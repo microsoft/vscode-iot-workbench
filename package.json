@@ -36,10 +36,10 @@
     "posttest": "npm run check"
   },
   "devDependencies": {
-    "typescript": "^2.6.1",
-    "vscode": "^1.1.6",
-    "@types/node": "^7.0.43",
     "@types/mocha": "^2.2.42",
-    "gts": "^0.5.1"
+    "@types/node": "^7.0.43",
+    "gts": "^0.5.1",
+    "typescript": "^2.6.2",
+    "vscode": "^1.1.6"
   }
 }
