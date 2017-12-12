@@ -2,6 +2,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import {ProjectInitializer} from './projectInitializer';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -11,6 +12,8 @@ export function activate(context: vscode.ExtensionContext) {
   // extension is activated
   console.log(
       'Congratulations, your extension "vscode-azure-iot-studio" is now active!');
+
+  const projectInitializer = new ProjectInitializer();
 
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with  registerCommand
@@ -23,6 +26,16 @@ export function activate(context: vscode.ExtensionContext) {
         // Display a message box to the user
         vscode.window.showInformationMessage('Hello World!');
       });
+
+  const projectInit = vscode.commands.registerCommand(
+      'azureiotstudio.initializeProject', async () => {
+        // The code you place here will be executed every time your command is
+        // executed
+
+        // Display a message box to the user
+        await projectInitializer.InitializeProject();
+      });
+
 
   context.subscriptions.push(disposable);
 }
