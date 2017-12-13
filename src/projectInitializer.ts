@@ -2,6 +2,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import {exceptionHelper} from './exceptionHelper';
 
 export class ProjectInitializer {
   async InitializeProject() {
@@ -22,9 +23,8 @@ export class ProjectInitializer {
           try {
             // TODO: add logic to initialize a project
 
-          } catch (err) {
-            console.error(err);
-            vscode.window.showErrorMessage(err);
+          } catch (error) {
+            exceptionHelper(error, true);
           }
         });
   }
