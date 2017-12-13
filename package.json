@@ -11,7 +11,8 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:extension.sayHello"
+    "onCommand:extension.sayHello",
+    "onCommand:azureiotstudio.initializeProject"
   ],
   "main": "./out/extension",
   "contributes": {
@@ -19,6 +20,11 @@
       {
         "command": "extension.sayHello",
         "title": "Hello World"
+      },
+      {
+          "command": "azureiotstudio.initializeProject",
+          "title": "Initialize Project",
+          "category": "IoTStudio"
       }
     ]
   },
