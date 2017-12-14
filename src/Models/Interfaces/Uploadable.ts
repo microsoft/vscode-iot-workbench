@@ -1,6 +1,4 @@
 
-declare namespace IoTStudio {
-    export interface Uploadable{
-        upload(): boolean;
-    }
+export interface Uploadable{
+    upload(): boolean;
 }

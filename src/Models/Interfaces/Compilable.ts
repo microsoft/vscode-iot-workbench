@@ -1,6 +1,4 @@
 
-declare namespace IoTStudio {
-    export interface Compilable{
-        compile(): boolean;
-    }
+export interface Compilable{
+    compile(): boolean;
 }

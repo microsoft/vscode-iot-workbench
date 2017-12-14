@@ -1,9 +1,11 @@
-declare namespace IoTStudio {
-    export enum DeviceType {
-        MXChip_AZ3166 = 1
-    }
+import {Component} from './Component'
+import {Compilable} from './Compilable'
+import {Uploadable} from './Uploadable'
 
-    export interface Deivce extends Component, Compilable, Uploadable{
-        getDeviceType(): DeviceType;
-    }
+export enum DeviceType {
+    MXChip_AZ3166 = 1
+}
+
+export interface Device extends Component, Compilable, Uploadable{
+    getDeviceType(): DeviceType;
 }

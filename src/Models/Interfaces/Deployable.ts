@@ -1,6 +1,4 @@
 
-declare namespace IoTStudio {
-    export interface Deployable{
-        deploy(): boolean;
-    }
+export interface Deployable{
+    deploy(): boolean;
 }
