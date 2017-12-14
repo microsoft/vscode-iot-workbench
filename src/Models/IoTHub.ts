@@ -1,6 +1,4 @@
-
-import {ComponentType} from './Interfaces/Component';
-import {Component} from './Interfaces/Component';
+import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
 
 export class IoTHub implements Component, Provisionable {
