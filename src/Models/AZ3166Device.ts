@@ -1,7 +1,5 @@
-import {ComponentType} from './Interfaces/Component';
-import {Component} from './Interfaces/Component';
-import {Device} from './Interfaces/Device';
-import {DeviceType} from './Interfaces/Device';
+import {Component, ComponentType} from './Interfaces/Component';
+import {Device, DeviceType} from './Interfaces/Device';
 
 export class AZ3166Device implements Device {
   private deviceType: DeviceType;
