@@ -1,11 +1,11 @@
-import {Component} from './Component'
-import {Compilable} from './Compilable'
-import {Uploadable} from './Uploadable'
+import {Compilable} from './Compilable';
+import {Component} from './Component';
+import {Uploadable} from './Uploadable';
 
 export enum DeviceType {
-    MXChip_AZ3166 = 1
+  MXChip_AZ3166 = 1
 }
 
-export interface Device extends Component, Compilable, Uploadable{
-    getDeviceType(): DeviceType;
+export interface Device extends Component, Compilable, Uploadable {
+  getDeviceType(): DeviceType;
 }

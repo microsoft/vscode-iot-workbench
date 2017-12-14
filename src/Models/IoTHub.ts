@@ -1,30 +1,28 @@
 
-import {ComponentType} from './Interfaces/Component'
-import {Component} from './Interfaces/Component'
-import {Provisionable} from './Interfaces/Provisionable'
+import {ComponentType} from './Interfaces/Component';
+import {Component} from './Interfaces/Component';
+import {Provisionable} from './Interfaces/Provisionable';
 
-export class IoTHub implements Component, Provisionable
-    {
-        private componentType : ComponentType;
+export class IoTHub implements Component, Provisionable {
+  private componentType: ComponentType;
 
-        constructor () {
-            this.componentType = ComponentType.IoTHub;
-        }
-        
-        getComponentType(): ComponentType{
-            return this.componentType;
-        }
+  constructor() {
+    this.componentType = ComponentType.IoTHub;
+  }
 
-        load(folderPath: string): boolean{
-            return true;
-        }
+  getComponentType(): ComponentType {
+    return this.componentType;
+  }
 
-        save(folderPath: string): boolean{
-            return true;
-        }
+  load(folderPath: string): boolean {
+    return true;
+  }
 
-        provision() :boolean {
-            return true;
-        }
+  save(folderPath: string): boolean {
+    return true;
+  }
 
-    }
+  provision(): boolean {
+    return true;
+  }
+}

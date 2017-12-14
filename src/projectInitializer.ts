@@ -23,7 +23,7 @@ export class ProjectInitializer {
 
           try {
             // TODO: add logic to initialize a project
-            let project  = new IoTProject();
+            const project = new IoTProject();
             project.deploy();
 
           } catch (error) {
