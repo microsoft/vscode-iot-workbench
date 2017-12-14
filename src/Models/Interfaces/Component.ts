@@ -1,11 +1,11 @@
-namespace IoTStudio {
+declare namespace IoTStudio {
     export enum ComponentType {
         Device = 1,
         IoTHub,
         AzureFunction
     }
 
-    export interface IComponent{
+    export interface Component{
         load(folderPath: string): boolean;
         save(folderPath: string): boolean;
         getComponentType(): ComponentType;

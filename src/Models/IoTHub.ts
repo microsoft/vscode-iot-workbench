@@ -1,18 +1,12 @@
-namespace IoTStudio {
-    export class AZ3166Device implements Deivce
+declare namespace IoTStudio {
+    export class IoTHub implements Component, Provisionable
     {
-        private deviceType: DeviceType;
         private componentType : ComponentType;
 
         constructor () {
-            this.deviceType = DeviceType.MXChip_AZ3166;
-            this.componentType = ComponentType.Device;
+            this.componentType = ComponentType.IoTHub;
         }
         
-        getDeviceType() : DeviceType {
-            return this.deviceType;
-        }
-
         getComponentType(): ComponentType{
             return this.componentType;
         }
@@ -25,12 +19,9 @@ namespace IoTStudio {
             return true;
         }
 
-        compile() :boolean {
+        provision() :boolean {
             return true;
         }
 
-        upload() :boolean {
-            return true;
-        }
     }
 }
