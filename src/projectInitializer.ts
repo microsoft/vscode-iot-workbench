@@ -3,6 +3,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import {exceptionHelper} from './exceptionHelper';
+import {IoTProject} from './Models/IoTProject';
 
 export class ProjectInitializer {
   async InitializeProject() {
@@ -22,6 +23,8 @@ export class ProjectInitializer {
 
           try {
             // TODO: add logic to initialize a project
+            const project = new IoTProject();
+            project.deploy();
 
           } catch (error) {
             exceptionHelper(error, true);

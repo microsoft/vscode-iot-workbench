@@ -1,0 +1,36 @@
+import {Component, ComponentType} from './Interfaces/Component';
+import {Device, DeviceType} from './Interfaces/Device';
+
+export class AZ3166Device implements Device {
+  private deviceType: DeviceType;
+  private componentType: ComponentType;
+
+  constructor() {
+    this.deviceType = DeviceType.MXChip_AZ3166;
+    this.componentType = ComponentType.Device;
+  }
+
+  getDeviceType(): DeviceType {
+    return this.deviceType;
+  }
+
+  getComponentType(): ComponentType {
+    return this.componentType;
+  }
+
+  load(folderPath: string): boolean {
+    return true;
+  }
+
+  save(folderPath: string): boolean {
+    return true;
+  }
+
+  compile(): boolean {
+    return true;
+  }
+
+  upload(): boolean {
+    return true;
+  }
+}
