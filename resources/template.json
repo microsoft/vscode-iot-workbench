@@ -15,5 +15,5 @@
             "detail": "Process device data by Azure Function",
             "label": "function"
         }
-      ]
+    ]
 }

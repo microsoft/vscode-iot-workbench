@@ -46,7 +46,7 @@ export class IoTProject {
   }
 
   create(
-      rootFolderPath: string|undefined = '',
+      rootFolderPath: string,
       templateType: ProjectTemplateType): boolean {
     return true;
   }

@@ -37,7 +37,7 @@ export class ProjectInitializer {
 
             vscode.window.showOpenDialog(options).then(folderUri => {
               if (folderUri && folderUri[0]) {
-                console.log('Selected folder: ' + folderUri[0].fsPath);
+                console.log(`Selected folder: ${folderUri[0].fsPath}`);
                 const uri = vscode.Uri.parse(folderUri[0].fsPath);
                 vscode.commands.executeCommand('vscode.openFolder', uri);
               }
@@ -51,7 +51,7 @@ export class ProjectInitializer {
       if (files && files[0]) {
         vscode.window.showInformationMessage(
             'We need an empty folder to initialize the project. ' +
-            'Please provide a empty folder');
+            'Please provide an empty folder');
         return;
       }
     }
@@ -111,7 +111,10 @@ export class ProjectInitializer {
             }
 
             const project = new IoTProject();
-            project.create(vscode.workspace.rootPath, templateType);
+
+            // vscode.workspace.rootPath can not be null
+            let rootPath : string = vscode.workspace.rootPath as string;
+            project.create(rootPath, templateType);
 
           } catch (error) {
             exceptionHelper(error, true);
