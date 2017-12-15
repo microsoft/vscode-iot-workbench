@@ -45,9 +45,7 @@ export class IoTProject {
     return true;
   }
 
-  create(
-      rootFolderPath: string,
-      templateType: ProjectTemplateType): boolean {
+  create(rootFolderPath: string, templateType: ProjectTemplateType): boolean {
     return true;
   }
 

@@ -113,7 +113,7 @@ export class ProjectInitializer {
             const project = new IoTProject();
 
             // vscode.workspace.rootPath can not be null
-            let rootPath : string = vscode.workspace.rootPath as string;
+            const rootPath: string = vscode.workspace.rootPath as string;
             project.create(rootPath, templateType);
 
           } catch (error) {
