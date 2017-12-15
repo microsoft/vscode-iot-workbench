@@ -1,0 +1,19 @@
+{
+    "templates": [
+        {
+            "description": "Device",
+            "detail": "Device",
+            "label": "basic"
+        },
+        {
+            "description": "Azure Iot Hub",
+            "detail": "Send device data to IoT Hub",
+            "label": "iothub"
+        },
+        {
+            "description": "Device data processing",
+            "detail": "Process device data by Azure Function",
+            "label": "function"
+        }
+    ]
+}
