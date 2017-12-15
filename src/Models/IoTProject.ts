@@ -1,6 +1,12 @@
 import {Component} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
 
+export enum ProjectTemplateType {
+  basic = 1,
+  IotHub,
+  Function
+}
+
 export class IoTProject {
   private componentList: Component[];
 
@@ -36,6 +42,12 @@ export class IoTProject {
   }
 
   deploy(): boolean {
+    return true;
+  }
+
+  create(
+      rootFolderPath: string|undefined = '',
+      templateType: ProjectTemplateType): boolean {
     return true;
   }
 

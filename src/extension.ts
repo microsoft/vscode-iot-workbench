@@ -33,7 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
         // executed
 
         // Display a message box to the user
-        await projectInitializer.InitializeProject();
+        await projectInitializer.InitializeProject(context);
       });
 
 
