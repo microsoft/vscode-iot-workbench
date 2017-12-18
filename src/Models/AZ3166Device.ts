@@ -20,7 +20,7 @@ export class AZ3166Device implements Device {
     return this.componentType;
   }
 
-  load(folderPath: string): boolean {
+  load(): boolean {
     return true;
   }
 
