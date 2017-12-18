@@ -26,11 +26,6 @@
         "command": "azureiotstudio.initializeProject",
         "title": "Initialize Project",
         "category": "IoTStudio"
-      },
-      {
-        "command": "azureiotstudio.provisionIotHub",
-        "title": "Provision IoT Hub",
-        "category": "IoTStudio"
       }
     ]
   },
