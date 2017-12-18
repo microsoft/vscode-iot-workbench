@@ -47,8 +47,7 @@ export class IoTProject {
   load(rootFolderPath: string): boolean {
     if (!fs.existsSync(rootFolderPath)) {
       exceptionHelper(
-          new Error(
-              'Unable to find the root path, please open an IoT Studio project'),
+          'Unable to find the root path, please open an IoT Studio project',
           true);
     }
 
@@ -59,8 +58,7 @@ export class IoTProject {
 
     if (!fs.existsSync(configFilePath)) {
       exceptionHelper(
-          new Error(
-              'Unable to open the configuration file, please open an IoT Studio project'),
+          'Unable to open the configuration file, please open an IoT Studio project',
           true);
     }
 
@@ -114,8 +112,7 @@ export class IoTProject {
   create(rootFolderPath: string, templateType: ProjectTemplateType): boolean {
     if (!fs.existsSync(rootFolderPath)) {
       exceptionHelper(
-          new Error(
-              'Unable to find the root path, please open the folder and initialize project again.'),
+          'Unable to find the root path, please open the folder and initialize project again.',
           true);
     }
 
@@ -133,7 +130,7 @@ export class IoTProject {
     const device = new AZ3166Device(deviceDir);
     this.componentList.push(device);
 
-    //TODO: Consider naming for project level settings.
+    // TODO: Consider naming for project level settings.
     const settings = {projectsettings: [] as ProjectSetting[]};
     settings.projectsettings.push(
         {name: jsonConstants.DevicePath, value: deviceDir});
