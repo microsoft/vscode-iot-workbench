@@ -23,28 +23,16 @@ export function activate(context: vscode.ExtensionContext) {
 
   const projectInit = vscode.commands.registerCommand(
       'azureiotstudio.initializeProject', async () => {
-        // The code you place here will be executed every time your command is
-        // executed
-
-        // Display a message box to the user
         await projectInitializer.InitializeProject(context);
       });
 
   const deviceCompile = vscode.commands.registerCommand(
       'azureiotstudio.deviceCompile', async () => {
-        // The code you place here will be executed every time your command is
-        // executed
-
-        // Display a message box to the user
         await deviceOperator.Compile(context);
       });
 
   const deviceUpload = vscode.commands.registerCommand(
       'azureiotstudio.deviceUpload', async () => {
-        // The code you place here will be executed every time your command is
-        // executed
-
-        // Display a message box to the user
         await deviceOperator.Upload(context);
       });
 

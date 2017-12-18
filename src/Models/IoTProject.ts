@@ -78,8 +78,8 @@ export class IoTProject {
         (obj: ProjectSetting) => obj.name === jsonConstants.IoTHubName);
 
     if (hubName) {
-      const iothub = new IoTHub();
-      this.componentList.push(iothub);
+      const iotHub = new IoTHub();
+      this.componentList.push(iotHub);
     }
 
     // Component level load
@@ -133,6 +133,7 @@ export class IoTProject {
     const device = new AZ3166Device(deviceDir);
     this.componentList.push(device);
 
+    //TODO: Consider naming for project level settings.
     const settings = {projectsettings: [] as ProjectSetting[]};
     settings.projectsettings.push(
         {name: jsonConstants.DevicePath, value: deviceDir});
