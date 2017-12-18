@@ -11,8 +11,9 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:extension.sayHello",
-    "onCommand:azureiotstudio.initializeProject"
+    "onCommand:azureiotstudio.initializeProject",
+    "onCommand:azureiotstudio.deviceCompile",
+    "onCommand:azureiotstudio.deviceUpload"
   ],
   "main": "./out/extension",
   "contributes": {
@@ -24,6 +25,16 @@
       {
         "command": "azureiotstudio.initializeProject",
         "title": "Initialize Project",
+        "category": "IoTStudio"
+      },
+      {
+        "command": "azureiotstudio.deviceCompile",
+        "title": "Device Compile",
+        "category": "IoTStudio"
+      },
+      {
+        "command": "azureiotstudio.deviceUpload",
+        "title": "Device Upload",
         "category": "IoTStudio"
       }
     ]

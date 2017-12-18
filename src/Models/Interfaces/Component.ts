@@ -5,7 +5,7 @@ export enum ComponentType {
 }
 
 export interface Component {
-  load(folderPath: string): boolean;
+  load(): boolean;
   create(): boolean;
   getComponentType(): ComponentType;
 }
