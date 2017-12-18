@@ -12,8 +12,7 @@
   ],
   "activationEvents": [
     "onCommand:extension.sayHello",
-    "onCommand:azureiotstudio.initializeProject",
-    "onCommand:azureiotstudio.provisionIotHub"
+    "onCommand:azureiotstudio.initializeProject"
   ],
   "main": "./out/extension",
   "contributes": {
