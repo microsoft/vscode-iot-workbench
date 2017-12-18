@@ -22,9 +22,9 @@
         "title": "Hello World"
       },
       {
-          "command": "azureiotstudio.initializeProject",
-          "title": "Initialize Project",
-          "category": "IoTStudio"
+        "command": "azureiotstudio.initializeProject",
+        "title": "Initialize Project",
+        "category": "IoTStudio"
       }
     ]
   },
@@ -47,5 +47,9 @@
     "gts": "^0.5.1",
     "typescript": "^2.6.2",
     "vscode": "^1.1.6"
+  },
+  "dependencies": {
+    "@types/fs-plus": "^3.0.0",
+    "fs-plus": "^3.0.1"
   }
 }

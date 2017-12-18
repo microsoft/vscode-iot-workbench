@@ -1,5 +1,7 @@
-import * as fs from 'fs';
+import * as fs from 'fs-plus';
 import * as path from 'path';
+
+import {exceptionHelper} from '../exceptionHelper';
 
 import {AZ3166Device} from './AZ3166Device';
 import {Component} from './Interfaces/Component';
@@ -9,7 +11,7 @@ import {IoTHub} from './IoTHub';
 const constants = {
   deviceDefaultFolderName: 'Device',
   functionDefaultFolderName: 'Function',
-  configFileName: 'project.json'
+  configFileName: 'iotstudio.config.json'
 };
 
 const jsonConstants = {
@@ -70,9 +72,12 @@ export class IoTProject {
 
   create(rootFolderPath: string, templateType: ProjectTemplateType): boolean {
     if (!fs.existsSync(rootFolderPath)) {
-      throw new Error(
-          'Unable to find the root path, please open the folder and initialize project again.');
+      exceptionHelper(
+          new Error(
+              'Unable to find the root path, please open the folder and initialize project again.'),
+          true);
     }
+
     this.projectRootPath = rootFolderPath;
     this.projectType = templateType;
 
