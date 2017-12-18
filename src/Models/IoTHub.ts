@@ -25,11 +25,14 @@ export class IoTHub implements Component, Provisionable {
   async provision(): Promise<boolean> {
     const toolkitApi = getExtensionApi(ApiName.Toolkit);
     const iothub = await toolkitApi.azureIoTExplorer.createIoTHub();
-    if (iothub && iothub.name) {
-      // TODO: iothub & handle device
-      return true;
-    } else {
-      return false;
-    }
+    
+    return new Promise((resolve: (value: boolean) => void, reject: (value: boolean) => void) => {
+      if (iothub && iothub.name) {
+        // TODO: iothub & handle device
+        resolve(true);
+      } else {
+        reject(false);
+      }
+    });
   }
 }
