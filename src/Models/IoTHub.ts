@@ -17,7 +17,7 @@ export class IoTHub implements Component, Provisionable {
     return true;
   }
 
-  save(folderPath: string): boolean {
+  create(): boolean {
     return true;
   }
 

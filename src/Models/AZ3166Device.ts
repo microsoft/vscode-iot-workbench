@@ -4,10 +4,12 @@ import {Device, DeviceType} from './Interfaces/Device';
 export class AZ3166Device implements Device {
   private deviceType: DeviceType;
   private componentType: ComponentType;
+  componentRootPath: string;
 
-  constructor() {
+  constructor(rootPath: string) {
     this.deviceType = DeviceType.MXChip_AZ3166;
     this.componentType = ComponentType.Device;
+    this.componentRootPath = rootPath;
   }
 
   getDeviceType(): DeviceType {
@@ -22,7 +24,7 @@ export class AZ3166Device implements Device {
     return true;
   }
 
-  save(folderPath: string): boolean {
+  create(): boolean {
     return true;
   }
 
