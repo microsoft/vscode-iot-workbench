@@ -92,8 +92,8 @@ export class IoTProject {
     const device = new AZ3166Device(deviceDir);
     this.componentList.push(device);
 
-    const projSettings = {projectsettings: [] as ProjectSettings[]};
-    projSettings.projectsettings.push(
+    const settings = {projectsettings: [] as ProjectSettings[]};
+    settings.projectsettings.push(
         {name: jsonConstants.DevicePath, value: deviceDir});
 
     switch (templateType) {
@@ -103,7 +103,7 @@ export class IoTProject {
       case ProjectTemplateType.IotHub:
         const iothub = new IoTHub();
         // In setting file, create a place holder for iothub name
-        projSettings.projectsettings.push(
+        settings.projectsettings.push(
             {name: jsonConstants.IoTHubName, value: ''});
         this.componentList.push(iothub);
         break;
@@ -114,7 +114,7 @@ export class IoTProject {
 
     const configFilePath =
         path.join(this.projectRootPath, constants.configFileName);
-    const jsonToSave = JSON.stringify(projSettings, null, 4);
+    const jsonToSave = JSON.stringify(settings, null, 4);
     fs.writeFileSync(configFilePath, jsonToSave);
 
     // Component level creation
