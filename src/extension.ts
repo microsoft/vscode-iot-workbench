@@ -36,8 +36,23 @@ export function activate(context: vscode.ExtensionContext) {
         await projectInitializer.InitializeProject(context);
       });
 
+  const provisionIotHub = vscode.commands.registerCommand(
+    'azureiotstudio.provisionIotHub', async () => {
+      // The code you place here will be executed every time your command is
+      // executed
+
+      // Display a message box to the user
+      const toolkitApi = vscode.extensions.getExtension("vsciot-vscode.azure-iot-toolkit")!.exports;
+      const iothub = await toolkitApi.azureIoTExplorer.createIoTHub();
+      if (iothub && iothub.name) {
+        console.log(iothub);
+        vscode.window.showInformationMessage(iothub.name);
+      }
+    });
 
   context.subscriptions.push(disposable);
+  context.subscriptions.push(projectInit);
+  context.subscriptions.push(provisionIotHub);
 }
 
 // this method is called when your extension is deactivated
