@@ -2,7 +2,6 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 
 import {exceptionHelper} from '../exceptionHelper';
-
 import {AZ3166Device} from './AZ3166Device';
 import {Component} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
@@ -19,7 +18,7 @@ const jsonConstants = {
   IoTHubName: 'IoTHubName'
 };
 
-interface ProjectSettings {
+interface ProjectSetting {
   name: string;
   value: string;
 }
@@ -45,7 +44,49 @@ export class IoTProject {
     this.componentList = [];
   }
 
-  load(folderPath: string): boolean {
+  load(rootFolderPath: string): boolean {
+    if (!fs.existsSync(rootFolderPath)) {
+      exceptionHelper(
+          new Error(
+              'Unable to find the root path, please open an IoT Studio project'),
+          true);
+    }
+
+    this.projectRootPath = rootFolderPath;
+
+    const configFilePath =
+        path.join(this.projectRootPath, constants.configFileName);
+
+    if (!fs.existsSync(configFilePath)) {
+      exceptionHelper(
+          new Error(
+              'Unable to open the configuration file, please open an IoT Studio project'),
+          true);
+    }
+
+    const settings = require(configFilePath);
+
+    const deviceLocation = settings.projectsettings.find(
+        (obj: ProjectSetting) => obj.name === jsonConstants.DevicePath);
+
+    if (deviceLocation) {
+      const device = new AZ3166Device(deviceLocation.value);
+      this.componentList.push(device);
+    }
+
+    const hubName = settings.projectsettings.find(
+        (obj: ProjectSetting) => obj.name === jsonConstants.IoTHubName);
+
+    if (hubName) {
+      const iotHub = new IoTHub();
+      this.componentList.push(iotHub);
+    }
+
+    // Component level load
+    this.componentList.forEach((element: Component) => {
+      element.load();
+    });
+
     return true;
   }
 
@@ -92,7 +133,8 @@ export class IoTProject {
     const device = new AZ3166Device(deviceDir);
     this.componentList.push(device);
 
-    const settings = {projectsettings: [] as ProjectSettings[]};
+    //TODO: Consider naming for project level settings.
+    const settings = {projectsettings: [] as ProjectSetting[]};
     settings.projectsettings.push(
         {name: jsonConstants.DevicePath, value: deviceDir});
 
