@@ -12,7 +12,7 @@ export class IoTHub implements Component, Provisionable {
     return this.componentType;
   }
 
-  load(folderPath: string): boolean {
+  load(): boolean {
     return true;
   }
 

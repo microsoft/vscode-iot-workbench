@@ -26,7 +26,7 @@ export class ProjectInitializer {
 
       vscode.window
           .showInformationMessage(
-              'Please select the root folder to initialize the project')
+              'Please select the root folder to initialize the project.')
           .then(() => {
             const options: vscode.OpenDialogOptions = {
               canSelectMany: false,
