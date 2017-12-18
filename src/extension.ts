@@ -36,8 +36,8 @@ export function activate(context: vscode.ExtensionContext) {
         await projectInitializer.InitializeProject(context);
       });
 
-
   context.subscriptions.push(disposable);
+  context.subscriptions.push(projectInit);
 }
 
 // this method is called when your extension is deactivated

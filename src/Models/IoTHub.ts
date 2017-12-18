@@ -1,5 +1,7 @@
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
+import {ApiName} from './Interfaces/Api';
+import {getExtensionApi} from './Apis';
 
 export class IoTHub implements Component, Provisionable {
   private componentType: ComponentType;
@@ -20,7 +22,14 @@ export class IoTHub implements Component, Provisionable {
     return true;
   }
 
-  provision(): boolean {
-    return true;
+  async provision(): Promise<boolean> {
+    const toolkitApi = getExtensionApi(ApiName.Toolkit);
+    const iothub = await toolkitApi.azureIoTExplorer.createIoTHub();
+    if (iothub && iothub.name) {
+      // TODO: iothub & handle device
+      return true;
+    } else {
+      return false;
+    }
   }
 }
