@@ -1,2 +1,2 @@
 
-export interface Provisionable { provision(): boolean; }
+export interface Provisionable { provision(): Promise<boolean>; }

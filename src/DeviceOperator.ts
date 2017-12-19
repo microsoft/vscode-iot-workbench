@@ -11,8 +11,7 @@ export class DeviceOperator {
   async Compile(context: vscode.ExtensionContext) {
     if (!vscode.workspace.rootPath) {
       exceptionHelper(
-          new Error(
-              'Unable to find the root path, please open an IoT Studio project'),
+          'Unable to find the root path, please open an IoT Studio project',
           true);
     }
 
