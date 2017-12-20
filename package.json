@@ -12,6 +12,8 @@
   ],
   "activationEvents": [
     "onCommand:azureiotstudio.initializeProject",
+    "onCommand:azureiotstudio.azureProvision",
+    "onCommand:azureiotstudio.azureDeploy",
     "onCommand:azureiotstudio.deviceCompile",
     "onCommand:azureiotstudio.deviceUpload"
   ],
@@ -25,6 +27,16 @@
       {
         "command": "azureiotstudio.initializeProject",
         "title": "Initialize Project",
+        "category": "IoTStudio"
+      },
+      {
+        "command": "azureiotstudio.azureProvision",
+        "title": "Azure Provision",
+        "category": "IoTStudio"
+      },
+      {
+        "command": "azureiotstudio.azureDeploy",
+        "title": "Azure Deploy",
         "category": "IoTStudio"
       },
       {

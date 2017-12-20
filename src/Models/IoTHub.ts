@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 
 import {exceptionHelper} from '../exceptionHelper';
 
-import {getExtensionApi} from './Apis';
-import {ApiName} from './Interfaces/Api';
+import {getExtension} from './Apis';
+import {extensionName} from './Interfaces/Api';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
 
@@ -52,19 +52,21 @@ export class IoTHub implements Component, Provisionable {
             return;
           }
 
-          const toolkitApi = getExtensionApi(ApiName.Toolkit);
-          if (toolkitApi === null) {
+          const toolkit = getExtension(extensionName.Toolkit);
+          if (toolkit === undefined) {
             reject(false);
             return;
           }
 
+          const toolkitApi = toolkit.exports;
+
           let iothub = null;
           switch (selection.detail) {
             case 'select':
-              iothub = await toolkitApi.selectIoTHub();
+              iothub = await toolkitApi.azureIoTExplorer.selectIoTHub();
               break;
             case 'create':
-              iothub = await toolkitApi.createIoTHub();
+              iothub = await toolkitApi.azureIoTExplorer.createIoTHub();
               break;
             default:
               break;

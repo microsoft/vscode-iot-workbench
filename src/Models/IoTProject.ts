@@ -2,6 +2,7 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 
 import {exceptionHelper} from '../exceptionHelper';
+
 import {AZ3166Device} from './AZ3166Device';
 import {Component} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
@@ -96,13 +97,22 @@ export class IoTProject {
     return true;
   }
 
-  provision(): boolean {
-    for (const item of this.componentList) {
-      if (this.canProvision(item)) {
-        // TODO: provision each components
-      }
-    }
-    return true;
+  async provision(): Promise<boolean> {
+    return new Promise(
+        async (
+            resolve: (value: boolean) => void,
+            reject: (value: boolean) => void) => {
+          for (const item of this.componentList) {
+            if (this.canProvision(item)) {
+              const res = await item.provision();
+              if (res === false) {
+                reject(false);
+                return;
+              }
+            }
+          }
+          resolve(true);
+        });
   }
 
   deploy(): boolean {
