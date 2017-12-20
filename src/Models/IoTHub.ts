@@ -58,15 +58,13 @@ export class IoTHub implements Component, Provisionable {
             return;
           }
 
-          const toolkitApi = toolkit.exports;
-
           let iothub = null;
           switch (selection.detail) {
             case 'select':
-              iothub = await toolkitApi.azureIoTExplorer.selectIoTHub();
+              iothub = await toolkit.azureIoTExplorer.selectIoTHub();
               break;
             case 'create':
-              iothub = await toolkitApi.azureIoTExplorer.createIoTHub();
+              iothub = await toolkit.azureIoTExplorer.createIoTHub();
               break;
             default:
               break;
