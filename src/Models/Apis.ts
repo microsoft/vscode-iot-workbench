@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
-import {ApiName} from './Interfaces/Api';
+import {extensionName} from './Interfaces/Api';
 
-export function getExtensionApi(name: ApiName): {}|null {
+export function getExtension(name: extensionName): vscode.Extension<{}>|
+    undefined {
   switch (name) {
-    case ApiName.Toolkit:
-      return vscode.extensions.getExtension(
-                                  'vsciot-vscode.azure-iot-toolkit')!.exports;
+    case extensionName.Toolkit:
+      return vscode.extensions.getExtension('vsciot-vscode.azure-iot-toolkit');
     default:
-      return null;
+      return undefined;
   }
 }

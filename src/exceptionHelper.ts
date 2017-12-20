@@ -21,6 +21,5 @@ export function exceptionHelper(
     vscode.window.showErrorMessage(_message);
   }
 
-  console.error(_error);
-  process.exit(1);
+  throw _error;
 }

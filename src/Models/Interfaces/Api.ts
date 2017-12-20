@@ -1,3 +1,3 @@
-export enum ApiName {
+export enum extensionName {
   Toolkit = 1
 }

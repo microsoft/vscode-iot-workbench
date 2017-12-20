@@ -1,5 +1,9 @@
-import {getExtensionApi} from './Apis';
-import {ApiName} from './Interfaces/Api';
+import * as vscode from 'vscode';
+
+import {exceptionHelper} from '../exceptionHelper';
+
+import {getExtension} from './Apis';
+import {extensionName} from './Interfaces/Api';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
 
@@ -23,12 +27,51 @@ export class IoTHub implements Component, Provisionable {
   }
 
   async provision(): Promise<boolean> {
-    const toolkitApi = getExtensionApi(ApiName.Toolkit);
-    const iothub = await toolkitApi.azureIoTExplorer.createIoTHub();
-
     return new Promise(
-        (resolve: (value: boolean) => void,
-         reject: (value: boolean) => void) => {
+        async (
+            resolve: (value: boolean) => void,
+            reject: (value: boolean) => void) => {
+          const provisionIothubSelection: vscode.QuickPickItem[] = [
+            {
+              label: 'Select an existed IoT Hub',
+              description: 'Select an existed IoT Hub',
+              detail: 'select'
+            },
+            {
+              label: 'Create a new IoT Hub',
+              description: 'Create a new IoT Hub',
+              detail: 'create'
+            }
+          ];
+          const selection = await vscode.window.showQuickPick(
+              provisionIothubSelection,
+              {ignoreFocusOut: true, placeHolder: 'Provision IoT Hub'});
+
+          if (!selection) {
+            reject(false);
+            return;
+          }
+
+          const toolkit = getExtension(extensionName.Toolkit);
+          if (toolkit === undefined) {
+            reject(false);
+            return;
+          }
+
+          const toolkitApi = toolkit.exports;
+
+          let iothub = null;
+          switch (selection.detail) {
+            case 'select':
+              iothub = await toolkitApi.azureIoTExplorer.selectIoTHub();
+              break;
+            case 'create':
+              iothub = await toolkitApi.azureIoTExplorer.createIoTHub();
+              break;
+            default:
+              break;
+          }
+
           if (iothub && iothub.name) {
             // TODO: iothub & handle device
             resolve(true);
