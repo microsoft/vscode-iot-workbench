@@ -7,8 +7,8 @@ import {AZ3166Device} from './AZ3166Device';
 import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
+import {Uploadable} from './Interfaces/Uploadable';
 import {IoTHub} from './IoTHub';
-import { Uploadable } from './Interfaces/Uploadable';
 
 const constants = {
   deviceDefaultFolderName: 'Device',
@@ -119,20 +119,20 @@ export class IoTProject {
 
   async upload(): Promise<boolean> {
     return new Promise(
-      async (
-          resolve: (value: boolean) => void,
-          reject: (value: boolean) => void) => {
-        for (const item of this.componentList) {
-          if (this.canUpload(item)) {
-            const res = await item.upload();
-            if (res === false) {
-              reject(false);
-              return;
+        async (
+            resolve: (value: boolean) => void,
+            reject: (value: boolean) => void) => {
+          for (const item of this.componentList) {
+            if (this.canUpload(item)) {
+              const res = await item.upload();
+              if (res === false) {
+                reject(false);
+                return;
+              }
             }
           }
-        }
-        resolve(true);
-      });
+          resolve(true);
+        });
   }
 
   async provision(): Promise<boolean> {
