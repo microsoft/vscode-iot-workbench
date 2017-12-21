@@ -4,7 +4,8 @@ import * as path from 'path';
 import {exceptionHelper} from '../exceptionHelper';
 
 import {AZ3166Device} from './AZ3166Device';
-import {Component} from './Interfaces/Component';
+import {Compilable} from './Interfaces/Compilable';
+import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
 import {IoTHub} from './IoTHub';
 
@@ -39,6 +40,10 @@ export class IoTProject {
 
   private canProvision(comp: {}): comp is Provisionable {
     return (comp as Provisionable).provision !== undefined;
+  }
+
+  private canCompile(comp: {}): comp is Compilable {
+    return (comp as Compilable).compile !== undefined;
   }
 
   constructor() {
@@ -89,8 +94,22 @@ export class IoTProject {
     return true;
   }
 
-  compile(): boolean {
-    return true;
+  async compile(): Promise<boolean> {
+    return new Promise(
+        async (
+            resolve: (value: boolean) => void,
+            reject: (value: boolean) => void) => {
+          for (const item of this.componentList) {
+            if (this.canCompile(item)) {
+              const res = await item.compile();
+              if (res === false) {
+                reject(false);
+                return;
+              }
+            }
+          }
+          resolve(true);
+        });
   }
 
   upload(): boolean {
@@ -137,13 +156,15 @@ export class IoTProject {
       fs.mkdirSync(deviceDir);
     }
 
-    const device = new AZ3166Device(deviceDir);
+    const device = new AZ3166Device(constants.deviceDefaultFolderName);
     this.componentList.push(device);
 
     // TODO: Consider naming for project level settings.
     const settings = {projectsettings: [] as ProjectSetting[]};
-    settings.projectsettings.push(
-        {name: jsonConstants.DevicePath, value: deviceDir});
+    settings.projectsettings.push({
+      name: jsonConstants.DevicePath,
+      value: constants.deviceDefaultFolderName
+    });
 
     switch (templateType) {
       case ProjectTemplateType.basic:
