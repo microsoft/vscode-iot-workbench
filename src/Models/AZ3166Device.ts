@@ -49,7 +49,20 @@ export class AZ3166Device implements Device {
         });
   }
 
-  upload(): boolean {
-    return true;
+  async upload(): Promise<boolean> {
+    return new Promise(
+        async (
+            resolve: (value: boolean) => void,
+            reject: (value: boolean) => void) => {
+          try {
+            vscode.commands.executeCommand(
+                'arduino.iotStudioInitialize', this.deviceFolder);
+            await vscode.commands.executeCommand('arduino.upload');
+            resolve(true);
+          } catch (error) {
+            ExceptionHelper.logError(error, true);
+            reject(false);
+          }
+        });
   }
 }

@@ -8,6 +8,7 @@ import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
 import {IoTHub} from './IoTHub';
+import { Uploadable } from './Interfaces/Uploadable';
 
 const constants = {
   deviceDefaultFolderName: 'Device',
@@ -44,6 +45,10 @@ export class IoTProject {
 
   private canCompile(comp: {}): comp is Compilable {
     return (comp as Compilable).compile !== undefined;
+  }
+
+  private canUpload(comp: {}): comp is Uploadable {
+    return (comp as Uploadable).upload !== undefined;
   }
 
   constructor() {
@@ -112,8 +117,22 @@ export class IoTProject {
         });
   }
 
-  upload(): boolean {
-    return true;
+  async upload(): Promise<boolean> {
+    return new Promise(
+      async (
+          resolve: (value: boolean) => void,
+          reject: (value: boolean) => void) => {
+        for (const item of this.componentList) {
+          if (this.canUpload(item)) {
+            const res = await item.upload();
+            if (res === false) {
+              reject(false);
+              return;
+            }
+          }
+        }
+        resolve(true);
+      });
   }
 
   async provision(): Promise<boolean> {
