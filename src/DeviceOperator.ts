@@ -8,7 +8,7 @@ import {ExceptionHelper} from './exceptionHelper';
 import {IoTProject, ProjectTemplateType} from './Models/IoTProject';
 
 export class DeviceOperator {
-  async Compile(context: vscode.ExtensionContext) {
+  async compile(context: vscode.ExtensionContext) {
     if (!vscode.workspace.rootPath) {
       ExceptionHelper.logError(
           'Unable to find the root path, please open an IoT Studio project',
@@ -21,5 +21,16 @@ export class DeviceOperator {
     await project.compile();
   }
 
-  async Upload(context: vscode.ExtensionContext) {}
+  async upload(context: vscode.ExtensionContext) {
+    if (!vscode.workspace.rootPath) {
+      ExceptionHelper.logError(
+          'Unable to find the root path, please open an IoT Studio project',
+          true);
+    }
+
+    const project = new IoTProject();
+    const rootPath: string = vscode.workspace.rootPath as string;
+    project.load(rootPath);
+    await project.upload();
+  }
 }

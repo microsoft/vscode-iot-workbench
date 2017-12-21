@@ -1,2 +1,2 @@
 
-export interface Uploadable { upload(): boolean; }
+export interface Uploadable { upload(): Promise<boolean>; }

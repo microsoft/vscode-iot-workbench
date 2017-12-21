@@ -40,12 +40,12 @@ export function activate(context: vscode.ExtensionContext) {
 
   const deviceCompile = vscode.commands.registerCommand(
       'azureiotstudio.deviceCompile', async () => {
-        await deviceOperator.Compile(context);
+        await deviceOperator.compile(context);
       });
 
   const deviceUpload = vscode.commands.registerCommand(
       'azureiotstudio.deviceUpload', async () => {
-        await deviceOperator.Upload(context);
+        await deviceOperator.upload(context);
       });
 
   context.subscriptions.push(projectInit);
