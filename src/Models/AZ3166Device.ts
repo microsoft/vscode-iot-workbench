@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import {exceptionHelper} from '../exceptionHelper';
+import {ExceptionHelper} from '../exceptionHelper';
 
 import {Component, ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
@@ -43,7 +43,7 @@ export class AZ3166Device implements Device {
             await vscode.commands.executeCommand('arduino.verify');
             resolve(true);
           } catch (error) {
-            exceptionHelper(error, true);
+            ExceptionHelper.logError(error, true);
             reject(false);
           }
         });
