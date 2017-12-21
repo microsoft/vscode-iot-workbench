@@ -49,6 +49,8 @@ export function activate(context: vscode.ExtensionContext) {
       });
 
   context.subscriptions.push(projectInit);
+  context.subscriptions.push(azureProvision);
+  context.subscriptions.push(azureDeploy);
   context.subscriptions.push(deviceCompile);
   context.subscriptions.push(deviceUpload);
 }
