@@ -1,7 +1,7 @@
 import * as fs from 'fs-plus';
 import * as path from 'path';
 
-import {exceptionHelper} from '../exceptionHelper';
+import {ExceptionHelper} from '../exceptionHelper';
 
 import {AZ3166Device} from './AZ3166Device';
 import {Component} from './Interfaces/Component';
@@ -47,7 +47,7 @@ export class IoTProject {
 
   load(rootFolderPath: string): boolean {
     if (!fs.existsSync(rootFolderPath)) {
-      exceptionHelper(
+      ExceptionHelper.logError(
           'Unable to find the root path, please open an IoT Studio project',
           true);
     }
@@ -58,7 +58,7 @@ export class IoTProject {
         path.join(this.projectRootPath, constants.configFileName);
 
     if (!fs.existsSync(configFilePath)) {
-      exceptionHelper(
+      ExceptionHelper.logError(
           'Unable to open the configuration file, please open an IoT Studio project',
           true);
     }
@@ -121,7 +121,7 @@ export class IoTProject {
 
   create(rootFolderPath: string, templateType: ProjectTemplateType): boolean {
     if (!fs.existsSync(rootFolderPath)) {
-      exceptionHelper(
+      ExceptionHelper.logError(
           'Unable to find the root path, please open the folder and initialize project again.',
           true);
     }
