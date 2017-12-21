@@ -18,7 +18,7 @@ export class DeviceOperator {
     const project = new IoTProject();
     const rootPath: string = vscode.workspace.rootPath as string;
     project.load(rootPath);
-    project.compile();
+    await project.compile();
   }
 
   async Upload(context: vscode.ExtensionContext) {}

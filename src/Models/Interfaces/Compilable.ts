@@ -1,1 +1,1 @@
-export interface Compilable { compile(): boolean; }
+export interface Compilable { compile(): Promise<boolean>; }
