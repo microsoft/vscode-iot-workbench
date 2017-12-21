@@ -58,19 +58,13 @@ export class IoTHub implements Component, Provisionable {
             return;
           }
 
-          const toolkitApi = toolkit.exports;
-
           let iothub = null;
           switch (selection.detail) {
             case 'select':
-              iothub = await vscode.extensions
-                           .getExtension('vsciot-vscode.azure-iot-toolkit')!
-                           .exports.azureIoTExplorer.selectIoTHub();
+              iothub = await toolkit.azureIoTExplorer.selectIoTHub();
               break;
             case 'create':
-              iothub = await vscode.extensions
-                           .getExtension('vsciot-vscode.azure-iot-toolkit')!
-                           .exports.azureIoTExplorer.createIoTHub();
+              iothub = await toolkit.azureIoTExplorer.createIoTHub();
               break;
             default:
               break;
