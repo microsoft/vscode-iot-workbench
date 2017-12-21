@@ -65,6 +65,7 @@
     "posttest": "npm run check"
   },
   "devDependencies": {
+    "@types/fs-plus": "^3.0.0",
     "@types/mocha": "^2.2.42",
     "@types/node": "^7.0.43",
     "gts": "^0.5.1",
@@ -72,7 +73,6 @@
     "vscode": "^1.1.6"
   },
   "dependencies": {
-    "@types/fs-plus": "^3.0.0",
     "fs-plus": "^3.0.1"
   }
 }
