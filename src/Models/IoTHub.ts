@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
-import {ExceptionHelper} from '../exceptionHelper';
+import {ConifgHandler} from '../configHandler';
+
 import {getExtension} from './Apis';
 import {extensionName} from './Interfaces/Api';
 import {Component, ComponentType} from './Interfaces/Component';
@@ -60,17 +61,19 @@ export class IoTHub implements Component, Provisionable {
           let iothub = null;
           switch (selection.detail) {
             case 'select':
-              iothub = await toolkit.azureIoTExplorer.selectIoTHub();
+              iothub = await toolkit.azureIoTExplorer.selectIoTHub(true);
               break;
             case 'create':
-              iothub = await toolkit.azureIoTExplorer.createIoTHub();
+              iothub = await toolkit.azureIoTExplorer.createIoTHub(true);
               break;
             default:
               break;
           }
 
-          if (iothub && iothub.name) {
-            // TODO: iothub & handle device
+          if (iothub && iothub.name && iothub.iotHubConnectionString) {
+            ConifgHandler.update(
+                'iothubConnectionString', iothub.iotHubConnectionString);
+            // TODO: handle device
             resolve(true);
           } else {
             reject(false);

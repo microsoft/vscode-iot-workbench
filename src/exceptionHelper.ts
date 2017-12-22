@@ -3,9 +3,7 @@
 import * as vscode from 'vscode';
 
 export class ExceptionHelper {
-  static logError(error: string, popupMsgbox: boolean): void;
-  static logError(error: Error, popupMsgbox: boolean): void;
-  static logError(error: string|Error, popupMsgbox: boolean): void {
+  static logError(error: string|Error, popupMsg: string|boolean): void {
     let _error: Error;
     let _message: string;
 
@@ -17,8 +15,10 @@ export class ExceptionHelper {
       _message = error.message;
     }
 
-    if (popupMsgbox) {
+    if (popupMsg === true) {
       vscode.window.showErrorMessage(_message);
+    } else if (typeof popupMsg === 'string') {
+      vscode.window.showErrorMessage(popupMsg);
     }
 
     throw _error;
