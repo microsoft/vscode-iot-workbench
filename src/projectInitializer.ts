@@ -109,7 +109,7 @@ export class ProjectInitializer {
                 // Throw exception;
                 break;
             }
-            const project = new IoTProject();
+            const project = new IoTProject(context);
 
             // vscode.workspace.rootPath can not be null
             const rootPath: string = vscode.workspace.rootPath as string;

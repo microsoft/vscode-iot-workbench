@@ -1,26 +1,33 @@
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
+
 import {Component, ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
 import {ExceptionHelper} from '../exceptionHelper';
+import {IoTProject, ProjectTemplateType} from '../Models/IoTProject';
 
 const constants = {
-  defaltSketchFileName: 'myDevice.ino',
+  vscodeSettingsFolderName: '.vscode',
+  defaultSketchFileName: 'device.ino',
   arduinoJsonFileName: 'arduino.json',
   boardInfo: 'AZ3166:stm32f4:MXCHIP_AZ3166',
-  uploadMethod: 'upload_method=OpenOCDMethod'
+  uploadMethod: 'upload_method=OpenOCDMethod',
+  resourcesFolderName: 'resources',
+  sketchTemplateFileName: 'emptySketch.ino'
 };
 
 export class AZ3166Device implements Device {
   private deviceType: DeviceType;
   private componentType: ComponentType;
   private deviceFolder: string;
+  private extensionContext: vscode.ExtensionContext;
 
-  constructor(devicePath: string) {
+  constructor(context: vscode.ExtensionContext, devicePath: string) {
     this.deviceType = DeviceType.MXChip_AZ3166;
     this.componentType = ComponentType.Device;
     this.deviceFolder = devicePath;
+    this.extensionContext = context;
   }
 
   getDeviceType(): DeviceType {
@@ -43,21 +50,29 @@ export class AZ3166Device implements Device {
       ExceptionHelper.logError(`Device folder doesn't exist: ${deviceFolderPath}`, true);
     }
 
+    const vscodeFolderPath = path.join(deviceFolderPath, constants.vscodeSettingsFolderName);
+    if (!fs.existsSync(vscodeFolderPath)) {
+      fs.mkdirSync(vscodeFolderPath);
+    }
+
     // Get arduino sketch file name from user input or use defalt sketch name
     const option: vscode.InputBoxOptions = {
-      value: constants.defaltSketchFileName,
+      value: constants.defaultSketchFileName,
       prompt: `Please input device sketch file name here.`,
       ignoreFocusOut: true
     };
 
+    let sketchFileName: string = constants.defaultSketchFileName;
     vscode.window
       .showInputBox(option)
       .then(val => {
-        const sketchFileName = val;
+        if (val !== undefined) {
+          sketchFileName = val;
+        }
 
         // Create arduino.json config file
-        const arduinoJsonFilePath = path.join(deviceFolderPath, constants.arduinoJsonFileName);
-        const arduinoJsonObj = {
+        const arduinoJSONFilePath = path.join(vscodeFolderPath, constants.arduinoJsonFileName);
+        const arduinoJSONObj = {
           'board': constants.boardInfo,
           'stetch': sketchFileName,
           'configuration': constants.uploadMethod
@@ -65,13 +80,26 @@ export class AZ3166Device implements Device {
 
         try
         {
-          fs.writeFileSync(arduinoJsonFilePath, JSON.stringify(arduinoJsonObj, null, 4));
+          fs.writeFileSync(arduinoJSONFilePath, JSON.stringify(arduinoJSONObj, null, 4));
         }
         catch (error)
         {
           ExceptionHelper.logError(`Device: create arduino config file failed: ${error.message}`, true);
         }
     });
+
+    // Create an empty arduino sketch
+    const sketchTemplateFilePath = this.extensionContext.asAbsolutePath(
+      path.join(constants.resourcesFolderName, constants.sketchTemplateFileName));
+    const newSketchFilePath = path.join(deviceFolderPath, sketchFileName);
+
+    try {
+      const content = fs.readFileSync(sketchTemplateFilePath).toString();
+      fs.writeFileSync(newSketchFilePath, content);
+    }
+    catch (error) {
+      ExceptionHelper.logError('Create arduino sketch file failed.', true);
+    }
 
     return true;
   }

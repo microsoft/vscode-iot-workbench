@@ -15,7 +15,7 @@ export class DeviceOperator {
           true);
     }
 
-    const project = new IoTProject();
+    const project = new IoTProject(context);
     const rootPath: string = vscode.workspace.rootPath as string;
     project.load(rootPath);
     await project.compile();
@@ -28,7 +28,7 @@ export class DeviceOperator {
           true);
     }
 
-    const project = new IoTProject();
+    const project = new IoTProject(context);
     const rootPath: string = vscode.workspace.rootPath as string;
     project.load(rootPath);
     await project.upload();
