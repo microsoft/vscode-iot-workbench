@@ -15,7 +15,7 @@ export class AzureOperator {
           true);
     }
 
-    const project = new IoTProject();
+    const project = new IoTProject(context);
     const rootPath: string = vscode.workspace.rootPath as string;
     project.load(rootPath);
     project.provision();
