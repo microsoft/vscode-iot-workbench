@@ -42,13 +42,7 @@ export class ConifgHandler {
     const configObject = getConfigObject();
     configObject[key] = value;
 
-    let stringToSave;
-
-    try {
-      stringToSave = JSON.stringify(configObject, null, 4);
-    } catch (e) {
-      ExceptionHelper.logError('Value is not a valid JSON object.', true);
-    }
+    const stringToSave = JSON.stringify(configObject, null, 4);
 
     if (!stringToSave) {
       ExceptionHelper.logError('Value is not a valid JSON object.', true);
