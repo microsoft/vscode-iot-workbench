@@ -6,6 +6,7 @@ import {getExtension} from './Apis';
 import {extensionName} from './Interfaces/Api';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
+import {IoTHubDevice} from './IoTHubDevice';
 
 export class IoTHub implements Component, Provisionable {
   private componentType: ComponentType;
@@ -70,10 +71,15 @@ export class IoTHub implements Component, Provisionable {
               break;
           }
 
-          if (iothub && iothub.name && iothub.iotHubConnectionString) {
+          if (iothub && iothub.iotHubConnectionString) {
             ConifgHandler.update(
                 'iothubConnectionString', iothub.iotHubConnectionString);
-            // TODO: handle device
+            const device = new IoTHubDevice(iothub.iotHubConnectionString);
+            if (await device.provision()) {
+              resolve(true);
+            } else {
+              reject(false);
+            }
             resolve(true);
           } else {
             reject(false);
