@@ -82,7 +82,7 @@ export class AZ3166Device implements Device {
           path.join(vscodeFolderPath, constants.arduinoJsonFileName);
       const arduinoJSONObj = {
         'board': constants.boardInfo,
-        'stetch': sketchFileName,
+        'sketch': sketchFileName,
         'configuration': constants.uploadMethod
       };
 
