@@ -9,7 +9,7 @@ import {IoTProject} from './Models/IoTProject';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
   // Use the console to output diagnostic information (console.log) and errors
   // (console.error) This line of code will only be executed once when your
   // extension is activated
@@ -19,7 +19,7 @@ export function activate(context: vscode.ExtensionContext) {
   const iotProject = new IoTProject(context);
   if (vscode.workspace.rootPath) {
     try {
-      iotProject.load(vscode.workspace.rootPath);
+      await iotProject.load(vscode.workspace.rootPath);
 
     } catch (error) {
       // do nothing as we are not sure whether the project is initialized.

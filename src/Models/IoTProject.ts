@@ -58,49 +58,54 @@ export class IoTProject {
     this.extensionContext = context;
   }
 
-  load(rootFolderPath: string): boolean {
-    if (!fs.existsSync(rootFolderPath)) {
-      ExceptionHelper.logError(
-          'Unable to find the root path, please open an IoT Studio project',
-          true);
-    }
 
-    this.projectRootPath = rootFolderPath;
+  async load(rootFolderPath: string): Promise<boolean> {
+    return new Promise(
+        async (
+            resolve: (value: boolean) => void,
+            reject: (value: boolean) => void) => {
+          if (!fs.existsSync(rootFolderPath)) {
+            ExceptionHelper.logError(
+                'Unable to find the root path, please open an IoT Studio project',
+                true);
+            reject(false);
+          }
+          this.projectRootPath = rootFolderPath;
 
-    const configFilePath =
-        path.join(this.projectRootPath, constants.configFileName);
+          const configFilePath =
+              path.join(this.projectRootPath, constants.configFileName);
 
-    if (!fs.existsSync(configFilePath)) {
-      ExceptionHelper.logError(
-          'Unable to open the configuration file, please open an IoT Studio project',
-          true);
-    }
+          if (!fs.existsSync(configFilePath)) {
+            ExceptionHelper.logError(
+                'Unable to open the configuration file, please open an IoT Studio project',
+                true);
+            reject(false);
+          }
+          const settings = require(configFilePath);
 
-    const settings = require(configFilePath);
+          const deviceLocation = settings.projectsettings.find(
+              (obj: ProjectSetting) => obj.name === jsonConstants.DevicePath);
 
-    const deviceLocation = settings.projectsettings.find(
-        (obj: ProjectSetting) => obj.name === jsonConstants.DevicePath);
+          if (deviceLocation) {
+            const device =
+                new AZ3166Device(this.extensionContext, deviceLocation.value);
+            this.componentList.push(device);
+          }
 
-    if (deviceLocation) {
-      const device =
-          new AZ3166Device(this.extensionContext, deviceLocation.value);
-      this.componentList.push(device);
-    }
+          const hubName = settings.projectsettings.find(
+              (obj: ProjectSetting) => obj.name === jsonConstants.IoTHubName);
 
-    const hubName = settings.projectsettings.find(
-        (obj: ProjectSetting) => obj.name === jsonConstants.IoTHubName);
+          if (hubName) {
+            const iotHub = new IoTHub();
+            this.componentList.push(iotHub);
+          }
 
-    if (hubName) {
-      const iotHub = new IoTHub();
-      this.componentList.push(iotHub);
-    }
-
-    // Component level load
-    this.componentList.forEach((element: Component) => {
-      element.load();
-    });
-
-    return true;
+          // Component level load
+          this.componentList.forEach((element: Component) => {
+            element.load();
+          });
+          resolve(true);
+        });
   }
 
   async compile(): Promise<boolean> {

@@ -5,7 +5,7 @@ export enum ComponentType {
 }
 
 export interface Component {
-  load(): boolean;
+  load(): Promise<boolean>;
   create(): boolean;
   getComponentType(): ComponentType;
 }
