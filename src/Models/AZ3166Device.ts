@@ -6,6 +6,7 @@ import {Component, ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
 import {ExceptionHelper} from '../exceptionHelper';
 import {IoTProject, ProjectTemplateType} from '../Models/IoTProject';
+import { error } from 'util';
 
 const constants = {
   vscodeSettingsFolderName: '.vscode',
@@ -67,6 +68,11 @@ export class AZ3166Device implements Device {
       .showInputBox(option)
       .then(val => {
         if (val !== undefined) {
+          var fileExt = val.split('.').pop();
+          if (fileExt !== 'ino') {
+            val = val + '.ino';
+          }
+          
           sketchFileName = val;
         }
 
@@ -86,24 +92,26 @@ export class AZ3166Device implements Device {
         {
           ExceptionHelper.logError(`Device: create arduino config file failed: ${error.message}`, true);
         }
+
+        // Create an empty arduino sketch
+        const sketchTemplateFilePath = this.extensionContext.asAbsolutePath(
+          path.join(constants.resourcesFolderName, constants.sketchTemplateFileName));
+        const newSketchFilePath = path.join(deviceFolderPath, sketchFileName);
+
+        try {
+          const content = fs.readFileSync(sketchTemplateFilePath).toString();
+          fs.writeFileSync(newSketchFilePath, content);
+          vscode.commands.executeCommand(
+            'arduino.iotStudioInitialize', this.deviceFolder);
+        }
+        catch (error) {
+          ExceptionHelper.logError('Create arduino sketch file failed.', true);
+        }
     });
-
-    // Create an empty arduino sketch
-    const sketchTemplateFilePath = this.extensionContext.asAbsolutePath(
-      path.join(constants.resourcesFolderName, constants.sketchTemplateFileName));
-    const newSketchFilePath = path.join(deviceFolderPath, sketchFileName);
-
-    try {
-      const content = fs.readFileSync(sketchTemplateFilePath).toString();
-      fs.writeFileSync(newSketchFilePath, content);
-    }
-    catch (error) {
-      ExceptionHelper.logError('Create arduino sketch file failed.', true);
-    }
 
     return true;
   }
-
+ 
   async compile(): Promise<boolean> {
     return new Promise(
         async (
