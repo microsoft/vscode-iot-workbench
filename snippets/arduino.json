@@ -21,8 +21,8 @@
             "    sensor->getTemperature(&temperature);",
             "    return temperature;",
             "}"
-      ],
-      "description": "Functions to get temperature data"
+        ],
+        "description": "Functions to get temperature data"
     },
     "initwifi": {
         "prefix": "iot-initwifi",
@@ -41,7 +41,7 @@
             "        return false;",
             "    }",
             "}"
-    ],
-    "description": "Functions to init WiFi"
-  }
+        ],
+        "description": "Functions to init WiFi"
+    }
 }
