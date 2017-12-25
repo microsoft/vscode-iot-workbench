@@ -1,0 +1,47 @@
+{
+    "gettemperature": {
+        "prefix": "iot-temperature",
+        "body": [
+            "#include \"HTS221Sensor.h\"",
+            "\t$0",
+            "DevI2C *i2c;",
+            "HTS221Sensor *sensor;",
+            "",
+            "void SensorInit()",
+            "{",
+            "    i2c = new DevI2C(D14, D15);",
+            "    sensor = new HTS221Sensor(*i2c);",
+            "    sensor->init(NULL);",
+            "}",
+
+            "float readTemperature()",
+            "{",
+            "    sensor->reset();",
+            "    float temperature = 0;",
+            "    sensor->getTemperature(&temperature);",
+            "    return temperature;",
+            "}"
+        ],
+        "description": "Functions to get temperature data"
+    },
+    "initwifi": {
+        "prefix": "iot-initwifi",
+        "body": [
+            "#include \"AZ3166WiFi.h\"",
+            "\t$0",
+            "bool InitWifi()",
+            "{",
+            "    if (WiFi.begin() == WL_CONNECTED)",
+            "    {",
+            "        IPAddress ip = WiFi.localIP();",
+            "        return true;",
+            "    }",
+            "    else",
+            "    {",
+            "        return false;",
+            "    }",
+            "}"
+        ],
+        "description": "Functions to init WiFi"
+    }
+}
