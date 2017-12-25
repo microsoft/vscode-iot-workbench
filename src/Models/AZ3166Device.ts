@@ -40,8 +40,20 @@ export class AZ3166Device implements Device {
     return this.componentType;
   }
 
-  load(): boolean {
-    return true;
+  async load(): Promise<boolean> {
+    return new Promise(
+        async (
+            resolve: (value: boolean) => void,
+            reject: (value: boolean) => void) => {
+          try {
+            await vscode.commands.executeCommand(
+                'arduino.iotStudioInitialize', this.deviceFolder);
+            resolve(true);
+          } catch (error) {
+            ExceptionHelper.logError(error, true);
+            reject(false);
+          }
+        });
   }
 
   create(): boolean {
@@ -120,7 +132,7 @@ export class AZ3166Device implements Device {
             resolve: (value: boolean) => void,
             reject: (value: boolean) => void) => {
           try {
-            vscode.commands.executeCommand(
+            await vscode.commands.executeCommand(
                 'arduino.iotStudioInitialize', this.deviceFolder);
             await vscode.commands.executeCommand('arduino.verify');
             resolve(true);
@@ -137,7 +149,7 @@ export class AZ3166Device implements Device {
             resolve: (value: boolean) => void,
             reject: (value: boolean) => void) => {
           try {
-            vscode.commands.executeCommand(
+            await vscode.commands.executeCommand(
                 'arduino.iotStudioInitialize', this.deviceFolder);
             await vscode.commands.executeCommand('arduino.upload');
             resolve(true);
