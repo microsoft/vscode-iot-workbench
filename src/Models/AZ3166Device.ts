@@ -1,12 +1,13 @@
 import * as fs from 'fs-plus';
 import * as path from 'path';
+import {error} from 'util';
 import * as vscode from 'vscode';
+
+import {ExceptionHelper} from '../exceptionHelper';
+import {IoTProject, ProjectTemplateType} from '../Models/IoTProject';
 
 import {Component, ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
-import {ExceptionHelper} from '../exceptionHelper';
-import {IoTProject, ProjectTemplateType} from '../Models/IoTProject';
-import { error } from 'util';
 
 const constants = {
   vscodeSettingsFolderName: '.vscode',
@@ -48,10 +49,12 @@ export class AZ3166Device implements Device {
     const deviceFolderPath = path.join(rootPath, this.deviceFolder);
 
     if (!fs.existsSync(deviceFolderPath)) {
-      ExceptionHelper.logError(`Device folder doesn't exist: ${deviceFolderPath}`, true);
+      ExceptionHelper.logError(
+          `Device folder doesn't exist: ${deviceFolderPath}`, true);
     }
 
-    const vscodeFolderPath = path.join(deviceFolderPath, constants.vscodeSettingsFolderName);
+    const vscodeFolderPath =
+        path.join(deviceFolderPath, constants.vscodeSettingsFolderName);
     if (!fs.existsSync(vscodeFolderPath)) {
       fs.mkdirSync(vscodeFolderPath);
     }
@@ -63,55 +66,54 @@ export class AZ3166Device implements Device {
       ignoreFocusOut: true
     };
 
-    vscode.window
-      .showInputBox(option)
-      .then(val => {
-        let sketchFileName: string = constants.defaultSketchFileName;
-        if (val !== undefined) {
-          const fileExt = val.split('.').pop();
-          if (fileExt !== 'ino') {
-            val = val + '.ino';
-          }
-          
-          sketchFileName = val;
+    vscode.window.showInputBox(option).then(val => {
+      let sketchFileName: string = constants.defaultSketchFileName;
+      if (val !== undefined) {
+        const fileExt = val.split('.').pop();
+        if (fileExt !== 'ino') {
+          val = val + '.ino';
         }
 
-        // Create arduino.json config file
-        const arduinoJSONFilePath = path.join(vscodeFolderPath, constants.arduinoJsonFileName);
-        const arduinoJSONObj = {
-          'board': constants.boardInfo,
-          'stetch': sketchFileName,
-          'configuration': constants.uploadMethod
-        };
+        sketchFileName = val;
+      }
 
-        try
-        {
-          fs.writeFileSync(arduinoJSONFilePath, JSON.stringify(arduinoJSONObj, null, 4));
-        }
-        catch (error)
-        {
-          ExceptionHelper.logError(`Device: create arduino config file failed: ${error.message}`, true);
-        }
+      // Create arduino.json config file
+      const arduinoJSONFilePath =
+          path.join(vscodeFolderPath, constants.arduinoJsonFileName);
+      const arduinoJSONObj = {
+        'board': constants.boardInfo,
+        'stetch': sketchFileName,
+        'configuration': constants.uploadMethod
+      };
 
-        // Create an empty arduino sketch
-        const sketchTemplateFilePath = this.extensionContext.asAbsolutePath(
-          path.join(constants.resourcesFolderName, constants.sketchTemplateFileName));
-        const newSketchFilePath = path.join(deviceFolderPath, sketchFileName);
+      try {
+        fs.writeFileSync(
+            arduinoJSONFilePath, JSON.stringify(arduinoJSONObj, null, 4));
+      } catch (error) {
+        ExceptionHelper.logError(
+            `Device: create arduino config file failed: ${error.message}`,
+            true);
+      }
 
-        try {
-          const content = fs.readFileSync(sketchTemplateFilePath).toString();
-          fs.writeFileSync(newSketchFilePath, content);
-          vscode.commands.executeCommand(
+      // Create an empty arduino sketch
+      const sketchTemplateFilePath =
+          this.extensionContext.asAbsolutePath(path.join(
+              constants.resourcesFolderName, constants.sketchTemplateFileName));
+      const newSketchFilePath = path.join(deviceFolderPath, sketchFileName);
+
+      try {
+        const content = fs.readFileSync(sketchTemplateFilePath).toString();
+        fs.writeFileSync(newSketchFilePath, content);
+        vscode.commands.executeCommand(
             'arduino.iotStudioInitialize', this.deviceFolder);
-        }
-        catch (error) {
-          ExceptionHelper.logError('Create arduino sketch file failed.', true);
-        }
+      } catch (error) {
+        ExceptionHelper.logError('Create arduino sketch file failed.', true);
+      }
     });
 
     return true;
   }
- 
+
   async compile(): Promise<boolean> {
     return new Promise(
         async (

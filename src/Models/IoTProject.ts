@@ -2,14 +2,14 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+import {ExceptionHelper} from '../exceptionHelper';
 
 import {AZ3166Device} from './AZ3166Device';
 import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
-import {ExceptionHelper} from '../exceptionHelper';
-import {IoTHub} from './IoTHub';
 import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
+import {IoTHub} from './IoTHub';
 
 const constants = {
   deviceDefaultFolderName: 'Device',
@@ -82,7 +82,8 @@ export class IoTProject {
         (obj: ProjectSetting) => obj.name === jsonConstants.DevicePath);
 
     if (deviceLocation) {
-      const device = new AZ3166Device(this.extensionContext, deviceLocation.value);
+      const device =
+          new AZ3166Device(this.extensionContext, deviceLocation.value);
       this.componentList.push(device);
     }
 
@@ -178,7 +179,8 @@ export class IoTProject {
       fs.mkdirSync(deviceDir);
     }
 
-    const device = new AZ3166Device(this.extensionContext, constants.deviceDefaultFolderName);
+    const device = new AZ3166Device(
+        this.extensionContext, constants.deviceDefaultFolderName);
     this.componentList.push(device);
 
     // TODO: Consider naming for project level settings.
