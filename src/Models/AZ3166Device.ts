@@ -63,12 +63,12 @@ export class AZ3166Device implements Device {
       ignoreFocusOut: true
     };
 
-    let sketchFileName: string = constants.defaultSketchFileName;
     vscode.window
       .showInputBox(option)
       .then(val => {
+        let sketchFileName: string = constants.defaultSketchFileName;
         if (val !== undefined) {
-          var fileExt = val.split('.').pop();
+          const fileExt = val.split('.').pop();
           if (fileExt !== 'ino') {
             val = val + '.ino';
           }
