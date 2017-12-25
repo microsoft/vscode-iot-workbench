@@ -88,6 +88,9 @@ export class IoTHubDevice {
   }
 }
 
+// As toolkit extension export api for device is not ready,
+// the below code is a temp solution.
+
 async function getDeviceList(iotHubConnectionString: string):
     Promise<vscode.QuickPickItem[]|undefined> {
   return new Promise(
