@@ -1,0 +1,13 @@
+#!/bin/sh
+
+echo "Checking TypeScript style..."
+if [[ $(gts check) ]]; then
+    echo "Trying auto fix style issues..."
+    gts fix
+    if [[ $(gts check) ]]; then
+        echo "You have style issues that cannot be fixed automatically, please fix it manually first before commit."
+        exit 1
+    else
+        git add -u
+    fi
+fi
