@@ -41,7 +41,14 @@ export class AZ3166Device implements Device {
   }
 
   load(): boolean {
-    return true;
+    try {
+      vscode.commands.executeCommand(
+          'arduino.iotStudioInitialize', this.deviceFolder);
+      return true;
+    } catch (error) {
+      ExceptionHelper.logError(error, true);
+      return false;
+    }
   }
 
   create(): boolean {
