@@ -147,4 +147,19 @@ export class AZ3166Device implements Device {
           }
         });
   }
+
+  async setDeviceConnectionString(): Promise<boolean> {
+    return new Promise(
+        async (
+            resolve: (value: boolean) => void,
+            reject: (value: boolean) => void) => {
+          try {
+            // TODO
+            resolve(true);
+          } catch (error) {
+            ExceptionHelper.logError(error, true);
+            reject(false);
+          }
+        });
+  }
 }

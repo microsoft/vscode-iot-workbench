@@ -33,4 +33,17 @@ export class DeviceOperator {
     project.load(rootPath);
     await project.upload();
   }
+
+  async setConnectionString(context: vscode.ExtensionContext) {
+    if (!vscode.workspace.rootPath) {
+      ExceptionHelper.logError(
+          'Unable to find the root path, please open an IoT Studio project',
+          true);
+    }
+
+    const project = new IoTProject(context);
+    const rootPath: string = vscode.workspace.rootPath as string;
+    project.load(rootPath);
+    await project.setDeviceConnectionString();
+  }
 }
