@@ -74,7 +74,7 @@ export class IoTHub implements Component, Provisionable {
           if (iothub && iothub.iotHubConnectionString) {
             ConifgHandler.update(
                 'iothubConnectionString', iothub.iotHubConnectionString);
-            const device = new IoTHubDevice(iothub.iotHubConnectionString);
+            const device = new IoTHubDevice();
             if (await device.provision()) {
               resolve(true);
             } else {

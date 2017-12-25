@@ -13,25 +13,11 @@ interface DeviceInfo {
   iothubDeviceConnectionString: string;
 }
 
-export class IoTHubDevice implements Component, Provisionable {
-  private componentType: ComponentType;
+export class IoTHubDevice {
   private iotHubConnectionString: string;
 
-  constructor(iotHubConnectionString: string) {
-    this.componentType = ComponentType.IoTHubDevice;
-    this.iotHubConnectionString = iotHubConnectionString;
-  }
-
-  getComponentType(): ComponentType {
-    return this.componentType;
-  }
-
-  load(): boolean {
-    return true;
-  }
-
-  create(): boolean {
-    return true;
+  constructor() {
+    this.iotHubConnectionString = ConifgHandler.get('iothubConnectionString');
   }
 
   async provision(): Promise<boolean> {
