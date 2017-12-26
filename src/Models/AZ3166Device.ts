@@ -1,8 +1,11 @@
 import * as fs from 'fs-plus';
 import * as path from 'path';
+import * as SerialPort from 'serialport';
 import {error} from 'util';
 import * as vscode from 'vscode';
 
+import {ConfigHandler} from '../configHandler';
+import {ConfigKey} from '../constants';
 import {ExceptionHelper} from '../exceptionHelper';
 import {IoTProject, ProjectTemplateType} from '../Models/IoTProject';
 
@@ -154,7 +157,18 @@ export class AZ3166Device implements Device {
             resolve: (value: boolean) => void,
             reject: (value: boolean) => void) => {
           try {
-            // TODO
+            // Get IoT Hub device connection string from config
+            const deviceConnectionString =
+                ConfigHandler.get(ConfigKey.iotHubDeviceConnectionString);
+
+            if (deviceConnectionString) {
+              console.log(deviceConnectionString);
+            } else {
+              // TODO: Create new IoT Hub device connection string
+            }
+
+            // TODO: Set connection string to device through DevKit CLI
+
             resolve(true);
           } catch (error) {
             ExceptionHelper.logError(error, true);
@@ -162,4 +176,6 @@ export class AZ3166Device implements Device {
           }
         });
   }
+
+  private async chooseCom() {}
 }

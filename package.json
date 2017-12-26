@@ -15,7 +15,8 @@
     "onCommand:azureiotstudio.azureProvision",
     "onCommand:azureiotstudio.azureDeploy",
     "onCommand:azureiotstudio.deviceCompile",
-    "onCommand:azureiotstudio.deviceUpload"
+    "onCommand:azureiotstudio.deviceUpload",
+    "onCommand:azureiotstudio.deviceConnectionStringConfig"
   ],
   "main": "./out/extension",
   "contributes": {
@@ -58,6 +59,11 @@
         "command": "azureiotstudio.deviceUpload",
         "title": "Device Upload",
         "category": "IoTStudio"
+      },
+      {
+        "command": "azureiotstudio.deviceConnectionStringConfig",
+        "title": "Config Device Connection String",
+        "category": "IoTStudio"
       }
     ]
   },
@@ -83,7 +89,9 @@
     "vscode": "^1.1.6"
   },
   "dependencies": {
+    "@types/serialport": "^6.0.0",
     "azure-iothub": "^1.2.3",
-    "fs-plus": "^3.0.1"
+    "fs-plus": "^3.0.1",
+    "serialport": "^6.0.4"
   }
 }
