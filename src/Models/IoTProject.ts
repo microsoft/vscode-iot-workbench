@@ -232,7 +232,7 @@ export class IoTProject {
               if (device.getDeviceType() === DeviceType.MXChip_AZ3166) {
                 const az3166Device = device as AZ3166Device;
                 try {
-                  az3166Device.setDeviceConnectionString();
+                  await az3166Device.setDeviceConnectionString();
                   resolve(true);
                 } catch (error) {
                   reject(error);
