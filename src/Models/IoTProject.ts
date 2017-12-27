@@ -7,6 +7,7 @@ import {ExceptionHelper} from '../exceptionHelper';
 import {AZ3166Device} from './AZ3166Device';
 import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
+import {Device, DeviceType} from './Interfaces/Device';
 import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
 import {IoTHub} from './IoTHub';
@@ -224,7 +225,26 @@ export class IoTProject {
     return true;
   }
 
-  setDeviceConnectionString(deviceConnectionString: string): boolean {
-    return true;
+  async setDeviceConnectionString(): Promise<boolean> {
+    return new Promise(
+        async (
+            resolve: (value: boolean) => void,
+            reject: (value: boolean) => void) => {
+          for (const component of this.componentList) {
+            if (component.getComponentType() === ComponentType.Device) {
+              const device = component as Device;
+              if (device.getDeviceType() === DeviceType.MXChip_AZ3166) {
+                const az3166Device = device as AZ3166Device;
+                try {
+                  await az3166Device.setDeviceConnectionString();
+                  resolve(true);
+                } catch (error) {
+                  reject(error);
+                  return;
+                }
+              }
+            }
+          }
+        });
   }
 }
