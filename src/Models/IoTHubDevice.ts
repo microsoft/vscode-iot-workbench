@@ -1,11 +1,9 @@
 import * as iothub from 'azure-iothub';
 import * as vscode from 'vscode';
-import {ConfigurationTarget} from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
 import {ExceptionHelper} from '../exceptionHelper';
-
 import {getExtension} from './Apis';
 import {extensionName} from './Interfaces/Api';
 import {Component, ComponentType} from './Interfaces/Component';

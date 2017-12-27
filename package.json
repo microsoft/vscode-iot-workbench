@@ -83,14 +83,14 @@
   "devDependencies": {
     "@types/fs-plus": "^3.0.0",
     "@types/mocha": "^2.2.42",
-    "@types/node": "^8.0.53",
-	"@types/lodash": "^4.14.91",
+    "@types/node": "^7.0.43",
+    "@types/lodash": "^4.14.91",
     "@types/serialport": "^4.0.7",
     "gts": "^0.5.1",
     "typescript": "^2.6.2",
     "vscode": "^1.1.6"
   },
-  "dependencies": {    
+  "dependencies": {
     "azure-iothub": "^1.2.3",
     "fs-plus": "^3.0.1",
     "lodash": "^4.17.4",

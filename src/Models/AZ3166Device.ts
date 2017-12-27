@@ -248,7 +248,7 @@ export class AZ3166Device implements Device {
             const deviceConnectionStringSelection: vscode.QuickPickItem[] = [
               {
                 label: 'Select IoT Hub Device Connection String',
-                description: `Device Information:  ${hostName}  ${deviceId}`,
+                description: `Device Information: ${hostName} ${deviceId}`,
                 detail: 'select'
               },
               {
@@ -272,7 +272,7 @@ export class AZ3166Device implements Device {
             if (selection.detail === 'input') {
               const option: vscode.InputBoxOptions = {
                 value:
-                    'HostName=<Host Name>;SharedAccessKeyName=<Key Name>;SharedAccessKey=<SAS Key>',
+                    'HostName=<Host Name>;DeviceId=<Device Name>;SharedAccessKey=<Device Key>',
                 prompt: `Please input device connection string here.`,
                 ignoreFocusOut: true
               };

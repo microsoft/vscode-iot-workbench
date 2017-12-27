@@ -1,5 +1,4 @@
 import * as fs from 'fs-plus';
-import {resolve} from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
