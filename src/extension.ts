@@ -5,15 +5,26 @@ import * as vscode from 'vscode';
 import {ProjectInitializer} from './projectInitializer';
 import {DeviceOperator} from './DeviceOperator';
 import {AzureOperator} from './AzureOperator';
+import {IoTProject} from './Models/IoTProject';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
   // Use the console to output diagnostic information (console.log) and errors
   // (console.error) This line of code will only be executed once when your
   // extension is activated
   console.log(
       'Congratulations, your extension "vscode-azure-iot-studio" is now active!');
+
+  const iotProject = new IoTProject(context);
+  if (vscode.workspace.rootPath) {
+    try {
+      await iotProject.load(vscode.workspace.rootPath);
+
+    } catch (error) {
+      // do nothing as we are not sure whether the project is initialized.
+    }
+  }
 
   const projectInitializer = new ProjectInitializer();
   const deviceOperator = new DeviceOperator();

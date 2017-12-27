@@ -11,6 +11,7 @@
     "Other"
   ],
   "activationEvents": [
+    "workspaceContains:**/iotstudio.config.json",    
     "onCommand:azureiotstudio.initializeProject",
     "onCommand:azureiotstudio.azureProvision",
     "onCommand:azureiotstudio.azureDeploy",
