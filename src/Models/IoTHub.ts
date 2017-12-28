@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
-import {ConifgHandler} from '../configHandler';
+import {ConfigHandler} from '../configHandler';
+import {ConfigKey} from '../constants';
 
 import {getExtension} from './Apis';
 import {extensionName} from './Interfaces/Api';
@@ -78,8 +79,9 @@ export class IoTHub implements Component, Provisionable {
           }
 
           if (iothub && iothub.iotHubConnectionString) {
-            ConifgHandler.update(
-                'iothubConnectionString', iothub.iotHubConnectionString);
+            ConfigHandler.update(
+                ConfigKey.iotHubConnectionString,
+                iothub.iotHubConnectionString);
             const device = new IoTHubDevice();
             if (await device.provision()) {
               resolve(true);

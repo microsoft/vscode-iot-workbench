@@ -1,9 +1,9 @@
 import * as iothub from 'azure-iothub';
 import * as vscode from 'vscode';
 
-import {ConifgHandler} from '../configHandler';
+import {ConfigHandler} from '../configHandler';
+import {ConfigKey} from '../constants';
 import {ExceptionHelper} from '../exceptionHelper';
-
 import {getExtension} from './Apis';
 import {extensionName} from './Interfaces/Api';
 import {Component, ComponentType} from './Interfaces/Component';
@@ -17,7 +17,8 @@ export class IoTHubDevice {
   private iotHubConnectionString: string;
 
   constructor() {
-    this.iotHubConnectionString = ConifgHandler.get('iothubConnectionString');
+    this.iotHubConnectionString =
+        ConfigHandler.get(ConfigKey.iotHubConnectionString);
   }
 
   async provision(): Promise<boolean> {
@@ -61,8 +62,8 @@ export class IoTHubDevice {
                   ExceptionHelper.logError(
                       'Cannot select the specific device', true);
                 } else {
-                  ConifgHandler.update(
-                      'iothubDeviceConnectionString',
+                  ConfigHandler.update(
+                      ConfigKey.iotHubDeviceConnectionString,
                       device.iothubDeviceConnectionString);
                 }
 
@@ -72,8 +73,8 @@ export class IoTHubDevice {
                 if (device === undefined) {
                   ExceptionHelper.logError('Cannot create device', true);
                 } else {
-                  ConifgHandler.update(
-                      'iothubDeviceConnectionString',
+                  ConfigHandler.update(
+                      ConfigKey.iotHubDeviceConnectionString,
                       device.iothubDeviceConnectionString);
                 }
 

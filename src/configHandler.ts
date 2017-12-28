@@ -33,7 +33,7 @@ function getConfigObject() {
   return configObject;
 }
 
-export class ConifgHandler {
+export class ConfigHandler {
   static update(key: string, value: {}) {
     if (!key) {
       ExceptionHelper.logError('Key is empty.', true);

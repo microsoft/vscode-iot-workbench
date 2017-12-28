@@ -71,11 +71,17 @@ export async function activate(context: vscode.ExtensionContext) {
         await deviceOperator.upload(context);
       });
 
+  const deviceConnectionStringConfig = vscode.commands.registerCommand(
+      'azureiotstudio.deviceConnectionStringConfig', async () => {
+        await deviceOperator.setConnectionString(context);
+      });
+
   context.subscriptions.push(projectInit);
   context.subscriptions.push(azureProvision);
   context.subscriptions.push(azureDeploy);
   context.subscriptions.push(deviceCompile);
   context.subscriptions.push(deviceUpload);
+  context.subscriptions.push(deviceConnectionStringConfig);
 }
 
 // this method is called when your extension is deactivated
