@@ -450,8 +450,7 @@ export class AZ3166Device implements Device {
   private async sendDataViaSerialPort(port: any, data: string):
       Promise<boolean> {
     return new Promise(
-        (resolve: (value: boolean) => void,
-         reject: (value: boolean) => void) => {
+        (resolve: (value: boolean) => void, reject: (value: Error) => void) => {
           try {
             // tslint:disable-next-line: no-any
             port.write(data, (err: any) => {

@@ -24,7 +24,7 @@ export class IoTHub implements Component, Provisionable {
     return new Promise(
         async (
             resolve: (value: boolean) => void,
-            reject: (value: boolean) => void) => {
+            reject: (value: Error) => void) => {
           resolve(true);
         });
   }

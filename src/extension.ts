@@ -60,6 +60,7 @@ export async function activate(context: vscode.ExtensionContext) {
       'azureiotstudio.azureProvision', async () => {
         try {
           await azureOperator.Provision(context);
+          vscode.window.showInformationMessage('Azure provision succeeded.');
         } catch (error) {
           ExceptionHelper.logError(error, true);
         }
