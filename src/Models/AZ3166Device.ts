@@ -255,8 +255,10 @@ export class AZ3166Device implements Device {
             const res =
                 await this.flushDeviceConnectionString(deviceConnectionString);
             if (res === false) {
+              vscode.window.showInformationMessage('Failed to set up device Connection String.');
               reject(false);
             } else {
+              vscode.window.showInformationMessage('Device Connection String is set up successfully.');
               resolve(true);
             }
           } catch (error) {
@@ -375,11 +377,15 @@ export class AZ3166Device implements Device {
           setTimeout(() => {
             if (errorRejected) return;
             if (!gotData || !configMode) {
-              console.log(
-                  'Please hold down button A and then push and release the reset button to enter configuration mode.');
-              port.write('\r\nhelp\r\n', (error: any) => {
-                rejectIfError(error);
-              });
+              // Prompt user to enter configuration mode
+              vscode.window
+                  .showInformationMessage(
+                      'Please hold down button A and then push and release the reset button to enter configuration mode.')
+                  .then(() => {
+                    port.write('\r\nhelp\r\n', (error: any) => {
+                      rejectIfError(error);
+                    });
+                  });
             }
           }, 10000);
         });
