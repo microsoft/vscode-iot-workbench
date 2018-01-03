@@ -1,21 +1,22 @@
+import {port} from '_debugger';
 import * as fs from 'fs-plus';
 import * as _ from 'lodash';
 import * as path from 'path';
 import {resolve} from 'url';
 import {error} from 'util';
 import * as vscode from 'vscode';
+import {TextEditorCursorStyle} from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, DeviceConfig} from '../constants';
 import {ExceptionHelper} from '../exceptionHelper';
 import {IoTProject, ProjectTemplateType} from '../Models/IoTProject';
 import {delay} from '../utils';
+
 import {Component, ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
-import { TextEditorCursorStyle } from 'vscode';
-import { port } from '_debugger';
 
-interface ISerialPortDetail {
+interface SerialPortInfo {
   comName: string;
   manufacturer: string;
   vendorId: string;
@@ -33,12 +34,14 @@ const constants = {
 };
 
 export class AZ3166Device implements Device {
-  public static get serialport(): any {
+  static get serialport(): any {
     if (!AZ3166Device._serialport) {
-      AZ3166Device._serialport = require("../../vendor/node-usb-native").SerialPort;
+      AZ3166Device._serialport =
+          require('../../vendor/node-usb-native').SerialPort;
     }
     return AZ3166Device._serialport;
   }
+
   private static _serialport: any;
 
   private deviceType: DeviceType;
@@ -255,10 +258,12 @@ export class AZ3166Device implements Device {
             const res =
                 await this.flushDeviceConnectionString(deviceConnectionString);
             if (res === false) {
-              vscode.window.showInformationMessage('Failed to set up device Connection String.');
+              vscode.window.showInformationMessage(
+                  'Failed to set up device Connection String.');
               reject(false);
             } else {
-              vscode.window.showInformationMessage('Device Connection String is set up successfully.');
+              vscode.window.showInformationMessage(
+                  'Device Connection String is set up successfully.');
               resolve(true);
             }
           } catch (error) {
@@ -274,7 +279,6 @@ export class AZ3166Device implements Device {
         async (
             resolve: (value: boolean) => void,
             reject: (value: boolean) => void) => {
-          
           let comPort = '';
           try {
             // Chooes COM port that AZ3166 is connected
@@ -335,7 +339,7 @@ export class AZ3166Device implements Device {
           };
 
           // Configure serial port callbacks
-          port.on('open', ()=> {
+          port.on('open', () => {
             port.write('\r\nhelp\r\n', (error: any) => {
               if (rejectIfError(error)) return;
             });
@@ -391,18 +395,18 @@ export class AZ3166Device implements Device {
         });
   }
 
-  private getComList(): Promise<ISerialPortDetail[]> {
+  private getComList(): Promise<SerialPortInfo[]> {
     return new Promise(
-      (resolve: (value: ISerialPortDetail[]) => void,
-      reject: (error: Error) => void) => {
-      AZ3166Device.serialport.list((e: any, ports: ISerialPortDetail[]) => {
-        if (e) {
-          reject(e);
-        } else {
-          resolve(ports);
-        }
-      });
-    });
+        (resolve: (value: SerialPortInfo[]) => void,
+         reject: (error: Error) => void) => {
+          AZ3166Device.serialport.list((e: any, ports: SerialPortInfo[]) => {
+            if (e) {
+              reject(e);
+            } else {
+              resolve(ports);
+            }
+          });
+        });
   }
 
   private async chooseCOM(): Promise<string> {
