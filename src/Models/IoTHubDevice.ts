@@ -25,7 +25,7 @@ export class IoTHubDevice {
     return new Promise(
         async (
             resolve: (value: boolean) => void,
-            reject: (value: boolean) => void) => {
+            reject: (value: Error) => void) => {
           const provisionIothubDeviceSelection: vscode.QuickPickItem[] = [
             {
               label: 'Select an existed IoT Hub device',
@@ -43,13 +43,14 @@ export class IoTHubDevice {
               {ignoreFocusOut: true, placeHolder: 'Provision IoTHub Device'});
 
           if (!selection) {
-            reject(false);
+            resolve(false);
             return;
           }
 
           const toolkit = getExtension(extensionName.Toolkit);
           if (toolkit === undefined) {
-            reject(false);
+            const error = new Error('Toolkit is not installed.');
+            reject(error);
             return;
           }
 

@@ -8,6 +8,7 @@ import {ProjectInitializer} from './projectInitializer';
 import {DeviceOperator} from './DeviceOperator';
 import {AzureOperator} from './AzureOperator';
 import {IoTProject} from './Models/IoTProject';
+import {ExceptionHelper} from './exceptionHelper';
 
 const constants = {
   configFileName: 'iotstudio.config.json'
@@ -48,32 +49,56 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const projectInit = vscode.commands.registerCommand(
       'azureiotstudio.initializeProject', async () => {
-        await projectInitializer.InitializeProject(context);
+        try {
+          await projectInitializer.InitializeProject(context);
+        } catch (error) {
+          ExceptionHelper.logError(error, true);
+        }
       });
 
   const azureProvision = vscode.commands.registerCommand(
       'azureiotstudio.azureProvision', async () => {
-        await azureOperator.Provision(context);
+        try {
+          await azureOperator.Provision(context);
+        } catch (error) {
+          ExceptionHelper.logError(error, true);
+        }
       });
 
   const azureDeploy = vscode.commands.registerCommand(
       'azureiotstudio.azureDeploy', async () => {
-        await azureOperator.Deploy(context);
+        try {
+          await azureOperator.Deploy(context);
+        } catch (error) {
+          ExceptionHelper.logError(error, true);
+        }
       });
 
   const deviceCompile = vscode.commands.registerCommand(
       'azureiotstudio.deviceCompile', async () => {
-        await deviceOperator.compile(context);
+        try {
+          await deviceOperator.compile(context);
+        } catch (error) {
+          ExceptionHelper.logError(error, true);
+        }
       });
 
   const deviceUpload = vscode.commands.registerCommand(
       'azureiotstudio.deviceUpload', async () => {
-        await deviceOperator.upload(context);
+        try {
+          await deviceOperator.upload(context);
+        } catch (error) {
+          ExceptionHelper.logError(error, true);
+        }
       });
 
   const deviceConnectionStringConfig = vscode.commands.registerCommand(
       'azureiotstudio.deviceConnectionStringConfig', async () => {
-        await deviceOperator.setConnectionString(context);
+        try {
+          await deviceOperator.setConnectionString(context);
+        } catch (error) {
+          ExceptionHelper.logError(error, true);
+        }
       });
 
   context.subscriptions.push(projectInit);
