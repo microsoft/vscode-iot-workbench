@@ -261,11 +261,11 @@ export class AZ3166Device implements Device {
                 await this.flushDeviceConnectionString(deviceConnectionString);
             if (res === false) {
               vscode.window.showInformationMessage(
-                  'Failed to set up device Connection String.');
+                  'Configure Device connection string failed.');
               reject(false);
             } else {
               vscode.window.showInformationMessage(
-                  'Device Connection String is set up successfully.');
+                  'Configure Device connection string successfully.');
               resolve(true);
             }
           } catch (error) {
