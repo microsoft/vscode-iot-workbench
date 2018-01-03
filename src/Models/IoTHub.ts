@@ -38,7 +38,7 @@ export class IoTHub implements Component, Provisionable {
     return new Promise(
         async (
             resolve: (value: boolean) => void,
-            reject: (value: boolean) => void) => {
+            reject: (value: Error) => void) => {
           const provisionIothubSelection: vscode.QuickPickItem[] = [
             {
               label: 'Select an existed IoT Hub',
@@ -56,13 +56,14 @@ export class IoTHub implements Component, Provisionable {
               {ignoreFocusOut: true, placeHolder: 'Provision IoT Hub'});
 
           if (!selection) {
-            reject(false);
+            resolve(false);
             return;
           }
 
           const toolkit = getExtension(extensionName.Toolkit);
           if (toolkit === undefined) {
-            reject(false);
+            const error = new Error('Toolkit is not installed.');
+            reject(error);
             return;
           }
 
@@ -86,11 +87,13 @@ export class IoTHub implements Component, Provisionable {
             if (await device.provision()) {
               resolve(true);
             } else {
-              reject(false);
+              const error = new Error('Device provision failed.');
+              reject(error);
             }
             resolve(true);
           } else {
-            reject(false);
+            const error = new Error('IoT Hub provision failed.');
+            reject(error);
           }
         });
   }

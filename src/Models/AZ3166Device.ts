@@ -115,14 +115,13 @@ export class AZ3166Device implements Device {
     return new Promise(
         async (
             resolve: (value: boolean) => void,
-            reject: (value: boolean) => void) => {
+            reject: (value: Error) => void) => {
           try {
             await vscode.commands.executeCommand(
                 'arduino.iotStudioInitialize', this.deviceFolder);
             resolve(true);
           } catch (error) {
-            ExceptionHelper.logError(error, true);
-            reject(false);
+            reject(error);
           }
         });
   }
@@ -201,15 +200,14 @@ export class AZ3166Device implements Device {
     return new Promise(
         async (
             resolve: (value: boolean) => void,
-            reject: (value: boolean) => void) => {
+            reject: (value: Error) => void) => {
           try {
             await vscode.commands.executeCommand(
                 'arduino.iotStudioInitialize', this.deviceFolder);
             await vscode.commands.executeCommand('arduino.verify');
             resolve(true);
           } catch (error) {
-            ExceptionHelper.logError(error, true);
-            reject(false);
+            reject(error);
           }
         });
   }
@@ -218,15 +216,14 @@ export class AZ3166Device implements Device {
     return new Promise(
         async (
             resolve: (value: boolean) => void,
-            reject: (value: boolean) => void) => {
+            reject: (value: Error) => void) => {
           try {
             await vscode.commands.executeCommand(
                 'arduino.iotStudioInitialize', this.deviceFolder);
             await vscode.commands.executeCommand('arduino.upload');
             resolve(true);
           } catch (error) {
-            ExceptionHelper.logError(error, true);
-            reject(false);
+            reject(error);
           }
         });
   }
@@ -235,7 +232,7 @@ export class AZ3166Device implements Device {
     return new Promise(
         async (
             resolve: (value: boolean) => void,
-            reject: (value: boolean) => void) => {
+            reject: (value: Error) => void) => {
           try {
             // Get IoT Hub device connection string from config
             let deviceConnectionString =
@@ -277,7 +274,7 @@ export class AZ3166Device implements Device {
                 });
 
             if (!selection) {
-              reject(false);
+              resolve(false);
               return;
             }
 
@@ -305,13 +302,13 @@ export class AZ3166Device implements Device {
             const res =
                 await this.flushDeviceConnectionString(deviceConnectionString);
             if (res === false) {
-              reject(false);
+              resolve(false);
             } else {
               resolve(true);
             }
           } catch (error) {
             ExceptionHelper.logError(error, true);
-            reject(false);
+            reject(error);
           }
         });
   }
@@ -321,7 +318,7 @@ export class AZ3166Device implements Device {
     return new Promise(
         async (
             resolve: (value: boolean) => void,
-            reject: (value: boolean) => void) => {
+            reject: (value: Error) => void) => {
           // Chooes COM port that AZ3166 is connected
           const comPort = await chooseCOM();
           console.log(`Opening ${comPort}.`);
@@ -343,7 +340,7 @@ export class AZ3166Device implements Device {
             if (errorRejected) return true;
             if (err) {
               errorRejected = true;
-              reject(false);
+              reject(err);
               try {
                 port.close();
               } catch (ignore) {
@@ -393,7 +390,7 @@ export class AZ3166Device implements Device {
               configMode = true;
               executeSetAzIoTHub()
                   .then(() => resolve(true))
-                  .catch(() => reject(false));
+                  .catch((error) => reject(error));
             } else {
               configMode = false;
             }

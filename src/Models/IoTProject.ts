@@ -64,12 +64,11 @@ export class IoTProject {
     return new Promise(
         async (
             resolve: (value: boolean) => void,
-            reject: (value: boolean) => void) => {
+            reject: (value: Error) => void) => {
           if (!fs.existsSync(rootFolderPath)) {
-            ExceptionHelper.logError(
-                'Unable to find the root path, please open an IoT Studio project',
-                true);
-            reject(false);
+            const error = new Error(
+                'Unable to find the root path, please open an IoT Studio project.');
+            reject(error);
           }
           this.projectRootPath = rootFolderPath;
 
@@ -77,10 +76,9 @@ export class IoTProject {
               path.join(this.projectRootPath, constants.configFileName);
 
           if (!fs.existsSync(configFilePath)) {
-            ExceptionHelper.logError(
-                'Unable to open the configuration file, please open an IoT Studio project',
-                true);
-            reject(false);
+            const error = new Error(
+                'Unable to open the configuration file, please open an IoT Studio project.');
+            reject(error);
           }
           const settings = require(configFilePath);
 
@@ -113,12 +111,13 @@ export class IoTProject {
     return new Promise(
         async (
             resolve: (value: boolean) => void,
-            reject: (value: boolean) => void) => {
+            reject: (value: Error) => void) => {
           for (const item of this.componentList) {
             if (this.canCompile(item)) {
               const res = await item.compile();
               if (res === false) {
-                reject(false);
+                const error = new Error('Compile failed.');
+                reject(error);
                 return;
               }
             }
@@ -131,12 +130,13 @@ export class IoTProject {
     return new Promise(
         async (
             resolve: (value: boolean) => void,
-            reject: (value: boolean) => void) => {
+            reject: (value: Error) => void) => {
           for (const item of this.componentList) {
             if (this.canUpload(item)) {
               const res = await item.upload();
               if (res === false) {
-                reject(false);
+                const error = new Error('Upload failed.');
+                reject(error);
                 return;
               }
             }
@@ -149,12 +149,13 @@ export class IoTProject {
     return new Promise(
         async (
             resolve: (value: boolean) => void,
-            reject: (value: boolean) => void) => {
+            reject: (value: Error) => void) => {
           for (const item of this.componentList) {
             if (this.canProvision(item)) {
               const res = await item.provision();
               if (res === false) {
-                reject(false);
+                const error = new Error('Provision failed.');
+                reject(error);
                 return;
               }
             }
