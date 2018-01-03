@@ -72,19 +72,21 @@ export class IoTHubDevice {
               case 'create':
                 device = await createDevice(this.iotHubConnectionString);
                 if (device === undefined) {
-                  ExceptionHelper.logError('Cannot create device', true);
+                  const error = new Error('Cannot create device.');
+                  reject(error);
+                  return;
                 } else {
                   ConfigHandler.update(
                       ConfigKey.iotHubDeviceConnectionString,
                       device.iothubDeviceConnectionString);
                 }
-
                 break;
               default:
                 break;
             }
-          } catch (e) {
-            throw e;
+            resolve(true);
+          } catch (error) {
+            reject(error);
           }
         });
   }
