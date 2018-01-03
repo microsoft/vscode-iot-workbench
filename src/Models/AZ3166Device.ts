@@ -1,18 +1,27 @@
+import {port} from '_debugger';
 import * as fs from 'fs-plus';
 import * as _ from 'lodash';
 import * as path from 'path';
-import * as SerialPort from 'serialport';
 import {resolve} from 'url';
 import {error} from 'util';
 import * as vscode from 'vscode';
+import {TextEditorCursorStyle} from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, DeviceConfig} from '../constants';
 import {ExceptionHelper} from '../exceptionHelper';
 import {IoTProject, ProjectTemplateType} from '../Models/IoTProject';
 import {delay} from '../utils';
+
 import {Component, ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
+
+interface SerialPortInfo {
+  comName: string;
+  manufacturer: string;
+  vendorId: string;
+  productId: string;
+}
 
 const constants = {
   vscodeSettingsFolderName: '.vscode',
@@ -24,73 +33,19 @@ const constants = {
   sketchTemplateFileName: 'emptySketch.ino'
 };
 
-async function getComList() {
-  return new Promise((resolve, reject) => {
-    SerialPort.list((e, list) => {
-      if (e) {
-        reject(e);
-      } else {
-        resolve(list);
-      }
-    });
-  });
-}
-
-async function chooseCOM(): Promise<string> {
-  return new Promise(
-      async (
-          resolve: (value: string) => void,
-          reject: (reason: Error) => void) => {
-        const comList = await getComList();
-        const list = _.filter(comList, com => {
-          if (com.vendorId && com.productId &&
-              com.vendorId === DeviceConfig.az3166ComPortVendorId &&
-              com.productId.toLowerCase() ===
-                  DeviceConfig.az3166ComPortProductId) {
-            return true;
-          } else {
-            return false;
-          }
-        });
-
-        if (list && list.length) {
-          let comPort = list[0].comName;
-          if (list.length > 1) {
-            // TODO: select com port from list when there are multiple AZ3166
-            // boards connected
-            comPort = list[0].comName;
-          }
-
-          if (!comPort) {
-            reject(new Error('No avalible COM port.'));
-          }
-
-          resolve(comPort);
-        } else {
-          reject(new Error('No AZ3166 board connected.'));
-        }
-      });
-}
-
-async function sendDataViaSerialPort(
-    port: SerialPort, data: string): Promise<boolean> {
-  return new Promise(
-      (resolve: (value: boolean) => void, reject: (value: boolean) => void) => {
-        try {
-          port.write(data, (err) => {
-            if (err) {
-              reject(err);
-            } else {
-              port.drain(() => resolve(true));
-            }
-          });
-        } catch (err) {
-          reject(err);
-        }
-      });
-}
-
 export class AZ3166Device implements Device {
+  // tslint:disable-next-line: no-any
+  static get serialport(): any {
+    if (!AZ3166Device._serialport) {
+      AZ3166Device._serialport =
+          require('../../vendor/node-usb-native').SerialPort;
+    }
+    return AZ3166Device._serialport;
+  }
+
+  // tslint:disable-next-line: no-any
+  private static _serialport: any;
+
   private deviceType: DeviceType;
   private componentType: ComponentType;
   private deviceFolder: string;
@@ -305,8 +260,12 @@ export class AZ3166Device implements Device {
             const res =
                 await this.flushDeviceConnectionString(deviceConnectionString);
             if (res === false) {
+              vscode.window.showInformationMessage(
+                  'Configure Device connection string failed.');
               reject(false);
             } else {
+              vscode.window.showInformationMessage(
+                  'Configure Device connection string successfully.');
               resolve(true);
             }
           } catch (error) {
@@ -322,15 +281,22 @@ export class AZ3166Device implements Device {
         async (
             resolve: (value: boolean) => void,
             reject: (value: boolean) => void) => {
-          // Chooes COM port that AZ3166 is connected
-          const comPort = await chooseCOM();
-          console.log(`Opening ${comPort}.`);
+          let comPort = '';
+          try {
+            // Chooes COM port that AZ3166 is connected
+            comPort = await this.chooseCOM();
+            console.log(`Opening ${comPort}.`);
+          } catch (error) {
+            ExceptionHelper.logError(error.message, true);
+            reject(false);
+          }
 
           let configMode = false;
           let errorRejected = false;
           let commandExecuted = false;
           let gotData = false;
-          const port = new SerialPort(comPort, {
+
+          const port = new AZ3166Device.serialport(comPort, {
             baudRate: DeviceConfig.defaultBaudRate,
             dataBits: 8,
             stopBits: 1,
@@ -356,10 +322,10 @@ export class AZ3166Device implements Device {
           const executeSetAzIoTHub = async () => {
             try {
               const data = `set_az_iothub "${connectionString}"\r\n`;
-              await sendDataViaSerialPort(port, data.slice(0, 120));
+              await this.sendDataViaSerialPort(port, data.slice(0, 120));
               if (data.length > 120) {
                 await delay(1000);
-                await sendDataViaSerialPort(port, data.slice(120));
+                await this.sendDataViaSerialPort(port, data.slice(120));
               }
 
               await delay(1000);
@@ -375,15 +341,15 @@ export class AZ3166Device implements Device {
           };
 
           // Configure serial port callbacks
-          port.on('open', error => {
-            if (rejectIfError(error)) return;
-
-            port.write('\r\nhelp\r\n', (error) => {
+          port.on('open', () => {
+            // tslint:disable-next-line: no-any
+            port.write('\r\nhelp\r\n', (error: any) => {
               if (rejectIfError(error)) return;
             });
           });
 
-          port.on('data', (data) => {
+          // tslint:disable-next-line: no-any
+          port.on('data', (data: any) => {
             gotData = true;
             const output = data.toString().trim();
 
@@ -410,7 +376,8 @@ export class AZ3166Device implements Device {
             }
           });
 
-          port.on('error', error => {
+          // tslint:disable-next-line: no-any
+          port.on('error', (error: any) => {
             if (errorRejected) return;
             console.log(error);
             rejectIfError(error);
@@ -419,13 +386,90 @@ export class AZ3166Device implements Device {
           setTimeout(() => {
             if (errorRejected) return;
             if (!gotData || !configMode) {
-              console.log(
-                  'Please hold down button A and then push and release the reset button to enter configuration mode.');
-              port.write('\r\nhelp\r\n', (error) => {
-                rejectIfError(error);
-              });
+              // Prompt user to enter configuration mode
+              vscode.window
+                  .showInformationMessage(
+                      'Please hold down button A and then push and release the reset button to enter configuration mode.')
+                  .then(() => {
+                    // tslint:disable-next-line: no-any
+                    port.write('\r\nhelp\r\n', (error: any) => {
+                      rejectIfError(error);
+                    });
+                  });
             }
           }, 10000);
+        });
+  }
+
+  private getComList(): Promise<SerialPortInfo[]> {
+    return new Promise(
+        (resolve: (value: SerialPortInfo[]) => void,
+         reject: (error: Error) => void) => {
+          // tslint:disable-next-line: no-any
+          AZ3166Device.serialport.list((e: any, ports: SerialPortInfo[]) => {
+            if (e) {
+              reject(e);
+            } else {
+              resolve(ports);
+            }
+          });
+        });
+  }
+
+  private async chooseCOM(): Promise<string> {
+    return new Promise(
+        async (
+            resolve: (value: string) => void,
+            reject: (reason: Error) => void) => {
+          const comList = await this.getComList();
+          const list = _.filter(comList, com => {
+            if (com.vendorId && com.productId &&
+                com.vendorId === DeviceConfig.az3166ComPortVendorId &&
+                com.productId.toLowerCase() ===
+                    DeviceConfig.az3166ComPortProductId) {
+              return true;
+            } else {
+              return false;
+            }
+          });
+
+          if (list && list.length) {
+            let comPort = list[0].comName;
+            if (list.length > 1) {
+              // TODO: select com port from list when there are multiple AZ3166
+              // boards connected
+              comPort = list[0].comName;
+            }
+
+            if (!comPort) {
+              reject(new Error('No avalible COM port.'));
+            }
+
+            resolve(comPort);
+          } else {
+            reject(new Error('No AZ3166 board connected.'));
+          }
+        });
+  }
+
+  // tslint:disable-next-line: no-any
+  private async sendDataViaSerialPort(port: any, data: string):
+      Promise<boolean> {
+    return new Promise(
+        (resolve: (value: boolean) => void,
+         reject: (value: boolean) => void) => {
+          try {
+            // tslint:disable-next-line: no-any
+            port.write(data, (err: any) => {
+              if (err) {
+                reject(err);
+              } else {
+                port.drain(() => resolve(true));
+              }
+            });
+          } catch (err) {
+            reject(err);
+          }
         });
   }
 }
