@@ -230,7 +230,7 @@ export class IoTProject {
     return new Promise(
         async (
             resolve: (value: boolean) => void,
-            reject: (value: boolean) => void) => {
+            reject: (value: Error) => void) => {
           for (const component of this.componentList) {
             if (component.getComponentType() === ComponentType.Device) {
               const device = component as Device;
