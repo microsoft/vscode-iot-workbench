@@ -34,6 +34,7 @@ const constants = {
 };
 
 export class AZ3166Device implements Device {
+  // tslint:disable-next-line: no-any
   static get serialport(): any {
     if (!AZ3166Device._serialport) {
       AZ3166Device._serialport =
@@ -42,6 +43,7 @@ export class AZ3166Device implements Device {
     return AZ3166Device._serialport;
   }
 
+  // tslint:disable-next-line: no-any
   private static _serialport: any;
 
   private deviceType: DeviceType;
@@ -340,11 +342,13 @@ export class AZ3166Device implements Device {
 
           // Configure serial port callbacks
           port.on('open', () => {
+            // tslint:disable-next-line: no-any
             port.write('\r\nhelp\r\n', (error: any) => {
               if (rejectIfError(error)) return;
             });
           });
 
+          // tslint:disable-next-line: no-any
           port.on('data', (data: any) => {
             gotData = true;
             const output = data.toString().trim();
@@ -372,6 +376,7 @@ export class AZ3166Device implements Device {
             }
           });
 
+          // tslint:disable-next-line: no-any
           port.on('error', (error: any) => {
             if (errorRejected) return;
             console.log(error);
@@ -386,6 +391,7 @@ export class AZ3166Device implements Device {
                   .showInformationMessage(
                       'Please hold down button A and then push and release the reset button to enter configuration mode.')
                   .then(() => {
+                    // tslint:disable-next-line: no-any
                     port.write('\r\nhelp\r\n', (error: any) => {
                       rejectIfError(error);
                     });
@@ -399,6 +405,7 @@ export class AZ3166Device implements Device {
     return new Promise(
         (resolve: (value: SerialPortInfo[]) => void,
          reject: (error: Error) => void) => {
+          // tslint:disable-next-line: no-any
           AZ3166Device.serialport.list((e: any, ports: SerialPortInfo[]) => {
             if (e) {
               reject(e);
@@ -445,12 +452,14 @@ export class AZ3166Device implements Device {
         });
   }
 
+  // tslint:disable-next-line: no-any
   private async sendDataViaSerialPort(port: any, data: string):
       Promise<boolean> {
     return new Promise(
         (resolve: (value: boolean) => void,
          reject: (value: boolean) => void) => {
           try {
+            // tslint:disable-next-line: no-any
             port.write(data, (err: any) => {
               if (err) {
                 reject(err);
