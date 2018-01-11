@@ -355,8 +355,7 @@ export class AZ3166Device implements Device {
             const output = data.toString().trim();
 
             if (commandExecuted) return;
-            if (output.includes('set_') &&
-                output.includes('SerialOutput help')) {
+            if (output.includes('set_')) {
               commandExecuted = true;
               configMode = true;
               executeSetAzIoTHub()
