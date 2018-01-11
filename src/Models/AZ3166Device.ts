@@ -133,6 +133,11 @@ export class AZ3166Device implements Device {
       try {
         const content = fs.readFileSync(sketchTemplateFilePath).toString();
         fs.writeFileSync(newSketchFilePath, content);
+        if (newSketchFilePath) {
+          const newFileUri: vscode.Uri = vscode.Uri.file(newSketchFilePath);
+          vscode.window.showTextDocument(newFileUri);
+        }
+
         vscode.commands.executeCommand(
             'arduino.iotStudioInitialize', this.deviceFolder);
       } catch (error) {
