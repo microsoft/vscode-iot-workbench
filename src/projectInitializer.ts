@@ -4,7 +4,6 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-plus';
 import * as path from 'path';
-import {ExceptionHelper} from './exceptionHelper';
 import {IoTProject, ProjectTemplateType} from './Models/IoTProject';
 
 
@@ -115,7 +114,7 @@ export class ProjectInitializer {
             const rootPath: string = vscode.workspace.rootPath as string;
             project.create(rootPath, templateType);
           } catch (error) {
-            ExceptionHelper.logError(error, true);
+            throw error;
           }
         });
   }

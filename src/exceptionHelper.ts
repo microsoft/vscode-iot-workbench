@@ -3,22 +3,40 @@
 import * as vscode from 'vscode';
 
 export class ExceptionHelper {
-  static logError(error: string|Error, popupMsg: string|boolean): void {
+  static logError(
+      channel: vscode.OutputChannel|undefined, error: Error,
+      popupErrorMsg: string): void;
+  static logError(
+      channel: vscode.OutputChannel|undefined, errorMsg: string,
+      popupErrorMsg: string): void;
+  static logError(
+      channel: vscode.OutputChannel|undefined, error: Error,
+      isPopupErrorMsg: boolean): void;
+  static logError(
+      channel: vscode.OutputChannel|undefined, errorMsg: string,
+      isPopupErrorMsg: boolean): void;
+  static logError(
+      channel: vscode.OutputChannel|undefined, errorValue: string|Error,
+      popupValue: string|boolean): void {
     let _error: Error;
     let _message: string;
 
-    if (typeof error === 'string') {
-      _error = new Error(error);
-      _message = error;
+    if (typeof errorValue === 'string') {
+      _error = new Error(errorValue);
+      _message = errorValue;
     } else {
-      _error = error;
-      _message = error.message;
+      _error = errorValue;
+      _message = errorValue.message;
     }
 
-    if (popupMsg === true) {
+    if (popupValue === true) {
       vscode.window.showErrorMessage(_message);
-    } else if (typeof popupMsg === 'string') {
-      vscode.window.showErrorMessage(popupMsg);
+    } else if (typeof popupValue === 'string') {
+      vscode.window.showErrorMessage(popupValue);
+    }
+
+    if (channel) {
+      channel.append(_error.toString());
     }
 
     throw _error;
