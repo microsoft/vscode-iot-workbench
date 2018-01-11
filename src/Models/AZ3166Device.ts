@@ -143,9 +143,7 @@ export class AZ3166Device implements Device {
         fs.writeFileSync(newSketchFilePath, content);
         if (newSketchFilePath) {
           const newFileUri: vscode.Uri = vscode.Uri.file(newSketchFilePath);
-          vscode.workspace.openTextDocument(newFileUri).then(doc => {
-            vscode.window.showTextDocument(doc);
-          });
+          vscode.window.showTextDocument(newFileUri);
         }
 
         vscode.commands.executeCommand(
