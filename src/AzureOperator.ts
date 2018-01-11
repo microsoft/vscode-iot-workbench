@@ -4,15 +4,13 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-plus';
 import * as path from 'path';
-import {ExceptionHelper} from './exceptionHelper';
 import {IoTProject, ProjectTemplateType} from './Models/IoTProject';
 
 export class AzureOperator {
   async Provision(context: vscode.ExtensionContext) {
     if (!vscode.workspace.rootPath) {
-      ExceptionHelper.logError(
-          'Unable to find the root path, please open an IoT Studio project',
-          true);
+      throw new Error(
+          'Unable to find the root path, please open an IoT Studio project');
     }
 
     const project = new IoTProject(context);

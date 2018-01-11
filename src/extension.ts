@@ -9,6 +9,7 @@ import {DeviceOperator} from './DeviceOperator';
 import {AzureOperator} from './AzureOperator';
 import {IoTProject} from './Models/IoTProject';
 import {ExceptionHelper} from './exceptionHelper';
+import {setTimeout} from 'timers';
 
 const constants = {
   configFileName: 'iotstudio.config.json'
@@ -23,6 +24,9 @@ export async function activate(context: vscode.ExtensionContext) {
   // extension is activated
   console.log(
       'Congratulations, your extension "vscode-azure-iot-studio" is now active!');
+
+  const outputChannel: vscode.OutputChannel =
+      vscode.window.createOutputChannel('Azure IoT Studio');
 
   const iotProject = new IoTProject(context);
   if (vscode.workspace.rootPath) {
@@ -52,7 +56,7 @@ export async function activate(context: vscode.ExtensionContext) {
         try {
           await projectInitializer.InitializeProject(context);
         } catch (error) {
-          ExceptionHelper.logError(error, true);
+          ExceptionHelper.logError(outputChannel, error, true);
         }
       });
 
@@ -62,7 +66,7 @@ export async function activate(context: vscode.ExtensionContext) {
           await azureOperator.Provision(context);
           vscode.window.showInformationMessage('Azure provision succeeded.');
         } catch (error) {
-          ExceptionHelper.logError(error, true);
+          ExceptionHelper.logError(outputChannel, error, true);
         }
       });
 
@@ -71,7 +75,7 @@ export async function activate(context: vscode.ExtensionContext) {
         try {
           await azureOperator.Deploy(context);
         } catch (error) {
-          ExceptionHelper.logError(error, true);
+          ExceptionHelper.logError(outputChannel, error, true);
         }
       });
 
@@ -80,7 +84,7 @@ export async function activate(context: vscode.ExtensionContext) {
         try {
           await deviceOperator.compile(context);
         } catch (error) {
-          ExceptionHelper.logError(error, true);
+          ExceptionHelper.logError(outputChannel, error, true);
         }
       });
 
@@ -89,7 +93,7 @@ export async function activate(context: vscode.ExtensionContext) {
         try {
           await deviceOperator.upload(context);
         } catch (error) {
-          ExceptionHelper.logError(error, true);
+          ExceptionHelper.logError(outputChannel, error, true);
         }
       });
 
@@ -98,7 +102,7 @@ export async function activate(context: vscode.ExtensionContext) {
         try {
           await deviceOperator.setConnectionString(context);
         } catch (error) {
-          ExceptionHelper.logError(error, true);
+          ExceptionHelper.logError(outputChannel, error, true);
         }
       });
 

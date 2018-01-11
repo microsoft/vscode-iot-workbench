@@ -9,7 +9,6 @@ import {TextEditorCursorStyle} from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, DeviceConfig} from '../constants';
-import {ExceptionHelper} from '../exceptionHelper';
 import {IoTProject, ProjectTemplateType} from '../Models/IoTProject';
 import {delay} from '../utils';
 
@@ -67,18 +66,13 @@ export class AZ3166Device implements Device {
   }
 
   async load(): Promise<boolean> {
-    return new Promise(
-        async (
-            resolve: (value: boolean) => void,
-            reject: (value: Error) => void) => {
-          try {
-            await vscode.commands.executeCommand(
-                'arduino.iotStudioInitialize', this.deviceFolder);
-            resolve(true);
-          } catch (error) {
-            reject(error);
-          }
-        });
+    try {
+      await vscode.commands.executeCommand(
+          'arduino.iotStudioInitialize', this.deviceFolder);
+      return true;
+    } catch (error) {
+      throw error;
+    }
   }
 
   create(): boolean {
@@ -86,8 +80,7 @@ export class AZ3166Device implements Device {
     const deviceFolderPath = path.join(rootPath, this.deviceFolder);
 
     if (!fs.existsSync(deviceFolderPath)) {
-      ExceptionHelper.logError(
-          `Device folder doesn't exist: ${deviceFolderPath}`, true);
+      throw new Error(`Device folder doesn't exist: ${deviceFolderPath}`);
     }
 
     const vscodeFolderPath =
@@ -127,9 +120,8 @@ export class AZ3166Device implements Device {
         fs.writeFileSync(
             arduinoJSONFilePath, JSON.stringify(arduinoJSONObj, null, 4));
       } catch (error) {
-        ExceptionHelper.logError(
-            `Device: create arduino config file failed: ${error.message}`,
-            true);
+        throw new Error(
+            `Device: create arduino config file failed: ${error.message}`);
       }
 
       // Create an empty arduino sketch
@@ -144,7 +136,7 @@ export class AZ3166Device implements Device {
         vscode.commands.executeCommand(
             'arduino.iotStudioInitialize', this.deviceFolder);
       } catch (error) {
-        ExceptionHelper.logError('Create arduino sketch file failed.', true);
+        throw new Error('Create arduino sketch file failed.');
       }
     });
 
@@ -152,122 +144,104 @@ export class AZ3166Device implements Device {
   }
 
   async compile(): Promise<boolean> {
-    return new Promise(
-        async (
-            resolve: (value: boolean) => void,
-            reject: (value: Error) => void) => {
-          try {
-            await vscode.commands.executeCommand(
-                'arduino.iotStudioInitialize', this.deviceFolder);
-            await vscode.commands.executeCommand('arduino.verify');
-            resolve(true);
-          } catch (error) {
-            reject(error);
-          }
-        });
+    try {
+      await vscode.commands.executeCommand(
+          'arduino.iotStudioInitialize', this.deviceFolder);
+      await vscode.commands.executeCommand('arduino.verify');
+      return true;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async upload(): Promise<boolean> {
-    return new Promise(
-        async (
-            resolve: (value: boolean) => void,
-            reject: (value: Error) => void) => {
-          try {
-            await vscode.commands.executeCommand(
-                'arduino.iotStudioInitialize', this.deviceFolder);
-            await vscode.commands.executeCommand('arduino.upload');
-            resolve(true);
-          } catch (error) {
-            reject(error);
-          }
-        });
+    try {
+      await vscode.commands.executeCommand(
+          'arduino.iotStudioInitialize', this.deviceFolder);
+      await vscode.commands.executeCommand('arduino.upload');
+      return true;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async setDeviceConnectionString(): Promise<boolean> {
-    return new Promise(
-        async (
-            resolve: (value: boolean) => void,
-            reject: (value: Error) => void) => {
-          try {
-            // Get IoT Hub device connection string from config
-            let deviceConnectionString =
-                ConfigHandler.get(ConfigKey.iotHubDeviceConnectionString);
+    try {
+      // Get IoT Hub device connection string from config
+      let deviceConnectionString =
+          ConfigHandler.get(ConfigKey.iotHubDeviceConnectionString);
 
-            let hostName = '';
-            let deviceId = '';
-            if (deviceConnectionString) {
-              const hostnameMatches =
-                  deviceConnectionString.match(/HostName=(.*?)[;$]/);
-              if (hostnameMatches) {
-                hostName = hostnameMatches[0];
-              }
+      let hostName = '';
+      let deviceId = '';
+      if (deviceConnectionString) {
+        const hostnameMatches =
+            deviceConnectionString.match(/HostName=(.*?)[;$]/);
+        if (hostnameMatches) {
+          hostName = hostnameMatches[0];
+        }
 
-              const deviceIDMatches =
-                  deviceConnectionString.match(/DeviceId=(.*?)[;$]/);
-              if (deviceIDMatches) {
-                deviceId = deviceIDMatches[0];
-              }
-            }
+        const deviceIDMatches =
+            deviceConnectionString.match(/DeviceId=(.*?)[;$]/);
+        if (deviceIDMatches) {
+          deviceId = deviceIDMatches[0];
+        }
+      }
 
-            const deviceConnectionStringSelection: vscode.QuickPickItem[] = [
-              {
-                label: 'Select IoT Hub Device Connection String',
-                description: `Device Information: ${hostName} ${deviceId}`,
-                detail: 'select'
-              },
-              {
-                label: 'Input IoT Hub Device Connection String',
-                description: 'input another...',
-                detail: 'input'
-              }
-            ];
+      const deviceConnectionStringSelection: vscode.QuickPickItem[] = [
+        {
+          label: 'Select IoT Hub Device Connection String',
+          description: `Device Information: ${hostName} ${deviceId}`,
+          detail: 'select'
+        },
+        {
+          label: 'Input IoT Hub Device Connection String',
+          description: 'input another...',
+          detail: 'input'
+        }
+      ];
 
-            const selection = await vscode.window.showQuickPick(
-                deviceConnectionStringSelection, {
-                  ignoreFocusOut: true,
-                  placeHolder: 'Choose IoT Hub Device Connection String'
-                });
+      const selection =
+          await vscode.window.showQuickPick(deviceConnectionStringSelection, {
+            ignoreFocusOut: true,
+            placeHolder: 'Choose IoT Hub Device Connection String'
+          });
 
-            if (!selection) {
-              resolve(false);
-              return;
-            }
+      if (!selection) {
+        return false;
+      }
 
-            if (selection.detail === 'input') {
-              const option: vscode.InputBoxOptions = {
-                value:
-                    'HostName=<Host Name>;DeviceId=<Device Name>;SharedAccessKey=<Device Key>',
-                prompt: `Please input device connection string here.`,
-                ignoreFocusOut: true
-              };
+      if (selection.detail === 'input') {
+        const option: vscode.InputBoxOptions = {
+          value:
+              'HostName=<Host Name>;DeviceId=<Device Name>;SharedAccessKey=<Device Key>',
+          prompt: `Please input device connection string here.`,
+          ignoreFocusOut: true
+        };
 
-              deviceConnectionString = await vscode.window.showInputBox(option);
-              if ((deviceConnectionString.indexOf('HostName') === -1) ||
-                  (deviceConnectionString.indexOf('DeviceId') === -1) ||
-                  (deviceConnectionString.indexOf('SharedAccessKey') === -1)) {
-                ExceptionHelper.logError(
-                    'The format of the IoT Hub Device connection string is invalid.',
-                    true);
-              }
-            }
+        deviceConnectionString = await vscode.window.showInputBox(option);
+        if ((deviceConnectionString.indexOf('HostName') === -1) ||
+            (deviceConnectionString.indexOf('DeviceId') === -1) ||
+            (deviceConnectionString.indexOf('SharedAccessKey') === -1)) {
+          throw new Error(
+              'The format of the IoT Hub Device connection string is invalid.');
+        }
+      }
 
-            console.log(deviceConnectionString);
+      console.log(deviceConnectionString);
 
-            // Set selected connection string to device
-            const res =
-                await this.flushDeviceConnectionString(deviceConnectionString);
-            if (res === false) {
-              resolve(false);
-            } else {
-              vscode.window.showInformationMessage(
-                  'Configure Device connection string successfully.');
-              resolve(true);
-            }
-          } catch (error) {
-            ExceptionHelper.logError(error, true);
-            reject(error);
-          }
-        });
+      // Set selected connection string to device
+      const res =
+          await this.flushDeviceConnectionString(deviceConnectionString);
+      if (res === false) {
+        return false;
+      } else {
+        vscode.window.showInformationMessage(
+            'Configure Device connection string successfully.');
+        return true;
+      }
+    } catch (error) {
+      throw error;
+    }
   }
 
   async flushDeviceConnectionString(connectionString: string):

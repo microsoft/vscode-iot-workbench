@@ -2,8 +2,6 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {ExceptionHelper} from '../exceptionHelper';
-
 import {AZ3166Device} from './AZ3166Device';
 import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
@@ -61,107 +59,84 @@ export class IoTProject {
 
 
   async load(rootFolderPath: string): Promise<boolean> {
-    return new Promise(
-        async (
-            resolve: (value: boolean) => void,
-            reject: (value: Error) => void) => {
-          if (!fs.existsSync(rootFolderPath)) {
-            const error = new Error(
-                'Unable to find the root path, please open an IoT Studio project.');
-            reject(error);
-          }
-          this.projectRootPath = rootFolderPath;
+    if (!fs.existsSync(rootFolderPath)) {
+      const error = new Error(
+          'Unable to find the root path, please open an IoT Studio project.');
+      throw error;
+    }
+    this.projectRootPath = rootFolderPath;
 
-          const configFilePath =
-              path.join(this.projectRootPath, constants.configFileName);
+    const configFilePath =
+        path.join(this.projectRootPath, constants.configFileName);
 
-          if (!fs.existsSync(configFilePath)) {
-            const error = new Error(
-                'Unable to open the configuration file, please open an IoT Studio project.');
-            reject(error);
-          }
-          const settings = require(configFilePath);
+    if (!fs.existsSync(configFilePath)) {
+      const error = new Error(
+          'Unable to open the configuration file, please open an IoT Studio project.');
+      throw error;
+    }
+    const settings = require(configFilePath);
 
-          const deviceLocation = settings.projectsettings.find(
-              (obj: ProjectSetting) => obj.name === jsonConstants.DevicePath);
+    const deviceLocation = settings.projectsettings.find(
+        (obj: ProjectSetting) => obj.name === jsonConstants.DevicePath);
 
-          if (deviceLocation) {
-            const device =
-                new AZ3166Device(this.extensionContext, deviceLocation.value);
-            this.componentList.push(device);
-          }
+    if (deviceLocation) {
+      const device =
+          new AZ3166Device(this.extensionContext, deviceLocation.value);
+      this.componentList.push(device);
+    }
 
-          const hubName = settings.projectsettings.find(
-              (obj: ProjectSetting) => obj.name === jsonConstants.IoTHubName);
+    const hubName = settings.projectsettings.find(
+        (obj: ProjectSetting) => obj.name === jsonConstants.IoTHubName);
 
-          if (hubName) {
-            const iotHub = new IoTHub();
-            this.componentList.push(iotHub);
-          }
+    if (hubName) {
+      const iotHub = new IoTHub();
+      this.componentList.push(iotHub);
+    }
 
-          // Component level load
-          this.componentList.forEach((element: Component) => {
-            element.load();
-          });
-          resolve(true);
-        });
+    // Component level load
+    this.componentList.forEach((element: Component) => {
+      element.load();
+    });
+    return true;
   }
 
   async compile(): Promise<boolean> {
-    return new Promise(
-        async (
-            resolve: (value: boolean) => void,
-            reject: (value: Error) => void) => {
-          for (const item of this.componentList) {
-            if (this.canCompile(item)) {
-              const res = await item.compile();
-              if (res === false) {
-                const error = new Error('Compile failed.');
-                reject(error);
-                return;
-              }
-            }
-          }
-          resolve(true);
-        });
+    for (const item of this.componentList) {
+      if (this.canCompile(item)) {
+        const res = await item.compile();
+        if (res === false) {
+          const error = new Error('Compile failed.');
+          throw error;
+        }
+      }
+    }
+    return true;
   }
 
   async upload(): Promise<boolean> {
-    return new Promise(
-        async (
-            resolve: (value: boolean) => void,
-            reject: (value: Error) => void) => {
-          for (const item of this.componentList) {
-            if (this.canUpload(item)) {
-              const res = await item.upload();
-              if (res === false) {
-                const error = new Error('Upload failed.');
-                reject(error);
-                return;
-              }
-            }
-          }
-          resolve(true);
-        });
+    for (const item of this.componentList) {
+      if (this.canUpload(item)) {
+        const res = await item.upload();
+        if (res === false) {
+          const error = new Error('Upload failed.');
+          throw error;
+        }
+      }
+    }
+    return true;
   }
 
   async provision(): Promise<boolean> {
-    return new Promise(
-        async (
-            resolve: (value: boolean) => void,
-            reject: (value: Error) => void) => {
-          for (const item of this.componentList) {
-            if (this.canProvision(item)) {
-              const res = await item.provision();
-              if (res === false) {
-                const error = new Error('Provision failed.');
-                reject(error);
-                return;
-              }
-            }
-          }
-          resolve(true);
-        });
+    for (const item of this.componentList) {
+      if (this.canProvision(item)) {
+        const res = await item.provision();
+        if (res === false) {
+          const error = new Error('Provision failed.');
+          throw error;
+        }
+      }
+    }
+    return true;
   }
 
   deploy(): boolean {
@@ -170,9 +145,8 @@ export class IoTProject {
 
   create(rootFolderPath: string, templateType: ProjectTemplateType): boolean {
     if (!fs.existsSync(rootFolderPath)) {
-      ExceptionHelper.logError(
-          'Unable to find the root path, please open the folder and initialize project again.',
-          true);
+      throw new Error(
+          'Unable to find the root path, please open the folder and initialize project again.');
     }
 
     this.projectRootPath = rootFolderPath;
@@ -227,25 +201,19 @@ export class IoTProject {
   }
 
   async setDeviceConnectionString(): Promise<boolean> {
-    return new Promise(
-        async (
-            resolve: (value: boolean) => void,
-            reject: (value: Error) => void) => {
-          for (const component of this.componentList) {
-            if (component.getComponentType() === ComponentType.Device) {
-              const device = component as Device;
-              if (device.getDeviceType() === DeviceType.MXChip_AZ3166) {
-                const az3166Device = device as AZ3166Device;
-                try {
-                  await az3166Device.setDeviceConnectionString();
-                  resolve(true);
-                } catch (error) {
-                  reject(error);
-                  return;
-                }
-              }
-            }
+    for (const component of this.componentList) {
+      if (component.getComponentType() === ComponentType.Device) {
+        const device = component as Device;
+        if (device.getDeviceType() === DeviceType.MXChip_AZ3166) {
+          const az3166Device = device as AZ3166Device;
+          try {
+            await az3166Device.setDeviceConnectionString();
+          } catch (error) {
+            throw error;
           }
-        });
+        }
+      }
+    }
+    return true;
   }
 }
