@@ -11,9 +11,11 @@ import {IoTHubDevice} from './IoTHubDevice';
 
 export class IoTHub implements Component, Provisionable {
   private componentType: ComponentType;
+  private channel: vscode.OutputChannel;
 
-  constructor() {
+  constructor(channel: vscode.OutputChannel) {
     this.componentType = ComponentType.IoTHub;
+    this.channel = channel;
   }
 
   getComponentType(): ComponentType {
@@ -62,6 +64,11 @@ export class IoTHub implements Component, Provisionable {
         iothub = await toolkit.azureIoTExplorer.selectIoTHub(true);
         break;
       case 'create':
+        if (this.channel) {
+          this.channel.show();
+          this.channel.appendLine('Creating new IoT Hub...');
+        }
+
         iothub = await toolkit.azureIoTExplorer.createIoTHub(true);
         break;
       default:
@@ -69,6 +76,11 @@ export class IoTHub implements Component, Provisionable {
     }
 
     if (iothub && iothub.iotHubConnectionString) {
+      if (this.channel) {
+        this.channel.show();
+        this.channel.appendLine(JSON.stringify(iothub, null, 2));
+      }
+
       ConfigHandler.update(
           ConfigKey.iotHubConnectionString, iothub.iotHubConnectionString);
       const device = new IoTHubDevice();

@@ -19,7 +19,8 @@ interface Template {
 }
 
 export class ProjectInitializer {
-  async InitializeProject(context: vscode.ExtensionContext) {
+  async InitializeProject(
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
     if (!vscode.workspace.rootPath) {
       // Create a folder and select it as the root path
 
@@ -108,7 +109,7 @@ export class ProjectInitializer {
                 // Throw exception;
                 break;
             }
-            const project = new IoTProject(context);
+            const project = new IoTProject(context, channel);
 
             // vscode.workspace.rootPath can not be null
             const rootPath: string = vscode.workspace.rootPath as string;

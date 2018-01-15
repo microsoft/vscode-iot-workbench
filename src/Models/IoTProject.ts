@@ -37,6 +37,7 @@ export class IoTProject {
   private projectRootPath: string;
   private projectType: ProjectTemplateType;
   private extensionContext: vscode.ExtensionContext;
+  private channel: vscode.OutputChannel;
 
   private addComponent(comp: Component) {}
 
@@ -52,9 +53,10 @@ export class IoTProject {
     return (comp as Uploadable).upload !== undefined;
   }
 
-  constructor(context: vscode.ExtensionContext) {
+  constructor(context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
     this.componentList = [];
     this.extensionContext = context;
+    this.channel = channel;
   }
 
 
@@ -89,7 +91,7 @@ export class IoTProject {
         (obj: ProjectSetting) => obj.name === jsonConstants.IoTHubName);
 
     if (hubName) {
-      const iotHub = new IoTHub();
+      const iotHub = new IoTHub(this.channel);
       this.componentList.push(iotHub);
     }
 
@@ -176,7 +178,7 @@ export class IoTProject {
         // Save data to configFile
         break;
       case ProjectTemplateType.IotHub:
-        const iothub = new IoTHub();
+        const iothub = new IoTHub(this.channel);
         // In setting file, create a place holder for iothub name
         settings.projectsettings.push(
             {name: jsonConstants.IoTHubName, value: ''});
