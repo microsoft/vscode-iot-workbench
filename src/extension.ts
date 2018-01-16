@@ -28,7 +28,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const outputChannel: vscode.OutputChannel =
       vscode.window.createOutputChannel('Azure IoT Studio');
 
-  const iotProject = new IoTProject(context);
+  const iotProject = new IoTProject(context, outputChannel);
   if (vscode.workspace.rootPath) {
     const configFilePath =
         path.join(vscode.workspace.rootPath, constants.configFileName);
@@ -54,7 +54,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const projectInit = vscode.commands.registerCommand(
       'azureiotstudio.initializeProject', async () => {
         try {
-          await projectInitializer.InitializeProject(context);
+          await projectInitializer.InitializeProject(context, outputChannel);
         } catch (error) {
           ExceptionHelper.logError(outputChannel, error, true);
         }
@@ -63,7 +63,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const azureProvision = vscode.commands.registerCommand(
       'azureiotstudio.azureProvision', async () => {
         try {
-          await azureOperator.Provision(context);
+          await azureOperator.Provision(context, outputChannel);
           vscode.window.showInformationMessage('Azure provision succeeded.');
         } catch (error) {
           ExceptionHelper.logError(outputChannel, error, true);
@@ -73,7 +73,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const azureDeploy = vscode.commands.registerCommand(
       'azureiotstudio.azureDeploy', async () => {
         try {
-          await azureOperator.Deploy(context);
+          await azureOperator.Deploy(context, outputChannel);
         } catch (error) {
           ExceptionHelper.logError(outputChannel, error, true);
         }
@@ -82,7 +82,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const deviceCompile = vscode.commands.registerCommand(
       'azureiotstudio.deviceCompile', async () => {
         try {
-          await deviceOperator.compile(context);
+          await deviceOperator.compile(context, outputChannel);
         } catch (error) {
           ExceptionHelper.logError(outputChannel, error, true);
         }
@@ -91,7 +91,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const deviceUpload = vscode.commands.registerCommand(
       'azureiotstudio.deviceUpload', async () => {
         try {
-          await deviceOperator.upload(context);
+          await deviceOperator.upload(context, outputChannel);
         } catch (error) {
           ExceptionHelper.logError(outputChannel, error, true);
         }
@@ -100,7 +100,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const deviceConnectionStringConfig = vscode.commands.registerCommand(
       'azureiotstudio.deviceConnectionStringConfig', async () => {
         try {
-          await deviceOperator.setConnectionString(context);
+          await deviceOperator.setConnectionString(context, outputChannel);
         } catch (error) {
           ExceptionHelper.logError(outputChannel, error, true);
         }
