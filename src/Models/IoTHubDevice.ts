@@ -14,8 +14,10 @@ interface DeviceInfo {
 
 export class IoTHubDevice {
   private iotHubConnectionString: string;
+  private channel: vscode.OutputChannel;
 
-  constructor() {
+  constructor(channel: vscode.OutputChannel) {
+    this.channel = channel;
     this.iotHubConnectionString =
         ConfigHandler.get(ConfigKey.iotHubConnectionString);
   }
@@ -40,6 +42,8 @@ export class IoTHubDevice {
     if (!selection) {
       return false;
     }
+    this.channel.show();
+    this.channel.appendLine('Provision IoTHub Device');
 
     const toolkit = getExtension(extensionName.Toolkit);
     if (toolkit === undefined) {
@@ -59,8 +63,8 @@ export class IoTHubDevice {
                 ConfigKey.iotHubDeviceConnectionString,
                 device.iothubDeviceConnectionString);
           }
-
           break;
+
         case 'create':
           device = await createDevice(this.iotHubConnectionString);
           if (device === undefined) {

@@ -69,7 +69,8 @@ export class IoTHub implements Component, Provisionable {
           this.channel.appendLine('Creating new IoT Hub...');
         }
 
-        iothub = await toolkit.azureIoTExplorer.createIoTHub(true);
+        iothub =
+            await toolkit.azureIoTExplorer.createIoTHub(true, this.channel);
         break;
       default:
         break;
@@ -83,7 +84,7 @@ export class IoTHub implements Component, Provisionable {
 
       ConfigHandler.update(
           ConfigKey.iotHubConnectionString, iothub.iotHubConnectionString);
-      const device = new IoTHubDevice();
+      const device = new IoTHubDevice(this.channel);
       if (await device.provision()) {
         return true;
       } else {
