@@ -157,6 +157,8 @@ export class ExampleExplorer {
 
     channel.appendLine('Downloading example package...');
     await this.downloadExamplePackage(context, channel, url, fsPath);
+    await vscode.commands.executeCommand(
+        'arduino.iotStudioInitialize', path.join(fsPath, 'Device'));
     return true;
   }
 }
