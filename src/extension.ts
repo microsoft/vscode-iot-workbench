@@ -10,6 +10,7 @@ import {AzureOperator} from './AzureOperator';
 import {IoTProject} from './Models/IoTProject';
 import {ExceptionHelper} from './exceptionHelper';
 import {setTimeout} from 'timers';
+import {ExampleExplorer} from './exampleExplorer';
 
 const constants = {
   configFileName: 'iotstudio.config.json'
@@ -46,6 +47,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const projectInitializer = new ProjectInitializer();
   const deviceOperator = new DeviceOperator();
   const azureOperator = new AzureOperator();
+  const exampleExplorer = new ExampleExplorer();
 
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with  registerCommand
@@ -106,12 +108,25 @@ export async function activate(context: vscode.ExtensionContext) {
         }
       });
 
+  const examples =
+      vscode.commands.registerCommand('azureiotstudio.examples', async () => {
+        try {
+          const res =
+              await exampleExplorer.initializeExample(context, outputChannel);
+          vscode.window.showInformationMessage(
+              res ? 'Example loaded.' : 'Example load failed.');
+        } catch (error) {
+          ExceptionHelper.logError(outputChannel, error, true);
+        }
+      });
+
   context.subscriptions.push(projectInit);
   context.subscriptions.push(azureProvision);
   context.subscriptions.push(azureDeploy);
   context.subscriptions.push(deviceCompile);
   context.subscriptions.push(deviceUpload);
   context.subscriptions.push(deviceConnectionStringConfig);
+  context.subscriptions.push(examples);
 }
 
 // this method is called when your extension is deactivated

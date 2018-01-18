@@ -17,7 +17,8 @@
     "onCommand:azureiotstudio.azureDeploy",
     "onCommand:azureiotstudio.deviceCompile",
     "onCommand:azureiotstudio.deviceUpload",
-    "onCommand:azureiotstudio.deviceConnectionStringConfig"
+    "onCommand:azureiotstudio.deviceConnectionStringConfig",
+    "onCommand:azureiotstudio.examples"
   ],
   "main": "./out/extension",
   "contributes": {
@@ -65,6 +66,11 @@
         "command": "azureiotstudio.deviceConnectionStringConfig",
         "title": "Config Device Connection String",
         "category": "IoTStudio"
+      },
+      {
+        "command": "azureiotstudio.examples",
+        "title": "Examples",
+        "category": "IoTStudio"
       }
     ]
   },
@@ -83,9 +89,11 @@
   },
   "devDependencies": {
     "@types/fs-plus": "^3.0.0",
+    "@types/lodash": "^4.14.91",
     "@types/mocha": "^2.2.42",
     "@types/node": "^7.0.43",
-    "@types/lodash": "^4.14.91",
+    "@types/request-promise": "^4.1.39",
+    "@types/unzip": "^0.1.0",
     "gts": "^0.5.1",
     "typescript": "^2.6.2",
     "vscode": "^1.1.6"
@@ -94,6 +102,9 @@
     "azure-iothub": "^1.2.3",
     "eventemitter2": "^5.0.0",
     "fs-plus": "^3.0.1",
-    "lodash": "^4.17.4"
+    "lodash": "^4.17.4",
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2",
+    "unzip": "^0.1.11"
   }
 }
