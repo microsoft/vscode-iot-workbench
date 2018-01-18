@@ -74,7 +74,7 @@ export class ExampleExplorer {
 
   private async downloadExamplePackage(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      url: string, fsPath: string): Promise<void> {
+      url: string, fsPath: string): Promise<boolean> {
     channel.show();
     const loading = setInterval(() => {
       channel.append('.');
@@ -92,21 +92,25 @@ export class ExampleExplorer {
     const stream = fs.createReadStream(path.join(tempPath, 'example.zip'))
                        .pipe(unzip.Extract({path: tempPath}));
 
-    stream.on('finish', () => {
-      clearInterval(loading);
-      channel.appendLine('');
-      channel.appendLine('Example loaded.');
-      setTimeout(async () => {
-        await this.moveTempFiles(fsPath);
-        Promise.resolve();
-      }, 1000);
-    });
+    return new Promise(
+        (resolve: (value: boolean) => void,
+         reject: (reason: Error) => void) => {
+          stream.on('finish', () => {
+            clearInterval(loading);
+            channel.appendLine('');
+            channel.appendLine('Example loaded.');
+            setTimeout(async () => {
+              await this.moveTempFiles(fsPath);
+              resolve(true);
+            }, 1000);
+          });
 
-    stream.on('error', (error: Error) => {
-      clearInterval(loading);
-      channel.appendLine('');
-      Promise.reject(error);
-    });
+          stream.on('error', (error: Error) => {
+            clearInterval(loading);
+            channel.appendLine('');
+            reject(error);
+          });
+        });
   }
 
   private async getExampleList(): Promise<vscode.QuickPickItem[]> {
@@ -156,9 +160,12 @@ export class ExampleExplorer {
     }
 
     channel.appendLine('Downloading example package...');
-    await this.downloadExamplePackage(context, channel, url, fsPath);
-    await vscode.commands.executeCommand(
-        'arduino.iotStudioInitialize', 'Device');
+    const res =
+        await this.downloadExamplePackage(context, channel, url, fsPath);
+    if (res) {
+      await vscode.commands.executeCommand(
+          'arduino.iotStudioInitialize', 'Device');
+    }
     return true;
   }
 }
