@@ -18,7 +18,6 @@ export class AzureFunction implements Component, Provisionable {
   private componentType: ComponentType;
   private channel: vscode.OutputChannel;
   private azureFunctionPath: string;
-  private extensionContext: vscode.ExtensionContext;
   private azureAccountExtension: vscode.Extension<AzureAccount>|undefined =
       vscode.extensions.getExtension<AzureAccount>('ms-vscode.azure-account');
 
@@ -65,13 +64,10 @@ export class AzureFunction implements Component, Provisionable {
     return undefined;
   }
 
-  constructor(
-      context: vscode.ExtensionContext, azureFunctionPath: string,
-      channel: vscode.OutputChannel) {
+  constructor(azureFunctionPath: string, channel: vscode.OutputChannel) {
     this.componentType = ComponentType.AzureFunction;
     this.channel = channel;
     this.azureFunctionPath = azureFunctionPath;
-    this.extensionContext = context;
   }
 
   getComponentType(): ComponentType {
@@ -85,6 +81,7 @@ export class AzureFunction implements Component, Provisionable {
   async create(): Promise<boolean> {
     const rootPath: string = vscode.workspace.rootPath as string;
     const azureFunctionPath = path.join(rootPath, this.azureFunctionPath);
+    console.log(azureFunctionPath);
 
     if (!fs.existsSync(azureFunctionPath)) {
       throw new Error(
@@ -92,16 +89,22 @@ export class AzureFunction implements Component, Provisionable {
     }
 
     try {
-      await vscode.commands.executeCommand(
-          'azureFunctions.createNewProject', azureFunctionPath, 'CSharp',
-          false /* openFolder */);
-      // We use one as value of cardinality in function.json, however, the
-      // template doesn't support customized cardinality value currently, the
-      // default value of cardinality is many
-      await vscode.commands.executeCommand(
-          'azureFunctions.createFunction', azureFunctionPath,
-          'IoTHubTrigger-CSharp', 'IoTHubTrigger1', 'eventHubConnectionString',
-          '%eventHubConnectionPath%', '$Default');
+      await vscode.commands
+          .executeCommand(
+              'azureFunctions.createNewProject', azureFunctionPath, 'CSharp',
+              false /* openFolder */)
+          .then(async () => {
+            // We use one as value of cardinality in function.json, however, the
+            // template doesn't support customized cardinality value currently,
+            // the default value of cardinality is many
+            setTimeout(async () => {
+              await vscode.commands.executeCommand(
+                  'azureFunctions.createFunction', azureFunctionPath,
+                  'IoTHubTrigger-CSharp', 'IoTHubTrigger1',
+                  'eventHubConnectionString', '%eventHubConnectionPath%',
+                  '$Default');
+            }, 3000);
+          });
 
       return true;
     } catch (error) {

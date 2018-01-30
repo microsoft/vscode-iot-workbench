@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {AZ3166Device} from './AZ3166Device';
+import {AzureFunction} from './AzureFunction';
 import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
@@ -18,6 +19,7 @@ const constants = {
 
 const jsonConstants = {
   DevicePath: 'DevicePath',
+  FunctionPath: 'FunctionPath',
   IoTHubName: 'IoTHubName'
 };
 
@@ -178,14 +180,37 @@ export class IoTProject {
       case ProjectTemplateType.basic:
         // Save data to configFile
         break;
-      case ProjectTemplateType.IotHub:
+      case ProjectTemplateType.IotHub: {
         const iothub = new IoTHub(this.channel);
         // In setting file, create a place holder for iothub name
         settings.projectsettings.push(
             {name: jsonConstants.IoTHubName, value: ''});
         this.componentList.push(iothub);
         break;
-      case ProjectTemplateType.Function:
+      }
+      case ProjectTemplateType.Function: {
+        const iothub = new IoTHub(this.channel);
+
+        const functionDir = path.join(
+            this.projectRootPath, constants.functionDefaultFolderName);
+
+        if (!fs.existsSync(functionDir)) {
+          fs.mkdirSync(functionDir);
+        }
+
+        const azureFunction = new AzureFunction(
+            constants.functionDefaultFolderName, this.channel);
+        // In setting file, create a place holder for iothub name
+        settings.projectsettings.push(
+            {name: jsonConstants.IoTHubName, value: ''});
+        settings.projectsettings.push({
+          name: jsonConstants.FunctionPath,
+          value: constants.functionDefaultFolderName
+        });
+        this.componentList.push(iothub);
+        this.componentList.push(azureFunction);
+        break;
+      }
       default:
         break;
     }
