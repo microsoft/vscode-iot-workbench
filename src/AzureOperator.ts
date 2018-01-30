@@ -11,7 +11,7 @@ export class AzureOperator {
       context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
     if (!vscode.workspace.rootPath) {
       throw new Error(
-          'Unable to find the root path, please open an IoT Studio project');
+          'Unable to find the root path, please open an IoT Development project');
     }
 
     const project = new IoTProject(context, channel);

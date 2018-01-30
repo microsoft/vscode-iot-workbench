@@ -1,7 +1,7 @@
 {
-  "name": "vscode-azure-iot-studio",
-  "displayName": "Azure IoT Studio",
-  "description": "Azure IoT studio for Visual Studio Code",
+  "name": "vscode-iot-dev-env",
+  "displayName": "VSCode Azure IoT dev env",
+  "description": "Azure IoT dev env for Visual Studio Code",
   "version": "0.0.1",
   "publisher": "vsciot-vscode",
   "engines": {
@@ -11,14 +11,14 @@
     "Other"
   ],
   "activationEvents": [
-    "workspaceContains:**/iotstudio.config.json",
-    "onCommand:azureiotstudio.initializeProject",
-    "onCommand:azureiotstudio.azureProvision",
-    "onCommand:azureiotstudio.azureDeploy",
-    "onCommand:azureiotstudio.deviceCompile",
-    "onCommand:azureiotstudio.deviceUpload",
-    "onCommand:azureiotstudio.deviceConnectionStringConfig",
-    "onCommand:azureiotstudio.examples"
+    "workspaceContains:**/iotdevenv.config.json",
+    "onCommand:iotdevenv.initializeProject",
+    "onCommand:iotdevenv.azureProvision",
+    "onCommand:iotdevenv.azureDeploy",
+    "onCommand:iotdevenv.deviceCompile",
+    "onCommand:iotdevenv.deviceUpload",
+    "onCommand:iotdevenv.deviceConnectionStringConfig",
+    "onCommand:iotdevenv.examples"
   ],
   "main": "./out/extension",
   "contributes": {
@@ -38,39 +38,39 @@
         "title": "Hello World"
       },
       {
-        "command": "azureiotstudio.initializeProject",
+        "command": "iotdevenv.initializeProject",
         "title": "Initialize Project",
-        "category": "IoTStudio"
+        "category": "IoTDev"
       },
       {
-        "command": "azureiotstudio.azureProvision",
+        "command": "iotdevenv.azureProvision",
         "title": "Azure Provision",
-        "category": "IoTStudio"
+        "category": "IoTDev"
       },
       {
-        "command": "azureiotstudio.azureDeploy",
+        "command": "iotdevenv.azureDeploy",
         "title": "Azure Deploy",
-        "category": "IoTStudio"
+        "category": "IoTDev"
       },
       {
-        "command": "azureiotstudio.deviceCompile",
+        "command": "iotdevenv.deviceCompile",
         "title": "Device Compile",
-        "category": "IoTStudio"
+        "category": "IoTDev"
       },
       {
-        "command": "azureiotstudio.deviceUpload",
+        "command": "iotdevenv.deviceUpload",
         "title": "Device Upload",
-        "category": "IoTStudio"
+        "category": "IoTDev"
       },
       {
-        "command": "azureiotstudio.deviceConnectionStringConfig",
+        "command": "iotdevenv.deviceConnectionStringConfig",
         "title": "Config Device Connection String",
-        "category": "IoTStudio"
+        "category": "IoTDev"
       },
       {
-        "command": "azureiotstudio.examples",
+        "command": "iotdevenv.examples",
         "title": "Examples",
-        "category": "IoTStudio"
+        "category": "IoTDev"
       }
     ]
   },
