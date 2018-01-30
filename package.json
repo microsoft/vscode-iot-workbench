@@ -1,7 +1,7 @@
 {
   "name": "vscode-iot-dev-env",
-  "displayName": "VSCode Azure IoT dev env",
-  "description": "Azure IoT dev env for Visual Studio Code",
+  "displayName": "VSCode Azure IoT Dev Env",
+  "description": "Azure IoT Dev Env for Visual Studio Code",
   "version": "0.0.1",
   "publisher": "vsciot-vscode",
   "engines": {
