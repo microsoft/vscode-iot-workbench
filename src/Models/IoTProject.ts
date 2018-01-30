@@ -145,7 +145,8 @@ export class IoTProject {
     return true;
   }
 
-  create(rootFolderPath: string, templateType: ProjectTemplateType): boolean {
+  async create(rootFolderPath: string, templateType: ProjectTemplateType):
+      Promise<boolean> {
     if (!fs.existsSync(rootFolderPath)) {
       throw new Error(
           'Unable to find the root path, please open the folder and initialize project again.');
@@ -195,8 +196,8 @@ export class IoTProject {
     fs.writeFileSync(configFilePath, jsonToSave);
 
     // Component level creation
-    this.componentList.forEach((element: Component) => {
-      element.create();
+    this.componentList.forEach(async (element: Component) => {
+      await element.create();
     });
 
     return true;

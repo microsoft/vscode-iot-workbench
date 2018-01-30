@@ -26,6 +26,9 @@ export async function activate(context: vscode.ExtensionContext) {
   console.log(
       'Congratulations, your extension "vscode-azure-iot-studio" is now active!');
 
+  console.log(
+      vscode.extensions.getExtension('ms-vscode.azure-account')!.exports);
+
   const outputChannel: vscode.OutputChannel =
       vscode.window.createOutputChannel('Azure IoT Studio');
 

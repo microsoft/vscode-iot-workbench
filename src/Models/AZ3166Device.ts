@@ -75,7 +75,7 @@ export class AZ3166Device implements Device {
     }
   }
 
-  create(): boolean {
+  async create(): Promise<boolean> {
     const rootPath: string = vscode.workspace.rootPath as string;
     const deviceFolderPath = path.join(rootPath, this.deviceFolder);
 

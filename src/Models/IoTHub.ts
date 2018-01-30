@@ -27,7 +27,7 @@ export class IoTHub implements Component, Provisionable {
   }
 
 
-  create(): boolean {
+  async create(): Promise<boolean> {
     return true;
   }
 
@@ -82,8 +82,27 @@ export class IoTHub implements Component, Provisionable {
         this.channel.appendLine(JSON.stringify(iothub, null, 2));
       }
 
+      const sharedAccessKeyMatches =
+          iothub.iotHubConnectionString.match(/SharedAccessKey=(.*?)[;$]/);
+      if (!sharedAccessKeyMatches || sharedAccessKeyMatches.length < 2) {
+        throw new Error(
+            'Cannot parse shared access key from IoT Hub connection string.');
+      }
+
+      const sharedAccessKey = sharedAccessKeyMatches[1];
+      const eventHubConnectionString = `Endpoint=${
+          iothub.properties.eventHubEndpoints.events
+              .endpoint};SharedAccessKeyName=iothubowner;SharedAccessKey=${
+          sharedAccessKey}`;
+      const eventHubConnectionPath =
+          iothub.properties.eventHubEndpoints.events.path;
+
       ConfigHandler.update(
           ConfigKey.iotHubConnectionString, iothub.iotHubConnectionString);
+      ConfigHandler.update(
+          ConfigKey.eventHubConnectionString, eventHubConnectionString);
+      ConfigHandler.update(
+          ConfigKey.eventHubConnectionPath, eventHubConnectionPath);
       const device = new IoTHubDevice(this.channel);
       if (await device.provision()) {
         return true;
