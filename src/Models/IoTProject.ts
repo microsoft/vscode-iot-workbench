@@ -13,7 +13,7 @@ import {IoTHub} from './IoTHub';
 const constants = {
   deviceDefaultFolderName: 'Device',
   functionDefaultFolderName: 'Function',
-  configFileName: 'iotstudio.config.json'
+  configFileName: 'iotdevenv.config.json'
 };
 
 const jsonConstants = {
@@ -63,7 +63,7 @@ export class IoTProject {
   async load(rootFolderPath: string): Promise<boolean> {
     if (!fs.existsSync(rootFolderPath)) {
       const error = new Error(
-          'Unable to find the root path, please open an IoT Studio project.');
+          'Unable to find the root path, please open an IoT Development project.');
       throw error;
     }
     this.projectRootPath = rootFolderPath;
@@ -73,7 +73,7 @@ export class IoTProject {
 
     if (!fs.existsSync(configFilePath)) {
       const error = new Error(
-          'Unable to open the configuration file, please open an IoT Studio project.');
+          'Unable to open the configuration file, please open an IoT Development project.');
       throw error;
     }
     const settings = require(configFilePath);

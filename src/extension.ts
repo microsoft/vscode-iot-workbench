@@ -13,7 +13,7 @@ import {setTimeout} from 'timers';
 import {ExampleExplorer} from './exampleExplorer';
 
 const constants = {
-  configFileName: 'iotstudio.config.json'
+  configFileName: 'iotdevenv.config.json'
 };
 
 
@@ -24,10 +24,10 @@ export async function activate(context: vscode.ExtensionContext) {
   // (console.error) This line of code will only be executed once when your
   // extension is activated
   console.log(
-      'Congratulations, your extension "vscode-azure-iot-studio" is now active!');
+      'Congratulations, your extension "vscode-iot-dev-env" is now active!');
 
   const outputChannel: vscode.OutputChannel =
-      vscode.window.createOutputChannel('Azure IoT Studio');
+      vscode.window.createOutputChannel('Azure IoT Dev');
 
   const iotProject = new IoTProject(context, outputChannel);
   if (vscode.workspace.rootPath) {
@@ -54,7 +54,7 @@ export async function activate(context: vscode.ExtensionContext) {
   // The commandId parameter must match the command field in package.json
 
   const projectInit = vscode.commands.registerCommand(
-      'azureiotstudio.initializeProject', async () => {
+      'iotdevenv.initializeProject', async () => {
         try {
           await projectInitializer.InitializeProject(context, outputChannel);
         } catch (error) {
@@ -63,7 +63,7 @@ export async function activate(context: vscode.ExtensionContext) {
       });
 
   const azureProvision = vscode.commands.registerCommand(
-      'azureiotstudio.azureProvision', async () => {
+      'iotdevenv.azureProvision', async () => {
         try {
           await azureOperator.Provision(context, outputChannel);
           vscode.window.showInformationMessage('Azure provision succeeded.');
@@ -73,7 +73,7 @@ export async function activate(context: vscode.ExtensionContext) {
       });
 
   const azureDeploy = vscode.commands.registerCommand(
-      'azureiotstudio.azureDeploy', async () => {
+      'iotdevenv.azureDeploy', async () => {
         try {
           await azureOperator.Deploy(context, outputChannel);
         } catch (error) {
@@ -82,7 +82,7 @@ export async function activate(context: vscode.ExtensionContext) {
       });
 
   const deviceCompile = vscode.commands.registerCommand(
-      'azureiotstudio.deviceCompile', async () => {
+      'iotdevenv.deviceCompile', async () => {
         try {
           await deviceOperator.compile(context, outputChannel);
         } catch (error) {
@@ -91,7 +91,7 @@ export async function activate(context: vscode.ExtensionContext) {
       });
 
   const deviceUpload = vscode.commands.registerCommand(
-      'azureiotstudio.deviceUpload', async () => {
+      'iotdevenv.deviceUpload', async () => {
         try {
           await deviceOperator.upload(context, outputChannel);
         } catch (error) {
@@ -100,7 +100,7 @@ export async function activate(context: vscode.ExtensionContext) {
       });
 
   const deviceConnectionStringConfig = vscode.commands.registerCommand(
-      'azureiotstudio.deviceConnectionStringConfig', async () => {
+      'iotdevenv.deviceConnectionStringConfig', async () => {
         try {
           await deviceOperator.setConnectionString(context, outputChannel);
         } catch (error) {
@@ -109,7 +109,7 @@ export async function activate(context: vscode.ExtensionContext) {
       });
 
   const examples =
-      vscode.commands.registerCommand('azureiotstudio.examples', async () => {
+      vscode.commands.registerCommand('iotdevenv.examples', async () => {
         try {
           const res =
               await exampleExplorer.initializeExample(context, outputChannel);

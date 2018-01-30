@@ -34,8 +34,8 @@ export class IoTHub implements Component, Provisionable {
   async provision(): Promise<boolean> {
     const provisionIothubSelection: vscode.QuickPickItem[] = [
       {
-        label: 'Select an existed IoT Hub',
-        description: 'Select an existed IoT Hub',
+        label: 'Select an existing IoT Hub',
+        description: 'Select an existing IoT Hub',
         detail: 'select'
       },
       {

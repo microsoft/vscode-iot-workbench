@@ -4,12 +4,12 @@ import * as vscode from 'vscode';
 
 const rootPath = vscode.workspace.rootPath;
 const configFilePath =
-    rootPath ? path.join(rootPath as string, 'iotstudio.config.json') : null;
+    rootPath ? path.join(rootPath as string, 'iotdevenv.config.json') : null;
 
 function getConfigObject() {
   if (!configFilePath) {
     throw new Error(
-        'Unable to find the root path, please open an IoT Studio project.');
+        'Unable to find the root path, please open an IoT Development project.');
   }
 
   let configString;
