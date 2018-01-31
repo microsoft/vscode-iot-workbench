@@ -173,7 +173,7 @@ export class AZ3166Device implements Device {
     try {
       // Get IoT Hub device connection string from config
       let deviceConnectionString =
-          ConfigHandler.get(ConfigKey.iotHubDeviceConnectionString);
+          ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
 
       let hostName = '';
       let deviceId = '';
@@ -223,12 +223,19 @@ export class AZ3166Device implements Device {
         };
 
         deviceConnectionString = await vscode.window.showInputBox(option);
+        if (!deviceConnectionString) {
+          return false;
+        }
         if ((deviceConnectionString.indexOf('HostName') === -1) ||
             (deviceConnectionString.indexOf('DeviceId') === -1) ||
             (deviceConnectionString.indexOf('SharedAccessKey') === -1)) {
           throw new Error(
               'The format of the IoT Hub Device connection string is invalid.');
         }
+      }
+
+      if (!deviceConnectionString) {
+        return false;
       }
 
       console.log(deviceConnectionString);

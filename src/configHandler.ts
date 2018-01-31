@@ -36,30 +36,14 @@ export class ConfigHandler {
       throw new Error('Key is empty.');
     }
 
-    const configObject = getConfigObject();
-    configObject[key] = value;
-
-    const stringToSave = JSON.stringify(configObject, null, 4);
-
-    if (!stringToSave) {
-      throw new Error('Value is not a valid JSON object.');
-    }
-
-    try {
-      fs.writeFileSync(
-          configFilePath as string, stringToSave as string, 'utf8');
-    } catch (e) {
-      throw new Error(
-          'Fail to update config file. Pleace check your permission.');
-    }
+    return vscode.workspace.getConfiguration('IoTStudio').update(key, value);
   }
 
-  static get(key: string) {
+  static get<T>(key: string) {
     if (!key) {
       throw new Error('Key is empty.');
     }
 
-    const configObject = getConfigObject();
-    return configObject[key];
+    return vscode.workspace.getConfiguration('IoTStudio').get<T>(key);
   }
 }

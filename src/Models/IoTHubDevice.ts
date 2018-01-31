@@ -13,16 +13,19 @@ interface DeviceInfo {
 }
 
 export class IoTHubDevice {
-  private iotHubConnectionString: string;
+  private iotHubConnectionString: string|undefined;
   private channel: vscode.OutputChannel;
 
   constructor(channel: vscode.OutputChannel) {
     this.channel = channel;
     this.iotHubConnectionString =
-        ConfigHandler.get(ConfigKey.iotHubConnectionString);
+        ConfigHandler.get<string>(ConfigKey.iotHubConnectionString);
   }
 
   async provision(): Promise<boolean> {
+    if (!this.iotHubConnectionString) {
+      throw new Error('No IoT Hub connection string found.');
+    }
     const provisionIothubDeviceSelection: vscode.QuickPickItem[] = [
       {
         label: 'Select an existed IoT Hub device',

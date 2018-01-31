@@ -11,6 +11,7 @@ import {IoTProject} from './Models/IoTProject';
 import {ExceptionHelper} from './exceptionHelper';
 import {setTimeout} from 'timers';
 import {ExampleExplorer} from './exampleExplorer';
+import {AzureFunction} from './Models/AzureFunction';
 
 const constants = {
   configFileName: 'iotstudio.config.json'
@@ -120,6 +121,26 @@ export async function activate(context: vscode.ExtensionContext) {
         }
       });
 
+  const functionInit = vscode.commands.registerCommand(
+      'azureiotstudio.initializeFunction', async () => {
+        try {
+          const azureFunctionPath =
+              vscode.workspace.getConfiguration('IoTStudio')
+                  .get<string>('FunctionPath');
+          if (!azureFunctionPath) {
+            throw new Error('Get workspace configure file failed.');
+          }
+          console.log(azureFunctionPath);
+          const azureFunction =
+              new AzureFunction(azureFunctionPath, outputChannel);
+          const res = await azureFunction.initialize();
+          vscode.window.showInformationMessage(
+              res ? 'Function created.' : 'Function create failed.');
+        } catch (error) {
+          ExceptionHelper.logError(outputChannel, error, true);
+        }
+      });
+
   context.subscriptions.push(projectInit);
   context.subscriptions.push(azureProvision);
   context.subscriptions.push(azureDeploy);
@@ -127,6 +148,7 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(deviceUpload);
   context.subscriptions.push(deviceConnectionStringConfig);
   context.subscriptions.push(examples);
+  context.subscriptions.push(functionInit);
 }
 
 // this method is called when your extension is deactivated

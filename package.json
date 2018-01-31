@@ -18,7 +18,8 @@
     "onCommand:azureiotstudio.deviceCompile",
     "onCommand:azureiotstudio.deviceUpload",
     "onCommand:azureiotstudio.deviceConnectionStringConfig",
-    "onCommand:azureiotstudio.examples"
+    "onCommand:azureiotstudio.examples",
+    "onCommand:azureiotstudio.initializeFunction"
   ],
   "main": "./out/extension",
   "contributes": {
@@ -70,6 +71,11 @@
       {
         "command": "azureiotstudio.examples",
         "title": "Examples",
+        "category": "IoTStudio"
+      },
+      {
+        "command": "azureiotstudio.initializeFunction",
+        "title": "Create Function",
         "category": "IoTStudio"
       }
     ],

@@ -1,3 +1,5 @@
+'use strict';
+
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
@@ -125,10 +127,13 @@ export class AzureFunction implements Component, Provisionable {
       if (functionAppId) {
         ConfigHandler.update(ConfigKey.functionAppId, functionAppId);
         const eventHubConnectionString =
-            ConfigHandler.get(ConfigKey.eventHubConnectionString);
+            ConfigHandler.get<string>(ConfigKey.eventHubConnectionString);
         const eventHubConnectionPath =
-            ConfigHandler.get(ConfigKey.eventHubConnectionPath);
+            ConfigHandler.get<string>(ConfigKey.eventHubConnectionPath);
 
+        if (!eventHubConnectionString || !eventHubConnectionPath) {
+          throw new Error('No event hub path or connection string found.');
+        }
         const credential =
             await this.getCredentialFromSubscriptionId(subscriptionId);
         if (credential === undefined) {
@@ -178,6 +183,22 @@ export class AzureFunction implements Component, Provisionable {
 
       await vscode.commands.executeCommand(
           'azureFunctions.deploy', azureFunctionPath, functionAppId);
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async initialize(): Promise<boolean> {
+    try {
+      // await vscode.commands.executeCommand(
+      //     'azureFunctions.createFunction', this.azureFunctionPath,
+      //     'IoTHubTrigger-CSharp', 'IoTHubTrigger1',
+      //     'eventHubConnectionString', '%eventHubConnectionPath%',
+      //     '$Default');
+      await vscode.commands.executeCommand(
+          'azureFunctions.createFunction', this.azureFunctionPath,
+          'HttpTrigger-CSharp', 'HttpTrigger1', 'DevKit', 'Anonymous');
       return true;
     } catch (error) {
       throw error;

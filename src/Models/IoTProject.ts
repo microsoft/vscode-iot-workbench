@@ -180,8 +180,7 @@ export class IoTProject {
       value: constants.deviceDefaultFolderName
     });
 
-    workspace.settings[`IoTStudio.${jsonConstants.DevicePath}`] =
-        constants.deviceDefaultFolderName;
+    workspace.settings[`IoTStudio.${jsonConstants.DevicePath}`] = deviceDir;
 
     switch (templateType) {
       case ProjectTemplateType.basic:
@@ -219,7 +218,7 @@ export class IoTProject {
 
         workspace.settings[`IoTStudio.${jsonConstants.IoTHubName}`] = '';
         workspace.settings[`IoTStudio.${jsonConstants.FunctionPath}`] =
-            constants.functionDefaultFolderName;
+            functionDir;
 
         this.componentList.push(iothub);
         this.componentList.push(azureFunction);
@@ -244,10 +243,8 @@ export class IoTProject {
     try {
       for (let i = 0; i < this.componentList.length; i++) {
         await this.componentList[i].create();
-        console.log(this.componentList[i].getComponentType());
       }
     } catch (error) {
-      console.log(error);
       throw error;
     }
 
@@ -256,15 +253,11 @@ export class IoTProject {
 
     fs.writeFileSync(
         workspaceConfigFilePath, JSON.stringify(workspace, null, 4));
-    console.log(workspaceConfigFilePath);
     try {
-      console.log('BEFORE execute command');
       await vscode.commands.executeCommand(
-          'workbench.action.openWorkspace', workspaceConfigFilePath);
-      console.log('AFTER execute command');
+          'vscode.openFolder', vscode.Uri.file(workspaceConfigFilePath));
       return true;
     } catch (error) {
-      console.log(error);
       throw error;
     }
   }
