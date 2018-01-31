@@ -9,12 +9,14 @@ import {Component, ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
 import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
+import {Workspace} from './Interfaces/Workspace';
 import {IoTHub} from './IoTHub';
 
 const constants = {
   deviceDefaultFolderName: 'Device',
   functionDefaultFolderName: 'Function',
-  configFileName: 'iotstudio.config.json'
+  configFileName: 'iotstudio.config.json',
+  workspaceConfigFilePath: 'project.code-workspace'
 };
 
 const jsonConstants = {
@@ -60,7 +62,6 @@ export class IoTProject {
     this.extensionContext = context;
     this.channel = channel;
   }
-
 
   async load(rootFolderPath: string): Promise<boolean> {
     if (!fs.existsSync(rootFolderPath)) {
@@ -157,6 +158,8 @@ export class IoTProject {
     this.projectRootPath = rootFolderPath;
     this.projectType = templateType;
 
+    const workspace: Workspace = {folders: [], settings: {}};
+
     // Whatever the template is, we will always create the device.
     const deviceDir =
         path.join(this.projectRootPath, constants.deviceDefaultFolderName);
@@ -165,8 +168,9 @@ export class IoTProject {
       fs.mkdirSync(deviceDir);
     }
 
-    const device = new AZ3166Device(
-        this.extensionContext, constants.deviceDefaultFolderName);
+    workspace.folders.push({path: constants.deviceDefaultFolderName});
+
+    const device = new AZ3166Device(this.extensionContext, deviceDir);
     this.componentList.push(device);
 
     // TODO: Consider naming for project level settings.
@@ -175,6 +179,9 @@ export class IoTProject {
       name: jsonConstants.DevicePath,
       value: constants.deviceDefaultFolderName
     });
+
+    workspace.settings[`IoTStudio.${jsonConstants.DevicePath}`] =
+        constants.deviceDefaultFolderName;
 
     switch (templateType) {
       case ProjectTemplateType.basic:
@@ -185,6 +192,7 @@ export class IoTProject {
         // In setting file, create a place holder for iothub name
         settings.projectsettings.push(
             {name: jsonConstants.IoTHubName, value: ''});
+        workspace.settings[`IoTStudio.${jsonConstants.IoTHubName}`] = '';
         this.componentList.push(iothub);
         break;
       }
@@ -198,8 +206,9 @@ export class IoTProject {
           fs.mkdirSync(functionDir);
         }
 
-        const azureFunction = new AzureFunction(
-            constants.functionDefaultFolderName, this.channel);
+        workspace.folders.push({path: constants.functionDefaultFolderName});
+
+        const azureFunction = new AzureFunction(functionDir, this.channel);
         // In setting file, create a place holder for iothub name
         settings.projectsettings.push(
             {name: jsonConstants.IoTHubName, value: ''});
@@ -207,6 +216,11 @@ export class IoTProject {
           name: jsonConstants.FunctionPath,
           value: constants.functionDefaultFolderName
         });
+
+        workspace.settings[`IoTStudio.${jsonConstants.IoTHubName}`] = '';
+        workspace.settings[`IoTStudio.${jsonConstants.FunctionPath}`] =
+            constants.functionDefaultFolderName;
+
         this.componentList.push(iothub);
         this.componentList.push(azureFunction);
         break;
@@ -221,11 +235,38 @@ export class IoTProject {
     fs.writeFileSync(configFilePath, jsonToSave);
 
     // Component level creation
-    this.componentList.forEach(async (element: Component) => {
-      await element.create();
-    });
+    // we cannot use forEach here:
+    // https://stackoverflow.com/questions/37576685/using-async-await-with-a-foreach-loop
+    // this.componentList.forEach(async (element: Component) => {
+    //   await element.create();
+    // });
 
-    return true;
+    try {
+      for (let i = 0; i < this.componentList.length; i++) {
+        await this.componentList[i].create();
+        console.log(this.componentList[i].getComponentType());
+      }
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+
+    const workspaceConfigFilePath =
+        path.join(this.projectRootPath, constants.workspaceConfigFilePath);
+
+    fs.writeFileSync(
+        workspaceConfigFilePath, JSON.stringify(workspace, null, 4));
+    console.log(workspaceConfigFilePath);
+    try {
+      console.log('BEFORE execute command');
+      await vscode.commands.executeCommand(
+          'workbench.action.openWorkspace', workspaceConfigFilePath);
+      console.log('AFTER execute command');
+      return true;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 
   async setDeviceConnectionString(): Promise<boolean> {

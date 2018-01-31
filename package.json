@@ -72,6 +72,25 @@
         "title": "Examples",
         "category": "IoTStudio"
       }
+    ],
+    "configuration": [
+      {
+        "title": "Azure Functions Configuration",
+        "properties": {
+          "azureFunctions.projectRuntime": {
+            "scope": "resource"
+          },
+          "azureFunctions.projectLanguage": {
+            "scope": "resource"
+          },
+          "azureFunctions.templateFilter": {
+            "scope": "resource"
+          },
+          "azureFunctions.deploySubpath": {
+            "scope": "resource"
+          }
+        }
+      }
     ]
   },
   "scripts": {

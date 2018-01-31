@@ -79,8 +79,7 @@ export class AzureFunction implements Component, Provisionable {
   }
 
   async create(): Promise<boolean> {
-    const rootPath: string = vscode.workspace.rootPath as string;
-    const azureFunctionPath = path.join(rootPath, this.azureFunctionPath);
+    const azureFunctionPath = this.azureFunctionPath;
     console.log(azureFunctionPath);
 
     if (!fs.existsSync(azureFunctionPath)) {
@@ -89,22 +88,21 @@ export class AzureFunction implements Component, Provisionable {
     }
 
     try {
-      await vscode.commands
-          .executeCommand(
-              'azureFunctions.createNewProject', azureFunctionPath, 'CSharp',
-              false /* openFolder */)
-          .then(async () => {
-            // We use one as value of cardinality in function.json, however, the
-            // template doesn't support customized cardinality value currently,
-            // the default value of cardinality is many
-            setTimeout(async () => {
-              await vscode.commands.executeCommand(
-                  'azureFunctions.createFunction', azureFunctionPath,
-                  'IoTHubTrigger-CSharp', 'IoTHubTrigger1',
-                  'eventHubConnectionString', '%eventHubConnectionPath%',
-                  '$Default');
-            }, 3000);
-          });
+      await vscode.commands.executeCommand(
+          'azureFunctions.createNewProject', azureFunctionPath, 'C#',
+          false /* openFolder */);
+      // .then(async () => {
+      //   // We use one as value of cardinality in function.json, however, the
+      //   // template doesn't support customized cardinality value currently,
+      //   // the default value of cardinality is many
+      //   setTimeout(async () => {
+      //     await vscode.commands.executeCommand(
+      //         'azureFunctions.createFunction', azureFunctionPath,
+      //         'IoTHubTrigger-CSharp', 'IoTHubTrigger1',
+      //         'eventHubConnectionString', '%eventHubConnectionPath%',
+      //         '$Default');
+      //   }, 3000);
+      // });
 
       return true;
     } catch (error) {
@@ -175,8 +173,7 @@ export class AzureFunction implements Component, Provisionable {
 
   async deploy(): Promise<boolean> {
     try {
-      const rootPath: string = vscode.workspace.rootPath as string;
-      const azureFunctionPath = path.join(rootPath, this.azureFunctionPath);
+      const azureFunctionPath = this.azureFunctionPath;
       const functionAppId = ConfigHandler.get(ConfigKey.functionAppId);
 
       await vscode.commands.executeCommand(

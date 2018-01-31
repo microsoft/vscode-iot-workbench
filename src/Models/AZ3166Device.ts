@@ -67,8 +67,8 @@ export class AZ3166Device implements Device {
 
   async load(): Promise<boolean> {
     try {
-      await vscode.commands.executeCommand(
-          'arduino.iotStudioInitialize', this.deviceFolder);
+      // await vscode.commands.executeCommand(
+      //     'arduino.iotStudioInitialize', this.deviceFolder);
       return true;
     } catch (error) {
       throw error;
@@ -76,8 +76,7 @@ export class AZ3166Device implements Device {
   }
 
   async create(): Promise<boolean> {
-    const rootPath: string = vscode.workspace.rootPath as string;
-    const deviceFolderPath = path.join(rootPath, this.deviceFolder);
+    const deviceFolderPath = this.deviceFolder;
 
     if (!fs.existsSync(deviceFolderPath)) {
       throw new Error(`Device folder doesn't exist: ${deviceFolderPath}`);
