@@ -141,23 +141,25 @@ export class AzureFunction implements Component, Provisionable {
         }
 
         const resourceGroupMatches =
-            functionAppId.match(/resourceGroups\/(.*?)\//);
+            functionAppId.match(/\/resourceGroups\/([^\/]*)/);
         if (!resourceGroupMatches || resourceGroupMatches.length < 2) {
           throw new Error('Cannot parse resource group from function app ID.');
         }
         const resourceGroup = resourceGroupMatches[1];
 
-        const siteNameMatches = functionAppId.match(/sites\/(.*?)[\/$]/);
+        const siteNameMatches = functionAppId.match(/\/sites\/([^\/]*)/);
         if (!siteNameMatches || siteNameMatches.length < 2) {
           throw new Error(
               'Cannot parse function app name from function app ID.');
         }
-        const siteName = resourceGroupMatches[1];
+        const siteName = siteNameMatches[1];
 
         const client = new WebSiteManagementClient(credential, subscriptionId);
+        console.log(resourceGroup, siteName);
         const appSettings: StringDictionary =
             await client.webApps.listApplicationSettings(
                 resourceGroup, siteName);
+        console.log(appSettings);
         appSettings.properties = appSettings.properties || {};
         appSettings.properties['eventHubConnectionString'] =
             eventHubConnectionString;

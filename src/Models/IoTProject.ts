@@ -2,6 +2,8 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+import {ConfigHandler} from '../configHandler';
+
 import {AZ3166Device} from './AZ3166Device';
 import {AzureFunction} from './AzureFunction';
 import {Compilable} from './Interfaces/Compilable';
@@ -63,39 +65,27 @@ export class IoTProject {
     this.channel = channel;
   }
 
-  async load(rootFolderPath: string): Promise<boolean> {
-    if (!fs.existsSync(rootFolderPath)) {
-      const error = new Error(
-          'Unable to find the root path, please open an IoT Studio project.');
-      throw error;
-    }
-    this.projectRootPath = rootFolderPath;
+  async load(): Promise<boolean> {
+    const deviceLocation = ConfigHandler.get<string>(jsonConstants.DevicePath);
 
-    const configFilePath =
-        path.join(this.projectRootPath, constants.configFileName);
-
-    if (!fs.existsSync(configFilePath)) {
-      const error = new Error(
-          'Unable to open the configuration file, please open an IoT Studio project.');
-      throw error;
-    }
-    const settings = require(configFilePath);
-
-    const deviceLocation = settings.projectsettings.find(
-        (obj: ProjectSetting) => obj.name === jsonConstants.DevicePath);
-
-    if (deviceLocation) {
-      const device =
-          new AZ3166Device(this.extensionContext, deviceLocation.value);
+    if (deviceLocation !== undefined) {
+      const device = new AZ3166Device(this.extensionContext, deviceLocation);
       this.componentList.push(device);
     }
 
-    const hubName = settings.projectsettings.find(
-        (obj: ProjectSetting) => obj.name === jsonConstants.IoTHubName);
+    const hubName = ConfigHandler.get<string>(jsonConstants.IoTHubName);
 
-    if (hubName) {
+    if (hubName !== undefined) {
       const iotHub = new IoTHub(this.channel);
       this.componentList.push(iotHub);
+    }
+
+    const functionLocation =
+        ConfigHandler.get<string>(jsonConstants.FunctionPath);
+
+    if (functionLocation !== undefined) {
+      const functionApp = new AzureFunction(functionLocation, this.channel);
+      this.componentList.push(functionApp);
     }
 
     // Component level load
@@ -132,6 +122,10 @@ export class IoTProject {
   }
 
   async provision(): Promise<boolean> {
+    if (this.componentList.length === 0) {
+      this.load();
+    }
+
     for (const item of this.componentList) {
       if (this.canProvision(item)) {
         const res = await item.provision();

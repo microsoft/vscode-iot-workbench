@@ -83,7 +83,7 @@ export class IoTHub implements Component, Provisionable {
       }
 
       const sharedAccessKeyMatches =
-          iothub.iotHubConnectionString.match(/SharedAccessKey=(.*?)[;$]/);
+          iothub.iotHubConnectionString.match(/SharedAccessKey=([^;]*)/);
       if (!sharedAccessKeyMatches || sharedAccessKeyMatches.length < 2) {
         throw new Error(
             'Cannot parse shared access key from IoT Hub connection string.');

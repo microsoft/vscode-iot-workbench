@@ -94,6 +94,30 @@
           },
           "azureFunctions.deploySubpath": {
             "scope": "resource"
+          },
+          "IoTStudio.DevicePath": {
+            "type": "string"
+          },
+          "IoTStudio.IoTHubName": {
+            "type": "string"
+          },
+          "IoTStudio.FunctionPath": {
+            "type": "string"
+          },
+          "IoTStudio.iothubConnectionString": {
+            "type": "string"
+          },
+          "IoTStudio.iothubDeviceConnectionString": {
+            "type": "string"
+          },
+          "IoTStudio.eventHubConnectionString" : {
+            "type": "string"
+          },
+          "IoTStudio.eventHubConnectionPath" : {
+
+          },
+          "IoTStudio.functionAppId" : {
+
           }
         }
       }

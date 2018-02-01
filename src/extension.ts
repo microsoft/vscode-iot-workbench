@@ -31,17 +31,11 @@ export async function activate(context: vscode.ExtensionContext) {
       vscode.window.createOutputChannel('Azure IoT Studio');
 
   const iotProject = new IoTProject(context, outputChannel);
-  if (vscode.workspace.rootPath) {
-    const configFilePath =
-        path.join(vscode.workspace.rootPath, constants.configFileName);
-
-    // Try to load the project only when the config file exists
-    if (fs.existsSync(configFilePath)) {
-      try {
-        await iotProject.load(vscode.workspace.rootPath);
-      } catch (error) {
-        // do nothing as we are not sure whether the project is initialized.
-      }
+  if (vscode.workspace.workspaceFolders) {
+    try {
+      await iotProject.load();
+    } catch (error) {
+      // do nothing as we are not sure whether the project is initialized.
     }
   }
 
