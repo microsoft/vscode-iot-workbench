@@ -8,6 +8,7 @@ import {AZ3166Device} from './AZ3166Device';
 import {AzureFunction} from './AzureFunction';
 import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
+import {Deployable} from './Interfaces/Deployable';
 import {Device, DeviceType} from './Interfaces/Device';
 import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
@@ -49,6 +50,10 @@ export class IoTProject {
 
   private canProvision(comp: {}): comp is Provisionable {
     return (comp as Provisionable).provision !== undefined;
+  }
+
+  private canDeploy(comp: {}): comp is Deployable {
+    return (comp as Deployable).deploy !== undefined;
   }
 
   private canCompile(comp: {}): comp is Compilable {
@@ -122,10 +127,6 @@ export class IoTProject {
   }
 
   async provision(): Promise<boolean> {
-    if (this.componentList.length === 0) {
-      this.load();
-    }
-
     for (const item of this.componentList) {
       if (this.canProvision(item)) {
         const res = await item.provision();
@@ -138,7 +139,16 @@ export class IoTProject {
     return true;
   }
 
-  deploy(): boolean {
+  async deploy(): Promise<boolean> {
+    for (const item of this.componentList) {
+      if (this.canDeploy(item)) {
+        const res = await item.deploy();
+        if (res === false) {
+          const error = new Error('Deploy failed.');
+          throw error;
+        }
+      }
+    }
     return true;
   }
 
