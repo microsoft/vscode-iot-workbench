@@ -62,7 +62,7 @@ export class IoTHubDevice {
           if (device === undefined) {
             throw new Error('Cannot select the specific device');
           } else {
-            ConfigHandler.update(
+            await ConfigHandler.update(
                 ConfigKey.iotHubDeviceConnectionString,
                 device.iothubDeviceConnectionString);
           }
@@ -74,7 +74,7 @@ export class IoTHubDevice {
             const error = new Error('Cannot create device.');
             throw error;
           } else {
-            ConfigHandler.update(
+            await ConfigHandler.update(
                 ConfigKey.iotHubDeviceConnectionString,
                 device.iothubDeviceConnectionString);
           }

@@ -97,11 +97,11 @@ export class IoTHub implements Component, Provisionable {
       const eventHubConnectionPath =
           iothub.properties.eventHubEndpoints.events.path;
 
-      ConfigHandler.update(
+      await ConfigHandler.update(
           ConfigKey.iotHubConnectionString, iothub.iotHubConnectionString);
-      ConfigHandler.update(
+      await ConfigHandler.update(
           ConfigKey.eventHubConnectionString, eventHubConnectionString);
-      ConfigHandler.update(
+      await ConfigHandler.update(
           ConfigKey.eventHubConnectionPath, eventHubConnectionPath);
       const device = new IoTHubDevice(this.channel);
       if (await device.provision()) {

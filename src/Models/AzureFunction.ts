@@ -90,8 +90,11 @@ export class AzureFunction implements Component, Provisionable {
     }
 
     try {
+      // await vscode.commands.executeCommand(
+      //     'azureFunctions.createNewProject', azureFunctionPath, 'C#',
+      //     false /* openFolder */);
       await vscode.commands.executeCommand(
-          'azureFunctions.createNewProject', azureFunctionPath, 'C#',
+          'azureFunctions.createNewProject', azureFunctionPath, 'JavaScript',
           false /* openFolder */);
       // .then(async () => {
       //   // We use one as value of cardinality in function.json, however, the
@@ -125,7 +128,7 @@ export class AzureFunction implements Component, Provisionable {
           await vscode.commands.executeCommand<string>(
               'azureFunctions.createFunctionApp', subscriptionId);
       if (functionAppId) {
-        ConfigHandler.update(ConfigKey.functionAppId, functionAppId);
+        await ConfigHandler.update(ConfigKey.functionAppId, functionAppId);
         const eventHubConnectionString =
             ConfigHandler.get<string>(ConfigKey.eventHubConnectionString);
         const eventHubConnectionPath =
@@ -185,6 +188,7 @@ export class AzureFunction implements Component, Provisionable {
 
       await vscode.commands.executeCommand(
           'azureFunctions.deploy', azureFunctionPath, functionAppId);
+      console.log(azureFunctionPath, functionAppId);
       return true;
     } catch (error) {
       throw error;
@@ -193,14 +197,13 @@ export class AzureFunction implements Component, Provisionable {
 
   async initialize(): Promise<boolean> {
     try {
-      // await vscode.commands.executeCommand(
-      //     'azureFunctions.createFunction', this.azureFunctionPath,
-      //     'IoTHubTrigger-CSharp', 'IoTHubTrigger1',
-      //     'eventHubConnectionString', '%eventHubConnectionPath%',
-      //     '$Default');
       await vscode.commands.executeCommand(
           'azureFunctions.createFunction', this.azureFunctionPath,
-          'HttpTrigger-CSharp', 'HttpTrigger1', 'DevKit', 'Anonymous');
+          'IoTHubTrigger-JavaScript', 'IoTHubTrigger1',
+          'eventHubConnectionString', '%eventHubConnectionPath%', '$Default');
+      // await vscode.commands.executeCommand(
+      //     'azureFunctions.createFunction', this.azureFunctionPath,
+      //     'HttpTrigger-CSharp', 'HttpTrigger1', 'DevKit', 'Anonymous');
       return true;
     } catch (error) {
       throw error;
