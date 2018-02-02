@@ -13,10 +13,6 @@ import {setTimeout} from 'timers';
 import {ExampleExplorer} from './exampleExplorer';
 import {AzureFunction} from './Models/AzureFunction';
 
-const constants = {
-  configFileName: 'iotdevenv.config.json'
-};
-
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed

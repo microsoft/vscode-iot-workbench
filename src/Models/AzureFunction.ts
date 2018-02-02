@@ -96,19 +96,6 @@ export class AzureFunction implements Component, Provisionable {
       await vscode.commands.executeCommand(
           'azureFunctions.createNewProject', azureFunctionPath, 'JavaScript',
           false /* openFolder */);
-      // .then(async () => {
-      //   // We use one as value of cardinality in function.json, however, the
-      //   // template doesn't support customized cardinality value currently,
-      //   // the default value of cardinality is many
-      //   setTimeout(async () => {
-      //     await vscode.commands.executeCommand(
-      //         'azureFunctions.createFunction', azureFunctionPath,
-      //         'IoTHubTrigger-CSharp', 'IoTHubTrigger1',
-      //         'eventHubConnectionString', '%eventHubConnectionPath%',
-      //         '$Default');
-      //   }, 3000);
-      // });
-
       return true;
     } catch (error) {
       throw error;
@@ -182,6 +169,15 @@ export class AzureFunction implements Component, Provisionable {
   }
 
   async deploy(): Promise<boolean> {
+    let deployPendding: NodeJS.Timer|null = null;
+    if (this.channel) {
+      this.channel.show();
+      this.channel.appendLine('Deploying Azure Function App...');
+      deployPendding = setInterval(() => {
+        this.channel.append('.');
+      }, 1000);
+    }
+
     try {
       const azureFunctionPath = this.azureFunctionPath;
       const functionAppId = ConfigHandler.get(ConfigKey.functionAppId);
@@ -189,8 +185,16 @@ export class AzureFunction implements Component, Provisionable {
       await vscode.commands.executeCommand(
           'azureFunctions.deploy', azureFunctionPath, functionAppId);
       console.log(azureFunctionPath, functionAppId);
+      if (this.channel && deployPendding) {
+        clearInterval(deployPendding);
+        this.channel.appendLine('.');
+      }
       return true;
     } catch (error) {
+      if (this.channel && deployPendding) {
+        clearInterval(deployPendding);
+        this.channel.appendLine('.');
+      }
       throw error;
     }
   }

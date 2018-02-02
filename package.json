@@ -11,7 +11,6 @@
     "Other"
   ],
   "activationEvents": [
-    "workspaceContains:**/iotdevenv.config.json",
     "onCommand:iotdevenv.initializeProject",
     "onCommand:iotdevenv.azureProvision",
     "onCommand:iotdevenv.azureDeploy",
@@ -114,10 +113,10 @@
             "type": "string"
           },
           "IoTDev.eventHubConnectionPath" : {
-
+            "type": "string"
           },
           "IoTDev.functionAppId" : {
-
+            "type": "string"
           }
         }
       }

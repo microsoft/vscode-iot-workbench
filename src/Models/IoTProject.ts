@@ -18,7 +18,6 @@ import {IoTHub} from './IoTHub';
 const constants = {
   deviceDefaultFolderName: 'Device',
   functionDefaultFolderName: 'Function',
-  configFileName: 'iotdevenv.config.json',
   workspaceConfigFilePath: 'project.code-workspace'
 };
 
@@ -231,11 +230,6 @@ export class IoTProject {
       default:
         break;
     }
-
-    const configFilePath =
-        path.join(this.projectRootPath, constants.configFileName);
-    const jsonToSave = JSON.stringify(settings, null, 4);
-    fs.writeFileSync(configFilePath, jsonToSave);
 
     // Component level creation
     // we cannot use forEach here:
