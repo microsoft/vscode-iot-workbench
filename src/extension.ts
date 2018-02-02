@@ -116,7 +116,7 @@ export async function activate(context: vscode.ExtensionContext) {
       });
 
   const functionInit = vscode.commands.registerCommand(
-      'azureiotstudio.initializeFunction', async () => {
+      'iotdevenv.initializeFunction', async () => {
         try {
           const azureFunctionPath =
               vscode.workspace.getConfiguration('IoTDev').get<string>(
