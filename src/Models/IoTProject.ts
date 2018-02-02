@@ -18,7 +18,7 @@ import {IoTHub} from './IoTHub';
 const constants = {
   deviceDefaultFolderName: 'Device',
   functionDefaultFolderName: 'Function',
-  configFileName: 'iotstudio.config.json',
+  configFileName: 'iotdevenv.config.json',
   workspaceConfigFilePath: 'project.code-workspace'
 };
 

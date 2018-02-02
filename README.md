@@ -1,6 +1,6 @@
-# vscode-azure-iot-studio README
+# vscode-iot-dev-env README
 
-This is the README for your extension "vscode-azure-iot-studio". After writing up a brief description, we recommend including the following sections.
+This is the README for your extension "vscode-iot-dev-env". After writing up a brief description, we recommend including the following sections.
 
 ## Features
 
