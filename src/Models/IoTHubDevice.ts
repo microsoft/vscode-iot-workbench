@@ -28,8 +28,8 @@ export class IoTHubDevice {
     }
     const provisionIothubDeviceSelection: vscode.QuickPickItem[] = [
       {
-        label: 'Select an existed IoT Hub device',
-        description: 'Select an existed IoT Hub device',
+        label: 'Select an existing IoT Hub device',
+        description: 'Select an existing IoT Hub device',
         detail: 'select'
       },
       {
