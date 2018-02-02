@@ -23,27 +23,19 @@ export class ProjectInitializer {
       context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
     if (!vscode.workspace.rootPath) {
       // Create a folder and select it as the root path
+      const options: vscode.OpenDialogOptions = {
+          canSelectMany: false,
+          openLabel: 'Select folder',
+          canSelectFolders: true,
+          canSelectFiles: false
+      };
 
-      vscode.window
-          .showInformationMessage(
-              'Please select the root folder to initialize the project.')
-          .then(() => {
-            const options: vscode.OpenDialogOptions = {
-              canSelectMany: false,
-              openLabel: 'Select',
-              canSelectFolders: true,
-              canSelectFiles: false
-            };
-
-            vscode.window.showOpenDialog(options).then(folderUri => {
-              if (folderUri && folderUri[0]) {
-                console.log(`Selected folder: ${folderUri[0].fsPath}`);
-                const uri = vscode.Uri.parse(folderUri[0].fsPath);
-                vscode.commands.executeCommand('vscode.openFolder', uri);
-              }
-            });
-          });
-
+      vscode.window.showOpenDialog(options).then(folderUri => {
+        if (folderUri && folderUri[0]) {
+          const uri = vscode.Uri.parse(folderUri[0].fsPath);
+          vscode.commands.executeCommand('vscode.openFolder', uri);
+        }
+      });
       return;
     } else {
       // if the selected folder is not empty, ask user to select another one.
