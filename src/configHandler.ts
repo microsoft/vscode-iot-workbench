@@ -8,8 +8,8 @@ export class ConfigHandler {
       throw new Error('Key is empty.');
     }
 
-    return await vscode.workspace.getConfiguration('IoTStudio')
-        .update(key, value, vscode.ConfigurationTarget.Workspace);
+    return await vscode.workspace.getConfiguration('IoTDev').update(
+        key, value, vscode.ConfigurationTarget.Workspace);
   }
 
   static get<T>(key: string) {
@@ -17,6 +17,6 @@ export class ConfigHandler {
       throw new Error('Key is empty.');
     }
 
-    return vscode.workspace.getConfiguration('IoTStudio').get<T>(key);
+    return vscode.workspace.getConfiguration('IoTDev').get<T>(key);
   }
 }

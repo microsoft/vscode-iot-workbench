@@ -57,8 +57,8 @@ export async function activate(context: vscode.ExtensionContext) {
         }
       });
 
-  const azureProvision = vscode.commands.registerCommand(
-      'iotdevenv.azureProvision', async () => {
+  const azureProvision =
+      vscode.commands.registerCommand('iotdevenv.azureProvision', async () => {
         try {
           await azureOperator.Provision(context, outputChannel);
           vscode.window.showInformationMessage('Azure provision succeeded.');
@@ -67,8 +67,8 @@ export async function activate(context: vscode.ExtensionContext) {
         }
       });
 
-  const azureDeploy = vscode.commands.registerCommand(
-      'iotdevenv.azureDeploy', async () => {
+  const azureDeploy =
+      vscode.commands.registerCommand('iotdevenv.azureDeploy', async () => {
         try {
           await azureOperator.Deploy(context, outputChannel);
         } catch (error) {
@@ -76,8 +76,8 @@ export async function activate(context: vscode.ExtensionContext) {
         }
       });
 
-  const deviceCompile = vscode.commands.registerCommand(
-      'iotdevenv.deviceCompile', async () => {
+  const deviceCompile =
+      vscode.commands.registerCommand('iotdevenv.deviceCompile', async () => {
         try {
           await deviceOperator.compile(context, outputChannel);
         } catch (error) {
@@ -85,8 +85,8 @@ export async function activate(context: vscode.ExtensionContext) {
         }
       });
 
-  const deviceUpload = vscode.commands.registerCommand(
-      'iotdevenv.deviceUpload', async () => {
+  const deviceUpload =
+      vscode.commands.registerCommand('iotdevenv.deviceUpload', async () => {
         try {
           await deviceOperator.upload(context, outputChannel);
         } catch (error) {
@@ -119,8 +119,8 @@ export async function activate(context: vscode.ExtensionContext) {
       'azureiotstudio.initializeFunction', async () => {
         try {
           const azureFunctionPath =
-              vscode.workspace.getConfiguration('IoTStudio')
-                  .get<string>('FunctionPath');
+              vscode.workspace.getConfiguration('IoTDev').get<string>(
+                  'FunctionPath');
           if (!azureFunctionPath) {
             throw new Error('Get workspace configure file failed.');
           }

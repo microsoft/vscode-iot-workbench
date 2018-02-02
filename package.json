@@ -11,7 +11,7 @@
     "Other"
   ],
   "activationEvents": [
-    "workspaceContains:**/iotstudio.config.json",
+    "workspaceContains:**/iotdevenv.config.json",
     "onCommand:iotdevenv.initializeProject",
     "onCommand:iotdevenv.azureProvision",
     "onCommand:iotdevenv.azureDeploy",
@@ -74,7 +74,7 @@
         "category": "IoTDev"
       },
       {
-        "command": "azureiotstudio.initializeFunction",
+        "command": "iotdevenv.initializeFunction",
         "title": "Create Function",
         "category": "IoTDev"
       }

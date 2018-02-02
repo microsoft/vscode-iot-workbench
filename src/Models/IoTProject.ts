@@ -184,7 +184,7 @@ export class IoTProject {
       value: constants.deviceDefaultFolderName
     });
 
-    workspace.settings[`IoTStudio.${jsonConstants.DevicePath}`] = deviceDir;
+    workspace.settings[`IoTDev.${jsonConstants.DevicePath}`] = deviceDir;
 
     switch (templateType) {
       case ProjectTemplateType.basic:
@@ -195,7 +195,7 @@ export class IoTProject {
         // In setting file, create a place holder for iothub name
         settings.projectsettings.push(
             {name: jsonConstants.IoTHubName, value: ''});
-        workspace.settings[`IoTStudio.${jsonConstants.IoTHubName}`] = '';
+        workspace.settings[`IoTDev.${jsonConstants.IoTHubName}`] = '';
         this.componentList.push(iothub);
         break;
       }
@@ -220,8 +220,8 @@ export class IoTProject {
           value: constants.functionDefaultFolderName
         });
 
-        workspace.settings[`IoTStudio.${jsonConstants.IoTHubName}`] = '';
-        workspace.settings[`IoTStudio.${jsonConstants.FunctionPath}`] =
+        workspace.settings[`IoTDev.${jsonConstants.IoTHubName}`] = '';
+        workspace.settings[`IoTDev.${jsonConstants.FunctionPath}`] =
             functionDir;
 
         this.componentList.push(iothub);
