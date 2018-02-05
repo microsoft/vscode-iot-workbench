@@ -109,13 +109,13 @@
           "IoTDev.iothubDeviceConnectionString": {
             "type": "string"
           },
-          "IoTDev.eventHubConnectionString" : {
+          "IoTDev.eventHubConnectionString": {
             "type": "string"
           },
-          "IoTDev.eventHubConnectionPath" : {
+          "IoTDev.eventHubConnectionPath": {
             "type": "string"
           },
-          "IoTDev.functionAppId" : {
+          "IoTDev.functionAppId": {
             "type": "string"
           }
         }

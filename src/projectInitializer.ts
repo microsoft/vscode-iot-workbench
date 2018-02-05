@@ -22,9 +22,9 @@ export class ProjectInitializer {
   async InitializeProject(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
     let rootPath: string;
-    if (!vscode.workspace.rootPath) {
-      // Create a folder and select it as the root path
+    if (!vscode.workspace.workspaceFolders) {
 
+      // Create a folder and select it as the root path
       const options: vscode.OpenDialogOptions = {
         canSelectMany: false,
         openLabel: 'Select',
@@ -39,8 +39,14 @@ export class ProjectInitializer {
       } else {
         return;
       }
-    } else {
-      rootPath = vscode.workspace.rootPath as string;
+    } else if(vscode.workspace.workspaceFolders.length > 1) {
+      vscode.window.showInformationMessage(
+        'There are multiple workspaces in the project ' +
+        'Please provide an empty folder');
+      return;
+    }
+    else{
+      rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
     }
 
     // if the selected folder is not empty, ask user to select another one.
