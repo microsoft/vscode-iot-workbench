@@ -8,14 +8,17 @@ import request = require('request-promise');
 import unzip = require('unzip');
 import {setInterval, setTimeout} from 'timers';
 
+// const GALLERY_INDEX =
+//     'https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/gallery/example_gallery.json';
+
 const GALLERY_INDEX =
-    'https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/gallery/example_gallery.json';
+    'https://raw.githubusercontent.com/Sneezry/example-gallery/master/example_gallery.json';
 
 export class ExampleExplorer {
   private examleList: vscode.QuickPickItem[];
 
   private async getCurrentPath(): Promise<string|undefined> {
-    if (!vscode.workspace.rootPath) {
+    if (!vscode.workspace.workspaceFolders) {
       const options: vscode.OpenDialogOptions = {
         canSelectMany: false,
         openLabel: 'Select',
@@ -29,10 +32,9 @@ export class ExampleExplorer {
       }
 
       const uri = vscode.Uri.parse(folderUri[0].fsPath);
-      vscode.commands.executeCommand('vscode.openFolder', uri);
       return folderUri[0].fsPath;
     } else {
-      return vscode.workspace.rootPath;
+      return vscode.workspace.workspaceFolders[0].uri.fsPath;
     }
   }
 
@@ -164,8 +166,11 @@ export class ExampleExplorer {
         await this.downloadExamplePackage(context, channel, url, fsPath);
     if (res) {
       await vscode.commands.executeCommand(
-          'arduino.iotStudioInitialize', 'Device');
+          'vscode.openFolder',
+          vscode.Uri.file(path.join(fsPath, 'project.code-workspace')));
+      return true;
+    } else {
+      return false;
     }
-    return true;
   }
 }

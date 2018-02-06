@@ -70,7 +70,18 @@ export class IoTProject {
   }
 
   async load(): Promise<boolean> {
-    const deviceLocation = ConfigHandler.get<string>(jsonConstants.DevicePath);
+    if (!vscode.workspace.workspaceFolders) {
+      return false;
+    }
+
+    const devicePath = ConfigHandler.get<string>(jsonConstants.DevicePath);
+    if (!devicePath) {
+      return false;
+    }
+
+    const deviceLocation = path.join(
+        vscode.workspace.workspaceFolders[0].uri.fsPath, '..', devicePath);
+    console.log(deviceLocation);
 
     if (deviceLocation !== undefined) {
       const device = new AZ3166Device(this.extensionContext, deviceLocation);
@@ -84,8 +95,18 @@ export class IoTProject {
       this.componentList.push(iotHub);
     }
 
-    const functionLocation =
-        ConfigHandler.get<string>(jsonConstants.FunctionPath);
+    if (!vscode.workspace.workspaceFolders) {
+      return false;
+    }
+
+    const functionPath = ConfigHandler.get<string>(jsonConstants.FunctionPath);
+    if (!functionPath) {
+      return false;
+    }
+
+    const functionLocation = path.join(
+        vscode.workspace.workspaceFolders[0].uri.fsPath, '..', functionPath);
+    console.log(functionLocation);
 
     if (functionLocation !== undefined) {
       const functionApp = new AzureFunction(functionLocation, this.channel);
@@ -183,7 +204,8 @@ export class IoTProject {
       value: constants.deviceDefaultFolderName
     });
 
-    workspace.settings[`IoTDev.${jsonConstants.DevicePath}`] = deviceDir;
+    workspace.settings[`IoTDev.${jsonConstants.DevicePath}`] =
+        constants.deviceDefaultFolderName;
 
     switch (templateType) {
       case ProjectTemplateType.basic:
@@ -221,7 +243,7 @@ export class IoTProject {
 
         workspace.settings[`IoTDev.${jsonConstants.IoTHubName}`] = '';
         workspace.settings[`IoTDev.${jsonConstants.FunctionPath}`] =
-            functionDir;
+            constants.functionDefaultFolderName;
 
         this.componentList.push(iothub);
         this.componentList.push(azureFunction);

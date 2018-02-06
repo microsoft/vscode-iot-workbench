@@ -95,7 +95,7 @@ export class AZ3166Device implements Device {
       ignoreFocusOut: true
     };
 
-     await vscode.window.showInputBox(option).then(val => {
+    await vscode.window.showInputBox(option).then(val => {
       let sketchFileName: string = constants.defaultSketchFileName;
       if (val !== undefined) {
         const fileExt = val.split('.').pop();

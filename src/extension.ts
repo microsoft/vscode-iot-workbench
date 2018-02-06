@@ -114,15 +114,24 @@ export async function activate(context: vscode.ExtensionContext) {
   const functionInit = vscode.commands.registerCommand(
       'iotdevenv.initializeFunction', async () => {
         try {
+          if (!vscode.workspace.workspaceFolders) {
+            throw new Error('No workspace open.');
+          }
+
           const azureFunctionPath =
               vscode.workspace.getConfiguration('IoTDev').get<string>(
                   'FunctionPath');
           if (!azureFunctionPath) {
             throw new Error('Get workspace configure file failed.');
           }
-          console.log(azureFunctionPath);
+
+          const functionLocation = path.join(
+              vscode.workspace.workspaceFolders[0].uri.fsPath, '..',
+              azureFunctionPath);
+          console.log(functionLocation);
+
           const azureFunction =
-              new AzureFunction(azureFunctionPath, outputChannel);
+              new AzureFunction(functionLocation, outputChannel);
           const res = await azureFunction.initialize();
           vscode.window.showInformationMessage(
               res ? 'Function created.' : 'Function create failed.');
