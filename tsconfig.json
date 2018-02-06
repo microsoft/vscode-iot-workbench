@@ -8,7 +8,7 @@
         "es6"
     ],
     "sourceMap": true,
-    "rootDir": "src"
+    "rootDir": "."
   },
   "include": [
     "src/*.ts",
