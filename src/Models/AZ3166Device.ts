@@ -67,17 +67,16 @@ export class AZ3166Device implements Device {
 
   async load(): Promise<boolean> {
     try {
-      await vscode.commands.executeCommand(
-          'arduino.iotStudioInitialize', this.deviceFolder);
+      // await vscode.commands.executeCommand(
+      //     'arduino.iotStudioInitialize', this.deviceFolder);
       return true;
     } catch (error) {
       throw error;
     }
   }
 
-  create(): boolean {
-    const rootPath: string = vscode.workspace.rootPath as string;
-    const deviceFolderPath = path.join(rootPath, this.deviceFolder);
+  async create(): Promise<boolean> {
+    const deviceFolderPath = this.deviceFolder;
 
     if (!fs.existsSync(deviceFolderPath)) {
       throw new Error(`Device folder doesn't exist: ${deviceFolderPath}`);
@@ -96,7 +95,7 @@ export class AZ3166Device implements Device {
       ignoreFocusOut: true
     };
 
-    vscode.window.showInputBox(option).then(val => {
+    await vscode.window.showInputBox(option).then(val => {
       let sketchFileName: string = constants.defaultSketchFileName;
       if (val !== undefined) {
         const fileExt = val.split('.').pop();
@@ -137,9 +136,6 @@ export class AZ3166Device implements Device {
           const newFileUri: vscode.Uri = vscode.Uri.file(newSketchFilePath);
           vscode.window.showTextDocument(newFileUri);
         }
-
-        vscode.commands.executeCommand(
-            'arduino.iotStudioInitialize', this.deviceFolder);
       } catch (error) {
         throw new Error('Create arduino sketch file failed.');
       }
@@ -151,7 +147,7 @@ export class AZ3166Device implements Device {
   async compile(): Promise<boolean> {
     try {
       await vscode.commands.executeCommand(
-          'arduino.iotStudioInitialize', this.deviceFolder);
+          'arduino.iotStudioInitialize', path.basename(this.deviceFolder));
       await vscode.commands.executeCommand('arduino.verify');
       return true;
     } catch (error) {
@@ -162,7 +158,7 @@ export class AZ3166Device implements Device {
   async upload(): Promise<boolean> {
     try {
       await vscode.commands.executeCommand(
-          'arduino.iotStudioInitialize', this.deviceFolder);
+          'arduino.iotStudioInitialize', path.basename(this.deviceFolder));
       await vscode.commands.executeCommand('arduino.upload');
       return true;
     } catch (error) {
@@ -174,7 +170,7 @@ export class AZ3166Device implements Device {
     try {
       // Get IoT Hub device connection string from config
       let deviceConnectionString =
-          ConfigHandler.get(ConfigKey.iotHubDeviceConnectionString);
+          ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
 
       let hostName = '';
       let deviceId = '';
@@ -224,12 +220,19 @@ export class AZ3166Device implements Device {
         };
 
         deviceConnectionString = await vscode.window.showInputBox(option);
+        if (!deviceConnectionString) {
+          return false;
+        }
         if ((deviceConnectionString.indexOf('HostName') === -1) ||
             (deviceConnectionString.indexOf('DeviceId') === -1) ||
             (deviceConnectionString.indexOf('SharedAccessKey') === -1)) {
           throw new Error(
               'The format of the IoT Hub Device connection string is invalid.');
         }
+      }
+
+      if (!deviceConnectionString) {
+        return false;
       }
 
       console.log(deviceConnectionString);

@@ -1,1 +1,1 @@
-export interface Deployable { deploy(): boolean; }
+export interface Deployable { deploy(): Promise<boolean>; }

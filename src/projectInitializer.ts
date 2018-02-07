@@ -21,39 +21,39 @@ interface Template {
 export class ProjectInitializer {
   async InitializeProject(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
-    if (!vscode.workspace.rootPath) {
+    let rootPath: string;
+    if (!vscode.workspace.workspaceFolders) {
       // Create a folder and select it as the root path
+      const options: vscode.OpenDialogOptions = {
+        canSelectMany: false,
+        openLabel: 'Select',
+        canSelectFolders: true,
+        canSelectFiles: false
+      };
 
-      vscode.window
-          .showInformationMessage(
-              'Please select the root folder to initialize the project.')
-          .then(() => {
-            const options: vscode.OpenDialogOptions = {
-              canSelectMany: false,
-              openLabel: 'Select',
-              canSelectFolders: true,
-              canSelectFiles: false
-            };
-
-            vscode.window.showOpenDialog(options).then(folderUri => {
-              if (folderUri && folderUri[0]) {
-                console.log(`Selected folder: ${folderUri[0].fsPath}`);
-                const uri = vscode.Uri.parse(folderUri[0].fsPath);
-                vscode.commands.executeCommand('vscode.openFolder', uri);
-              }
-            });
-          });
-
-      return;
-    } else {
-      // if the selected folder is not empty, ask user to select another one.
-      const files = fs.readdirSync(vscode.workspace.rootPath);
-      if (files && files[0]) {
-        vscode.window.showInformationMessage(
-            'We need an empty folder to initialize the project. ' +
-            'Please provide an empty folder');
+      const folderUri = await vscode.window.showOpenDialog(options);
+      if (folderUri && folderUri[0]) {
+        console.log(`Selected folder: ${folderUri[0].fsPath}`);
+        rootPath = folderUri[0].fsPath;
+      } else {
         return;
       }
+    } else if (vscode.workspace.workspaceFolders.length > 1) {
+      vscode.window.showInformationMessage(
+          'There are multiple workspaces in the project ' +
+          'Please provide an empty folder');
+      return;
+    } else {
+      rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+    }
+
+    // if the selected folder is not empty, ask user to select another one.
+    const files = fs.readdirSync(rootPath);
+    if (files && files[0]) {
+      vscode.window.showInformationMessage(
+          'We need an empty folder to initialize the project. ' +
+          'Please provide an empty folder');
+      return;
     }
 
     // Initial project
@@ -110,10 +110,7 @@ export class ProjectInitializer {
                 break;
             }
             const project = new IoTProject(context, channel);
-
-            // vscode.workspace.rootPath can not be null
-            const rootPath: string = vscode.workspace.rootPath as string;
-            project.create(rootPath, templateType);
+            return await project.create(rootPath, templateType);
           } catch (error) {
             throw error;
           }

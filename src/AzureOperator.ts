@@ -9,17 +9,20 @@ import {IoTProject, ProjectTemplateType} from './Models/IoTProject';
 export class AzureOperator {
   async Provision(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
-    if (!vscode.workspace.rootPath) {
+    if (!vscode.workspace.workspaceFolders) {
       throw new Error(
           'Unable to find the root path, please open an IoT Development project');
     }
 
     const project = new IoTProject(context, channel);
-    const rootPath: string = vscode.workspace.rootPath as string;
-    project.load(rootPath);
+    project.load();
     await project.provision();
   }
 
   async Deploy(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel) {}
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
+    const project = new IoTProject(context, channel);
+    project.load();
+    await project.deploy();
+  }
 }

@@ -11,10 +11,7 @@ import {IoTProject} from './Models/IoTProject';
 import {ExceptionHelper} from './exceptionHelper';
 import {setTimeout} from 'timers';
 import {ExampleExplorer} from './exampleExplorer';
-
-const constants = {
-  configFileName: 'iotdevenv.config.json'
-};
+import {AzureFunction} from './Models/AzureFunction';
 
 
 // this method is called when your extension is activated
@@ -30,17 +27,11 @@ export async function activate(context: vscode.ExtensionContext) {
       vscode.window.createOutputChannel('Azure IoT Dev');
 
   const iotProject = new IoTProject(context, outputChannel);
-  if (vscode.workspace.rootPath) {
-    const configFilePath =
-        path.join(vscode.workspace.rootPath, constants.configFileName);
-
-    // Try to load the project only when the config file exists
-    if (fs.existsSync(configFilePath)) {
-      try {
-        await iotProject.load(vscode.workspace.rootPath);
-      } catch (error) {
-        // do nothing as we are not sure whether the project is initialized.
-      }
+  if (vscode.workspace.workspaceFolders) {
+    try {
+      await iotProject.load();
+    } catch (error) {
+      // do nothing as we are not sure whether the project is initialized.
     }
   }
 
@@ -62,8 +53,8 @@ export async function activate(context: vscode.ExtensionContext) {
         }
       });
 
-  const azureProvision = vscode.commands.registerCommand(
-      'iotdevenv.azureProvision', async () => {
+  const azureProvision =
+      vscode.commands.registerCommand('iotdevenv.azureProvision', async () => {
         try {
           await azureOperator.Provision(context, outputChannel);
           vscode.window.showInformationMessage('Azure provision succeeded.');
@@ -72,8 +63,8 @@ export async function activate(context: vscode.ExtensionContext) {
         }
       });
 
-  const azureDeploy = vscode.commands.registerCommand(
-      'iotdevenv.azureDeploy', async () => {
+  const azureDeploy =
+      vscode.commands.registerCommand('iotdevenv.azureDeploy', async () => {
         try {
           await azureOperator.Deploy(context, outputChannel);
         } catch (error) {
@@ -81,8 +72,8 @@ export async function activate(context: vscode.ExtensionContext) {
         }
       });
 
-  const deviceCompile = vscode.commands.registerCommand(
-      'iotdevenv.deviceCompile', async () => {
+  const deviceCompile =
+      vscode.commands.registerCommand('iotdevenv.deviceCompile', async () => {
         try {
           await deviceOperator.compile(context, outputChannel);
         } catch (error) {
@@ -90,8 +81,8 @@ export async function activate(context: vscode.ExtensionContext) {
         }
       });
 
-  const deviceUpload = vscode.commands.registerCommand(
-      'iotdevenv.deviceUpload', async () => {
+  const deviceUpload =
+      vscode.commands.registerCommand('iotdevenv.deviceUpload', async () => {
         try {
           await deviceOperator.upload(context, outputChannel);
         } catch (error) {
@@ -120,6 +111,35 @@ export async function activate(context: vscode.ExtensionContext) {
         }
       });
 
+  const functionInit = vscode.commands.registerCommand(
+      'iotdevenv.initializeFunction', async () => {
+        try {
+          if (!vscode.workspace.workspaceFolders) {
+            throw new Error('No workspace open.');
+          }
+
+          const azureFunctionPath =
+              vscode.workspace.getConfiguration('IoTDev').get<string>(
+                  'FunctionPath');
+          if (!azureFunctionPath) {
+            throw new Error('Get workspace configure file failed.');
+          }
+
+          const functionLocation = path.join(
+              vscode.workspace.workspaceFolders[0].uri.fsPath, '..',
+              azureFunctionPath);
+          console.log(functionLocation);
+
+          const azureFunction =
+              new AzureFunction(functionLocation, outputChannel);
+          const res = await azureFunction.initialize();
+          vscode.window.showInformationMessage(
+              res ? 'Function created.' : 'Function create failed.');
+        } catch (error) {
+          ExceptionHelper.logError(outputChannel, error, true);
+        }
+      });
+
   context.subscriptions.push(projectInit);
   context.subscriptions.push(azureProvision);
   context.subscriptions.push(azureDeploy);
@@ -127,6 +147,7 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(deviceUpload);
   context.subscriptions.push(deviceConnectionStringConfig);
   context.subscriptions.push(examples);
+  context.subscriptions.push(functionInit);
 }
 
 // this method is called when your extension is deactivated

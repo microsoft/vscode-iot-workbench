@@ -11,16 +11,16 @@
     "Other"
   ],
   "activationEvents": [
-    "workspaceContains:**/iotdevenv.config.json",
     "onCommand:iotdevenv.initializeProject",
     "onCommand:iotdevenv.azureProvision",
     "onCommand:iotdevenv.azureDeploy",
     "onCommand:iotdevenv.deviceCompile",
     "onCommand:iotdevenv.deviceUpload",
     "onCommand:iotdevenv.deviceConnectionStringConfig",
-    "onCommand:iotdevenv.examples"
+    "onCommand:iotdevenv.examples",
+    "onCommand:iotdevenv.initializeFunction"
   ],
-  "main": "./out/extension",
+  "main": "./out/src/extension",
   "contributes": {
     "snippets": [
       {
@@ -71,6 +71,54 @@
         "command": "iotdevenv.examples",
         "title": "Examples",
         "category": "IoTDev"
+      },
+      {
+        "command": "iotdevenv.initializeFunction",
+        "title": "Create Function",
+        "category": "IoTDev"
+      }
+    ],
+    "configuration": [
+      {
+        "title": "Azure Functions Configuration",
+        "properties": {
+          "azureFunctions.projectRuntime": {
+            "scope": "resource"
+          },
+          "azureFunctions.projectLanguage": {
+            "scope": "resource"
+          },
+          "azureFunctions.templateFilter": {
+            "scope": "resource"
+          },
+          "azureFunctions.deploySubpath": {
+            "scope": "resource"
+          },
+          "IoTDev.DevicePath": {
+            "type": "string"
+          },
+          "IoTDev.IoTHubName": {
+            "type": "string"
+          },
+          "IoTDev.FunctionPath": {
+            "type": "string"
+          },
+          "IoTDev.iothubConnectionString": {
+            "type": "string"
+          },
+          "IoTDev.iothubDeviceConnectionString": {
+            "type": "string"
+          },
+          "IoTDev.eventHubConnectionString": {
+            "type": "string"
+          },
+          "IoTDev.eventHubConnectionPath": {
+            "type": "string"
+          },
+          "IoTDev.functionAppId": {
+            "type": "string"
+          }
+        }
       }
     ]
   },
@@ -99,10 +147,13 @@
     "vscode": "^1.1.6"
   },
   "dependencies": {
+    "azure-arm-resource": "^3.1.0-preview",
+    "azure-arm-website": "^3.0.0-preview",
     "azure-iothub": "^1.2.3",
     "eventemitter2": "^5.0.0",
     "fs-plus": "^3.0.1",
     "lodash": "^4.17.4",
+    "ms-rest": "^2.3.0",
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
     "unzip": "^0.1.11"
