@@ -20,7 +20,7 @@
     "onCommand:iotdevenv.examples",
     "onCommand:iotdevenv.initializeFunction"
   ],
-  "main": "./out/extension",
+  "main": "./out/src/extension",
   "contributes": {
     "snippets": [
       {

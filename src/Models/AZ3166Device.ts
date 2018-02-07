@@ -136,9 +136,6 @@ export class AZ3166Device implements Device {
           const newFileUri: vscode.Uri = vscode.Uri.file(newSketchFilePath);
           vscode.window.showTextDocument(newFileUri);
         }
-
-        vscode.commands.executeCommand(
-            'arduino.iotStudioInitialize', this.deviceFolder);
       } catch (error) {
         throw new Error('Create arduino sketch file failed.');
       }
@@ -150,7 +147,7 @@ export class AZ3166Device implements Device {
   async compile(): Promise<boolean> {
     try {
       await vscode.commands.executeCommand(
-          'arduino.iotStudioInitialize', this.deviceFolder);
+          'arduino.iotStudioInitialize', path.basename(this.deviceFolder));
       await vscode.commands.executeCommand('arduino.verify');
       return true;
     } catch (error) {
@@ -161,7 +158,7 @@ export class AZ3166Device implements Device {
   async upload(): Promise<boolean> {
     try {
       await vscode.commands.executeCommand(
-          'arduino.iotStudioInitialize', this.deviceFolder);
+          'arduino.iotStudioInitialize', path.basename(this.deviceFolder));
       await vscode.commands.executeCommand('arduino.upload');
       return true;
     } catch (error) {
