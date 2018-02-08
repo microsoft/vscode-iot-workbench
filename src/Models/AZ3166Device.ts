@@ -28,9 +28,13 @@ const constants = {
   arduinoJsonFileName: 'arduino.json',
   boardInfo: 'AZ3166:stm32f4:MXCHIP_AZ3166',
   uploadMethod: 'upload_method=OpenOCDMethod',
-  resourcesFolderName: 'resources',
-  sketchTemplateFileName: 'emptySketch.ino'
+  resourcesFolderName: 'resources'
 };
+
+export enum AZ3166SketchType {
+  emptySketch = 1,
+  sendTemrature
+}
 
 export class AZ3166Device implements Device {
   // tslint:disable-next-line: no-any
@@ -49,12 +53,16 @@ export class AZ3166Device implements Device {
   private componentType: ComponentType;
   private deviceFolder: string;
   private extensionContext: vscode.ExtensionContext;
+  private sketchType: AZ3166SketchType;
 
-  constructor(context: vscode.ExtensionContext, devicePath: string) {
+  constructor(
+      context: vscode.ExtensionContext, devicePath: string,
+      sketchType: AZ3166SketchType) {
     this.deviceType = DeviceType.MXChip_AZ3166;
     this.componentType = ComponentType.Device;
     this.deviceFolder = devicePath;
     this.extensionContext = context;
+    this.sketchType = sketchType;
   }
 
   getDeviceType(): DeviceType {
@@ -124,7 +132,8 @@ export class AZ3166Device implements Device {
       // Create an empty arduino sketch
       const sketchTemplateFilePath =
           this.extensionContext.asAbsolutePath(path.join(
-              constants.resourcesFolderName, constants.sketchTemplateFileName));
+              constants.resourcesFolderName,
+              AZ3166SketchType[this.sketchType] + '.ino'));
       const newSketchFilePath = path.join(deviceFolderPath, sketchFileName);
 
       try {

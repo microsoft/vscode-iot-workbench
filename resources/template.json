@@ -14,6 +14,11 @@
             "description": "Device data processing",
             "detail": "Process device data by Azure Function",
             "label": "function"
+        },
+        {
+            "description": "Send data to IoT Hub",
+            "detail": "Send temperature sensor data to IoT Hub",
+            "label": "temrature"
         }
     ]
 }

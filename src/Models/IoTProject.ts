@@ -1,10 +1,11 @@
+import {PreconditionFailedError} from 'azure-iot-common/lib/errors';
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 
-import {AZ3166Device} from './AZ3166Device';
+import {AZ3166Device, AZ3166SketchType} from './AZ3166Device';
 import {AzureFunction} from './AzureFunction';
 import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
@@ -35,7 +36,8 @@ interface ProjectSetting {
 export enum ProjectTemplateType {
   basic = 1,
   IotHub,
-  Function
+  Function,
+  Temperature
 }
 
 export class IoTProject {
@@ -81,10 +83,13 @@ export class IoTProject {
 
     const deviceLocation = path.join(
         vscode.workspace.workspaceFolders[0].uri.fsPath, '..', devicePath);
-    console.log(deviceLocation);
 
     if (deviceLocation !== undefined) {
-      const device = new AZ3166Device(this.extensionContext, deviceLocation);
+      // we load an existing project, so AZ3166SketchType is useless here which
+      // is used for project provision use AZ3166SketchType.emptySketch as a
+      // placeholder
+      const device = new AZ3166Device(
+          this.extensionContext, deviceLocation, AZ3166SketchType.emptySketch);
       this.componentList.push(device);
     }
 
@@ -106,7 +111,6 @@ export class IoTProject {
 
     const functionLocation = path.join(
         vscode.workspace.workspaceFolders[0].uri.fsPath, '..', functionPath);
-    console.log(functionLocation);
 
     if (functionLocation !== undefined) {
       const functionApp = new AzureFunction(functionLocation, this.channel);
@@ -193,8 +197,22 @@ export class IoTProject {
     }
 
     workspace.folders.push({path: constants.deviceDefaultFolderName});
+    let sketchType: AZ3166SketchType;
+    switch (templateType) {
+      case ProjectTemplateType.basic:
+      case ProjectTemplateType.IotHub:
+      case ProjectTemplateType.Function:
+        sketchType = AZ3166SketchType.emptySketch;
+        break;
+      case ProjectTemplateType.Temperature:
+        sketchType = AZ3166SketchType.sendTemrature;
+        break;
+      default:
+        throw new Error('Invalid template.');
+    }
 
-    const device = new AZ3166Device(this.extensionContext, deviceDir);
+    const device =
+        new AZ3166Device(this.extensionContext, deviceDir, sketchType);
     this.componentList.push(device);
 
     // TODO: Consider naming for project level settings.

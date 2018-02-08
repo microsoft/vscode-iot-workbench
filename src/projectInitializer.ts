@@ -105,6 +105,9 @@ export class ProjectInitializer {
               case 'function':
                 templateType = ProjectTemplateType.Function;
                 break;
+              case 'temrature':
+                templateType = ProjectTemplateType.Temperature;
+                break;
               default:
                 // Throw exception;
                 break;
