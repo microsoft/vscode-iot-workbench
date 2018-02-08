@@ -229,7 +229,8 @@ export class IoTProject {
       case ProjectTemplateType.basic:
         // Save data to configFile
         break;
-      case ProjectTemplateType.IotHub: {
+      case ProjectTemplateType.IotHub:
+      case ProjectTemplateType.Temperature: {
         const iothub = new IoTHub(this.channel);
         // In setting file, create a place holder for iothub name
         settings.projectsettings.push(
