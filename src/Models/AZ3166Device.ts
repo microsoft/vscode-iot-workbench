@@ -67,8 +67,6 @@ export class AZ3166Device implements Device {
 
   async load(): Promise<boolean> {
     try {
-      // await vscode.commands.executeCommand(
-      //     'arduino.iotStudioInitialize', this.deviceFolder);
       return true;
     } catch (error) {
       throw error;
@@ -146,8 +144,6 @@ export class AZ3166Device implements Device {
 
   async compile(): Promise<boolean> {
     try {
-      await vscode.commands.executeCommand(
-          'arduino.iotStudioInitialize', path.basename(this.deviceFolder));
       await vscode.commands.executeCommand('arduino.verify');
       return true;
     } catch (error) {
@@ -157,8 +153,6 @@ export class AZ3166Device implements Device {
 
   async upload(): Promise<boolean> {
     try {
-      await vscode.commands.executeCommand(
-          'arduino.iotStudioInitialize', path.basename(this.deviceFolder));
       await vscode.commands.executeCommand('arduino.upload');
       return true;
     } catch (error) {
