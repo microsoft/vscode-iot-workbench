@@ -105,6 +105,8 @@ export class IoTHub implements Component, Provisionable {
           ConfigKey.eventHubConnectionPath, eventHubConnectionPath);
       const device = new IoTHubDevice(this.channel);
       if (await device.provision()) {
+        await vscode.window.showInformationMessage(
+            'IoT Hub provision completed.');
         return true;
       } else {
         const error = new Error('Device provision failed.');
