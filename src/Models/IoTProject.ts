@@ -1,4 +1,3 @@
-import {PreconditionFailedError} from 'azure-iot-common/lib/errors';
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
@@ -85,11 +84,7 @@ export class IoTProject {
         vscode.workspace.workspaceFolders[0].uri.fsPath, '..', devicePath);
 
     if (deviceLocation !== undefined) {
-      // we load an existing project, so AZ3166SketchType is useless here which
-      // is used for project provision use AZ3166SketchType.emptySketch as a
-      // placeholder
-      const device = new AZ3166Device(
-          this.extensionContext, deviceLocation, AZ3166SketchType.emptySketch);
+      const device = new AZ3166Device(this.extensionContext, deviceLocation);
       this.componentList.push(device);
     }
 

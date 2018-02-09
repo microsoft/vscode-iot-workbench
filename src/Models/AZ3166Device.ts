@@ -57,12 +57,14 @@ export class AZ3166Device implements Device {
 
   constructor(
       context: vscode.ExtensionContext, devicePath: string,
-      sketchType: AZ3166SketchType) {
+      sketchType?: AZ3166SketchType) {
     this.deviceType = DeviceType.MXChip_AZ3166;
     this.componentType = ComponentType.Device;
     this.deviceFolder = devicePath;
     this.extensionContext = context;
-    this.sketchType = sketchType;
+    if (sketchType) {
+      this.sketchType = sketchType;
+    }
   }
 
   getDeviceType(): DeviceType {
@@ -82,6 +84,9 @@ export class AZ3166Device implements Device {
   }
 
   async create(): Promise<boolean> {
+    if (!this.sketchType) {
+      throw new Error('No sketch type found.');
+    }
     const deviceFolderPath = this.deviceFolder;
 
     if (!fs.existsSync(deviceFolderPath)) {
