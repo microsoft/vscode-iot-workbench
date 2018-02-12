@@ -32,11 +32,6 @@ const constants = {
   resourcesFolderName: 'resources'
 };
 
-export enum AZ3166SketchType {
-  emptySketch = 1,
-  sendTemrature
-}
-
 export class AZ3166Device implements Device {
   // tslint:disable-next-line: no-any
   static get serialport(): any {
