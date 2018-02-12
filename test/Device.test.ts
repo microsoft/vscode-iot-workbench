@@ -12,7 +12,7 @@ suite('IoT Dev Env: AZ3166Device', () => {
   // tslint:disable-next-line: only-arrow-functions
   test('property of AZ3166 device should be set correctly', function(done) {
     const context = new TestExtensionContext();
-    const device = new AZ3166Device(context, '', AZ3166SketchType.emptySketch);
+    const device = new AZ3166Device(context, '','emptySketch.ino');
     assert.equal(device.getDeviceType(), DeviceType.MXChip_AZ3166);
     assert.equal(device.getComponentType(), ComponentType.Device);
     done();

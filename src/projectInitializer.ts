@@ -4,7 +4,8 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-plus';
 import * as path from 'path';
-import {IoTProject, ProjectTemplateType} from './Models/IoTProject';
+import {IoTProject} from './Models/IoTProject';
+import {ProjectTemplate, ProjectTemplateType} from './Models/Interfaces/ProjectTemplate';
 
 
 const constants = {
@@ -12,11 +13,6 @@ const constants = {
   resourceFolderName: 'resources'
 };
 
-interface Template {
-  label: string;
-  detail: string;
-  description: string;
-}
 
 export class ProjectInitializer {
   async InitializeProject(
@@ -75,7 +71,7 @@ export class ProjectInitializer {
 
             const projectTemplateList: vscode.QuickPickItem[] = [];
 
-            templateJson.templates.forEach((element: Template) => {
+            templateJson.templates.forEach((element: ProjectTemplate) => {
               projectTemplateList.push({
                 label: element.label,
                 description: element.description,
@@ -94,26 +90,18 @@ export class ProjectInitializer {
             if (!selection) {
               return;
             }
-            let templateType = ProjectTemplateType.basic;
-            switch (selection.label) {
-              case 'basic':
-                templateType = ProjectTemplateType.basic;
-                break;
-              case 'iothub':
-                templateType = ProjectTemplateType.IotHub;
-                break;
-              case 'function':
-                templateType = ProjectTemplateType.Function;
-                break;
-              case 'temrature':
-                templateType = ProjectTemplateType.Temperature;
-                break;
-              default:
-                // Throw exception;
-                break;
+
+            const result = templateJson.templates.filter(
+              function(template: ProjectTemplate){ 
+                return template.label === selection.label;
+              });
+
+            if (!result) {
+              return;
             }
+
             const project = new IoTProject(context, channel);
-            return await project.create(rootPath, templateType);
+            return await project.create(rootPath, result[0]);
           } catch (error) {
             throw error;
           }

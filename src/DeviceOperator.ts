@@ -4,7 +4,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-plus';
 import * as path from 'path';
-import {IoTProject, ProjectTemplateType} from './Models/IoTProject';
+import {IoTProject} from './Models/IoTProject';
 
 export class DeviceOperator {
   async compile(
