@@ -140,8 +140,10 @@
     "@types/lodash": "^4.14.91",
     "@types/mocha": "^2.2.42",
     "@types/node": "^7.0.43",
+    "@types/opn": "3.0.28",
     "@types/request-promise": "^4.1.39",
     "@types/unzip": "^0.1.0",
+    "@types/winreg": "^1.2.30",
     "gts": "^0.5.1",
     "typescript": "^2.6.2",
     "vscode": "^1.1.6"
@@ -156,6 +158,8 @@
     "ms-rest": "^2.3.0",
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
-    "unzip": "^0.1.11"
+    "unzip": "^0.1.11",
+    "winreg": "^1.2.3",
+    "opn": "5.1.0"
   }
 }
