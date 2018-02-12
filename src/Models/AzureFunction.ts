@@ -159,6 +159,8 @@ export class AzureFunction implements Component, Provisionable {
         await client.webApps.updateApplicationSettings(
             resourceGroup, siteName, appSettings);
 
+        await vscode.window.showInformationMessage(
+            'Azure function app provision completed.');
         return true;
       } else {
         throw new Error('Provision Azure Function failed.');
