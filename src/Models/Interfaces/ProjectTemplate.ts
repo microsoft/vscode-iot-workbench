@@ -10,5 +10,5 @@ export interface ProjectTemplate {
   detail: string;
   description: string;
   type: number;
-  sketch: string
+  sketch: string;
 }

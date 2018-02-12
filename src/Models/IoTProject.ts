@@ -10,11 +10,11 @@ import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Deployable} from './Interfaces/Deployable';
 import {Device, DeviceType} from './Interfaces/Device';
+import {ProjectTemplate, ProjectTemplateType} from './Interfaces/ProjectTemplate';
 import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
 import {Workspace} from './Interfaces/Workspace';
 import {IoTHub} from './IoTHub';
-import {ProjectTemplate, ProjectTemplateType} from './Interfaces/ProjectTemplate';
 
 
 const constants = {
@@ -188,8 +188,8 @@ export class IoTProject {
 
     workspace.folders.push({path: constants.deviceDefaultFolderName});
 
-    const device =
-        new AZ3166Device(this.extensionContext, deviceDir, projectTemplateItem.sketch);
+    const device = new AZ3166Device(
+        this.extensionContext, deviceDir, projectTemplateItem.sketch);
     this.componentList.push(device);
 
     // TODO: Consider naming for project level settings.

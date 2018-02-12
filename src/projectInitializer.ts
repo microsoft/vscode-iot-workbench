@@ -91,10 +91,10 @@ export class ProjectInitializer {
               return;
             }
 
-            const result = templateJson.templates.filter(
-              function(template: ProjectTemplate){ 
-                return template.label === selection.label;
-              });
+            const result =
+                templateJson.templates.filter((template: ProjectTemplate) => {
+                  return template.label === selection.label;
+                });
 
             if (!result) {
               return;

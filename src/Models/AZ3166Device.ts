@@ -9,8 +9,8 @@ import {TextEditorCursorStyle} from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, DeviceConfig} from '../constants';
-import {IoTProject} from '../Models/IoTProject';
 import {ProjectTemplate, ProjectTemplateType} from '../Models/Interfaces/ProjectTemplate';
+import {IoTProject} from '../Models/IoTProject';
 import {delay} from '../utils';
 
 import {Component, ComponentType} from './Interfaces/Component';
@@ -58,7 +58,7 @@ export class AZ3166Device implements Device {
     this.componentType = ComponentType.Device;
     this.deviceFolder = devicePath;
     this.extensionContext = context;
-    if(sketchName){
+    if (sketchName) {
       this.sketchName = sketchName;
     }
   }
@@ -131,10 +131,8 @@ export class AZ3166Device implements Device {
       }
 
       // Create an empty arduino sketch
-      const sketchTemplateFilePath =
-          this.extensionContext.asAbsolutePath(path.join(
-              constants.resourcesFolderName,
-              this.sketchName));
+      const sketchTemplateFilePath = this.extensionContext.asAbsolutePath(
+          path.join(constants.resourcesFolderName, this.sketchName));
       const newSketchFilePath = path.join(deviceFolderPath, sketchFileName);
 
       try {
