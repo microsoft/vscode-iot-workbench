@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 
-import {AZ3166Device, AZ3166SketchType} from './AZ3166Device';
+import {AZ3166Device} from './AZ3166Device';
 import {AzureFunction} from './AzureFunction';
 import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
@@ -202,10 +202,10 @@ export class IoTProject {
     workspace.settings[`IoTDev.${jsonConstants.DevicePath}`] =
         constants.deviceDefaultFolderName;
 
-    const type: ProjectTemplateType = projectTemplateItem.type;
+    var type: ProjectTemplateType = (<any>ProjectTemplateType)[projectTemplateItem.type];
 
     switch (type) {
-      case ProjectTemplateType.basic:
+      case ProjectTemplateType.Basic:
         // Save data to configFile
         break;
       case ProjectTemplateType.IotHub: {
