@@ -33,7 +33,10 @@ const constants = {
   arduinoJsonFileName: 'arduino.json',
   boardInfo: 'AZ3166:stm32f4:MXCHIP_AZ3166',
   uploadMethod: 'upload_method=OpenOCDMethod',
-  resourcesFolderName: 'resources'
+  resourcesFolderName: 'resources',
+  cppPropertiesFileName: 'c_cpp_properties.json',
+  cppPropertiesFileNameMac: 'c_cpp_properties_macos.json',
+  cppPropertiesFileNameWin: 'c_cpp_properties_win32.json',
 };
 
 export class AZ3166Device implements Device {
@@ -113,7 +116,6 @@ export class AZ3166Device implements Device {
         if (fileExt !== 'ino') {
           val = val + '.ino';
         }
-
         sketchFileName = val;
       }
 
@@ -134,6 +136,34 @@ export class AZ3166Device implements Device {
             `Device: create arduino config file failed: ${error.message}`);
       }
 
+      // Create c_cpp_properties.json file
+      const cppPropertiesFilePath =
+          path.join(vscodeFolderPath, constants.cppPropertiesFileName);
+
+      try {
+        const plat = os.platform();
+        let osPropertiesFilePath = '';
+        if (plat === 'win32') {
+          osPropertiesFilePath = this.extensionContext.asAbsolutePath(path.join(
+              constants.resourcesFolderName,
+              constants.cppPropertiesFileNameWin));
+        }
+        // TODO: Let's use the same file for Linux and MacOS for now. Need to
+        // revisit this part.
+        else {
+          osPropertiesFilePath = this.extensionContext.asAbsolutePath(path.join(
+              constants.resourcesFolderName,
+              constants.cppPropertiesFileNameMac));
+        }
+
+        const propertiesContent =
+            fs.readFileSync(osPropertiesFilePath).toString();
+        fs.writeFileSync(cppPropertiesFilePath, propertiesContent);
+
+      } catch (error) {
+        throw new Error(`Create cpp properties file failed: ${error.message}`);
+      }
+
       // Create an empty arduino sketch
       const sketchTemplateFilePath = this.extensionContext.asAbsolutePath(
           path.join(constants.resourcesFolderName, this.sketchName));
@@ -147,7 +177,7 @@ export class AZ3166Device implements Device {
           vscode.window.showTextDocument(newFileUri);
         }
       } catch (error) {
-        throw new Error('Create arduino sketch file failed.');
+        throw new Error(`Create arduino sketch file failed: ${error.message}`);
       }
     });
 
