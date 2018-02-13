@@ -142,24 +142,31 @@ export class AZ3166Device implements Device {
 
       try {
         const plat = os.platform();
-        let osPropertiesFilePath = '';
+
         if (plat === 'win32') {
-          osPropertiesFilePath = this.extensionContext.asAbsolutePath(path.join(
-              constants.resourcesFolderName,
-              constants.cppPropertiesFileNameWin));
+          const propertiesFilePathWin32 =
+              this.extensionContext.asAbsolutePath(path.join(
+                  constants.resourcesFolderName,
+                  constants.cppPropertiesFileNameWin));
+          const propertiesContentWin32 =
+              fs.readFileSync(propertiesFilePathWin32).toString();
+          const pattern = /{ROOTPATH}/gi;
+          const localAppData: string = process.env.LOCALAPPDATA;
+          const replaceStr = propertiesContentWin32.replace(
+              pattern, localAppData.replace(/\\/g, '\\\\'));
+          fs.writeFileSync(cppPropertiesFilePath, replaceStr);
         }
         // TODO: Let's use the same file for Linux and MacOS for now. Need to
         // revisit this part.
         else {
-          osPropertiesFilePath = this.extensionContext.asAbsolutePath(path.join(
-              constants.resourcesFolderName,
-              constants.cppPropertiesFileNameMac));
+          const propertiesFilePathMac =
+              this.extensionContext.asAbsolutePath(path.join(
+                  constants.resourcesFolderName,
+                  constants.cppPropertiesFileNameMac));
+          const propertiesContentMac =
+              fs.readFileSync(propertiesFilePathMac).toString();
+          fs.writeFileSync(cppPropertiesFilePath, propertiesContentMac);
         }
-
-        const propertiesContent =
-            fs.readFileSync(osPropertiesFilePath).toString();
-        fs.writeFileSync(cppPropertiesFilePath, propertiesContent);
-
       } catch (error) {
         throw new Error(`Create cpp properties file failed: ${error.message}`);
       }

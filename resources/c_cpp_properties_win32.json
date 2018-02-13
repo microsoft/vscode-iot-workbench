@@ -3,12 +3,12 @@
         {
             "name": "Win32",
             "includePath": [
-                "C:\\Users\\renhel\\AppData\\Local\\Arduino15\\packages\\AZ3166\\hardware\\stm32f4"
+                "{ROOTPATH}\\Arduino15\\packages\\AZ3166\\hardware\\stm32f4"
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": false,
                 "path": [
-                    "C:\\Users\\renhel\\AppData\\Local\\Arduino15\\packages\\AZ3166\\hardware\\stm32f4"
+                    "{ROOTPATH}\\Arduino15\\packages\\AZ3166\\hardware\\stm32f4"
                 ]
             },
             "intelliSenseMode": "msvc-x64"
