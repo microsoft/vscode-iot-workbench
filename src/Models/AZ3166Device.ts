@@ -1,26 +1,24 @@
 import {port} from '_debugger';
 import * as fs from 'fs-plus';
 import * as _ from 'lodash';
+import * as opn from 'opn';
+import * as os from 'os';
 import * as path from 'path';
 import {resolve} from 'url';
 import {error} from 'util';
-import * as os from 'os';
 import * as vscode from 'vscode';
-import * as WinReg from "winreg";
-import * as opn from 'opn';
+import * as WinReg from 'winreg';
 
-import {TextEditorCursorStyle, Uri} from 'vscode';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, DeviceConfig} from '../constants';
+import {DialogResponses} from '../DialogResponses';
 import {ProjectTemplate, ProjectTemplateType} from '../Models/Interfaces/ProjectTemplate';
 import {IoTProject} from '../Models/IoTProject';
+import {getRegistryValues} from '../Utility';
 import {delay} from '../utils';
+
 import {Component, ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
-import { getRegistryValues } from "../Utility";
-import { DialogResponses } from '../DialogResponses';
-import { platform } from 'os';
-
 
 interface SerialPortInfo {
   comName: string;
@@ -168,12 +166,17 @@ export class AZ3166Device implements Device {
   async upload(): Promise<boolean> {
     try {
       const isStlinkInstalled = await this.stlinkDriverInstalled();
-      if(!isStlinkInstalled) {
-        const message = 'The ST-LINK driver for DevKit is not installed. Install now?';
-        const result: vscode.MessageItem | undefined = await vscode.window.showWarningMessage(message, DialogResponses.yes, DialogResponses.skipForNow, DialogResponses.cancel);
+      if (!isStlinkInstalled) {
+        const message =
+            'The ST-LINK driver for DevKit is not installed. Install now?';
+        const result: vscode.MessageItem|undefined =
+            await vscode.window.showWarningMessage(
+                message, DialogResponses.yes, DialogResponses.skipForNow,
+                DialogResponses.cancel);
         if (result === DialogResponses.yes) {
           // Open the download page
-          const installUri = "http://www.st.com/en/development-tools/stsw-link009.html";
+          const installUri =
+              'http://www.st.com/en/development-tools/stsw-link009.html';
           opn(installUri);
           return true;
         } else if (result !== DialogResponses.cancel) {
@@ -472,24 +475,23 @@ export class AZ3166Device implements Device {
 
   private async stlinkDriverInstalled() {
     const plat = os.platform();
-    if (plat === "win32") {
+    if (plat === 'win32') {
       try {
         // The STlink driver would write to the following registry.
-        const pathString = await getRegistryValues(WinReg.HKLM,
-          "\\SYSTEM\\ControlSet001\\Control\\Class\\{88bae032-5a81-49f0-bc3d-a4ff138216d6}",
-          "Class");
+        const pathString = await getRegistryValues(
+            WinReg.HKLM,
+            '\\SYSTEM\\ControlSet001\\Control\\Class\\{88bae032-5a81-49f0-bc3d-a4ff138216d6}',
+            'Class');
         if (pathString) {
-            return true;
-        }
-        else {
+          return true;
+        } else {
           return false;
         }
       } catch (error) {
-          return false;
+        return false;
       }
     }
     // For other OS platform, there is no need to install STLink Driver.
     return true;
   }
-
 }
