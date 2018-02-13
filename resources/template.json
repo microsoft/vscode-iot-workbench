@@ -1,24 +1,32 @@
 {
     "templates": [
         {
-            "description": "Device",
-            "detail": "Device",
-            "label": "basic"
+            "description": "Empty Device",
+            "detail": "Create empty device sketch",
+            "label": "basic_device",
+            "type": "Basic",
+            "sketch": "emptySketch.ino"
         },
         {
-            "description": "Azure Iot Hub",
-            "detail": "Send device data to IoT Hub",
-            "label": "iothub"
+            "description": "Device and Azure Iot Hub",
+            "detail": "Empty device sketch with prebuild IoT Hub",
+            "label": "basic_iothub",
+            "type": "IotHub",
+            "sketch": "emptySketch.ino"
         },
         {
             "description": "Device data processing",
             "detail": "Process device data by Azure Function",
-            "label": "function"
+            "label": "basic_function",
+            "type": "Function",
+            "sketch": "emptySketch.ino"
         },
         {
             "description": "Send data to IoT Hub",
             "detail": "Send temperature sensor data to IoT Hub",
-            "label": "temrature"
+            "label": "temperature",
+            "type": "IotHub",
+            "sketch": "sendTemperature.ino"
         }
     ]
 }

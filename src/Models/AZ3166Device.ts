@@ -12,7 +12,8 @@ import * as opn from 'opn';
 import {TextEditorCursorStyle, Uri} from 'vscode';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, DeviceConfig} from '../constants';
-import {IoTProject, ProjectTemplateType} from '../Models/IoTProject';
+import {ProjectTemplate, ProjectTemplateType} from '../Models/Interfaces/ProjectTemplate';
+import {IoTProject} from '../Models/IoTProject';
 import {delay} from '../utils';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
@@ -37,11 +38,6 @@ const constants = {
   resourcesFolderName: 'resources'
 };
 
-export enum AZ3166SketchType {
-  emptySketch = 1,
-  sendTemrature
-}
-
 export class AZ3166Device implements Device {
   // tslint:disable-next-line: no-any
   static get serialport(): any {
@@ -59,17 +55,17 @@ export class AZ3166Device implements Device {
   private componentType: ComponentType;
   private deviceFolder: string;
   private extensionContext: vscode.ExtensionContext;
-  private sketchType: AZ3166SketchType;
+  private sketchName: string;
 
   constructor(
       context: vscode.ExtensionContext, devicePath: string,
-      sketchType?: AZ3166SketchType) {
+      sketchName?: string) {
     this.deviceType = DeviceType.MXChip_AZ3166;
     this.componentType = ComponentType.Device;
     this.deviceFolder = devicePath;
     this.extensionContext = context;
-    if (sketchType) {
-      this.sketchType = sketchType;
+    if (sketchName) {
+      this.sketchName = sketchName;
     }
   }
 
@@ -90,8 +86,8 @@ export class AZ3166Device implements Device {
   }
 
   async create(): Promise<boolean> {
-    if (!this.sketchType) {
-      throw new Error('No sketch type found.');
+    if (!this.sketchName) {
+      throw new Error('No sketch file found.');
     }
     const deviceFolderPath = this.deviceFolder;
 
@@ -141,10 +137,8 @@ export class AZ3166Device implements Device {
       }
 
       // Create an empty arduino sketch
-      const sketchTemplateFilePath =
-          this.extensionContext.asAbsolutePath(path.join(
-              constants.resourcesFolderName,
-              AZ3166SketchType[this.sketchType] + '.ino'));
+      const sketchTemplateFilePath = this.extensionContext.asAbsolutePath(
+          path.join(constants.resourcesFolderName, this.sketchName));
       const newSketchFilePath = path.join(deviceFolderPath, sketchFileName);
 
       try {

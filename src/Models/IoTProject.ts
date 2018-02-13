@@ -4,16 +4,18 @@ import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 
-import {AZ3166Device, AZ3166SketchType} from './AZ3166Device';
+import {AZ3166Device} from './AZ3166Device';
 import {AzureFunction} from './AzureFunction';
 import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Deployable} from './Interfaces/Deployable';
 import {Device, DeviceType} from './Interfaces/Device';
+import {ProjectTemplate, ProjectTemplateType} from './Interfaces/ProjectTemplate';
 import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
 import {Workspace} from './Interfaces/Workspace';
 import {IoTHub} from './IoTHub';
+
 
 const constants = {
   deviceDefaultFolderName: 'Device',
@@ -32,17 +34,10 @@ interface ProjectSetting {
   value: string;
 }
 
-export enum ProjectTemplateType {
-  basic = 1,
-  IotHub,
-  Function,
-  Temperature
-}
-
 export class IoTProject {
   private componentList: Component[];
   private projectRootPath: string;
-  private projectType: ProjectTemplateType;
+  private projectTemplateItem: ProjectTemplate;
   private extensionContext: vscode.ExtensionContext;
   private channel: vscode.OutputChannel;
 
@@ -171,7 +166,7 @@ export class IoTProject {
     return true;
   }
 
-  async create(rootFolderPath: string, templateType: ProjectTemplateType):
+  async create(rootFolderPath: string, projectTemplateItem: ProjectTemplate):
       Promise<boolean> {
     if (!fs.existsSync(rootFolderPath)) {
       throw new Error(
@@ -179,7 +174,7 @@ export class IoTProject {
     }
 
     this.projectRootPath = rootFolderPath;
-    this.projectType = templateType;
+    this.projectTemplateItem = projectTemplateItem;
 
     const workspace: Workspace = {folders: [], settings: {}};
 
@@ -192,22 +187,9 @@ export class IoTProject {
     }
 
     workspace.folders.push({path: constants.deviceDefaultFolderName});
-    let sketchType: AZ3166SketchType;
-    switch (templateType) {
-      case ProjectTemplateType.basic:
-      case ProjectTemplateType.IotHub:
-      case ProjectTemplateType.Function:
-        sketchType = AZ3166SketchType.emptySketch;
-        break;
-      case ProjectTemplateType.Temperature:
-        sketchType = AZ3166SketchType.sendTemrature;
-        break;
-      default:
-        throw new Error('Invalid template.');
-    }
 
-    const device =
-        new AZ3166Device(this.extensionContext, deviceDir, sketchType);
+    const device = new AZ3166Device(
+        this.extensionContext, deviceDir, projectTemplateItem.sketch);
     this.componentList.push(device);
 
     // TODO: Consider naming for project level settings.
@@ -220,12 +202,14 @@ export class IoTProject {
     workspace.settings[`IoTDev.${jsonConstants.DevicePath}`] =
         constants.deviceDefaultFolderName;
 
-    switch (templateType) {
-      case ProjectTemplateType.basic:
+    const type: ProjectTemplateType = (ProjectTemplateType)
+        [projectTemplateItem.type as keyof typeof ProjectTemplateType];
+
+    switch (type) {
+      case ProjectTemplateType.Basic:
         // Save data to configFile
         break;
-      case ProjectTemplateType.IotHub:
-      case ProjectTemplateType.Temperature: {
+      case ProjectTemplateType.IotHub: {
         const iothub = new IoTHub(this.channel);
         // In setting file, create a place holder for iothub name
         settings.projectsettings.push(
