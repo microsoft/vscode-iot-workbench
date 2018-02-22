@@ -36,7 +36,17 @@ export class ExceptionHelper {
     }
 
     if (channel) {
-      channel.append(_error.toString());
+      let errorMessage: string;
+      if (_error.message) {
+        errorMessage = _error.message;
+        // tslint:disable-next-line: no-any
+      } else if ((_error as any).body && (_error as any).body.message) {
+        // tslint:disable-next-line: no-any
+        errorMessage = (_error as any).body.message;
+      } else {
+        errorMessage = _error.toString();
+      }
+      channel.append(errorMessage);
     }
 
     throw _error;
