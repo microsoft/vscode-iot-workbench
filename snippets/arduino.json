@@ -43,5 +43,33 @@
             "}"
         ],
         "description": "Functions to init WiFi"
+    },
+    "initMqttClient": {
+        "prefix": "iot-initMqtt",
+        "body": [
+            "//Please include the following header file",
+            "//#include \"DevKitMQTTClient.h\"",
+            "",
+            "DevKitMQTTClient_Init(${0:true});",
+            "//DevKitMQTTClient_SetSendConfirmationCallback(SendConfirmationCallback);",
+            "//DevKitMQTTClient_SetMessageCallback(MessageCallback);",
+            "//DevKitMQTTClient_SetDeviceTwinCallback(DeviceTwinCallback);",
+            "//DevKitMQTTClient_SetDeviceMethodCallback(DeviceMethodCallback);"
+        ],
+        "description": "Initialize Mqtt client"
+    },
+    "mqttSendData": {
+        "prefix": "iot-MqttSend",
+        "body": [
+            "int ${1:length} = 256;",
+            "char ${2:payLoad}[${1:length}];",
+            "",
+            "//TODO: Generate message data",
+            "",
+            "EVENT_INSTANCE* ${3:message} = DevKitMQTTClient_Event_Generate(${2:payLoad}, ${4|MESSAGE,STATE|});",
+            "DevKitMQTTClient_Event_AddProp(${3:message}, ${5:propertyName}, ${6:propertyValue});",
+            "DevKitMQTTClient_SendEventInstance(${3:message});"
+        ],
+        "description": "code to send Mqtt data to IoTHub"
     }
 }
