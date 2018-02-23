@@ -161,5 +161,10 @@
     "unzip": "^0.1.11",
     "winreg": "^1.2.3",
     "opn": "5.1.0"
-  }
+  },
+  "extensionDependencies": [
+    "vsciot-vscode.azure-iot-toolkit",
+    "ms-azuretools.vscode-azurefunctions",
+    "vsciot-vscode.vscode-arduino"
+  ]
 }
