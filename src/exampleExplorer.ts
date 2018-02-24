@@ -12,7 +12,7 @@ const GALLERY_INDEX =
     'https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/gallery/example_gallery.json';
 
 export class ExampleExplorer {
-  private examleList: vscode.QuickPickItem[];
+  private exampleList: vscode.QuickPickItem[];
 
   private async getCurrentPath(): Promise<string|undefined> {
     if (!vscode.workspace.workspaceFolders) {
@@ -113,8 +113,8 @@ export class ExampleExplorer {
   }
 
   private async getExampleList(): Promise<vscode.QuickPickItem[]> {
-    if (this.examleList) {
-      return this.examleList;
+    if (this.exampleList) {
+      return this.exampleList;
     }
     const _list =
         (JSON.parse(await request(GALLERY_INDEX).promise() as string)) as
