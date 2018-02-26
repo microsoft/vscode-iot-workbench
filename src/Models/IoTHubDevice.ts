@@ -28,18 +28,30 @@ export class IoTHubDevice {
     if (!this.iotHubConnectionString) {
       throw new Error('No IoT Hub connection string found.');
     }
-    const provisionIothubDeviceSelection: vscode.QuickPickItem[] = [
-      {
-        label: 'Select an existing IoT Hub device',
-        description: 'Select an existing IoT Hub device',
-        detail: 'select'
-      },
-      {
+    let provisionIothubDeviceSelection: vscode.QuickPickItem[];
+
+    const deviceNumber = await getDeviceNumber(this.iotHubConnectionString);
+    if (deviceNumber > 0) {
+      provisionIothubDeviceSelection = [
+        {
+          label: 'Select an existing IoT Hub device',
+          description: 'Select an existing IoT Hub device',
+          detail: 'select'
+        },
+        {
+          label: 'Create a new IoT Hub device',
+          description: 'Create a new IoT Hub device',
+          detail: 'create'
+        }
+      ];
+    } else {
+      provisionIothubDeviceSelection = [{
         label: 'Create a new IoT Hub device',
         description: 'Create a new IoT Hub device',
         detail: 'create'
-      }
-    ];
+      }];
+    }
+
     const selection = await vscode.window.showQuickPick(
         provisionIothubDeviceSelection,
         {ignoreFocusOut: true, placeHolder: 'Provision IoTHub Device'});
@@ -58,7 +70,8 @@ export class IoTHubDevice {
     try {
       switch (selection.detail) {
         case 'select':
-          device = await toolkit.azureIoTExplorer.getDevice(null, this.iotHubConnectionString);
+          device = await toolkit.azureIoTExplorer.getDevice(
+              null, this.iotHubConnectionString);
           if (device === undefined) {
             throw new Error('Cannot select the specific device');
           } else {
@@ -69,8 +82,8 @@ export class IoTHubDevice {
           break;
 
         case 'create':
-          device =
-              await toolkit.azureIoTExplorer.createDevice(false, this.iotHubConnectionString);
+          device = await toolkit.azureIoTExplorer.createDevice(
+              false, this.iotHubConnectionString);
           if (device === undefined) {
             const error = new Error('Cannot create device.');
             throw error;
@@ -90,14 +103,9 @@ export class IoTHubDevice {
   }
 }
 
-// As toolkit extension export api for device is not ready,
-// the below code is a temp solution.
-
-async function getDeviceList(iotHubConnectionString: string):
-    Promise<vscode.QuickPickItem[]> {
+async function getDeviceNumber(iotHubConnectionString: string) {
   return new Promise(
-      (resolve: (value: vscode.QuickPickItem[]|undefined) => void,
-       reject: (error: Error) => void) => {
+      (resolve: (value: number) => void, reject: (error: Error) => void) => {
         const registry: iothub.Registry =
             iothub.Registry.fromConnectionString(iotHubConnectionString);
         registry.list((err, list) => {
@@ -105,110 +113,9 @@ async function getDeviceList(iotHubConnectionString: string):
             return reject(err);
           }
           if (list === undefined) {
-            return resolve([]);
-          }
-
-          const deviceList: vscode.QuickPickItem[] = [];
-          const hostnameMatch = iotHubConnectionString.match(/HostName=(.*?);/);
-          let hostname: string|null = null;
-          if (hostnameMatch !== null && hostnameMatch.length > 1) {
-            hostname = hostnameMatch[1];
-          }
-
-          list.forEach(deviceInfo => {
-            const deviceId = deviceInfo.deviceId;
-            let deviceKey = null;
-            if (deviceInfo.authentication &&
-                deviceInfo.authentication.symmetricKey) {
-              deviceKey = deviceInfo.authentication.symmetricKey.primaryKey;
-            }
-            const iothubDeviceConnectionString =
-                `HostName=${hostname as string};DeviceId=${
-                    deviceId};SharedAccessKey=${deviceKey}`;
-            deviceList.push({
-              label: deviceId,
-              description: hostname as string,
-              detail: iothubDeviceConnectionString
-            });
-          });
-
-          resolve(deviceList);
-        });
-      });
-}
-
-async function selectDevice(iotHubConnectionString: string):
-    Promise<DeviceInfo|undefined> {
-  const deviceList = getDeviceList(iotHubConnectionString);
-  const selection = await vscode.window.showQuickPick(
-      deviceList, {ignoreFocusOut: true, placeHolder: 'Select IoT Hub device'});
-  if (!selection || !selection.detail) {
-    return undefined;
-  }
-  return ({'iothubDeviceConnectionString': selection.detail});
-}
-
-async function createDevice(
-    iotHubConnectionString: string,
-    channel: vscode.OutputChannel): Promise<DeviceInfo|undefined> {
-  const deviceId =
-      await vscode.window.showInputBox({prompt: 'Enter device ID to create'});
-
-  if (!deviceId) {
-    return undefined;
-  }
-
-  channel.show();
-  channel.appendLine('Provision IoTHub Device');
-  const provisionPendding = setInterval(() => {
-    channel.append('.');
-  }, 1000);
-
-  const deviceInfo =
-      await createDeviceWrapper(iotHubConnectionString, deviceId);
-
-  channel.appendLine('.');
-  clearInterval(provisionPendding);
-
-  return deviceInfo;
-}
-
-async function createDeviceWrapper(
-    iotHubConnectionString: string,
-    deviceId: string): Promise<DeviceInfo|undefined> {
-  return new Promise(
-      (resolve: (value: DeviceInfo|undefined) => void,
-       reject: (error: Error) => void) => {
-        const registry: iothub.Registry =
-            iothub.Registry.fromConnectionString(iotHubConnectionString);
-        const device: iothub.Registry.DeviceDescription = {deviceId};
-
-        registry.create(device, (err, deviceInfo, res) => {
-          if (err) {
-            return reject(err);
+            return resolve(0);
           } else {
-            if (deviceInfo === undefined) {
-              return resolve(undefined);
-            } else {
-              const hostnameMatch =
-                  iotHubConnectionString.match(/HostName=(.*?);/);
-              let hostname: string|null = null;
-              if (hostnameMatch !== null && hostnameMatch.length > 1) {
-                hostname = hostnameMatch[1];
-              }
-
-              const deviceId = deviceInfo.deviceId;
-              let deviceKey = null;
-              if (deviceInfo.authentication &&
-                  deviceInfo.authentication.symmetricKey) {
-                deviceKey = deviceInfo.authentication.symmetricKey.primaryKey;
-              }
-              const iothubDeviceConnectionString = `HostName=${
-                  hostname};DeviceId=${deviceId};SharedAccessKey=${deviceKey}`;
-              return resolve({
-                'iothubDeviceConnectionString': iothubDeviceConnectionString
-              });
-            }
+            return resolve(list.length);
           }
         });
       });
