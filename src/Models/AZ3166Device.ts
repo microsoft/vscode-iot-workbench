@@ -14,8 +14,7 @@ import {ConfigKey, DeviceConfig} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 import {ProjectTemplate, ProjectTemplateType} from '../Models/Interfaces/ProjectTemplate';
 import {IoTProject} from '../Models/IoTProject';
-import {getRegistryValues} from '../Utility';
-import {delay} from '../utils';
+import {delay, getRegistryValues} from '../utils';
 
 import {Component, ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
