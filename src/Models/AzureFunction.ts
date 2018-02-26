@@ -72,6 +72,8 @@ export class AzureFunction implements Component, Provisionable {
     this.azureFunctionPath = azureFunctionPath;
   }
 
+  name = 'Azure Function';
+
   getComponentType(): ComponentType {
     return this.componentType;
   }
@@ -159,8 +161,6 @@ export class AzureFunction implements Component, Provisionable {
         await client.webApps.updateApplicationSettings(
             resourceGroup, siteName, appSettings);
 
-        await vscode.window.showInformationMessage(
-            'Azure function app provision completed.');
         return true;
       } else {
         throw new Error('Provision Azure Function failed.');

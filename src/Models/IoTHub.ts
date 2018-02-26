@@ -18,6 +18,8 @@ export class IoTHub implements Component, Provisionable {
     this.channel = channel;
   }
 
+  name = 'IoT Hub';
+
   getComponentType(): ComponentType {
     return this.componentType;
   }
@@ -103,15 +105,12 @@ export class IoTHub implements Component, Provisionable {
           ConfigKey.eventHubConnectionString, eventHubConnectionString);
       await ConfigHandler.update(
           ConfigKey.eventHubConnectionPath, eventHubConnectionPath);
-      const device = new IoTHubDevice(this.channel);
-      if (await device.provision()) {
-        await vscode.window.showInformationMessage(
-            'IoT Hub provision completed.');
-        return true;
-      } else {
-        const error = new Error('Device provision failed.');
-        throw error;
+
+      if (this.channel) {
+        this.channel.show();
+        this.channel.appendLine('IoT Hub provision succeeded.');
       }
+      return true;
     } else {
       const error = new Error('IoT Hub provision failed.');
       throw error;

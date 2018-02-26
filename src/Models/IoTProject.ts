@@ -15,6 +15,7 @@ import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
 import {Workspace} from './Interfaces/Workspace';
 import {IoTHub} from './IoTHub';
+import {IoTHubDevice} from './IoTHubDevice';
 
 
 const constants = {
@@ -36,8 +37,8 @@ interface ProjectSetting {
 
 export class IoTProject {
   private componentList: Component[];
-  private projectRootPath: string;
-  private projectTemplateItem: ProjectTemplate;
+  private projectRootPath = '';
+  private projectTemplateItem: ProjectTemplate|null = null;
   private extensionContext: vscode.ExtensionContext;
   private channel: vscode.OutputChannel;
 
@@ -88,6 +89,8 @@ export class IoTProject {
     if (hubName !== undefined) {
       const iotHub = new IoTHub(this.channel);
       this.componentList.push(iotHub);
+      const device = new IoTHubDevice(this.channel);
+      this.componentList.push(device);
     }
 
     if (!vscode.workspace.workspaceFolders) {
@@ -141,8 +144,28 @@ export class IoTProject {
   }
 
   async provision(): Promise<boolean> {
+    const provisionItemList: vscode.QuickPickItem[] = [];
     for (const item of this.componentList) {
       if (this.canProvision(item)) {
+        provisionItemList.push({label: item.name, description: item.name});
+      }
+    }
+
+    for (const item of this.componentList) {
+      if (this.canProvision(item)) {
+        for (let i = 0; i < provisionItemList.length; i++) {
+          if (provisionItemList[i].description === item.name) {
+            provisionItemList[i].label =
+                `>\t${provisionItemList[i].description}`;
+          } else {
+            provisionItemList[i].label =
+                `\t${provisionItemList[i].description}`;
+          }
+        }
+        await vscode.window.showQuickPick(
+            provisionItemList,
+            {ignoreFocusOut: true, placeHolder: 'Provision process'});
+
         const res = await item.provision();
         if (res === false) {
           const error = new Error('Provision failed.');
