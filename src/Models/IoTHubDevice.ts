@@ -58,7 +58,7 @@ export class IoTHubDevice {
     try {
       switch (selection.detail) {
         case 'select':
-          device = await selectDevice(this.iotHubConnectionString);
+          device = await toolkit.azureIoTExplorer.getDevice(null, this.iotHubConnectionString);
           if (device === undefined) {
             throw new Error('Cannot select the specific device');
           } else {
@@ -70,7 +70,7 @@ export class IoTHubDevice {
 
         case 'create':
           device =
-              await createDevice(this.iotHubConnectionString, this.channel);
+              await toolkit.azureIoTExplorer.createDevice(false, this.iotHubConnectionString);
           if (device === undefined) {
             const error = new Error('Cannot create device.');
             throw error;
