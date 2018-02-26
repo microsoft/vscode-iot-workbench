@@ -58,7 +58,7 @@ export class ProjectInitializer {
     const files = fs.readdirSync(rootPath);
     if (files && files[0]) {
       const message =
-          'An empty folder is required initialize the project. Initialize new project in default directory?';
+          'An empty folder is required to initialize the project. Initialize new project in default directory?';
       const result: vscode.MessageItem|undefined =
           await vscode.window.showWarningMessage(
               message, DialogResponses.yes, DialogResponses.cancel);
