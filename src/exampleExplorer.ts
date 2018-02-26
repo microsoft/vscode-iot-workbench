@@ -7,33 +7,14 @@ import {Example} from './Models/Interfaces/Example';
 import request = require('request-promise');
 import unzip = require('unzip');
 import {setInterval, setTimeout} from 'timers';
+import {IoTDevSettings} from './IoTSettings';
+import * as utils from './utils';
 
 const GALLERY_INDEX =
     'https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/gallery/example_gallery.json';
 
 export class ExampleExplorer {
-  private examleList: vscode.QuickPickItem[];
-
-  private async getCurrentPath(): Promise<string|undefined> {
-    if (!vscode.workspace.workspaceFolders) {
-      const options: vscode.OpenDialogOptions = {
-        canSelectMany: false,
-        openLabel: 'Select',
-        canSelectFolders: true,
-        canSelectFiles: false
-      };
-
-      const folderUri = await vscode.window.showOpenDialog(options);
-      if (!folderUri) {
-        return undefined;
-      }
-
-      const uri = vscode.Uri.parse(folderUri[0].fsPath);
-      return folderUri[0].fsPath;
-    } else {
-      return vscode.workspace.workspaceFolders[0].uri.fsPath;
-    }
-  }
+  private exampleList: Example[];
 
   private async moveTempFiles(fsPath: string) {
     const tempPath = path.join(fsPath, '.temp');
@@ -113,29 +94,48 @@ export class ExampleExplorer {
   }
 
   private async getExampleList(): Promise<vscode.QuickPickItem[]> {
-    if (this.examleList) {
-      return this.examleList;
+    if (!this.exampleList) {
+      this.exampleList =
+          (JSON.parse(await request(GALLERY_INDEX).promise() as string)) as
+          Example[];
     }
-    const _list =
-        (JSON.parse(await request(GALLERY_INDEX).promise() as string)) as
-        Example[];
-    const exampleList: vscode.QuickPickItem[] = [];
-    _list.forEach((item: Example) => {
-      exampleList.push(
-          {label: item.name, description: item.name, detail: item.url});
+
+    const itemList: vscode.QuickPickItem[] = [];
+    this.exampleList.forEach((item: Example) => {
+      itemList.push({
+        label: item.name,
+        description: item.description,
+        detail: item.detail
+      });
     });
-    return exampleList;
+    return itemList;
   }
+
+  private GenerateExampleFolder(exampleName: string): string {
+    const settings: IoTDevSettings = new IoTDevSettings();
+    if (!utils.directoryExistsSync(settings.defaultProjectsPath)) {
+      utils.mkdirRecursivelySync(settings.defaultProjectsPath);
+    }
+
+    let counter = 0;
+    const name = path.join(
+        settings.defaultProjectsPath, 'generated_examples', exampleName);
+    let candidateName = name;
+    while (true) {
+      if (!utils.fileExistsSync(candidateName) &&
+          !utils.directoryExistsSync(candidateName)) {
+        utils.mkdirRecursivelySync(candidateName);
+        return candidateName;
+      }
+      counter++;
+      candidateName = `${name}_${counter}`;
+    }
+  }
+
 
   async initializeExample(
       context: vscode.ExtensionContext,
       channel: vscode.OutputChannel): Promise<boolean> {
-    const fsPath = await this.getCurrentPath();
-
-    if (!fsPath) {
-      return false;
-    }
-
     const list = this.getExampleList();
     const selection = await vscode.window.showQuickPick(list, {
       ignoreFocusOut: true,
@@ -148,13 +148,18 @@ export class ExampleExplorer {
       return false;
     }
 
-    const url = selection.detail;
+    const result = this.exampleList.filter((item: Example) => {
+      return item.name === selection.label;
+    });
 
-    const files = fs.readdirSync(fsPath);
-    if (files && files[0]) {
-      vscode.window.showInformationMessage(
-          'We need an empty folder to load the example. ' +
-          'Please provide an empty folder');
+    if (!result) {
+      return false;
+    }
+
+    const url = result[0].url;
+    const fsPath = this.GenerateExampleFolder(result[0].name);
+
+    if (!fsPath) {
       return false;
     }
 
@@ -162,9 +167,11 @@ export class ExampleExplorer {
     const res =
         await this.downloadExamplePackage(context, channel, url, fsPath);
     if (res) {
+      // Follow the same pattern in Arduino extension to open examples in new
+      // VSCode instance
       await vscode.commands.executeCommand(
           'vscode.openFolder',
-          vscode.Uri.file(path.join(fsPath, 'project.code-workspace')));
+          vscode.Uri.file(path.join(fsPath, 'project.code-workspace')), true);
       return true;
     } else {
       return false;

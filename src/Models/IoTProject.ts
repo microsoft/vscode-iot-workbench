@@ -166,8 +166,9 @@ export class IoTProject {
     return true;
   }
 
-  async create(rootFolderPath: string, projectTemplateItem: ProjectTemplate):
-      Promise<boolean> {
+  async create(
+      rootFolderPath: string, projectTemplateItem: ProjectTemplate,
+      openInNewWindow: boolean): Promise<boolean> {
     if (!fs.existsSync(rootFolderPath)) {
       throw new Error(
           'Unable to find the root path, please open the folder and initialize project again.');
@@ -273,7 +274,8 @@ export class IoTProject {
         workspaceConfigFilePath, JSON.stringify(workspace, null, 4));
     try {
       await vscode.commands.executeCommand(
-          'vscode.openFolder', vscode.Uri.file(workspaceConfigFilePath));
+          'vscode.openFolder', vscode.Uri.file(workspaceConfigFilePath),
+          openInNewWindow);
       return true;
     } catch (error) {
       throw error;
