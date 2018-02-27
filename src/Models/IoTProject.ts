@@ -120,7 +120,8 @@ export class IoTProject {
       if (this.canCompile(item)) {
         const res = await item.compile();
         if (res === false) {
-          const error = new Error('Unable to compile the sketch, please check output window for detail.');
+          const error = new Error(
+              'Unable to compile the sketch, please check output window for detail.');
           throw error;
         }
       }
@@ -133,7 +134,8 @@ export class IoTProject {
       if (this.canUpload(item)) {
         const res = await item.upload();
         if (res === false) {
-          const error = new Error('Unable to upload the sketch, please check output window for detail.');
+          const error = new Error(
+              'Unable to upload the sketch, please check output window for detail.');
           throw error;
         }
       }

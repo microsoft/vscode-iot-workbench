@@ -56,7 +56,8 @@ export class IoTHub implements Component, Provisionable {
 
     const toolkit = getExtension(extensionName.Toolkit);
     if (toolkit === undefined) {
-      const error = new Error('Azure IoT Toolkit is not installed. Please install it from Marketplace.');
+      const error = new Error(
+          'Azure IoT Toolkit is not installed. Please install it from Marketplace.');
       throw error;
     }
 
@@ -118,7 +119,8 @@ export class IoTHub implements Component, Provisionable {
       }
       return true;
     } else {
-      const error = new Error('IoT Hub provision failed. Please check output window for detail.');
+      const error = new Error(
+          'IoT Hub provision failed. Please check output window for detail.');
       throw error;
     }
   }
