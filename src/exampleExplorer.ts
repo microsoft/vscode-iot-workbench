@@ -94,7 +94,7 @@ export class ExampleExplorer {
   }
 
   private async getExampleList(): Promise<vscode.QuickPickItem[]> {
-    if (!this.exampleList) {
+    if (!this.exampleList.length) {
       this.exampleList =
           (JSON.parse(await request(GALLERY_INDEX).promise() as string)) as
           Example[];

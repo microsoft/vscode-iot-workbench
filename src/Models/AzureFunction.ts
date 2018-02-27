@@ -122,6 +122,8 @@ export class AzureFunction implements Component, Provisionable {
             ConfigHandler.get<string>(ConfigKey.eventHubConnectionString);
         const eventHubConnectionPath =
             ConfigHandler.get<string>(ConfigKey.eventHubConnectionPath);
+        const iotHubConnectionString =
+            ConfigHandler.get<string>(ConfigKey.iotHubConnectionString);
 
         if (!eventHubConnectionString || !eventHubConnectionPath) {
           throw new Error('No event hub path or connection string found.');
@@ -154,9 +156,11 @@ export class AzureFunction implements Component, Provisionable {
         console.log(appSettings);
         appSettings.properties = appSettings.properties || {};
         appSettings.properties['eventHubConnectionString'] =
-            eventHubConnectionString;
+            eventHubConnectionString || '';
         appSettings.properties['eventHubConnectionPath'] =
-            eventHubConnectionPath;
+            eventHubConnectionPath || '';
+        appSettings.properties['iotHubConnectionString'] =
+            iotHubConnectionString || '';
 
         await client.webApps.updateApplicationSettings(
             resourceGroup, siteName, appSettings);
