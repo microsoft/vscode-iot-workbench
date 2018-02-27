@@ -8,7 +8,8 @@ import {IoTProject} from './Models/IoTProject';
 
 export class AzureOperator {
   async Provision(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel): Promise<boolean>{
+      context: vscode.ExtensionContext,
+      channel: vscode.OutputChannel): Promise<boolean> {
     if (!vscode.workspace.workspaceFolders) {
       throw new Error(
           'Unable to find the root path, please open an IoT Development project');

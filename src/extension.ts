@@ -57,7 +57,7 @@ export async function activate(context: vscode.ExtensionContext) {
       vscode.commands.registerCommand('iotdevenv.azureProvision', async () => {
         try {
           const status = await azureOperator.Provision(context, outputChannel);
-          if(status){
+          if (status) {
             vscode.window.showInformationMessage('Azure provision succeeded.');
           }
         } catch (error) {

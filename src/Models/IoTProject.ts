@@ -151,8 +151,9 @@ export class IoTProject {
       }
     }
 
-    if(provisionItemList.length === 0){
-      await vscode.window.showWarningMessage("The project does not contain any Azure components, Azure Provision skipped.");
+    if (provisionItemList.length === 0) {
+      await vscode.window.showWarningMessage(
+          'The project does not contain any Azure components, Azure Provision skipped.');
       return false;
     }
 
