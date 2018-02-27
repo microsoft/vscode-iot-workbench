@@ -144,26 +144,29 @@ export class IoTProject {
   }
 
   async provision(): Promise<boolean> {
-    const provisionItemList: vscode.QuickPickItem[] = [];
+    const provisionItemList: string[] = [];
     for (const item of this.componentList) {
       if (this.canProvision(item)) {
-        provisionItemList.push({label: item.name, description: item.name});
+        provisionItemList.push(item.name);
       }
     }
 
     for (const item of this.componentList) {
+      const _provisionItemList: string[] = [];
       if (this.canProvision(item)) {
         for (let i = 0; i < provisionItemList.length; i++) {
-          if (provisionItemList[i].description === item.name) {
-            provisionItemList[i].label =
-                `>\t${provisionItemList[i].description}`;
+          if (provisionItemList[i] === item.name) {
+            _provisionItemList[i] = `>> ${i + 1}. ${provisionItemList[i]}`;
           } else {
-            provisionItemList[i].label =
-                `\t${provisionItemList[i].description}`;
+            _provisionItemList[i] = `${i + 1}. ${provisionItemList[i]}`;
           }
         }
         await vscode.window.showQuickPick(
-            provisionItemList,
+            [{
+              label: _provisionItemList.join('   -   '),
+              description: '',
+              detail: 'Click to continue'
+            }],
             {ignoreFocusOut: true, placeHolder: 'Provision process'});
 
         const res = await item.provision();
