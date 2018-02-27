@@ -92,10 +92,15 @@ export class IoTHub implements Component, Provisionable {
       }
 
       const sharedAccessKey = sharedAccessKeyMatches[1];
+      // EntityPath is for Event Hub triggered functon only
+      // Before IoT Hub trigged function is ready
+      // we keep it as a workaround
+      // When we are ready to switch to IoT Hub trigged function
+      // ;EntityPath=... needs to be removed
       const eventHubConnectionString = `Endpoint=${
           iothub.properties.eventHubEndpoints.events
               .endpoint};SharedAccessKeyName=iothubowner;SharedAccessKey=${
-          sharedAccessKey}`;
+          sharedAccessKey};EntityPath=${iothub.properties.eventHubEndpoints.events.path}`;
       const eventHubConnectionPath =
           iothub.properties.eventHubEndpoints.events.path;
 
