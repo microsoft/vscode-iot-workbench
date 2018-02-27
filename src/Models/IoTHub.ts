@@ -100,7 +100,8 @@ export class IoTHub implements Component, Provisionable {
       const eventHubConnectionString = `Endpoint=${
           iothub.properties.eventHubEndpoints.events
               .endpoint};SharedAccessKeyName=iothubowner;SharedAccessKey=${
-          sharedAccessKey};EntityPath=${iothub.properties.eventHubEndpoints.events.path}`;
+          sharedAccessKey};EntityPath=${
+          iothub.properties.eventHubEndpoints.events.path}`;
       const eventHubConnectionPath =
           iothub.properties.eventHubEndpoints.events.path;
 
