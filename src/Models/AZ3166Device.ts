@@ -290,7 +290,7 @@ export class AZ3166Device implements Device {
             (deviceConnectionString.indexOf('DeviceId') === -1) ||
             (deviceConnectionString.indexOf('SharedAccessKey') === -1)) {
           throw new Error(
-              'The format of the IoT Hub Device connection string is invalid.');
+              'The format of the IoT Hub Device connection string is invalid. Please provide a valid Device connection string.');
         }
       }
 

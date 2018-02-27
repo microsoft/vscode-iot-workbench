@@ -42,7 +42,7 @@ export class IoTHubDevice implements Component, Provisionable {
 
   async provision(): Promise<boolean> {
     if (!this.iotHubConnectionString) {
-      throw new Error('No IoT Hub connection string found.');
+      throw new Error('Unable to find IoT Hub connection in the project. Please retry Azure Provision.');
     }
 
     const selection = await vscode.window.showQuickPick(
@@ -55,7 +55,7 @@ export class IoTHubDevice implements Component, Provisionable {
 
     const toolkit = getExtension(extensionName.Toolkit);
     if (toolkit === undefined) {
-      const error = new Error('Toolkit is not installed.');
+      const error = new Error('Azure IoT Toolkit is not installed. Please install it from Marketplace.');
       throw error;
     }
 
@@ -66,7 +66,7 @@ export class IoTHubDevice implements Component, Provisionable {
           device = await toolkit.azureIoTExplorer.getDevice(
               null, this.iotHubConnectionString);
           if (device === undefined) {
-            throw new Error('Cannot select the specific device');
+            throw new Error('Unable to select the specific device. Please retry Azure Provision and select another device.');
           } else {
             await ConfigHandler.update(
                 ConfigKey.iotHubDeviceConnectionString,
@@ -78,7 +78,7 @@ export class IoTHubDevice implements Component, Provisionable {
           device = await toolkit.azureIoTExplorer.createDevice(
               false, this.iotHubConnectionString);
           if (device === undefined) {
-            const error = new Error('Cannot create device.');
+            const error = new Error('Unable to create device in IoT Hub. Please check output window for detail.');
             throw error;
           } else {
             await ConfigHandler.update(

@@ -122,7 +122,7 @@ export class IoTProject {
       if (this.canCompile(item)) {
         const res = await item.compile();
         if (res === false) {
-          const error = new Error('Compile failed.');
+          const error = new Error('Unable to compile the sketch, please check output window for detail.');
           throw error;
         }
       }
@@ -135,7 +135,7 @@ export class IoTProject {
       if (this.canUpload(item)) {
         const res = await item.upload();
         if (res === false) {
-          const error = new Error('Upload failed.');
+          const error = new Error('Unable to upload the sketch, please check output window for detail.');
           throw error;
         }
       }
@@ -171,7 +171,7 @@ export class IoTProject {
 
         const res = await item.provision();
         if (res === false) {
-          const error = new Error('Provision failed.');
+          const error = new Error(`The provision of ${item.name} failed.`);
           throw error;
         }
       }
@@ -184,7 +184,7 @@ export class IoTProject {
       if (this.canDeploy(item)) {
         const res = await item.deploy();
         if (res === false) {
-          const error = new Error('Deploy failed.');
+          const error = new Error(`The deployment of ${item.name} failed.`);
           throw error;
         }
       }
