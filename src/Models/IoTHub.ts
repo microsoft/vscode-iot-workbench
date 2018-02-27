@@ -118,7 +118,7 @@ export class IoTHub implements Component, Provisionable {
       }
       return true;
     } else {
-      const error = new Error('IoT Hub provision failed. Please check output window for detail');
+      const error = new Error('IoT Hub provision failed. Please check output window for detail.');
       throw error;
     }
   }
