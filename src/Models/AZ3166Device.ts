@@ -43,7 +43,7 @@ export class AZ3166Device implements Device {
   static get serialport(): any {
     if (!AZ3166Device._serialport) {
       AZ3166Device._serialport =
-          require('../../vendor/node-usb-native').SerialPort;
+          require('../../../vendor/node-usb-native').SerialPort;
     }
     return AZ3166Device._serialport;
   }
