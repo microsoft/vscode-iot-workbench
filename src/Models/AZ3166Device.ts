@@ -30,6 +30,8 @@ const constants = {
   vscodeSettingsFolderName: '.vscode',
   defaultSketchFileName: 'device.ino',
   arduinoJsonFileName: 'arduino.json',
+  settingsJsonFileName: 'settings.json',
+  iotdevprojectFileName: '.iotdevproject',
   boardInfo: 'AZ3166:stm32f4:MXCHIP_AZ3166',
   uploadMethod: 'upload_method=OpenOCDMethod',
   resourcesFolderName: 'resources',
@@ -80,11 +82,58 @@ export class AZ3166Device implements Device {
   }
 
   async load(): Promise<boolean> {
-    try {
-      return true;
-    } catch (error) {
-      throw error;
+    const deviceFolderPath = this.deviceFolder;
+
+    if (!fs.existsSync(deviceFolderPath)) {
+      throw new Error(`Device folder doesn't exist: ${deviceFolderPath}`);
     }
+
+    const vscodeFolderPath =
+        path.join(deviceFolderPath, constants.vscodeSettingsFolderName);
+    if (!fs.existsSync(vscodeFolderPath)) {
+      fs.mkdirSync(vscodeFolderPath);
+    }
+
+    // Create c_cpp_properties.json file
+    const cppPropertiesFilePath =
+        path.join(vscodeFolderPath, constants.cppPropertiesFileName);
+
+    if (fs.existsSync(cppPropertiesFilePath)) {
+      return true;
+    }
+
+    try {
+      const plat = os.platform();
+
+      if (plat === 'win32') {
+        const propertiesFilePathWin32 =
+            this.extensionContext.asAbsolutePath(path.join(
+                constants.resourcesFolderName,
+                constants.cppPropertiesFileNameWin));
+        const propertiesContentWin32 =
+            fs.readFileSync(propertiesFilePathWin32).toString();
+        const pattern = /{ROOTPATH}/gi;
+        const localAppData: string = process.env.LOCALAPPDATA;
+        const replaceStr = propertiesContentWin32.replace(
+            pattern, localAppData.replace(/\\/g, '\\\\'));
+        fs.writeFileSync(cppPropertiesFilePath, replaceStr);
+      }
+      // TODO: Let's use the same file for Linux and MacOS for now. Need to
+      // revisit this part.
+      else {
+        const propertiesFilePathMac =
+            this.extensionContext.asAbsolutePath(path.join(
+                constants.resourcesFolderName,
+                constants.cppPropertiesFileNameMac));
+        const propertiesContentMac =
+            fs.readFileSync(propertiesFilePathMac).toString();
+        fs.writeFileSync(cppPropertiesFilePath, propertiesContentMac);
+      }
+    } catch (error) {
+      throw new Error(`Create cpp properties file failed: ${error.message}`);
+    }
+
+    return true;
   }
 
   async create(): Promise<boolean> {
@@ -96,6 +145,16 @@ export class AZ3166Device implements Device {
     if (!fs.existsSync(deviceFolderPath)) {
       throw new Error(`Device folder doesn't exist: ${deviceFolderPath}`);
     }
+
+    try {
+      const iotdevprojectFilePath =
+          path.join(deviceFolderPath, constants.iotdevprojectFileName);
+      fs.writeFileSync(iotdevprojectFilePath, ' ');
+    } catch (error) {
+      throw new Error(
+          `Device: create iotdevproject file failed: ${error.message}`);
+    }
+
 
     const vscodeFolderPath =
         path.join(deviceFolderPath, constants.vscodeSettingsFolderName);
@@ -137,40 +196,21 @@ export class AZ3166Device implements Device {
             `Device: create arduino config file failed: ${error.message}`);
       }
 
-      // Create c_cpp_properties.json file
-      const cppPropertiesFilePath =
-          path.join(vscodeFolderPath, constants.cppPropertiesFileName);
+      // Create settings.json config file
+      const settingsJSONFilePath =
+          path.join(vscodeFolderPath, constants.settingsJsonFileName);
+      const settingsJSONObj = {'files.exclude': {'.build': true}};
 
       try {
-        const plat = os.platform();
-
-        if (plat === 'win32') {
-          const propertiesFilePathWin32 =
-              this.extensionContext.asAbsolutePath(path.join(
-                  constants.resourcesFolderName,
-                  constants.cppPropertiesFileNameWin));
-          const propertiesContentWin32 =
-              fs.readFileSync(propertiesFilePathWin32).toString();
-          const pattern = /{ROOTPATH}/gi;
-          const localAppData: string = process.env.LOCALAPPDATA;
-          const replaceStr = propertiesContentWin32.replace(
-              pattern, localAppData.replace(/\\/g, '\\\\'));
-          fs.writeFileSync(cppPropertiesFilePath, replaceStr);
-        }
-        // TODO: Let's use the same file for Linux and MacOS for now. Need to
-        // revisit this part.
-        else {
-          const propertiesFilePathMac =
-              this.extensionContext.asAbsolutePath(path.join(
-                  constants.resourcesFolderName,
-                  constants.cppPropertiesFileNameMac));
-          const propertiesContentMac =
-              fs.readFileSync(propertiesFilePathMac).toString();
-          fs.writeFileSync(cppPropertiesFilePath, propertiesContentMac);
-        }
+        fs.writeFileSync(
+            settingsJSONFilePath, JSON.stringify(settingsJSONObj, null, 4));
       } catch (error) {
-        throw new Error(`Create cpp properties file failed: ${error.message}`);
+        throw new Error(
+            `Device: create arduino config file failed: ${error.message}`);
       }
+
+      // Create c_cpp_properties.json file
+      this.load();
 
       // Create an empty arduino sketch
       const sketchTemplateFilePath = this.extensionContext.asAbsolutePath(
