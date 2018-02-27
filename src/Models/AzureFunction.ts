@@ -131,7 +131,8 @@ export class AzureFunction implements Component, Provisionable {
         const credential =
             await this.getCredentialFromSubscriptionId(subscriptionId);
         if (credential === undefined) {
-          throw new Error('Cannot get credential.');
+          throw new Error(`Unable to get credential for the subscription, id:${
+              subscriptionId}.`);
         }
 
         const resourceGroupMatches =
