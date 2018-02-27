@@ -56,7 +56,8 @@ export class IoTHub implements Component, Provisionable {
 
     const toolkit = getExtension(extensionName.Toolkit);
     if (toolkit === undefined) {
-      const error = new Error('Toolkit is not installed.');
+      const error = new Error(
+          'Azure IoT Toolkit is not installed. Please install it from Marketplace.');
       throw error;
     }
 
@@ -88,7 +89,7 @@ export class IoTHub implements Component, Provisionable {
           iothub.iotHubConnectionString.match(/SharedAccessKey=([^;]*)/);
       if (!sharedAccessKeyMatches || sharedAccessKeyMatches.length < 2) {
         throw new Error(
-            'Cannot parse shared access key from IoT Hub connection string.');
+            'Cannot parse shared access key from IoT Hub connection string. Please retry Azure Provision.');
       }
 
       const sharedAccessKey = sharedAccessKeyMatches[1];
@@ -118,7 +119,8 @@ export class IoTHub implements Component, Provisionable {
       }
       return true;
     } else {
-      const error = new Error('IoT Hub provision failed.');
+      const error = new Error(
+          'IoT Hub provision failed. Please check output window for detail.');
       throw error;
     }
   }

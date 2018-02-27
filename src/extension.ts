@@ -87,11 +87,13 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const azureProvision = async () => {
     try {
-      await azureOperator.Provision(context, outputChannel);
-      vscode.window.showInformationMessage('Azure provision succeeded.');
-    } catch (error) {
-      ExceptionHelper.logError(outputChannel, error, true);
-    }
+      const status = await azureOperator.Provision(context, outputChannel);
+        if (status) {
+          vscode.window.showInformationMessage('Azure provision succeeded.');
+        }
+      } catch (error) {
+        ExceptionHelper.logError(outputChannel, error, true);
+      }
   };
 
   const azureDeploy = async () => {
