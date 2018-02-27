@@ -11,6 +11,7 @@
     "Other"
   ],
   "activationEvents": [
+    "workspaceContains:**/.iotdevproject",
     "onCommand:iotdevenv.initializeProject",
     "onCommand:iotdevenv.azureProvision",
     "onCommand:iotdevenv.azureDeploy",

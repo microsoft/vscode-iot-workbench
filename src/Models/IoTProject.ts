@@ -98,16 +98,14 @@ export class IoTProject {
     }
 
     const functionPath = ConfigHandler.get<string>(jsonConstants.FunctionPath);
-    if (!functionPath) {
-      return false;
-    }
+    if (functionPath !== undefined) {
+      const functionLocation = path.join(
+          vscode.workspace.workspaceFolders[0].uri.fsPath, '..', functionPath);
 
-    const functionLocation = path.join(
-        vscode.workspace.workspaceFolders[0].uri.fsPath, '..', functionPath);
-
-    if (functionLocation !== undefined) {
-      const functionApp = new AzureFunction(functionLocation, this.channel);
-      this.componentList.push(functionApp);
+      if (functionLocation !== undefined) {
+        const functionApp = new AzureFunction(functionLocation, this.channel);
+        this.componentList.push(functionApp);
+      }
     }
 
     // Component level load
