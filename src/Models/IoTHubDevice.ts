@@ -70,7 +70,7 @@ export class IoTHubDevice implements Component, Provisionable {
           } else {
             await ConfigHandler.update(
                 ConfigKey.iotHubDeviceConnectionString,
-                device.iothubDeviceConnectionString);
+                device.connectionString);
           }
           break;
 
@@ -83,7 +83,7 @@ export class IoTHubDevice implements Component, Provisionable {
           } else {
             await ConfigHandler.update(
                 ConfigKey.iotHubDeviceConnectionString,
-                device.iothubDeviceConnectionString);
+                device.connectionString);
           }
           break;
         default:

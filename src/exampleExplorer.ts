@@ -14,7 +14,7 @@ const GALLERY_INDEX =
     'https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/gallery/example_gallery.json';
 
 export class ExampleExplorer {
-  private exampleList: Example[];
+  private exampleList: Example[] = [];
 
   private async moveTempFiles(fsPath: string) {
     const tempPath = path.join(fsPath, '.temp');
