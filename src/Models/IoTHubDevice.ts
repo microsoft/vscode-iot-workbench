@@ -14,46 +14,39 @@ interface DeviceInfo {
   iothubDeviceConnectionString: string;
 }
 
-export class IoTHubDevice {
+export class IoTHubDevice implements Component, Provisionable {
+  private componentType: ComponentType;
   private iotHubConnectionString: string|undefined;
   private channel: vscode.OutputChannel;
 
   constructor(channel: vscode.OutputChannel) {
+    this.componentType = ComponentType.IoTHubDevice;
     this.channel = channel;
     this.iotHubConnectionString =
         ConfigHandler.get<string>(ConfigKey.iotHubConnectionString);
+  }
+
+  name = 'IoT Hub Device';
+
+  getComponentType(): ComponentType {
+    return this.componentType;
+  }
+
+  async load(): Promise<boolean> {
+    return true;
+  }
+
+  async create(): Promise<boolean> {
+    return true;
   }
 
   async provision(): Promise<boolean> {
     if (!this.iotHubConnectionString) {
       throw new Error('No IoT Hub connection string found.');
     }
-    let provisionIothubDeviceSelection: vscode.QuickPickItem[];
-
-    const deviceNumber = await getDeviceNumber(this.iotHubConnectionString);
-    if (deviceNumber > 0) {
-      provisionIothubDeviceSelection = [
-        {
-          label: 'Select an existing IoT Hub device',
-          description: 'Select an existing IoT Hub device',
-          detail: 'select'
-        },
-        {
-          label: 'Create a new IoT Hub device',
-          description: 'Create a new IoT Hub device',
-          detail: 'create'
-        }
-      ];
-    } else {
-      provisionIothubDeviceSelection = [{
-        label: 'Create a new IoT Hub device',
-        description: 'Create a new IoT Hub device',
-        detail: 'create'
-      }];
-    }
 
     const selection = await vscode.window.showQuickPick(
-        provisionIothubDeviceSelection,
+        getProvisionIothubDeviceSelection(this.iotHubConnectionString),
         {ignoreFocusOut: true, placeHolder: 'Provision IoTHub Device'});
 
     if (!selection) {
@@ -77,7 +70,7 @@ export class IoTHubDevice {
           } else {
             await ConfigHandler.update(
                 ConfigKey.iotHubDeviceConnectionString,
-                device.iothubDeviceConnectionString);
+                device.connectionString);
           }
           break;
 
@@ -90,7 +83,7 @@ export class IoTHubDevice {
           } else {
             await ConfigHandler.update(
                 ConfigKey.iotHubDeviceConnectionString,
-                device.iothubDeviceConnectionString);
+                device.connectionString);
           }
           break;
         default:
@@ -101,6 +94,34 @@ export class IoTHubDevice {
       throw error;
     }
   }
+}
+
+async function getProvisionIothubDeviceSelection(
+    iotHubConnectionString: string) {
+  let provisionIothubDeviceSelection: vscode.QuickPickItem[];
+
+  const deviceNumber = await getDeviceNumber(iotHubConnectionString);
+  if (deviceNumber > 0) {
+    provisionIothubDeviceSelection = [
+      {
+        label: 'Select an existing IoT Hub device',
+        description: 'Select an existing IoT Hub device',
+        detail: 'select'
+      },
+      {
+        label: 'Create a new IoT Hub device',
+        description: 'Create a new IoT Hub device',
+        detail: 'create'
+      }
+    ];
+  } else {
+    provisionIothubDeviceSelection = [{
+      label: 'Create a new IoT Hub device',
+      description: 'Create a new IoT Hub device',
+      detail: 'create'
+    }];
+  }
+  return provisionIothubDeviceSelection;
 }
 
 async function getDeviceNumber(iotHubConnectionString: string) {

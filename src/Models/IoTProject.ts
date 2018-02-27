@@ -15,6 +15,7 @@ import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
 import {Workspace} from './Interfaces/Workspace';
 import {IoTHub} from './IoTHub';
+import {IoTHubDevice} from './IoTHubDevice';
 
 
 const constants = {
@@ -36,8 +37,8 @@ interface ProjectSetting {
 
 export class IoTProject {
   private componentList: Component[];
-  private projectRootPath: string;
-  private projectTemplateItem: ProjectTemplate;
+  private projectRootPath = '';
+  private projectTemplateItem: ProjectTemplate|null = null;
   private extensionContext: vscode.ExtensionContext;
   private channel: vscode.OutputChannel;
 
@@ -88,6 +89,8 @@ export class IoTProject {
     if (hubName !== undefined) {
       const iotHub = new IoTHub(this.channel);
       this.componentList.push(iotHub);
+      const device = new IoTHubDevice(this.channel);
+      this.componentList.push(device);
     }
 
     if (!vscode.workspace.workspaceFolders) {
@@ -141,8 +144,31 @@ export class IoTProject {
   }
 
   async provision(): Promise<boolean> {
+    const provisionItemList: string[] = [];
     for (const item of this.componentList) {
       if (this.canProvision(item)) {
+        provisionItemList.push(item.name);
+      }
+    }
+
+    for (const item of this.componentList) {
+      const _provisionItemList: string[] = [];
+      if (this.canProvision(item)) {
+        for (let i = 0; i < provisionItemList.length; i++) {
+          if (provisionItemList[i] === item.name) {
+            _provisionItemList[i] = `>> ${i + 1}. ${provisionItemList[i]}`;
+          } else {
+            _provisionItemList[i] = `${i + 1}. ${provisionItemList[i]}`;
+          }
+        }
+        await vscode.window.showQuickPick(
+            [{
+              label: _provisionItemList.join('   -   '),
+              description: '',
+              detail: 'Click to continue'
+            }],
+            {ignoreFocusOut: true, placeHolder: 'Provision process'});
+
         const res = await item.provision();
         if (res === false) {
           const error = new Error('Provision failed.');

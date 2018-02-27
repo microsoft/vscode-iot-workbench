@@ -55,7 +55,7 @@ export class AZ3166Device implements Device {
   private componentType: ComponentType;
   private deviceFolder: string;
   private extensionContext: vscode.ExtensionContext;
-  private sketchName: string;
+  private sketchName = '';
 
   constructor(
       context: vscode.ExtensionContext, devicePath: string,
@@ -68,6 +68,8 @@ export class AZ3166Device implements Device {
       this.sketchName = sketchName;
     }
   }
+
+  name = 'AZ3166';
 
   getDeviceType(): DeviceType {
     return this.deviceType;
