@@ -84,14 +84,10 @@ export class IoTProject {
       this.componentList.push(device);
     }
 
-    const hubName = ConfigHandler.get<string>(jsonConstants.IoTHubName);
-
-    if (hubName !== undefined) {
-      const iotHub = new IoTHub(this.channel);
-      this.componentList.push(iotHub);
-      const device = new IoTHubDevice(this.channel);
-      this.componentList.push(device);
-    }
+    const iotHub = new IoTHub(this.channel);
+    this.componentList.push(iotHub);
+    const device = new IoTHubDevice(this.channel);
+    this.componentList.push(device);
 
     if (!vscode.workspace.workspaceFolders) {
       return false;
