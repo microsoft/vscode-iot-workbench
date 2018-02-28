@@ -16,14 +16,11 @@ interface DeviceInfo {
 
 export class IoTHubDevice implements Component, Provisionable {
   private componentType: ComponentType;
-  private iotHubConnectionString: string|undefined;
   private channel: vscode.OutputChannel;
 
   constructor(channel: vscode.OutputChannel) {
     this.componentType = ComponentType.IoTHubDevice;
     this.channel = channel;
-    this.iotHubConnectionString =
-        ConfigHandler.get<string>(ConfigKey.iotHubConnectionString);
   }
 
   name = 'IoT Hub Device';
@@ -41,13 +38,15 @@ export class IoTHubDevice implements Component, Provisionable {
   }
 
   async provision(): Promise<boolean> {
-    if (!this.iotHubConnectionString) {
+    const iotHubConnectionString =
+        ConfigHandler.get<string>(ConfigKey.iotHubConnectionString);
+    if (!iotHubConnectionString) {
       throw new Error(
           'Unable to find IoT Hub connection in the project. Please retry Azure Provision.');
     }
 
     const selection = await vscode.window.showQuickPick(
-        getProvisionIothubDeviceSelection(this.iotHubConnectionString),
+        getProvisionIothubDeviceSelection(iotHubConnectionString),
         {ignoreFocusOut: true, placeHolder: 'Provision IoTHub Device'});
 
     if (!selection) {
@@ -66,7 +65,7 @@ export class IoTHubDevice implements Component, Provisionable {
       switch (selection.detail) {
         case 'select':
           device = await toolkit.azureIoTExplorer.getDevice(
-              null, this.iotHubConnectionString);
+              null, iotHubConnectionString);
           if (device === undefined) {
             throw new Error(
                 'Unable to select the specific device. Please retry Azure Provision and select another device.');
@@ -79,7 +78,7 @@ export class IoTHubDevice implements Component, Provisionable {
 
         case 'create':
           device = await toolkit.azureIoTExplorer.createDevice(
-              false, this.iotHubConnectionString);
+              false, iotHubConnectionString);
           if (device === undefined) {
             const error = new Error(
                 'Unable to create device in IoT Hub. Please check output window for detail.');
