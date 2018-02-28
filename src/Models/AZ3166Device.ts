@@ -295,20 +295,20 @@ export class AZ3166Device implements Device {
         deviceConnectionStringSelection = [
           {
             label: 'Select IoT Hub Device Connection String',
-            description: `Device Information: ${hostName} ${deviceId}`,
-            detail: 'select'
+            description: '',
+            detail: `Device Information: ${hostName} ${deviceId}`
           },
           {
             label: 'Input IoT Hub Device Connection String',
-            description: 'input another...',
-            detail: 'input'
+            description: '',
+            detail: 'Input another...'
           }
         ];
       } else {
         deviceConnectionStringSelection = [{
           label: 'Input IoT Hub Device Connection String',
-          description: 'input another...',
-          detail: 'input'
+          description: '',
+          detail: 'Input another...'
         }];
       }
 
