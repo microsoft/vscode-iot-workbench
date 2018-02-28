@@ -511,9 +511,8 @@ export class AZ3166Device implements Device {
           const comList = await this.getComList();
           const list = _.filter(comList, com => {
             if (com.vendorId && com.productId &&
-                com.vendorId === DeviceConfig.az3166ComPortVendorId &&
-                com.productId.toLowerCase() ===
-                    DeviceConfig.az3166ComPortProductId) {
+                com.vendorId.toLowerCase().endsWith(DeviceConfig.az3166ComPortVendorId) &&
+                com.productId.toLowerCase().endsWith(DeviceConfig.az3166ComPortProductId)) {
               return true;
             } else {
               return false;
