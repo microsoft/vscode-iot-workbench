@@ -65,7 +65,7 @@ export class IoTHubDevice implements Component, Provisionable {
       switch (selection.detail) {
         case 'select':
           device = await toolkit.azureIoTExplorer.getDevice(
-              null, iotHubConnectionString);
+              null, iotHubConnectionString, this.channel);
           if (device === undefined) {
             throw new Error(
                 'Unable to select the specific device. Please retry Azure Provision and select another device.');
@@ -78,7 +78,7 @@ export class IoTHubDevice implements Component, Provisionable {
 
         case 'create':
           device = await toolkit.azureIoTExplorer.createDevice(
-              false, iotHubConnectionString);
+              false, iotHubConnectionString, this.channel);
           if (device === undefined) {
             const error = new Error(
                 'Unable to create device in IoT Hub. Please check output window for detail.');
