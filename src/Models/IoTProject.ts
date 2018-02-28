@@ -86,7 +86,7 @@ export class IoTProject {
 
     const hubName = ConfigHandler.get<string>(jsonConstants.IoTHubName);
 
-    if (hubName) {
+    if (hubName !== undefined) {
       const iotHub = new IoTHub(this.channel);
       this.componentList.push(iotHub);
       const device = new IoTHubDevice(this.channel);
@@ -149,12 +149,6 @@ export class IoTProject {
       if (this.canProvision(item)) {
         provisionItemList.push(item.name);
       }
-    }
-
-    if (provisionItemList.length === 0) {
-      await vscode.window.showWarningMessage(
-          'The project does not contain any Azure components, Azure Provision skipped.');
-      return false;
     }
 
     for (const item of this.componentList) {
