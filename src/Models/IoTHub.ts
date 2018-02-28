@@ -7,7 +7,6 @@ import {getExtension} from './Apis';
 import {extensionName} from './Interfaces/Api';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
-import {IoTHubDevice} from './IoTHubDevice';
 
 export class IoTHub implements Component, Provisionable {
   private componentType: ComponentType;
