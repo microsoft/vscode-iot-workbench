@@ -155,7 +155,6 @@ export class AZ3166Device implements Device {
           `Device: create iotdevproject file failed: ${error.message}`);
     }
 
-
     const vscodeFolderPath =
         path.join(deviceFolderPath, constants.vscodeSettingsFolderName);
     if (!fs.existsSync(vscodeFolderPath)) {
@@ -291,18 +290,27 @@ export class AZ3166Device implements Device {
         }
       }
 
-      const deviceConnectionStringSelection: vscode.QuickPickItem[] = [
-        {
-          label: 'Select IoT Hub Device Connection String',
-          description: `Device Information: ${hostName} ${deviceId}`,
-          detail: 'select'
-        },
-        {
+      let deviceConnectionStringSelection: vscode.QuickPickItem[] = [];
+      if (deviceId && hostName) {
+        deviceConnectionStringSelection = [
+          {
+            label: 'Select IoT Hub Device Connection String',
+            description: '',
+            detail: `Device Information: ${hostName} ${deviceId}`
+          },
+          {
+            label: 'Input IoT Hub Device Connection String',
+            description: '',
+            detail: 'Input another...'
+          }
+        ];
+      } else {
+        deviceConnectionStringSelection = [{
           label: 'Input IoT Hub Device Connection String',
-          description: 'input another...',
-          detail: 'input'
-        }
-      ];
+          description: '',
+          detail: 'Input another...'
+        }];
+      }
 
       const selection =
           await vscode.window.showQuickPick(deviceConnectionStringSelection, {
