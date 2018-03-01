@@ -56,31 +56,19 @@ export class IoTDevSettings {
   }
 
   async setWorkbenchPath() {
-    let userWorkbenchPath = ConfigHandler.get<string>('workbench');
-    const selection = await vscode.window.showInformationMessage(
-        `Current workbench: ${userWorkbenchPath || this._workbenchPath}`, 'OK',
-        'Change');
+    const options: vscode.OpenDialogOptions = {
+      canSelectMany: false,
+      openLabel: 'Select',
+      canSelectFolders: true,
+      canSelectFiles: false
+    };
 
-    if (selection === 'OK') {
-      if (!userWorkbenchPath) {
-        await ConfigHandler.update(
-            'workbench', this._workbenchPath,
-            vscode.ConfigurationTarget.Global);
-      }
-    } else if (selection === 'Change') {
-      const options: vscode.OpenDialogOptions = {
-        canSelectMany: false,
-        openLabel: 'Select',
-        canSelectFolders: true,
-        canSelectFiles: false
-      };
-
-      const folderUri = await vscode.window.showOpenDialog(options);
-      if (folderUri && folderUri[0]) {
-        userWorkbenchPath = folderUri[0].fsPath;
-        await ConfigHandler.update(
-            'workbench', userWorkbenchPath, vscode.ConfigurationTarget.Global);
-      }
+    const folderUri = await vscode.window.showOpenDialog(options);
+    if (folderUri && folderUri[0]) {
+      const userWorkbenchPath = folderUri[0].fsPath;
+      await ConfigHandler.update(
+          'workbench', userWorkbenchPath, vscode.ConfigurationTarget.Global);
+      await vscode.window.showInformationMessage('Change workbench succeeded.');
     }
   }
 }
