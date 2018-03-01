@@ -322,7 +322,7 @@ export class AZ3166Device implements Device {
         return false;
       }
 
-      if (selection.detail === 'input') {
+      if (selection.detail === 'Input another...') {
         const option: vscode.InputBoxOptions = {
           value:
               'HostName=<Host Name>;DeviceId=<Device Name>;SharedAccessKey=<Device Key>',
