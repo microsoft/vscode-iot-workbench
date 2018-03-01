@@ -3,7 +3,7 @@
         "prefix": "iot-gettemperature",
         "body": [
             "#include \"HTS221Sensor.h\"",
-            "\t$0",
+            "",
             "DevI2C *i2c;",
             "HTS221Sensor *sensor;",
             "",
