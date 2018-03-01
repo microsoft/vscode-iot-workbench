@@ -9,7 +9,7 @@ void setup() {
   if (WiFi.begin() == WL_CONNECTED)
   {
     hasWifi = true;
-    Screen.print(1, "Running... \r\n");
+    Screen.print(1, "Running...");
 
     if (!DevKitMQTTClient_Init())
     {
@@ -21,7 +21,7 @@ void setup() {
   else
   {
     hasWifi = false;
-    Screen.print(1, "No Wi-Fi\r\n ");
+    Screen.print(1, "No Wi-Fi");
   }
 }
 
@@ -36,11 +36,11 @@ void loop() {
     
     if (DevKitMQTTClient_SendEvent(buff))
     {
-      Screen.print(1, "Sending... \r\n");
+      Screen.print(1, "Sending...");
     }
     else
     {
-      Screen.print(1, "Failure... \r\n");
+      Screen.print(1, "Failure...");
     }
     delay(2000);
   }
