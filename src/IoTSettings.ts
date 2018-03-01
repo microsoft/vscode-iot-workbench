@@ -68,7 +68,8 @@ export class IoTDevSettings {
       const userWorkbenchPath = folderUri[0].fsPath;
       await ConfigHandler.update(
           'workbench', userWorkbenchPath, vscode.ConfigurationTarget.Global);
-      await vscode.window.showInformationMessage('Change workbench succeeded.');
+      await vscode.window.showInformationMessage(
+          'Change workbench successfully.');
     }
   }
 }
