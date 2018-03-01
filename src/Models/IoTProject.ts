@@ -26,8 +26,7 @@ const constants = {
 
 const jsonConstants = {
   DevicePath: 'DevicePath',
-  FunctionPath: 'FunctionPath',
-  IoTHubName: 'IoTHubName'
+  FunctionPath: 'FunctionPath'
 };
 
 interface ProjectSetting {
@@ -240,10 +239,6 @@ export class IoTProject {
         break;
       case ProjectTemplateType.IotHub: {
         const iothub = new IoTHub(this.channel);
-        // In setting file, create a place holder for iothub name
-        settings.projectsettings.push(
-            {name: jsonConstants.IoTHubName, value: ''});
-        workspace.settings[`IoTDev.${jsonConstants.IoTHubName}`] = '';
         this.componentList.push(iothub);
         break;
       }
@@ -260,15 +255,11 @@ export class IoTProject {
         workspace.folders.push({path: constants.functionDefaultFolderName});
 
         const azureFunction = new AzureFunction(functionDir, this.channel);
-        // In setting file, create a place holder for iothub name
-        settings.projectsettings.push(
-            {name: jsonConstants.IoTHubName, value: ''});
         settings.projectsettings.push({
           name: jsonConstants.FunctionPath,
           value: constants.functionDefaultFolderName
         });
 
-        workspace.settings[`IoTDev.${jsonConstants.IoTHubName}`] = '';
         workspace.settings[`IoTDev.${jsonConstants.FunctionPath}`] =
             constants.functionDefaultFolderName;
 
