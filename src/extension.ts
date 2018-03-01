@@ -11,6 +11,7 @@ import {IoTProject} from './Models/IoTProject';
 import {ExceptionHelper} from './exceptionHelper';
 import {setTimeout} from 'timers';
 import {ExampleExplorer} from './exampleExplorer';
+import {IoTDevSettings} from './IoTSettings';
 import {AzureFunction} from './Models/AzureFunction';
 import {CommandItem} from './Models/Interfaces/CommandItem';
 
@@ -268,7 +269,23 @@ export async function activate(context: vscode.ExtensionContext) {
   const functionInit = vscode.commands.registerCommand(
       'iotdevenv.initializeFunction', functionInitProvider);
 
+  const workbenchPath =
+      vscode.commands.registerCommand('iotdevenv.workbench', async () => {
+        const settings = new IoTDevSettings();
+        await settings.setWorkbenchPath();
+        return;
+      });
+
   context.subscriptions.push(iotdevMenu);
+  context.subscriptions.push(projectInit);
+  context.subscriptions.push(azureProvision);
+  context.subscriptions.push(azureDeploy);
+  context.subscriptions.push(deviceCompile);
+  context.subscriptions.push(deviceUpload);
+  context.subscriptions.push(deviceConnectionStringConfig);
+  context.subscriptions.push(examples);
+  context.subscriptions.push(functionInit);
+  context.subscriptions.push(workbenchPath);
 }
 
 // this method is called when your extension is deactivated
