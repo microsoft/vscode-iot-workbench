@@ -1,20 +1,20 @@
 {
     "gettemperature": {
-        "prefix": "iot-temperature",
+        "prefix": "iot-gettemperature",
         "body": [
             "#include \"HTS221Sensor.h\"",
             "\t$0",
             "DevI2C *i2c;",
             "HTS221Sensor *sensor;",
             "",
-            "void SensorInit()",
+            "void InitSensor()",
             "{",
             "    i2c = new DevI2C(D14, D15);",
             "    sensor = new HTS221Sensor(*i2c);",
             "    sensor->init(NULL);",
             "}",
-
-            "float readTemperature()",
+            "",
+            "float ReadTemperature()",
             "{",
             "    sensor->reset();",
             "    float temperature = 0;",
@@ -45,7 +45,7 @@
         "description": "Functions to init WiFi"
     },
     "initMqttClient": {
-        "prefix": "iot-initMqtt",
+        "prefix": "iot-initmqtt",
         "body": [
             "//Please include the following header file",
             "//#include \"DevKitMQTTClient.h\"",
@@ -59,17 +59,17 @@
         "description": "Initialize Mqtt client"
     },
     "mqttSendData": {
-        "prefix": "iot-MqttSend",
+        "prefix": "iot-sendmqtt",
         "body": [
-            "int ${1:length} = 256;",
-            "char ${2:payLoad}[${1:length}];",
+            "char ${2:payLoad}[${1:128}];",
             "",
-            "//TODO: Generate message data",
-            "",
+            "//Replace the following line with the actual event data",
+            "//snprintf(${2:payLoad}, ${1:128}, \"{YOUR DATA}\");",
             "EVENT_INSTANCE* ${3:message} = DevKitMQTTClient_Event_Generate(${2:payLoad}, ${4|MESSAGE,STATE|});",
-            "DevKitMQTTClient_Event_AddProp(${3:message}, ${5:propertyName}, ${6:propertyValue});",
+            "DevKitMQTTClient_Event_AddProp(${3:message}, ${5:propertyName} /*name of the user property for MQTT event*/,",
+            "   ${6:propertyValue} /*value of the user property*/);",
             "DevKitMQTTClient_SendEventInstance(${3:message});"
         ],
-        "description": "code to send Mqtt data to IoTHub"
+        "description": "Send Mqtt data to IoTHub"
     }
 }
