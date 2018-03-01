@@ -51,9 +51,6 @@
           "IoTDev.DevicePath": {
             "type": "string"
           },
-          "IoTDev.IoTHubName": {
-            "type": "string"
-          },
           "IoTDev.FunctionPath": {
             "type": "string"
           },
