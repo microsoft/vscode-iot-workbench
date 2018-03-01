@@ -6,7 +6,7 @@ static bool hasIoTHub = false;
 
 void setup() {
   // put your setup code here, to run once:
-  if(WiFi.begin() == WL_CONNECTED)
+  if (WiFi.begin() == WL_CONNECTED)
   {
     hasWifi = true;
     Screen.print(1, "Running... \r\n");
@@ -27,14 +27,14 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  if(hasIoTHub && hasWifi)
+  if (hasIoTHub && hasWifi)
   {
     char buff[128];
 
-    // Replace the following line with the data sent to Azure IoTHub
+    // replace the following line with your data sent to Azure IoTHub
     snprintf(buff, 128, "{\"topic\":\"iot\"}");
     
-    if(DevKitMQTTClient_SendEvent(buff))
+    if (DevKitMQTTClient_SendEvent(buff))
     {
       Screen.print(1, "Sending... \r\n");
     }
