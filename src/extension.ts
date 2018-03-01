@@ -77,7 +77,7 @@ export async function activate(context: vscode.ExtensionContext) {
   // Now provide the implementation of the command with  registerCommand
   // The commandId parameter must match the command field in package.json
 
-  const projectInit = async () => {
+  const projectInitProvider = async () => {
     try {
       await projectInitializer.InitializeProject(context, outputChannel);
     } catch (error) {
@@ -85,7 +85,7 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   };
 
-  const azureProvision = async () => {
+  const azureProvisionProvider = async () => {
     try {
       const status = await azureOperator.Provision(context, outputChannel);
       if (status) {
@@ -96,7 +96,7 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   };
 
-  const azureDeploy = async () => {
+  const azureDeployProvider = async () => {
     try {
       await azureOperator.Deploy(context, outputChannel);
     } catch (error) {
@@ -104,7 +104,7 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   };
 
-  const deviceCompile = async () => {
+  const deviceCompileProvider = async () => {
     try {
       await deviceOperator.compile(context, outputChannel);
     } catch (error) {
@@ -112,7 +112,7 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   };
 
-  const deviceUpload = async () => {
+  const deviceUploadProvider = async () => {
     try {
       await deviceOperator.upload(context, outputChannel);
     } catch (error) {
@@ -120,7 +120,7 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   };
 
-  const deviceConnectionStringConfig = async () => {
+  const deviceConnectionStringConfigProvider = async () => {
     try {
       await deviceOperator.setConnectionString(context, outputChannel);
     } catch (error) {
@@ -128,7 +128,7 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   };
 
-  const examples = async () => {
+  const examplesProvider = async () => {
     try {
       const res =
           await exampleExplorer.initializeExample(context, outputChannel);
@@ -139,7 +139,7 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   };
 
-  const functionInit = async () => {
+  const functionInitProvider = async () => {
     try {
       if (!vscode.workspace.workspaceFolders) {
         throw new Error('No workspace open.');
@@ -176,13 +176,13 @@ export async function activate(context: vscode.ExtensionContext) {
           label: 'Initialize Project',
           description: '',
           detail: 'Create a new project',
-          onClick: projectInit
+          onClick: projectInitProvider
         },
         {
           label: 'Example Projects',
           description: '',
           detail: 'Load an example project',
-          onClick: examples
+          onClick: examplesProvider
         }
       ]
     },
@@ -195,19 +195,19 @@ export async function activate(context: vscode.ExtensionContext) {
           label: 'Azure Provision',
           description: '',
           detail: 'Setup cloud services on Azure',
-          onClick: azureProvision
+          onClick: azureProvisionProvider
         },
         {
           label: 'Azure Deploy',
           description: '',
           detail: 'Deploy local code to Azure',
-          onClick: azureDeploy
+          onClick: azureDeployProvider
         },
         {
           label: 'Create Function',
           description: '',
           detail: 'Generate Azure Function code in local',
-          onClick: functionInit
+          onClick: functionInitProvider
         }
       ]
     },
@@ -220,19 +220,19 @@ export async function activate(context: vscode.ExtensionContext) {
           label: 'Config Device Connection String',
           description: '',
           detail: 'Set connection string on device to connection to Azure',
-          onClick: deviceConnectionStringConfig
+          onClick: deviceConnectionStringConfigProvider
         },
         {
           label: 'Device Compile',
           description: '',
           detail: 'Compile device side code',
-          onClick: deviceCompile
+          onClick: deviceCompileProvider
         },
         {
           label: 'Device Upload',
           description: '',
           detail: 'Upload code to device',
-          onClick: deviceUpload
+          onClick: deviceUploadProvider
         }
       ]
     }
@@ -242,6 +242,31 @@ export async function activate(context: vscode.ExtensionContext) {
       vscode.commands.registerCommand('iotdevenv.mainMenu', async () => {
         renderMenu('IoT Dev Env Project', menu);
       });
+
+  const projectInit = vscode.commands.registerCommand(
+      'iotdevenv.initializeProject', projectInitProvider);
+
+  const azureProvision = vscode.commands.registerCommand(
+      'iotdevenv.azureProvision', azureProvisionProvider);
+
+  const azureDeploy = vscode.commands.registerCommand(
+      'iotdevenv.azureDeploy', azureDeployProvider);
+
+  const deviceCompile = vscode.commands.registerCommand(
+      'iotdevenv.deviceCompile', deviceCompileProvider);
+
+  const deviceUpload = vscode.commands.registerCommand(
+      'iotdevenv.deviceUpload', deviceUploadProvider);
+
+  const deviceConnectionStringConfig = vscode.commands.registerCommand(
+      'iotdevenv.deviceConnectionStringConfig',
+      deviceConnectionStringConfigProvider);
+
+  const examples =
+      vscode.commands.registerCommand('iotdevenv.examples', examplesProvider);
+
+  const functionInit = vscode.commands.registerCommand(
+      'iotdevenv.initializeFunction', functionInitProvider);
 
   context.subscriptions.push(iotdevMenu);
 }
