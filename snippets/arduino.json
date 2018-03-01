@@ -71,5 +71,50 @@
             "DevKitMQTTClient_SendEventInstance(${3:message});"
         ],
         "description": "Send Mqtt data to IoTHub"
+    },
+    "recordAudio": {
+        "prefix": "iot-recordaudio",
+        "body": [
+            "//Please include the following header file",
+            "//#include \"AudioClassV2.h\"",
+            "",
+            "static AudioClass& Audio = AudioClass::getInstance();",
+            "const char ${1:readBuffer}[AUDIO_CHUNK_SIZE];",
+            "",
+            "void recordCallback(void)",
+            "{",
+            "    int length = Audio.readFromRecordBuffer(${1:readBuffer}, AUDIO_CHUNK_SIZE);",
+            "    // Do work with the recorded data in ${1:readBuffer}iot",
+            "}",
+            "",
+            "void record()",
+            "{",
+            "    Audio.format(8000, 16);",
+            "    Audio.startRecord(recordCallback);",
+            "}"
+        ],
+        "description": "Record audio from on-board microphone"
+    },
+    "playAudio": {
+        "prefix": "iot-playaudio",
+        "body": [
+            "//Please include the following header file",
+            "//#include \"AudioClassV2.h\"",
+            "",
+            "const int ${1:bufferLength} = AUDIO_CHUNK_SIZE * 10;",
+            "const char ${2:audioBuffer}[${1:bufferLength}];",
+            "",
+            "void playCallback(void)",
+            "{",
+            "   Audio.writeToPlayBuffer(${2:audioBuffer}, AUDIO_CHUNK_SIZE);",
+            "}",
+            "",
+            "void play()",
+            "{",
+            "   Audio.format(8000, 16);",
+            "   Audio.startPlay(playCallback);",
+            "}"
+        ],
+        "description": "Play audio via on-board headphone interface"
     }
 }
