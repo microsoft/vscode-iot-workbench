@@ -12,7 +12,15 @@
   ],
   "activationEvents": [
     "workspaceContains:**/.iotdevproject",
-    "onCommand:iotdevenv.mainMenu"
+    "onCommand:iotdevenv.mainMenu",
+    "onCommand:iotdevenv.initializeProject",
+    "onCommand:iotdevenv.azureProvision",
+    "onCommand:iotdevenv.azureDeploy",
+    "onCommand:iotdevenv.deviceCompile",
+    "onCommand:iotdevenv.deviceUpload",
+    "onCommand:iotdevenv.deviceConnectionStringConfig",
+    "onCommand:iotdevenv.examples",
+    "onCommand:iotdevenv.initializeFunction"
   ],
   "main": "./out/src/extension",
   "contributes": {
@@ -30,6 +38,46 @@
       {
         "command": "iotdevenv.mainMenu",
         "title": "IoT Dev Env Project"
+      },
+      {
+        "command": "iotdevenv.initializeProject",
+        "title": "Initialize Project",
+        "category": "IoTDev"
+      },
+      {
+        "command": "iotdevenv.azureProvision",
+        "title": "Azure Provision",
+        "category": "IoTDev"
+      },
+      {
+        "command": "iotdevenv.azureDeploy",
+        "title": "Azure Deploy",
+        "category": "IoTDev"
+      },
+      {
+        "command": "iotdevenv.deviceCompile",
+        "title": "Device Compile",
+        "category": "IoTDev"
+      },
+      {
+        "command": "iotdevenv.deviceUpload",
+        "title": "Device Upload",
+        "category": "IoTDev"
+      },
+      {
+        "command": "iotdevenv.deviceConnectionStringConfig",
+        "title": "Config Device Connection String",
+        "category": "IoTDev"
+      },
+      {
+        "command": "iotdevenv.examples",
+        "title": "Examples",
+        "category": "IoTDev"
+      },
+      {
+        "command": "iotdevenv.initializeFunction",
+        "title": "Create Function",
+        "category": "IoTDev"
       }
     ],
     "configuration": [
