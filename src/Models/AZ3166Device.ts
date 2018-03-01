@@ -198,7 +198,10 @@ export class AZ3166Device implements Device {
       // Create settings.json config file
       const settingsJSONFilePath =
           path.join(vscodeFolderPath, constants.settingsJsonFileName);
-      const settingsJSONObj = {'files.exclude': {'.build': true}};
+      const settingsJSONObj = {
+        'files.exclude': {'.build': true},
+        'C_Cpp.intelliSenseEngine': 'Tag Parser'
+      };
 
       try {
         fs.writeFileSync(
