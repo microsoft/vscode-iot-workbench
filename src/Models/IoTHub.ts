@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
-
 import {getExtension} from './Apis';
 import {extensionName} from './Interfaces/Api';
 import {Component, ComponentType} from './Interfaces/Component';

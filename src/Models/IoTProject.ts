@@ -16,6 +16,7 @@ import {Uploadable} from './Interfaces/Uploadable';
 import {Workspace} from './Interfaces/Workspace';
 import {IoTHub} from './IoTHub';
 import {IoTHubDevice} from './IoTHubDevice';
+import { loginAzure } from './Apis';
 
 
 const constants = {
@@ -146,6 +147,11 @@ export class IoTProject {
       }
     }
 
+    // Ensure azure login before component provision
+    if (provisionItemList.length > 0) {
+      await loginAzure();
+    }
+
     for (const item of this.componentList) {
       const _provisionItemList: string[] = [];
       if (this.canProvision(item)) {
@@ -176,9 +182,15 @@ export class IoTProject {
 
   async deploy(): Promise<boolean> {
     let needDeploy = false;
+    let azureLoggedIn = false;
+
     for (const item of this.componentList) {
       if (this.canDeploy(item)) {
         needDeploy = true;
+        if (!azureLoggedIn) {
+          azureLoggedIn = await loginAzure();
+        }
+
         const res = await item.deploy();
         if (res === false) {
           const error = new Error(`The deployment of ${item.name} failed.`);
@@ -186,10 +198,12 @@ export class IoTProject {
         }
       }
     }
+
     if (!needDeploy) {
       await vscode.window.showWarningMessage(
-          'The project does not contain any Azure components to be deployed, Azure Deploy skipped.');
+        'The project does not contain any Azure components to be deployed, Azure Deploy skipped.');
     }
+    
     return needDeploy;
   }
 
