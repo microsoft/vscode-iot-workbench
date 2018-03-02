@@ -147,16 +147,38 @@ export class ProjectInitializer {
     }
 
     let counter = 0;
-    const name = path.join(workbench, constants.defaultProjectName);
+    const name = constants.defaultProjectName;
     let candidateName = name;
     while (true) {
-      if (!utils.fileExistsSync(candidateName) &&
-          !utils.directoryExistsSync(candidateName)) {
-        utils.mkdirRecursivelySync(candidateName);
-        return candidateName;
+      const projectPath = path.join(workbench, candidateName);
+      if (!utils.fileExistsSync(projectPath) &&
+          !utils.directoryExistsSync(projectPath)) {
+        break;
       }
       counter++;
       candidateName = `${name}_${counter}`;
     }
+
+    const projectName = await vscode.window.showInputBox({
+      value: candidateName,
+      prompt: 'Input project name.',
+      ignoreFocusOut: true,
+      validateInput: (projectName: string) => {
+        const projectPath = path.join(workbench, projectName);
+        if (!utils.fileExistsSync(projectPath) &&
+            !utils.directoryExistsSync(projectPath)) {
+          return;
+        } else {
+          return `${projectPath} exists, please choose another name.`;
+        }
+      }
+    });
+
+    const projectPath =
+        projectName ? path.join(workbench, projectName) : undefined;
+    if (projectPath) {
+      utils.mkdirRecursivelySync(projectPath);
+    }
+    return projectPath;
   }
 }
