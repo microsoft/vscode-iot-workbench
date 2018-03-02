@@ -16,7 +16,7 @@ import {Uploadable} from './Interfaces/Uploadable';
 import {Workspace} from './Interfaces/Workspace';
 import {IoTHub} from './IoTHub';
 import {IoTHubDevice} from './IoTHubDevice';
-import { loginAzure } from './Apis';
+import { checkAzureLogin } from './Apis';
 
 
 const constants = {
@@ -149,7 +149,7 @@ export class IoTProject {
 
     // Ensure azure login before component provision
     if (provisionItemList.length > 0) {
-      await loginAzure();
+      await checkAzureLogin();
     }
 
     for (const item of this.componentList) {
@@ -188,7 +188,7 @@ export class IoTProject {
       if (this.canDeploy(item)) {
         needDeploy = true;
         if (!azureLoggedIn) {
-          azureLoggedIn = await loginAzure();
+          azureLoggedIn = await checkAzureLogin();
         }
 
         const res = await item.deploy();
