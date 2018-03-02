@@ -17,7 +17,7 @@ export function getExtension(name: extensionName) {
   }
 }
 
-export async function LoginAzure() {
+export async function loginAzure() {
   const azureAccount = getExtension(extensionName.AzureAccount);
   if (azureAccount === undefined) {
     throw new Error('Azure account extension is not found.');

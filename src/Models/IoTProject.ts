@@ -16,6 +16,7 @@ import {Uploadable} from './Interfaces/Uploadable';
 import {Workspace} from './Interfaces/Workspace';
 import {IoTHub} from './IoTHub';
 import {IoTHubDevice} from './IoTHubDevice';
+import { loginAzure } from './Apis';
 
 
 const constants = {
@@ -144,6 +145,11 @@ export class IoTProject {
       if (this.canProvision(item)) {
         provisionItemList.push(item.name);
       }
+    }
+
+    // Ensure azure login before component provision
+    if (provisionItemList.length > 0) {
+      await loginAzure();
     }
 
     for (const item of this.componentList) {

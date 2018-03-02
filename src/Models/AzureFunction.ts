@@ -15,7 +15,7 @@ import {ConfigKey} from '../constants';
 import {ServiceClientCredentials} from 'ms-rest';
 import {AzureAccount, AzureResourceFilter} from '../azure-account.api';
 import {StringDictionary} from 'azure-arm-website/lib/models';
-import { LoginAzure, getExtension } from './Apis';
+import { getExtension } from './Apis';
 import { extensionName } from './Interfaces/Api';
 
 export class AzureFunction implements Component, Provisionable {
@@ -108,8 +108,6 @@ export class AzureFunction implements Component, Provisionable {
 
   async provision(): Promise<boolean> {
     try {
-      await LoginAzure();
-
       const subscription = await vscode.window.showQuickPick(
           this.getSubscriptionList(),
           {placeHolder: 'Select Subscription', ignoreFocusOut: true});
