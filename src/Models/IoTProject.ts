@@ -316,19 +316,28 @@ export class IoTProject {
   }
 
   async setDeviceConnectionString(): Promise<boolean> {
+    let hasDeviceComponent = false;
+
     for (const component of this.componentList) {
       if (component.getComponentType() === ComponentType.Device) {
         const device = component as Device;
+
         if (device.getDeviceType() === DeviceType.MXChip_AZ3166) {
           const az3166Device = device as AZ3166Device;
           try {
             await az3166Device.setDeviceConnectionString();
+            hasDeviceComponent = true;
           } catch (error) {
             throw error;
           }
         }
       }
     }
+
+    if (!hasDeviceComponent) {
+      throw new Error("Cannot set device connection string in a non-iotdev project. Please initialize an IoT Project first.");
+    }
+
     return true;
   }
 }
