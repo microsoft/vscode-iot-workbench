@@ -15,13 +15,15 @@ import {ConfigKey} from '../constants';
 import {ServiceClientCredentials} from 'ms-rest';
 import {AzureAccount, AzureResourceFilter} from '../azure-account.api';
 import {StringDictionary} from 'azure-arm-website/lib/models';
+import { getExtension } from './Apis';
+import { extensionName } from './Interfaces/Api';
 
 export class AzureFunction implements Component, Provisionable {
   private componentType: ComponentType;
   private channel: vscode.OutputChannel;
   private azureFunctionPath: string;
-  private azureAccountExtension: vscode.Extension<AzureAccount>|undefined =
-      vscode.extensions.getExtension<AzureAccount>('ms-vscode.azure-account');
+  private azureAccountExtension: AzureAccount|undefined =
+      getExtension(extensionName.AzureAccount);
 
   private async getSubscriptionList(): Promise<vscode.QuickPickItem[]> {
     const subscriptionList: vscode.QuickPickItem[] = [];
@@ -29,7 +31,7 @@ export class AzureFunction implements Component, Provisionable {
       throw new Error('Azure account extension is not found.');
     }
 
-    const subscriptions = this.azureAccountExtension.exports.filters;
+    const subscriptions = this.azureAccountExtension.filters;
     subscriptions.forEach(item => {
       subscriptionList.push({
         label: item.subscription.displayName,
@@ -60,7 +62,7 @@ export class AzureFunction implements Component, Provisionable {
     }
 
     const subscriptions: AzureResourceFilter[] =
-        this.azureAccountExtension.exports.filters;
+        this.azureAccountExtension.filters;
     for (let i = 0; i < subscriptions.length; i++) {
       const subscription: AzureResourceFilter = subscriptions[i];
       if (subscription.subscription.subscriptionId === subscriptionId) {
