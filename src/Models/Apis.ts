@@ -17,14 +17,16 @@ export function getExtension(name: extensionName) {
   }
 }
 
-export async function loginAzure() {
+export async function loginAzure(): Promise<boolean> {
   const azureAccount = getExtension(extensionName.AzureAccount);
   if (azureAccount === undefined) {
-    throw new Error('Azure account extension is not found.');
+    throw new Error('Azure account extension is not found. Please install it from Marketplace.');
   }
 
   // Sign in Azure
   if (azureAccount.status !== "LoggedIn") {
     await vscode.commands.executeCommand("azure-account.login");
   }
+
+  return true;
 }

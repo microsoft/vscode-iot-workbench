@@ -182,9 +182,15 @@ export class IoTProject {
 
   async deploy(): Promise<boolean> {
     let needDeploy = false;
+    let azureLoggedIn = false;
+
     for (const item of this.componentList) {
       if (this.canDeploy(item)) {
         needDeploy = true;
+        if (!azureLoggedIn) {
+          azureLoggedIn = await loginAzure();
+        }
+
         const res = await item.deploy();
         if (res === false) {
           const error = new Error(`The deployment of ${item.name} failed.`);
@@ -192,10 +198,12 @@ export class IoTProject {
         }
       }
     }
+
     if (!needDeploy) {
       await vscode.window.showWarningMessage(
-          'The project does not contain any Azure components to be deployed, Azure Deploy skipped.');
+        'The project does not contain any Azure components to be deployed, Azure Deploy skipped.');
     }
+    
     return needDeploy;
   }
 
