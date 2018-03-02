@@ -20,7 +20,8 @@
     "onCommand:iotdevenv.deviceUpload",
     "onCommand:iotdevenv.deviceConnectionStringConfig",
     "onCommand:iotdevenv.examples",
-    "onCommand:iotdevenv.initializeFunction"
+    "onCommand:iotdevenv.initializeFunction",
+    "onCommand:iotdevenv.workbench"
   ],
   "main": "./out/src/extension",
   "contributes": {
@@ -78,6 +79,11 @@
         "command": "iotdevenv.initializeFunction",
         "title": "Create Function",
         "category": "IoTDev"
+      },
+      {
+        "command": "iotdevenv.workbench",
+        "title": "Set Workbench Path",
+        "category": "IoTDev"
       }
     ],
     "configuration": [
@@ -95,6 +101,9 @@
           },
           "azureFunctions.deploySubpath": {
             "scope": "resource"
+          },
+          "IoTDev.workbench": {
+            "type": "string"
           },
           "IoTDev.DevicePath": {
             "type": "string"

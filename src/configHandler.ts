@@ -3,13 +3,14 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 export class ConfigHandler {
-  static async update(key: string, value: {}) {
+  static async update(
+      key: string, value: {}, target = vscode.ConfigurationTarget.Workspace) {
     if (!key) {
       throw new Error('Key is empty.');
     }
 
     return await vscode.workspace.getConfiguration('IoTDev').update(
-        key, value, vscode.ConfigurationTarget.Workspace);
+        key, value, target);
   }
 
   static get<T>(key: string) {
