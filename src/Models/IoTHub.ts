@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
 
-import {getExtension} from './Apis';
+import {getExtension, LoginAzure} from './Apis';
 import {extensionName} from './Interfaces/Api';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
@@ -33,6 +33,9 @@ export class IoTHub implements Component, Provisionable {
   }
 
   async provision(): Promise<boolean> {
+    // Check Azure login status
+    await LoginAzure();
+
     const provisionIothubSelection: vscode.QuickPickItem[] = [
       {
         label: 'Select an existing IoT Hub',
