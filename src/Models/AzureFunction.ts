@@ -92,11 +92,8 @@ export class AzureFunction implements Component, Provisionable {
     }
 
     try {
-      // await vscode.commands.executeCommand(
-      //     'azureFunctions.createNewProject', azureFunctionPath, 'C#',
-      //     false /* openFolder */);
       await vscode.commands.executeCommand(
-          'azureFunctions.createNewProject', azureFunctionPath, 'C#Script',
+          'azureFunctions.createNewProject', azureFunctionPath, 'C#Script', '~1',
           false /* openFolder */);
       return true;
     } catch (error) {
@@ -210,11 +207,8 @@ export class AzureFunction implements Component, Provisionable {
     try {
       await vscode.commands.executeCommand(
           'azureFunctions.createFunction', this.azureFunctionPath,
-          'EventHubTrigger-CSharp', 'IoTHubTrigger1',
-          'eventHubConnectionString', '%eventHubConnectionPath%', '$Default');
-      // await vscode.commands.executeCommand(
-      //     'azureFunctions.createFunction', this.azureFunctionPath,
-      //     'HttpTrigger-CSharp', 'HttpTrigger1', 'DevKit', 'Anonymous');
+          'IoTHubTrigger-CSharp', 'IoTHubTrigger1',
+          {connection:'eventHubConnectionString', path:'%eventHubConnectionPath%', consumerGroup: '$Default'});
       return true;
     } catch (error) {
       throw error;
