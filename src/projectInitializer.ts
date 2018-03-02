@@ -169,7 +169,7 @@ export class ProjectInitializer {
             !utils.directoryExistsSync(projectPath)) {
           return;
         } else {
-          return `${projectPath} is exsiting, please choose another name.`;
+          return `${projectPath} exists, please choose another name.`;
         }
       }
     });
