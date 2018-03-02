@@ -111,15 +111,19 @@ export class ExampleExplorer {
     return itemList;
   }
 
-  private GenerateExampleFolder(exampleName: string): string {
+  private async GenerateExampleFolder(exampleName: string) {
     const settings: IoTDevSettings = new IoTDevSettings();
-    if (!utils.directoryExistsSync(settings.defaultProjectsPath)) {
-      utils.mkdirRecursivelySync(settings.defaultProjectsPath);
+    const workbench = await settings.workbenchPath();
+    if (!workbench) {
+      return undefined;
+    }
+
+    if (!utils.directoryExistsSync(workbench)) {
+      utils.mkdirRecursivelySync(workbench);
     }
 
     let counter = 0;
-    const name = path.join(
-        settings.defaultProjectsPath, 'generated_examples', exampleName);
+    const name = path.join(workbench, 'generated_examples', exampleName);
     let candidateName = name;
     while (true) {
       if (!utils.fileExistsSync(candidateName) &&
@@ -157,7 +161,7 @@ export class ExampleExplorer {
     }
 
     const url = result[0].url;
-    const fsPath = this.GenerateExampleFolder(result[0].name);
+    const fsPath = await this.GenerateExampleFolder(result[0].name);
 
     if (!fsPath) {
       return false;

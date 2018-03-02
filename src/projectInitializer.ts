@@ -40,12 +40,16 @@ export class ProjectInitializer {
       }
     } else if (vscode.workspace.workspaceFolders.length > 1) {
       const message =
-          'There are multiple workspaces in the project. Initialize new project in default directory?';
+          'There are multiple workspaces in the project. Initialize new project in workbench directory?';
       const result: vscode.MessageItem|undefined =
           await vscode.window.showWarningMessage(
               message, DialogResponses.yes, DialogResponses.cancel);
       if (result === DialogResponses.yes) {
-        rootPath = this.GenerateProjectFolder();
+        const projectFolder = await this.GenerateProjectFolder();
+        if (!projectFolder) {
+          return;
+        }
+        rootPath = projectFolder;
         openInNewWindow = true;
       } else {
         return;
@@ -58,12 +62,16 @@ export class ProjectInitializer {
     const files = fs.readdirSync(rootPath);
     if (files && files[0]) {
       const message =
-          'An empty folder is required to initialize the project. Initialize new project in default directory?';
+          'An empty folder is required to initialize the project. Initialize new project in workbench directory?';
       const result: vscode.MessageItem|undefined =
           await vscode.window.showWarningMessage(
               message, DialogResponses.yes, DialogResponses.cancel);
       if (result === DialogResponses.yes) {
-        rootPath = this.GenerateProjectFolder();
+        const projectFolder = await this.GenerateProjectFolder();
+        if (!projectFolder) {
+          return;
+        }
+        rootPath = projectFolder;
         openInNewWindow = true;
       } else {
         return;
@@ -127,15 +135,19 @@ export class ProjectInitializer {
   }
 
 
-  private GenerateProjectFolder(): string {
+  private async GenerateProjectFolder() {
     const settings: IoTDevSettings = new IoTDevSettings();
-    if (!utils.directoryExistsSync(settings.defaultProjectsPath)) {
-      utils.mkdirRecursivelySync(settings.defaultProjectsPath);
+    const workbench = await settings.workbenchPath();
+    if (!workbench) {
+      return undefined;
+    }
+
+    if (!utils.directoryExistsSync(workbench)) {
+      utils.mkdirRecursivelySync(workbench);
     }
 
     let counter = 0;
-    const name =
-        path.join(settings.defaultProjectsPath, constants.defaultProjectName);
+    const name = path.join(workbench, constants.defaultProjectName);
     let candidateName = name;
     while (true) {
       if (!utils.fileExistsSync(candidateName) &&

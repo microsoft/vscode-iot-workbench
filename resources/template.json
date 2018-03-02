@@ -12,14 +12,14 @@
             "detail": "Empty device sketch with prebuild IoT Hub",
             "label": "basic_iothub",
             "type": "IotHub",
-            "sketch": "emptySketch.ino"
+            "sketch": "simple_iothub.ino"
         },
         {
             "description": "Device data processing",
             "detail": "Process device data by Azure Function",
             "label": "basic_function",
             "type": "Function",
-            "sketch": "emptySketch.ino"
+            "sketch": "simple_iothub.ino"
         },
         {
             "description": "Blink user led",
