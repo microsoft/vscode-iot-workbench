@@ -38,7 +38,11 @@ export class AzureFunction implements Component, Provisionable {
     });
 
     if (subscriptionList.length === 0) {
-      throw new Error('No subscription found.');
+      subscriptionList.push({
+        label: 'No subscription found',
+        description: '',
+        detail: 'Click Azure account at bottom left corner and check Select All'
+      } as vscode.QuickPickItem);
     }
 
     return subscriptionList;
@@ -109,7 +113,7 @@ export class AzureFunction implements Component, Provisionable {
       const subscription = await vscode.window.showQuickPick(
           this.getSubscriptionList(),
           {placeHolder: 'Select Subscription', ignoreFocusOut: true});
-      if (!subscription) {
+      if (!subscription || !subscription.description) {
         return false;
       }
       const subscriptionId = subscription.description;
