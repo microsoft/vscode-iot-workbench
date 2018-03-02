@@ -28,7 +28,7 @@ export async function checkAzureLogin(): Promise<boolean> {
     try {
       await vscode.commands.executeCommand("azure-account.login");
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
