@@ -41,7 +41,8 @@ export class AzureFunction implements Component, Provisionable {
       subscriptionList.push({
         label: 'No subscription found',
         description: '',
-        detail: 'Click Azure account at bottom left corner and check Select All'
+        detail:
+            'Click Azure account at bottom left corner and choose Select All'
       } as vscode.QuickPickItem);
     }
 
