@@ -15,8 +15,8 @@ import {ConfigKey} from '../constants';
 import {ServiceClientCredentials} from 'ms-rest';
 import {AzureAccount, AzureResourceFilter} from '../azure-account.api';
 import {StringDictionary} from 'azure-arm-website/lib/models';
-import { getExtension } from './Apis';
-import { extensionName } from './Interfaces/Api';
+import {getExtension} from './Apis';
+import {extensionName} from './Interfaces/Api';
 
 export class AzureFunction implements Component, Provisionable {
   private componentType: ComponentType;
