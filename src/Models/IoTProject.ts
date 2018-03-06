@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
-import {checkIoTDevProject} from '../utils';
+import {checkIoTWorkbenchProject} from '../utils';
 
 import {checkAzureLogin} from './Apis';
 import {AZ3166Device} from './AZ3166Device';
@@ -139,7 +139,7 @@ export class IoTProject {
     const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
     if (!devicePath) {
       throw new Error(
-          'Cannot run IoT Dev command in a non-IoTDev project. Please initialize an IoT Dev project first.');
+          'Cannot run IoT Workbench command in a non-IoTWorkbench project. Please initialize an IoT Workbench project first.');
     }
 
     const provisionItemList: string[] = [];
@@ -183,7 +183,7 @@ export class IoTProject {
   }
 
   async deploy(): Promise<boolean> {
-    checkIoTDevProject();
+    checkIoTWorkbenchProject();
 
     let needDeploy = false;
     let azureLoggedIn = false;
@@ -243,7 +243,7 @@ export class IoTProject {
     settings.projectsettings.push(
         {name: ConfigKey.devicePath, value: constants.deviceDefaultFolderName});
 
-    workspace.settings[`IoTDev.${ConfigKey.devicePath}`] =
+    workspace.settings[`IoTWorkbench.${ConfigKey.devicePath}`] =
         constants.deviceDefaultFolderName;
 
     const type: ProjectTemplateType = (ProjectTemplateType)
@@ -276,7 +276,7 @@ export class IoTProject {
           value: constants.functionDefaultFolderName
         });
 
-        workspace.settings[`IoTDev.${ConfigKey.functionPath}`] =
+        workspace.settings[`IoTWorkbench.${ConfigKey.functionPath}`] =
             constants.functionDefaultFolderName;
 
         this.componentList.push(iothub);
@@ -318,7 +318,7 @@ export class IoTProject {
   }
 
   async setDeviceConnectionString(): Promise<boolean> {
-    checkIoTDevProject();
+    checkIoTWorkbenchProject();
 
     for (const component of this.componentList) {
       if (component.getComponentType() === ComponentType.Device) {

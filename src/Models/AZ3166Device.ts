@@ -31,7 +31,7 @@ const constants = {
   defaultSketchFileName: 'device.ino',
   arduinoJsonFileName: 'arduino.json',
   settingsJsonFileName: 'settings.json',
-  iotdevprojectFileName: '.iotdevproject',
+  iotworkbenchprojectFileName: '.iotworkbenchproject',
   boardInfo: 'AZ3166:stm32f4:MXCHIP_AZ3166',
   uploadMethod: 'upload_method=OpenOCDMethod',
   resourcesFolderName: 'resources',
@@ -147,12 +147,12 @@ export class AZ3166Device implements Device {
     }
 
     try {
-      const iotdevprojectFilePath =
-          path.join(deviceFolderPath, constants.iotdevprojectFileName);
-      fs.writeFileSync(iotdevprojectFilePath, ' ');
+      const iotworkbenchprojectFilePath =
+          path.join(deviceFolderPath, constants.iotworkbenchprojectFileName);
+      fs.writeFileSync(iotworkbenchprojectFilePath, ' ');
     } catch (error) {
       throw new Error(
-          `Device: create iotdevproject file failed: ${error.message}`);
+          `Device: create iotworkbenchproject file failed: ${error.message}`);
     }
 
     const vscodeFolderPath =

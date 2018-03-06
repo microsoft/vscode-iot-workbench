@@ -7,7 +7,7 @@ import {Example} from './Models/Interfaces/Example';
 import request = require('request-promise');
 import unzip = require('unzip');
 import {setInterval, setTimeout} from 'timers';
-import {IoTDevSettings} from './IoTSettings';
+import {IoTWorkbenchSettings} from './IoTSettings';
 import * as utils from './utils';
 
 const GALLERY_INDEX =
@@ -112,7 +112,7 @@ export class ExampleExplorer {
   }
 
   private async GenerateExampleFolder(exampleName: string) {
-    const settings: IoTDevSettings = new IoTDevSettings();
+    const settings: IoTWorkbenchSettings = new IoTWorkbenchSettings();
     const workbench = await settings.workbenchPath();
     if (!workbench) {
       return undefined;

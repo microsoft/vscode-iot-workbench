@@ -74,11 +74,11 @@ export function fileExistsSync(filePath: string): boolean {
   }
 }
 
-export function checkIoTDevProject(): boolean {
+export function checkIoTWorkbenchProject(): boolean {
   const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
   if (!devicePath) {
     throw new Error(
-        'Cannot run IoT Dev command in a non-IoTDev project. Please initialize an IoT Dev project first.');
+        'Cannot run IoT Workbench command in a non-IoTWorkbench project. Please initialize an IoT Workbench project first.');
   }
 
   return true;

@@ -12,7 +12,7 @@ import * as vscode from 'vscode';
 import * as myExtension from '../src/extension';
 
 // Defines a Mocha test suite to group tests of similar kind together
-suite('IoT Dev Env Tests', () => {
+suite('IoT Workbench Tests', () => {
   test('should be present', () => {
     assert.ok(
         vscode.extensions.getExtension('vsciot-vscode.vscode-iot-dev-env'));

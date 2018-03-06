@@ -8,7 +8,7 @@ import {Device, DeviceType} from '../src/Models/Interfaces/Device';
 
 import {TestExtensionContext} from './stub';
 
-suite('IoT Dev Env: AZ3166Device', () => {
+suite('IoT Workbench: AZ3166Device', () => {
   // tslint:disable-next-line: only-arrow-functions
   test('property of AZ3166 device should be set correctly', function(done) {
     const context = new TestExtensionContext();
