@@ -3,6 +3,8 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
+import {ConfigKey} from '../constants';
+import {checkIoTDevProject} from '../utils';
 
 import {checkAzureLogin} from './Apis';
 import {AZ3166Device} from './AZ3166Device';
@@ -18,16 +20,10 @@ import {Workspace} from './Interfaces/Workspace';
 import {IoTHub} from './IoTHub';
 import {IoTHubDevice} from './IoTHubDevice';
 
-
 const constants = {
   deviceDefaultFolderName: 'Device',
   functionDefaultFolderName: 'Function',
   workspaceConfigFilePath: 'project.code-workspace'
-};
-
-const jsonConstants = {
-  DevicePath: 'DevicePath',
-  FunctionPath: 'FunctionPath'
 };
 
 interface ProjectSetting {
@@ -71,7 +67,7 @@ export class IoTProject {
       return false;
     }
 
-    const devicePath = ConfigHandler.get<string>(jsonConstants.DevicePath);
+    const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
     if (!devicePath) {
       return false;
     }
@@ -93,7 +89,7 @@ export class IoTProject {
       return false;
     }
 
-    const functionPath = ConfigHandler.get<string>(jsonConstants.FunctionPath);
+    const functionPath = ConfigHandler.get<string>(ConfigKey.functionPath);
     if (functionPath) {
       const functionLocation = path.join(
           vscode.workspace.workspaceFolders[0].uri.fsPath, '..', functionPath);
@@ -140,6 +136,12 @@ export class IoTProject {
   }
 
   async provision(): Promise<boolean> {
+    const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
+    if (!devicePath) {
+      throw new Error(
+          'Cannot run IoT Dev command in a non-IoTDev project. Please initialize an IoT Dev project first.');
+    }
+
     const provisionItemList: string[] = [];
     for (const item of this.componentList) {
       if (this.canProvision(item)) {
@@ -181,6 +183,8 @@ export class IoTProject {
   }
 
   async deploy(): Promise<boolean> {
+    checkIoTDevProject();
+
     let needDeploy = false;
     let azureLoggedIn = false;
 
@@ -236,12 +240,10 @@ export class IoTProject {
 
     // TODO: Consider naming for project level settings.
     const settings = {projectsettings: [] as ProjectSetting[]};
-    settings.projectsettings.push({
-      name: jsonConstants.DevicePath,
-      value: constants.deviceDefaultFolderName
-    });
+    settings.projectsettings.push(
+        {name: ConfigKey.devicePath, value: constants.deviceDefaultFolderName});
 
-    workspace.settings[`IoTDev.${jsonConstants.DevicePath}`] =
+    workspace.settings[`IoTDev.${ConfigKey.devicePath}`] =
         constants.deviceDefaultFolderName;
 
     const type: ProjectTemplateType = (ProjectTemplateType)
@@ -270,11 +272,11 @@ export class IoTProject {
 
         const azureFunction = new AzureFunction(functionDir, this.channel);
         settings.projectsettings.push({
-          name: jsonConstants.FunctionPath,
+          name: ConfigKey.functionPath,
           value: constants.functionDefaultFolderName
         });
 
-        workspace.settings[`IoTDev.${jsonConstants.FunctionPath}`] =
+        workspace.settings[`IoTDev.${ConfigKey.functionPath}`] =
             constants.functionDefaultFolderName;
 
         this.componentList.push(iothub);
@@ -316,9 +318,12 @@ export class IoTProject {
   }
 
   async setDeviceConnectionString(): Promise<boolean> {
+    checkIoTDevProject();
+
     for (const component of this.componentList) {
       if (component.getComponentType() === ComponentType.Device) {
         const device = component as Device;
+
         if (device.getDeviceType() === DeviceType.MXChip_AZ3166) {
           const az3166Device = device as AZ3166Device;
           try {
@@ -329,6 +334,7 @@ export class IoTProject {
         }
       }
     }
+
     return true;
   }
 }
