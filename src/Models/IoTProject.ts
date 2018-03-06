@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 
+import {checkAzureLogin} from './Apis';
 import {AZ3166Device} from './AZ3166Device';
 import {AzureFunction} from './AzureFunction';
 import {Compilable} from './Interfaces/Compilable';
@@ -16,7 +17,6 @@ import {Uploadable} from './Interfaces/Uploadable';
 import {Workspace} from './Interfaces/Workspace';
 import {IoTHub} from './IoTHub';
 import {IoTHubDevice} from './IoTHubDevice';
-import { checkAzureLogin } from './Apis';
 
 
 const constants = {
@@ -201,9 +201,9 @@ export class IoTProject {
 
     if (!needDeploy) {
       await vscode.window.showWarningMessage(
-        'The project does not contain any Azure components to be deployed, Azure Deploy skipped.');
+          'The project does not contain any Azure components to be deployed, Azure Deploy skipped.');
     }
-    
+
     return needDeploy;
   }
 

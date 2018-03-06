@@ -171,9 +171,11 @@ export class AZ3166Device implements Device {
     await vscode.window.showInputBox(option).then(val => {
       let sketchFileName: string = constants.defaultSketchFileName;
       if (val !== undefined) {
-        const fileExt = val.split('.').pop();
-        if (fileExt !== 'ino') {
-          val = val + '.ino';
+        val = val.trim();
+        if (val === '' || val === '.ino') {
+          val = constants.defaultSketchFileName;
+        } else if (!/\.ino$/.test(val)) {
+          val += '.ino';
         }
         sketchFileName = val;
       }
