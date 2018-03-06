@@ -164,6 +164,10 @@ export class ProjectInitializer {
       prompt: 'Input project name.',
       ignoreFocusOut: true,
       validateInput: (projectName: string) => {
+        if (!/^([a-z0-9_]|[a-z0-9_][-a-z0-9_.]*[a-z0-9_])(\.ino)?$/i.test(
+                projectName)) {
+          return 'Project name can only contain letters, numbers, "-" and ".", and cannot start or end with "-" or ".".';
+        }
         const projectPath = path.join(workbench, projectName);
         if (!utils.fileExistsSync(projectPath) &&
             !utils.directoryExistsSync(projectPath)) {
