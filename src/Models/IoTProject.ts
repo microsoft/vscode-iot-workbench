@@ -1,12 +1,14 @@
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
-
-import {ConfigHandler} from '../configHandler';
 import {AZ3166Device} from './AZ3166Device';
 import {AzureFunction} from './AzureFunction';
 import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
+import {ConfigHandler} from '../configHandler';
+import {checkAzureLogin} from './Apis';
+import {ConfigKey} from '../constants';
+import {checkIoTDevProject} from '../utils';
 import {Deployable} from './Interfaces/Deployable';
 import {Device, DeviceType} from './Interfaces/Device';
 import {ProjectTemplate, ProjectTemplateType} from './Interfaces/ProjectTemplate';
@@ -15,10 +17,6 @@ import {Uploadable} from './Interfaces/Uploadable';
 import {Workspace} from './Interfaces/Workspace';
 import {IoTHub} from './IoTHub';
 import {IoTHubDevice} from './IoTHubDevice';
-import { checkAzureLogin } from './Apis';
-import { ConfigKey } from '../constants';
-import { checkIoTDevProject } from '../utils';
-
 
 const constants = {
   deviceDefaultFolderName: 'Device',
@@ -208,9 +206,9 @@ export class IoTProject {
 
     if (!needDeploy) {
       await vscode.window.showWarningMessage(
-        'The project does not contain any Azure components to be deployed, Azure Deploy skipped.');
+          'The project does not contain any Azure components to be deployed, Azure Deploy skipped.');
     }
-    
+
     return needDeploy;
   }
 
