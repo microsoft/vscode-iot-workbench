@@ -3,7 +3,6 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-
 import {AZ3166Device} from './AZ3166Device';
 import {AzureFunction} from './AzureFunction';
 import {Compilable} from './Interfaces/Compilable';
@@ -17,6 +16,8 @@ import {Workspace} from './Interfaces/Workspace';
 import {IoTHub} from './IoTHub';
 import {IoTHubDevice} from './IoTHubDevice';
 import { checkAzureLogin } from './Apis';
+import { ConfigKey } from '../constants';
+import { checkIoTDevProject } from '../utils';
 
 
 const constants = {
@@ -26,7 +27,6 @@ const constants = {
 };
 
 const jsonConstants = {
-  DevicePath: 'DevicePath',
   FunctionPath: 'FunctionPath'
 };
 
@@ -71,7 +71,7 @@ export class IoTProject {
       return false;
     }
 
-    const devicePath = ConfigHandler.get<string>(jsonConstants.DevicePath);
+    const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
     if (!devicePath) {
       return false;
     }
@@ -140,6 +140,11 @@ export class IoTProject {
   }
 
   async provision(): Promise<boolean> {
+    const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
+    if (!devicePath) {
+      throw new Error("Cannot run IoT Dev command in a non-IoTDev project. Please initialize an IoT Dev project first.")
+    }
+
     const provisionItemList: string[] = [];
     for (const item of this.componentList) {
       if (this.canProvision(item)) {
@@ -181,6 +186,8 @@ export class IoTProject {
   }
 
   async deploy(): Promise<boolean> {
+    checkIoTDevProject();
+
     let needDeploy = false;
     let azureLoggedIn = false;
 
@@ -237,11 +244,11 @@ export class IoTProject {
     // TODO: Consider naming for project level settings.
     const settings = {projectsettings: [] as ProjectSetting[]};
     settings.projectsettings.push({
-      name: jsonConstants.DevicePath,
+      name: ConfigKey.devicePath,
       value: constants.deviceDefaultFolderName
     });
 
-    workspace.settings[`IoTDev.${jsonConstants.DevicePath}`] =
+    workspace.settings[`IoTDev.${ConfigKey.devicePath}`] =
         constants.deviceDefaultFolderName;
 
     const type: ProjectTemplateType = (ProjectTemplateType)
@@ -316,7 +323,7 @@ export class IoTProject {
   }
 
   async setDeviceConnectionString(): Promise<boolean> {
-    let hasDeviceComponent = false;
+    checkIoTDevProject();
 
     for (const component of this.componentList) {
       if (component.getComponentType() === ComponentType.Device) {
@@ -326,16 +333,11 @@ export class IoTProject {
           const az3166Device = device as AZ3166Device;
           try {
             await az3166Device.setDeviceConnectionString();
-            hasDeviceComponent = true;
           } catch (error) {
             throw error;
           }
         }
       }
-    }
-
-    if (!hasDeviceComponent) {
-      throw new Error("Cannot set device connection string in a non-iotdev project. Please initialize an IoT Project first.");
     }
 
     return true;
