@@ -3,8 +3,8 @@ import * as path from 'path';
 import {setTimeout} from 'timers';
 import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
-import { ConfigHandler } from './configHandler';
-import { ConfigKey } from './constants';
+import {ConfigHandler} from './configHandler';
+import {ConfigKey} from './constants';
 
 export function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -77,8 +77,9 @@ export function fileExistsSync(filePath: string): boolean {
 export function checkIoTDevProject(): boolean {
   const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
   if (!devicePath) {
-    throw new Error("Cannot run IoT Dev command in a non-IoTDev project. Please initialize an IoT Dev project first.")
+    throw new Error(
+        'Cannot run IoT Dev command in a non-IoTDev project. Please initialize an IoT Dev project first.');
   }
 
-  return true
+  return true;
 }

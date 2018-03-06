@@ -1,14 +1,16 @@
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
+
+import {ConfigHandler} from '../configHandler';
+import {ConfigKey} from '../constants';
+import {checkIoTDevProject} from '../utils';
+
+import {checkAzureLogin} from './Apis';
 import {AZ3166Device} from './AZ3166Device';
 import {AzureFunction} from './AzureFunction';
 import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
-import {ConfigHandler} from '../configHandler';
-import {checkAzureLogin} from './Apis';
-import {ConfigKey} from '../constants';
-import {checkIoTDevProject} from '../utils';
 import {Deployable} from './Interfaces/Deployable';
 import {Device, DeviceType} from './Interfaces/Device';
 import {ProjectTemplate, ProjectTemplateType} from './Interfaces/ProjectTemplate';
@@ -22,10 +24,6 @@ const constants = {
   deviceDefaultFolderName: 'Device',
   functionDefaultFolderName: 'Function',
   workspaceConfigFilePath: 'project.code-workspace'
-};
-
-const jsonConstants = {
-  FunctionPath: 'FunctionPath'
 };
 
 interface ProjectSetting {
@@ -91,7 +89,7 @@ export class IoTProject {
       return false;
     }
 
-    const functionPath = ConfigHandler.get<string>(jsonConstants.FunctionPath);
+    const functionPath = ConfigHandler.get<string>(ConfigKey.functionPath);
     if (functionPath) {
       const functionLocation = path.join(
           vscode.workspace.workspaceFolders[0].uri.fsPath, '..', functionPath);
@@ -140,7 +138,8 @@ export class IoTProject {
   async provision(): Promise<boolean> {
     const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
     if (!devicePath) {
-      throw new Error("Cannot run IoT Dev command in a non-IoTDev project. Please initialize an IoT Dev project first.")
+      throw new Error(
+          'Cannot run IoT Dev command in a non-IoTDev project. Please initialize an IoT Dev project first.');
     }
 
     const provisionItemList: string[] = [];
@@ -241,10 +240,8 @@ export class IoTProject {
 
     // TODO: Consider naming for project level settings.
     const settings = {projectsettings: [] as ProjectSetting[]};
-    settings.projectsettings.push({
-      name: ConfigKey.devicePath,
-      value: constants.deviceDefaultFolderName
-    });
+    settings.projectsettings.push(
+        {name: ConfigKey.devicePath, value: constants.deviceDefaultFolderName});
 
     workspace.settings[`IoTDev.${ConfigKey.devicePath}`] =
         constants.deviceDefaultFolderName;
@@ -275,11 +272,11 @@ export class IoTProject {
 
         const azureFunction = new AzureFunction(functionDir, this.channel);
         settings.projectsettings.push({
-          name: jsonConstants.FunctionPath,
+          name: ConfigKey.functionPath,
           value: constants.functionDefaultFolderName
         });
 
-        workspace.settings[`IoTDev.${jsonConstants.FunctionPath}`] =
+        workspace.settings[`IoTDev.${ConfigKey.functionPath}`] =
             constants.functionDefaultFolderName;
 
         this.componentList.push(iothub);

@@ -1,10 +1,11 @@
 export class ConfigKey {
-  static readonly devicePath = "DevicePath";
+  static readonly devicePath = 'DevicePath';
   static readonly iotHubConnectionString = 'iothubConnectionString';
   static readonly iotHubDeviceConnectionString = 'iothubDeviceConnectionString';
   static readonly eventHubConnectionString = 'eventHubConnectionString';
   static readonly eventHubConnectionPath = 'eventHubConnectionPath';
   static readonly functionAppId = 'functionAppId';
+  static readonly functionPath = 'FunctionPath';
 }
 
 export class DeviceConfig {
