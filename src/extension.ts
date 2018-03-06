@@ -11,7 +11,7 @@ import {IoTProject} from './Models/IoTProject';
 import {ExceptionHelper} from './exceptionHelper';
 import {setTimeout} from 'timers';
 import {ExampleExplorer} from './exampleExplorer';
-import {IoTDevSettings} from './IoTSettings';
+import {IoTWorkbenchSettings} from './IoTSettings';
 import {AzureFunction} from './Models/AzureFunction';
 import {CommandItem} from './Models/Interfaces/CommandItem';
 
@@ -58,7 +58,7 @@ export async function activate(context: vscode.ExtensionContext) {
       'Congratulations, your extension "vscode-iot-dev-env" is now active!');
 
   const outputChannel: vscode.OutputChannel =
-      vscode.window.createOutputChannel('Azure IoT Dev');
+      vscode.window.createOutputChannel('Azure IoT Workbench');
 
   const iotProject = new IoTProject(context, outputChannel);
   if (vscode.workspace.workspaceFolders) {
@@ -147,8 +147,8 @@ export async function activate(context: vscode.ExtensionContext) {
       }
 
       const azureFunctionPath =
-          vscode.workspace.getConfiguration('IoTDev').get<string>(
-              'FunctionPath');
+          vscode.workspace.getConfiguration('IoTWorkbench')
+              .get<string>('FunctionPath');
       if (!azureFunctionPath) {
         throw new Error('Get workspace configure file failed.');
       }
@@ -240,38 +240,38 @@ export async function activate(context: vscode.ExtensionContext) {
   ];
 
   const iotdevMenu =
-      vscode.commands.registerCommand('iotdevenv.mainMenu', async () => {
-        renderMenu('IoT Dev Env Project', menu);
+      vscode.commands.registerCommand('iotworkbench.mainMenu', async () => {
+        renderMenu('IoT Workbench Project', menu);
       });
 
   const projectInit = vscode.commands.registerCommand(
-      'iotdevenv.initializeProject', projectInitProvider);
+      'iotworkbench.initializeProject', projectInitProvider);
 
   const azureProvision = vscode.commands.registerCommand(
-      'iotdevenv.azureProvision', azureProvisionProvider);
+      'iotworkbench.azureProvision', azureProvisionProvider);
 
   const azureDeploy = vscode.commands.registerCommand(
-      'iotdevenv.azureDeploy', azureDeployProvider);
+      'iotworkbench.azureDeploy', azureDeployProvider);
 
   const deviceCompile = vscode.commands.registerCommand(
-      'iotdevenv.deviceCompile', deviceCompileProvider);
+      'iotworkbench.deviceCompile', deviceCompileProvider);
 
   const deviceUpload = vscode.commands.registerCommand(
-      'iotdevenv.deviceUpload', deviceUploadProvider);
+      'iotworkbench.deviceUpload', deviceUploadProvider);
 
   const deviceConnectionStringConfig = vscode.commands.registerCommand(
-      'iotdevenv.deviceConnectionStringConfig',
+      'iotworkbench.deviceConnectionStringConfig',
       deviceConnectionStringConfigProvider);
 
-  const examples =
-      vscode.commands.registerCommand('iotdevenv.examples', examplesProvider);
+  const examples = vscode.commands.registerCommand(
+      'iotworkbench.examples', examplesProvider);
 
   const functionInit = vscode.commands.registerCommand(
-      'iotdevenv.initializeFunction', functionInitProvider);
+      'iotworkbench.initializeFunction', functionInitProvider);
 
   const workbenchPath =
-      vscode.commands.registerCommand('iotdevenv.workbench', async () => {
-        const settings = new IoTDevSettings();
+      vscode.commands.registerCommand('iotworkbench.workbench', async () => {
+        const settings = new IoTWorkbenchSettings();
         await settings.setWorkbenchPath();
         return;
       });

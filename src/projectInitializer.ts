@@ -7,7 +7,7 @@ import * as path from 'path';
 import {IoTProject} from './Models/IoTProject';
 import {ProjectTemplate, ProjectTemplateType} from './Models/Interfaces/ProjectTemplate';
 import {DialogResponses} from './DialogResponses';
-import {IoTDevSettings} from './IoTSettings';
+import {IoTWorkbenchSettings} from './IoTSettings';
 import * as utils from './utils';
 
 const constants = {
@@ -136,7 +136,7 @@ export class ProjectInitializer {
 
 
   private async GenerateProjectFolder() {
-    const settings: IoTDevSettings = new IoTDevSettings();
+    const settings: IoTWorkbenchSettings = new IoTWorkbenchSettings();
     const workbench = await settings.workbenchPath();
     if (!workbench) {
       return undefined;

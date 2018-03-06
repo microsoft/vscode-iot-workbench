@@ -3,21 +3,21 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import {ConfigHandler} from './configHandler';
 
-export class IoTDevSettings {
+export class IoTWorkbenchSettings {
   private _workbenchPath: string;
 
   constructor() {
     const platform = os.platform();
     if (platform === 'win32') {
-      this._workbenchPath =
-          path.join(process.env.USERPROFILE, 'Documents', 'IoTProjects');
+      this._workbenchPath = path.join(
+          process.env.USERPROFILE, 'Documents', 'IoTWorkbenchProjects');
     } else if (platform === 'linux') {
-      this._workbenchPath = path.join(process.env.HOME, 'IoTProjects');
+      this._workbenchPath = path.join(process.env.HOME, 'IoTWorkbenchProjects');
     } else if (platform === 'darwin') {
       this._workbenchPath =
-          path.join(process.env.HOME, 'Documents', 'IoTProjects');
+          path.join(process.env.HOME, 'Documents', 'IoTWorkbenchProjects');
     } else {
-      this._workbenchPath = '/IoTProjects';
+      this._workbenchPath = '/IoTWorkbenchProjects';
     }
   }
 

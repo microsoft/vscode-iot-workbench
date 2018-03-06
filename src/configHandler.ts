@@ -9,8 +9,8 @@ export class ConfigHandler {
       throw new Error('Key is empty.');
     }
 
-    return await vscode.workspace.getConfiguration('IoTDev').update(
-        key, value, target);
+    return await vscode.workspace.getConfiguration('IoTWorkbench')
+        .update(key, value, target);
   }
 
   static get<T>(key: string) {
@@ -18,10 +18,10 @@ export class ConfigHandler {
       throw new Error('Key is empty.');
     }
 
-    if (!vscode.workspace.getConfiguration('IoTDev').has(key)) {
+    if (!vscode.workspace.getConfiguration('IoTWorkbench').has(key)) {
       return undefined;
     }
 
-    return vscode.workspace.getConfiguration('IoTDev').get<T>(key);
+    return vscode.workspace.getConfiguration('IoTWorkbench').get<T>(key);
   }
 }
