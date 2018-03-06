@@ -165,16 +165,21 @@ export class AZ3166Device implements Device {
     const option: vscode.InputBoxOptions = {
       value: constants.defaultSketchFileName,
       prompt: `Please input device sketch file name here.`,
-      ignoreFocusOut: true
+      ignoreFocusOut: true,
+      validateInput: (sketchFileName: string) => {
+        if (/^([a-z0-9_]|[a-z0-9_][-a-z0-9_.]*[a-z0-9_])(\.ino)?$/i.test(
+                sketchFileName)) {
+          return '';
+        }
+        return 'Sketch file name can only contain letters, numbers, "-" and ".", and cannot start or end with "-" or ".".';
+      }
     };
 
     await vscode.window.showInputBox(option).then(val => {
       let sketchFileName: string = constants.defaultSketchFileName;
       if (val !== undefined) {
         val = val.trim();
-        if (val === '' || val === '.ino') {
-          val = constants.defaultSketchFileName;
-        } else if (!/\.ino$/.test(val)) {
+        if (!/\.ino$/i.test(val)) {
           val += '.ino';
         }
         sketchFileName = val;
