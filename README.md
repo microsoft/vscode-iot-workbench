@@ -1,6 +1,6 @@
-# Visual Studio Code extension for IoT Dev Env 
+# Visual Studio Code extension for IoT Workbench 
 
-Welcome to Visual Studio Code extension for **IoT Dev Env** <sup>preview</sup> ! The iot-dev-env extension makes it easy to code, build, deploy and debug your IoT project for DevKit in Visual Studio Code, with a rich set of functionalities.
+Welcome to Visual Studio Code extension for **IoT Workbench** <sup>preview</sup> ! The iot-dev-env extension makes it easy to code, build, deploy and debug your IoT project for DevKit in Visual Studio Code, with a rich set of functionalities.
 
 ## Prerequisites
 Arduino IDE is required. Please install it from [here](https://www.arduino.cc/en/main/software#download).

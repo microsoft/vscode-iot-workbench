@@ -1,7 +1,7 @@
 {
-  "name": "vscode-iot-dev-env",
-  "displayName": "VSCode Azure IoT Dev Env",
-  "description": "Azure IoT Dev Env for Visual Studio Code",
+  "name": "vscode-iot-workbench",
+  "displayName": "VSCode Azure IoT Workbench",
+  "description": "Azure IoT Workbench for Visual Studio Code",
   "version": "0.0.1",
   "publisher": "vsciot-vscode",
   "engines": {
@@ -11,17 +11,18 @@
     "Other"
   ],
   "activationEvents": [
-    "workspaceContains:**/.iotdevproject",
-    "onCommand:iotdevenv.mainMenu",
-    "onCommand:iotdevenv.initializeProject",
-    "onCommand:iotdevenv.azureProvision",
-    "onCommand:iotdevenv.azureDeploy",
-    "onCommand:iotdevenv.deviceCompile",
-    "onCommand:iotdevenv.deviceUpload",
-    "onCommand:iotdevenv.deviceConnectionStringConfig",
-    "onCommand:iotdevenv.examples",
-    "onCommand:iotdevenv.initializeFunction",
-    "onCommand:iotdevenv.workbench"
+    "workspaceContains:**/.iotworkbenchproject",
+    "onCommand:iotworkbench.mainMenu",
+    "onCommand:iotworkbench.initializeProject",
+    "onCommand:iotworkbench.azureProvision",
+    "onCommand:iotworkbench.azureDeploy",
+    "onCommand:iotworkbench.deviceCompile",
+    "onCommand:iotworkbench.deviceUpload",
+    "onCommand:iotworkbench.deviceConnectionStringConfig",
+    "onCommand:iotworkbench.examples",
+    "onCommand:iotworkbench.initializeFunction",
+    "onCommand:iotworkbench.help",
+    "onCommand:iotworkbench.workbench"
   ],
   "main": "./out/src/extension",
   "contributes": {
@@ -37,53 +38,58 @@
     ],
     "commands": [
       {
-        "command": "iotdevenv.mainMenu",
-        "title": "IoT Dev Env Project"
+        "command": "iotworkbench.mainMenu",
+        "title": "IoT Workbench Project"
       },
       {
-        "command": "iotdevenv.initializeProject",
+        "command": "iotworkbench.initializeProject",
         "title": "Initialize Project",
-        "category": "IoTDev"
+        "category": "IoT Workbench"
       },
       {
-        "command": "iotdevenv.azureProvision",
+        "command": "iotworkbench.azureProvision",
         "title": "Azure Provision",
-        "category": "IoTDev"
+        "category": "IoT Workbench"
       },
       {
-        "command": "iotdevenv.azureDeploy",
+        "command": "iotworkbench.azureDeploy",
         "title": "Azure Deploy",
-        "category": "IoTDev"
+        "category": "IoT Workbench"
       },
       {
-        "command": "iotdevenv.deviceCompile",
+        "command": "iotworkbench.deviceCompile",
         "title": "Device Compile",
-        "category": "IoTDev"
+        "category": "IoT Workbench"
       },
       {
-        "command": "iotdevenv.deviceUpload",
+        "command": "iotworkbench.deviceUpload",
         "title": "Device Upload",
-        "category": "IoTDev"
+        "category": "IoT Workbench"
       },
       {
-        "command": "iotdevenv.deviceConnectionStringConfig",
+        "command": "iotworkbench.deviceConnectionStringConfig",
         "title": "Config Device Connection String",
-        "category": "IoTDev"
+        "category": "IoT Workbench"
       },
       {
-        "command": "iotdevenv.examples",
+        "command": "iotworkbench.examples",
         "title": "Examples",
-        "category": "IoTDev"
+        "category": "IoT Workbench"
       },
       {
-        "command": "iotdevenv.initializeFunction",
+        "command": "iotworkbench.initializeFunction",
         "title": "Create Function",
-        "category": "IoTDev"
+        "category": "IoT Workbench"
       },
       {
-        "command": "iotdevenv.workbench",
+        "command": "iotworkbench.help",
+        "title": "Help",
+        "category": "IoT Workbench"
+      },
+      {
+        "command": "iotworkbench.workbench",
         "title": "Set Workbench Path",
-        "category": "IoTDev"
+        "category": "IoT Workbench"
       }
     ],
     "configuration": [
@@ -102,28 +108,28 @@
           "azureFunctions.deploySubpath": {
             "scope": "resource"
           },
-          "IoTDev.workbench": {
+          "IoTWorkbench.workbench": {
             "type": "string"
           },
-          "IoTDev.DevicePath": {
+          "IoTWorkbench.DevicePath": {
             "type": "string"
           },
-          "IoTDev.FunctionPath": {
+          "IoTWorkbench.FunctionPath": {
             "type": "string"
           },
-          "IoTDev.iothubConnectionString": {
+          "IoTWorkbench.iothubConnectionString": {
             "type": "string"
           },
-          "IoTDev.iothubDeviceConnectionString": {
+          "IoTWorkbench.iothubDeviceConnectionString": {
             "type": "string"
           },
-          "IoTDev.eventHubConnectionString": {
+          "IoTWorkbench.eventHubConnectionString": {
             "type": "string"
           },
-          "IoTDev.eventHubConnectionPath": {
+          "IoTWorkbench.eventHubConnectionPath": {
             "type": "string"
           },
-          "IoTDev.functionAppId": {
+          "IoTWorkbench.functionAppId": {
             "type": "string"
           }
         }

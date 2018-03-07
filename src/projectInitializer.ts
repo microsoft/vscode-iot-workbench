@@ -7,7 +7,7 @@ import * as path from 'path';
 import {IoTProject} from './Models/IoTProject';
 import {ProjectTemplate, ProjectTemplateType} from './Models/Interfaces/ProjectTemplate';
 import {DialogResponses} from './DialogResponses';
-import {IoTDevSettings} from './IoTSettings';
+import {IoTWorkbenchSettings} from './IoTSettings';
 import * as utils from './utils';
 
 const constants = {
@@ -136,7 +136,7 @@ export class ProjectInitializer {
 
 
   private async GenerateProjectFolder() {
-    const settings: IoTDevSettings = new IoTDevSettings();
+    const settings: IoTWorkbenchSettings = new IoTWorkbenchSettings();
     const workbench = await settings.workbenchPath();
     if (!workbench) {
       return undefined;
@@ -164,6 +164,10 @@ export class ProjectInitializer {
       prompt: 'Input project name.',
       ignoreFocusOut: true,
       validateInput: (projectName: string) => {
+        if (!/^([a-z0-9_]|[a-z0-9_][-a-z0-9_.]*[a-z0-9_])(\.ino)?$/i.test(
+                projectName)) {
+          return 'Project name can only contain letters, numbers, "-" and ".", and cannot start or end with "-" or ".".';
+        }
         const projectPath = path.join(workbench, projectName);
         if (!utils.fileExistsSync(projectPath) &&
             !utils.directoryExistsSync(projectPath)) {

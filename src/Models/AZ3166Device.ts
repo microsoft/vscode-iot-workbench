@@ -31,7 +31,7 @@ const constants = {
   defaultSketchFileName: 'device.ino',
   arduinoJsonFileName: 'arduino.json',
   settingsJsonFileName: 'settings.json',
-  iotdevprojectFileName: '.iotdevproject',
+  iotworkbenchprojectFileName: '.iotworkbenchproject',
   boardInfo: 'AZ3166:stm32f4:MXCHIP_AZ3166',
   uploadMethod: 'upload_method=OpenOCDMethod',
   resourcesFolderName: 'resources',
@@ -147,12 +147,12 @@ export class AZ3166Device implements Device {
     }
 
     try {
-      const iotdevprojectFilePath =
-          path.join(deviceFolderPath, constants.iotdevprojectFileName);
-      fs.writeFileSync(iotdevprojectFilePath, ' ');
+      const iotworkbenchprojectFilePath =
+          path.join(deviceFolderPath, constants.iotworkbenchprojectFileName);
+      fs.writeFileSync(iotworkbenchprojectFilePath, ' ');
     } catch (error) {
       throw new Error(
-          `Device: create iotdevproject file failed: ${error.message}`);
+          `Device: create iotworkbenchproject file failed: ${error.message}`);
     }
 
     const vscodeFolderPath =
@@ -165,15 +165,22 @@ export class AZ3166Device implements Device {
     const option: vscode.InputBoxOptions = {
       value: constants.defaultSketchFileName,
       prompt: `Please input device sketch file name here.`,
-      ignoreFocusOut: true
+      ignoreFocusOut: true,
+      validateInput: (sketchFileName: string) => {
+        if (/^([a-z0-9_]|[a-z0-9_][-a-z0-9_.]*[a-z0-9_])(\.ino)?$/i.test(
+                sketchFileName)) {
+          return '';
+        }
+        return 'Sketch file name can only contain letters, numbers, "-" and ".", and cannot start or end with "-" or ".".';
+      }
     };
 
     await vscode.window.showInputBox(option).then(val => {
       let sketchFileName: string = constants.defaultSketchFileName;
       if (val !== undefined) {
-        const fileExt = val.split('.').pop();
-        if (fileExt !== 'ino') {
-          val = val + '.ino';
+        val = val.trim();
+        if (!/\.ino$/i.test(val)) {
+          val += '.ino';
         }
         sketchFileName = val;
       }
