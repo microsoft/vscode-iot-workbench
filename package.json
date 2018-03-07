@@ -21,6 +21,7 @@
     "onCommand:iotworkbench.deviceConnectionStringConfig",
     "onCommand:iotworkbench.examples",
     "onCommand:iotworkbench.initializeFunction",
+    "onCommand:iotworkbench.help",
     "onCommand:iotworkbench.workbench"
   ],
   "main": "./out/src/extension",
@@ -78,6 +79,11 @@
       {
         "command": "iotworkbench.initializeFunction",
         "title": "Create Function",
+        "category": "IoT Workbench"
+      },
+      {
+        "command": "iotworkbench.help",
+        "title": "Help",
         "category": "IoT Workbench"
       },
       {

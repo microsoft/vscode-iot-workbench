@@ -269,6 +269,14 @@ export async function activate(context: vscode.ExtensionContext) {
   const functionInit = vscode.commands.registerCommand(
       'iotworkbench.initializeFunction', functionInitProvider);
 
+  const helpInit = vscode.commands.registerCommand('iotworkbench.help', async () => {
+    await vscode.commands.executeCommand(
+        'vscode.open',
+        vscode.Uri.parse(
+            'https://microsoft.github.io/azure-iot-developer-kit/docs/get-started/'));
+    return;
+  });
+
   const workbenchPath =
       vscode.commands.registerCommand('iotworkbench.workbench', async () => {
         const settings = new IoTWorkbenchSettings();
@@ -285,6 +293,7 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(deviceConnectionStringConfig);
   context.subscriptions.push(examples);
   context.subscriptions.push(functionInit);
+  context.subscriptions.push(helpInit);
   context.subscriptions.push(workbenchPath);
 }
 
