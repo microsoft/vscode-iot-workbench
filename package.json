@@ -1,6 +1,6 @@
 {
   "name": "vscode-iot-workbench",
-  "displayName": "VSCode Azure IoT Workbench",
+  "displayName": "Azure IoT Workbench",
   "description": "Azure IoT Workbench for Visual Studio Code",
   "version": "0.0.1",
   "publisher": "vsciot-vscode",
