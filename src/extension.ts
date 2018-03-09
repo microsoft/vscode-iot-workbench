@@ -222,7 +222,7 @@ export async function activate(context: vscode.ExtensionContext) {
       label: 'Azure Provision',
       description: '',
       detail: 'Provision Azure services',
-      onClick: projectInitProvider
+      onClick: azureProvisionProvider
     },
     {
       label: 'Create Azure Function',
