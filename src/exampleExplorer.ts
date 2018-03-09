@@ -149,6 +149,7 @@ export class ExampleExplorer {
     });
 
     if (!selection || !selection.detail) {
+      channel.appendLine('The operation of selecting example cancelled.');
       return false;
     }
 
@@ -157,6 +158,8 @@ export class ExampleExplorer {
     });
 
     if (!result) {
+      channel.appendLine(`Unable to load the example with name:${
+          selection.label}, please retry.`);
       return false;
     }
 
@@ -164,6 +167,8 @@ export class ExampleExplorer {
     const fsPath = await this.GenerateExampleFolder(result[0].name);
 
     if (!fsPath) {
+      channel.appendLine(
+          'Unable to create folder for examples, please check the workbench settings.');
       return false;
     }
 
@@ -178,6 +183,8 @@ export class ExampleExplorer {
           vscode.Uri.file(path.join(fsPath, 'project.code-workspace')), true);
       return true;
     } else {
+      channel.appendLine(
+          'Downloading example package failed. Please check your network settings.');
       return false;
     }
   }

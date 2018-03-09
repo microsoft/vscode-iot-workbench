@@ -133,8 +133,13 @@ export async function activate(context: vscode.ExtensionContext) {
     try {
       const res =
           await exampleExplorer.initializeExample(context, outputChannel);
-      vscode.window.showInformationMessage(
-          res ? 'Example loaded.' : 'Example load failed.');
+
+      if (res) {
+        vscode.window.showInformationMessage('Example load successfully.');
+      } else {
+        vscode.window.showErrorMessage(
+            'Unable to load example. Please check output window for detailed information.');
+      }
     } catch (error) {
       ExceptionHelper.logError(outputChannel, error, true);
     }
