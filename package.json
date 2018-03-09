@@ -43,7 +43,7 @@
       },
       {
         "command": "iotworkbench.initializeProject",
-        "title": "Initialize Project",
+        "title": "New",
         "category": "IoT Workbench"
       },
       {

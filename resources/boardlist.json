@@ -1,0 +1,8 @@
+{
+    "boards": [
+        {
+            "name": "IoT DevKit",
+            "platform": "Arduino"
+        }
+    ]
+}
