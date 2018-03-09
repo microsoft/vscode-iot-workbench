@@ -9,9 +9,16 @@ import unzip = require('unzip');
 import {setInterval, setTimeout} from 'timers';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import * as utils from './utils';
+import {Board} from './Models/Interfaces/Board';
 
 const GALLERY_INDEX =
     'https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/gallery/example_gallery.json';
+
+
+const constants = {
+  boardListFileName: 'boardlist.json',
+  resourceFolderName: 'resources',
+};
 
 export class ExampleExplorer {
   private exampleList: Example[] = [];
@@ -140,6 +147,30 @@ export class ExampleExplorer {
   async initializeExample(
       context: vscode.ExtensionContext,
       channel: vscode.OutputChannel): Promise<boolean> {
+        
+    // Select board
+    const boardItemList: vscode.QuickPickItem[] = [];
+    const boardList = context.asAbsolutePath(
+        path.join(constants.resourceFolderName, constants.boardListFileName));
+    const boardsJson = require(boardList);
+    boardsJson.boards.forEach((board: Board) => {
+      boardItemList.push({
+        label: board.name,
+        description: board.platform,
+      });
+    });
+
+    const boardSelection = await vscode.window.showQuickPick(boardItemList, {
+      ignoreFocusOut: true,
+      matchOnDescription: true,
+      matchOnDetail: true,
+      placeHolder: 'Select a board',
+    });
+
+    if (!boardSelection) {
+      return false;
+    }
+
     const list = this.getExampleList();
     const selection = await vscode.window.showQuickPick(list, {
       ignoreFocusOut: true,

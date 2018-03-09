@@ -9,9 +9,11 @@ import {ProjectTemplate, ProjectTemplateType} from './Models/Interfaces/ProjectT
 import {DialogResponses} from './DialogResponses';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import * as utils from './utils';
+import {Board} from './Models/Interfaces/Board';
 
 const constants = {
   templateFileName: 'template.json',
+  boardListFileName: 'boardlist.json',
   resourceFolderName: 'resources',
   defaultProjectName: 'IoTproject'
 };
@@ -90,6 +92,31 @@ export class ProjectInitializer {
           });
 
           try {
+            // Select board
+            const boardItemList: vscode.QuickPickItem[] = [];
+
+            const boardList = context.asAbsolutePath(path.join(
+                constants.resourceFolderName, constants.boardListFileName));
+            const boardsJson = require(boardList);
+            boardsJson.boards.forEach((board: Board) => {
+              boardItemList.push({
+                label: board.name,
+                description: board.platform,
+              });
+            });
+
+            const boardSelection =
+                await vscode.window.showQuickPick(boardItemList, {
+                  ignoreFocusOut: true,
+                  matchOnDescription: true,
+                  matchOnDetail: true,
+                  placeHolder: 'Select a board',
+                });
+
+            if (!boardSelection) {
+              return;
+            }
+
             // Template select
             const template = context.asAbsolutePath(path.join(
                 constants.resourceFolderName, constants.templateFileName));
