@@ -147,7 +147,6 @@ export class ExampleExplorer {
   async initializeExample(
       context: vscode.ExtensionContext,
       channel: vscode.OutputChannel): Promise<boolean> {
-        
     // Select board
     const boardItemList: vscode.QuickPickItem[] = [];
     const boardList = context.asAbsolutePath(

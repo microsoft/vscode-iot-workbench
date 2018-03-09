@@ -13,12 +13,10 @@
   "activationEvents": [
     "workspaceContains:**/.iotworkbenchproject",
     "onCommand:iotworkbench.mainMenu",
+    "onCommand:iotworkbench.device",
     "onCommand:iotworkbench.initializeProject",
     "onCommand:iotworkbench.azureProvision",
     "onCommand:iotworkbench.azureDeploy",
-    "onCommand:iotworkbench.deviceCompile",
-    "onCommand:iotworkbench.deviceUpload",
-    "onCommand:iotworkbench.deviceConnectionStringConfig",
     "onCommand:iotworkbench.examples",
     "onCommand:iotworkbench.initializeFunction",
     "onCommand:iotworkbench.help",
@@ -57,21 +55,6 @@
         "category": "IoT Workbench"
       },
       {
-        "command": "iotworkbench.deviceCompile",
-        "title": "Device Compile",
-        "category": "IoT Workbench"
-      },
-      {
-        "command": "iotworkbench.deviceUpload",
-        "title": "Device Upload",
-        "category": "IoT Workbench"
-      },
-      {
-        "command": "iotworkbench.deviceConnectionStringConfig",
-        "title": "Config Device Connection String",
-        "category": "IoT Workbench"
-      },
-      {
         "command": "iotworkbench.examples",
         "title": "Examples",
         "category": "IoT Workbench"
@@ -79,6 +62,11 @@
       {
         "command": "iotworkbench.initializeFunction",
         "title": "Create Function",
+        "category": "IoT Workbench"
+      },
+      {
+        "command": "iotworkbench.device",
+        "title": "Device",
         "category": "IoT Workbench"
       },
       {
