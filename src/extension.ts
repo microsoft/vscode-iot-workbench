@@ -172,6 +172,28 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   };
 
+  const menuForDevice: CommandItem[] =[
+    {
+      label: 'Config Device Connection String',
+      description: '',
+      detail: 'Set connection string on device to connection to Azure',
+      onClick: deviceConnectionStringConfigProvider
+    },
+    {
+      label: 'Device Compile',
+      description: '',
+      detail: 'Compile device side code',
+      onClick: deviceCompileProvider
+    },
+    {
+      label: 'Device Upload',
+      description: '',
+      detail: 'Upload code to device',
+      onClick: deviceUploadProvider
+    }
+  ]
+
+
   const menu: CommandItem[] = [
     {
       label: 'Project Setup',
@@ -216,31 +238,6 @@ export async function activate(context: vscode.ExtensionContext) {
           onClick: functionInitProvider
         }
       ]
-    },
-    {
-      label: 'Develop for Device',
-      description: '',
-      detail: 'Development on device side',
-      children: [
-        {
-          label: 'Config Device Connection String',
-          description: '',
-          detail: 'Set connection string on device to connection to Azure',
-          onClick: deviceConnectionStringConfigProvider
-        },
-        {
-          label: 'Device Compile',
-          description: '',
-          detail: 'Compile device side code',
-          onClick: deviceCompileProvider
-        },
-        {
-          label: 'Device Upload',
-          description: '',
-          detail: 'Upload code to device',
-          onClick: deviceUploadProvider
-        }
-      ]
     }
   ];
 
@@ -248,6 +245,11 @@ export async function activate(context: vscode.ExtensionContext) {
       vscode.commands.registerCommand('iotworkbench.mainMenu', async () => {
         renderMenu('IoT Workbench Project', menu);
       });
+  
+  const iotdeviceMenu =
+      vscode.commands.registerCommand('iotworkbench.device', async () => {
+        renderMenu('IoT Workbench: Device', menuForDevice);
+      });    
 
   const projectInit = vscode.commands.registerCommand(
       'iotworkbench.initializeProject', projectInitProvider);
@@ -257,16 +259,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const azureDeploy = vscode.commands.registerCommand(
       'iotworkbench.azureDeploy', azureDeployProvider);
-
-  const deviceCompile = vscode.commands.registerCommand(
-      'iotworkbench.deviceCompile', deviceCompileProvider);
-
-  const deviceUpload = vscode.commands.registerCommand(
-      'iotworkbench.deviceUpload', deviceUploadProvider);
-
-  const deviceConnectionStringConfig = vscode.commands.registerCommand(
-      'iotworkbench.deviceConnectionStringConfig',
-      deviceConnectionStringConfigProvider);
 
   const examples = vscode.commands.registerCommand(
       'iotworkbench.examples', examplesProvider);
@@ -290,12 +282,10 @@ export async function activate(context: vscode.ExtensionContext) {
       });
 
   context.subscriptions.push(iotdevMenu);
+  context.subscriptions.push(iotdeviceMenu);
   context.subscriptions.push(projectInit);
   context.subscriptions.push(azureProvision);
   context.subscriptions.push(azureDeploy);
-  context.subscriptions.push(deviceCompile);
-  context.subscriptions.push(deviceUpload);
-  context.subscriptions.push(deviceConnectionStringConfig);
   context.subscriptions.push(examples);
   context.subscriptions.push(functionInit);
   context.subscriptions.push(helpInit);
