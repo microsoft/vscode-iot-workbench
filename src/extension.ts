@@ -22,11 +22,8 @@ function filterMenu(commands: CommandItem[]) {
     const command = commands[i];
     let filtered = false;
     if (command.only) {
-      console.log(command.only);
       const hasRequiredConfig = ConfigHandler.get(command.only);
-      console.log(hasRequiredConfig);
       if (!hasRequiredConfig) {
-        console.log('Filtered', i);
         commands.splice(i, 1);
         i--;
         filtered = true;
@@ -189,7 +186,6 @@ export async function activate(context: vscode.ExtensionContext) {
       const functionLocation = path.join(
           vscode.workspace.workspaceFolders[0].uri.fsPath, '..',
           azureFunctionPath);
-      console.log(functionLocation);
 
       const azureFunction = new AzureFunction(functionLocation, outputChannel);
       const res = await azureFunction.initialize();
@@ -238,7 +234,7 @@ export async function activate(context: vscode.ExtensionContext) {
     {
       label: 'Azure Deploy',
       description: '',
-      detail: 'Deploy local code to Azure',
+      detail: 'Deploy function code to Azure',
       only: ConfigKey.functionPath,
       onClick: azureDeployProvider
     }

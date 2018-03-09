@@ -11,7 +11,7 @@ export interface CommandItem extends vscode.QuickPickItem {
    */
   children?: CommandItem[];
   /**
-   * Show the meu item when only the
+   * Show the menu item when only the
    * workspace configuration contains
    * the specific field.
    */
