@@ -54,8 +54,8 @@ async function renderMenu(
   for (let i = 0; i < commands.length; i++) {
     if (commands[i].label === selection.label &&
         commands[i].description === selection.description) {
-      if (commands[i].onClick !== undefined) {
-        executeCommand(commands[i].onClick);
+      if (commands[i].click !== undefined) {
+        executeCommand(commands[i].click);
       } else if (commands[i].children !== undefined) {
         renderMenu(commands[i].label, commands[i].children);
       }
@@ -201,19 +201,19 @@ export async function activate(context: vscode.ExtensionContext) {
       label: 'Config Device Connection String',
       description: '',
       detail: 'Set connection string on device to connection to Azure',
-      onClick: deviceConnectionStringConfigProvider
+      click: deviceConnectionStringConfigProvider
     },
     {
       label: 'Device Compile',
       description: '',
       detail: 'Compile device side code',
-      onClick: deviceCompileProvider
+      click: deviceCompileProvider
     },
     {
       label: 'Device Upload',
       description: '',
       detail: 'Upload code to device',
-      onClick: deviceUploadProvider
+      click: deviceUploadProvider
     }
   ];
 
@@ -222,21 +222,21 @@ export async function activate(context: vscode.ExtensionContext) {
       label: 'Azure Provision',
       description: '',
       detail: 'Provision Azure services',
-      onClick: projectInitProvider
+      click: azureProvisionProvider
     },
     {
       label: 'Create Azure Function',
       description: '',
       detail: 'Generate Azure Function code in local',
       only: ConfigKey.functionPath,
-      onClick: functionInitProvider
+      click: functionInitProvider
     },
     {
       label: 'Azure Deploy',
       description: '',
       detail: 'Deploy function code to Azure',
       only: ConfigKey.functionPath,
-      onClick: azureDeployProvider
+      click: azureDeployProvider
     }
   ];
 
@@ -250,13 +250,13 @@ export async function activate(context: vscode.ExtensionContext) {
           label: 'Initialize Project',
           description: '',
           detail: 'Create a new project',
-          onClick: projectInitProvider
+          click: projectInitProvider
         },
         {
           label: 'Example Projects',
           description: '',
           detail: 'Load an example project',
-          onClick: examplesProvider
+          click: examplesProvider
         }
       ]
     },
@@ -269,19 +269,19 @@ export async function activate(context: vscode.ExtensionContext) {
           label: 'Azure Provision',
           description: '',
           detail: 'Setup cloud services on Azure',
-          onClick: azureProvisionProvider
+          click: azureProvisionProvider
         },
         {
           label: 'Azure Deploy',
           description: '',
           detail: 'Deploy local code to Azure',
-          onClick: azureDeployProvider
+          click: azureDeployProvider
         },
         {
           label: 'Create Function',
           description: '',
           detail: 'Generate Azure Function code in local',
-          onClick: functionInitProvider
+          click: functionInitProvider
         }
       ]
     }
