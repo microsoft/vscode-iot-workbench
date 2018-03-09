@@ -172,7 +172,7 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   };
 
-  const menuForDevice: CommandItem[] =[
+  const menuForDevice: CommandItem[] = [
     {
       label: 'Config Device Connection String',
       description: '',
@@ -191,7 +191,7 @@ export async function activate(context: vscode.ExtensionContext) {
       detail: 'Upload code to device',
       onClick: deviceUploadProvider
     }
-  ]
+  ];
 
 
   const menu: CommandItem[] = [
@@ -245,11 +245,11 @@ export async function activate(context: vscode.ExtensionContext) {
       vscode.commands.registerCommand('iotworkbench.mainMenu', async () => {
         renderMenu('IoT Workbench Project', menu);
       });
-  
+
   const iotdeviceMenu =
       vscode.commands.registerCommand('iotworkbench.device', async () => {
         renderMenu('IoT Workbench: Device', menuForDevice);
-      });    
+      });
 
   const projectInit = vscode.commands.registerCommand(
       'iotworkbench.initializeProject', projectInitProvider);
