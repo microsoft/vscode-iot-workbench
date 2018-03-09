@@ -55,7 +55,7 @@ export async function activate(context: vscode.ExtensionContext) {
   // (console.error) This line of code will only be executed once when your
   // extension is activated
   console.log(
-      'Congratulations, your extension "vscode-iot-dev-env" is now active!');
+      'Congratulations, your extension "vscode-iot-workbench" is now active!');
 
   const outputChannel: vscode.OutputChannel =
       vscode.window.createOutputChannel('Azure IoT Workbench');

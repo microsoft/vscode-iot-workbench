@@ -15,14 +15,14 @@ import * as myExtension from '../src/extension';
 suite('IoT Workbench Tests', () => {
   test('should be present', () => {
     assert.ok(
-        vscode.extensions.getExtension('vsciot-vscode.vscode-iot-dev-env'));
+        vscode.extensions.getExtension('vsciot-vscode.vscode-iot-workbench'));
   });
 
   // tslint:disable-next-line:only-arrow-functions
   test('should be able to activate the extension', function(done) {
     this.timeout(60 * 1000);
     const extension =
-        vscode.extensions.getExtension('vsciot-vscode.vscode-iot-dev-env');
+        vscode.extensions.getExtension('vsciot-vscode.vscode-iot-workbench');
     if (!extension) {
       done('Failed to activate extension');
     } else if (!extension.isActive) {
