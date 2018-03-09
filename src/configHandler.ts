@@ -18,10 +18,6 @@ export class ConfigHandler {
       throw new Error('Key is empty.');
     }
 
-    if (!vscode.workspace.getConfiguration('IoTWorkbench').has(key)) {
-      return undefined;
-    }
-
     return vscode.workspace.getConfiguration('IoTWorkbench').get<T>(key);
   }
 }

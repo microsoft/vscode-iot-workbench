@@ -14,12 +14,37 @@ import {ExampleExplorer} from './exampleExplorer';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import {AzureFunction} from './Models/AzureFunction';
 import {CommandItem} from './Models/Interfaces/CommandItem';
+import {ConfigHandler} from './configHandler';
+import {ConfigKey} from './constants';
+
+function filterMenu(commands: CommandItem[]) {
+  for (let i = 0; i < commands.length; i++) {
+    const command = commands[i];
+    let filtered = false;
+    if (command.only) {
+      const hasRequiredConfig = ConfigHandler.get(command.only);
+      if (!hasRequiredConfig) {
+        commands.splice(i, 1);
+        i--;
+        filtered = true;
+      }
+    }
+
+    if (!filtered && command.children) {
+      command.children = filterMenu(command.children);
+    }
+  }
+  return commands;
+}
 
 async function renderMenu(
     parentLabel: string, commands: CommandItem[]|undefined) {
   if (commands === undefined) {
     return;
   }
+
+  commands = filterMenu(commands);
+
   const selection = await vscode.window.showQuickPick(
       commands, {ignoreFocusOut: true, placeHolder: parentLabel});
   if (!selection) {
@@ -161,7 +186,6 @@ export async function activate(context: vscode.ExtensionContext) {
       const functionLocation = path.join(
           vscode.workspace.workspaceFolders[0].uri.fsPath, '..',
           azureFunctionPath);
-      console.log(functionLocation);
 
       const azureFunction = new AzureFunction(functionLocation, outputChannel);
       const res = await azureFunction.initialize();
@@ -193,6 +217,28 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   ];
 
+  const menuForCloud: CommandItem[] = [
+    {
+      label: 'Azure Provision',
+      description: '',
+      detail: 'Provision Azure services',
+      onClick: projectInitProvider
+    },
+    {
+      label: 'Create Azure Function',
+      description: '',
+      detail: 'Generate Azure Function code in local',
+      only: ConfigKey.functionPath,
+      onClick: functionInitProvider
+    },
+    {
+      label: 'Azure Deploy',
+      description: '',
+      detail: 'Deploy function code to Azure',
+      only: ConfigKey.functionPath,
+      onClick: azureDeployProvider
+    }
+  ];
 
   const menu: CommandItem[] = [
     {
@@ -241,30 +287,21 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   ];
 
-  const iotdevMenu =
-      vscode.commands.registerCommand('iotworkbench.mainMenu', async () => {
-        renderMenu('IoT Workbench Project', menu);
-      });
-
   const iotdeviceMenu =
       vscode.commands.registerCommand('iotworkbench.device', async () => {
         renderMenu('IoT Workbench: Device', menuForDevice);
       });
 
+  const iotcloudMenu =
+      vscode.commands.registerCommand('iotworkbench.cloud', async () => {
+        renderMenu('IoT Workbench: Cloud', menuForCloud);
+      });
+
   const projectInit = vscode.commands.registerCommand(
       'iotworkbench.initializeProject', projectInitProvider);
 
-  const azureProvision = vscode.commands.registerCommand(
-      'iotworkbench.azureProvision', azureProvisionProvider);
-
-  const azureDeploy = vscode.commands.registerCommand(
-      'iotworkbench.azureDeploy', azureDeployProvider);
-
   const examples = vscode.commands.registerCommand(
       'iotworkbench.examples', examplesProvider);
-
-  const functionInit = vscode.commands.registerCommand(
-      'iotworkbench.initializeFunction', functionInitProvider);
 
   const helpInit = vscode.commands.registerCommand('iotworkbench.help', async () => {
     await vscode.commands.executeCommand(
@@ -281,13 +318,10 @@ export async function activate(context: vscode.ExtensionContext) {
         return;
       });
 
-  context.subscriptions.push(iotdevMenu);
   context.subscriptions.push(iotdeviceMenu);
+  context.subscriptions.push(iotcloudMenu);
   context.subscriptions.push(projectInit);
-  context.subscriptions.push(azureProvision);
-  context.subscriptions.push(azureDeploy);
   context.subscriptions.push(examples);
-  context.subscriptions.push(functionInit);
   context.subscriptions.push(helpInit);
   context.subscriptions.push(workbenchPath);
 }
