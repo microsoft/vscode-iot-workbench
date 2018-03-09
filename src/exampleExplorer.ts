@@ -130,7 +130,7 @@ export class ExampleExplorer {
     }
 
     let counter = 0;
-    const name = path.join(workbench, 'generated_examples', exampleName);
+    const name = path.join(workbench, 'examples', exampleName);
     let candidateName = name;
     while (true) {
       if (!utils.fileExistsSync(candidateName) &&
