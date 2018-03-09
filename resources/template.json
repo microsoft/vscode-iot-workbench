@@ -20,20 +20,6 @@
             "label": "basic_function",
             "type": "Function",
             "sketch": "simple_iothub.ino"
-        },
-        {
-            "description": "Blink user led",
-            "detail": "Blink user led",
-            "label": "blink",
-            "type": "Basic",
-            "sketch": "blink.ino"
-        },
-        {
-            "description": "Send data to IoT Hub",
-            "detail": "Send temperature sensor data to IoT Hub",
-            "label": "temperature",
-            "type": "IotHub",
-            "sketch": "sendTemperature.ino"
         }
     ]
 }
