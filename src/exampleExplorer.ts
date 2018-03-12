@@ -142,7 +142,7 @@ export class ExampleExplorer {
             {
               label: `Open an existing example`,
               description: '',
-              detail: `Folder exists: ${name}`
+              detail: `Example exists: ${name}`
             },
             {
               label: 'Generate a new example',
