@@ -172,7 +172,7 @@ export class AzureFunction implements Component, Provisionable {
 
         return true;
       } else {
-        throw new Error('Provision Azure Function failed.');
+        throw new Error('Unable to create Azure Function application. Please check the error and retry');
       }
     } catch (error) {
       throw error;
