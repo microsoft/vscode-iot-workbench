@@ -139,8 +139,16 @@ export class ExampleExplorer {
     if (fs.existsSync(workspaceFile)) {
       const selection = await vscode.window.showQuickPick(
           [
-            {label: `Open existing example`, description: ''},
-            {label: 'Generate a new example', description: ''}
+            {
+              label: `Open an existing example`,
+              description: '',
+              detail: `Folder exists: ${name}`
+            },
+            {
+              label: 'Generate a new example',
+              description: '',
+              detail: 'Create a new folder to generate the example'
+            }
           ],
           {
             ignoreFocusOut: true,
@@ -153,7 +161,7 @@ export class ExampleExplorer {
         return '';
       }
 
-      if (selection.label === 'Open existing example') {
+      if (selection.label === 'Open an existing example') {
         return name;
       }
     }
