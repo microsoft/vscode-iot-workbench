@@ -206,7 +206,7 @@ export class AZ3166Device implements Device {
       const settingsJSONFilePath =
           path.join(vscodeFolderPath, constants.settingsJsonFileName);
       const settingsJSONObj = {
-        'files.exclude': {'.build': true},
+        'files.exclude': {'.build': true, '.iotworkbenchproject': true},
         'C_Cpp.intelliSenseEngine': 'Tag Parser'
       };
 
