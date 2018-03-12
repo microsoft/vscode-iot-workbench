@@ -129,18 +129,67 @@ export class ExampleExplorer {
       utils.mkdirRecursivelySync(workbench);
     }
 
-    let counter = 0;
     const name = path.join(workbench, 'examples', exampleName);
-    let candidateName = name;
-    while (true) {
-      if (!utils.fileExistsSync(candidateName) &&
-          !utils.directoryExistsSync(candidateName)) {
-        utils.mkdirRecursivelySync(candidateName);
-        return candidateName;
-      }
-      counter++;
-      candidateName = `${name}_${counter}`;
+    if (!utils.fileExistsSync(name) && !utils.directoryExistsSync(name)) {
+      utils.mkdirRecursivelySync(name);
+      return name;
     }
+
+    const workspaceFile = path.join(name, 'project.code-workspace');
+    if (fs.existsSync(workspaceFile)) {
+      const selection = await vscode.window.showQuickPick(
+          [
+            {label: `Open existing example`, description: ''},
+            {label: 'Generate a new example', description: ''}
+          ],
+          {
+            ignoreFocusOut: true,
+            matchOnDescription: true,
+            matchOnDetail: true,
+            placeHolder: 'Select an option',
+          });
+
+      if (!selection) {
+        return '';
+      }
+
+      if (selection.label === 'Open existing example') {
+        return name;
+      }
+    }
+
+    const customizedName = await vscode.window.showInputBox({
+      prompt: 'Input example folder name',
+      ignoreFocusOut: true,
+      validateInput: (exampleName: string) => {
+        const name = path.join(workbench, 'examples', exampleName);
+        if (!utils.fileExistsSync(name) && !utils.directoryExistsSync(name)) {
+          if (!/^([a-z0-9_]|[a-z0-9_][-a-z0-9_.]*[a-z0-9_])$/i.test(
+                  exampleName)) {
+            return 'Folder name can only contain letters, numbers, "-" and ".", and cannot start or end with "-" or ".".';
+          }
+          return;
+        } else {
+          const items = fs.listSync(name);
+          if (items.length === 0) {
+            return;
+          }
+          return `${exampleName} exists, please use other folder name.`;
+        }
+      }
+    });
+
+    if (!customizedName) {
+      return '';
+    }
+
+    const customizedPath = path.join(workbench, 'examples', customizedName);
+    if (!utils.fileExistsSync(customizedPath) &&
+        !utils.directoryExistsSync(customizedPath)) {
+      utils.mkdirRecursivelySync(customizedPath);
+    }
+
+    return customizedPath;
   }
 
 
@@ -196,10 +245,22 @@ export class ExampleExplorer {
     const url = result[0].url;
     const fsPath = await this.GenerateExampleFolder(result[0].name);
 
-    if (!fsPath) {
+    if (fsPath === undefined) {
       channel.appendLine(
           'Unable to create folder for examples, please check the workbench settings.');
       return false;
+    }
+
+    if (!fsPath) {
+      return false;
+    }
+
+    const items = fs.listSync(fsPath);
+    if (items.length !== 0) {
+      await vscode.commands.executeCommand(
+          'vscode.openFolder',
+          vscode.Uri.file(path.join(fsPath, 'project.code-workspace')), true);
+      return true;
     }
 
     channel.appendLine('Downloading example package...');
