@@ -173,7 +173,8 @@ export async function activate(context: vscode.ExtensionContext) {
   const functionInitProvider = async () => {
     try {
       if (!vscode.workspace.workspaceFolders) {
-        throw new Error('No workspace open.');
+        throw new Error(
+            'Unable to find the root path, please open an IoT Workbench project.');
       }
 
       const azureFunctionPath =

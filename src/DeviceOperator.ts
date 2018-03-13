@@ -15,7 +15,11 @@ export class DeviceOperator {
     }
 
     const project = new IoTProject(context, channel);
-    project.load();
+    const result = await project.load();
+    if (!result) {
+      throw new Error(
+          'Unable to compile device code, please open an IoT Workbench project and retry.');
+    }
     await project.compile();
   }
 
@@ -27,7 +31,11 @@ export class DeviceOperator {
     }
 
     const project = new IoTProject(context, channel);
-    project.load();
+    const result = await project.load();
+    if (!result) {
+      throw new Error(
+          'Unable to upload device code, please open an IoT Workbench project and retry.');
+    }
     await project.upload();
   }
 
@@ -39,7 +47,11 @@ export class DeviceOperator {
     }
 
     const project = new IoTProject(context, channel);
-    project.load();
+    const result = await project.load();
+    if (!result) {
+      throw new Error(
+          'Unable to set device connection string, please open an IoT Workbench project and retry.');
+    }
     await project.setDeviceConnectionString();
   }
 }
