@@ -4,7 +4,6 @@ import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
-import {checkIoTWorkbenchProject} from '../utils';
 
 import {checkAzureLogin} from './Apis';
 import {AZ3166Device} from './AZ3166Device';
@@ -183,8 +182,6 @@ export class IoTProject {
   }
 
   async deploy(): Promise<boolean> {
-    checkIoTWorkbenchProject();
-
     let needDeploy = false;
     let azureLoggedIn = false;
 
@@ -318,8 +315,6 @@ export class IoTProject {
   }
 
   async setDeviceConnectionString(): Promise<boolean> {
-    checkIoTWorkbenchProject();
-
     for (const component of this.componentList) {
       if (component.getComponentType() === ComponentType.Device) {
         const device = component as Device;

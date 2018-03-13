@@ -16,7 +16,11 @@ export class AzureOperator {
     }
 
     const project = new IoTProject(context, channel);
-    project.load();
+    const result = await project.load();
+    if (!result) {
+      throw new Error(
+          'Unable to provision Azure objects, please open an IoT Workbench project and retry.');
+    }
     const status = await project.provision();
     return status;
   }
@@ -24,7 +28,11 @@ export class AzureOperator {
   async Deploy(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
     const project = new IoTProject(context, channel);
-    project.load();
+    const result = await project.load();
+    if (!result) {
+      throw new Error(
+          'Unable to deploy Azure objects, please open an IoT Workbench project and retry.');
+    }
     await project.deploy();
   }
 }
