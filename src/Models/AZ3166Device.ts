@@ -229,10 +229,6 @@ export class AZ3166Device implements Device {
       try {
         const content = fs.readFileSync(sketchTemplateFilePath).toString();
         fs.writeFileSync(newSketchFilePath, content);
-        if (newSketchFilePath) {
-          const newFileUri: vscode.Uri = vscode.Uri.file(newSketchFilePath);
-          vscode.window.showTextDocument(newFileUri);
-        }
       } catch (error) {
         throw new Error(`Create arduino sketch file failed: ${error.message}`);
       }
