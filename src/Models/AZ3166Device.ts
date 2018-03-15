@@ -4,6 +4,7 @@ import * as _ from 'lodash';
 import * as opn from 'opn';
 import * as os from 'os';
 import * as path from 'path';
+import {SerialPortLite} from 'serialport-lite';
 import {resolve} from 'url';
 import {error} from 'util';
 import * as vscode from 'vscode';
@@ -355,8 +356,17 @@ export class AZ3166Device implements Device {
       console.log(deviceConnectionString);
 
       // Set selected connection string to device
-      const res =
-          await this.flushDeviceConnectionString(deviceConnectionString);
+      let res: boolean;
+      const plat = os.platform();
+      if (plat === 'win32') {
+        res = await this.flushDeviceConnectionString(deviceConnectionString);
+      } else {
+        await vscode.window.showInformationMessage(
+            'Please hold down button A and then push and release the reset button to enter configuration mode.');
+        res =
+            await this.flushDeviceConnectionStringUnix(deviceConnectionString);
+      }
+
       if (res === false) {
         return false;
       } else {
@@ -367,6 +377,33 @@ export class AZ3166Device implements Device {
     } catch (error) {
       throw error;
     }
+  }
+
+  async flushDeviceConnectionStringUnix(connectionString: string):
+      Promise<boolean> {
+    return new Promise(
+        async (
+            resolve: (value: boolean) => void,
+            reject: (reason: Error) => void) => {
+          try {
+            const list = await SerialPortLite.list();
+            for (let i = 0; i < list.length; i++) {
+              const device = list[i];
+              if (device.vendorId ===
+                      Number(`0x${DeviceConfig.az3166ComPortVendorId}`) &&
+                  device.productId ===
+                      Number(`0x${DeviceConfig.az3166ComPortProductId}`)) {
+                const res = await SerialPortLite.write(
+                    device.port, `set_az_iothub "${connectionString}"\r`,
+                    115200);
+                return resolve(res);
+              }
+            }
+            return resolve(false);
+          } catch (error) {
+            return resolve(false);
+          }
+        });
   }
 
   async flushDeviceConnectionString(connectionString: string):

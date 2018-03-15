@@ -3,7 +3,7 @@
   "displayName": "Azure IoT Workbench",
   "description": "Azure IoT Workbench for Visual Studio Code",
   "version": "0.1.0",
-  "publisher": "vsciot-vscode",  
+  "publisher": "vsciot-vscode",
   "icon": "logo.png",
   "engines": {
     "vscode": "^1.18.0"
@@ -142,11 +142,12 @@
     "fs-plus": "^3.0.1",
     "lodash": "^4.17.4",
     "ms-rest": "^2.3.0",
+    "opn": "5.1.0",
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
+    "serialport-lite": "^0.1.2",
     "unzip": "^0.1.11",
-    "winreg": "^1.2.3",
-    "opn": "5.1.0"
+    "winreg": "^1.2.3"
   },
   "extensionDependencies": [
     "vsciot-vscode.azure-iot-toolkit",
