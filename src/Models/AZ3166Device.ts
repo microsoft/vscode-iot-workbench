@@ -361,8 +361,19 @@ export class AZ3166Device implements Device {
       if (plat === 'win32') {
         res = await this.flushDeviceConnectionString(deviceConnectionString);
       } else {
-        await vscode.window.showInformationMessage(
-            'Please hold down button A and then push and release the reset button to enter configuration mode.');
+        const selection = await vscode.window.showQuickPick(
+            [{
+              label:
+                  'Please hold down button A and then push and release the reset button to enter configuration mode.',
+              detail: '',
+              description: 'Click or press Enter to continue.'
+            }],
+            {
+              ignoreFocusOut: true,
+              matchOnDescription: true,
+              matchOnDetail: true,
+              placeHolder: 'Waiting to confirm to enter configuration mode'
+            });
         res =
             await this.flushDeviceConnectionStringUnix(deviceConnectionString);
       }
