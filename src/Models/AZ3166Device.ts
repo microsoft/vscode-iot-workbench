@@ -389,7 +389,10 @@ export class AZ3166Device implements Device {
             const list = await SerialPortLite.list();
             for (let i = 0; i < list.length; i++) {
               const device = list[i];
-              if (device.vendorId === 0x0483 && device.productId === 0x374b) {
+              if (device.vendorId ===
+                      Number(`0x${DeviceConfig.az3166ComPortVendorId}`) &&
+                  device.productId ===
+                      Number(`0x${DeviceConfig.az3166ComPortProductId}`)) {
                 const res = await SerialPortLite.write(
                     device.port, `set_az_iothub "${connectionString}"\r`,
                     115200);
