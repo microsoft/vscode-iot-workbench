@@ -15,7 +15,8 @@ import {IoTWorkbenchSettings} from './IoTSettings';
 import {AzureFunction} from './Models/AzureFunction';
 import {CommandItem} from './Models/Interfaces/CommandItem';
 import {ConfigHandler} from './configHandler';
-import {ConfigKey} from './constants';
+import {ConfigKey, EventNames} from './constants';
+import {TelemetryContext, TelemetryProperties, TelemetryMeasurements, TelemetryWorker} from './telemetry';
 
 function filterMenu(commands: CommandItem[]) {
   for (let i = 0; i < commands.length; i++) {
@@ -85,6 +86,9 @@ export async function activate(context: vscode.ExtensionContext) {
   const outputChannel: vscode.OutputChannel =
       vscode.window.createOutputChannel('Azure IoT Workbench');
 
+  // Initialize Telemetry
+  TelemetryWorker.Initialize(context);
+
   const iotProject = new IoTProject(context, outputChannel);
   if (vscode.workspace.workspaceFolders) {
     try {
@@ -103,13 +107,38 @@ export async function activate(context: vscode.ExtensionContext) {
   // Now provide the implementation of the command with  registerCommand
   // The commandId parameter must match the command field in package.json
 
-  const projectInitProvider = async () => {
+  const basicProvider = async (
+      eventName: string,
+      callback: (
+          context: vscode.ExtensionContext,
+          outputChannel: vscode.OutputChannel) => {}) => {
+    const start: number = Date.now();
+    const telemetryContext: TelemetryContext = {
+      properties: {result: 'Succeeded', error: '', errorMessage: ''},
+      measurements: {duration: 0}
+    };
+
     try {
-      await projectInitializer.InitializeProject(context, outputChannel);
+      await callback(context, outputChannel);
     } catch (error) {
+      telemetryContext.properties.result = 'Failed';
+      telemetryContext.properties.error = error.errorType;
+      telemetryContext.properties.errorMessage = error.message;
       ExceptionHelper.logError(outputChannel, error, true);
+    } finally {
+      const end: number = Date.now();
+      telemetryContext.measurements.duration = (end - start) / 1000;
+      TelemetryWorker.sendEvent(eventName, telemetryContext);
     }
   };
+
+  const projectInitProvider = async () => {
+    basicProvider(
+        EventNames.createNewProjectEvent,
+        async () =>
+            await projectInitializer.InitializeProject(context, outputChannel));
+  };
+
 
   const azureProvisionProvider = async () => {
     try {

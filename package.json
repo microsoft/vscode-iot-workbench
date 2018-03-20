@@ -5,6 +5,7 @@
   "version": "0.1.0",
   "publisher": "vsciot-vscode",
   "icon": "logo.png",
+  "aiKey": "5b869bc6-ca93-4f24-aa87-92871a3a616e",
   "engines": {
     "vscode": "^1.18.0"
   },
@@ -147,7 +148,8 @@
     "request-promise": "^4.2.2",
     "serialport-lite": "^0.1.2",
     "unzip": "^0.1.11",
-    "winreg": "^1.2.3"
+    "winreg": "^1.2.3",
+    "vscode-extension-telemetry": "^0.0.15"
   },
   "extensionDependencies": [
     "vsciot-vscode.azure-iot-toolkit",

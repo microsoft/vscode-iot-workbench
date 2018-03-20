@@ -13,3 +13,7 @@ export class DeviceConfig {
   static readonly az3166ComPortVendorId = '0483';
   static readonly az3166ComPortProductId = '374b';
 }
+
+export class EventNames {
+  static readonly createNewProjectEvent = 'IoTWorkbench.new';
+}
