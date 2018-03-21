@@ -39,6 +39,7 @@ const constants = {
   cppPropertiesFileName: 'c_cpp_properties.json',
   cppPropertiesFileNameMac: 'c_cpp_properties_macos.json',
   cppPropertiesFileNameWin: 'c_cpp_properties_win32.json',
+  outputPath: './build'
 };
 
 export class AZ3166Device implements Device {
@@ -192,7 +193,8 @@ export class AZ3166Device implements Device {
       const arduinoJSONObj = {
         'board': constants.boardInfo,
         'sketch': sketchFileName,
-        'configuration': constants.uploadMethod
+        'configuration': constants.uploadMethod,
+        'output': constants.outputPath
       };
 
       try {

@@ -99,9 +99,15 @@ export async function activate(context: vscode.ExtensionContext) {
   }
 
   const projectInitializer = new ProjectInitializer();
+  const projectInitializerBinder =
+      projectInitializer.InitializeProject.bind(projectInitializer);
+
   const deviceOperator = new DeviceOperator();
   const azureOperator = new AzureOperator();
+
   const exampleExplorer = new ExampleExplorer();
+  const initializeExampleBinder =
+      exampleExplorer.initializeExample.bind(exampleExplorer);
 
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with  registerCommand
@@ -110,7 +116,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const projectInitProvider = async () => {
     callWithTelemetry(
         EventNames.createNewProjectEvent, outputChannel, context,
-        projectInitializer.InitializeProject);
+        projectInitializerBinder);
   };
 
   const azureProvisionProvider = async () => {
@@ -145,8 +151,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const examplesProvider = async () => {
     callWithTelemetry(
-        EventNames.setDeviceConnectionStringEvent, outputChannel, context,
-        exampleExplorer.initializeExample);
+        EventNames.loadExampleEvent, outputChannel, context,
+        initializeExampleBinder);
   };
 
   const functionInitProvider = async () => {
