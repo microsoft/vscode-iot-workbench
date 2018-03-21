@@ -71,9 +71,11 @@ export class TelemetryWorker {
 
 export async function callWithTelemetry(
     eventName: string, outputChannel: vscode.OutputChannel,
+    context: vscode.ExtensionContext,
     callback: (
+        context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
         // tslint:disable-next-line:no-any
-        context: TelemetryContext) => {}): Promise<any> {
+        telemetrycontext: TelemetryContext) => any): Promise<any> {
   const start: number = Date.now();
   const telemetryContext: TelemetryContext = {
     properties: {result: 'Succeeded', error: '', errorMessage: ''},
@@ -81,7 +83,8 @@ export async function callWithTelemetry(
   };
 
   try {
-    return await Promise.resolve(callback(telemetryContext));
+    return await Promise.resolve(
+        callback(context, outputChannel, telemetryContext));
   } catch (error) {
     telemetryContext.properties.result = 'Failed';
     telemetryContext.properties.error = error.errorType;

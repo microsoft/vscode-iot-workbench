@@ -109,11 +109,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const projectInitProvider = async () => {
     callWithTelemetry(
-        EventNames.createNewProjectEvent, outputChannel,
-        async(telemetryContext: TelemetryContext): Promise<void> => {
-          await projectInitializer.InitializeProject(
-              context, outputChannel, telemetryContext);
-        });
+        EventNames.createNewProjectEvent, outputChannel, context,
+        projectInitializer.InitializeProject);
   };
 
 
