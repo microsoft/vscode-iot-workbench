@@ -204,8 +204,8 @@ export class ExampleExplorer {
   async initializeExample(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    const res =
-        await this.initializeExampleInternal(context, channel, telemetryContext);
+    const res = await this.initializeExampleInternal(
+        context, channel, telemetryContext);
 
     if (res) {
       vscode.window.showInformationMessage('Example load successfully.');
