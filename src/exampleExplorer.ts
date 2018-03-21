@@ -10,6 +10,7 @@ import {setInterval, setTimeout} from 'timers';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import * as utils from './utils';
 import {Board} from './Models/Interfaces/Board';
+import {TelemetryContext} from './telemetry';
 
 const GALLERY_INDEX =
     'https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/gallery/example_gallery.json';
@@ -200,10 +201,23 @@ export class ExampleExplorer {
     return customizedPath;
   }
 
-
   async initializeExample(
-      context: vscode.ExtensionContext,
-      channel: vscode.OutputChannel): Promise<boolean> {
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext) {
+    const res =
+        await this.initializeExample(context, channel, telemetryContext);
+
+    if (res) {
+      vscode.window.showInformationMessage('Example load successfully.');
+    } else {
+      vscode.window.showErrorMessage(
+          'Unable to load example. Please check output window for detailed information.');
+    }
+  }
+
+  private async initializeExampleInternal(
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext): Promise<boolean> {
     // Select board
     const boardItemList: vscode.QuickPickItem[] = [];
     const boardList = context.asAbsolutePath(
