@@ -16,7 +16,7 @@ import {AzureFunction} from './Models/AzureFunction';
 import {CommandItem} from './Models/Interfaces/CommandItem';
 import {ConfigHandler} from './configHandler';
 import {ConfigKey, EventNames} from './constants';
-import {TelemetryContext, TelemetryProperties, TelemetryMeasurements, TelemetryWorker} from './telemetry';
+import {TelemetryContext, callWithTelemetry, TelemetryWorker} from './telemetry';
 
 function filterMenu(commands: CommandItem[]) {
   for (let i = 0; i < commands.length; i++) {
@@ -107,36 +107,13 @@ export async function activate(context: vscode.ExtensionContext) {
   // Now provide the implementation of the command with  registerCommand
   // The commandId parameter must match the command field in package.json
 
-  const basicProvider = async (
-      eventName: string,
-      callback: (
-          context: vscode.ExtensionContext,
-          outputChannel: vscode.OutputChannel) => {}) => {
-    const start: number = Date.now();
-    const telemetryContext: TelemetryContext = {
-      properties: {result: 'Succeeded', error: '', errorMessage: ''},
-      measurements: {duration: 0}
-    };
-
-    try {
-      await callback(context, outputChannel);
-    } catch (error) {
-      telemetryContext.properties.result = 'Failed';
-      telemetryContext.properties.error = error.errorType;
-      telemetryContext.properties.errorMessage = error.message;
-      ExceptionHelper.logError(outputChannel, error, true);
-    } finally {
-      const end: number = Date.now();
-      telemetryContext.measurements.duration = (end - start) / 1000;
-      TelemetryWorker.sendEvent(eventName, telemetryContext);
-    }
-  };
-
   const projectInitProvider = async () => {
-    basicProvider(
-        EventNames.createNewProjectEvent,
-        async () =>
-            await projectInitializer.InitializeProject(context, outputChannel));
+    callWithTelemetry(
+        EventNames.createNewProjectEvent, outputChannel,
+        async(telemetryContext: TelemetryContext): Promise<void> => {
+          await projectInitializer.InitializeProject(
+              context, outputChannel, telemetryContext);
+        });
   };
 
 

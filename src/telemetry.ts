@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import TelemetryReporter from 'vscode-extension-telemetry';
+import {ExceptionHelper} from './exceptionHelper';
 
 interface PackageInfo {
   name: string;
@@ -65,5 +66,30 @@ export class TelemetryWorker {
     }
     this._reporter = new TelemetryReporter(
         packageInfo.name, packageInfo.version, packageInfo.aiKey);
+  }
+}
+
+export async function callWithTelemetry(
+    eventName: string, outputChannel: vscode.OutputChannel,
+    callback: (
+        // tslint:disable-next-line:no-any
+        context: TelemetryContext) => {}): Promise<any> {
+  const start: number = Date.now();
+  const telemetryContext: TelemetryContext = {
+    properties: {result: 'Succeeded', error: '', errorMessage: ''},
+    measurements: {duration: 0}
+  };
+
+  try {
+    return await Promise.resolve(callback(telemetryContext));
+  } catch (error) {
+    telemetryContext.properties.result = 'Failed';
+    telemetryContext.properties.error = error.errorType;
+    telemetryContext.properties.errorMessage = error.message;
+    ExceptionHelper.logError(outputChannel, error, true);
+  } finally {
+    const end: number = Date.now();
+    telemetryContext.measurements.duration = (end - start) / 1000;
+    TelemetryWorker.sendEvent(eventName, telemetryContext);
   }
 }

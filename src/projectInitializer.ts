@@ -10,6 +10,7 @@ import {DialogResponses} from './DialogResponses';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import * as utils from './utils';
 import {Board} from './Models/Interfaces/Board';
+import {TelemetryContext} from './telemetry';
 
 const constants = {
   templateFileName: 'template.json',
@@ -21,7 +22,8 @@ const constants = {
 
 export class ProjectInitializer {
   async InitializeProject(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext) {
     let rootPath: string;
     let openInNewWindow = false;
     if (!vscode.workspace.workspaceFolders) {
@@ -38,6 +40,7 @@ export class ProjectInitializer {
         console.log(`Selected folder: ${folderUri[0].fsPath}`);
         rootPath = folderUri[0].fsPath;
       } else {
+        telemetryContext.properties.result = 'Canceled';
         return;
       }
     } else if (vscode.workspace.workspaceFolders.length > 1) {
