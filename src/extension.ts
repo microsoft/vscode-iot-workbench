@@ -15,7 +15,8 @@ import {IoTWorkbenchSettings} from './IoTSettings';
 import {AzureFunction} from './Models/AzureFunction';
 import {CommandItem} from './Models/Interfaces/CommandItem';
 import {ConfigHandler} from './configHandler';
-import {ConfigKey} from './constants';
+import {ConfigKey, EventNames} from './constants';
+import {TelemetryContext, callWithTelemetry, TelemetryWorker} from './telemetry';
 
 function filterMenu(commands: CommandItem[]) {
   for (let i = 0; i < commands.length; i++) {
@@ -85,6 +86,9 @@ export async function activate(context: vscode.ExtensionContext) {
   const outputChannel: vscode.OutputChannel =
       vscode.window.createOutputChannel('Azure IoT Workbench');
 
+  // Initialize Telemetry
+  TelemetryWorker.Initialize(context);
+
   const iotProject = new IoTProject(context, outputChannel);
   if (vscode.workspace.workspaceFolders) {
     try {
@@ -104,97 +108,51 @@ export async function activate(context: vscode.ExtensionContext) {
   // The commandId parameter must match the command field in package.json
 
   const projectInitProvider = async () => {
-    try {
-      await projectInitializer.InitializeProject(context, outputChannel);
-    } catch (error) {
-      ExceptionHelper.logError(outputChannel, error, true);
-    }
+    callWithTelemetry(
+        EventNames.createNewProjectEvent, outputChannel, context,
+        projectInitializer.InitializeProject);
   };
 
   const azureProvisionProvider = async () => {
-    try {
-      const status = await azureOperator.Provision(context, outputChannel);
-      if (status) {
-        vscode.window.showInformationMessage('Azure provision succeeded.');
-      }
-    } catch (error) {
-      ExceptionHelper.logError(outputChannel, error, true);
-    }
+    callWithTelemetry(
+        EventNames.azureProvisionEvent, outputChannel, context,
+        azureOperator.Provision);
   };
 
   const azureDeployProvider = async () => {
-    try {
-      await azureOperator.Deploy(context, outputChannel);
-    } catch (error) {
-      ExceptionHelper.logError(outputChannel, error, true);
-    }
+    callWithTelemetry(
+        EventNames.azureDeployEvent, outputChannel, context,
+        azureOperator.Deploy);
   };
 
   const deviceCompileProvider = async () => {
-    try {
-      await deviceOperator.compile(context, outputChannel);
-    } catch (error) {
-      ExceptionHelper.logError(outputChannel, error, true);
-    }
+    callWithTelemetry(
+        EventNames.deviceCompileEvent, outputChannel, context,
+        deviceOperator.compile);
   };
 
   const deviceUploadProvider = async () => {
-    try {
-      await deviceOperator.upload(context, outputChannel);
-    } catch (error) {
-      ExceptionHelper.logError(outputChannel, error, true);
-    }
+    callWithTelemetry(
+        EventNames.deviceUploadEvent, outputChannel, context,
+        deviceOperator.upload);
   };
 
   const deviceConnectionStringConfigProvider = async () => {
-    try {
-      await deviceOperator.setConnectionString(context, outputChannel);
-    } catch (error) {
-      ExceptionHelper.logError(outputChannel, error, true);
-    }
+    callWithTelemetry(
+        EventNames.setDeviceConnectionStringEvent, outputChannel, context,
+        deviceOperator.setConnectionString);
   };
 
   const examplesProvider = async () => {
-    try {
-      const res =
-          await exampleExplorer.initializeExample(context, outputChannel);
-
-      if (res) {
-        vscode.window.showInformationMessage('Example load successfully.');
-      } else {
-        vscode.window.showErrorMessage(
-            'Unable to load example. Please check output window for detailed information.');
-      }
-    } catch (error) {
-      ExceptionHelper.logError(outputChannel, error, true);
-    }
+    callWithTelemetry(
+        EventNames.setDeviceConnectionStringEvent, outputChannel, context,
+        exampleExplorer.initializeExample);
   };
 
   const functionInitProvider = async () => {
-    try {
-      if (!vscode.workspace.workspaceFolders) {
-        throw new Error(
-            'Unable to find the root path, please open an IoT Workbench project.');
-      }
-
-      const azureFunctionPath =
-          vscode.workspace.getConfiguration('IoTWorkbench')
-              .get<string>('FunctionPath');
-      if (!azureFunctionPath) {
-        throw new Error('Get workspace configure file failed.');
-      }
-
-      const functionLocation = path.join(
-          vscode.workspace.workspaceFolders[0].uri.fsPath, '..',
-          azureFunctionPath);
-
-      const azureFunction = new AzureFunction(functionLocation, outputChannel);
-      const res = await azureFunction.initialize();
-      vscode.window.showInformationMessage(
-          res ? 'Function created.' : 'Function create failed.');
-    } catch (error) {
-      ExceptionHelper.logError(outputChannel, error, true);
-    }
+    callWithTelemetry(
+        EventNames.createAzureFunctionEvent, outputChannel, context,
+        azureOperator.CreateFunction);
   };
 
   const menuForDevice: CommandItem[] = [

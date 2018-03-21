@@ -5,10 +5,12 @@ import * as vscode from 'vscode';
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import {IoTProject} from './Models/IoTProject';
+import {TelemetryContext} from './telemetry';
 
 export class DeviceOperator {
   async compile(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext) {
     if (!vscode.workspace.rootPath) {
       throw new Error(
           'Unable to find the root path, please open an IoT Workbench project.');
@@ -24,7 +26,8 @@ export class DeviceOperator {
   }
 
   async upload(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext) {
     if (!vscode.workspace.rootPath) {
       throw new Error(
           'Unable to find the root path, please open an IoT Workbench project.');
@@ -40,7 +43,8 @@ export class DeviceOperator {
   }
 
   async setConnectionString(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext) {
     if (!vscode.workspace.rootPath) {
       throw new Error(
           'Unable to find the root path, please open an IoT Workbench project.');
