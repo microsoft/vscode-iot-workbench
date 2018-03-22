@@ -56,7 +56,7 @@ export class AzureOperator {
     }
 
     const azureFunctionsPath = vscode.workspace.getConfiguration('IoTWorkbench')
-                                  .get<string>('FunctionPath');
+                                   .get<string>('FunctionPath');
     if (!azureFunctionsPath) {
       throw new Error('Get workspace configure file failed.');
     }
@@ -68,6 +68,7 @@ export class AzureOperator {
     const azureFunctions = new AzureFunctions(functionLocation, channel);
     const res = await azureFunctions.initialize();
     vscode.window.showInformationMessage(
-        res ? 'Azure Functions created successfully.' : 'Failed to create Azure Functions.');
+        res ? 'Azure Functions created successfully.' :
+              'Failed to create Azure Functions.');
   }
 }
