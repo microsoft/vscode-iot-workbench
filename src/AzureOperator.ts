@@ -9,7 +9,7 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import {IoTProject} from './Models/IoTProject';
 import {TelemetryContext} from './telemetry';
-import {AzureFunction} from './Models/AzureFunction';
+import {AzureFunctions} from './Models/AzureFunctions';
 
 export class AzureOperator {
   async Provision(
@@ -47,7 +47,7 @@ export class AzureOperator {
     await project.deploy();
   }
 
-  async CreateFunction(
+  async createFunction(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     if (!vscode.workspace.workspaceFolders) {
@@ -55,19 +55,20 @@ export class AzureOperator {
           'Unable to find the root path, please open an IoT Workbench project.');
     }
 
-    const azureFunctionPath = vscode.workspace.getConfiguration('IoTWorkbench')
-                                  .get<string>('FunctionPath');
-    if (!azureFunctionPath) {
+    const azureFunctionsPath = vscode.workspace.getConfiguration('IoTWorkbench')
+                                   .get<string>('FunctionPath');
+    if (!azureFunctionsPath) {
       throw new Error('Get workspace configure file failed.');
     }
 
     const functionLocation = path.join(
         vscode.workspace.workspaceFolders[0].uri.fsPath, '..',
-        azureFunctionPath);
+        azureFunctionsPath);
 
-    const azureFunction = new AzureFunction(functionLocation, channel);
-    const res = await azureFunction.initialize();
+    const azureFunctions = new AzureFunctions(functionLocation, channel);
+    const res = await azureFunctions.initialize();
     vscode.window.showInformationMessage(
-        res ? 'Function created.' : 'Function create failed.');
+        res ? 'Azure Functions created successfully.' :
+              'Failed to create Azure Functions.');
   }
 }
