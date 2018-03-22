@@ -18,7 +18,7 @@
             "description": "",
             "detail": "Create project that connects to Azure IoT Hub and process device data further in Azure Functions.",
             "label": "With Azure Functions",
-            "type": "Function",
+            "type": "AzureFunctions",
             "sketch": "simple_iothub.ino"
         }
     ]

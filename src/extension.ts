@@ -15,7 +15,7 @@ import {ExceptionHelper} from './exceptionHelper';
 import {setTimeout} from 'timers';
 import {ExampleExplorer} from './exampleExplorer';
 import {IoTWorkbenchSettings} from './IoTSettings';
-import {AzureFunction} from './Models/AzureFunction';
+import {AzureFunctions} from './Models/AzureFunctions';
 import {CommandItem} from './Models/Interfaces/CommandItem';
 import {ConfigHandler} from './configHandler';
 import {ConfigKey, EventNames} from './constants';
@@ -160,8 +160,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const functionInitProvider = async () => {
     callWithTelemetry(
-        EventNames.createAzureFunctionEvent, outputChannel, context,
-        azureOperator.CreateFunction);
+        EventNames.createAzureFunctionsEvent, outputChannel, context,
+        azureOperator.createFunction);
   };
 
   const menuForDevice: CommandItem[] = [
@@ -193,16 +193,16 @@ export async function activate(context: vscode.ExtensionContext) {
       click: azureProvisionProvider
     },
     {
-      label: 'Create Azure Function',
+      label: 'Create Azure Functions',
       description: '',
-      detail: 'Generate Azure Function code in local',
+      detail: 'Generate Azure Functions code in local',
       only: ConfigKey.functionPath,
       click: functionInitProvider
     },
     {
       label: 'Azure Deploy',
       description: '',
-      detail: 'Deploy function code to Azure',
+      detail: 'Deploy Azure Functions code to Azure',
       only: ConfigKey.functionPath,
       click: azureDeployProvider
     }

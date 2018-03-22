@@ -10,7 +10,7 @@ import {ConfigKey} from '../constants';
 
 import {checkAzureLogin} from './Apis';
 import {AZ3166Device} from './AZ3166Device';
-import {AzureFunction} from './AzureFunction';
+import {AzureFunctions} from './AzureFunctions';
 import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Deployable} from './Interfaces/Deployable';
@@ -24,7 +24,7 @@ import {IoTHubDevice} from './IoTHubDevice';
 
 const constants = {
   deviceDefaultFolderName: 'Device',
-  functionDefaultFolderName: 'Function',
+  functionDefaultFolderName: 'Functions',
   workspaceConfigFilePath: 'project.code-workspace'
 };
 
@@ -97,7 +97,7 @@ export class IoTProject {
           vscode.workspace.workspaceFolders[0].uri.fsPath, '..', functionPath);
 
       if (functionLocation) {
-        const functionApp = new AzureFunction(functionLocation, this.channel);
+        const functionApp = new AzureFunctions(functionLocation, this.channel);
         this.componentList.push(functionApp);
       }
     }
@@ -258,7 +258,7 @@ export class IoTProject {
         this.componentList.push(iothub);
         break;
       }
-      case ProjectTemplateType.Function: {
+      case ProjectTemplateType.AzureFunctions: {
         const iothub = new IoTHub(this.channel);
 
         const functionDir = path.join(
@@ -270,7 +270,7 @@ export class IoTProject {
 
         workspace.folders.push({path: constants.functionDefaultFolderName});
 
-        const azureFunction = new AzureFunction(functionDir, this.channel);
+        const azureFunctions = new AzureFunctions(functionDir, this.channel);
         settings.projectsettings.push({
           name: ConfigKey.functionPath,
           value: constants.functionDefaultFolderName
@@ -280,7 +280,7 @@ export class IoTProject {
             constants.functionDefaultFolderName;
 
         this.componentList.push(iothub);
-        this.componentList.push(azureFunction);
+        this.componentList.push(azureFunctions);
         break;
       }
       default:

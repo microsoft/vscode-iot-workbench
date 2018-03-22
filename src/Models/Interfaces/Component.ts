@@ -4,7 +4,7 @@
 export enum ComponentType {
   Device = 1,
   IoTHub,
-  AzureFunction,
+  AzureFunctions,
   IoTHubDevice
 }
 
