@@ -39,7 +39,7 @@ const constants = {
   cppPropertiesFileName: 'c_cpp_properties.json',
   cppPropertiesFileNameMac: 'c_cpp_properties_macos.json',
   cppPropertiesFileNameWin: 'c_cpp_properties_win32.json',
-  outputPath: './build'
+  outputPath: './.build'
 };
 
 export class AZ3166Device implements Device {
