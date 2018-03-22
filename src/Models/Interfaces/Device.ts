@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 import {Compilable} from './Compilable';
 import {Component} from './Component';
 import {Uploadable} from './Uploadable';
