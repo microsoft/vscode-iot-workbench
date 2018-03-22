@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 import * as iothub from 'azure-iothub';
 import {clearInterval} from 'timers';
 import * as vscode from 'vscode';

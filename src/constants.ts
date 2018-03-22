@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 export class ConfigKey {
   static readonly devicePath = 'DevicePath';
   static readonly iotHubConnectionString = 'iothubConnectionString';

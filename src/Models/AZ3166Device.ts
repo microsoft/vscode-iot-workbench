@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 import {port} from '_debugger';
 import * as fs from 'fs-plus';
 import * as _ from 'lodash';
