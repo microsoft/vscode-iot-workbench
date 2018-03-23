@@ -658,6 +658,7 @@ export class AZ3166Device implements Device {
   private async generatePlatformLocal() {
     const plat = os.platform();
 
+    // TODO: Currently, we do not support portable Arduino installation.
     let _arduinoPackagePath = '';
     if (plat === 'win32') {
       _arduinoPackagePath = path.join(
@@ -672,10 +673,10 @@ export class AZ3166Device implements Device {
         path.join(_arduinoPackagePath, 'AZ3166', 'hardware', 'stm32f4');
 
     function getHashMacAsync() {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         getmac.getMac((err, macAddress) => {
           if (err) {
-            reject(error);
+            throw (err);
           }
           const hashMacAddress = crypto.createHash('sha256')
                                      .update(macAddress, 'utf8')
@@ -715,7 +716,7 @@ export class AZ3166Device implements Device {
       try {
         hashMacAddress = await getHashMacAsync();
       } catch (error) {
-        throw new Error(error.message);
+        throw error;
       }
       // Create the file of platform.local.txt
       const targetFileName =
@@ -728,7 +729,7 @@ export class AZ3166Device implements Device {
       try {
         fs.writeFileSync(targetFileName, content);
       } catch (e) {
-        throw new Error(e.message);
+        throw e;
       }
     }
   }
