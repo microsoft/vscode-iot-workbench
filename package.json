@@ -149,7 +149,8 @@
     "serialport-lite": "^0.1.2",
     "unzip": "^0.1.11",
     "winreg": "^1.2.3",
-    "vscode-extension-telemetry": "^0.0.15"
+    "vscode-extension-telemetry": "^0.0.15",
+    "getmac": "^1.2.1"
   },
   "extensionDependencies": [
     "vsciot-vscode.azure-iot-toolkit",

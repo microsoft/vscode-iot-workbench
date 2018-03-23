@@ -46,3 +46,11 @@ If you would like to help to build the best IoT experience with VS Code, you can
 
 ## Telemetry
 VS Code collects usage data and sends it to Microsoft to help improve our products and services. Read our [privacy statement](https://go.microsoft.com/fwlink/?LinkID=528096&clcid=0x409) to learn more. If you don’t wish to send usage data to Microsoft, you can set the `telemetry.enableTelemetry` setting to `false`. Learn more in our [FAQ](https://code.visualstudio.com/docs/supporting/faq#_how-to-disable-telemetry-reporting).
+
+Microsoft would like to collect data about how users use Azure IoT DevKit and some problems they encounter. Microsoft uses this information to improve our DevKit experience. Participation is voluntary and when you choose to participate, your device automatically sends information to Microsoft about how you use Azure IoT DevKit.
+
+To disable telemetry on Azure IoT Devkit，
+
+- Windows: set `-DENABLETRACE=0` in `C:\Users\{your name}\AppData\Local\Arduino15\packages\AZ3166\hardware\stm32f4\{version}\platform.local.txt`
+- macOS： set `-DENABLETRACE=0` in `~/Library/Arduino15/packages/AZ3166/hardware\stm32f4/{version}/platform.local.txt`
+

@@ -2,7 +2,9 @@
 // Licensed under the MIT License.
 
 import {port} from '_debugger';
+import * as crypto from 'crypto';
 import * as fs from 'fs-plus';
+import * as getmac from 'getmac';
 import * as _ from 'lodash';
 import * as opn from 'opn';
 import * as os from 'os';
@@ -42,7 +44,11 @@ const constants = {
   cppPropertiesFileName: 'c_cpp_properties.json',
   cppPropertiesFileNameMac: 'c_cpp_properties_macos.json',
   cppPropertiesFileNameWin: 'c_cpp_properties_win32.json',
-  outputPath: './.build'
+  outputPath: './.build',
+  platformLocalFileName: 'platform.local.txt',
+  cExtraFlag: 'compiler.c.extra_flags=-DCORRELATIONID="',
+  cppExtraFlag: 'compiler.cpp.extra_flags=-DCORRELATIONID="',
+  traceExtraFlag: ' -DENABLETRACE='
 };
 
 export class AZ3166Device implements Device {
@@ -137,6 +143,9 @@ export class AZ3166Device implements Device {
     } catch (error) {
       throw new Error(`Create cpp properties file failed: ${error.message}`);
     }
+
+    // Enable logging on IoT Devkit
+    await this.generatePlatformLocal();
 
     return true;
   }
@@ -245,6 +254,9 @@ export class AZ3166Device implements Device {
 
   async compile(): Promise<boolean> {
     try {
+      // Enable logging on IoT Devkit
+      await this.generatePlatformLocal();
+
       await vscode.commands.executeCommand('arduino.verify');
       return true;
     } catch (error) {
@@ -272,6 +284,8 @@ export class AZ3166Device implements Device {
           return false;
         }
       }
+      // Enable logging on IoT Devkit
+      await this.generatePlatformLocal();
 
       await vscode.commands.executeCommand('arduino.upload');
       return true;
@@ -639,5 +653,84 @@ export class AZ3166Device implements Device {
     }
     // For other OS platform, there is no need to install STLink Driver.
     return true;
+  }
+
+  private async generatePlatformLocal() {
+    const plat = os.platform();
+
+    // TODO: Currently, we do not support portable Arduino installation.
+    let _arduinoPackagePath = '';
+    if (plat === 'win32') {
+      _arduinoPackagePath = path.join(
+          process.env['USERPROFILE'], 'AppData', 'Local', 'Arduino15',
+          'packages');
+    } else if (plat === 'darwin') {
+      _arduinoPackagePath =
+          path.join(process.env.HOME, 'Library', 'Arduino15', 'packages');
+    }
+
+    const arduinoPackagePath =
+        path.join(_arduinoPackagePath, 'AZ3166', 'hardware', 'stm32f4');
+
+    function getHashMacAsync() {
+      return new Promise((resolve) => {
+        getmac.getMac((err, macAddress) => {
+          if (err) {
+            throw (err);
+          }
+          const hashMacAddress = crypto.createHash('sha256')
+                                     .update(macAddress, 'utf8')
+                                     .digest('hex');
+          resolve(hashMacAddress);
+        });
+      });
+    }
+
+    if (!fs.existsSync(arduinoPackagePath)) {
+      throw new Error(
+          'Unable to find the Arduino package path, please install the lastest Arduino package for Devkit.');
+    }
+
+    const files = fs.readdirSync(arduinoPackagePath);
+    for (let i = files.length - 1; i >= 0; i--) {
+      if (files[i] === '.DS_Store') {
+        files.splice(i, 1);
+      }
+    }
+
+    if (files.length === 0 || files.length > 1) {
+      throw new Error(`There are unexpected files or folders under ${
+          arduinoPackagePath}. Please clear the folder and reinstall the package for Devkit.`);
+    }
+
+    const directoryName = path.join(arduinoPackagePath, files[0]);
+    if (!fs.isDirectorySync(directoryName)) {
+      throw new Error(
+          'The Arduino package of Devkit is not installed. Please follow the guide to install it');
+    }
+
+    const fileName = path.join(directoryName, constants.platformLocalFileName);
+    if (!fs.existsSync(fileName)) {
+      const enableTrace = 1;
+      let hashMacAddress;
+      try {
+        hashMacAddress = await getHashMacAsync();
+      } catch (error) {
+        throw error;
+      }
+      // Create the file of platform.local.txt
+      const targetFileName =
+          path.join(directoryName, constants.platformLocalFileName);
+
+      const content = `${constants.cExtraFlag}${hashMacAddress}" ${
+                          constants.traceExtraFlag}${enableTrace}\r\n` +
+          `${constants.cppExtraFlag}${hashMacAddress}" ${
+                          constants.traceExtraFlag}${enableTrace}\r\n`;
+      try {
+        fs.writeFileSync(targetFileName, content);
+      } catch (e) {
+        throw e;
+      }
+    }
   }
 }
