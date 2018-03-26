@@ -28,7 +28,7 @@ Currently this extension supports the following operatings systems:
 ST-Link driver is required in Windows system. Please install it from [here](http://www.st.com/en/development-tools/stsw-link009.html).
 
 #### Install IoT DevKit Package
-1. Use `Ctrl+Shift+P` to open the command palette, type **Arduino**, and then find and select **Arduino: Board Manager**.
+1. Use `Ctrl + Shift + P` to open the command palette, type **Arduino**, and then find and select **Arduino: Board Manager**.
 
 2. Select **Additional URLs** at the lower right.
 
