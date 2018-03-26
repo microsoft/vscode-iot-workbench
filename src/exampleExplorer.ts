@@ -214,7 +214,7 @@ export class ExampleExplorer {
       if (res) {
         vscode.window.showInformationMessage('Example load successfully.');
       } else {
-        vscode.window.showWarningMessage('Example load Canceled.');
+        vscode.window.showWarningMessage('Example load canceled.');
       }
     } catch (error) {
       vscode.window.showErrorMessage(
@@ -274,7 +274,7 @@ export class ExampleExplorer {
     });
 
     if (!result) {
-      throw Error(`Unable to load the example with name:${
+      throw new Error(`Unable to load the example with name:${
           selection.label}, please retry.`);
     } else {
       telemetryContext.properties.Example = selection.label;
@@ -284,7 +284,7 @@ export class ExampleExplorer {
     const fsPath = await this.GenerateExampleFolder(result[0].name);
 
     if (fsPath === undefined) {
-      throw Error(
+      throw new Error(
           'Unable to create folder for examples, please check the workbench settings.');
     }
 
@@ -311,7 +311,7 @@ export class ExampleExplorer {
           vscode.Uri.file(path.join(fsPath, 'project.code-workspace')), true);
       return true;
     } else {
-      throw Error(
+      throw new Error(
           'Downloading example package failed. Please check your network settings.');
     }
   }

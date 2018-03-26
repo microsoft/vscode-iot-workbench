@@ -180,7 +180,7 @@ export class ProjectInitializer {
                 });
 
             if (!result) {
-              throw Error('Unable to load project template.');
+              throw new Error('Unable to load project template.');
             }
 
             const project = new IoTProject(context, channel);
