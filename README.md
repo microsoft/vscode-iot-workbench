@@ -43,7 +43,7 @@ ST-Link driver is required in Windows system. Please install it from [here](http
 
 * Create new IoT Workbench projects
   * Device only: Create project with device only code.
-  
+
   * With Azure IoT Hub: Create project that connects to Azure IoT Hub, such as sending sensor data to cloud.
 
   * With Azure Functions: Create project that connects to Azure IoT Hub and process device data further in Azure Functions.
@@ -72,7 +72,7 @@ There are a couple of ways you can contribute to this repo:
 - **Code**: Contribute bug fixes, features or design changes:
   - Clone the repository locally and open in VS Code.
   - Install [TSLint for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=eg2.tslint).
-  - Open the terminal (press `CTRL+`\`) and run `npm install`.
+  - Open the terminal (press `CTRL+\``) and run `npm install`.
   - To build, press `F1` and type in `Tasks: Run Build Task`.
   - Debug: press `F5` to start debugging the extension.
   - Run `gts check` and `gts fix` to follow TypeScript style guide.  
@@ -91,5 +91,5 @@ Microsoft would like to collect data about how users use Azure IoT DevKit and so
 To disable telemetry on Azure IoT Devkit，
 
 - Windows: set `-DENABLETRACE=0` in `C:\Users\{your name}\AppData\Local\Arduino15\packages\AZ3166\hardware\stm32f4\{version}\platform.local.txt`
-- macOS： set `-DENABLETRACE=0` in `~/Library/Arduino15/packages/AZ3166/hardware\stm32f4/{version}/platform.local.txt`
+- macOS： set `-DENABLETRACE=0` in `~/Library/Arduino15/packages/AZ3166/hardware/stm32f4/{version}/platform.local.txt`
 
