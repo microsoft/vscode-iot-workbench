@@ -207,14 +207,19 @@ export class ExampleExplorer {
   async initializeExample(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    const res = await this.initializeExampleInternal(
-        context, channel, telemetryContext);
+    try {
+      const res = await this.initializeExampleInternal(
+          context, channel, telemetryContext);
 
-    if (res) {
-      vscode.window.showInformationMessage('Example load successfully.');
-    } else {
+      if (res) {
+        vscode.window.showInformationMessage('Example load successfully.');
+      } else {
+        vscode.window.showWarningMessage('Example load canceled.');
+      }
+    } catch (error) {
       vscode.window.showErrorMessage(
           'Unable to load example. Please check output window for detailed information.');
+      throw error;
     }
   }
 
@@ -241,7 +246,11 @@ export class ExampleExplorer {
     });
 
     if (!boardSelection) {
+      telemetryContext.properties.errorMessage = 'Board selection canceled.';
+      telemetryContext.properties.result = 'Canceled';
       return false;
+    } else {
+      telemetryContext.properties.board = boardSelection.label;
     }
 
     const list = this.getExampleList();
@@ -253,7 +262,10 @@ export class ExampleExplorer {
     });
 
     if (!selection || !selection.detail) {
-      channel.appendLine('The operation of selecting example cancelled.');
+      channel.appendLine('The operation of selecting example canceled.');
+      telemetryContext.properties.errorMessage =
+          'The operation of selecting example canceled.';
+      telemetryContext.properties.result = 'Canceled';
       return false;
     }
 
@@ -262,18 +274,18 @@ export class ExampleExplorer {
     });
 
     if (!result) {
-      channel.appendLine(`Unable to load the example with name:${
+      throw new Error(`Unable to load the example with name:${
           selection.label}, please retry.`);
-      return false;
+    } else {
+      telemetryContext.properties.Example = selection.label;
     }
 
     const url = result[0].url;
     const fsPath = await this.GenerateExampleFolder(result[0].name);
 
     if (fsPath === undefined) {
-      channel.appendLine(
+      throw new Error(
           'Unable to create folder for examples, please check the workbench settings.');
-      return false;
     }
 
     if (!fsPath) {
@@ -299,9 +311,8 @@ export class ExampleExplorer {
           vscode.Uri.file(path.join(fsPath, 'project.code-workspace')), true);
       return true;
     } else {
-      channel.appendLine(
+      throw new Error(
           'Downloading example package failed. Please check your network settings.');
-      return false;
     }
   }
 }

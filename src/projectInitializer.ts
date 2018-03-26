@@ -43,6 +43,8 @@ export class ProjectInitializer {
         console.log(`Selected folder: ${folderUri[0].fsPath}`);
         rootPath = folderUri[0].fsPath;
       } else {
+        telemetryContext.properties.errorMessage =
+            'Folder selection canceled.';
         telemetryContext.properties.result = 'Canceled';
         return;
       }
@@ -55,11 +57,17 @@ export class ProjectInitializer {
       if (result === DialogResponses.yes) {
         const projectFolder = await this.GenerateProjectFolder();
         if (!projectFolder) {
+          telemetryContext.properties.errorMessage =
+              'Generate project folder canceled.';
+          telemetryContext.properties.result = 'Canceled';
           return;
         }
         rootPath = projectFolder;
         openInNewWindow = true;
       } else {
+        telemetryContext.properties.errorMessage =
+            'Initialize project folder canceled.';
+        telemetryContext.properties.result = 'Canceled';
         return;
       }
     } else {
@@ -77,11 +85,17 @@ export class ProjectInitializer {
       if (result === DialogResponses.yes) {
         const projectFolder = await this.GenerateProjectFolder();
         if (!projectFolder) {
+          telemetryContext.properties.errorMessage =
+              'Generate project folder canceled.';
+          telemetryContext.properties.result = 'Canceled';
           return;
         }
         rootPath = projectFolder;
         openInNewWindow = true;
       } else {
+        telemetryContext.properties.errorMessage =
+            'Empty folder selection canceled.';
+        telemetryContext.properties.result = 'Canceled';
         return;
       }
     }
@@ -120,7 +134,12 @@ export class ProjectInitializer {
                 });
 
             if (!boardSelection) {
+              telemetryContext.properties.errorMessage =
+                  'Board selection canceled.';
+              telemetryContext.properties.result = 'Canceled';
               return;
+            } else {
+              telemetryContext.properties.board = boardSelection.label;
             }
 
             // Template select
@@ -147,7 +166,12 @@ export class ProjectInitializer {
                 });
 
             if (!selection) {
+              telemetryContext.properties.errorMessage =
+                  'Project template selection canceled.';
+              telemetryContext.properties.result = 'Canceled';
               return;
+            } else {
+              telemetryContext.properties.template = selection.label;
             }
 
             const result =
@@ -156,7 +180,7 @@ export class ProjectInitializer {
                 });
 
             if (!result) {
-              return;
+              throw new Error('Unable to load project template.');
             }
 
             const project = new IoTProject(context, channel);
