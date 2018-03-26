@@ -7,8 +7,6 @@ Arduino IDE is required. Please install it from [here](https://www.arduino.cc/en
 - The supported Arduino IDE versions are 1.6.x and later.
 - The Windows Store's version of Arduino IDE is not supported because of the sandbox environment of Windows app.
 
-ST-Link driver is required in Windows system. Please install it from [here](http://www.st.com/en/development-tools/stsw-link009.html).
-
 ## Installation
 Open VS Code and press `F1` or `Ctrl + Shift + P` to open command palette, select **Install Extension** and click `install from VSIX...`.
 
@@ -22,7 +20,14 @@ Currently this extension supports the following operatings systems:
 - Windows 7 and later (32-bit and 64-bit)
 - macOS 10.10 and later
 
-## Prepare Development Environment
+## Board-Specific Settings
+
+### IoT DevKit
+
+#### Prerequisites
+ST-Link driver is required in Windows system. Please install it from [here](http://www.st.com/en/development-tools/stsw-link009.html).
+
+#### Install IoT DevKit Package
 1. Use `Ctrl+Shift+P` to open the command palette, type **Arduino**, and then find and select **Arduino: Board Manager**.
 
 2. Select **Additional URLs** at the lower right.
@@ -32,11 +37,45 @@ Currently this extension supports the following operatings systems:
  "arduino.additionalUrls": "https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/master/package_azureboard_index.json"
  ```
 
-4. In Board Manager, search for **az3166** and install the latest version.
+4. Refresh package indexes and then in Board Manager, search for **az3166** and install the latest version.
+
+## Features
+
+* Create new IoT Workbench projects
+  * Device only: Create project with device only code.
+  
+  * With Azure IoT Hub: Create project that connects to Azure IoT Hub, such as sending sensor data to cloud.
+
+  * With Azure Functions: Create project that connects to Azure IoT Hub and process device data further in Azure Functions.
+
+* Load existing IoT Workbench project of mini solutions.
+
+  * Get_started: Send sensor data from DevKit to Azure IoT Hub.
+
+  * DevKit_DPS: Automatically provision security enabled devices to Azure IoT Hub.
+
+  * ShakeShake: Use the motion sensor to detect shaking and find a tweet with specified topic.
+
+* Compile and upload device code.
+* Set device connection string.
+* Code snippet to improve develop experience.
 
 
 ## Privacy Statement
 The [Microsft Enterprise and Developer Privacy Statement](https://www.microsoft.com/en-us/privacystatement/EnterpriseDev/default.aspx) describes the privacy statement of this software.
+
+## Contributing
+There are a couple of ways you can contribute to this repo:
+
+- **Ideas, feature requests and bugs**: We are open to all ideas and we want to get rid of bugs! Use the Issues section to either report a new issue, provide your ideas or contribute to existing threads.
+- **Documentation**: Found a typo or strangely worded sentences? Submit a PR!
+- **Code**: Contribute bug fixes, features or design changes:
+  - Clone the repository locally and open in VS Code.
+  - Install [TSLint for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=eg2.tslint).
+  - Open the terminal (press `CTRL+`\`) and run `npm install`.
+  - To build, press `F1` and type in `Tasks: Run Build Task`.
+  - Debug: press `F5` to start debugging the extension.
+  - Run `gts check` and `gts fix` to follow TypeScript style guide.  
 
 ## Code of Conduct
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct). For more information please see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/#howadopt) or contact opencode@microsoft.com with any additional questions or comments.
