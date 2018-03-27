@@ -60,6 +60,11 @@ export class IoTWorkbenchSettings {
       const folderUri = await vscode.window.showOpenDialog(options);
       if (folderUri && folderUri[0]) {
         userWorkbenchPath = folderUri[0].fsPath;
+      } else {
+        if (showMessage) {
+          await vscode.window.showWarningMessage('Change workbench canceled.');
+        }
+        return userWorkbenchPath;
       }
     } else if (selection !== undefined) {
       userWorkbenchPath = selection.data;

@@ -43,8 +43,7 @@ export class ProjectInitializer {
         console.log(`Selected folder: ${folderUri[0].fsPath}`);
         rootPath = folderUri[0].fsPath;
       } else {
-        telemetryContext.properties.errorMessage =
-            'Folder selection canceled.';
+        telemetryContext.properties.errorMessage = 'Folder selection canceled.';
         telemetryContext.properties.result = 'Canceled';
         return;
       }
