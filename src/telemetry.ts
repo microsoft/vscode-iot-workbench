@@ -96,6 +96,11 @@ export async function callWithTelemetry(
   } finally {
     const end: number = Date.now();
     telemetryContext.measurements.duration = (end - start) / 1000;
-    TelemetryWorker.sendEvent(eventName, telemetryContext);
+    try{
+      TelemetryWorker.sendEvent(eventName, telemetryContext);
+    }
+    catch{
+      // If sending telemetry failed, skip the error to avoid blocking user.
+    }
   }
 }
