@@ -46,29 +46,4 @@ export class AzureOperator {
     }
     await project.deploy();
   }
-
-  async createFunction(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext) {
-    if (!vscode.workspace.workspaceFolders) {
-      throw new Error(
-          'Unable to find the root path, please open an IoT Workbench project.');
-    }
-
-    const azureFunctionsPath = vscode.workspace.getConfiguration('IoTWorkbench')
-                                   .get<string>('FunctionPath');
-    if (!azureFunctionsPath) {
-      throw new Error('Get workspace configure file failed.');
-    }
-
-    const functionLocation = path.join(
-        vscode.workspace.workspaceFolders[0].uri.fsPath, '..',
-        azureFunctionsPath);
-
-    const azureFunctions = new AzureFunctions(functionLocation, channel);
-    const res = await azureFunctions.initialize();
-    vscode.window.showInformationMessage(
-        res ? 'Azure Functions created successfully.' :
-              'Failed to create Azure Functions.');
-  }
 }
