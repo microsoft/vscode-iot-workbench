@@ -1,0 +1,47 @@
+language: node_js
+
+node_js:
+- 'node'
+
+os:
+- linux
+dist: trusty # using Ubuntu 14.04.5 LTS
+
+branches:
+  only:
+  - master
+  - /v?[0-9]+\.[0-9]+\.[0-9]+(.*)?/
+
+env:
+  global:
+    - ISPRODTAG=^v?[0-9]+\.[0-9]+\.[0-9]+$
+
+install:
+- npm install -g vsce
+- npm install -g typescript
+- npm install -g gts
+- npm install
+
+script:
+- gts check
+- vsce package
+
+deploy:
+  # deploy to github release
+  - provider: releases
+    api_key: $GIT_TOKEN
+    file_glob: true
+    file: "*.vsix"
+    skip_cleanup: true
+    on:
+      tags: true
+      all_branches: true
+  # deploy to vscode extension market
+  - provider: script  
+    script: vsce publish -p $VSCE_TOKEN --packagePath *.vsix
+    skip_cleanup: true
+    on:
+      tags: true
+      all_branches: true
+      # if it's a PROD tag (something like 1.0.0), then publish extension to market.
+      condition: "$TRAVIS_TAG =~ $ISPRODTAG"
