@@ -29,3 +29,8 @@ export class EventNames {
       'IoTWorkbench.SetDeviceConnectionString';
   static readonly loadExampleEvent = 'IoTWorkbench.loadExample';
 }
+
+export class ContentView {
+  static readonly workbenchContentProtocol = 'iot-workbench';
+  static readonly workbenchExampleURI = 'iot-workbench://example';
+}
