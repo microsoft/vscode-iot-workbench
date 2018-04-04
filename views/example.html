@@ -14,7 +14,8 @@ body {
 
 ul {
   padding: 0;
-  margin-right: -20px;
+  margin: auto;
+  width: 1700px;
 }
 
 ul:after {
@@ -130,6 +131,30 @@ ul > li > .body > .buttons > button {
 
 ul > li > .body > .buttons > button:hover {
   background: #55d2fc;
+}
+
+@media (min-width: 1380px) and (max-width: 1719px) {
+  ul {
+    width: 1360px;
+  }
+}
+
+@media (min-width: 1040px) and (max-width: 1379px) {
+  ul {
+    width: 1020px;
+  }
+}
+
+@media (min-width: 700px) and (max-width: 1039px) {
+  ul {
+    width: 680px;
+  }
+}
+
+@media (max-width: 699px) {
+  ul {
+    width: 340px;
+  }
 }
 </style>
 <script src="vue.js"></script>
