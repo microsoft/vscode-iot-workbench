@@ -12,12 +12,9 @@ import unzip = require('unzip');
 import {setInterval, setTimeout} from 'timers';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import * as utils from './utils';
-import {Board} from './Models/Interfaces/Board';
+import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {TelemetryContext} from './telemetry';
-
-const GALLERY_INDEX =
-    'https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/gallery/example_gallery.json';
-
+import {ContentView} from './constants';
 
 const constants = {
   boardListFileName: 'boardlist.json',
@@ -26,6 +23,8 @@ const constants = {
 
 export class ExampleExplorer {
   private exampleList: Example[] = [];
+  private _exampleName = '';
+  private _exampleUrl = '';
 
   private async moveTempFiles(fsPath: string) {
     const tempPath = path.join(fsPath, '.temp');
@@ -102,24 +101,6 @@ export class ExampleExplorer {
             reject(error);
           });
         });
-  }
-
-  private async getExampleList(): Promise<vscode.QuickPickItem[]> {
-    if (!this.exampleList.length) {
-      this.exampleList =
-          (JSON.parse(await request(GALLERY_INDEX).promise() as string)) as
-          Example[];
-    }
-
-    const itemList: vscode.QuickPickItem[] = [];
-    this.exampleList.forEach((item: Example) => {
-      itemList.push({
-        label: item.name,
-        description: item.description,
-        detail: item.detail
-      });
-    });
-    return itemList;
   }
 
   private async GenerateExampleFolder(exampleName: string) {
@@ -204,35 +185,18 @@ export class ExampleExplorer {
     return customizedPath;
   }
 
-  async initializeExample(
+  async selectBoard(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    try {
-      const res = await this.initializeExampleInternal(
-          context, channel, telemetryContext);
-
-      if (res) {
-        vscode.window.showInformationMessage('Example load successfully.');
-      } else {
-        vscode.window.showWarningMessage('Example load canceled.');
-      }
-    } catch (error) {
-      vscode.window.showErrorMessage(
-          'Unable to load example. Please check output window for detailed information.');
-      throw error;
-    }
-  }
-
-  private async initializeExampleInternal(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext): Promise<boolean> {
-    // Select board
-    const boardItemList: vscode.QuickPickItem[] = [];
+    const boardItemList: BoardQuickPickItem[] = [];
     const boardList = context.asAbsolutePath(
         path.join(constants.resourceFolderName, constants.boardListFileName));
     const boardsJson = require(boardList);
     boardsJson.boards.forEach((board: Board) => {
       boardItemList.push({
+        name: board.name,
+        id: board.id,
+        platform: board.platform,
         label: board.name,
         description: board.platform,
       });
@@ -253,35 +217,48 @@ export class ExampleExplorer {
       telemetryContext.properties.board = boardSelection.label;
     }
 
-    const list = this.getExampleList();
-    const selection = await vscode.window.showQuickPick(list, {
-      ignoreFocusOut: true,
-      matchOnDescription: true,
-      matchOnDetail: true,
-      placeHolder: 'Select an example',
-    });
+    vscode.commands.executeCommand(
+        'vscode.previewHtml',
+        ContentView.workbenchExampleURI + '?' + boardSelection.id,
+        vscode.ViewColumn.Two, 'IoT Workbench Examples');
+    return true;
+  }
 
-    if (!selection || !selection.detail) {
-      channel.appendLine('The operation of selecting example canceled.');
-      telemetryContext.properties.errorMessage =
-          'The operation of selecting example canceled.';
-      telemetryContext.properties.result = 'Canceled';
+  async initializeExample(
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext) {
+    try {
+      const res = await this.initializeExampleInternal(
+          context, channel, telemetryContext);
+
+      if (res) {
+        vscode.window.showInformationMessage('Example load successfully.');
+      } else {
+        vscode.window.showWarningMessage('Example load canceled.');
+      }
+    } catch (error) {
+      vscode.window.showErrorMessage(
+          'Unable to load example. Please check output window for detailed information.');
+      throw error;
+    }
+  }
+
+  setSelectedExample(name: string, url: string) {
+    this._exampleName = name;
+    this._exampleUrl = url;
+  }
+
+  private async initializeExampleInternal(
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext): Promise<boolean> {
+    if (!this._exampleName || !this._exampleUrl) {
       return false;
     }
 
-    const result = this.exampleList.filter((item: Example) => {
-      return item.name === selection.label;
-    });
+    telemetryContext.properties.Example = this._exampleName;
 
-    if (!result) {
-      throw new Error(`Unable to load the example with name:${
-          selection.label}, please retry.`);
-    } else {
-      telemetryContext.properties.Example = selection.label;
-    }
-
-    const url = result[0].url;
-    const fsPath = await this.GenerateExampleFolder(result[0].name);
+    const url = this._exampleUrl;
+    const fsPath = await this.GenerateExampleFolder(this._exampleName);
 
     if (fsPath === undefined) {
       throw new Error(

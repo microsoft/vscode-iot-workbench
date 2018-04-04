@@ -2,6 +2,7 @@
     "boards": [
         {
             "name": "IoT DevKit",
+            "id": "devkit",
             "platform": "Arduino"
         }
     ]
