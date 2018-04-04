@@ -220,7 +220,7 @@ export class ExampleExplorer {
     vscode.commands.executeCommand(
         'vscode.previewHtml',
         ContentView.workbenchExampleURI + '?' + boardSelection.id,
-        vscode.ViewColumn.Two, 'IoT Workbench Examples');
+        vscode.ViewColumn.One, 'IoT Workbench Examples');
     return true;
   }
 

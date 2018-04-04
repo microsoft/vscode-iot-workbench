@@ -2,6 +2,19 @@
 <html>
 <head>
 <style>
+::-webkit-scrollbar {
+    width: 10px;
+    background: white;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #AAA;
+    border: 2px solid white;
+    border-radius: 5px;
+}
+
+[v-cloak] { display: none }
+
 * {
   box-sizing: border-box;
 }
@@ -10,39 +23,49 @@ body {
   margin: 20px;
   background: white;
   font-family: "Segoe UI",-apple-system,".SFNSText-Regular","San Francisco","Helvetica Neue","Lucida Grande",Arial,sans-serif;
+  text-align: center;
+  min-width: 700px;
+  cursor: default;
 }
 
-ul {
-  padding: 0;
-  margin: auto;
+#main {
   width: 1700px;
+  display: inline-block;
+  vertical-align: top;
+  padding-right: 20px;
 }
 
-ul:after {
+ul.example-list {
+  padding: 0;
+  margin: 0;
+  margin-right: -20px;
+  margin-bottom: -20px;
+}
+
+ul.example-list:after {
   content: "";
   display: block;
   clear: both;
 }
 
-ul > li {
+ul.example-list > li {
   list-style: none;
   width: 320px;
   margin-right: 20px;
   margin-bottom: 20px;
   float: left;
+  text-align: left;
 }
 
-ul > li > .header {
+ul.example-list > li > .header {
   height: 185px;
   width: 100%;
   position: relative;
   overflow: hidden;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-  background: #ccc;
 }
 
-ul > li > .header > .difficulty {
+#featured > .difficulty,
+ul.example-list > li > .header > .difficulty {
   position: absolute;
   left: 14px;
   top: 12px;
@@ -51,108 +74,278 @@ ul > li > .header > .difficulty {
   border-radius: 2px;
   font-size: 11px;
   font-weight: 700;
+  z-index: 10;
 }
 
-ul > li > .header > .difficulty.easy {
+#featured > .difficulty.easy,
+ul.example-list > li > .header > .difficulty.easy {
   background: rgb(143, 195, 31);
 }
 
-ul > li > .header > .difficulty.medium {
+#featured > .difficulty.medium,
+ul.example-list > li > .header > .difficulty.medium {
   background: rgb(249, 143, 64);
 }
 
-ul > li > .header > .difficulty.hard {
+#featured > .difficulty.hard,
+ul.example-list > li > .header > .difficulty.hard {
   background: rgb(240, 90, 45);
 }
 
-ul > li > .header > .difficulty.easy:before {
+#featured > .difficulty.easy:before,
+ul.example-list > li > .header > .difficulty.easy:before {
   content: "EASY"
 }
 
-ul > li > .header > .difficulty.medium:before {
+#featured > .difficulty.medium:before,
+ul.example-list > li > .header > .difficulty.medium:before {
   content: "MEDIUM"
 }
 
-ul > li > .header > .difficulty.hard:before {
+#featured > .difficulty.hard:before,
+ul.example-list > li > .header > .difficulty.hard:before {
   content: "HARD"
 }
 
-ul > li > .header > img {
+ul.example-list > li > .header > img {
   width: 100%;
 }
 
-ul > li > .body {
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
-  border: 1px solid #ccc;
+ul.example-list > li > .body {
+  border: 1px solid #ddd;
   border-top: none;
-  padding: 10px;
+  padding: 20px;
 }
 
-ul > li > .body > h2 {
+ul.example-list > li > .body > h2 {
   margin-top: 0;
   font-size: 18px;
   font-weight: 500;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-ul > li > .body > .description {
+ul.example-list > li > .body > .description {
   font-size: 14px;
-  height: 80px;
+  height: 58px;
   padding-bottom: 10px;
+  word-break: break-all;
+  hyphens: auto;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-ul > li > .body > .services {
+ul.example-list > li > .body > .services {
   height: 34px;
 }
 
-ul > li > .body > .services > img {
+ul.example-list > li > .body > .services > img {
   width: 24px;
   height: 24px;
   margin-right: 12px;
 }
 
-ul > li > .body > .buttons {
-  text-align: right;
-  padding-bottom: 10px;
-}
-
-ul > li > .body > .buttons > button {
-  background: #23c7ff;
-  color: white;
-  border: none;
+#featured > .body  > .buttons > button,
+ul.example-list > li > .body > .buttons > button {
   padding: 10px 15px;
   cursor: pointer;
   outline: none;
+  margin-right: 10px;
 }
 
-ul > li > .body > .buttons > button:hover {
-  background: #55d2fc;
+#featured > .body  > .buttons > button {
+  background: #069;
+  color: white;
+  border: 1px solid #069;
 }
 
-@media (min-width: 1380px) and (max-width: 1719px) {
-  ul {
+ul.example-list > li > .body > .buttons > button {
+  background: white;
+  color: #069;
+  border: 1px solid #069;
+}
+
+#featured > .body  > .buttons > button:hover,
+ul.example-list > li > .body > .buttons > button:hover {
+  background: #66a3c2;
+  color: white;
+  border: 1px solid #66a3c2;
+}
+
+aside {
+  width: 300px;
+  height: 500px;
+  display: inline-block;
+  vertical-align: top;
+  color: gray;
+  text-align: left;
+}
+
+#quick-links {
+  padding: 20px;
+  background: #eee;
+  margin-bottom: 20px;
+}
+
+#quick-links > h1 {
+  font-weight: 400;
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: black;
+}
+
+#quick-links > ul.links {
+  padding: 0;
+  margin: 0;
+}
+
+#quick-links > ul.links > li {
+  list-style: none;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+#quick-links > ul.links > li:hover {
+  text-decoration: underline;
+}
+
+#blog {
+  margin-bottom: 20px;
+}
+
+#blog > ul.blog {
+  margin: 0;
+  padding: 0 20px;
+  border: 1px solid #ddd;
+}
+
+#blog > ul.blog > li {
+  list-style: none;
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+#blog > ul.blog > li:last-child {
+  border: none;
+}
+
+#blog > ul.blog > li > h2 {
+  font-size: 17px;
+  font-weight: 500;
+  color: #555;
+  margin: 0;
+  margin-bottom: 10px;
+  cursor: pointer;
+  word-break: break-all;
+  hyphens: auto;
+}
+
+#blog > ul.blog > li > h2:hover {
+  text-decoration: underline;
+}
+
+#blog > ul.blog > li > p {
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 0;
+  margin-top: 10px;
+  display: none;
+}
+
+#blog > ul.blog > li:first-child > p {
+  display: block;
+}
+
+#blog > ul.blog > li > .date {
+  font-size: 13px;
+  margin: 0;
+}
+
+#version {
+  margin-bottom: 20px;
+}
+
+#version > h1 {
+  margin: 0;
+  font-weight: 400;
+  font-size: 18px;
+  text-align: right;
+  color: black;
+  cursor: pointer;
+}
+
+#version > h1:hover {
+  text-decoration: underline;
+}
+
+#featured {
+  width: 100%;
+  height: 380px;
+  position: relative;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+#featured:before {
+  content: "";
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+  z-index: 1;
+}
+
+#featured > img {
+  min-width: 100%;
+  min-height: 100%;
+}
+
+ul.example-list > li:hover > .header > img,
+#featured:hover > img {
+  opacity: 0.8;
+}
+
+#featured > .body {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 100px 20px 20px 20px;  
+  text-align: left;
+  z-index: 10;
+  color: white;
+}
+
+#featured > .body > h2 {
+  font-weight: 400;
+}
+
+#featured > .body > .description {
+  margin-bottom: 20px;
+  max-width: 500px;
+}
+
+@media (min-width: 1720px) and (max-width: 2059px) {
+  #main {
     width: 1360px;
   }
 }
 
-@media (min-width: 1040px) and (max-width: 1379px) {
-  ul {
+@media (min-width: 1380px) and (max-width: 1719px) {
+  #main {
     width: 1020px;
   }
 }
 
-@media (min-width: 700px) and (max-width: 1039px) {
-  ul {
+@media (min-width: 1040px) and (max-width: 1379px) {
+  #main {
     width: 680px;
   }
 }
 
-@media (max-width: 699px) {
-  ul {
+@media (max-width: 1039px) {
+  #main {
     width: 340px;
   }
 }
@@ -160,20 +353,62 @@ ul > li > .body > .buttons > button:hover {
 <script src="vue.js"></script>
 </head>
 <body>
-<ul id="example">
-<li v-for="example in examples">
-    <div class="header">
-      <span v-bind:class="'difficulty ' + example.difficulty"></span>
-      <img v-bind:src="example.image">
-    </div>
+<div id="example" v-cloak>
+<div id="main">
+  <div id="featured" v-if="featuredExample">
+    <span v-bind:class="'difficulty ' + featuredExample.difficulty"></span>
+    <img v-bind:src="featuredExample.image">
     <div class="body">
-      <h2>{{ example.name }}</h2>
-      <div class="description">{{ example.description }}</div>
-      <div class="services" v-html="getServiceImage(example.services)"></div>
-      <div class="buttons"><button v-on:click="callAPI(example.name, example.url)">CREATE</button></div>
+      <h2>{{ featuredExample.name }}</h2>
+      <div class="description">{{ featuredExample.description }}</div>
+      <div class="buttons">
+        <button v-on:click="openLink(example.totural)">View Toturial</button>
+        <button v-on:click="callAPI(example.name, example.url)">Try</button>
+      </div>
     </div>
-</li>
-</ul>
+  </div>
+  <ul class="example-list">
+    <li v-for="example in examples">
+      <div class="header">
+        <span v-bind:class="'difficulty ' + example.difficulty"></span>
+        <img v-bind:src="example.image">
+      </div>
+      <div class="body">
+        <h2>{{ example.name }}</h2>
+        <div class="description">{{ example.description }}</div>
+        <div class="buttons">
+          <button v-on:click="openLink(example.totural)">View Toturial</button>
+          <button v-on:click="callAPI(example.name, example.url)">Try</button>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>
+<aside>
+<div id="quick-links">
+  <h1>Quick links</h1>
+  <ul class="links">
+    <li v-on:click="openLink('https://microsoft.github.io/azure-iot-developer-kit/docs/apis/arduino-language-reference/')">API Reference</li>
+    <li v-on:click="openLink('https://microsoft.github.io/azure-iot-developer-kit/docs/faq/')">FAQ</li>
+    <li v-on:click="openLink('https://github.com/Microsoft/devkit-sdk/issues/new')">Report Issue</li>
+    <li v-on:click="openLink('https://github.com/microsoft/devkit-sdk')">Follow: GitHub</li>
+    <li v-on:click="openLink('https://blogs.msdn.microsoft.com/iotdev/feed/')">Subscript: Feed</li>
+  </ul>
+</div>
+<div id="blog" v-if="blogs.length">
+  <ul class="blog">
+    <li v-for="blog in blogs">
+      <h2 v-on:click="openLink(blog.link)">{{ blog.title }}</h2>
+      <div class="date">{{ blog.date }}</div>
+      <p>{{ blog.description }}</p>
+    </li>
+  </ul>
+</div>
+<div id="version">
+  <h1 v-on:click="openLink('https://microsoft.github.io/azure-iot-developer-kit/versions/')">{{ version }}</h1>
+</div>
+</aside>
+</div>
 <script src="example.js"></script>
 </body>
 </html>
