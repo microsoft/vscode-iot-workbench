@@ -104,7 +104,12 @@ export class AzureFunctions implements Component, Provisionable {
     try {
       await vscode.commands.executeCommand(
           'azureFunctions.createNewProject', azureFunctionsPath, 'C#Script',
-          '~1', false /* openFolder */);
+          '~1', false /* openFolder */, 'IoTHubTrigger-CSharp',
+          'IoTHubTrigger1', {
+            connection: 'eventHubConnectionString',
+            path: '%eventHubConnectionPath%',
+            consumerGroup: '$Default'
+          });
       return true;
     } catch (error) {
       throw error;
@@ -210,21 +215,6 @@ export class AzureFunctions implements Component, Provisionable {
         clearInterval(deployPendding);
         this.channel.appendLine('.');
       }
-      throw error;
-    }
-  }
-
-  async initialize(): Promise<boolean> {
-    try {
-      await vscode.commands.executeCommand(
-          'azureFunctions.createFunction', this.azureFunctionsPath,
-          'IoTHubTrigger-CSharp', 'IoTHubTrigger1', {
-            connection: 'eventHubConnectionString',
-            path: '%eventHubConnectionPath%',
-            consumerGroup: '$Default'
-          });
-      return true;
-    } catch (error) {
       throw error;
     }
   }
