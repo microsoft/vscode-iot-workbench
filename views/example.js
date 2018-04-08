@@ -22,8 +22,8 @@ var example = new Vue({
         if (examples[i].featured && !this.featuredExample) {
           this.featuredExample = examples.splice(i, 1)[0];
           i--;
-        } else if (examples[i].description.length > 85) {
-          examples[i].description = examples[i].description.substr(0, 82) + '...';
+        } else if (examples[i].description.length > 80) {
+          examples[i].description = examples[i].description.substr(0, 77) + '...';
         }
       }
       this.examples = examples;
