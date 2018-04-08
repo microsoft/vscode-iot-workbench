@@ -174,12 +174,6 @@ export async function activate(context: vscode.ExtensionContext) {
         initializeExampleBinder);
   };
 
-  const functionInitProvider = async () => {
-    callWithTelemetry(
-        EventNames.createAzureFunctionsEvent, outputChannel, context,
-        azureOperator.createFunction);
-  };
-
   const menuForDevice: CommandItem[] = [
     {
       label: 'Config Device Connection String',
@@ -207,13 +201,6 @@ export async function activate(context: vscode.ExtensionContext) {
       description: '',
       detail: 'Provision Azure services',
       click: azureProvisionProvider
-    },
-    {
-      label: 'Create Azure Functions',
-      description: '',
-      detail: 'Generate Azure Functions code in local',
-      only: ConfigKey.functionPath,
-      click: functionInitProvider
     },
     {
       label: 'Azure Deploy',
@@ -260,12 +247,6 @@ export async function activate(context: vscode.ExtensionContext) {
           description: '',
           detail: 'Deploy local code to Azure',
           click: azureDeployProvider
-        },
-        {
-          label: 'Create Function',
-          description: '',
-          detail: 'Generate Azure Function code in local',
-          click: functionInitProvider
         }
       ]
     }
