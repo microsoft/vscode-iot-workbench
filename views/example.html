@@ -17,12 +17,12 @@
 
 * {
   box-sizing: border-box;
+  font-family: "Segoe UI",-apple-system,".SFNSText-Regular","San Francisco","Helvetica Neue","Lucida Grande",Arial,sans-serif;
 }
 
 body {
   margin: 20px;
   background: white;
-  font-family: "Segoe UI",-apple-system,".SFNSText-Regular","San Francisco","Helvetica Neue","Lucida Grande",Arial,sans-serif;
   text-align: center;
   min-width: 700px;
   cursor: default;
@@ -119,16 +119,17 @@ ul.example-list > li > .body {
 
 ul.example-list > li > .body > h2 {
   margin-top: 0;
-  font-size: 18px;
+  margin-bottom: 10px;
+  font-size: 17px;
   font-weight: 500;
+  color: #333;
 }
 
 ul.example-list > li > .body > .description {
-  font-size: 14px;
+  font-size: 15px;
   height: 58px;
-  padding-bottom: 10px;
-  word-break: break-all;
-  hyphens: auto;
+  padding-bottom: 20px;
+  color: #666;
   overflow: hidden;
 }
 
@@ -148,6 +149,7 @@ ul.example-list > li > .body > .buttons > button {
   cursor: pointer;
   outline: none;
   margin-right: 10px;
+  font-size: 15px;
 }
 
 #featured > .body  > .buttons > button {
@@ -185,10 +187,11 @@ aside {
 }
 
 #quick-links > h1 {
-  font-weight: 400;
+  font-weight: 500;
   margin-top: 0;
   margin-bottom: 10px;
-  color: black;
+  color: #333;
+  font-size: 17px;
 }
 
 #quick-links > ul.links {
@@ -200,6 +203,8 @@ aside {
   list-style: none;
   line-height: 1.5;
   cursor: pointer;
+  font-size: 15px;
+  color: #666;
 }
 
 #quick-links > ul.links > li:hover {
@@ -251,11 +256,13 @@ aside {
 
 #blog > ul.blog > li:first-child > p {
   display: block;
+  color: #666;
 }
 
 #blog > ul.blog > li > .date {
   font-size: 13px;
   margin: 0;
+  color: #666;
 }
 
 #version {
