@@ -1,0 +1,179 @@
+<!doctype html>
+<html>
+<head>
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 20px;
+  background: white;
+  font-family: "Segoe UI",-apple-system,".SFNSText-Regular","San Francisco","Helvetica Neue","Lucida Grande",Arial,sans-serif;
+}
+
+ul {
+  padding: 0;
+  margin: auto;
+  width: 1700px;
+}
+
+ul:after {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+ul > li {
+  list-style: none;
+  width: 320px;
+  margin-right: 20px;
+  margin-bottom: 20px;
+  float: left;
+}
+
+ul > li > .header {
+  height: 185px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  background: #ccc;
+}
+
+ul > li > .header > .difficulty {
+  position: absolute;
+  left: 14px;
+  top: 12px;
+  padding: 1px 14px;
+  color: white;
+  border-radius: 2px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+ul > li > .header > .difficulty.easy {
+  background: rgb(143, 195, 31);
+}
+
+ul > li > .header > .difficulty.medium {
+  background: rgb(249, 143, 64);
+}
+
+ul > li > .header > .difficulty.hard {
+  background: rgb(240, 90, 45);
+}
+
+ul > li > .header > .difficulty.easy:before {
+  content: "EASY"
+}
+
+ul > li > .header > .difficulty.medium:before {
+  content: "MEDIUM"
+}
+
+ul > li > .header > .difficulty.hard:before {
+  content: "HARD"
+}
+
+ul > li > .header > img {
+  width: 100%;
+}
+
+ul > li > .body {
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  border: 1px solid #ccc;
+  border-top: none;
+  padding: 10px;
+}
+
+ul > li > .body > h2 {
+  margin-top: 0;
+  font-size: 18px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+ul > li > .body > .description {
+  font-size: 14px;
+  height: 80px;
+  padding-bottom: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+ul > li > .body > .services {
+  height: 34px;
+}
+
+ul > li > .body > .services > img {
+  width: 24px;
+  height: 24px;
+  margin-right: 12px;
+}
+
+ul > li > .body > .buttons {
+  text-align: right;
+  padding-bottom: 10px;
+}
+
+ul > li > .body > .buttons > button {
+  background: #23c7ff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  outline: none;
+}
+
+ul > li > .body > .buttons > button:hover {
+  background: #55d2fc;
+}
+
+@media (min-width: 1380px) and (max-width: 1719px) {
+  ul {
+    width: 1360px;
+  }
+}
+
+@media (min-width: 1040px) and (max-width: 1379px) {
+  ul {
+    width: 1020px;
+  }
+}
+
+@media (min-width: 700px) and (max-width: 1039px) {
+  ul {
+    width: 680px;
+  }
+}
+
+@media (max-width: 699px) {
+  ul {
+    width: 340px;
+  }
+}
+</style>
+<script src="vue.js"></script>
+</head>
+<body>
+<ul id="example">
+<li v-for="example in examples">
+    <div class="header">
+      <span v-bind:class="'difficulty ' + example.difficulty"></span>
+      <img v-bind:src="example.image">
+    </div>
+    <div class="body">
+      <h2>{{ example.name }}</h2>
+      <div class="description">{{ example.description }}</div>
+      <div class="services" v-html="getServiceImage(example.services)"></div>
+      <div class="buttons"><button v-on:click="callAPI(example.name, example.url)">CREATE</button></div>
+    </div>
+</li>
+</ul>
+<script src="example.js"></script>
+</body>
+</html>

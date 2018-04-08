@@ -18,7 +18,8 @@ import {IoTWorkbenchSettings} from './IoTSettings';
 import {AzureFunctions} from './Models/AzureFunctions';
 import {CommandItem} from './Models/Interfaces/CommandItem';
 import {ConfigHandler} from './configHandler';
-import {ConfigKey, EventNames} from './constants';
+import {ConfigKey, EventNames, ContentView} from './constants';
+import {ContentProvider} from './contentProvider';
 import {TelemetryContext, callWithTelemetry, TelemetryWorker} from './telemetry';
 
 function filterMenu(commands: CommandItem[]) {
@@ -109,8 +110,17 @@ export async function activate(context: vscode.ExtensionContext) {
   const azureOperator = new AzureOperator();
 
   const exampleExplorer = new ExampleExplorer();
+  const exampleSelectBoardBinder =
+      exampleExplorer.selectBoard.bind(exampleExplorer);
   const initializeExampleBinder =
       exampleExplorer.initializeExample.bind(exampleExplorer);
+
+
+  const contentProvider =
+      new ContentProvider(context.extensionPath, exampleExplorer);
+  context.subscriptions.push(
+      vscode.workspace.registerTextDocumentContentProvider(
+          ContentView.workbenchContentProtocol, contentProvider));
 
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with  registerCommand
@@ -153,6 +163,12 @@ export async function activate(context: vscode.ExtensionContext) {
   };
 
   const examplesProvider = async () => {
+    callWithTelemetry(
+        EventNames.loadExampleEvent, outputChannel, context,
+        exampleSelectBoardBinder);
+  };
+
+  const examplesInitializeProvider = async () => {
     callWithTelemetry(
         EventNames.loadExampleEvent, outputChannel, context,
         initializeExampleBinder);
@@ -251,6 +267,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const examples = vscode.commands.registerCommand(
       'iotworkbench.examples', examplesProvider);
+
+  const exampleInitialize = vscode.commands.registerCommand(
+      'iotworkbench.exampleInitialize', examplesInitializeProvider);
 
   const helpInit = vscode.commands.registerCommand('iotworkbench.help', async () => {
     await vscode.commands.executeCommand(
