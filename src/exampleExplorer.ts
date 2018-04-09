@@ -155,6 +155,9 @@ export class ExampleExplorer {
       prompt: 'Input example folder name',
       ignoreFocusOut: true,
       validateInput: (exampleName: string) => {
+        if (exampleName === null) {
+          return;
+        }
         const name = path.join(workbench, 'examples', exampleName);
         if (!utils.fileExistsSync(name) && !utils.directoryExistsSync(name)) {
           if (!/^([a-z0-9_]|[a-z0-9_][-a-z0-9_.]*[a-z0-9_])$/i.test(
