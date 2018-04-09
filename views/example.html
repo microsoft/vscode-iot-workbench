@@ -369,8 +369,8 @@ ul.example-list > li:hover > .header > img,
       <h2>{{ featuredExample.name }}</h2>
       <div class="description">{{ featuredExample.description }}</div>
       <div class="buttons">
-        <button v-on:click="openLink(example.totural)">View Toturial</button>
-        <button v-on:click="callAPI(example.name, example.url)">Try</button>
+        <button v-on:click="openLink(featuredExample.totural)">View Toturial</button>
+        <button v-on:click="callAPI(featuredExample.name, featuredExample.url)">Try</button>
       </div>
     </div>
   </div>
