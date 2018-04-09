@@ -23,7 +23,6 @@
 body {
   margin: 20px;
   background: white;
-  text-align: center;
   min-width: 700px;
   cursor: default;
 }
@@ -238,8 +237,6 @@ aside {
   margin: 0;
   margin-bottom: 10px;
   cursor: pointer;
-  word-break: break-all;
-  hyphens: auto;
 }
 
 #blog > ul.blog > li > h2:hover {
@@ -331,6 +328,22 @@ ul.example-list > li:hover > .header > img,
 #featured > .body > .description {
   margin-bottom: 20px;
   max-width: 500px;
+}
+
+@media (min-width: 4096px) {
+  body:after {
+    content: "There's more to the picture than meets the eye.";
+    position: fixed;
+    display: block;
+    font-size: 12px;
+    left: 100%;
+    top: 0;
+    color: gray;
+    transform: rotate(90deg);
+    transform-origin: 0 0;
+    white-space: nowrap;
+    padding: 5px 15px;
+  }
 }
 
 @media (min-width: 1720px) and (max-width: 2059px) {
