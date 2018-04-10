@@ -182,11 +182,11 @@ export class AZ3166Device implements Device {
       ignoreFocusOut: true,
       validateInput: (sketchFileName: string) => {
         if (!sketchFileName ||
-            /^([a-z0-9_]|[a-z0-9_][-a-z0-9_.]*[a-z0-9_])(\.ino)?$/i.test(
+            /^([a-z_]|[a-z_][-a-z0-9_.]*[a-z0-9_])(\.ino)?$/i.test(
                 sketchFileName)) {
           return '';
         }
-        return 'Sketch file name can only contain letters, numbers, "-" and ".", and cannot start or end with "-" or ".".';
+        return 'Sketch file name can only contain alphanumeric and cannot start with number.';
       }
     };
 
