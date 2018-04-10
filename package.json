@@ -13,6 +13,7 @@
     "Other"
   ],
   "activationEvents": [
+    "*",
     "workspaceContains:**/.iotworkbenchproject",
     "onCommand:iotworkbench.device",
     "onCommand:iotworkbench.cloud",
