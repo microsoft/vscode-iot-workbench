@@ -181,7 +181,8 @@ export class AZ3166Device implements Device {
       prompt: `Please input device sketch file name here.`,
       ignoreFocusOut: true,
       validateInput: (sketchFileName: string) => {
-        if (/^([a-z0-9_]|[a-z0-9_][-a-z0-9_.]*[a-z0-9_])(\.ino)?$/i.test(
+        if (!sketchFileName ||
+            /^([a-z0-9_]|[a-z0-9_][-a-z0-9_.]*[a-z0-9_])(\.ino)?$/i.test(
                 sketchFileName)) {
           return '';
         }
@@ -189,65 +190,68 @@ export class AZ3166Device implements Device {
       }
     };
 
-    await vscode.window.showInputBox(option).then(val => {
-      let sketchFileName: string = constants.defaultSketchFileName;
-      if (val !== undefined) {
-        val = val.trim();
-        if (!/\.ino$/i.test(val)) {
-          val += '.ino';
-        }
-        sketchFileName = val;
+    let sketchFileName = await vscode.window.showInputBox(option);
+
+
+    if (sketchFileName === undefined) {
+      return false;
+    } else if (!sketchFileName) {
+      sketchFileName = constants.defaultSketchFileName;
+    } else {
+      sketchFileName = sketchFileName.trim();
+      if (!/\.ino$/i.test(sketchFileName)) {
+        sketchFileName += '.ino';
       }
+    }
 
-      // Create arduino.json config file
-      const arduinoJSONFilePath =
-          path.join(vscodeFolderPath, constants.arduinoJsonFileName);
-      const arduinoJSONObj = {
-        'board': constants.boardInfo,
-        'sketch': sketchFileName,
-        'configuration': constants.uploadMethod,
-        'output': constants.outputPath
-      };
+    // Create arduino.json config file
+    const arduinoJSONFilePath =
+        path.join(vscodeFolderPath, constants.arduinoJsonFileName);
+    const arduinoJSONObj = {
+      'board': constants.boardInfo,
+      'sketch': sketchFileName,
+      'configuration': constants.uploadMethod,
+      'output': constants.outputPath
+    };
 
-      try {
-        fs.writeFileSync(
-            arduinoJSONFilePath, JSON.stringify(arduinoJSONObj, null, 4));
-      } catch (error) {
-        throw new Error(
-            `Device: create arduino config file failed: ${error.message}`);
-      }
+    try {
+      fs.writeFileSync(
+          arduinoJSONFilePath, JSON.stringify(arduinoJSONObj, null, 4));
+    } catch (error) {
+      throw new Error(
+          `Device: create arduino config file failed: ${error.message}`);
+    }
 
-      // Create settings.json config file
-      const settingsJSONFilePath =
-          path.join(vscodeFolderPath, constants.settingsJsonFileName);
-      const settingsJSONObj = {
-        'files.exclude': {'.build': true, '.iotworkbenchproject': true},
-        'C_Cpp.intelliSenseEngine': 'Tag Parser'
-      };
+    // Create settings.json config file
+    const settingsJSONFilePath =
+        path.join(vscodeFolderPath, constants.settingsJsonFileName);
+    const settingsJSONObj = {
+      'files.exclude': {'.build': true, '.iotworkbenchproject': true},
+      'C_Cpp.intelliSenseEngine': 'Tag Parser'
+    };
 
-      try {
-        fs.writeFileSync(
-            settingsJSONFilePath, JSON.stringify(settingsJSONObj, null, 4));
-      } catch (error) {
-        throw new Error(
-            `Device: create arduino config file failed: ${error.message}`);
-      }
+    try {
+      fs.writeFileSync(
+          settingsJSONFilePath, JSON.stringify(settingsJSONObj, null, 4));
+    } catch (error) {
+      throw new Error(
+          `Device: create arduino config file failed: ${error.message}`);
+    }
 
-      // Create c_cpp_properties.json file
-      this.load();
+    // Create c_cpp_properties.json file
+    this.load();
 
-      // Create an empty arduino sketch
-      const sketchTemplateFilePath = this.extensionContext.asAbsolutePath(
-          path.join(constants.resourcesFolderName, this.sketchName));
-      const newSketchFilePath = path.join(deviceFolderPath, sketchFileName);
+    // Create an empty arduino sketch
+    const sketchTemplateFilePath = this.extensionContext.asAbsolutePath(
+        path.join(constants.resourcesFolderName, this.sketchName));
+    const newSketchFilePath = path.join(deviceFolderPath, sketchFileName);
 
-      try {
-        const content = fs.readFileSync(sketchTemplateFilePath).toString();
-        fs.writeFileSync(newSketchFilePath, content);
-      } catch (error) {
-        throw new Error(`Create arduino sketch file failed: ${error.message}`);
-      }
-    });
+    try {
+      const content = fs.readFileSync(sketchTemplateFilePath).toString();
+      fs.writeFileSync(newSketchFilePath, content);
+    } catch (error) {
+      throw new Error(`Create arduino sketch file failed: ${error.message}`);
+    }
 
     return true;
   }

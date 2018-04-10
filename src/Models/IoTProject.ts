@@ -176,8 +176,8 @@ export class IoTProject {
 
         const res = await item.provision();
         if (res === false) {
-          const error = new Error(`The provision of ${item.name} failed.`);
-          throw error;
+          vscode.window.showWarningMessage('Provision canceled.');
+          return false;
         }
       }
     }
@@ -296,7 +296,12 @@ export class IoTProject {
 
     try {
       for (let i = 0; i < this.componentList.length; i++) {
-        await this.componentList[i].create();
+        const res = await this.componentList[i].create();
+        if (res === false) {
+          fs.removeSync(this.projectRootPath);
+          vscode.window.showWarningMessage('Project initialize canceled.');
+          return false;
+        }
       }
     } catch (error) {
       throw error;
