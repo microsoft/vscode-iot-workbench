@@ -5,9 +5,13 @@ import * as os from 'os';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from './configHandler';
-import {ContentView} from './constants';
+import {ContentView, DeviceConfig} from './constants';
 
-const DEVICE_INFO = [{deviceId: 'devkit', vendorId: 0x0483, productId: 0x374b}];
+const DEVICE_INFO = [{
+  deviceId: 'devkit',
+  vendorId: DeviceConfig.az3166ComPortVendorId,
+  productId: DeviceConfig.az3166ComPortProductId
+}];
 
 export interface DeviceInfo {
   vendorId: number;
@@ -22,8 +26,9 @@ export class UsbDetector {
   static showLandingPage(device: DeviceInfo) {
     if (device.vendorId && device.productId) {
       for (const deviceInfo of DEVICE_INFO) {
-        if (deviceInfo.vendorId === device.vendorId &&
-            deviceInfo.productId === device.productId) {
+        const vendorId = Number('0x' + deviceInfo.vendorId);
+        const productId = Number('0x' + deviceInfo.productId);
+        if (vendorId === device.vendorId && productId === device.productId) {
           vscode.commands.executeCommand(
               'vscode.previewHtml',
               ContentView.workbenchExampleURI + '?' + deviceInfo.deviceId,
