@@ -19,12 +19,11 @@ const BOARD_INFO: {[key: string]: BoardInfo} = {
 
 export class ArduinoPackageManager {
   private static async setAdditionalUrl(url: string) {
-    const existedUrls =
-        vscode.workspace.getConfiguration('arduino').get<string[]>(
-            'additionalUrls');
+    const existedUrls = vscode.workspace.getConfiguration().get<string[]>(
+        'arduino.additionalUrls');
     if (!existedUrls || existedUrls.length === 0) {
-      await vscode.workspace.getConfiguration('arduino').update(
-          'additionalUrls', [url]);
+      await vscode.workspace.getConfiguration().update(
+          'arduino.additionalUrls', [url], vscode.ConfigurationTarget.Global);
     } else {
       for (const additionalUrl of existedUrls) {
         if (additionalUrl === url) {
@@ -32,8 +31,9 @@ export class ArduinoPackageManager {
         }
       }
       existedUrls.push(url);
-      await vscode.workspace.getConfiguration('arduino').update(
-          'additionalUrls', existedUrls, vscode.ConfigurationTarget.Global);
+      await vscode.workspace.getConfiguration().update(
+          'arduino.additionalUrls', existedUrls,
+          vscode.ConfigurationTarget.Global);
     }
   }
 
