@@ -21,6 +21,7 @@ import {ConfigHandler} from './configHandler';
 import {ConfigKey, EventNames, ContentView} from './constants';
 import {ContentProvider} from './contentProvider';
 import {TelemetryContext, callWithTelemetry, TelemetryWorker} from './telemetry';
+import {UsbDetector} from './usbDetector';
 
 function filterMenu(commands: CommandItem[]) {
   for (let i = 0; i < commands.length; i++) {
@@ -292,6 +293,8 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(examples);
   context.subscriptions.push(helpInit);
   context.subscriptions.push(workbenchPath);
+
+  UsbDetector.startListening();
 }
 
 // this method is called when your extension is deactivated
