@@ -2,6 +2,7 @@
   "name": "vscode-iot-workbench",
   "displayName": "Azure IoT Workbench",
   "description": "Azure IoT Workbench for Visual Studio Code",
+  "repository": "https://github.com/Microsoft/vscode-iot-workbench",
   "version": "0.1.0",
   "publisher": "vsciot-vscode",
   "icon": "logo.png",
@@ -71,6 +72,9 @@
       {
         "title": "Azure Functions Configuration",
         "properties": {
+          "arduino.additionalUrls": {
+            "type": "array"
+          },
           "azureFunctions.projectRuntime": {
             "scope": "resource"
           },
