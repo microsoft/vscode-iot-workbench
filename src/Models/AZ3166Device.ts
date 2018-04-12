@@ -426,64 +426,67 @@ export class AZ3166Device implements Device {
             reject: (reason: Error) => void) => {
           try {
             const list = await SerialPortLite.list();
+            let devkitConnected = false;
             for (let i = 0; i < list.length; i++) {
               const device = list[i];
               if (device.vendorId ===
                       Number(`0x${DeviceConfig.az3166ComPortVendorId}`) &&
                   device.productId ===
                       Number(`0x${DeviceConfig.az3166ComPortProductId}`)) {
-                let configMode = false;
-                let gotData = false;
+                devkitConnected = true;
+                const screenLogFile = path.join(
+                    this.extensionContext.extensionPath, 'screenlog.0');
 
                 const timeoutMessage = setTimeout(async () => {
-                  if (!gotData || !configMode) {
-                    await vscode.window.showInformationMessage(
-                        'Please hold down button A and then push and release the reset button to enter configuration mode.');
-                    if (!gotData || !configMode) {
-                      await SerialPortLite.write(
-                          device.port, `\r\nhelp\r`, 115200);
-                    }
-                  }
+                  await vscode.window.showInformationMessage(
+                      'Please hold down button A and then push and release the reset button to enter configuration mode.');
+                  await cmd(
+                      `screen -S devkit -p 0 -X stuff \$'\\r\\nhelp\\r\\n'`);
                 }, 20000);
 
-                await cmd(`rm -f screenlog.* && screen -dmSL devkit ${
+                await cmd(`cd ${
+                    this.extensionContext
+                        .extensionPath} && rm -f screenlog.* && screen -dmSL devkit ${
                     device.port} 115200 && sleep 1`);
-                if (!fs.existsSync('screenlog.0')) {
+                if (!fs.existsSync(screenLogFile)) {
+                  await cmd('screen -X -S devkit quit');
                   clearTimeout(timeoutMessage);
                   throw new Error(`Cannot open serial port ${device.port}`);
                 }
 
-                await SerialPortLite.write(device.port, `\r\nhelp\r`, 115200);
+                await cmd(
+                    `screen -S devkit -p 0 -X stuff \$'\\r\\nhelp\\r\\n'`);
 
-                let logs = fs.readFileSync('screenlog.0', 'utf-8');
+                let logs = fs.readFileSync(screenLogFile, 'utf-8');
                 if (logs.includes('set_')) {
-                  configMode = true;
+                  clearTimeout(timeoutMessage);
+                  await cmd(
+                      'screen -X -S devkit quit && sleep 1 && rm -f screenlog.*');
                   const res = await SerialPortLite.write(
                       device.port, `set_az_iothub "${connectionString}"\r`,
                       115200);
-                  clearTimeout(timeoutMessage);
                   return resolve(res);
                 } else {
-                  fs.watchFile('screenlog.0', async () => {
-                    logs = fs.readFileSync('screenlog.0', 'utf-8');
-                    gotData = true;
+                  fs.watchFile(screenLogFile, async () => {
+                    logs = fs.readFileSync(screenLogFile, 'utf-8');
 
                     if (logs.includes('set_')) {
-                      fs.unwatchFile('screenlog.0');
-                      configMode = true;
+                      fs.unwatchFile(screenLogFile);
+                      clearTimeout(timeoutMessage);
+                      await cmd(
+                          'screen -X -S devkit quit && sleep 1 && rm -f screenlog.*');
                       const res = await SerialPortLite.write(
                           device.port, `set_az_iothub "${connectionString}"\r`,
                           115200);
-                      clearTimeout(timeoutMessage);
                       return resolve(res);
-                    } else {
-                      configMode = false;
                     }
                   });
                 }
               }
             }
-            return resolve(false);
+            if (!devkitConnected) {
+              return resolve(false);
+            }
           } catch (error) {
             return resolve(false);
           }
