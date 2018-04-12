@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 import {port} from '_debugger';
+import {exec} from 'child_process';
 import * as crypto from 'crypto';
 import * as fs from 'fs-plus';
 import * as getmac from 'getmac';
@@ -50,6 +51,10 @@ const constants = {
   cppExtraFlag: 'compiler.cpp.extra_flags=-DCORRELATIONID="',
   traceExtraFlag: ' -DENABLETRACE='
 };
+
+async function cmd(command: string) {
+  exec(command, Promise.resolve);
+}
 
 export class AZ3166Device implements Device {
   // tslint:disable-next-line: no-any
@@ -384,19 +389,6 @@ export class AZ3166Device implements Device {
       if (plat === 'win32') {
         res = await this.flushDeviceConnectionString(deviceConnectionString);
       } else {
-        const selection = await vscode.window.showQuickPick(
-            [{
-              label:
-                  'Please hold down button A and then push and release the reset button to enter configuration mode.',
-              description: '',
-              detail: 'Click or press Enter to continue.'
-            }],
-            {
-              ignoreFocusOut: true,
-              matchOnDescription: true,
-              matchOnDetail: true,
-              placeHolder: 'Waiting to confirm to enter configuration mode'
-            });
         res =
             await this.flushDeviceConnectionStringUnix(deviceConnectionString);
       }
@@ -421,19 +413,67 @@ export class AZ3166Device implements Device {
             reject: (reason: Error) => void) => {
           try {
             const list = await SerialPortLite.list();
+            let devkitConnected = false;
             for (let i = 0; i < list.length; i++) {
               const device = list[i];
               if (device.vendorId ===
                       Number(`0x${DeviceConfig.az3166ComPortVendorId}`) &&
                   device.productId ===
                       Number(`0x${DeviceConfig.az3166ComPortProductId}`)) {
-                const res = await SerialPortLite.write(
-                    device.port, `set_az_iothub "${connectionString}"\r`,
-                    115200);
-                return resolve(res);
+                devkitConnected = true;
+                const screenLogFile = path.join(
+                    this.extensionContext.extensionPath, 'screenlog.0');
+
+                const timeoutMessage = setTimeout(async () => {
+                  await vscode.window.showInformationMessage(
+                      'Please hold down button A and then push and release the reset button to enter configuration mode.');
+                  await cmd(
+                      `screen -S devkit -p 0 -X stuff \$'\\r\\nhelp\\r\\n'`);
+                }, 20000);
+
+                await cmd(`cd ${
+                    this.extensionContext
+                        .extensionPath} && rm -f screenlog.* && screen -dmSL devkit ${
+                    device.port} 115200 && sleep 1`);
+                if (!fs.existsSync(screenLogFile)) {
+                  await cmd('screen -X -S devkit quit');
+                  clearTimeout(timeoutMessage);
+                  throw new Error(`Cannot open serial port ${device.port}`);
+                }
+
+                await cmd(
+                    `screen -S devkit -p 0 -X stuff \$'\\r\\nhelp\\r\\n'`);
+
+                let logs = fs.readFileSync(screenLogFile, 'utf-8');
+                if (logs.includes('set_')) {
+                  clearTimeout(timeoutMessage);
+                  await cmd(
+                      'screen -X -S devkit quit && sleep 1 && rm -f screenlog.*');
+                  const res = await SerialPortLite.write(
+                      device.port, `set_az_iothub "${connectionString}"\r`,
+                      115200);
+                  return resolve(res);
+                } else {
+                  fs.watchFile(screenLogFile, async () => {
+                    logs = fs.readFileSync(screenLogFile, 'utf-8');
+
+                    if (logs.includes('set_')) {
+                      fs.unwatchFile(screenLogFile);
+                      clearTimeout(timeoutMessage);
+                      await cmd(
+                          'screen -X -S devkit quit && sleep 1 && rm -f screenlog.*');
+                      const res = await SerialPortLite.write(
+                          device.port, `set_az_iothub "${connectionString}"\r`,
+                          115200);
+                      return resolve(res);
+                    }
+                  });
+                }
               }
             }
-            return resolve(false);
+            if (!devkitConnected) {
+              return resolve(false);
+            }
           } catch (error) {
             return resolve(false);
           }
