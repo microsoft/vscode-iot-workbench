@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 import {port} from '_debugger';
+import {exec} from 'child_process';
 import * as crypto from 'crypto';
 import * as fs from 'fs-plus';
 import * as getmac from 'getmac';
@@ -50,6 +51,10 @@ const constants = {
   cppExtraFlag: 'compiler.cpp.extra_flags=-DCORRELATIONID="',
   traceExtraFlag: ' -DENABLETRACE='
 };
+
+async function cmd(command: string) {
+  exec(command, Promise.resolve);
+}
 
 export class AZ3166Device implements Device {
   // tslint:disable-next-line: no-any
@@ -427,10 +432,55 @@ export class AZ3166Device implements Device {
                       Number(`0x${DeviceConfig.az3166ComPortVendorId}`) &&
                   device.productId ===
                       Number(`0x${DeviceConfig.az3166ComPortProductId}`)) {
-                const res = await SerialPortLite.write(
-                    device.port, `set_az_iothub "${connectionString}"\r`,
-                    115200);
-                return resolve(res);
+                let configMode = false;
+                let gotData = false;
+
+                const timeoutMessage = setTimeout(async () => {
+                  if (!gotData || !configMode) {
+                    await vscode.window.showInformationMessage(
+                        'Please hold down button A and then push and release the reset button to enter configuration mode.');
+                    if (!gotData || !configMode) {
+                      await SerialPortLite.write(
+                          device.port, `\r\nhelp\r`, 115200);
+                    }
+                  }
+                }, 20000);
+
+                await cmd(`rm -f screenlog.* && screen -dmSL devkit ${
+                    device.port} 115200 && sleep 1`);
+                if (!fs.existsSync('screenlog.0')) {
+                  clearTimeout(timeoutMessage);
+                  throw new Error(`Cannot open serial port ${device.port}`);
+                }
+
+                await SerialPortLite.write(device.port, `\r\nhelp\r`, 115200);
+
+                let logs = fs.readFileSync('screenlog.0', 'utf-8');
+                if (logs.includes('set_')) {
+                  configMode = true;
+                  const res = await SerialPortLite.write(
+                      device.port, `set_az_iothub "${connectionString}"\r`,
+                      115200);
+                  clearTimeout(timeoutMessage);
+                  return resolve(res);
+                } else {
+                  fs.watchFile('screenlog.0', async () => {
+                    logs = fs.readFileSync('screenlog.0', 'utf-8');
+                    gotData = true;
+
+                    if (logs.includes('set_')) {
+                      fs.unwatchFile('screenlog.0');
+                      configMode = true;
+                      const res = await SerialPortLite.write(
+                          device.port, `set_az_iothub "${connectionString}"\r`,
+                          115200);
+                      clearTimeout(timeoutMessage);
+                      return resolve(res);
+                    } else {
+                      configMode = false;
+                    }
+                  });
+                }
               }
             }
             return resolve(false);
