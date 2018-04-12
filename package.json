@@ -2,7 +2,14 @@
   "name": "vscode-iot-workbench",
   "displayName": "Azure IoT Workbench",
   "description": "Azure IoT Workbench for Visual Studio Code",
-  "repository": "https://github.com/Microsoft/vscode-iot-workbench",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/vscode-iot-workbench.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Microsoft/vscode-iot-workbench/issues"
+  },
+  "homepage": "https://github.com/Microsoft/vscode-iot-workbench/blob/master/README.md",
   "version": "0.1.0",
   "publisher": "vsciot-vscode",
   "icon": "logo.png",
