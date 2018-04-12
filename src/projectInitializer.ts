@@ -12,8 +12,9 @@ import {ProjectTemplate, ProjectTemplateType} from './Models/Interfaces/ProjectT
 import {DialogResponses} from './DialogResponses';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import * as utils from './utils';
-import {Board} from './Models/Interfaces/Board';
+import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {TelemetryContext} from './telemetry';
+import {ArduinoPackageManager} from './ArduinoPackageManager';
 
 const constants = {
   templateFileName: 'template.json',
@@ -112,13 +113,16 @@ export class ProjectInitializer {
 
           try {
             // Select board
-            const boardItemList: vscode.QuickPickItem[] = [];
+            const boardItemList: BoardQuickPickItem[] = [];
 
             const boardList = context.asAbsolutePath(path.join(
                 constants.resourceFolderName, constants.boardListFileName));
             const boardsJson = require(boardList);
             boardsJson.boards.forEach((board: Board) => {
               boardItemList.push({
+                name: board.name,
+                id: board.id,
+                platform: board.platform,
                 label: board.name,
                 description: board.platform,
               });
@@ -139,6 +143,7 @@ export class ProjectInitializer {
               return;
             } else {
               telemetryContext.properties.board = boardSelection.label;
+              ArduinoPackageManager.installBoard(boardSelection.id);
             }
 
             // Template select

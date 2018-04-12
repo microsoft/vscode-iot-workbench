@@ -15,6 +15,7 @@ import * as utils from './utils';
 import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {TelemetryContext} from './telemetry';
 import {ContentView} from './constants';
+import {ArduinoPackageManager} from './ArduinoPackageManager';
 
 const constants = {
   boardListFileName: 'boardlist.json',
@@ -218,6 +219,7 @@ export class ExampleExplorer {
       return false;
     } else {
       telemetryContext.properties.board = boardSelection.label;
+      ArduinoPackageManager.installBoard(boardSelection.id);
     }
 
     vscode.commands.executeCommand(

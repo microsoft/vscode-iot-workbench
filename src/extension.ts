@@ -22,7 +22,6 @@ import {ConfigKey, EventNames, ContentView} from './constants';
 import {ContentProvider} from './contentProvider';
 import {TelemetryContext, callWithTelemetry, TelemetryWorker} from './telemetry';
 import {UsbDetector} from './usbDetector';
-import {ArduinoPackageManager} from './ArduinoPackageManager';
 
 function filterMenu(commands: CommandItem[]) {
   for (let i = 0; i < commands.length; i++) {
@@ -158,6 +157,12 @@ export async function activate(context: vscode.ExtensionContext) {
         deviceOperator.upload);
   };
 
+  const devicePackageManager = async () => {
+    callWithTelemetry(
+        EventNames.devicePackageEvent, outputChannel, context,
+        deviceOperator.downloadPackage);
+  };
+
   const deviceConnectionStringConfigProvider = async () => {
     callWithTelemetry(
         EventNames.setDeviceConnectionStringEvent, outputChannel, context,
@@ -194,6 +199,12 @@ export async function activate(context: vscode.ExtensionContext) {
       description: '',
       detail: 'Upload code to device',
       click: deviceUploadProvider
+    },
+    {
+      label: 'Install Device SDK',
+      description: '',
+      detail: 'Download device board package',
+      click: devicePackageManager
     }
   ];
 
@@ -296,7 +307,6 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(workbenchPath);
 
   UsbDetector.startListening();
-  await ArduinoPackageManager.installBoard('devkit');
 }
 
 // this method is called when your extension is deactivated
