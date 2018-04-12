@@ -28,7 +28,7 @@ export class ArduinoPackageManager {
     } else {
       let _existedUrls: string[];
       if (typeof existedUrls === 'string') {
-        _existedUrls = existedUrls.split(',');
+        _existedUrls = existedUrls.split(',').map((url) => url.trim());
       } else {
         _existedUrls = existedUrls;
       }
