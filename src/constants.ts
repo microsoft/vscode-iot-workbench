@@ -25,6 +25,7 @@ export class EventNames {
       'IoTWorkbench.CreateAzureFunctions';
   static readonly deviceCompileEvent = 'IoTWorkbench.DeviceCompile';
   static readonly deviceUploadEvent = 'IoTWorkbench.DeviceUpload';
+  static readonly devicePackageEvent = 'IoTWorkbench.DevicePackage';
   static readonly setDeviceConnectionStringEvent =
       'IoTWorkbench.SetDeviceConnectionString';
   static readonly loadExampleEvent = 'IoTWorkbench.loadExample';

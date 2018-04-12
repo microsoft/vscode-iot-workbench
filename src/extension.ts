@@ -157,6 +157,12 @@ export async function activate(context: vscode.ExtensionContext) {
         deviceOperator.upload);
   };
 
+  const devicePackageManager = async () => {
+    callWithTelemetry(
+        EventNames.devicePackageEvent, outputChannel, context,
+        deviceOperator.downloadPackage);
+  };
+
   const deviceConnectionStringConfigProvider = async () => {
     callWithTelemetry(
         EventNames.setDeviceConnectionStringEvent, outputChannel, context,
@@ -193,6 +199,12 @@ export async function activate(context: vscode.ExtensionContext) {
       description: '',
       detail: 'Upload code to device',
       click: deviceUploadProvider
+    },
+    {
+      label: 'Install Device SDK',
+      description: '',
+      detail: 'Download device board package',
+      click: devicePackageManager
     }
   ];
 

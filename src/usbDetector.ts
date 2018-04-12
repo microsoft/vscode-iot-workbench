@@ -4,6 +4,7 @@
 import * as os from 'os';
 import * as vscode from 'vscode';
 
+import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {ConfigHandler} from './configHandler';
 import {ContentView, DeviceConfig} from './constants';
 
@@ -29,6 +30,7 @@ export class UsbDetector {
         const vendorId = Number('0x' + deviceInfo.vendorId);
         const productId = Number('0x' + deviceInfo.productId);
         if (vendorId === device.vendorId && productId === device.productId) {
+          ArduinoPackageManager.installBoard(deviceInfo.deviceId);
           vscode.commands.executeCommand(
               'vscode.previewHtml',
               ContentView.workbenchExampleURI + '?' + deviceInfo.deviceId,
