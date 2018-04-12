@@ -1,12 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import * as fs from 'fs-plus';
 import * as os from 'os';
+import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {ConfigHandler} from './configHandler';
-import {ContentView, DeviceConfig} from './constants';
+import {ConfigKey, ContentView, DeviceConfig} from './constants';
 
 const DEVICE_INFO = [{
   deviceId: 'devkit',
@@ -19,12 +21,31 @@ export interface DeviceInfo {
   productId: number;
 }
 
+const constants = {
+  iotworkbenchprojectFileName: '.iotworkbenchproject'
+};
+
 export class UsbDetector {
   // tslint:disable-next-line: no-any
   private static _usbDetector: any =
       require('../../vendor/node-usb-native').detector;
 
   static showLandingPage(device: DeviceInfo) {
+    // if current workspace is iot workbench workspace
+    // we shouldn't popup landing page
+    if (vscode.workspace.workspaceFolders &&
+        vscode.workspace.workspaceFolders.length) {
+      const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
+      if (devicePath) {
+        const deviceLocation = path.join(
+            vscode.workspace.workspaceFolders[0].uri.fsPath, '..', devicePath,
+            constants.iotworkbenchprojectFileName);
+        if (fs.existsSync(deviceLocation)) {
+          return;
+        }
+      }
+    }
+
     if (device.vendorId && device.productId) {
       for (const deviceInfo of DEVICE_INFO) {
         const vendorId = Number('0x' + deviceInfo.vendorId);
