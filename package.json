@@ -80,7 +80,10 @@
         "title": "Azure Functions Configuration",
         "properties": {
           "arduino.additionalUrls": {
-            "type": "array"
+            "type": [
+              "string",
+              "array"
+            ]
           },
           "azureFunctions.projectRuntime": {
             "scope": "resource"

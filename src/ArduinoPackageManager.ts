@@ -19,21 +19,34 @@ const BOARD_INFO: {[key: string]: BoardInfo} = {
 
 export class ArduinoPackageManager {
   private static async setAdditionalUrl(url: string) {
-    const existedUrls = vscode.workspace.getConfiguration().get<string[]>(
-        'arduino.additionalUrls');
+    const existedUrls =
+        vscode.workspace.getConfiguration().get<string[]|string>(
+            'arduino.additionalUrls');
     if (!existedUrls || existedUrls.length === 0) {
       await vscode.workspace.getConfiguration().update(
-          'arduino.additionalUrls', [url], vscode.ConfigurationTarget.Global);
+          'arduino.additionalUrls', url, vscode.ConfigurationTarget.Global);
     } else {
-      for (const additionalUrl of existedUrls) {
+      let _existedUrls: string[];
+      if (typeof existedUrls === 'string') {
+        _existedUrls = existedUrls.split(',').map((url) => url.trim());
+      } else {
+        _existedUrls = existedUrls;
+      }
+      for (const additionalUrl of _existedUrls) {
         if (additionalUrl === url) {
           return;
         }
       }
-      existedUrls.push(url);
-      await vscode.workspace.getConfiguration().update(
-          'arduino.additionalUrls', existedUrls,
-          vscode.ConfigurationTarget.Global);
+      _existedUrls.push(url);
+      if (typeof existedUrls === 'string') {
+        await vscode.workspace.getConfiguration().update(
+            'arduino.additionalUrls', _existedUrls.join(','),
+            vscode.ConfigurationTarget.Global);
+      } else {
+        await vscode.workspace.getConfiguration().update(
+            'arduino.additionalUrls', _existedUrls,
+            vscode.ConfigurationTarget.Global);
+      }
     }
   }
 
