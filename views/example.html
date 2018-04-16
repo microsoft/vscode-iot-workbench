@@ -382,7 +382,7 @@ ul.example-list > li:hover > .header > img,
       <h2>{{ featuredExample.name }}</h2>
       <div class="description">{{ featuredExample.description }}</div>
       <div class="buttons">
-        <button v-on:click="openLink(featuredExample.totural)">View Toturial</button>
+        <button v-on:click="openLink(featuredExample.tutorial)">View Tutorial</button>
         <button v-on:click="callAPI(featuredExample.project_name, featuredExample.url)">Try</button>
       </div>
     </div>
@@ -397,7 +397,7 @@ ul.example-list > li:hover > .header > img,
         <h2>{{ example.name }}</h2>
         <div class="description">{{ example.description }}</div>
         <div class="buttons">
-          <button v-on:click="openLink(example.totural)">View Toturial</button>
+          <button v-on:click="openLink(example.tutorial)">View Tutorial</button>
           <button v-on:click="callAPI(example.project_name, example.url)">Try</button>
         </div>
       </div>
