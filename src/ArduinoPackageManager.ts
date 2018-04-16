@@ -57,7 +57,6 @@ export class ArduinoPackageManager {
     }
 
     await ArduinoPackageManager.setAdditionalUrl(board.additionalUrl);
-    await vscode.commands.executeCommand('arduino.loadPackages');
     await vscode.commands.executeCommand(
         'arduino.installBoard', board.packageName, board.architecture);
     return;
