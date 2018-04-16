@@ -144,7 +144,7 @@ ul.example-list > li > .body > .services > img {
 
 #featured > .body  > .buttons > button,
 ul.example-list > li > .body > .buttons > button {
-  padding: 10px 15px;
+  padding: 8px 15px;
   cursor: pointer;
   outline: none;
   margin-right: 10px;
@@ -157,17 +157,34 @@ ul.example-list > li > .body > .buttons > button {
   border: 1px solid #069;
 }
 
+ul.example-list > li > .body > .buttons {
+  text-align: right;
+}
+
 ul.example-list > li > .body > .buttons > button {
   background: white;
   color: #069;
   border: 1px solid #069;
 }
 
-#featured > .body  > .buttons > button:hover,
-ul.example-list > li > .body > .buttons > button:hover {
+#featured > .body  > .buttons > button:hover {
   background: #66a3c2;
   color: white;
   border: 1px solid #66a3c2;
+}
+
+ul.example-list > li > .body > .buttons > button:hover {
+  background: #069;
+  color: white;
+  border: 1px solid #069;
+}
+
+.link {
+  cursor: pointer;
+}
+
+.link:hover {
+  text-decoration: underline;
 }
 
 aside {
@@ -179,18 +196,22 @@ aside {
   text-align: left;
 }
 
-#quick-links {
-  padding: 20px;
-  background: #eee;
-  margin-bottom: 20px;
-}
-
-#quick-links > h1 {
-  font-weight: 500;
+aside h1 {
+  font-weight: 400;
   margin-top: 0;
   margin-bottom: 10px;
   color: #333;
-  font-size: 17px;
+  font-size: 13px;
+  text-transform: uppercase;
+  display: inline-block;
+  padding-bottom: 2px;
+  border-bottom: 1px solid #333;
+}
+
+aside .section {
+  margin-bottom: 20px;
+  padding: 0 20px;
+  font-size: 15px;
 }
 
 #quick-links > ul.links {
@@ -200,7 +221,7 @@ aside {
 
 #quick-links > ul.links > li {
   list-style: none;
-  line-height: 1.5;
+  line-height: 2;
   cursor: pointer;
   font-size: 15px;
   color: #666;
@@ -216,14 +237,12 @@ aside {
 
 #blog > ul.blog {
   margin: 0;
-  padding: 0 20px;
-  border: 1px solid #ddd;
+  padding: 0;
 }
 
 #blog > ul.blog > li {
   list-style: none;
-  padding: 10px 0;
-  border-bottom: 1px solid #ddd;
+  margin-bottom: 10px;
 }
 
 #blog > ul.blog > li:last-child {
@@ -235,7 +254,7 @@ aside {
   font-weight: 500;
   color: #555;
   margin: 0;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
   cursor: pointer;
 }
 
@@ -247,7 +266,7 @@ aside {
   font-size: 15px;
   line-height: 1.5;
   margin: 0;
-  margin-top: 10px;
+  margin-top: 5px;
   display: none;
 }
 
@@ -262,21 +281,12 @@ aside {
   color: #666;
 }
 
-#version {
-  margin-bottom: 20px;
+#info table td {
+  padding-right: 10px;
 }
 
-#version > h1 {
-  margin: 0;
-  font-weight: 400;
-  font-size: 18px;
-  text-align: right;
-  color: black;
-  cursor: pointer;
-}
-
-#version > h1:hover {
-  text-decoration: underline;
+#social table td {
+  padding-right: 20px;
 }
 
 #featured {
@@ -328,6 +338,36 @@ ul.example-list > li:hover > .header > img,
 #featured > .body > .description {
   margin-bottom: 20px;
   max-width: 500px;
+}
+
+.github:before,
+.feed:before {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  top: 4px;
+  margin-right: 5px;
+  opacity: 0.5;
+}
+
+.github:hover:before,
+.feed:hover:before {
+  opacity: 0.8;
+}
+
+.github:before {
+  content: url(images/github.svg);
+}
+
+.feed:before {
+  content: url(images/feed.svg);
+}
+
+.tutorial {
+  float: left;
+  padding: 8px 0;
+  color: #069;
 }
 
 @media (min-width: 4096px) {
@@ -383,7 +423,7 @@ ul.example-list > li:hover > .header > img,
       <div class="description">{{ featuredExample.description }}</div>
       <div class="buttons">
         <button v-on:click="openLink(featuredExample.tutorial)">View Tutorial</button>
-        <button v-on:click="callAPI(featuredExample.project_name, featuredExample.url)">Try</button>
+        <button v-on:click="callAPI(featuredExample.project_name, featuredExample.url)">Open Sample</button>
       </div>
     </div>
   </div>
@@ -397,25 +437,24 @@ ul.example-list > li:hover > .header > img,
         <h2>{{ example.name }}</h2>
         <div class="description">{{ example.description }}</div>
         <div class="buttons">
-          <button v-on:click="openLink(example.tutorial)">View Tutorial</button>
-          <button v-on:click="callAPI(example.project_name, example.url)">Try</button>
+          <div class="link tutorial" v-on:click="openLink(example.tutorial)">View Tutorial</div>
+          <button v-on:click="callAPI(example.project_name, example.url)">Open Sample</button>
         </div>
       </div>
     </li>
   </ul>
 </div>
 <aside>
-<div id="quick-links">
+<div id="quick-links" class="section">
   <h1>Quick links</h1>
   <ul class="links">
     <li v-on:click="openLink('https://microsoft.github.io/azure-iot-developer-kit/docs/apis/arduino-language-reference/')">API Reference</li>
     <li v-on:click="openLink('https://microsoft.github.io/azure-iot-developer-kit/docs/faq/')">FAQ</li>
     <li v-on:click="openLink('https://github.com/Microsoft/devkit-sdk/issues/new')">Report Issue</li>
-    <li v-on:click="openLink('https://github.com/microsoft/devkit-sdk')">Follow: GitHub</li>
-    <li v-on:click="openLink('https://blogs.msdn.microsoft.com/iotdev/feed/')">Subscript: Feed</li>
   </ul>
 </div>
-<div id="blog" v-if="blogs.length">
+<div id="blog" class="section" v-if="blogs.length">
+  <h1>Blogs</h1>
   <ul class="blog">
     <li v-for="blog in blogs">
       <h2 v-on:click="openLink(blog.link)">{{ blog.title }}</h2>
@@ -424,8 +463,24 @@ ul.example-list > li:hover > .header > img,
     </li>
   </ul>
 </div>
-<div id="version">
-  <h1 v-on:click="openLink('https://microsoft.github.io/azure-iot-developer-kit/versions/')">{{ version }}</h1>
+<div id="info" class="section">
+  <h1>Info</h1>
+  <table>
+    <tr>
+      <td>Version</td><td><span class="link" v-on:click="openLink('https://microsoft.github.io/azure-iot-developer-kit/versions/')">{{ version }}</span></td>
+    </tr>
+    <tr>
+      <td>Last updated</td><td>{{ publishDate }}</td>
+    </tr>
+  </table>
+</div>
+<div id="social" class="section">
+  <table>
+    <tr>
+      <td><span class="link github" v-on:click="openLink('https://github.com/microsoft/devkit-sdk')">GITHUB</span></td>
+      <td><span class="link feed" v-on:click="openLink('https://blogs.msdn.microsoft.com/iotdev/feed/')">Feed</span></td>
+    </tr>
+  </table>
 </div>
 </aside>
 </div>
