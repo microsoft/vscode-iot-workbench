@@ -2,6 +2,7 @@ var example = new Vue({
   el: '#example',
   data: {
     version: '',
+    publishDate: '',
     featuredExample: null,
     examples: [],
     blogs: []
@@ -44,8 +45,10 @@ var example = new Vue({
       this.blogs = blogs;
     }.bind(this));
 
-    httpRequest('https://raw.githubusercontent.com/Microsoft/azure-iot-developer-kit/pre-release/docs/firmware.txt', function(data) {
-      this.version = `Version ${data}`;
+    httpRequest('https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/gallery/version_index_devkit.json', function(data) {
+      data = JSON.parse(data);
+      this.version = data.version;
+      this.publishDate = data.date;
     }.bind(this));
   },
   methods: {
