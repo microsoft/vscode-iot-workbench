@@ -128,7 +128,7 @@ ul.example-list > li > .body > .description {
   font-size: 15px;
   height: 58px;
   padding-bottom: 20px;
-  color: #666;
+  color: #333;
   overflow: hidden;
 }
 
@@ -367,6 +367,14 @@ ul.example-list > li:hover > .header > img,
   color: #069;
 }
 
+.example-list > li:hover .example-link {
+  text-decoration: underline;
+}
+
+.example-link {
+  cursor: pointer;
+}
+
 @media (min-width: 4096px) {
   body:after {
     content: "There's more to the picture than meets the eye.";
@@ -425,17 +433,17 @@ ul.example-list > li:hover > .header > img,
     </div>
   </div>
   <ul class="example-list">
-    <li v-for="example in examples">
+    <li v-for="example in examples" v-on:click="openLink(example.tutorial)">
       <div class="header">
         <span v-bind:class="'difficulty ' + example.difficulty"></span>
         <img v-bind:src="example.image">
       </div>
       <div class="body">
-        <h2>{{ example.name }}</h2>
+        <h2 class="example-link">{{ example.name }}</h2>
         <div class="description">{{ example.description }}</div>
         <div class="buttons">
-          <div class="link tutorial" v-on:click="openLink(example.tutorial)">View Tutorial</div>
-          <button v-on:click="callAPI(example.project_name, example.url)">Open Sample</button>
+          <div class="example-link tutorial">View Tutorial</div>
+          <button v-on:click.stop="callAPI(example.project_name, example.url)">Open Sample</button>
         </div>
       </div>
     </li>
