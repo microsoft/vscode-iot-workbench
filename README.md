@@ -1,4 +1,8 @@
+<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/logo.png" align="right" width="128" height="128">
+
 # Visual Studio Code extension for IoT Workbench 
+
+[![Travis CI](https://travis-ci.org/Microsoft/vscode-iot-workbench.svg?branch=master)](https://travis-ci.org/Microsoft/vscode-iot-workbench)
 
 Welcome to Visual Studio Code extension for **IoT Workbench** <sup>preview</sup> ! The iot workbench extension makes it easy to code, build, deploy and debug your IoT project for DevKit in Visual Studio Code, with a rich set of functionalities.
 
