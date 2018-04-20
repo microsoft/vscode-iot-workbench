@@ -18,7 +18,7 @@ export class DeviceConfig {
 }
 
 export class EventNames {
-  static readonly createNewProjectEvent = 'IoTWorkbench.New';
+  static readonly createNewProjectEvent = 'IoTWorkbench.NewProject';
   static readonly azureProvisionEvent = 'IoTWorkbench.AzureProvision';
   static readonly azureDeployEvent = 'IoTWorkbench.AzureDeploy';
   static readonly createAzureFunctionsEvent =
