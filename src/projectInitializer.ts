@@ -148,7 +148,8 @@ export class ProjectInitializer {
 
             // Template select
             const template = context.asAbsolutePath(path.join(
-                constants.resourceFolderName, boardSelection.id, constants.templateFileName));
+                constants.resourceFolderName, boardSelection.id,
+                constants.templateFileName));
             const templateJson = require(template);
 
             const projectTemplateList: vscode.QuickPickItem[] = [];
@@ -188,7 +189,8 @@ export class ProjectInitializer {
             }
 
             const project = new IoTProject(context, channel);
-            return await project.create(rootPath, result[0], boardSelection.id, openInNewWindow);
+            return await project.create(
+                rootPath, result[0], boardSelection.id, openInNewWindow);
           } catch (error) {
             throw error;
           }
