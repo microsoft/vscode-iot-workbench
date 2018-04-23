@@ -82,7 +82,7 @@ export class IoTProject {
       if (!boardId) {
         return false;
       }
-      if(boardId === AZ3166Device.boardId) {
+      if (boardId === AZ3166Device.boardId) {
         const device = new AZ3166Device(this.extensionContext, deviceLocation);
         this.componentList.push(device);
       }
@@ -240,7 +240,7 @@ export class IoTProject {
 
     workspace.folders.push({path: constants.deviceDefaultFolderName});
 
-    if(boardId === AZ3166Device.boardId){
+    if (boardId === AZ3166Device.boardId) {
       const device = new AZ3166Device(
           this.extensionContext, deviceDir, projectTemplateItem.sketch);
       workspace.settings[`IoTWorkbench.${ConfigKey.boardId}`] = boardId;

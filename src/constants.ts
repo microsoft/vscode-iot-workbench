@@ -36,3 +36,9 @@ export class ContentView {
   static readonly workbenchContentProtocol = 'iot-workbench';
   static readonly workbenchExampleURI = 'iot-workbench://example';
 }
+
+export class FileNames {
+  static readonly templateFileName = 'template.json';
+  static readonly boardListFileName = 'boardlist.json';
+  static readonly resourceFolderName = 'resources';
+}
