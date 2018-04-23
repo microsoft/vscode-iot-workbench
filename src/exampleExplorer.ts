@@ -219,7 +219,7 @@ export class ExampleExplorer {
       return false;
     } else {
       telemetryContext.properties.board = boardSelection.label;
-      ArduinoPackageManager.installBoard(boardSelection.id);
+      ArduinoPackageManager.installBoard(context, boardSelection.id);
     }
 
     vscode.commands.executeCommand(

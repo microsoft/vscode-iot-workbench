@@ -1,21 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import * as fs from 'fs-plus';
+import * as path from 'path';
 import * as vscode from 'vscode';
 
-export interface BoardInfo {
-  additionalUrl: string;
-  packageName: string;
-  architecture: string;
-}
-const BOARD_INFO: {[key: string]: BoardInfo} = {
-  devkit: {
-    additionalUrl:
-        'https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/master/package_azureboard_index.json',
-    packageName: 'AZ3166',
-    architecture: 'stm32f4'
-  }
-};
+import {FileNames} from './constants';
+import {Board} from './Models/Interfaces/Board';
 
 export class ArduinoPackageManager {
   private static async setAdditionalUrl(url: string) {
@@ -50,15 +41,24 @@ export class ArduinoPackageManager {
     }
   }
 
-  static async installBoard(boardId: string) {
-    const board = BOARD_INFO[boardId];
-    if (!board) {
+  static async installBoard(context: vscode.ExtensionContext, boardId: string) {
+    const boardList = context.asAbsolutePath(
+        path.join(FileNames.resourceFolderName, FileNames.boardListFileName));
+    const boardsJson = require(boardList);
+
+    const board = boardsJson.boards.find((template: Board) => {
+      return template.id === boardId;
+    });
+
+    if (!board || !board.installation) {
       return;
     }
 
-    await ArduinoPackageManager.setAdditionalUrl(board.additionalUrl);
+    await ArduinoPackageManager.setAdditionalUrl(
+        board.installation.additionalUrl);
     await vscode.commands.executeCommand(
-        'arduino.installBoard', board.packageName, board.architecture);
+        'arduino.installBoard', board.installation.packageName,
+        board.installation.architecture);
     return;
   }
 }

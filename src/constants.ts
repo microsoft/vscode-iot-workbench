@@ -9,6 +9,7 @@ export class ConfigKey {
   static readonly eventHubConnectionPath = 'eventHubConnectionPath';
   static readonly functionAppId = 'functionAppId';
   static readonly functionPath = 'FunctionPath';
+  static readonly boardId = 'BoardId';
 }
 
 export class DeviceConfig {
@@ -34,4 +35,10 @@ export class EventNames {
 export class ContentView {
   static readonly workbenchContentProtocol = 'iot-workbench';
   static readonly workbenchExampleURI = 'iot-workbench://example';
+}
+
+export class FileNames {
+  static readonly templateFileName = 'template.json';
+  static readonly boardListFileName = 'boardlist.json';
+  static readonly resourceFolderName = 'resources';
 }

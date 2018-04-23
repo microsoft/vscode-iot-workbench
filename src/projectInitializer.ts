@@ -12,14 +12,12 @@ import {ProjectTemplate, ProjectTemplateType} from './Models/Interfaces/ProjectT
 import {DialogResponses} from './DialogResponses';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import * as utils from './utils';
-import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
+import {Board, BoardInstallation, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {TelemetryContext} from './telemetry';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
+import {FileNames} from './constants';
 
 const constants = {
-  templateFileName: 'template.json',
-  boardListFileName: 'boardlist.json',
-  resourceFolderName: 'resources',
   defaultProjectName: 'IoTproject'
 };
 
@@ -103,12 +101,12 @@ export class ProjectInitializer {
     // Initial project
     await vscode.window.withProgress(
         {
-          title: 'Devkit project initialization',
+          title: 'Project initialization',
           location: vscode.ProgressLocation.Window,
         },
         async (progress) => {
           progress.report({
-            message: 'Updating a list of avaialbe template',
+            message: 'Updating a list of available template',
           });
 
           try {
@@ -116,7 +114,7 @@ export class ProjectInitializer {
             const boardItemList: BoardQuickPickItem[] = [];
 
             const boardList = context.asAbsolutePath(path.join(
-                constants.resourceFolderName, constants.boardListFileName));
+                FileNames.resourceFolderName, FileNames.boardListFileName));
             const boardsJson = require(boardList);
             boardsJson.boards.forEach((board: Board) => {
               boardItemList.push({
@@ -143,12 +141,13 @@ export class ProjectInitializer {
               return;
             } else {
               telemetryContext.properties.board = boardSelection.label;
-              ArduinoPackageManager.installBoard(boardSelection.id);
+              ArduinoPackageManager.installBoard(context, boardSelection.id);
             }
 
             // Template select
             const template = context.asAbsolutePath(path.join(
-                constants.resourceFolderName, constants.templateFileName));
+                FileNames.resourceFolderName, boardSelection.id,
+                FileNames.templateFileName));
             const templateJson = require(template);
 
             const projectTemplateList: vscode.QuickPickItem[] = [];
@@ -179,7 +178,7 @@ export class ProjectInitializer {
             }
 
             const result =
-                templateJson.templates.filter((template: ProjectTemplate) => {
+                templateJson.templates.find((template: ProjectTemplate) => {
                   return template.label === selection.label;
                 });
 
@@ -188,7 +187,8 @@ export class ProjectInitializer {
             }
 
             const project = new IoTProject(context, channel);
-            return await project.create(rootPath, result[0], openInNewWindow);
+            return await project.create(
+                rootPath, result, boardSelection.id, openInNewWindow);
           } catch (error) {
             throw error;
           }

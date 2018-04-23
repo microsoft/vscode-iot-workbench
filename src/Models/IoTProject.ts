@@ -78,8 +78,14 @@ export class IoTProject {
         vscode.workspace.workspaceFolders[0].uri.fsPath, '..', devicePath);
 
     if (deviceLocation !== undefined) {
-      const device = new AZ3166Device(this.extensionContext, deviceLocation);
-      this.componentList.push(device);
+      const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
+      if (!boardId) {
+        return false;
+      }
+      if (boardId === AZ3166Device.boardId) {
+        const device = new AZ3166Device(this.extensionContext, deviceLocation);
+        this.componentList.push(device);
+      }
     }
 
     const iotHub = new IoTHub(this.channel);
@@ -213,7 +219,7 @@ export class IoTProject {
 
   async create(
       rootFolderPath: string, projectTemplateItem: ProjectTemplate,
-      openInNewWindow: boolean): Promise<boolean> {
+      boardId: string, openInNewWindow: boolean): Promise<boolean> {
     if (!fs.existsSync(rootFolderPath)) {
       throw new Error(
           'Unable to find the root path, please open the folder and initialize project again.');
@@ -234,10 +240,13 @@ export class IoTProject {
 
     workspace.folders.push({path: constants.deviceDefaultFolderName});
 
-    const device = new AZ3166Device(
-        this.extensionContext, deviceDir, projectTemplateItem.sketch);
-    this.componentList.push(device);
+    if (boardId === AZ3166Device.boardId) {
+      const device = new AZ3166Device(
+          this.extensionContext, deviceDir, projectTemplateItem.sketch);
 
+      workspace.settings[`IoTWorkbench.${ConfigKey.boardId}`] = boardId;
+      this.componentList.push(device);
+    }
     // TODO: Consider naming for project level settings.
     const settings = {projectsettings: [] as ProjectSetting[]};
     settings.projectsettings.push(

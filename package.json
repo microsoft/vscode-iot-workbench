@@ -124,6 +124,9 @@
           "IoTWorkbench.disableAutoPopupLandingPage": {
             "boolean": "boolean",
             "default": false
+          },
+          "IoTWorkbench.BoardId": {
+            "type": "string"
           }
         }
       }

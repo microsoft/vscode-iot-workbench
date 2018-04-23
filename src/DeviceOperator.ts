@@ -100,7 +100,7 @@ export class DeviceOperator {
     } else {
       telemetryContext.properties.board = boardSelection.label;
       try {
-        await ArduinoPackageManager.installBoard(boardSelection.id);
+        await ArduinoPackageManager.installBoard(context, boardSelection.id);
       } catch (error) {
         throw new Error(`Device package for ${
             boardSelection.label} installation failed: ${error.message}`);

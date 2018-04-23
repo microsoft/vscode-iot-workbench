@@ -29,6 +29,7 @@ export class UsbDetector {
   // tslint:disable-next-line: no-any
   private static _usbDetector: any =
       require('../../vendor/node-usb-native').detector;
+  private static context: vscode.ExtensionContext;
 
   static showLandingPage(device: DeviceInfo) {
     // if current workspace is iot workbench workspace
@@ -51,7 +52,8 @@ export class UsbDetector {
         const vendorId = Number('0x' + deviceInfo.vendorId);
         const productId = Number('0x' + deviceInfo.productId);
         if (vendorId === device.vendorId && productId === device.productId) {
-          ArduinoPackageManager.installBoard(deviceInfo.deviceId);
+          ArduinoPackageManager.installBoard(
+              UsbDetector.context, deviceInfo.deviceId);
           vscode.commands.executeCommand(
               'vscode.previewHtml',
               ContentView.workbenchExampleURI + '?' + deviceInfo.deviceId,
@@ -61,7 +63,7 @@ export class UsbDetector {
     }
   }
 
-  static async startListening() {
+  static async startListening(context: vscode.ExtensionContext) {
     const disableUSBDetection =
         ConfigHandler.get<boolean>('disableAutoPopupLandingPage');
     if (os.platform() === 'linux' || disableUSBDetection) {
@@ -71,6 +73,8 @@ export class UsbDetector {
     if (!UsbDetector._usbDetector) {
       return;
     }
+
+    UsbDetector.context = context;
 
     const devices: DeviceInfo[]|undefined =
         await UsbDetector._usbDetector.find();

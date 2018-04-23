@@ -3,7 +3,12 @@
         {
             "name": "IoT DevKit",
             "id": "devkit",
-            "platform": "Arduino"
+            "platform": "MXChip - Microsoft Azure IoT Developer Kit",
+            "installation": {
+                "additionalUrl": "https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/master/package_azureboard_index.json",
+                "packageName": "AZ3166",
+                "architecture": "stm32f4"
+            }
         }
     ]
 }
