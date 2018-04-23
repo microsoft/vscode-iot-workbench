@@ -74,7 +74,7 @@ export class UsbDetector {
       return;
     }
 
-    this.context = context;
+    UsbDetector.context = context;
 
     const devices: DeviceInfo[]|undefined =
         await UsbDetector._usbDetector.find();
