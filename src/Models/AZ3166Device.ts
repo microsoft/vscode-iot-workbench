@@ -74,6 +74,7 @@ export class AZ3166Device implements Device {
   private deviceFolder: string;
   private extensionContext: vscode.ExtensionContext;
   private sketchName = '';
+  static BoardId = 'devkit';
 
   constructor(
       context: vscode.ExtensionContext, devicePath: string,
@@ -124,7 +125,7 @@ export class AZ3166Device implements Device {
       if (plat === 'win32') {
         const propertiesFilePathWin32 =
             this.extensionContext.asAbsolutePath(path.join(
-                constants.resourcesFolderName,
+                constants.resourcesFolderName, AZ3166Device.BoardId,
                 constants.cppPropertiesFileNameWin));
         const propertiesContentWin32 =
             fs.readFileSync(propertiesFilePathWin32).toString();
@@ -139,7 +140,7 @@ export class AZ3166Device implements Device {
       else {
         const propertiesFilePathMac =
             this.extensionContext.asAbsolutePath(path.join(
-                constants.resourcesFolderName,
+                constants.resourcesFolderName, AZ3166Device.BoardId,
                 constants.cppPropertiesFileNameMac));
         const propertiesContentMac =
             fs.readFileSync(propertiesFilePathMac).toString();
@@ -248,7 +249,7 @@ export class AZ3166Device implements Device {
 
     // Create an empty arduino sketch
     const sketchTemplateFilePath = this.extensionContext.asAbsolutePath(
-        path.join(constants.resourcesFolderName, this.sketchName));
+        path.join(constants.resourcesFolderName, AZ3166Device.BoardId, this.sketchName));
     const newSketchFilePath = path.join(deviceFolderPath, sketchFileName);
 
     try {

@@ -9,6 +9,7 @@ export class ConfigKey {
   static readonly eventHubConnectionPath = 'eventHubConnectionPath';
   static readonly functionAppId = 'functionAppId';
   static readonly functionPath = 'FunctionPath';
+  static readonly boardId = 'BoardId';
 }
 
 export class DeviceConfig {
