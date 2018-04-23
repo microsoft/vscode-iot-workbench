@@ -3,7 +3,7 @@
         {
             "name": "IoT DevKit",
             "id": "devkit",
-            "platform": "Arduino"
+            "platform": "MXChip - Microsoft Azure IoT Developer Kit"
         }
     ]
 }
