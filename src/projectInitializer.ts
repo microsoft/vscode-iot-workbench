@@ -178,7 +178,7 @@ export class ProjectInitializer {
             }
 
             const result =
-                templateJson.templates.filter((template: ProjectTemplate) => {
+                templateJson.templates.find((template: ProjectTemplate) => {
                   return template.label === selection.label;
                 });
 
@@ -188,7 +188,7 @@ export class ProjectInitializer {
 
             const project = new IoTProject(context, channel);
             return await project.create(
-                rootPath, result[0], boardSelection.id, openInNewWindow);
+                rootPath, result, boardSelection.id, openInNewWindow);
           } catch (error) {
             throw error;
           }
