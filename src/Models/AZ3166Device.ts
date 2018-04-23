@@ -74,7 +74,11 @@ export class AZ3166Device implements Device {
   private deviceFolder: string;
   private extensionContext: vscode.ExtensionContext;
   private sketchName = '';
-  static boardId = 'devkit';
+  private static _boardId = 'devkit';
+
+  static get boardId() {
+    return AZ3166Device._boardId;
+  }
 
   constructor(
       context: vscode.ExtensionContext, devicePath: string,

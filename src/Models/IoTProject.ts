@@ -243,6 +243,7 @@ export class IoTProject {
     if (boardId === AZ3166Device.boardId) {
       const device = new AZ3166Device(
           this.extensionContext, deviceDir, projectTemplateItem.sketch);
+
       workspace.settings[`IoTWorkbench.${ConfigKey.boardId}`] = boardId;
       this.componentList.push(device);
     }

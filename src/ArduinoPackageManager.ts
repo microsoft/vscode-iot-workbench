@@ -46,19 +46,19 @@ export class ArduinoPackageManager {
         path.join(FileNames.resourceFolderName, FileNames.boardListFileName));
     const boardsJson = require(boardList);
 
-    const board = boardsJson.boards.filter((template: Board) => {
+    const board = boardsJson.boards.find((template: Board) => {
       return template.id === boardId;
     });
 
-    if (!board || !board[0]) {
+    if (!board || !board.installation) {
       return;
     }
 
     await ArduinoPackageManager.setAdditionalUrl(
-        board[0].installation.additionalUrl);
+        board.installation.additionalUrl);
     await vscode.commands.executeCommand(
-        'arduino.installBoard', board[0].installation.packageName,
-        board[0].installation.architecture);
+        'arduino.installBoard', board.installation.packageName,
+        board.installation.architecture);
     return;
   }
 }
