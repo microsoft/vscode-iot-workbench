@@ -18,7 +18,7 @@ import * as WinReg from 'winreg';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey} from '../constants';
+import {ConfigKey, FileNames} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 import {ProjectTemplate, ProjectTemplateType} from '../Models/Interfaces/ProjectTemplate';
 import {IoTProject} from '../Models/IoTProject';
@@ -40,10 +40,8 @@ const constants = {
   defaultSketchFileName: 'device.ino',
   arduinoJsonFileName: 'arduino.json',
   settingsJsonFileName: 'settings.json',
-  iotworkbenchprojectFileName: '.iotworkbenchproject',
   boardInfo: 'AZ3166:stm32f4:MXCHIP_AZ3166',
   uploadMethod: 'upload_method=OpenOCDMethod',
-  resourcesFolderName: 'resources',
   cppPropertiesFileName: 'c_cpp_properties.json',
   cppPropertiesFileNameMac: 'c_cpp_properties_macos.json',
   cppPropertiesFileNameWin: 'c_cpp_properties_win32.json',
@@ -137,7 +135,7 @@ export class AZ3166Device implements Device {
       if (plat === 'win32') {
         const propertiesFilePathWin32 =
             this.extensionContext.asAbsolutePath(path.join(
-                constants.resourcesFolderName, AZ3166Device.boardId,
+                FileNames.resourcesFolderName, AZ3166Device.boardId,
                 constants.cppPropertiesFileNameWin));
         const propertiesContentWin32 =
             fs.readFileSync(propertiesFilePathWin32).toString();
@@ -152,7 +150,7 @@ export class AZ3166Device implements Device {
       else {
         const propertiesFilePathMac =
             this.extensionContext.asAbsolutePath(path.join(
-                constants.resourcesFolderName, AZ3166Device.boardId,
+                FileNames.resourcesFolderName, AZ3166Device.boardId,
                 constants.cppPropertiesFileNameMac));
         const propertiesContentMac =
             fs.readFileSync(propertiesFilePathMac).toString();
@@ -180,7 +178,7 @@ export class AZ3166Device implements Device {
 
     try {
       const iotworkbenchprojectFilePath =
-          path.join(deviceFolderPath, constants.iotworkbenchprojectFileName);
+          path.join(deviceFolderPath, FileNames.iotworkbenchprojectFileName);
       fs.writeFileSync(iotworkbenchprojectFilePath, ' ');
     } catch (error) {
       throw new Error(
@@ -262,7 +260,7 @@ export class AZ3166Device implements Device {
     // Create an empty arduino sketch
     const sketchTemplateFilePath =
         this.extensionContext.asAbsolutePath(path.join(
-            constants.resourcesFolderName, AZ3166Device.boardId,
+            FileNames.resourcesFolderName, AZ3166Device.boardId,
             this.sketchName));
     const newSketchFilePath = path.join(deviceFolderPath, sketchFileName);
 

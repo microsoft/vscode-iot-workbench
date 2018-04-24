@@ -2,24 +2,17 @@
     "templates": [
         {
             "description": "",
-            "detail": "Create project with device only code.",
-            "label": "Device only",
-            "type": "Basic",
-            "sketch": "emptySketch.ino"
-        },
-        {
-            "description": "",
             "detail": "Create project that connects to Azure IoT Hub, such as sending sensor data to cloud.",
             "label": "With Azure IoT Hub",
             "type": "IotHub",
-            "sketch": "simple_iothub.ino"
+            "sketch": "userdata.json"
         },
         {
             "description": "",
             "detail": "Create project that connects to Azure IoT Hub and processes device data further in Azure Functions.",
             "label": "With Azure Functions",
             "type": "AzureFunctions",
-            "sketch": "simple_iothub.ino"
+            "sketch": "userdata.json"
         }
     ]
 }

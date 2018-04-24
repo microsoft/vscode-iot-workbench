@@ -150,7 +150,7 @@ export class ProjectInitializer {
 
             // Template select
             const template = context.asAbsolutePath(path.join(
-                FileNames.resourceFolderName, boardSelection.id,
+                FileNames.resourcesFolderName, boardSelection.id,
                 FileNames.templateFileName));
             const templateJson = require(template);
 

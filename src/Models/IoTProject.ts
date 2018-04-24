@@ -19,6 +19,7 @@ import {ProjectTemplate, ProjectTemplateType} from './Interfaces/ProjectTemplate
 import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
 import {Workspace} from './Interfaces/Workspace';
+import {IoTButtonDevice} from './IoTButtonDevice';
 import {IoTHub} from './IoTHub';
 import {IoTHubDevice} from './IoTHubDevice';
 
@@ -84,6 +85,10 @@ export class IoTProject {
       }
       if (boardId === AZ3166Device.boardId) {
         const device = new AZ3166Device(this.extensionContext, deviceLocation);
+        this.componentList.push(device);
+      } else if (boardId === IoTButtonDevice.boardId) {
+        const device =
+            new IoTButtonDevice(this.extensionContext, deviceLocation);
         this.componentList.push(device);
       }
     }
@@ -239,14 +244,20 @@ export class IoTProject {
     }
 
     workspace.folders.push({path: constants.deviceDefaultFolderName});
-
+    let device: Component;
     if (boardId === AZ3166Device.boardId) {
-      const device = new AZ3166Device(
+      device = new AZ3166Device(
           this.extensionContext, deviceDir, projectTemplateItem.sketch);
-
-      workspace.settings[`IoTWorkbench.${ConfigKey.boardId}`] = boardId;
-      this.componentList.push(device);
+    } else if (boardId === IoTButtonDevice.boardId) {
+      device = new IoTButtonDevice(
+          this.extensionContext, deviceDir, projectTemplateItem.sketch);
+    } else {
+      throw new Error('The specified board is not supported.');
     }
+
+    workspace.settings[`IoTWorkbench.${ConfigKey.boardId}`] = boardId;
+    this.componentList.push(device);
+
     // TODO: Consider naming for project level settings.
     const settings = {projectsettings: [] as ProjectSetting[]};
     settings.projectsettings.push(

@@ -13,6 +13,11 @@
                 "packageName": "AZ3166",
                 "architecture": "stm32f4"
             }
+        },
+        {
+            "name": "IoT Button",
+            "id": "iotbutton",
+            "platform": "Microsoft Azure IoT Button"
         }
     ]
 }
