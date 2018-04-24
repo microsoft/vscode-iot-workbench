@@ -7,7 +7,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ArduinoPackageManager} from './ArduinoPackageManager';
-import {boardList, boardOption, BoardProvider} from './boardProvider';
+import {BoardProvider} from './boardProvider';
 import {ConfigHandler} from './configHandler';
 import {ConfigKey, ContentView} from './constants';
 
@@ -43,13 +43,9 @@ export class UsbDetector {
     }
 
     if (device.vendorId && device.productId) {
-      const option: boardOption = {
-        vendorId: device.vendorId,
-        productId: device.productId
-      };
-
       const boardProvider = new BoardProvider(this.context);
-      const board = boardProvider.find(option);
+      const board = boardProvider.find(
+          {vendorId: device.vendorId, productId: device.productId});
 
       if (board) {
         ArduinoPackageManager.installBoard(board);
