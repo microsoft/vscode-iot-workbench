@@ -22,7 +22,8 @@ const constants = {
 
 export class UsbDetector {
   // tslint:disable-next-line: no-any
-  private _usbDetector: any = require('../../vendor/node-usb-native').detector;
+  private static _usbDetector: any =
+      require('../../vendor/node-usb-native').detector;
 
   constructor(private context: vscode.ExtensionContext) {}
 
@@ -64,15 +65,16 @@ export class UsbDetector {
       return;
     }
 
-    if (!this._usbDetector) {
+    if (!UsbDetector._usbDetector) {
       return;
     }
 
-    const devices: DeviceInfo[]|undefined = await this._usbDetector.find();
+    const devices: DeviceInfo[]|undefined =
+        await UsbDetector._usbDetector.find();
     if (devices) {
       devices.forEach(this.showLandingPage);
     }
 
-    this._usbDetector.on('add', this.showLandingPage);
+    UsbDetector._usbDetector.on('add', this.showLandingPage);
   }
 }
