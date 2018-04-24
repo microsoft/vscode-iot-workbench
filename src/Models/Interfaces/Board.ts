@@ -16,6 +16,7 @@ export interface Board {
   defaultBaudRate?: number;
   vendorId?: string;
   productId?: string;
+  exampleUrl?: string;
   installation?: BoardInstallation;
 }
 

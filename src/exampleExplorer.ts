@@ -18,11 +18,6 @@ import {ContentView} from './constants';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 
-const constants = {
-  boardListFileName: 'boardlist.json',
-  resourceFolderName: 'resources',
-};
-
 export class ExampleExplorer {
   private exampleList: Example[] = [];
   private _exampleName = '';
@@ -223,14 +218,18 @@ export class ExampleExplorer {
 
       if (board) {
         await ArduinoPackageManager.installBoard(board);
+        vscode.commands.executeCommand(
+            'vscode.previewHtml',
+            ContentView.workbenchExampleURI + '?' +
+                encodeURIComponent(
+                    'board=' + board.id +
+                    '&url=' + encodeURIComponent(board.exampleUrl || '')),
+            vscode.ViewColumn.One, 'IoT Workbench Examples');
+        return true;
       }
     }
 
-    vscode.commands.executeCommand(
-        'vscode.previewHtml',
-        ContentView.workbenchExampleURI + '?' + boardSelection.id,
-        vscode.ViewColumn.One, 'IoT Workbench Examples');
-    return true;
+    return false;
   }
 
   async initializeExample(
