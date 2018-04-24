@@ -306,7 +306,8 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(helpInit);
   context.subscriptions.push(workbenchPath);
 
-  UsbDetector.startListening(context);
+  const usbDetector = new UsbDetector(context);
+  usbDetector.startListening();
 }
 
 // this method is called when your extension is deactivated

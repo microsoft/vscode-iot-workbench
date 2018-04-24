@@ -16,6 +16,7 @@ import {Board, BoardInstallation, BoardQuickPickItem} from './Models/Interfaces/
 import {TelemetryContext} from './telemetry';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {FileNames} from './constants';
+import {BoardProvider} from './boardProvider';
 
 const constants = {
   defaultProjectName: 'IoTproject'
@@ -111,12 +112,11 @@ export class ProjectInitializer {
 
           try {
             // Select board
+            const boardProvider = new BoardProvider(context);
             const boardItemList: BoardQuickPickItem[] = [];
 
-            const boardList = context.asAbsolutePath(path.join(
-                FileNames.resourceFolderName, FileNames.boardListFileName));
-            const boardsJson = require(boardList);
-            boardsJson.boards.forEach((board: Board) => {
+            const boards = boardProvider.list;
+            boards.forEach((board: Board) => {
               boardItemList.push({
                 name: board.name,
                 id: board.id,
@@ -141,7 +141,11 @@ export class ProjectInitializer {
               return;
             } else {
               telemetryContext.properties.board = boardSelection.label;
-              ArduinoPackageManager.installBoard(context, boardSelection.id);
+              const board = boardProvider.find({id: boardSelection.id});
+
+              if (board) {
+                await ArduinoPackageManager.installBoard(board);
+              }
             }
 
             // Template select

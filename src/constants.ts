@@ -12,12 +12,6 @@ export class ConfigKey {
   static readonly boardId = 'BoardId';
 }
 
-export class DeviceConfig {
-  static readonly defaultBaudRate = 115200;
-  static readonly az3166ComPortVendorId = '0483';
-  static readonly az3166ComPortProductId = '374b';
-}
-
 export class EventNames {
   static readonly createNewProjectEvent = 'IoTWorkbench.NewProject';
   static readonly azureProvisionEvent = 'IoTWorkbench.AzureProvision';

@@ -7,14 +7,9 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ArduinoPackageManager} from './ArduinoPackageManager';
+import {boardList, boardOption, BoardProvider} from './boardProvider';
 import {ConfigHandler} from './configHandler';
-import {ConfigKey, ContentView, DeviceConfig} from './constants';
-
-const DEVICE_INFO = [{
-  deviceId: 'devkit',
-  vendorId: DeviceConfig.az3166ComPortVendorId,
-  productId: DeviceConfig.az3166ComPortProductId
-}];
+import {ConfigKey, ContentView} from './constants';
 
 export interface DeviceInfo {
   vendorId: number;
@@ -27,11 +22,11 @@ const constants = {
 
 export class UsbDetector {
   // tslint:disable-next-line: no-any
-  private static _usbDetector: any =
-      require('../../vendor/node-usb-native').detector;
-  private static context: vscode.ExtensionContext;
+  private _usbDetector: any = require('../../vendor/node-usb-native').detector;
 
-  static showLandingPage(device: DeviceInfo) {
+  constructor(private context: vscode.ExtensionContext) {}
+
+  showLandingPage(device: DeviceInfo) {
     // if current workspace is iot workbench workspace
     // we shouldn't popup landing page
     if (vscode.workspace.workspaceFolders &&
@@ -48,40 +43,40 @@ export class UsbDetector {
     }
 
     if (device.vendorId && device.productId) {
-      for (const deviceInfo of DEVICE_INFO) {
-        const vendorId = Number('0x' + deviceInfo.vendorId);
-        const productId = Number('0x' + deviceInfo.productId);
-        if (vendorId === device.vendorId && productId === device.productId) {
-          ArduinoPackageManager.installBoard(
-              UsbDetector.context, deviceInfo.deviceId);
-          vscode.commands.executeCommand(
-              'vscode.previewHtml',
-              ContentView.workbenchExampleURI + '?' + deviceInfo.deviceId,
-              vscode.ViewColumn.One, 'IoT Workbench Examples');
-        }
+      const option: boardOption = {
+        vendorId: device.vendorId,
+        productId: device.productId
+      };
+
+      const boardProvider = new BoardProvider(this.context);
+      const board = boardProvider.find(option);
+
+      if (board) {
+        ArduinoPackageManager.installBoard(board);
+        vscode.commands.executeCommand(
+            'vscode.previewHtml',
+            ContentView.workbenchExampleURI + '?' + board.id,
+            vscode.ViewColumn.One, 'IoT Workbench Examples');
       }
     }
   }
 
-  static async startListening(context: vscode.ExtensionContext) {
+  async startListening() {
     const disableUSBDetection =
         ConfigHandler.get<boolean>('disableAutoPopupLandingPage');
     if (os.platform() === 'linux' || disableUSBDetection) {
       return;
     }
 
-    if (!UsbDetector._usbDetector) {
+    if (!this._usbDetector) {
       return;
     }
 
-    UsbDetector.context = context;
-
-    const devices: DeviceInfo[]|undefined =
-        await UsbDetector._usbDetector.find();
+    const devices: DeviceInfo[]|undefined = await this._usbDetector.find();
     if (devices) {
-      devices.forEach(UsbDetector.showLandingPage);
+      devices.forEach(this.showLandingPage);
     }
 
-    UsbDetector._usbDetector.on('add', UsbDetector.showLandingPage);
+    this._usbDetector.on('add', this.showLandingPage);
   }
 }
