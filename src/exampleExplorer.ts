@@ -16,11 +16,7 @@ import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {TelemetryContext} from './telemetry';
 import {ContentView} from './constants';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
-
-const constants = {
-  boardListFileName: 'boardlist.json',
-  resourceFolderName: 'resources',
-};
+import {BoardProvider} from './boardProvider';
 
 export class ExampleExplorer {
   private exampleList: Example[] = [];
@@ -192,11 +188,10 @@ export class ExampleExplorer {
   async selectBoard(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
+    const boardProvider = new BoardProvider(context);
     const boardItemList: BoardQuickPickItem[] = [];
-    const boardList = context.asAbsolutePath(
-        path.join(constants.resourceFolderName, constants.boardListFileName));
-    const boardsJson = require(boardList);
-    boardsJson.boards.forEach((board: Board) => {
+    const boards = boardProvider.list;
+    boards.forEach((board: Board) => {
       boardItemList.push({
         name: board.name,
         id: board.id,
@@ -219,14 +214,22 @@ export class ExampleExplorer {
       return false;
     } else {
       telemetryContext.properties.board = boardSelection.label;
-      ArduinoPackageManager.installBoard(context, boardSelection.id);
+      const board = boardProvider.find({id: boardSelection.id});
+
+      if (board) {
+        await ArduinoPackageManager.installBoard(board);
+        vscode.commands.executeCommand(
+            'vscode.previewHtml',
+            ContentView.workbenchExampleURI + '?' +
+                encodeURIComponent(
+                    'board=' + board.id +
+                    '&url=' + encodeURIComponent(board.exampleUrl || '')),
+            vscode.ViewColumn.One, 'IoT Workbench Examples');
+        return true;
+      }
     }
 
-    vscode.commands.executeCommand(
-        'vscode.previewHtml',
-        ContentView.workbenchExampleURI + '?' + boardSelection.id,
-        vscode.ViewColumn.One, 'IoT Workbench Examples');
-    return true;
+    return false;
   }
 
   async initializeExample(

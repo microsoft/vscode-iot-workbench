@@ -41,15 +41,7 @@ export class ArduinoPackageManager {
     }
   }
 
-  static async installBoard(context: vscode.ExtensionContext, boardId: string) {
-    const boardList = context.asAbsolutePath(
-        path.join(FileNames.resourcesFolderName, FileNames.boardListFileName));
-    const boardsJson = require(boardList);
-
-    const board = boardsJson.boards.find((template: Board) => {
-      return template.id === boardId;
-    });
-
+  static async installBoard(board: Board) {
     if (!board || !board.installation) {
       return;
     }
