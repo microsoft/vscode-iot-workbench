@@ -11,11 +11,7 @@ import {IoTProject} from './Models/IoTProject';
 import {TelemetryContext} from './telemetry';
 import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
-
-const constants = {
-  boardListFileName: 'boardlist.json',
-  resourceFolderName: 'resources',
-};
+import {BoardProvider} from './boardProvider';
 
 export class DeviceOperator {
   async compile(
@@ -72,11 +68,10 @@ export class DeviceOperator {
   async downloadPackage(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
+    const boardProvider = new BoardProvider(context);
     const boardItemList: BoardQuickPickItem[] = [];
-    const boardList = context.asAbsolutePath(
-        path.join(constants.resourceFolderName, constants.boardListFileName));
-    const boardsJson = require(boardList);
-    boardsJson.boards.forEach((board: Board) => {
+    const boards = boardProvider.list;
+    boards.forEach((board: Board) => {
       boardItemList.push({
         name: board.name,
         id: board.id,
@@ -100,7 +95,11 @@ export class DeviceOperator {
     } else {
       telemetryContext.properties.board = boardSelection.label;
       try {
-        await ArduinoPackageManager.installBoard(context, boardSelection.id);
+        const board = boardProvider.find({id: boardSelection.id});
+
+        if (board) {
+          await ArduinoPackageManager.installBoard(board);
+        }
       } catch (error) {
         throw new Error(`Device package for ${
             boardSelection.label} installation failed: ${error.message}`);

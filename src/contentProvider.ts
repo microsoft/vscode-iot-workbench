@@ -29,7 +29,8 @@ export class ContentProvider implements vscode.TextDocumentContentProvider {
 
   async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
     let type = '';
-    switch (uri.toString()) {
+    const url = uri.toString();
+    switch (url) {
       case ContentView.workbenchExampleURI:
         type = 'example';
         break;
@@ -37,11 +38,13 @@ export class ContentProvider implements vscode.TextDocumentContentProvider {
         type = 'example';
     }
 
+    const endpoint = this._webserver.getEndpointUri(type) + '?' +
+        decodeURIComponent(url.split('?')[1]);
+
     return `<html>
       <body style="margin: 0; padding: 0; height: 100%; overflow: hidden;">
           <iframe src="${
-        this._webserver.getEndpointUri(
-            type)}" width="100%" height="100%" frameborder="0" style="position:absolute; left: 0; right: 0; bottom: 0; top: 0px;"/>
+        endpoint}" width="100%" height="100%" frameborder="0" style="position:absolute; left: 0; right: 0; bottom: 0; top: 0px;"/>
       </body>
       </html>`;
   }

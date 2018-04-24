@@ -8,8 +8,11 @@ var example = new Vue({
     blogs: []
   },
   created: function() {
-    var board = location.search ? location.search.substr(1) : 'devkit';
-    httpRequest(`https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/gallery/workbench-example-${board}.json`, function(data) {
+    const query = parseQuery(location.href);
+    const board = query.board || 'devkit';
+    const url = query.url ||
+        'https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/gallery/workbench-example-devkit.json';
+    httpRequest(url, function(data) {
       var examples = [];
       try {
         if (data) {
@@ -109,4 +112,18 @@ function getSingleServiceImage(service) {
     default:
       return '';
   }
+}
+
+function parseQuery(url) {
+  if (url.indexOf('?') < 0) {
+    return {};
+  }
+  const query = url.split('?')[1].split('&');
+  let res = {};
+  query.forEach(q => {
+    const item = q.split('=');
+    res[item[0]] = item[1] ? decodeURIComponent(item[1]) : undefined;
+  });
+
+  return res;
 }

@@ -16,13 +16,15 @@ import {error} from 'util';
 import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
 
+import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, DeviceConfig} from '../constants';
+import {ConfigKey} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 import {ProjectTemplate, ProjectTemplateType} from '../Models/Interfaces/ProjectTemplate';
 import {IoTProject} from '../Models/IoTProject';
 import {delay, getRegistryValues} from '../utils';
 
+import {Board} from './Interfaces/Board';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
 
@@ -100,6 +102,12 @@ export class AZ3166Device implements Device {
 
   getComponentType(): ComponentType {
     return this.componentType;
+  }
+
+  get board() {
+    const boardProvider = new BoardProvider(this.extensionContext);
+    const az3166 = boardProvider.find({id: AZ3166Device._boardId});
+    return az3166;
   }
 
   async load(): Promise<boolean> {
@@ -421,12 +429,17 @@ export class AZ3166Device implements Device {
           try {
             const list = await SerialPortLite.list();
             let devkitConnected = false;
+            const az3166 = this.board;
+
+            if (!az3166) {
+              return reject(
+                  new Error('AZ3166 is not found in the board list.'));
+            }
+
             for (let i = 0; i < list.length; i++) {
               const device = list[i];
-              if (device.vendorId ===
-                      Number(`0x${DeviceConfig.az3166ComPortVendorId}`) &&
-                  device.productId ===
-                      Number(`0x${DeviceConfig.az3166ComPortProductId}`)) {
+              if (device.vendorId === Number(`0x${az3166.vendorId}`) &&
+                  device.productId === Number(`0x${az3166.productId}`)) {
                 devkitConnected = true;
                 const screenLogFile = path.join(
                     this.extensionContext.extensionPath, 'screenlog.0');
@@ -507,8 +520,14 @@ export class AZ3166Device implements Device {
           let commandExecuted = false;
           let gotData = false;
 
+          const az3166 = this.board;
+
+          if (!az3166) {
+            return reject(new Error('AZ3166 is not found in the board list.'));
+          }
+
           const port = new AZ3166Device.serialport(comPort, {
-            baudRate: DeviceConfig.defaultBaudRate,
+            baudRate: az3166.defaultBaudRate,
             dataBits: 8,
             stopBits: 1,
             xon: false,
@@ -633,12 +652,18 @@ export class AZ3166Device implements Device {
             resolve: (value: string) => void,
             reject: (reason: Error) => void) => {
           const comList = await this.getComList();
+
+          const az3166 = this.board;
+
+          if (!az3166) {
+            return reject(new Error('AZ3166 is not found in the board list.'));
+          }
+
           const list = _.filter(comList, com => {
-            if (com.vendorId && com.productId &&
-                com.vendorId.toLowerCase().endsWith(
-                    DeviceConfig.az3166ComPortVendorId) &&
-                com.productId.toLowerCase().endsWith(
-                    DeviceConfig.az3166ComPortProductId)) {
+            if (com.vendorId && com.productId && az3166.vendorId &&
+                az3166.productId &&
+                com.vendorId.toLowerCase().endsWith(az3166.vendorId) &&
+                com.productId.toLowerCase().endsWith(az3166.productId)) {
               return true;
             } else {
               return false;
