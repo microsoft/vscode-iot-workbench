@@ -190,7 +190,7 @@ export class ExampleExplorer {
       telemetryContext: TelemetryContext) {
     const boardProvider = new BoardProvider(context);
     const boardItemList: BoardQuickPickItem[] = [];
-    const boards = boardProvider.list;
+    const boards = boardProvider.list.filter(board => board.exampleUrl);
     boards.forEach((board: Board) => {
       boardItemList.push({
         name: board.name,
