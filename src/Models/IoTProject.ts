@@ -19,9 +19,9 @@ import {ProjectTemplate, ProjectTemplateType} from './Interfaces/ProjectTemplate
 import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
 import {Workspace} from './Interfaces/Workspace';
+import {IoTButtonDevice} from './IoTButtonDevice';
 import {IoTHub} from './IoTHub';
 import {IoTHubDevice} from './IoTHubDevice';
-import { IoTButtonDevice } from './IoTButtonDevice';
 
 const constants = {
   deviceDefaultFolderName: 'Device',
@@ -86,9 +86,9 @@ export class IoTProject {
       if (boardId === AZ3166Device.boardId) {
         const device = new AZ3166Device(this.extensionContext, deviceLocation);
         this.componentList.push(device);
-      }
-      else if (boardId === IoTButtonDevice.boardId) {
-        const device = new IoTButtonDevice(this.extensionContext, deviceLocation);
+      } else if (boardId === IoTButtonDevice.boardId) {
+        const device =
+            new IoTButtonDevice(this.extensionContext, deviceLocation);
         this.componentList.push(device);
       }
     }
@@ -248,12 +248,10 @@ export class IoTProject {
     if (boardId === AZ3166Device.boardId) {
       device = new AZ3166Device(
           this.extensionContext, deviceDir, projectTemplateItem.sketch);
-    }
-    else if (boardId === IoTButtonDevice.boardId) {
+    } else if (boardId === IoTButtonDevice.boardId) {
       device = new IoTButtonDevice(
-        this.extensionContext, deviceDir, projectTemplateItem.sketch);
-    }
-    else {
+          this.extensionContext, deviceDir, projectTemplateItem.sketch);
+    } else {
       throw new Error('The specified board is not supported.');
     }
 

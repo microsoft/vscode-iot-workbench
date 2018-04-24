@@ -135,7 +135,7 @@ export class AZ3166Device implements Device {
       if (plat === 'win32') {
         const propertiesFilePathWin32 =
             this.extensionContext.asAbsolutePath(path.join(
-              FileNames.resourcesFolderName, AZ3166Device.boardId,
+                FileNames.resourcesFolderName, AZ3166Device.boardId,
                 constants.cppPropertiesFileNameWin));
         const propertiesContentWin32 =
             fs.readFileSync(propertiesFilePathWin32).toString();
