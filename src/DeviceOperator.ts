@@ -52,7 +52,7 @@ export class DeviceOperator {
     await project.upload();
   }
 
-  async setConnectionString(
+  async configDeviceSettings(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     if (!vscode.workspace.rootPath) {
@@ -66,7 +66,7 @@ export class DeviceOperator {
       throw new Error(
           'Unable to set device connection string, please open an IoT Workbench project and retry.');
     }
-    await project.setDeviceConnectionString();
+    await project.configDeviceSettings();
   }
 
   async downloadPackage(
