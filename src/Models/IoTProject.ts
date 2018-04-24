@@ -331,22 +331,17 @@ export class IoTProject {
     }
   }
 
-  async setDeviceConnectionString(): Promise<boolean> {
+  async configDeviceSettings(): Promise<boolean> {
     for (const component of this.componentList) {
       if (component.getComponentType() === ComponentType.Device) {
         const device = component as Device;
-
-        if (device.getDeviceType() === DeviceType.MXChip_AZ3166) {
-          const az3166Device = device as AZ3166Device;
-          try {
-            await az3166Device.setDeviceConnectionString();
-          } catch (error) {
-            throw error;
-          }
+        try {
+          await device.configDeviceSettings();
+        } catch (error) {
+          throw error;
         }
       }
     }
-
     return true;
   }
 }

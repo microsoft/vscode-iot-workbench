@@ -163,10 +163,10 @@ export async function activate(context: vscode.ExtensionContext) {
         deviceOperator.downloadPackage);
   };
 
-  const deviceConnectionStringConfigProvider = async () => {
+  const deviceSettingsConfigProvider = async () => {
     callWithTelemetry(
-        EventNames.setDeviceConnectionStringEvent, outputChannel, context,
-        deviceOperator.setConnectionString);
+        EventNames.configDeviceSettingsEvent, outputChannel, context,
+        deviceOperator.configDeviceSettings);
   };
 
   const examplesProvider = async () => {
@@ -183,10 +183,10 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const menuForDevice: CommandItem[] = [
     {
-      label: 'Config Device Connection String',
+      label: 'Config Device Settings',
       description: '',
-      detail: 'Set connection string on device to connection to Azure',
-      click: deviceConnectionStringConfigProvider
+      detail: 'Config the settings on device to connect to Azure',
+      click: deviceSettingsConfigProvider
     },
     {
       label: 'Device Compile',

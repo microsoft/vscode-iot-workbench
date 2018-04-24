@@ -318,7 +318,7 @@ export class AZ3166Device implements Device {
     }
   }
 
-  async setDeviceConnectionString(): Promise<boolean> {
+  async configDeviceSettings(): Promise<boolean> {
     try {
       // Get IoT Hub device connection string from config
       let deviceConnectionString =

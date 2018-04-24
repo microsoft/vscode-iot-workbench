@@ -21,8 +21,8 @@ export class EventNames {
   static readonly deviceCompileEvent = 'IoTWorkbench.DeviceCompile';
   static readonly deviceUploadEvent = 'IoTWorkbench.DeviceUpload';
   static readonly devicePackageEvent = 'IoTWorkbench.DevicePackage';
-  static readonly setDeviceConnectionStringEvent =
-      'IoTWorkbench.SetDeviceConnectionString';
+  static readonly configDeviceSettingsEvent =
+      'IoTWorkbench.ConfigDeviceSettingsEvent';
   static readonly loadExampleEvent = 'IoTWorkbench.loadExample';
 }
 
