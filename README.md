@@ -94,6 +94,6 @@ Microsoft would like to collect data about how users use Azure IoT DevKit and so
 
 To disable telemetry on Azure IoT Devkit，
 
-- Windows: set `-DENABLETRACE=0` in `C:\Users\{your name}\AppData\Local\Arduino15\packages\AZ3166\hardware\stm32f4\{version}\platform.local.txt`
+- Windows: set `-DENABLETRACE=0` in `%LOCALAPPDATA%\Arduino15\packages\AZ3166\hardware\stm32f4\{version}\platform.local.txt`
 - macOS： set `-DENABLETRACE=0` in `~/Library/Arduino15/packages/AZ3166/hardware/stm32f4/{version}/platform.local.txt`
 
