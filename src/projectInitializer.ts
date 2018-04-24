@@ -114,7 +114,7 @@ export class ProjectInitializer {
             const boardItemList: BoardQuickPickItem[] = [];
 
             const boardList = context.asAbsolutePath(path.join(
-                FileNames.resourceFolderName, FileNames.boardListFileName));
+                FileNames.resourcesFolderName, FileNames.boardListFileName));
             const boardsJson = require(boardList);
             boardsJson.boards.forEach((board: Board) => {
               boardItemList.push({
@@ -146,7 +146,7 @@ export class ProjectInitializer {
 
             // Template select
             const template = context.asAbsolutePath(path.join(
-                FileNames.resourceFolderName, boardSelection.id,
+                FileNames.resourcesFolderName, boardSelection.id,
                 FileNames.templateFileName));
             const templateJson = require(template);
 

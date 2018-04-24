@@ -1,0 +1,18 @@
+{
+    "templates": [
+        {
+            "description": "",
+            "detail": "Create project that connects to Azure IoT Hub, such as sending sensor data to cloud.",
+            "label": "With Azure IoT Hub",
+            "type": "IotHub",
+            "sketch": "userdata.json"
+        },
+        {
+            "description": "",
+            "detail": "Create project that connects to Azure IoT Hub and process device data further in Azure Functions.",
+            "label": "With Azure Functions",
+            "type": "AzureFunctions",
+            "sketch": "userdata.json"
+        }
+    ]
+}

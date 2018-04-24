@@ -43,7 +43,7 @@ export class ArduinoPackageManager {
 
   static async installBoard(context: vscode.ExtensionContext, boardId: string) {
     const boardList = context.asAbsolutePath(
-        path.join(FileNames.resourceFolderName, FileNames.boardListFileName));
+        path.join(FileNames.resourcesFolderName, FileNames.boardListFileName));
     const boardsJson = require(boardList);
 
     const board = boardsJson.boards.find((template: Board) => {
