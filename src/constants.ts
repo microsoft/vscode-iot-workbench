@@ -36,4 +36,6 @@ export class FileNames {
   static readonly boardListFileName = 'boardlist.json';
   static readonly resourcesFolderName = 'resources';
   static readonly iotworkbenchprojectFileName = '.iotworkbenchproject';
+  static readonly settingsJsonFileName = 'settings.json';
+  static readonly vscodeSettingsFolderName = '.vscode';
 }

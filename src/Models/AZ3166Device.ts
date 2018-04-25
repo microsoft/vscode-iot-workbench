@@ -36,10 +36,8 @@ interface SerialPortInfo {
 }
 
 const constants = {
-  vscodeSettingsFolderName: '.vscode',
   defaultSketchFileName: 'device.ino',
   arduinoJsonFileName: 'arduino.json',
-  settingsJsonFileName: 'settings.json',
   boardInfo: 'AZ3166:stm32f4:MXCHIP_AZ3166',
   uploadMethod: 'upload_method=OpenOCDMethod',
   cppPropertiesFileName: 'c_cpp_properties.json',
@@ -116,7 +114,7 @@ export class AZ3166Device implements Device {
     }
 
     const vscodeFolderPath =
-        path.join(deviceFolderPath, constants.vscodeSettingsFolderName);
+        path.join(deviceFolderPath, FileNames.vscodeSettingsFolderName);
     if (!fs.existsSync(vscodeFolderPath)) {
       fs.mkdirSync(vscodeFolderPath);
     }
@@ -186,7 +184,7 @@ export class AZ3166Device implements Device {
     }
 
     const vscodeFolderPath =
-        path.join(deviceFolderPath, constants.vscodeSettingsFolderName);
+        path.join(deviceFolderPath, FileNames.vscodeSettingsFolderName);
     if (!fs.existsSync(vscodeFolderPath)) {
       fs.mkdirSync(vscodeFolderPath);
     }
@@ -240,7 +238,7 @@ export class AZ3166Device implements Device {
 
     // Create settings.json config file
     const settingsJSONFilePath =
-        path.join(vscodeFolderPath, constants.settingsJsonFileName);
+        path.join(vscodeFolderPath, FileNames.settingsJsonFileName);
     const settingsJSONObj = {
       'files.exclude': {'.build': true, '.iotworkbenchproject': true},
       'C_Cpp.intelliSenseEngine': 'Tag Parser'
