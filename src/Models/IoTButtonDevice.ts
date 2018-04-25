@@ -419,8 +419,8 @@ export class IoTButtonDevice implements Device {
       value: 'pool.ntp.org',
       prompt: `Time Server`,
       ignoreFocusOut: true,
-      validateInput: (ssid: string) => {
-        if (!ssid) {
+      validateInput: (timeserver: string) => {
+        if (!timeserver) {
           return 'Time Server cannot be empty.';
         } else {
           return;
