@@ -85,7 +85,7 @@ export class IoTButtonDevice implements Device {
           `Device: create iotworkbenchproject file failed: ${error.message}`);
     }
 
-    // Create an empty arduino sketch
+    // Create an empty userdata.json
     const userdataJsonFilePath = this.extensionContext.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, IoTButtonDevice._boardId,
         this.inputFileName));
@@ -96,6 +96,26 @@ export class IoTButtonDevice implements Device {
       fs.writeFileSync(newUserdataPath, content);
     } catch (error) {
       throw new Error(`Create userdata json file failed: ${error.message}`);
+    }
+
+    const vscodeFolderPath =
+        path.join(deviceFolderPath, FileNames.vscodeSettingsFolderName);
+    if (!fs.existsSync(vscodeFolderPath)) {
+      fs.mkdirSync(vscodeFolderPath);
+    }
+
+    // Create settings.json config file
+    const settingsJSONFilePath =
+        path.join(vscodeFolderPath, FileNames.settingsJsonFileName);
+    const settingsJSONObj = {
+      'files.exclude': {'.build': true, '.iotworkbenchproject': true}
+    };
+
+    try {
+      fs.writeFileSync(
+          settingsJSONFilePath, JSON.stringify(settingsJSONObj, null, 4));
+    } catch (error) {
+      throw new Error(`Device: create config file failed: ${error.message}`);
     }
 
     return true;
