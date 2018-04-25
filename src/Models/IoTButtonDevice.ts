@@ -115,8 +115,7 @@ export class IoTButtonDevice implements Device {
       fs.writeFileSync(
           settingsJSONFilePath, JSON.stringify(settingsJSONObj, null, 4));
     } catch (error) {
-      throw new Error(
-          `Device: create config file failed: ${error.message}`);
+      throw new Error(`Device: create config file failed: ${error.message}`);
     }
 
     return true;
