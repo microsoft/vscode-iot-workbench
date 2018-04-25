@@ -18,7 +18,7 @@ import {Device, DeviceType} from './Interfaces/Device';
 
 const constants = {
   timeout: 10000,
-  accessPointHost: 'http://192.168.4.1',
+  accessEndpoint: 'http://192.168.4.1',
   userjsonFilename: 'userdata.json'
 };
 
@@ -268,7 +268,7 @@ export class IoTButtonDevice implements Device {
     }
 
     const data = {ssid, password};
-    const uri = constants.accessPointHost;
+    const uri = constants.accessEndpoint;
 
     const res = await this.setConfig(uri, data);
 
@@ -377,7 +377,7 @@ export class IoTButtonDevice implements Device {
     const iotdevicesecret = iotdevicesecretMatches[1];
 
     const data = {iothub, iotdevicename, iotdevicesecret};
-    const uri = constants.accessPointHost;
+    const uri = constants.accessEndpoint;
 
     const res = await this.setConfig(uri, data);
 
@@ -407,7 +407,7 @@ export class IoTButtonDevice implements Device {
     }
 
     const data = {userjson: JSON.stringify(userjson)};
-    const uri = constants.accessPointHost;
+    const uri = constants.accessEndpoint;
 
     const res = await this.setConfig(uri, data);
 
@@ -433,7 +433,7 @@ export class IoTButtonDevice implements Device {
     }
 
     const data = {timeserver};
-    const uri = constants.accessPointHost;
+    const uri = constants.accessEndpoint;
 
     const res = await this.setConfig(uri, data);
 
@@ -442,7 +442,7 @@ export class IoTButtonDevice implements Device {
 
   async configSaveAndShutdown() {
     const data = {action: 'shutdown'};
-    const uri = constants.accessPointHost;
+    const uri = constants.accessEndpoint;
 
     const res = await this.setConfig(uri, data);
 
