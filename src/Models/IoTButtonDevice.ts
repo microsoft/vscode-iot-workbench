@@ -4,6 +4,7 @@
 import * as fs from 'fs-plus';
 import * as os from 'os';
 import * as path from 'path';
+import * as request from 'request-promise';
 import {error} from 'util';
 import * as vscode from 'vscode';
 
@@ -16,7 +17,12 @@ import {Component, ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
 
 const constants = {
+  timeout: 10000,
   accessPointHost: 'http://192.168.4.1',
+  wifiPath: '/config/wifi',
+  hubPath: '/config/iothub',
+  userjsonPath: '/config/userjson',
+  userjsonFilename: 'userdata.json',
   requestHead:
       {'Content-type': 'application/json', 'Accept': 'application/json'}
 };
@@ -163,6 +169,189 @@ export class IoTButtonDevice implements Device {
       return false;
     }
 
+    if (configSelection.detail === 'Config WiFi') {
+      const res = await this.configWifi();
+      // console.log(res);
+    } else if (configSelection.detail === 'Config IoT Hub Device') {
+      const res = await this.configHub();
+      // console.log(res);
+    } else {
+      const res = await this.configUserData();
+      // console.log(res);
+    }
+
     return true;
+  }
+
+  async setConfig(uri: string, json: {}) {
+    const option = {
+      uri,
+      method: 'POST',
+      timeout: constants.timeout,
+      headers: constants.requestHead,
+      json
+    };
+
+    const res = await request(option);
+
+    return res;
+  }
+
+  async configWifi() {
+    const ssid = await vscode.window.showInputBox({
+      prompt: `WiFi SSID`,
+      ignoreFocusOut: true,
+    });
+
+    if (!ssid) {
+      return false;
+    }
+
+    const password = await vscode.window.showInputBox({
+      prompt: `WiFi Password`,
+      ignoreFocusOut: true,
+    });
+
+    if (!password) {
+      return false;
+    }
+
+    const data = {ssid, password};
+    const uri = constants.accessPointHost + constants.wifiPath;
+
+    const res = await this.setConfig(uri, data);
+
+    return res;
+  }
+
+  async configHub() {
+    let deviceConnectionString =
+        ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
+
+    let hostName = '';
+    let deviceId = '';
+    if (deviceConnectionString) {
+      const hostnameMatches =
+          deviceConnectionString.match(/HostName=(.*?)(;|$)/);
+      if (hostnameMatches) {
+        hostName = hostnameMatches[0];
+      }
+
+      const deviceIDMatches =
+          deviceConnectionString.match(/DeviceId=(.*?)(;|$)/);
+      if (deviceIDMatches) {
+        deviceId = deviceIDMatches[0];
+      }
+    }
+
+    let deviceConnectionStringSelection: vscode.QuickPickItem[] = [];
+    if (deviceId && hostName) {
+      deviceConnectionStringSelection = [
+        {
+          label: 'Select IoT Hub Device Connection String',
+          description: '',
+          detail: `Device Information: ${hostName} ${deviceId}`
+        },
+        {
+          label: 'Input IoT Hub Device Connection String',
+          description: '',
+          detail: 'Input another...'
+        }
+      ];
+    } else {
+      deviceConnectionStringSelection = [{
+        label: 'Input IoT Hub Device Connection String',
+        description: '',
+        detail: 'Input another...'
+      }];
+    }
+
+    const selection =
+        await vscode.window.showQuickPick(deviceConnectionStringSelection, {
+          ignoreFocusOut: true,
+          placeHolder: 'Choose IoT Hub Device Connection String'
+        });
+
+    if (!selection) {
+      return false;
+    }
+
+    if (selection.detail === 'Input another...') {
+      const option: vscode.InputBoxOptions = {
+        value:
+            'HostName=<Host Name>;DeviceId=<Device Name>;SharedAccessKey=<Device Key>',
+        prompt: `Please input device connection string here.`,
+        ignoreFocusOut: true
+      };
+
+      deviceConnectionString = await vscode.window.showInputBox(option);
+      if (!deviceConnectionString) {
+        return false;
+      }
+      if ((deviceConnectionString.indexOf('HostName') === -1) ||
+          (deviceConnectionString.indexOf('DeviceId') === -1) ||
+          (deviceConnectionString.indexOf('SharedAccessKey') === -1)) {
+        throw new Error(
+            'The format of the IoT Hub Device connection string is invalid. Please provide a valid Device connection string.');
+      }
+    }
+
+    if (!deviceConnectionString) {
+      return false;
+    }
+
+    console.log(deviceConnectionString);
+
+    const iothubMatches = deviceConnectionString.match(/HostName=(.*?)(;|$)/);
+    const iotdevicenameMatches =
+        deviceConnectionString.match(/DeviceId=(.*?)(;|$)/);
+    const iotdevicesecretMatches =
+        deviceConnectionString.match(/SharedAccessKey=(.*?)(;|$)/);
+    if (!iothubMatches || !iothubMatches[1] || !iotdevicenameMatches ||
+        !iotdevicenameMatches[1] || !iotdevicesecretMatches ||
+        !iotdevicesecretMatches[1]) {
+      return false;
+    }
+
+    const iothub = iothubMatches[1];
+    const iotdevicename = iotdevicenameMatches[1];
+    const iotdevicesecret = iotdevicesecretMatches[1];
+
+    const data = {iothub, iotdevicename, iotdevicesecret};
+    const uri = constants.accessPointHost + constants.hubPath;
+
+    const res = await this.setConfig(uri, data);
+
+    return res;
+  }
+
+  async configUserData() {
+    const deviceFolderPath = this.deviceFolder;
+
+    if (!fs.existsSync(deviceFolderPath)) {
+      throw new Error(`Device folder doesn't exist: ${deviceFolderPath}`);
+    }
+
+    const userjsonFilePath =
+        path.join(deviceFolderPath, constants.userjsonFilename);
+
+    if (!fs.existsSync(userjsonFilePath)) {
+      throw new Error(`${userjsonFilePath} does not exist.`);
+    }
+
+    let userjson = {};
+
+    try {
+      userjson = require(userjsonFilePath);
+    } catch (error) {
+      userjson = {};
+    }
+
+    const data = {userjson};
+    const uri = constants.accessPointHost + constants.userjsonPath;
+
+    const res = await this.setConfig(uri, data);
+
+    return res;
   }
 }
