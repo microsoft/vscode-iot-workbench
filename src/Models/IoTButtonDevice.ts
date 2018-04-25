@@ -209,6 +209,7 @@ export class IoTButtonDevice implements Device {
 
     const password = await vscode.window.showInputBox({
       prompt: `WiFi Password`,
+      password: true,
       ignoreFocusOut: true,
     });
 
