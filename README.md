@@ -4,7 +4,7 @@
 
 [![Travis CI](https://travis-ci.org/Microsoft/vscode-iot-workbench.svg?branch=master)](https://travis-ci.org/Microsoft/vscode-iot-workbench)
 
-Welcome to Visual Studio Code extension for **IoT Workbench** <sup>preview</sup> ! The iot workbench extension makes it easy to code, build, deploy and debug your IoT project for DevKit in Visual Studio Code, with a rich set of functionalities.
+Welcome to Visual Studio Code extension for **IoT Workbench** <sup>preview</sup> ! The iot workbench extension makes it easy to code, build, deploy and debug your IoT project in Visual Studio Code, with a rich set of functionalities.
 
 ## Prerequisites
 Arduino IDE is required. Please install it from [here](https://www.arduino.cc/en/main/software#download).
@@ -28,20 +28,7 @@ Currently this extension supports the following operatings systems:
 
 ### IoT DevKit
 
-#### Prerequisites
-ST-Link driver is required in Windows system. Please install it from [here](http://www.st.com/en/development-tools/stsw-link009.html).
-
-#### Install IoT DevKit Package
-1. Use `Ctrl + Shift + P` to open the command palette, type **Arduino**, and then find and select **Arduino: Board Manager**.
-
-2. Select **Additional URLs** at the lower right.
-
-3. In the `settings.json` file, add a line at the bottom of the **USER SETTINGS** pane and save.
- ```json
- "arduino.additionalUrls": "https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/master/package_azureboard_index.json"
- ```
-
-4. Refresh package indexes and then in Board Manager, search for **az3166** and install the latest version.
+Please follow the [guide](https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/docs/IoTDevKit.md) to setup IoT DevKit.
 
 ## Features
 
