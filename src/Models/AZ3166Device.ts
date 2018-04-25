@@ -326,13 +326,13 @@ export class AZ3166Device implements Device {
       let deviceId = '';
       if (deviceConnectionString) {
         const hostnameMatches =
-            deviceConnectionString.match(/HostName=(.*?)[;$]/);
+            deviceConnectionString.match(/HostName=(.*?)(;|$)/);
         if (hostnameMatches) {
           hostName = hostnameMatches[0];
         }
 
         const deviceIDMatches =
-            deviceConnectionString.match(/DeviceId=(.*?)[;$]/);
+            deviceConnectionString.match(/DeviceId=(.*?)(;|$)/);
         if (deviceIDMatches) {
           deviceId = deviceIDMatches[0];
         }
