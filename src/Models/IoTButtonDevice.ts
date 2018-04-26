@@ -18,13 +18,8 @@ import {Device, DeviceType} from './Interfaces/Device';
 
 const constants = {
   timeout: 10000,
-  accessPointHost: 'http://192.168.4.1',
-  wifiPath: '/config/wifi',
-  hubPath: '/config/iothub',
-  userjsonPath: '/config/userjson',
-  userjsonFilename: 'userdata.json',
-  requestHead:
-      {'Content-type': 'application/json', 'Accept': 'application/json'}
+  accessEndpoint: 'http://192.168.4.1',
+  userjsonFilename: 'userdata.json'
 };
 
 
@@ -152,9 +147,19 @@ export class IoTButtonDevice implements Device {
         detail: 'Config IoT Hub Device'
       },
       {
+        label: 'Config time server of Azure IoT Button',
+        description: 'Config time server of Azure IoT Button',
+        detail: 'Config Time Server'
+      },
+      {
         label: 'Config JSON data to append to message',
         description: 'Config JSON data to append to message',
         detail: 'Config User Json Data'
+      },
+      {
+        label: 'Save all config and shutdown Azure IoT Button',
+        description: 'Save all config and shutdown Azure IoT Button',
+        detail: 'Save and Shutdown'
       }
     ];
 
@@ -165,34 +170,75 @@ export class IoTButtonDevice implements Device {
           matchOnDetail: true,
           placeHolder: 'Select an option',
         });
+
     if (!configSelection) {
       return false;
     }
 
     if (configSelection.detail === 'Config WiFi') {
-      const res = await this.configWifi();
-      // console.log(res);
+      try {
+        const res = await this.configWifi();
+        if (res) {
+          vscode.window.showInformationMessage('Config WiFi successfully.');
+        }
+      } catch (error) {
+        vscode.window.showWarningMessage('Config WiFi failed.');
+      }
     } else if (configSelection.detail === 'Config IoT Hub Device') {
-      const res = await this.configHub();
-      // console.log(res);
+      try {
+        const res = await this.configHub();
+        if (res) {
+          vscode.window.showInformationMessage(
+              'Config Azure IoT Hub successfully.');
+        }
+      } catch (error) {
+        vscode.window.showWarningMessage('Config IoT Hub failed.');
+      }
+    } else if (configSelection.detail === 'Config Time Server') {
+      try {
+        const res = await this.configNtp();
+        if (res) {
+          vscode.window.showInformationMessage(
+              'Config time server successfully.');
+        }
+      } catch (error) {
+        vscode.window.showWarningMessage('Config IoT Hub failed.');
+      }
+    } else if (configSelection.detail === 'Config User Json Data') {
+      try {
+        const res = await this.configUserData();
+        if (res) {
+          vscode.window.showInformationMessage(
+              'Config user data successfully.');
+        }
+      } catch (error) {
+        vscode.window.showWarningMessage('Config user data failed.');
+      }
     } else {
-      const res = await this.configUserData();
-      // console.log(res);
+      try {
+        const res = await this.configSaveAndShutdown();
+      } catch (error) {
+        // Ignore.
+        // Because the button has been shutdown, we won't get any response for
+        // the action
+      }
+
+      vscode.window.showInformationMessage('Config saved.');
+      return true;
     }
 
-    return true;
+    return await this.configDeviceSettings();
   }
 
-  async setConfig(uri: string, json: {}) {
-    const option = {
-      uri,
-      method: 'POST',
-      timeout: constants.timeout,
-      headers: constants.requestHead,
-      json
-    };
+  async setConfig(uri: string, data: {}) {
+    const option =
+        {uri, method: 'POST', timeout: constants.timeout, form: data};
 
     const res = await request(option);
+
+    if (!res) {
+      throw new Error('Empty response.');
+    }
 
     return res;
   }
@@ -201,24 +247,28 @@ export class IoTButtonDevice implements Device {
     const ssid = await vscode.window.showInputBox({
       prompt: `WiFi SSID`,
       ignoreFocusOut: true,
+      validateInput: (ssid: string) => {
+        if (!ssid) {
+          return 'WiFi SSID cannot be empty.';
+        } else {
+          return;
+        }
+      }
     });
 
-    if (!ssid) {
+    if (ssid === undefined) {
       return false;
     }
 
-    const password = await vscode.window.showInputBox({
-      prompt: `WiFi Password`,
-      password: true,
-      ignoreFocusOut: true,
-    });
+    const password = await vscode.window.showInputBox(
+        {prompt: `WiFi Password`, password: true, ignoreFocusOut: true});
 
-    if (!password) {
+    if (password === undefined) {
       return false;
     }
 
     const data = {ssid, password};
-    const uri = constants.accessPointHost + constants.wifiPath;
+    const uri = constants.accessEndpoint;
 
     const res = await this.setConfig(uri, data);
 
@@ -282,13 +332,21 @@ export class IoTButtonDevice implements Device {
         value:
             'HostName=<Host Name>;DeviceId=<Device Name>;SharedAccessKey=<Device Key>',
         prompt: `Please input device connection string here.`,
-        ignoreFocusOut: true
+        ignoreFocusOut: true,
+        validateInput: (connectionString: string) => {
+          if (!connectionString) {
+            return 'Connection string cannot be empty.';
+          } else {
+            return;
+          }
+        }
       };
 
       deviceConnectionString = await vscode.window.showInputBox(option);
-      if (!deviceConnectionString) {
+      if (deviceConnectionString === undefined) {
         return false;
       }
+
       if ((deviceConnectionString.indexOf('HostName') === -1) ||
           (deviceConnectionString.indexOf('DeviceId') === -1) ||
           (deviceConnectionString.indexOf('SharedAccessKey') === -1)) {
@@ -319,7 +377,7 @@ export class IoTButtonDevice implements Device {
     const iotdevicesecret = iotdevicesecretMatches[1];
 
     const data = {iothub, iotdevicename, iotdevicesecret};
-    const uri = constants.accessPointHost + constants.hubPath;
+    const uri = constants.accessEndpoint;
 
     const res = await this.setConfig(uri, data);
 
@@ -348,8 +406,43 @@ export class IoTButtonDevice implements Device {
       userjson = {};
     }
 
-    const data = {userjson};
-    const uri = constants.accessPointHost + constants.userjsonPath;
+    const data = {userjson: JSON.stringify(userjson)};
+    const uri = constants.accessEndpoint;
+
+    const res = await this.setConfig(uri, data);
+
+    return res;
+  }
+
+  async configNtp() {
+    const timeserver = await vscode.window.showInputBox({
+      value: 'pool.ntp.org',
+      prompt: `Time Server`,
+      ignoreFocusOut: true,
+      validateInput: (timeserver: string) => {
+        if (!timeserver) {
+          return 'Time Server cannot be empty.';
+        } else {
+          return;
+        }
+      }
+    });
+
+    if (timeserver === undefined) {
+      return false;
+    }
+
+    const data = {timeserver};
+    const uri = constants.accessEndpoint;
+
+    const res = await this.setConfig(uri, data);
+
+    return res;
+  }
+
+  async configSaveAndShutdown() {
+    const data = {action: 'shutdown'};
+    const uri = constants.accessEndpoint;
 
     const res = await this.setConfig(uri, data);
 
