@@ -98,7 +98,7 @@ export class AzureFunctions implements Component, Provisionable {
 
     if (!fs.existsSync(azureFunctionsPath)) {
       throw new Error(
-          `Azure Functions folder doesn't exist: ${azureFunctionsPath}`);
+          'Unable to find the Azure Functions folder inside the project.');
     }
 
     try {
@@ -143,8 +143,7 @@ export class AzureFunctions implements Component, Provisionable {
         const credential =
             await this.getCredentialFromSubscriptionId(subscriptionId);
         if (credential === undefined) {
-          throw new Error(`Unable to get credential for the subscription, id:${
-              subscriptionId}.`);
+          throw new Error('Unable to get credential for the subscription.');
         }
 
         const resourceGroupMatches =

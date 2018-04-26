@@ -62,7 +62,7 @@ export class IoTButtonDevice implements Device {
     const deviceFolderPath = this.deviceFolder;
 
     if (!fs.existsSync(deviceFolderPath)) {
-      throw new Error(`Device folder doesn't exist: ${deviceFolderPath}`);
+      throw new Error('Unable to find the device folder inside the project.');
     }
     return true;
   }
@@ -74,7 +74,7 @@ export class IoTButtonDevice implements Device {
     const deviceFolderPath = this.deviceFolder;
 
     if (!fs.existsSync(deviceFolderPath)) {
-      throw new Error(`Device folder doesn't exist: ${deviceFolderPath}`);
+      throw new Error('Unable to find the device folder inside the project.');
     }
 
     try {
@@ -388,14 +388,14 @@ export class IoTButtonDevice implements Device {
     const deviceFolderPath = this.deviceFolder;
 
     if (!fs.existsSync(deviceFolderPath)) {
-      throw new Error(`Device folder doesn't exist: ${deviceFolderPath}`);
+      throw new Error('Unable to find the device folder inside the project.');
     }
 
     const userjsonFilePath =
         path.join(deviceFolderPath, constants.userjsonFilename);
 
     if (!fs.existsSync(userjsonFilePath)) {
-      throw new Error(`${userjsonFilePath} does not exist.`);
+      throw new Error('The user json file does not exist.');
     }
 
     let userjson = {};

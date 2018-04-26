@@ -110,7 +110,7 @@ export class AZ3166Device implements Device {
     const deviceFolderPath = this.deviceFolder;
 
     if (!fs.existsSync(deviceFolderPath)) {
-      throw new Error(`Device folder doesn't exist: ${deviceFolderPath}`);
+      throw new Error('Unable to find the device folder inside the project.');
     }
 
     const vscodeFolderPath =
@@ -171,7 +171,7 @@ export class AZ3166Device implements Device {
     const deviceFolderPath = this.deviceFolder;
 
     if (!fs.existsSync(deviceFolderPath)) {
-      throw new Error(`Device folder doesn't exist: ${deviceFolderPath}`);
+      throw new Error('Unable to find the device folder inside the project.');
     }
 
     try {
@@ -519,7 +519,8 @@ export class AZ3166Device implements Device {
           const az3166 = this.board;
 
           if (!az3166) {
-            return reject(new Error('AZ3166 is not found in the board list.'));
+            return reject(
+                new Error('IoT DevKit is not found in the board list.'));
           }
 
           const port = new AZ3166Device.serialport(comPort, {
@@ -771,8 +772,8 @@ export class AZ3166Device implements Device {
     }
 
     if (files.length === 0 || files.length > 1) {
-      throw new Error(`There are unexpected files or folders under ${
-          arduinoPackagePath}. Please clear the folder and reinstall the package for Devkit.`);
+      throw new Error(
+          'There are unexpected files or folders under Arduino package installation path. Please clear the folder and reinstall the package for Devkit.');
     }
 
     const directoryName = path.join(arduinoPackagePath, files[0]);
