@@ -35,7 +35,7 @@ Please follow the [guide](./docs/IoTDevKit.md) to setup IoT DevKit.
 
 ## Features
 
-* Create new IoT Workbench projects
+* Create new IoT Workbench projects.
 * Load existing examples of IoT Workbench project.
 * Compile and upload device code.
 * Set device connection string.
