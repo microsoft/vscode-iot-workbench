@@ -36,20 +36,7 @@ Please follow the [guide](./docs/IoTDevKit.md) to setup IoT DevKit.
 ## Features
 
 * Create new IoT Workbench projects
-  * Device only: Create project with device only code.
-
-  * With Azure IoT Hub: Create project that connects to Azure IoT Hub, such as sending sensor data to cloud.
-
-  * With Azure Functions: Create project that connects to Azure IoT Hub and process device data further in Azure Functions.
-
-* Load existing IoT Workbench project of mini solutions.
-
-  * Get_started: Send sensor data from DevKit to Azure IoT Hub.
-
-  * DevKit_DPS: Automatically provision security enabled devices to Azure IoT Hub.
-
-  * ShakeShake: Use the motion sensor to detect shaking and find a tweet with specified topic.
-
+* Load existing examples of IoT Workbench project.
 * Compile and upload device code.
 * Set device connection string.
 * Code snippet to improve develop experience.
