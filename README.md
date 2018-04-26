@@ -4,7 +4,7 @@
 
 [![Travis CI](https://travis-ci.org/Microsoft/vscode-iot-workbench.svg?branch=master)](https://travis-ci.org/Microsoft/vscode-iot-workbench)
 
-Welcome to Visual Studio Code extension for **IoT Workbench** <sup>preview</sup> ! The iot workbench extension makes it easy to code, build, deploy and debug your IoT project in Visual Studio Code, with a rich set of functionalities.
+Welcome to Visual Studio Code extension for **IoT Workbench** <sup>preview</sup> ! The IoT Workbench extension makes it easy to code, build, deploy and debug your IoT project in Visual Studio Code, with a rich set of functionalities.
 
 ## Prerequisites
 Arduino IDE is required. Please install it from [here](https://www.arduino.cc/en/main/software#download).
@@ -12,9 +12,12 @@ Arduino IDE is required. Please install it from [here](https://www.arduino.cc/en
 - The Windows Store's version of Arduino IDE is not supported because of the sandbox environment of Windows app.
 
 ## Installation
-Open VS Code and press `F1` or `Ctrl + Shift + P` to open command palette, select **Install Extension** and click `install from VSIX...`.
+Open VS Code and press `F1` or `Ctrl + Shift + P` to open command palette, select **Install Extension** and type `iot-workbench`.
 
-In the file selection window, nevigate to the folder that contains 'vscode-iot-workbench-0.1.0.vsix', then select 'vscode-iot-workbenh-0.1.0.vsix'. 
+Or launch VS Code Quick Open (`Ctrl + P`), paste the following command, and press enter.
+```bash
+ext install vscode-iot-workbench
+```
 
 After installation, please reload the window and make sure all the dependency extensions are correctly installed.
 
@@ -28,7 +31,7 @@ Currently this extension supports the following operatings systems:
 
 ### IoT DevKit
 
-Please follow the [guide](https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/docs/IoTDevKit.md) to setup IoT DevKit.
+Please follow the [guide](./docs/IoTDevKit.md) to setup IoT DevKit.
 
 ## Features
 
