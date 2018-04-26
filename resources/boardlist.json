@@ -15,9 +15,9 @@
             }
         },
         {
-            "name": "IoT Button",
+            "name": "IoT button",
             "id": "iotbutton",
-            "platform": "Microsoft Azure IoT Button"
+            "platform": "teXXmo – Microsoft Azure IoT Developer Kit"
         }
     ]
 }
