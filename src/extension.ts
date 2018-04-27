@@ -22,6 +22,7 @@ import {ConfigKey, EventNames, ContentView} from './constants';
 import {ContentProvider} from './contentProvider';
 import {TelemetryContext, callWithTelemetry, TelemetryWorker} from './telemetry';
 import {UsbDetector} from './usbDetector';
+import {HelpProvider} from './helpProvider';
 
 function filterMenu(commands: CommandItem[]) {
   for (let i = 0; i < commands.length; i++) {
@@ -284,13 +285,11 @@ export async function activate(context: vscode.ExtensionContext) {
   const exampleInitialize = vscode.commands.registerCommand(
       'iotworkbench.exampleInitialize', examplesInitializeProvider);
 
-  const helpInit = vscode.commands.registerCommand('iotworkbench.help', async () => {
-    await vscode.commands.executeCommand(
-        'vscode.open',
-        vscode.Uri.parse(
-            'https://microsoft.github.io/azure-iot-developer-kit/docs/get-started/'));
-    return;
-  });
+  const helpInit =
+      vscode.commands.registerCommand('iotworkbench.help', async () => {
+        await HelpProvider.open(context);
+        return;
+      });
 
   const workbenchPath =
       vscode.commands.registerCommand('iotworkbench.workbench', async () => {
