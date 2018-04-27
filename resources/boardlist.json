@@ -8,6 +8,7 @@
             "vendorId": "0483",
             "productId": "374b",
             "exampleUrl": "https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/gallery/workbench-example-devkit.json",
+            "helpUrl": "https://aka.ms/iot-devkit",
             "installation": {
                 "additionalUrl": "https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/master/package_azureboard_index.json",
                 "packageName": "AZ3166",
@@ -17,7 +18,8 @@
         {
             "name": "IoT button",
             "id": "iotbutton",
-            "platform": "teXXmo – Microsoft Azure IoT Developer Kit"
+            "platform": "teXXmo – Microsoft Azure IoT Developer Kit",
+            "helpUrl": "https://aka.ms/button"
         }
     ]
 }
