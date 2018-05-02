@@ -4,28 +4,27 @@
 import * as fs from 'fs-plus';
 import * as os from 'os';
 import * as path from 'path';
-
 import {error} from 'util';
 import * as vscode from 'vscode';
 
+import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames} from '../constants';
 import {ProjectTemplate, ProjectTemplateType} from '../Models/Interfaces/ProjectTemplate';
 import {IoTProject} from '../Models/IoTProject';
 
+import {ArduinoDeviceBase} from './ArduinoDeviceBase';
+import {Board} from './Interfaces/Board';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
-import {BoardProvider} from '../boardProvider';
-import {Board} from './Interfaces/Board';
-import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 
 const constants = {
   defaultBoardInfo: 'esp32:esp32:m5stack-core-esp32',
-  defaultBoardConfig: 'FlashMode=qio,FlashFreq=80,UploadSpeed=921600,DebugLevel=none'
-}
+  defaultBoardConfig:
+      'FlashMode=qio,FlashFreq=80,UploadSpeed=921600,DebugLevel=none'
+};
 
 export class Esp32Device extends ArduinoDeviceBase {
-
   private sketchFileTemplateName = '';
   private static _boardId = 'esp32';
 
@@ -40,63 +39,62 @@ export class Esp32Device extends ArduinoDeviceBase {
   }
 
   name = 'Esp32Arduino';
-  
+
   constructor(
-    context: vscode.ExtensionContext, devicePath: string,
-    sketchFileTemplateName?: string) {
-      super(context, devicePath, DeviceType.IoT_Button);
-      if (sketchFileTemplateName) {
-        this.sketchFileTemplateName = sketchFileTemplateName;
-      }
+      context: vscode.ExtensionContext, devicePath: string,
+      sketchFileTemplateName?: string) {
+    super(context, devicePath, DeviceType.IoT_Button);
+    if (sketchFileTemplateName) {
+      this.sketchFileTemplateName = sketchFileTemplateName;
+    }
+  }
+
+  async load(): Promise<boolean> {
+    const deviceFolderPath = this.deviceFolder;
+
+    if (!fs.existsSync(deviceFolderPath)) {
+      throw new Error('Unable to find the device folder inside the project.');
     }
 
-    async load(): Promise<boolean> {
-      const deviceFolderPath = this.deviceFolder;
-  
-      if (!fs.existsSync(deviceFolderPath)) {
-        throw new Error('Unable to find the device folder inside the project.');
-      }
-
-      if(!this.board){
-        throw new Error('Unable to find the board in the config file.');
-      }
-
-      this.generateCppPropertiesFile(this.board);
-      return true;
+    if (!this.board) {
+      throw new Error('Unable to find the board in the config file.');
     }
 
-    async create(): Promise<boolean> {
-      if (!this.sketchFileTemplateName) {
-        throw new Error('No sketch file found.');
-      }
-      const deviceFolderPath = this.deviceFolder;
+    this.generateCppPropertiesFile(this.board);
+    return true;
+  }
 
-      if (!fs.existsSync(deviceFolderPath)) {
-        throw new Error('Unable to find the device folder inside the project.');
-      }    
-      if(!this.board){
-        throw new Error('Unable to find the board in the config file.');
-      }
-
-      this.generateCommonFiles();
-      this.generateCppPropertiesFile(this.board);
-      await this.generateSketchFile(this.sketchFileTemplateName, this.board,
-        constants.defaultBoardInfo, constants.defaultBoardConfig);
-      return true;
+  async create(): Promise<boolean> {
+    if (!this.sketchFileTemplateName) {
+      throw new Error('No sketch file found.');
     }
-  
+    const deviceFolderPath = this.deviceFolder;
 
-    async configDeviceSettings(): Promise<boolean> {
-      throw new Error(
-        'Not implemented');
+    if (!fs.existsSync(deviceFolderPath)) {
+      throw new Error('Unable to find the device folder inside the project.');
+    }
+    if (!this.board) {
+      throw new Error('Unable to find the board in the config file.');
     }
 
-    async preCompileAction():  Promise<boolean>{
-      return true;
-    }
+    this.generateCommonFiles();
+    this.generateCppPropertiesFile(this.board);
+    await this.generateSketchFile(
+        this.sketchFileTemplateName, this.board, constants.defaultBoardInfo,
+        constants.defaultBoardConfig);
+    return true;
+  }
 
-    async preUploadAction(): Promise<boolean>{
-      return true;
-    }
 
+  async configDeviceSettings(): Promise<boolean> {
+    throw new Error('Not implemented');
+  }
+
+  async preCompileAction(): Promise<boolean> {
+    return true;
+  }
+
+  async preUploadAction(): Promise<boolean> {
+    return true;
+  }
 }

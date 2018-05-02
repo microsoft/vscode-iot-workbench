@@ -4,19 +4,18 @@
 import * as fs from 'fs-plus';
 import * as os from 'os';
 import * as path from 'path';
-
 import {error} from 'util';
 import * as vscode from 'vscode';
 
+import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames} from '../constants';
 import {ProjectTemplate, ProjectTemplateType} from '../Models/Interfaces/ProjectTemplate';
 import {IoTProject} from '../Models/IoTProject';
 
+import {Board} from './Interfaces/Board';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
-import {BoardProvider} from '../boardProvider';
-import {Board} from './Interfaces/Board';
 
 const constants = {
   defaultSketchFileName: 'device.ino',
@@ -29,7 +28,6 @@ const constants = {
 
 
 export abstract class ArduinoDeviceBase implements Device {
-
   protected deviceType: DeviceType;
   protected componentType: ComponentType;
   protected deviceFolder: string;
@@ -40,15 +38,15 @@ export abstract class ArduinoDeviceBase implements Device {
 
 
   constructor(
-    context: vscode.ExtensionContext, devicePath: string,
-    deviceType: DeviceType) {
-      this.deviceType = deviceType;
-      this.componentType = ComponentType.Device;
-      this.deviceFolder = devicePath;
-      this.extensionContext = context;
-      this.vscodeFolderPath =
+      context: vscode.ExtensionContext, devicePath: string,
+      deviceType: DeviceType) {
+    this.deviceType = deviceType;
+    this.componentType = ComponentType.Device;
+    this.deviceFolder = devicePath;
+    this.extensionContext = context;
+    this.vscodeFolderPath =
         path.join(this.deviceFolder, FileNames.vscodeSettingsFolderName);
-    }
+  }
 
 
 
@@ -63,7 +61,7 @@ export abstract class ArduinoDeviceBase implements Device {
   async compile(): Promise<boolean> {
     try {
       const result = await this.preCompileAction();
-      if(!result){
+      if (!result) {
         return false;
       }
       await vscode.commands.executeCommand('arduino.verify');
@@ -76,14 +74,14 @@ export abstract class ArduinoDeviceBase implements Device {
   async upload(): Promise<boolean> {
     try {
       const result = await this.preUploadAction();
-      if(!result){
+      if (!result) {
         return false;
-      }      
+      }
       await vscode.commands.executeCommand('arduino.upload');
       return true;
     } catch (error) {
       throw error;
-    }  
+    }
   }
 
 
@@ -91,18 +89,18 @@ export abstract class ArduinoDeviceBase implements Device {
 
   abstract async load(): Promise<boolean>;
   abstract async create(): Promise<boolean>;
-  
+
   abstract async preCompileAction(): Promise<boolean>;
 
   abstract async preUploadAction(): Promise<boolean>;
 
-  //Helper functions:
+  // Helper functions:
   generateCommonFiles(): void {
     const deviceFolderPath = this.deviceFolder;
 
     if (!fs.existsSync(deviceFolderPath)) {
       throw new Error('Unable to find the device folder inside the project.');
-    }  
+    }
 
     try {
       const iotworkbenchprojectFilePath =
@@ -118,7 +116,7 @@ export abstract class ArduinoDeviceBase implements Device {
     }
   }
 
-  generateCppPropertiesFile(board: Board): void{
+  generateCppPropertiesFile(board: Board): void {
     // Create c_cpp_properties.json file
     const cppPropertiesFilePath =
         path.join(this.vscodeFolderPath, constants.cppPropertiesFileName);
@@ -159,8 +157,9 @@ export abstract class ArduinoDeviceBase implements Device {
     }
   }
 
-  async generateSketchFile(sketchTemplateFileName: string, 
-    board: Board, boardInfo: string, boardConfig: string): Promise<boolean> {
+  async generateSketchFile(
+      sketchTemplateFileName: string, board: Board, boardInfo: string,
+      boardConfig: string): Promise<boolean> {
     // Get arduino sketch file name from user input or use defalt sketch name
     const option: vscode.InputBoxOptions = {
       value: constants.defaultSketchFileName,
@@ -227,8 +226,7 @@ export abstract class ArduinoDeviceBase implements Device {
     // Create an empty arduino sketch
     const sketchTemplateFilePath =
         this.extensionContext.asAbsolutePath(path.join(
-            FileNames.resourcesFolderName, board.id,
-            sketchTemplateFileName));
+            FileNames.resourcesFolderName, board.id, sketchTemplateFileName));
     const newSketchFilePath = path.join(this.deviceFolder, sketchFileName);
 
     try {
@@ -236,8 +234,7 @@ export abstract class ArduinoDeviceBase implements Device {
       fs.writeFileSync(newSketchFilePath, content);
     } catch (error) {
       throw new Error(`Create arduino sketch file failed: ${error.message}`);
-    } 
-    return true;   
+    }
+    return true;
   }
-
 }

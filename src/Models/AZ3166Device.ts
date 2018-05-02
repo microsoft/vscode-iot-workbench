@@ -24,10 +24,10 @@ import {ProjectTemplate, ProjectTemplateType} from '../Models/Interfaces/Project
 import {IoTProject} from '../Models/IoTProject';
 import {delay, getRegistryValues} from '../utils';
 
+import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 import {Board} from './Interfaces/Board';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
-import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 
 interface SerialPortInfo {
   comName: string;
@@ -94,7 +94,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
       throw new Error('Unable to find the device folder inside the project.');
     }
 
-    if(!this.board){
+    if (!this.board) {
       throw new Error('Unable to find the board in the config file.');
     }
 
@@ -114,24 +114,25 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
     if (!fs.existsSync(deviceFolderPath)) {
       throw new Error('Unable to find the device folder inside the project.');
-    }    
-    if(!this.board){
+    }
+    if (!this.board) {
       throw new Error('Unable to find the board in the config file.');
     }
 
     this.generateCommonFiles();
     this.generateCppPropertiesFile(this.board);
-    await this.generateSketchFile(this.sketchName, this.board,
-      constants.boardInfo, constants.uploadMethod);
+    await this.generateSketchFile(
+        this.sketchName, this.board, constants.boardInfo,
+        constants.uploadMethod);
     return true;
   }
 
-  async preCompileAction():  Promise<boolean>{
+  async preCompileAction(): Promise<boolean> {
     await this.generatePlatformLocal();
     return true;
   }
 
-  async preUploadAction(): Promise<boolean>{
+  async preUploadAction(): Promise<boolean> {
     const isStlinkInstalled = await this.stlinkDriverInstalled();
     if (!isStlinkInstalled) {
       const message =
