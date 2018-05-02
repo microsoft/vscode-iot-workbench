@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import * as copypaste from 'copy-paste';
 import * as fs from 'fs-plus';
 import * as os from 'os';
 import * as path from 'path';
@@ -87,7 +88,37 @@ export class Esp32Device extends ArduinoDeviceBase {
 
 
   async configDeviceSettings(): Promise<boolean> {
-    throw new Error('Not implemented');
+    const configSelectionItems: vscode.QuickPickItem[] = [{
+      label: 'Copy device connection string',
+      description: 'Copy device connection string',
+      detail: 'Copy'
+    }];
+
+    const configSelection =
+        await vscode.window.showQuickPick(configSelectionItems, {
+          ignoreFocusOut: true,
+          matchOnDescription: true,
+          matchOnDetail: true,
+          placeHolder: 'Select an option',
+        });
+
+    if (!configSelection) {
+      return false;
+    }
+
+    if (configSelection.detail === 'Copy') {
+      const deviceConnectionString =
+          ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
+
+      if (!deviceConnectionString) {
+        throw new Error(
+            'Unable to get the device connection string, please invoke the command of Azure Provision first.');
+      }
+      copypaste.copy(deviceConnectionString);
+      return true;
+    }
+
+    return false;
   }
 
   async preCompileAction(): Promise<boolean> {
