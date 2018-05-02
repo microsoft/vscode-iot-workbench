@@ -123,11 +123,15 @@ export class IoTButtonDevice implements Device {
   }
 
   async compile(): Promise<boolean> {
-    throw new Error('Compiling device code for IoT button is not supported');
+    await vscode.window.showInformationMessage(
+        'Compiling device code for IoT button is not supported');
+    return true;
   }
 
   async upload(): Promise<boolean> {
-    throw new Error('Uploading device code for IoT button is not supported');
+    await vscode.window.showInformationMessage(
+        'Uploading device code for IoT button is not supported');
+    return true;
   }
 
   async configDeviceSettings(): Promise<boolean> {
@@ -399,7 +403,7 @@ export class IoTButtonDevice implements Device {
     let userjson = {};
 
     try {
-      userjson = JSON.parse(fs.readFileSync(userjsonFilePath).toString());
+      userjson = JSON.parse(fs.readFileSync(userjsonFilePath, 'utf8'));
     } catch (error) {
       userjson = {};
     }
