@@ -225,7 +225,7 @@ export class IoTButtonDevice implements Device {
         // the action
       }
 
-      vscode.window.showInformationMessage('Config saved.');
+      vscode.window.showInformationMessage('Shutdown IoT button completed.');
       return true;
     }
 
