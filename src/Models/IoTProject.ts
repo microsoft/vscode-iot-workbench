@@ -22,6 +22,7 @@ import {Workspace} from './Interfaces/Workspace';
 import {IoTButtonDevice} from './IoTButtonDevice';
 import {IoTHub} from './IoTHub';
 import {IoTHubDevice} from './IoTHubDevice';
+import { Esp32Device } from './Esp32Device';
 
 const constants = {
   deviceDefaultFolderName: 'Device',
@@ -89,6 +90,11 @@ export class IoTProject {
       } else if (boardId === IoTButtonDevice.boardId) {
         const device =
             new IoTButtonDevice(this.extensionContext, deviceLocation);
+        this.componentList.push(device);
+      }
+      else if (boardId === Esp32Device.boardId) {
+        const device =
+            new Esp32Device(this.extensionContext, deviceLocation);
         this.componentList.push(device);
       }
     }
@@ -251,7 +257,10 @@ export class IoTProject {
     } else if (boardId === IoTButtonDevice.boardId) {
       device = new IoTButtonDevice(
           this.extensionContext, deviceDir, projectTemplateItem.sketch);
-    } else {
+    } else if (boardId === Esp32Device.boardId) {
+      device = new Esp32Device(
+          this.extensionContext, deviceDir, projectTemplateItem.sketch);
+    }else {
       throw new Error('The specified board is not supported.');
     }
 
