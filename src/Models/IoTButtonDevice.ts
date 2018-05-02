@@ -123,13 +123,11 @@ export class IoTButtonDevice implements Device {
   }
 
   async compile(): Promise<boolean> {
-    throw new Error(
-        'Compiling device code for Azure IoT Button is not supported');
+    throw new Error('Compiling device code for IoT button is not supported');
   }
 
   async upload(): Promise<boolean> {
-    throw new Error(
-        'Uploading device code for Azure IoT Button is not supported');
+    throw new Error('Uploading device code for IoT button is not supported');
   }
 
   async configDeviceSettings(): Promise<boolean> {
@@ -137,8 +135,8 @@ export class IoTButtonDevice implements Device {
     // connection.
     const configSelectionItems: vscode.QuickPickItem[] = [
       {
-        label: 'Config WiFi of Azure IoT Button',
-        description: 'Config WiFi of Azure IoT Button',
+        label: 'Config WiFi of IoT button',
+        description: 'Config WiFi of IoT button',
         detail: 'Config WiFi'
       },
       {
@@ -147,8 +145,8 @@ export class IoTButtonDevice implements Device {
         detail: 'Config IoT Hub Device'
       },
       {
-        label: 'Config time server of Azure IoT Button',
-        description: 'Config time server of Azure IoT Button',
+        label: 'Config time server of IoT button',
+        description: 'Config time server of IoT button',
         detail: 'Config Time Server'
       },
       {
@@ -157,9 +155,9 @@ export class IoTButtonDevice implements Device {
         detail: 'Config User Json Data'
       },
       {
-        label: 'Save all config and shutdown Azure IoT Button',
-        description: 'Save all config and shutdown Azure IoT Button',
-        detail: 'Save and Shutdown'
+        label: 'Shutdown IoT button',
+        description: 'Shutdown IoT button',
+        detail: 'Shutdown'
       }
     ];
 
@@ -401,7 +399,7 @@ export class IoTButtonDevice implements Device {
     let userjson = {};
 
     try {
-      userjson = require(userjsonFilePath);
+      userjson = JSON.parse(fs.readFileSync(userjsonFilePath).toString());
     } catch (error) {
       userjson = {};
     }
