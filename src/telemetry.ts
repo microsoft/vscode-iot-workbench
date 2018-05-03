@@ -53,6 +53,12 @@ export class TelemetryWorker {
     }
   }
 
+  static async dispose() {
+    if (this._reporter) {
+      await this._reporter.dispose();
+    }
+  }
+
   static Initialize(context: vscode.ExtensionContext): void {
     const packageInfo = getPackageInfo(context);
     if (!packageInfo) {
