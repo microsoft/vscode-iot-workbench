@@ -20,7 +20,7 @@ export class AzureOperator {
           'Unable to find the root path, please open an IoT Workbench project');
     }
 
-    const project = new IoTProject(context, channel);
+    const project = new IoTProject(context, channel, telemetryContext);
     const result = await project.load();
     if (!result) {
       throw new Error(
@@ -38,7 +38,7 @@ export class AzureOperator {
   async Deploy(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    const project = new IoTProject(context, channel);
+    const project = new IoTProject(context, channel, telemetryContext);
     const result = await project.load();
     if (!result) {
       throw new Error(

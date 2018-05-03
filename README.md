@@ -43,11 +43,15 @@ Please follow the [guide](./docs/IoTDevKit.md) to setup IoT DevKit.
 
 ### Create New Project
 
-<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/new.gif" width="380">
+<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/new.gif" width="380">
 
 ### Provision Azure Service
 
-<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/provision.gif" width="380">
+<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/provision.gif" width="380">
+
+### Example Gallery
+
+<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/example.gif" width="596">
 
 #### Note: 
 When invoking the **Azure Provision** command with Azure IoT Hub and Azure Functions, by default, Azure Functions would use the IoT Hub consumer group of `$Default`. To switch to another consumer group, please follow the [guide](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-create-through-portal) to create a new consumer group in Azure Poral. Then in IoT project, modify the following setting in **function.json**:
