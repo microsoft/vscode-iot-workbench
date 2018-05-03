@@ -95,7 +95,11 @@ export async function activate(context: vscode.ExtensionContext) {
   // Initialize Telemetry
   TelemetryWorker.Initialize(context);
 
-  const iotProject = new IoTProject(context, outputChannel);
+  const telemetryContext: TelemetryContext = {
+    properties: {result: 'Succeeded', error: '', errorMessage: ''},
+    measurements: {duration: 0}
+  };
+  const iotProject = new IoTProject(context, outputChannel, telemetryContext);
   if (vscode.workspace.workspaceFolders) {
     try {
       await iotProject.load();
@@ -310,4 +314,6 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export async function deactivate() {
+  await TelemetryWorker.dispose();
+}

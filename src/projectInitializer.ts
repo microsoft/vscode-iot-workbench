@@ -190,7 +190,7 @@ export class ProjectInitializer {
               throw new Error('Unable to load project template.');
             }
 
-            const project = new IoTProject(context, channel);
+            const project = new IoTProject(context, channel, telemetryContext);
             return await project.create(
                 rootPath, result, boardSelection.id, openInNewWindow);
           } catch (error) {
