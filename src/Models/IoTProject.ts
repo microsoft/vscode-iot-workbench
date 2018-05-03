@@ -7,6 +7,8 @@ import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
+import {EventNames} from '../constants';
+import {TelemetryContext, TelemetryWorker} from '../telemetry';
 
 import {checkAzureLogin} from './Apis';
 import {AZ3166Device} from './AZ3166Device';
@@ -40,6 +42,7 @@ export class IoTProject {
   private projectTemplateItem: ProjectTemplate|null = null;
   private extensionContext: vscode.ExtensionContext;
   private channel: vscode.OutputChannel;
+  private telemetryContext: TelemetryContext;
 
   private addComponent(comp: Component) {}
 
@@ -59,10 +62,13 @@ export class IoTProject {
     return (comp as Uploadable).upload !== undefined;
   }
 
-  constructor(context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
+  constructor(
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext) {
     this.componentList = [];
     this.extensionContext = context;
     this.channel = channel;
+    this.telemetryContext = telemetryContext;
   }
 
   async load(): Promise<boolean> {
@@ -332,10 +338,24 @@ export class IoTProject {
 
     fs.writeFileSync(
         workspaceConfigFilePath, JSON.stringify(workspace, null, 4));
+
+    if (!openInNewWindow) {
+      // Need to add telemetry here otherwise, after restart VSCode, no
+      // telemetry data will be sent.
+      try {
+        TelemetryWorker.sendEvent(
+            EventNames.createNewProjectEvent, this.telemetryContext);
+      } catch {
+        // If sending telemetry failed, skip the error to avoid blocking user.
+      }
+    }
+
     try {
-      await vscode.commands.executeCommand(
-          'vscode.openFolder', vscode.Uri.file(workspaceConfigFilePath),
-          openInNewWindow);
+      setTimeout(
+          () => vscode.commands.executeCommand(
+              'vscode.openFolder', vscode.Uri.file(workspaceConfigFilePath),
+              openInNewWindow),
+          1000);
       return true;
     } catch (error) {
       throw error;
