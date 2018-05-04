@@ -37,12 +37,12 @@ Please follow the [guide](./docs/IoTDevKit.md) to setup IoT DevKit.
 
 | Command | Description |
 | --- | --- |
-| `IoT Workbench: New`  | Create new IoT Workbench projects.|
-| `IoT Workbench: Examples` | Load existing examples of IoT Workbench project.|
-| `IoT Workbench: Cloud` | Provison Azure services and deploy Azure Functions.|
-| `IoT Workbench: Device`  | Compile, upload device code and config device settings.|
-| `IoT Workbench: Set Workbench Path` | Set the default path for IoT Workbench.|
-| `IoT Workbench: Help` | Open help URL.|
+| `IoT Workbench: New`  | Create new IoT Workbench projects. |
+| `IoT Workbench: Examples` | Load existing examples of IoT Workbench project. |
+| `IoT Workbench: Cloud` | Provison Azure services and deploy Azure Functions. |
+| `IoT Workbench: Device`  | Compile, upload device code and config device settings. |
+| `IoT Workbench: Set Workbench Path` | Set the default path for IoT Workbench. |
+| `IoT Workbench: Help` | Open help URL. |
 
 
 ### Create New Project
