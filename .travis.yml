@@ -42,6 +42,7 @@ script:
 - gts check
 - node genAiKey.js
 - vsce package
+- npm test --silent
 
 deploy:
   # deploy to github release
