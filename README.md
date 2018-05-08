@@ -8,9 +8,12 @@
 Welcome to Visual Studio Code extension for **IoT Workbench** <sup>preview</sup> ! The IoT Workbench extension makes it easy to code, build, deploy and debug your IoT project in Visual Studio Code, with a rich set of functionalities.
 
 ## Prerequisites
-Arduino IDE is required. Please install it from [here](https://www.arduino.cc/en/main/software#download).
-- The supported Arduino IDE versions are 1.6.x and later.
-- The Windows Store's version of Arduino IDE is not supported because of the sandbox environment of Windows app.
+
+IoT Workbench aims to support multiple popular IoT development boards and kits. It currently supports following IoT hardware:
+
+- [MXChip IoT DevKit](https://aka.ms/iot-devkit)
+
+Please find the [Setup Guide](#setup-guide) section below to configure your hardware.
 
 ## Installation
 Open VS Code and press `F1` or `Ctrl + Shift + P` to open command palette, select **Install Extension** and type `iot-workbench`.
@@ -28,9 +31,9 @@ Currently this extension supports the following operatings systems:
 - Windows 7 and later (32-bit and 64-bit)
 - macOS 10.10 and later
 
-## Board-Specific Settings
+## Setup Guide
 
-### IoT DevKit
+### MXChip IoT DevKit
 
 Please follow the [guide](./docs/IoTDevKit.md) to setup IoT DevKit.
 
@@ -45,18 +48,17 @@ Please follow the [guide](./docs/IoTDevKit.md) to setup IoT DevKit.
 | `IoT Workbench: Set Workbench Path` | Set the default path for IoT Workbench. |
 | `IoT Workbench: Help` | Open help URL. |
 
-
 ### Create New Project
 
-<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/new.gif" width="380">
+<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/new.gif">
 
 ### Provision Azure Service
 
-<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/provision.gif" width="380">
+<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/provision.gif">
 
 ### Example Gallery
 
-<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/example.gif" width="596">
+<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/example.gif">
 
 #### Note: 
 When invoking the **Azure Provision** command with Azure IoT Hub and Azure Functions, by default, Azure Functions would use the IoT Hub consumer group of `$Default`. To switch to another consumer group, please follow the [guide](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-create-through-portal) to create a new consumer group in Azure Poral. Then in IoT project, modify the following setting in **function.json**:
