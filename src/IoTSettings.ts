@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
@@ -57,6 +60,11 @@ export class IoTWorkbenchSettings {
       const folderUri = await vscode.window.showOpenDialog(options);
       if (folderUri && folderUri[0]) {
         userWorkbenchPath = folderUri[0].fsPath;
+      } else {
+        if (showMessage) {
+          await vscode.window.showWarningMessage('Change workbench canceled.');
+        }
+        return userWorkbenchPath;
       }
     } else if (selection !== undefined) {
       userWorkbenchPath = selection.data;

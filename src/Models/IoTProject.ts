@@ -1,13 +1,18 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
+import {EventNames} from '../constants';
+import {TelemetryContext, TelemetryWorker} from '../telemetry';
 
 import {checkAzureLogin} from './Apis';
 import {AZ3166Device} from './AZ3166Device';
-import {AzureFunction} from './AzureFunction';
+import {AzureFunctions} from './AzureFunctions';
 import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Deployable} from './Interfaces/Deployable';
@@ -16,12 +21,13 @@ import {ProjectTemplate, ProjectTemplateType} from './Interfaces/ProjectTemplate
 import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
 import {Workspace} from './Interfaces/Workspace';
+import {IoTButtonDevice} from './IoTButtonDevice';
 import {IoTHub} from './IoTHub';
 import {IoTHubDevice} from './IoTHubDevice';
 
 const constants = {
   deviceDefaultFolderName: 'Device',
-  functionDefaultFolderName: 'Function',
+  functionDefaultFolderName: 'Functions',
   workspaceConfigFilePath: 'project.code-workspace'
 };
 
@@ -36,6 +42,7 @@ export class IoTProject {
   private projectTemplateItem: ProjectTemplate|null = null;
   private extensionContext: vscode.ExtensionContext;
   private channel: vscode.OutputChannel;
+  private telemetryContext: TelemetryContext;
 
   private addComponent(comp: Component) {}
 
@@ -55,10 +62,13 @@ export class IoTProject {
     return (comp as Uploadable).upload !== undefined;
   }
 
-  constructor(context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
+  constructor(
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext) {
     this.componentList = [];
     this.extensionContext = context;
     this.channel = channel;
+    this.telemetryContext = telemetryContext;
   }
 
   async load(): Promise<boolean> {
@@ -75,8 +85,18 @@ export class IoTProject {
         vscode.workspace.workspaceFolders[0].uri.fsPath, '..', devicePath);
 
     if (deviceLocation !== undefined) {
-      const device = new AZ3166Device(this.extensionContext, deviceLocation);
-      this.componentList.push(device);
+      const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
+      if (!boardId) {
+        return false;
+      }
+      if (boardId === AZ3166Device.boardId) {
+        const device = new AZ3166Device(this.extensionContext, deviceLocation);
+        this.componentList.push(device);
+      } else if (boardId === IoTButtonDevice.boardId) {
+        const device =
+            new IoTButtonDevice(this.extensionContext, deviceLocation);
+        this.componentList.push(device);
+      }
     }
 
     const iotHub = new IoTHub(this.channel);
@@ -94,7 +114,7 @@ export class IoTProject {
           vscode.workspace.workspaceFolders[0].uri.fsPath, '..', functionPath);
 
       if (functionLocation) {
-        const functionApp = new AzureFunction(functionLocation, this.channel);
+        const functionApp = new AzureFunctions(functionLocation, this.channel);
         this.componentList.push(functionApp);
       }
     }
@@ -173,8 +193,8 @@ export class IoTProject {
 
         const res = await item.provision();
         if (res === false) {
-          const error = new Error(`The provision of ${item.name} failed.`);
-          throw error;
+          vscode.window.showWarningMessage('Provision canceled.');
+          return false;
         }
       }
     }
@@ -210,7 +230,7 @@ export class IoTProject {
 
   async create(
       rootFolderPath: string, projectTemplateItem: ProjectTemplate,
-      openInNewWindow: boolean): Promise<boolean> {
+      boardId: string, openInNewWindow: boolean): Promise<boolean> {
     if (!fs.existsSync(rootFolderPath)) {
       throw new Error(
           'Unable to find the root path, please open the folder and initialize project again.');
@@ -230,9 +250,18 @@ export class IoTProject {
     }
 
     workspace.folders.push({path: constants.deviceDefaultFolderName});
+    let device: Component;
+    if (boardId === AZ3166Device.boardId) {
+      device = new AZ3166Device(
+          this.extensionContext, deviceDir, projectTemplateItem.sketch);
+    } else if (boardId === IoTButtonDevice.boardId) {
+      device = new IoTButtonDevice(
+          this.extensionContext, deviceDir, projectTemplateItem.sketch);
+    } else {
+      throw new Error('The specified board is not supported.');
+    }
 
-    const device = new AZ3166Device(
-        this.extensionContext, deviceDir, projectTemplateItem.sketch);
+    workspace.settings[`IoTWorkbench.${ConfigKey.boardId}`] = boardId;
     this.componentList.push(device);
 
     // TODO: Consider naming for project level settings.
@@ -255,7 +284,7 @@ export class IoTProject {
         this.componentList.push(iothub);
         break;
       }
-      case ProjectTemplateType.Function: {
+      case ProjectTemplateType.AzureFunctions: {
         const iothub = new IoTHub(this.channel);
 
         const functionDir = path.join(
@@ -267,7 +296,7 @@ export class IoTProject {
 
         workspace.folders.push({path: constants.functionDefaultFolderName});
 
-        const azureFunction = new AzureFunction(functionDir, this.channel);
+        const azureFunctions = new AzureFunctions(functionDir, this.channel);
         settings.projectsettings.push({
           name: ConfigKey.functionPath,
           value: constants.functionDefaultFolderName
@@ -277,7 +306,7 @@ export class IoTProject {
             constants.functionDefaultFolderName;
 
         this.componentList.push(iothub);
-        this.componentList.push(azureFunction);
+        this.componentList.push(azureFunctions);
         break;
       }
       default:
@@ -293,7 +322,12 @@ export class IoTProject {
 
     try {
       for (let i = 0; i < this.componentList.length; i++) {
-        await this.componentList[i].create();
+        const res = await this.componentList[i].create();
+        if (res === false) {
+          fs.removeSync(this.projectRootPath);
+          vscode.window.showWarningMessage('Project initialize canceled.');
+          return false;
+        }
       }
     } catch (error) {
       throw error;
@@ -304,32 +338,41 @@ export class IoTProject {
 
     fs.writeFileSync(
         workspaceConfigFilePath, JSON.stringify(workspace, null, 4));
+
+    if (!openInNewWindow) {
+      // Need to add telemetry here otherwise, after restart VSCode, no
+      // telemetry data will be sent.
+      try {
+        TelemetryWorker.sendEvent(
+            EventNames.createNewProjectEvent, this.telemetryContext);
+      } catch {
+        // If sending telemetry failed, skip the error to avoid blocking user.
+      }
+    }
+
     try {
-      await vscode.commands.executeCommand(
-          'vscode.openFolder', vscode.Uri.file(workspaceConfigFilePath),
-          openInNewWindow);
+      setTimeout(
+          () => vscode.commands.executeCommand(
+              'vscode.openFolder', vscode.Uri.file(workspaceConfigFilePath),
+              openInNewWindow),
+          1000);
       return true;
     } catch (error) {
       throw error;
     }
   }
 
-  async setDeviceConnectionString(): Promise<boolean> {
+  async configDeviceSettings(): Promise<boolean> {
     for (const component of this.componentList) {
       if (component.getComponentType() === ComponentType.Device) {
         const device = component as Device;
-
-        if (device.getDeviceType() === DeviceType.MXChip_AZ3166) {
-          const az3166Device = device as AZ3166Device;
-          try {
-            await az3166Device.setDeviceConnectionString();
-          } catch (error) {
-            throw error;
-          }
+        try {
+          await device.configDeviceSettings();
+        } catch (error) {
+          throw error;
         }
       }
     }
-
     return true;
   }
 }

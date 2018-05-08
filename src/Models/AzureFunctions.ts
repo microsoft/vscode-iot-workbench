@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 'use strict';
 
 import * as fs from 'fs-plus';
@@ -18,10 +21,10 @@ import {StringDictionary} from 'azure-arm-website/lib/models';
 import {getExtension} from './Apis';
 import {extensionName} from './Interfaces/Api';
 
-export class AzureFunction implements Component, Provisionable {
+export class AzureFunctions implements Component, Provisionable {
   private componentType: ComponentType;
   private channel: vscode.OutputChannel;
-  private azureFunctionPath: string;
+  private azureFunctionsPath: string;
   private azureAccountExtension: AzureAccount|undefined =
       getExtension(extensionName.AzureAccount);
 
@@ -73,13 +76,13 @@ export class AzureFunction implements Component, Provisionable {
     return undefined;
   }
 
-  constructor(azureFunctionPath: string, channel: vscode.OutputChannel) {
-    this.componentType = ComponentType.AzureFunction;
+  constructor(azureFunctionsPath: string, channel: vscode.OutputChannel) {
+    this.componentType = ComponentType.AzureFunctions;
     this.channel = channel;
-    this.azureFunctionPath = azureFunctionPath;
+    this.azureFunctionsPath = azureFunctionsPath;
   }
 
-  name = 'Azure Function';
+  name = 'Azure Functions';
 
   getComponentType(): ComponentType {
     return this.componentType;
@@ -90,18 +93,23 @@ export class AzureFunction implements Component, Provisionable {
   }
 
   async create(): Promise<boolean> {
-    const azureFunctionPath = this.azureFunctionPath;
-    console.log(azureFunctionPath);
+    const azureFunctionsPath = this.azureFunctionsPath;
+    console.log(azureFunctionsPath);
 
-    if (!fs.existsSync(azureFunctionPath)) {
+    if (!fs.existsSync(azureFunctionsPath)) {
       throw new Error(
-          `Azure Function folder doesn't exist: ${azureFunctionPath}`);
+          'Unable to find the Azure Functions folder inside the project.');
     }
 
     try {
       await vscode.commands.executeCommand(
-          'azureFunctions.createNewProject', azureFunctionPath, 'C#Script',
-          '~1', false /* openFolder */);
+          'azureFunctions.createNewProject', azureFunctionsPath, 'C#Script',
+          '~1', false /* openFolder */, 'IoTHubTrigger-CSharp',
+          'IoTHubTrigger1', {
+            connection: 'eventHubConnectionString',
+            path: '%eventHubConnectionPath%',
+            consumerGroup: '$Default'
+          });
       return true;
     } catch (error) {
       throw error;
@@ -135,8 +143,7 @@ export class AzureFunction implements Component, Provisionable {
         const credential =
             await this.getCredentialFromSubscriptionId(subscriptionId);
         if (credential === undefined) {
-          throw new Error(`Unable to get credential for the subscription, id:${
-              subscriptionId}.`);
+          throw new Error('Unable to get credential for the subscription.');
         }
 
         const resourceGroupMatches =
@@ -173,7 +180,7 @@ export class AzureFunction implements Component, Provisionable {
         return true;
       } else {
         throw new Error(
-            'Unable to create Azure Function application. Please check the error and retry.');
+            'Unable to create Azure Functions application. Please check the error and retry.');
       }
     } catch (error) {
       throw error;
@@ -184,19 +191,19 @@ export class AzureFunction implements Component, Provisionable {
     let deployPendding: NodeJS.Timer|null = null;
     if (this.channel) {
       this.channel.show();
-      this.channel.appendLine('Deploying Azure Function App...');
+      this.channel.appendLine('Deploying Azure Functions App...');
       deployPendding = setInterval(() => {
         this.channel.append('.');
       }, 1000);
     }
 
     try {
-      const azureFunctionPath = this.azureFunctionPath;
+      const azureFunctionsPath = this.azureFunctionsPath;
       const functionAppId = ConfigHandler.get(ConfigKey.functionAppId);
 
       await vscode.commands.executeCommand(
-          'azureFunctions.deploy', azureFunctionPath, functionAppId);
-      console.log(azureFunctionPath, functionAppId);
+          'azureFunctions.deploy', azureFunctionsPath, functionAppId);
+      console.log(azureFunctionsPath, functionAppId);
       if (this.channel && deployPendding) {
         clearInterval(deployPendding);
         this.channel.appendLine('.');
@@ -207,21 +214,6 @@ export class AzureFunction implements Component, Provisionable {
         clearInterval(deployPendding);
         this.channel.appendLine('.');
       }
-      throw error;
-    }
-  }
-
-  async initialize(): Promise<boolean> {
-    try {
-      await vscode.commands.executeCommand(
-          'azureFunctions.createFunction', this.azureFunctionPath,
-          'IoTHubTrigger-CSharp', 'IoTHubTrigger1', {
-            connection: 'eventHubConnectionString',
-            path: '%eventHubConnectionPath%',
-            consumerGroup: '$Default'
-          });
-      return true;
-    } catch (error) {
       throw error;
     }
   }

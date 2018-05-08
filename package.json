@@ -2,9 +2,18 @@
   "name": "vscode-iot-workbench",
   "displayName": "Azure IoT Workbench",
   "description": "Azure IoT Workbench for Visual Studio Code",
-  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/vscode-iot-workbench.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Microsoft/vscode-iot-workbench/issues"
+  },
+  "homepage": "https://github.com/Microsoft/vscode-iot-workbench/blob/master/README.md",
+  "version": "0.1.1",
   "publisher": "vsciot-vscode",
   "icon": "logo.png",
+  "aiKey": "5b869bc6-ca93-4f24-aa87-92871a3a616e",
   "engines": {
     "vscode": "^1.18.0"
   },
@@ -12,13 +21,15 @@
     "Other"
   ],
   "activationEvents": [
+    "*",
     "workspaceContains:**/.iotworkbenchproject",
     "onCommand:iotworkbench.device",
     "onCommand:iotworkbench.cloud",
     "onCommand:iotworkbench.initializeProject",
     "onCommand:iotworkbench.examples",
     "onCommand:iotworkbench.help",
-    "onCommand:iotworkbench.workbench"
+    "onCommand:iotworkbench.workbench",
+    "onCommand:iotworkbench.testexample"
   ],
   "main": "./out/src/extension",
   "contributes": {
@@ -68,6 +79,12 @@
       {
         "title": "Azure Functions Configuration",
         "properties": {
+          "arduino.additionalUrls": {
+            "type": [
+              "string",
+              "array"
+            ]
+          },
           "azureFunctions.projectRuntime": {
             "scope": "resource"
           },
@@ -103,6 +120,13 @@
           },
           "IoTWorkbench.functionAppId": {
             "type": "string"
+          },
+          "IoTWorkbench.disableAutoPopupLandingPage": {
+            "boolean": "boolean",
+            "default": false
+          },
+          "IoTWorkbench.BoardId": {
+            "type": "string"
           }
         }
       }
@@ -119,9 +143,12 @@
     "fix": "gts fix",
     "prepare": "npm run compile",
     "pretest": "npm run compile",
-    "posttest": "npm run check"
+    "posttest": "npm run check",
+    "update:package": "rm -rf node_modules && npm update --save-dev && npm update --save"
   },
   "devDependencies": {
+    "@types/body-parser": "^1.16.8",
+    "@types/express": "^4.11.1",
     "@types/fs-plus": "^3.0.0",
     "@types/lodash": "^4.14.91",
     "@types/mocha": "^2.2.42",
@@ -138,15 +165,19 @@
     "azure-arm-resource": "^3.1.0-preview",
     "azure-arm-website": "^3.0.0-preview",
     "azure-iothub": "^1.2.3",
+    "body-parser": "^1.18.2",
     "eventemitter2": "^5.0.0",
+    "express": "^4.16.3",
     "fs-plus": "^3.0.1",
-    "lodash": "^4.17.4",
+    "getmac": "^1.2.1",
+    "lodash": "^4.17.10",
     "ms-rest": "^2.3.0",
     "opn": "5.1.0",
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
     "serialport-lite": "^0.1.2",
     "unzip": "^0.1.11",
+    "vscode-extension-telemetry": "^0.0.15",
     "winreg": "^1.2.3"
   },
   "extensionDependencies": [
