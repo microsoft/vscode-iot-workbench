@@ -16,6 +16,22 @@ env:
   global:
     - ISPRODTAG=^v?[0-9]+\.[0-9]+\.[0-9]+$
 
+
+before_install:
+- if [ $TRAVIS_OS_NAME == "linux" ]; then
+    export CXX="g++-4.9" CC="gcc-4.9" DISPLAY=:99.0 CODE_VERSION=1.20.1;
+    sh -e /etc/init.d/xvfb start;
+    sleep 3;
+    wget https://downloads.arduino.cc/arduino-1.8.2-linux64.tar.xz -P /home/$USER;
+    tar -xvf /home/$USER/arduino-1.8.2-linux64.tar.xz -C /home/$USER/;
+    sudo ln -s /home/$USER/arduino-1.8.2/arduino /usr/bin/arduino;
+  fi
+- if [ $TRAVIS_OS_NAME == "osx" ]; then
+    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)";
+    brew cask install arduino;
+  fi
+
+
 install:
 - npm install -g vsce
 - npm install -g typescript

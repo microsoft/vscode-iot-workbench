@@ -10,9 +10,9 @@ import {TelemetryContext} from '../src/telemetry';
 
 import {TestExtensionContext} from './stub';
 
-suite('IoT Workbench: AZ3166Device', () => {
+suite('IoT Workbench: Device', () => {
   // tslint:disable-next-line: only-arrow-functions
-  test('property of AZ3166 device should be set correctly', function(done) {
+  test('property of device should be set correctly', function(done) {
     const context = new TestExtensionContext();
     const device = new AZ3166Device(context, '', 'emptySketch.ino');
     assert.equal(device.getDeviceType(), DeviceType.MXChip_AZ3166);
