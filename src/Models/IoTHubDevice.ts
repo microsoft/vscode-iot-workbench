@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 import * as iothub from 'azure-iothub';
 import {clearInterval} from 'timers';
 import * as vscode from 'vscode';
@@ -67,8 +70,7 @@ export class IoTHubDevice implements Component, Provisionable {
           device = await toolkit.azureIoTExplorer.getDevice(
               null, iotHubConnectionString, this.channel);
           if (device === undefined) {
-            throw new Error(
-                'Unable to select the specific device. Please retry Azure Provision and select another device.');
+            return false;
           } else {
             await ConfigHandler.update(
                 ConfigKey.iotHubDeviceConnectionString,
@@ -80,9 +82,7 @@ export class IoTHubDevice implements Component, Provisionable {
           device = await toolkit.azureIoTExplorer.createDevice(
               false, iotHubConnectionString, this.channel);
           if (device === undefined) {
-            const error = new Error(
-                'Unable to create device in IoT Hub. Please check output window for detail.');
-            throw error;
+            return false;
           } else {
             await ConfigHandler.update(
                 ConfigKey.iotHubDeviceConnectionString,

@@ -1,0 +1,503 @@
+<!doctype html>
+<html>
+<head>
+<style>
+::-webkit-scrollbar {
+    width: 10px;
+    background: white;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #AAA;
+    border: 2px solid white;
+    border-radius: 5px;
+}
+
+[v-cloak] { display: none }
+
+* {
+  box-sizing: border-box;
+  font-family: "Segoe UI",-apple-system,".SFNSText-Regular","San Francisco","Helvetica Neue","Lucida Grande",Arial,sans-serif;
+}
+
+body {
+  margin: 20px;
+  background: white;
+  min-width: 700px;
+  cursor: default;
+}
+
+#main {
+  width: 1700px;
+  display: inline-block;
+  vertical-align: top;
+  padding-right: 20px;
+}
+
+ul.example-list {
+  padding: 0;
+  margin: 0;
+  margin-right: -20px;
+  margin-bottom: -20px;
+}
+
+ul.example-list:after {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+ul.example-list > li {
+  list-style: none;
+  width: 320px;
+  margin-right: 20px;
+  margin-bottom: 20px;
+  float: left;
+  text-align: left;
+  box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+}
+
+ul.example-list > li:hover {
+  box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.3);
+}
+
+ul.example-list > li > .header {
+  height: 185px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+#featured > .difficulty,
+ul.example-list > li > .header > .difficulty {
+  position: absolute;
+  left: 14px;
+  top: 12px;
+  padding: 1px 14px;
+  color: white;
+  border-radius: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  z-index: 10;
+}
+
+#featured > .difficulty.easy,
+ul.example-list > li > .header > .difficulty.easy {
+  background: rgb(143, 195, 31);
+}
+
+#featured > .difficulty.medium,
+ul.example-list > li > .header > .difficulty.medium {
+  background: rgb(249, 143, 64);
+}
+
+#featured > .difficulty.hard,
+ul.example-list > li > .header > .difficulty.hard {
+  background: rgb(240, 90, 45);
+}
+
+#featured > .difficulty.easy:before,
+ul.example-list > li > .header > .difficulty.easy:before {
+  content: "EASY"
+}
+
+#featured > .difficulty.medium:before,
+ul.example-list > li > .header > .difficulty.medium:before {
+  content: "MEDIUM"
+}
+
+#featured > .difficulty.hard:before,
+ul.example-list > li > .header > .difficulty.hard:before {
+  content: "HARD"
+}
+
+ul.example-list > li > .header > img {
+  width: 100%;
+}
+
+ul.example-list > li > .body {
+  border-top: none;
+  padding: 20px;
+}
+
+ul.example-list > li > .body > h2 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 17px;
+  font-weight: 500;
+  color: #333;
+}
+
+ul.example-list > li > .body > .description {
+  font-size: 15px;
+  height: 58px;
+  padding-bottom: 20px;
+  color: #333;
+  overflow: hidden;
+}
+
+ul.example-list > li > .body > .services {
+  height: 34px;
+}
+
+ul.example-list > li > .body > .services > img {
+  width: 24px;
+  height: 24px;
+  margin-right: 12px;
+}
+
+#featured > .body  > .buttons > button,
+ul.example-list > li > .body > .buttons > button {
+  padding: 8px 15px;
+  cursor: pointer;
+  outline: none;
+  margin-right: 10px;
+  font-size: 15px;
+}
+
+#featured > .body  > .buttons > button {
+  background: #069;
+  color: white;
+  border: 1px solid #069;
+}
+
+ul.example-list > li > .body > .buttons {
+  text-align: right;
+}
+
+ul.example-list > li > .body > .buttons > button {
+  background: white;
+  color: #069;
+  border: 1px solid #069;
+}
+
+#featured > .body  > .buttons > button:hover {
+  background: #66a3c2;
+  color: white;
+  border: 1px solid #66a3c2;
+}
+
+ul.example-list > li > .body > .buttons > button:hover {
+  background: #069;
+  color: white;
+  border: 1px solid #069;
+}
+
+.link {
+  cursor: pointer;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+aside {
+  width: 300px;
+  height: 500px;
+  display: inline-block;
+  vertical-align: top;
+  color: #333;
+  text-align: left;
+}
+
+aside h1 {
+  font-weight: 400;
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 13px;
+  text-transform: uppercase;
+  display: inline-block;
+  padding-bottom: 2px;
+  border-bottom: 2px solid #666;
+  color: #666;
+}
+
+aside .section {
+  margin-bottom: 20px;
+  padding: 0 20px;
+  font-size: 15px;
+}
+
+#quick-links > ul.links {
+  padding: 0;
+  margin: 0;
+}
+
+#quick-links > ul.links > li {
+  list-style: none;
+  line-height: 2;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+#quick-links > ul.links > li:hover {
+  text-decoration: underline;
+}
+
+#blog {
+  margin-bottom: 20px;
+}
+
+#blog > ul.blog {
+  margin: 0;
+  padding: 0;
+}
+
+#blog > ul.blog > li {
+  list-style: none;
+  margin-bottom: 10px;
+}
+
+#blog > ul.blog > li:last-child {
+  border: none;
+}
+
+#blog > ul.blog > li > h2 {
+  font-size: 17px;
+  font-weight: 500;
+  margin: 0;
+  margin-bottom: 5px;
+  cursor: pointer;
+}
+
+#blog > ul.blog > li > h2:hover {
+  text-decoration: underline;
+}
+
+#blog > ul.blog > li > p {
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 0;
+  margin-top: 5px;
+  display: none;
+}
+
+#blog > ul.blog > li:first-child > p {
+  display: block;
+}
+
+#blog > ul.blog > li > .date {
+  font-size: 13px;
+  margin: 0;
+  color: #666;
+}
+
+#info table td {
+  padding-right: 10px;
+}
+
+#social table td {
+  padding-right: 20px;
+}
+
+#featured {
+  width: 100%;
+  height: 380px;
+  position: relative;
+  margin-bottom: 20px;
+  overflow: hidden;
+  box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.15);
+}
+
+#featured:hover {
+  box-shadow: 0px 1px 3px 0 rgba(0, 0, 0, 0.3);
+}
+
+#featured:before {
+  content: "";
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+  z-index: 1;
+}
+
+#featured > img {
+  min-width: 100%;
+  min-height: 100%;
+}
+
+ul.example-list > li:hover > .header > img,
+#featured:hover > img {
+  opacity: 0.8;
+}
+
+#featured > .body {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 100px 20px 20px 20px;  
+  text-align: left;
+  z-index: 10;
+  color: white;
+}
+
+#featured > .body > h2 {
+  font-weight: 400;
+}
+
+#featured > .body > .description {
+  margin-bottom: 20px;
+  max-width: 500px;
+}
+
+.github:before,
+.feed:before {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  top: 4px;
+  margin-right: 5px;
+  opacity: 0.5;
+}
+
+.github:hover:before,
+.feed:hover:before {
+  opacity: 0.8;
+}
+
+.github:before {
+  content: url(images/github.svg);
+}
+
+.feed:before {
+  content: url(images/feed.svg);
+}
+
+.tutorial {
+  float: left;
+  padding: 8px 0;
+  color: #069;
+}
+
+.example-list > li:hover .example-link {
+  text-decoration: underline;
+}
+
+.example-link {
+  cursor: pointer;
+}
+
+@media (min-width: 4096px) {
+  body:after {
+    content: "There's more to the picture than meets the eye.";
+    position: fixed;
+    display: block;
+    font-size: 12px;
+    left: 100%;
+    top: 0;
+    color: gray;
+    transform: rotate(90deg);
+    transform-origin: 0 0;
+    white-space: nowrap;
+    padding: 5px 15px;
+  }
+}
+
+@media (min-width: 1720px) and (max-width: 2059px) {
+  #main {
+    width: 1360px;
+  }
+}
+
+@media (min-width: 1380px) and (max-width: 1719px) {
+  #main {
+    width: 1020px;
+  }
+}
+
+@media (min-width: 1040px) and (max-width: 1379px) {
+  #main {
+    width: 680px;
+  }
+}
+
+@media (max-width: 1039px) {
+  #main {
+    width: 340px;
+  }
+}
+</style>
+<script src="vue.js"></script>
+</head>
+<body>
+<div id="example" v-cloak>
+<div id="main">
+  <div id="featured" v-if="featuredExample">
+    <span v-bind:class="'difficulty ' + featuredExample.difficulty"></span>
+    <img v-bind:src="featuredExample.image">
+    <div class="body">
+      <h2>{{ featuredExample.name }}</h2>
+      <div class="description">{{ featuredExample.description }}</div>
+      <div class="buttons">
+        <button v-on:click="openLink(featuredExample.tutorial)">View Tutorial</button>
+        <button v-on:click="callAPI(featuredExample.project_name, featuredExample.url)">Open Sample</button>
+      </div>
+    </div>
+  </div>
+  <ul class="example-list">
+    <li v-for="example in examples" v-on:click="openLink(example.tutorial)">
+      <div class="header">
+        <span v-bind:class="'difficulty ' + example.difficulty"></span>
+        <img v-bind:src="example.image">
+      </div>
+      <div class="body">
+        <h2 class="example-link">{{ example.name }}</h2>
+        <div class="description">{{ example.description }}</div>
+        <div class="buttons">
+          <div class="example-link tutorial">View Tutorial</div>
+          <button v-on:click.stop="callAPI(example.project_name, example.url)">Open Sample</button>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>
+<aside>
+<div id="quick-links" class="section">
+  <h1>Quick links</h1>
+  <ul class="links">
+    <li v-on:click="openLink('https://microsoft.github.io/azure-iot-developer-kit/docs/apis/arduino-language-reference/')">API Reference</li>
+    <li v-on:click="openLink('https://microsoft.github.io/azure-iot-developer-kit/docs/faq/')">FAQ</li>
+    <li v-on:click="openLink('https://github.com/Microsoft/devkit-sdk/issues/new')">Report Issue</li>
+  </ul>
+</div>
+<div id="blog" class="section" v-if="blogs.length">
+  <h1>Blogs</h1>
+  <ul class="blog">
+    <li v-for="blog in blogs">
+      <h2 v-on:click="openLink(blog.link)">{{ blog.title }}</h2>
+      <div class="date">{{ blog.date }}</div>
+      <p>{{ blog.description }}</p>
+    </li>
+  </ul>
+</div>
+<div id="info" class="section">
+  <h1>Info</h1>
+  <table>
+    <tr>
+      <td>Version</td><td><span class="link" v-on:click="openLink('https://microsoft.github.io/azure-iot-developer-kit/versions/')">{{ version }}</span></td>
+    </tr>
+    <tr>
+      <td>Last updated</td><td>{{ publishDate }}</td>
+    </tr>
+  </table>
+</div>
+<div id="social" class="section">
+  <table>
+    <tr>
+      <td><span class="link github" v-on:click="openLink('https://github.com/microsoft/devkit-sdk')">GITHUB</span></td>
+      <td><span class="link feed" v-on:click="openLink('https://blogs.msdn.microsoft.com/iotdev/feed/')">Feed</span></td>
+    </tr>
+  </table>
+</div>
+</aside>
+</div>
+<script src="example.js"></script>
+</body>
+</html>

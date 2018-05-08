@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 'use strict';
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
@@ -12,10 +15,14 @@ import {ExceptionHelper} from './exceptionHelper';
 import {setTimeout} from 'timers';
 import {ExampleExplorer} from './exampleExplorer';
 import {IoTWorkbenchSettings} from './IoTSettings';
-import {AzureFunction} from './Models/AzureFunction';
+import {AzureFunctions} from './Models/AzureFunctions';
 import {CommandItem} from './Models/Interfaces/CommandItem';
 import {ConfigHandler} from './configHandler';
-import {ConfigKey} from './constants';
+import {ConfigKey, EventNames, ContentView} from './constants';
+import {ContentProvider} from './contentProvider';
+import {TelemetryContext, callWithTelemetry, TelemetryWorker} from './telemetry';
+import {UsbDetector} from './usbDetector';
+import {HelpProvider} from './helpProvider';
 
 function filterMenu(commands: CommandItem[]) {
   for (let i = 0; i < commands.length; i++) {
@@ -85,7 +92,14 @@ export async function activate(context: vscode.ExtensionContext) {
   const outputChannel: vscode.OutputChannel =
       vscode.window.createOutputChannel('Azure IoT Workbench');
 
-  const iotProject = new IoTProject(context, outputChannel);
+  // Initialize Telemetry
+  TelemetryWorker.Initialize(context);
+
+  const telemetryContext: TelemetryContext = {
+    properties: {result: 'Succeeded', error: '', errorMessage: ''},
+    measurements: {duration: 0}
+  };
+  const iotProject = new IoTProject(context, outputChannel, telemetryContext);
   if (vscode.workspace.workspaceFolders) {
     try {
       await iotProject.load();
@@ -95,114 +109,89 @@ export async function activate(context: vscode.ExtensionContext) {
   }
 
   const projectInitializer = new ProjectInitializer();
+  const projectInitializerBinder =
+      projectInitializer.InitializeProject.bind(projectInitializer);
+
   const deviceOperator = new DeviceOperator();
   const azureOperator = new AzureOperator();
+
   const exampleExplorer = new ExampleExplorer();
+  const exampleSelectBoardBinder =
+      exampleExplorer.selectBoard.bind(exampleExplorer);
+  const initializeExampleBinder =
+      exampleExplorer.initializeExample.bind(exampleExplorer);
+
+
+  const contentProvider =
+      new ContentProvider(context.extensionPath, exampleExplorer);
+  context.subscriptions.push(
+      vscode.workspace.registerTextDocumentContentProvider(
+          ContentView.workbenchContentProtocol, contentProvider));
 
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with  registerCommand
   // The commandId parameter must match the command field in package.json
 
   const projectInitProvider = async () => {
-    try {
-      await projectInitializer.InitializeProject(context, outputChannel);
-    } catch (error) {
-      ExceptionHelper.logError(outputChannel, error, true);
-    }
+    callWithTelemetry(
+        EventNames.createNewProjectEvent, outputChannel, context,
+        projectInitializerBinder);
   };
 
   const azureProvisionProvider = async () => {
-    try {
-      const status = await azureOperator.Provision(context, outputChannel);
-      if (status) {
-        vscode.window.showInformationMessage('Azure provision succeeded.');
-      }
-    } catch (error) {
-      ExceptionHelper.logError(outputChannel, error, true);
-    }
+    callWithTelemetry(
+        EventNames.azureProvisionEvent, outputChannel, context,
+        azureOperator.Provision);
   };
 
   const azureDeployProvider = async () => {
-    try {
-      await azureOperator.Deploy(context, outputChannel);
-    } catch (error) {
-      ExceptionHelper.logError(outputChannel, error, true);
-    }
+    callWithTelemetry(
+        EventNames.azureDeployEvent, outputChannel, context,
+        azureOperator.Deploy);
   };
 
   const deviceCompileProvider = async () => {
-    try {
-      await deviceOperator.compile(context, outputChannel);
-    } catch (error) {
-      ExceptionHelper.logError(outputChannel, error, true);
-    }
+    callWithTelemetry(
+        EventNames.deviceCompileEvent, outputChannel, context,
+        deviceOperator.compile);
   };
 
   const deviceUploadProvider = async () => {
-    try {
-      await deviceOperator.upload(context, outputChannel);
-    } catch (error) {
-      ExceptionHelper.logError(outputChannel, error, true);
-    }
+    callWithTelemetry(
+        EventNames.deviceUploadEvent, outputChannel, context,
+        deviceOperator.upload);
   };
 
-  const deviceConnectionStringConfigProvider = async () => {
-    try {
-      await deviceOperator.setConnectionString(context, outputChannel);
-    } catch (error) {
-      ExceptionHelper.logError(outputChannel, error, true);
-    }
+  const devicePackageManager = async () => {
+    callWithTelemetry(
+        EventNames.devicePackageEvent, outputChannel, context,
+        deviceOperator.downloadPackage);
+  };
+
+  const deviceSettingsConfigProvider = async () => {
+    callWithTelemetry(
+        EventNames.configDeviceSettingsEvent, outputChannel, context,
+        deviceOperator.configDeviceSettings);
   };
 
   const examplesProvider = async () => {
-    try {
-      const res =
-          await exampleExplorer.initializeExample(context, outputChannel);
-
-      if (res) {
-        vscode.window.showInformationMessage('Example load successfully.');
-      } else {
-        vscode.window.showErrorMessage(
-            'Unable to load example. Please check output window for detailed information.');
-      }
-    } catch (error) {
-      ExceptionHelper.logError(outputChannel, error, true);
-    }
+    callWithTelemetry(
+        EventNames.loadExampleEvent, outputChannel, context,
+        exampleSelectBoardBinder);
   };
 
-  const functionInitProvider = async () => {
-    try {
-      if (!vscode.workspace.workspaceFolders) {
-        throw new Error(
-            'Unable to find the root path, please open an IoT Workbench project.');
-      }
-
-      const azureFunctionPath =
-          vscode.workspace.getConfiguration('IoTWorkbench')
-              .get<string>('FunctionPath');
-      if (!azureFunctionPath) {
-        throw new Error('Get workspace configure file failed.');
-      }
-
-      const functionLocation = path.join(
-          vscode.workspace.workspaceFolders[0].uri.fsPath, '..',
-          azureFunctionPath);
-
-      const azureFunction = new AzureFunction(functionLocation, outputChannel);
-      const res = await azureFunction.initialize();
-      vscode.window.showInformationMessage(
-          res ? 'Function created.' : 'Function create failed.');
-    } catch (error) {
-      ExceptionHelper.logError(outputChannel, error, true);
-    }
+  const examplesInitializeProvider = async () => {
+    callWithTelemetry(
+        EventNames.loadExampleEvent, outputChannel, context,
+        initializeExampleBinder);
   };
 
   const menuForDevice: CommandItem[] = [
     {
-      label: 'Config Device Connection String',
+      label: 'Config Device Settings',
       description: '',
-      detail: 'Set connection string on device to connection to Azure',
-      click: deviceConnectionStringConfigProvider
+      detail: 'Config the settings on device to connect to Azure',
+      click: deviceSettingsConfigProvider
     },
     {
       label: 'Device Compile',
@@ -215,6 +204,12 @@ export async function activate(context: vscode.ExtensionContext) {
       description: '',
       detail: 'Upload code to device',
       click: deviceUploadProvider
+    },
+    {
+      label: 'Install Device SDK',
+      description: '',
+      detail: 'Download device board package',
+      click: devicePackageManager
     }
   ];
 
@@ -226,16 +221,9 @@ export async function activate(context: vscode.ExtensionContext) {
       click: azureProvisionProvider
     },
     {
-      label: 'Create Azure Function',
-      description: '',
-      detail: 'Generate Azure Function code in local',
-      only: ConfigKey.functionPath,
-      click: functionInitProvider
-    },
-    {
       label: 'Azure Deploy',
       description: '',
-      detail: 'Deploy function code to Azure',
+      detail: 'Deploy Azure Functions code to Azure',
       only: ConfigKey.functionPath,
       click: azureDeployProvider
     }
@@ -277,12 +265,6 @@ export async function activate(context: vscode.ExtensionContext) {
           description: '',
           detail: 'Deploy local code to Azure',
           click: azureDeployProvider
-        },
-        {
-          label: 'Create Function',
-          description: '',
-          detail: 'Generate Azure Function code in local',
-          click: functionInitProvider
         }
       ]
     }
@@ -304,13 +286,14 @@ export async function activate(context: vscode.ExtensionContext) {
   const examples = vscode.commands.registerCommand(
       'iotworkbench.examples', examplesProvider);
 
-  const helpInit = vscode.commands.registerCommand('iotworkbench.help', async () => {
-    await vscode.commands.executeCommand(
-        'vscode.open',
-        vscode.Uri.parse(
-            'https://microsoft.github.io/azure-iot-developer-kit/docs/get-started/'));
-    return;
-  });
+  const exampleInitialize = vscode.commands.registerCommand(
+      'iotworkbench.exampleInitialize', examplesInitializeProvider);
+
+  const helpInit =
+      vscode.commands.registerCommand('iotworkbench.help', async () => {
+        await HelpProvider.open(context);
+        return;
+      });
 
   const workbenchPath =
       vscode.commands.registerCommand('iotworkbench.workbench', async () => {
@@ -325,7 +308,12 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(examples);
   context.subscriptions.push(helpInit);
   context.subscriptions.push(workbenchPath);
+
+  const usbDetector = new UsbDetector(context);
+  usbDetector.startListening();
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export async function deactivate() {
+  await TelemetryWorker.dispose();
+}

@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
@@ -110,10 +113,11 @@ export class IoTHub implements Component, Provisionable {
         this.channel.appendLine('IoT Hub provision succeeded.');
       }
       return true;
+    } else if (!iothub) {
+      return false;
     } else {
-      const error = new Error(
+      throw new Error(
           'IoT Hub provision failed. Please check output window for detail.');
-      throw error;
     }
   }
 }

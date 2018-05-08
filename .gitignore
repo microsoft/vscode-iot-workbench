@@ -4,3 +4,4 @@ node_modules
 *.vsix
 .vscode/arduino.json
 .vscode/c_cpp_properties.json
+screenlog*
