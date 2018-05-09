@@ -137,7 +137,7 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "postinstall": "node ./node_modules/vscode/bin/install",
-    "test": "npm run compile && gulp test",
+    "test": "npm run compile && node ./node_modules/vscode/bin/test", 
     "check": "gts check",
     "clean": "gts clean",
     "fix": "gts fix",
