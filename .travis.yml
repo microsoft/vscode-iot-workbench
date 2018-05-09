@@ -16,7 +16,6 @@ env:
   global:
     - ISPRODTAG=^v?[0-9]+\.[0-9]+\.[0-9]+$
 
-
 install:
 - npm install -g vsce
 - npm install -g typescript
