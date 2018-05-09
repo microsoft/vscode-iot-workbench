@@ -1,5 +1,4 @@
 import * as assert from 'assert';
-import * as Path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../src/configHandler';
