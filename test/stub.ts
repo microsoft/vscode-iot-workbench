@@ -25,4 +25,4 @@ class TestExtensionContext implements vscode.ExtensionContext {
 }
 
 
-export {TestExtensionContext};
+export {DummyMemento, TestExtensionContext};

@@ -37,4 +37,24 @@ suite('IoT Workbench Tests', () => {
       done();
     }
   });
+
+  test('should be able to register iot workbench commands', () => {
+    return vscode.commands.getCommands(true).then((commands) => {
+      const COMMANDS = [
+        'iotworkbench.device', 'iotworkbench.cloud',
+        'iotworkbench.initializeProject', 'iotworkbench.examples',
+        'iotworkbench.exampleInitialize', 'iotworkbench.help',
+        'iotworkbench.workbench'
+      ];
+
+      const foundIoTWorkbenchCommands = commands.filter((value) => {
+        return COMMANDS.indexOf(value) >= 0 ||
+            value.startsWith('iotworkbench.');
+      });
+
+      const errorMsg =
+          'Some commands are not registered properly or a new command is not added to the test';
+      assert.equal(foundIoTWorkbenchCommands.length, COMMANDS.length, errorMsg);
+    });
+  });
 });
