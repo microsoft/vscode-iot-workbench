@@ -4,7 +4,6 @@ import * as vscode from 'vscode';
 import {ConfigHandler} from '../src/configHandler';
 import {ConfigKey} from '../src/constants';
 
-
 suite('IoT Workbench: Config', () => {
   test('should set and get config value correctly', async function() {
     this.timeout(60 * 1000);
