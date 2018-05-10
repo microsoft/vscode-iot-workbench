@@ -33,16 +33,6 @@
   ],
   "main": "./out/src/extension",
   "contributes": {
-    "snippets": [
-      {
-        "language": "cpp",
-        "path": "./snippets/arduino.json"
-      },
-      {
-        "language": "c",
-        "path": "./snippets/arduino.json"
-      }
-    ],
     "commands": [
       {
         "command": "iotworkbench.initializeProject",
