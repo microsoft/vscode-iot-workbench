@@ -18,7 +18,11 @@
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",
-            "args": ["--extensionDevelopmentPath=${workspaceRoot}", "--extensionTestsPath=${workspaceRoot}/out/test" ],
+            "args": [
+                "${workspaceRoot}/test/resources/project1/project.code-workspace",
+                "--extensionDevelopmentPath=${workspaceRoot}", 
+                "--extensionTestsPath=${workspaceRoot}/out/test" 
+            ],
             "stopOnEntry": false,
             "sourceMaps": true,
             "outFiles": [ "${workspaceRoot}/out/test/**/*.js" ],
