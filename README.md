@@ -2,14 +2,19 @@
 
 # Visual Studio Code extension for IoT Workbench 
 
+[![Gitter](https://img.shields.io/badge/chat-on%20gitter-blue.svg)](https://gitter.im/Microsoft/vscode-iot-workbench)
 [![Travis CI](https://travis-ci.org/Microsoft/vscode-iot-workbench.svg?branch=master)](https://travis-ci.org/Microsoft/vscode-iot-workbench)
 
 Welcome to Visual Studio Code extension for **IoT Workbench** <sup>preview</sup> ! The IoT Workbench extension makes it easy to code, build, deploy and debug your IoT project in Visual Studio Code, with a rich set of functionalities.
 
 ## Prerequisites
-Arduino IDE is required. Please install it from [here](https://www.arduino.cc/en/main/software#download).
-- The supported Arduino IDE versions are 1.6.x and later.
-- The Windows Store's version of Arduino IDE is not supported because of the sandbox environment of Windows app.
+
+IoT Workbench aims to support multiple popular IoT development boards and kits. It currently supports following IoT hardware:
+
+- [MXChip IoT DevKit](https://aka.ms/iot-devkit)
+- [teXXmo IoT button](https://aka.ms/button)
+
+Please find the [Setup Guide](#setup-guide) section below to configure your hardware.
 
 ## Installation
 Open VS Code and press `F1` or `Ctrl + Shift + P` to open command palette, select **Install Extension** and type `iot-workbench`.
@@ -27,31 +32,34 @@ Currently this extension supports the following operatings systems:
 - Windows 7 and later (32-bit and 64-bit)
 - macOS 10.10 and later
 
-## Board-Specific Settings
+## Setup Guide
 
-### IoT DevKit
+### MXChip IoT DevKit
 
 Please follow the [guide](./docs/IoTDevKit.md) to setup IoT DevKit.
 
-## Features
+## Commands
 
-* Create new IoT Workbench projects.
-* Load existing examples of IoT Workbench project.
-* Compile and upload device code.
-* Set device connection string.
-* Code snippet to improve develop experience.
+| Command | Description |
+| --- | --- |
+| `IoT Workbench: New`  | Create new IoT Workbench projects. |
+| `IoT Workbench: Examples` | Load existing examples of IoT Workbench project. |
+| `IoT Workbench: Cloud` | Provison Azure services and deploy Azure Functions. |
+| `IoT Workbench: Device`  | Compile, upload device code and config device settings. |
+| `IoT Workbench: Set Workbench Path` | Set the default path for IoT Workbench. |
+| `IoT Workbench: Help` | Open help URL. |
 
 ### Create New Project
 
-<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/new.gif" width="380">
+<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/new.gif">
 
 ### Provision Azure Service
 
-<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/provision.gif" width="380">
+<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/provision.gif">
 
 ### Example Gallery
 
-<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/example.gif" width="596">
+<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/example.gif">
 
 #### Note: 
 When invoking the **Azure Provision** command with Azure IoT Hub and Azure Functions, by default, Azure Functions would use the IoT Hub consumer group of `$Default`. To switch to another consumer group, please follow the [guide](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-create-through-portal) to create a new consumer group in Azure Poral. Then in IoT project, modify the following setting in **function.json**:
@@ -79,7 +87,7 @@ There are a couple of ways you can contribute to this repo:
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct). For more information please see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/#howadopt) or contact opencode@microsoft.com with any additional questions or comments.
 
 ## Contact Us
-If you would like to help to build the best IoT experience with VS Code, you can reach us directly at [gitter chat room](https://gitter.im/Microsoft/azure-iot-developer-kit).
+If you would like to help to build the best IoT experience with IoT Workbench, you can reach us directly at [gitter chat room](https://gitter.im/Microsoft/vscode-iot-workbench).
 
 ## Telemetry
 VS Code collects usage data and sends it to Microsoft to help improve our products and services. Read our [privacy statement](https://go.microsoft.com/fwlink/?LinkID=528096&clcid=0x409) to learn more. If you don’t wish to send usage data to Microsoft, you can set the `telemetry.enableTelemetry` setting to `false`. Learn more in our [FAQ](https://code.visualstudio.com/docs/supporting/faq#_how-to-disable-telemetry-reporting).
