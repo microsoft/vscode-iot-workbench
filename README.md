@@ -12,6 +12,7 @@ Welcome to Visual Studio Code extension for **IoT Workbench** <sup>preview</sup>
 IoT Workbench aims to support multiple popular IoT development boards and kits. It currently supports following IoT hardware:
 
 - [MXChip IoT DevKit](https://aka.ms/iot-devkit)
+- [teXXmo IoT button](https://aka.ms/button)
 
 Please find the [Setup Guide](#setup-guide) section below to configure your hardware.
 
