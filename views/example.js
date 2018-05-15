@@ -1,5 +1,5 @@
 var example = new Vue({
-  el: '#example',
+  el: '#main',
   data: {
     version: '',
     publishDate: '',
@@ -9,18 +9,22 @@ var example = new Vue({
   },
   created: function() {
     const query = parseQuery(location.href);
-    const board = query.board || 'devkit';
     const url = query.url ||
-        'https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/gallery/workbench-example-devkit.json';
+        'https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/gallery/workbench-example-devkit-v2.json';
     httpRequest(url, function(data) {
       var examples = [];
+      var aside = [];
       try {
         if (data) {
-          examples = JSON.parse(data);
+          data = JSON.parse(data);
+          examples = data.examples;
+          aside = data.aside;
         }
       } catch(error) {
         // ignore
       }
+
+      generateAside(aside);
       
       for (var i = 0; i < examples.length; i++) {
         if (examples[i].featured && !this.featuredExample) {
@@ -31,27 +35,6 @@ var example = new Vue({
         }
       }
       this.examples = examples;
-    }.bind(this));
-
-    httpRequest('/api/feed', function(data) {
-      var parser = new DOMParser();
-      var xmlDoc = parser.parseFromString(data,'text/xml');
-      var items = xmlDoc.getElementsByTagName('item');
-      var blogs = [];
-      for (var i = 0; i < Math.min(items.length, 3); i++) {
-        var title = items[i].getElementsByTagName('title')[0].textContent;
-        var link = items[i].getElementsByTagName('link')[0].textContent;
-        var date = new Date(items[i].getElementsByTagName('pubDate')[0].textContent).toISOString().slice(0, 10);
-        var description = items[i].getElementsByTagName('description')[0].textContent;
-        blogs.push({title, link, date, description});
-      }
-      this.blogs = blogs;
-    }.bind(this));
-
-    httpRequest('https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/gallery/version_index_devkit.json', function(data) {
-      data = JSON.parse(data);
-      this.version = data.version;
-      this.publishDate = data.date;
     }.bind(this));
   },
   methods: {
@@ -69,12 +52,14 @@ var example = new Vue({
       var apiUrl = `/api/example?name=${encodeURIComponent(name)}&url=${encodeURIComponent(url)}`;
       httpRequest(apiUrl);
     },
-    openLink: function(url) {
-      var apiUrl = `/api/link?url=${url}`;
-      httpRequest(apiUrl);
-    }
+    openLink: openLink
   }
 });
+
+function openLink(url) {
+  var apiUrl = `/api/link?url=${url}`;
+  httpRequest(apiUrl);
+}
 
 function httpRequest(url, callback) {
   var xhr = new XMLHttpRequest();
@@ -95,25 +80,6 @@ function httpRequest(url, callback) {
   xhr.send();
 }
 
-function getSingleServiceImage(service) {
-  switch(service) {
-    case 'iothub':
-      return 'images/icon-iot-hub.svg';
-    case 'functions':
-      return 'images/icon-azure-functions.svg';
-    case 'eventhub':
-      return 'images/icon-event-hub.svg';
-    case 'asa':
-      return 'images/icon-stream-analytics.svg';
-    case 'cognitive':
-      return 'images/icon-cognitive-services.svg';
-    case 'suite':
-      return 'images/icon-azure-iot-suite.svg';
-    default:
-      return '';
-  }
-}
-
 function parseQuery(url) {
   if (url.indexOf('?') < 0) {
     return {};
@@ -126,4 +92,178 @@ function parseQuery(url) {
   });
 
   return res;
+}
+
+function generateSection(obj, className) {
+  let section = document.createElement('div');
+  section.className = 'section';
+  if (className) {
+    section.className += ' ' + className;
+  }
+
+  if (obj.title) {
+    let title = document.createElement('h1');
+    title.innerText = obj.title;
+    section.appendChild(title);
+  }
+  return section;
+}
+
+function generateLinks(obj) {
+  let section = generateSection(obj, 'quick-links');
+  if (obj.items && obj.items.length) {
+    let ulEl = document.createElement('ul');
+    ulEl.className = 'links';
+    obj.items.forEach((link) => {
+      let linkEl = document.createElement('li');
+      linkEl.innerText = link.text;
+      linkEl.addEventListener('click', () => {
+        openLink(link.url);
+      });
+      ulEl.appendChild(linkEl);
+    });
+    section.appendChild(ulEl);
+  }
+  return section;
+}
+
+function generateTable(obj) {
+  let section = generateSection(obj, 'info');
+  if (obj.rows && obj.rows.length) {
+    let tableEl = document.createElement('table');
+    obj.rows.forEach((row) => {
+      if (row.length) {
+        let trEl = document.createElement('tr');
+        row.forEach((col) => {
+          let tdEl = document.createElement('td');
+          tdEl.innerText = col.text;
+          if (col.url) {
+            tdEl.className = 'link';
+            tdEl.addEventListener('click', () => {
+              openLink(col.url);
+            });
+          }
+          trEl.appendChild(tdEl);
+        });
+        tableEl.appendChild(trEl);
+      }
+    });
+    section.appendChild(tableEl);
+  }
+  return section;
+}
+
+function generateText(obj) {
+  let section = generateSection(obj);
+  let pEl = document.createElement('p');
+  pEl.innerText = obj.text;
+  section.appendChild(pEl);
+  return section;
+}
+
+function generateImage(obj) {
+  let section = generateSection(obj);
+  let imgEl = document.createElement('img');
+  imgEl.src = obj.src;
+  if (obj.url) {
+    imgEl.className = 'link';
+    imgEl.addEventListener('click', () => {
+      openLink(obj.url);
+    });
+  }
+  section.appendChild(imgEl);
+  return section;
+}
+
+function generateBadge(obj) {
+  let section = generateSection(obj, 'badge');
+  if (obj.items && obj.items.length) {
+    obj.items.forEach((item) => {
+      let spanEl = document.createElement('span');
+      spanEl.className = item.icon;
+      spanEl.innerText = item.text;
+      if (item.url) {
+        spanEl.className += ' link';
+        spanEl.addEventListener('click', () => {
+          openLink(item.url);
+        });
+      }
+      section.appendChild(spanEl);
+    });
+  }
+  return section;
+}
+
+function generateFeed(obj) {
+  let section = generateSection(obj, 'blog');
+  httpRequest('/api/feed?url=' + encodeURIComponent(obj.url), function(data) {
+    let parser = new DOMParser();
+    let xmlDoc = parser.parseFromString(data,'text/xml');
+    let items = xmlDoc.getElementsByTagName('item');
+    let ulEl = document.createElement('ul');
+    ulEl.className = 'blog';
+    for (let i = 0; i < Math.min(items.length, 3); i++) {
+      let title = items[i].getElementsByTagName('title')[0].textContent;
+      let link = items[i].getElementsByTagName('link')[0].textContent;
+      let date = new Date(items[i].getElementsByTagName('pubDate')[0].textContent).toISOString().slice(0, 10);
+      let description = items[i].getElementsByTagName('description')[0].textContent;
+
+      let liEl = document.createElement('li');
+      let h2El = document.createElement('h2');
+      h2El.innerText = title;
+      h2El.addEventListener('click', () => {
+        openLink(link);
+      });
+      liEl.appendChild(h2El);
+
+      let divEl = document.createElement('div');
+      divEl.className = 'date';
+      divEl.innerText = date;
+      liEl.appendChild(divEl);
+
+      let pEl = document.createElement('p');
+      pEl.innerText = description;
+      liEl.appendChild(pEl);
+
+      ulEl.appendChild(liEl);
+    }
+    section.appendChild(ulEl);
+  });
+  return section;
+}
+
+function generateAside(data) {
+  const aside = document.getElementById('aside');
+
+  if (data.length) {
+    data.forEach(item => {
+      let section;
+      switch(item.type) {
+        case 'links':
+          section = generateLinks(item);
+          break;
+        case 'table':
+          section = generateTable(item);
+          break;
+        case 'text':
+          section = generateText(item);
+          break;
+        case 'image':
+          section = generateImage(item);
+          break;
+        case 'badge':
+          section = generateBadge(item);
+          break;
+        case 'feed':
+          section = generateFeed(item);
+          break;
+        default:
+          break;
+      }
+
+      if (section) {
+        aside.appendChild(section);
+      }
+    });
+  }
 }

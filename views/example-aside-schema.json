@@ -1,0 +1,52 @@
+{
+  "oneOf": [
+    {
+      "type": "links",
+      "title": "string|null",
+      "items": [
+        {
+          "text": "string",
+          "url": "string"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "string|null",
+      "rows": [
+        [
+          {
+            "text": "string",
+            "url": "string|null"
+          }
+        ]
+      ]
+    },
+    {
+      "type": "text",
+      "title": "string|null",
+      "text": "string"
+    },
+    {
+      "type": "image",
+      "title": "string|null",
+      "src": "string",
+      "url": "string|null"
+    },
+    {
+      "type": "badge",
+      "title": "string|null",
+      "items": [
+        {
+          "icon": "string",
+          "text": "string",
+          "url": "string|null"
+        }
+      ]
+    },
+    {
+      "type": "feed",
+      "url": "string"
+    }
+  ]
+}
