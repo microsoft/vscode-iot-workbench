@@ -18,19 +18,23 @@ var example = new Vue({
         if (data) {
           data = JSON.parse(data);
           examples = data.examples;
-          aside = data.aside;
+          aside = data.aside || [];
         }
       } catch(error) {
         // ignore
       }
 
-      generateAside(aside);
+      if (aside.length) {
+        generateAside(aside);
+      } else {
+        document.getElementById('main').className = 'no-aside';
+      }
       
       for (var i = 0; i < examples.length; i++) {
         if (examples[i].featured && !this.featuredExample) {
           this.featuredExample = examples.splice(i, 1)[0];
           i--;
-        } else if (examples[i].description.length > 80) {
+        } else if (examples[i].description && examples[i].description.length > 80) {
           examples[i].description = examples[i].description.substr(0, 77) + '...';
         }
       }
@@ -38,15 +42,17 @@ var example = new Vue({
     }.bind(this));
   },
   methods: {
-    getServiceImage: function(services) {
-      var serviceImages = [];
-      services.forEach(function (service) {
-        var image = getSingleServiceImage(service);
-        if (image) {
-          serviceImages.push(`<img src="${image}">`);
-        }
-      });
-      return serviceImages.join('');
+    getProjectName: function(example) {
+      if (example.project_name) {
+        return example.project_name;
+      }
+    
+      if (example.name) {
+        let project_name = example.name.replace(/[^a-z0-9]/ig, '_').toLowerCase();
+        return project_name;
+      }
+    
+      return 'example_' + new Date().getTime();
     },
     callAPI: function(name, url) {
       var apiUrl = `/api/example?name=${encodeURIComponent(name)}&url=${encodeURIComponent(url)}`;
@@ -57,6 +63,9 @@ var example = new Vue({
 });
 
 function openLink(url) {
+  if (!url) {
+    return;
+  }
   var apiUrl = `/api/link?url=${url}`;
   httpRequest(apiUrl);
 }

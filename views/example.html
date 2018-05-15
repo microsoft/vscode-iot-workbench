@@ -193,7 +193,6 @@ ul.example-list > li > .body > .buttons > button:hover {
 
 aside {
   width: 300px;
-  height: 500px;
   display: inline-block;
   vertical-align: top;
   color: #333;
@@ -405,26 +404,50 @@ ul.example-list > li:hover > .header > img,
   }
 }
 
+@media (min-width: 1420px) and (max-width: 1759px) {
+  #main.no-aside {
+    width: 1360px;
+  }
+}
+
+@media (min-width: 1080px) and (max-width: 1419px) {
+  #main.no-aside {
+    width: 1020px;
+  }
+}
+
+@media (min-width: 740px) and (max-width: 1079px) {
+  #main.no-aside {
+    width: 680px;
+  }
+}
+
+@media (max-width: 739px) {
+  #main.no-aside {
+    width: 340px;
+  }
+}
+
 @media (min-width: 1720px) and (max-width: 2059px) {
-  #main {
+  #main:not(.no-aside) {
     width: 1360px;
   }
 }
 
 @media (min-width: 1380px) and (max-width: 1719px) {
-  #main {
+  #main:not(.no-aside) {
     width: 1020px;
   }
 }
 
 @media (min-width: 1040px) and (max-width: 1379px) {
-  #main {
+  #main:not(.no-aside) {
     width: 680px;
   }
 }
 
 @media (max-width: 1039px) {
-  #main {
+  #main:not(.no-aside) {
     width: 340px;
   }
 }
@@ -435,29 +458,30 @@ ul.example-list > li:hover > .header > img,
 <div id="example">
 <div id="main" v-cloak>
   <div id="featured" v-if="featuredExample">
-    <span v-bind:class="'difficulty ' + featuredExample.difficulty"></span>
-    <img v-bind:src="featuredExample.image">
+    <span v-if="featuredExample.difficulty" v-bind:class="'difficulty ' + featuredExample.difficulty"></span>
+    <img v-bind:src="featuredExample.image || '/images/no-image.png'">
     <div class="body">
       <h2>{{ featuredExample.name }}</h2>
-      <div class="description">{{ featuredExample.description }}</div>
+      <div class="description" v-if="featuredExample.description">{{ featuredExample.description }}</div>
       <div class="buttons">
-        <button v-on:click="openLink(featuredExample.tutorial)">View Tutorial</button>
-        <button v-on:click="callAPI(featuredExample.project_name, featuredExample.url)">Open Sample</button>
+        <button v-on:click="openLink(featuredExample.tutorial)" v-if="featuredExample.tutorial">View Tutorial</button>
+        <button v-on:click="callAPI(getProjectName(featuredExample), featuredExample.url)">Open Sample</button>
       </div>
     </div>
   </div>
   <ul class="example-list">
     <li v-for="example in examples" v-on:click="openLink(example.tutorial)">
       <div class="header">
-        <span v-bind:class="'difficulty ' + example.difficulty"></span>
-        <img v-bind:src="example.image">
+        <span v-if="example.difficulty" v-bind:class="'difficulty ' + example.difficulty"></span>
+        <img v-bind:src="example.image || '/images/no-image.png'">
       </div>
       <div class="body">
-        <h2 class="example-link">{{ example.name }}</h2>
-        <div class="description">{{ example.description }}</div>
+        <h2 v-bind:class="{'example-link': example.tutorial}">{{ example.name }}</h2>
+        <div class="description" v-if="example.description">{{ example.description }}</div>
         <div class="buttons">
-          <div class="example-link tutorial">View Tutorial</div>
-          <button v-on:click.stop="callAPI(example.project_name, example.url)">Open Sample</button>
+          <!-- Fake button. The entire block is clickable. -->
+          <div v-if="example.tutorial" class="example-link tutorial">View Tutorial</div>
+          <button v-on:click.stop="callAPI(getProjectName(example), example.url)">Open Sample</button>
         </div>
       </div>
     </li>
