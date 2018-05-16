@@ -459,7 +459,7 @@ ul.example-list > li:hover > .header > img,
 <div id="main" v-cloak>
   <div id="featured" v-if="featuredExample">
     <span v-if="featuredExample.difficulty" v-bind:class="'difficulty ' + featuredExample.difficulty"></span>
-    <img v-bind:src="featuredExample.image || '/images/no-image.png'">
+    <img v-bind:src="featuredExample.image || '/images/no-image.jpg'">
     <div class="body">
       <h2>{{ featuredExample.name }}</h2>
       <div class="description" v-if="featuredExample.description">{{ featuredExample.description }}</div>
@@ -473,7 +473,7 @@ ul.example-list > li:hover > .header > img,
     <li v-for="example in examples" v-on:click="openLink(example.tutorial)">
       <div class="header">
         <span v-if="example.difficulty" v-bind:class="'difficulty ' + example.difficulty"></span>
-        <img v-bind:src="example.image || '/images/no-image.png'">
+        <img v-bind:src="example.image || '/images/no-image.jpg'">
       </div>
       <div class="body">
         <h2 v-bind:class="{'example-link': example.tutorial}">{{ example.name }}</h2>
