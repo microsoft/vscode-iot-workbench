@@ -49,7 +49,7 @@ export class BoardProvider {
           const optionId = typeof optionProperty.value === 'number' ?
               optionProperty.value :
               Number(`0x${optionProperty.value}`);
-          const boardId = Number(`0x${optionProperty.value}`);
+          const boardId = Number(`0x${boardProperty.value}`);
           if (optionId !== boardId) {
             return false;
           }
