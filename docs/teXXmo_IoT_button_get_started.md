@@ -3,12 +3,12 @@
 
 # Table of Contents
 
--   [Introduction](#Introduction)
--   [Step 1: Prerequisites](#Step-1-Prerequisites)
--   [Step 2: Create IoT Project](#Step-2-CreateIoTProject)
--   [Step 3: Provision Azure Services](#Step-3-AzureProvision)
--   [Step 4: Configure the setting on IoT button](#Step-4-ConfigDevice)
--   [Step 5: Deploy Azure Services](#Step-5-AzureDeploy)
+-   [Introduction](#introduction)
+-   [Step 1: Prerequisites](#step-1-prerequisites)
+-   [Step 2: Create IoT Project](#step-2-create-iot-project)
+-   [Step 3: Provision Azure Services](#step-3-provision-azure-services)
+-   [Step 4: Configure the setting on IoT button](#step-4-configure-the-setting-on-iot-button)
+-   [Step 5: Deploy Azure Services](#step-5-deploy-azure-services)
 
 # Introduction
 
