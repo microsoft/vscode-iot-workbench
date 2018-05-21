@@ -10,7 +10,6 @@
 -   [Step 4: Configure the setting on IoT button](#Step-4-ConfigDevice)
 -   [Step 5: Deploy Azure Services](#Step-5-AzureDeploy)
 
-<a name="Introduction"></a>
 # Introduction
 
 **About this document**
@@ -20,7 +19,6 @@ This document describes the steps for developing an IoT project for [teXXmo IoT 
 -   Provision and deploy Azure resources.
 -   Configure device settings and run the sample.
 
-<a name="Step-1-Prerequisites"></a>
 # Step 1: Prerequisites
 
 You need to make sure the following steps are finished before beginning the process:
@@ -29,7 +27,6 @@ You need to make sure the following steps are finished before beginning the proc
 * [Visual Studio Code](https://code.visualstudio.com/download/) with [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) installed.
 * [An Azure Subscription](https://azure.microsoft.com/en-us/free/) (free trial works great)
 
-<a name="Step-2-CreateIoTProject"></a>
 # Step 2: Create IoT Project
 
 1. Open Visual Studio Code and open an empty folder.
@@ -40,7 +37,6 @@ You need to make sure the following steps are finished before beginning the proc
 ![SelectTemplage](Images/iot_button_template.jpg)
 1. After reload, the IoT project will be created in the target folder. 
 
-<a name="Step-3-AzureProvision"></a>
 # Step 3: Provision Azure Services
 
 1. Press **F1** or **Ctrl + Shift + P** in Visual Studio Code - **IoT Workbench:Cloud** and click **Azure Provision**
@@ -51,7 +47,6 @@ You need to make sure the following steps are finished before beginning the proc
     * Select an existing IoT Hub device or create a new IoT Hub device. 
     * Create a new Function App.
 
-<a name="Step-4-ConfigDevice"></a>
 # Step 4: Configure the setting on IoT button
 
 1. Hold power button for 5 sec. LED changes from Green Flash to Yellow, then Red flash. When LED flashes in RED, the device is in AP Mode.
@@ -72,7 +67,6 @@ You need to make sure the following steps are finished before beginning the proc
 
     Please click `Config WiFi of IoT button` and `Config connection of IoT Hub Device` and follow the guide to set the WiFi and device connection string of teXXmo IoT button and then click `Shutdown IoT button`
 
-<a name="Step-5-AzureDeploy"></a>
 # Step 5: Deploy Azure Services
 
 ## Creating the Azure Logic App
