@@ -51,7 +51,7 @@ You need to make sure the following steps are finished before beginning the proc
     * Select an existing IoT Hub device or create a new IoT Hub device. 
     * Create a new Function App.
 
-<a name="#Step-4-ConfigDevice"></a>
+<a name="Step-4-ConfigDevice"></a>
 # Step 4: Configure the setting on IoT button
 
 1. Hold power button for 5 sec. LED changes from Green Flash to Yellow, then Red flash. When LED flashes in RED, the device is in AP Mode.
@@ -72,7 +72,7 @@ You need to make sure the following steps are finished before beginning the proc
 
     Please click `Config WiFi of IoT button` and `Config connection of IoT Hub Device` and follow the guide to set the WiFi and device connection string of teXXmo IoT button and then click `Shutdown IoT button`
 
-<a name="#Step-5-AzureDeploy"></a>
+<a name="Step-5-AzureDeploy"></a>
 # Step 5: Deploy Azure Services
 
 ## Creating the Azure Logic App
