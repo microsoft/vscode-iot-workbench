@@ -51,12 +51,10 @@ You need to make sure the following steps are finished before beginning the proc
     * Select an existing IoT Hub device or create a new IoT Hub device. 
     * Create a new Function App.
 
-
 <a name="#Step-4-ConfigDevice"></a>
 # Step 4: Configure the setting on IoT button
 
-
-1. Hold power button for 5 sec. LED changes from Green Flash to Yellow, then Red flash.When LED flashes in RED, the device is in AP Mode.
+1. Hold power button for 5 sec. LED changes from Green Flash to Yellow, then Red flash. When LED flashes in RED, the device is in AP Mode.
 
 1. From any desktop machine, connect to the device via WiFi using the SSID : ESP_<Last 3 digits of MAC Address>.
 
