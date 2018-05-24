@@ -7,13 +7,14 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+import * as utils from '../utils';
 import WebSiteManagementClient = require('azure-arm-website');
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
 import {Deployable} from './Interfaces/Deployable';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey} from '../constants';
+import {ConfigKey, AzureFunctionsLanguage} from '../constants';
 
 import {ServiceClientCredentials} from 'ms-rest';
 import {AzureAccount, AzureResourceFilter} from '../azure-account.api';
@@ -27,6 +28,7 @@ export class AzureFunctions implements Component, Provisionable {
   private azureFunctionsPath: string;
   private azureAccountExtension: AzureAccount|undefined =
       getExtension(extensionName.AzureAccount);
+  private functionLanguage: string|null;
 
   private async getSubscriptionList(): Promise<vscode.QuickPickItem[]> {
     const subscriptionList: vscode.QuickPickItem[] = [];
@@ -76,10 +78,13 @@ export class AzureFunctions implements Component, Provisionable {
     return undefined;
   }
 
-  constructor(azureFunctionsPath: string, channel: vscode.OutputChannel) {
+  constructor(
+      azureFunctionsPath: string, channel: vscode.OutputChannel,
+      language: string|null = null) {
     this.componentType = ComponentType.AzureFunctions;
     this.channel = channel;
     this.azureFunctionsPath = azureFunctionsPath;
+    this.functionLanguage = language;
   }
 
   name = 'Azure Functions';
@@ -101,10 +106,37 @@ export class AzureFunctions implements Component, Provisionable {
           'Unable to find the Azure Functions folder inside the project.');
     }
 
+    if (!this.functionLanguage) {
+      const picks: vscode.QuickPickItem[] = [
+        {label: AzureFunctionsLanguage.CSharpScript, description: ''},
+        {label: AzureFunctionsLanguage.JavaScript, description: ''}
+      ];
+
+      const languageSelection = await vscode.window.showQuickPick(picks, {
+        ignoreFocusOut: true,
+        matchOnDescription: true,
+        matchOnDetail: true,
+        placeHolder: 'Select a language for Azure Functions',
+      });
+
+      if (!languageSelection) {
+        throw new Error(
+            'Unable to get the language for Azure Functions. Creating project for Azure Functions canceled.');
+      }
+      this.functionLanguage = languageSelection.label;
+    }
+
+    const templateName =
+        utils.getScriptTemplateNameFromLanguage(this.functionLanguage);
+    if (!templateName) {
+      throw new Error(
+          'Unable to get the template for Azure Functions.Creating project for Azure Functions canceled.');
+    }
+
     try {
       await vscode.commands.executeCommand(
-          'azureFunctions.createNewProject', azureFunctionsPath, 'C#Script',
-          '~1', false /* openFolder */, 'IoTHubTrigger-CSharp',
+          'azureFunctions.createNewProject', azureFunctionsPath,
+          this.functionLanguage, '~1', false /* openFolder */, templateName,
           'IoTHubTrigger1', {
             connection: 'eventHubConnectionString',
             path: '%eventHubConnectionPath%',

@@ -39,3 +39,8 @@ export class FileNames {
   static readonly settingsJsonFileName = 'settings.json';
   static readonly vscodeSettingsFolderName = '.vscode';
 }
+
+export enum AzureFunctionsLanguage {
+  CSharpScript = 'C#Script',
+  JavaScript = 'JavaScript'
+}
