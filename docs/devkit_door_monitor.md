@@ -91,7 +91,7 @@ Your API key is displayed only one time. Be sure to copy and store it safely, as
 
 1. Click the **Save** button to save this serverless workflow.
 1. Click the **When a HTTP request is received** card to open and reveal the URL generated after saving.  Copy that URL.
-![capture URL](Images/devkit-door-monitor/capture-url.JPG)
+![capture URL](Images/devkit-door-monitor/capture-url.jpg)
 
 ## Provision Azure services
 
