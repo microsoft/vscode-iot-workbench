@@ -32,9 +32,9 @@ You need to make sure the following steps are finished before beginning the proc
 1. Open Visual Studio Code and open an empty folder.
 1. Press **F1** or **Ctrl + Shift + P** in Visual Studio Code and select **IoT Workbench:New**.
 1. Select the device of **IoT button teXXmo - Microsoft Azure Developer Kit**.
-![CreateProject](Images/iot_button_create.jpg)
+![CreateProject](Images/iot-button-get-started/iot_button_create.jpg)
 1. From the project template, please select **With Azure Functions**. With this template, when teXXmo IoT button is clicked, a telemetry will be sent to IoT Hub and Azure Functions will be triggered to execute the code.
-![SelectTemplage](Images/iot_button_template.jpg)
+![SelectTemplage](Images/iot-button-get-started/iot_button_template.jpg)
 1. After reload, the IoT project will be created in the target folder. 
 
 # Step 3: Provision Azure Services
@@ -42,7 +42,7 @@ You need to make sure the following steps are finished before beginning the proc
 1. Press **F1** or **Ctrl + Shift + P** in Visual Studio Code - **IoT Workbench:Cloud** and click **Azure Provision**
 1. You need to login with your Azure subscrption if you didn't do that before.
 1. A popup window will open and guide you to provision the required Azure services. The whole process includes:
-![provision](Images/iot_button_azure_provision.JPG)
+![provision](Images/iot-button-get-started/iot_button_azure_provision.JPG)
     * Select an existing IoT Hub or create a new IoT Hub.
     * Select an existing IoT Hub device or create a new IoT Hub device. 
     * Create a new Function App.
@@ -54,7 +54,7 @@ You need to make sure the following steps are finished before beginning the proc
 1. From any desktop machine, connect to the device via WiFi using the SSID : ESP_<Last 3 digits of MAC Address>.
 
 1. In Visual Studio Code, press **F1** or **Ctrl + Shift + P** in Visual Studio Code - **IoT Workbench:Device** and click **Configure Device Settings**
-![ConfigDevice](Images/iot_button_config_device.JPG)
+![ConfigDevice](Images/iot-button-get-started/iot_button_config_device.JPG)
     For teXXmo IoT button, the following commands are provided:
 
     | Command | Description |
@@ -84,7 +84,7 @@ You need to make sure the following steps are finished before beginning the proc
 1. Provide some text to be posted. For example: `I just built something awesome with Azure IoT! Try it yourself here: http://aka.ms/azureiotdemo`
 1. Click the **Save** button to save this serverless workflow
 1. Click the **When a HTTP request is received** card to open and reveal the URL generated after saving.  Copy that URL.
-![logicApp](Images/iot_button_logicapp.JPG)
+![logicApp](Images/iot-button-get-started/iot_button_logicapp.JPG)
 
 ## Deploy Azure Functions
 
@@ -109,4 +109,4 @@ You need to make sure the following steps are finished before beginning the proc
 ## Testing the deployment
 
 After clicking teXXmo IoT button, you will see the following tweets in your tweeter account.
-![showTwitter](Images/iot_button_twitter.JPG)
+![showTwitter](Images/iot-button-get-started/iot_button_twitter.JPG)
