@@ -18,6 +18,7 @@
     "vscode": "^1.18.0"
   },
   "categories": [
+    "Azure",
     "Other"
   ],
   "activationEvents": [
