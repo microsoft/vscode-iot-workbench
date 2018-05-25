@@ -25,6 +25,16 @@ Finish the [Getting Started Guide](https://microsoft.github.io/azure-iot-develop
   * Activate a [free 30-day trial Microsoft Azure account](https://azure.microsoft.com/free/).
   * Claim your [Azure credit](https://azure.microsoft.com/pricing/member-offers/msdn-benefits-details/) if you are an MSDN or Visual Studio subscriber.
 
+## Open the DoorMonitor sample
+
+1. Start VS Code. Make sure [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
+
+1. Use `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select the command of **IoT Workbench: Examples**. 
+
+1. Please select the board **IoT DevKit**. Find **Door Monitor** 
+
+1. Click **Open Sample** button. A new VS Code window with a project folder in it opens.
+
 ## Deploy SendGrid service in Azure
 
 [SendGrid](https://sendgrid.com/) is a cloud-based email delivery platform. This service will be used to send email notifications.
