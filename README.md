@@ -1,5 +1,3 @@
-<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/logo.png" align="right" width="128" height="128">
-
 # Visual Studio Code extension for IoT Workbench 
 
 [![Gitter](https://img.shields.io/badge/chat-on%20gitter-blue.svg)](https://gitter.im/Microsoft/vscode-iot-workbench)

@@ -30,18 +30,18 @@ export class UsbDetector {
   showLandingPage(device: DeviceInfo) {
     // if current workspace is iot workbench workspace
     // we shouldn't popup landing page
-    if (vscode.workspace.workspaceFolders &&
-        vscode.workspace.workspaceFolders.length) {
-      const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
-      if (devicePath) {
-        const deviceLocation = path.join(
-            vscode.workspace.workspaceFolders[0].uri.fsPath, '..', devicePath,
-            constants.iotworkbenchprojectFileName);
-        if (fs.existsSync(deviceLocation)) {
-          return;
-        }
-      }
-    }
+    // if (vscode.workspace.workspaceFolders &&
+    //     vscode.workspace.workspaceFolders.length) {
+    //   const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
+    //   if (devicePath) {
+    //     const deviceLocation = path.join(
+    //         vscode.workspace.workspaceFolders[0].uri.fsPath, '..',
+    //         devicePath, constants.iotworkbenchprojectFileName);
+    //     if (fs.existsSync(deviceLocation)) {
+    //       return;
+    //     }
+    //   }
+    // }
 
     if (device.vendorId && device.productId) {
       const boardProvider = new BoardProvider(this.context);
@@ -72,9 +72,9 @@ export class UsbDetector {
     const devices: DeviceInfo[]|undefined =
         await UsbDetector._usbDetector.find();
     if (devices) {
-      devices.forEach(this.showLandingPage);
+      devices.forEach(this.showLandingPage.bind(this));
     }
 
-    UsbDetector._usbDetector.on('add', this.showLandingPage);
+    UsbDetector._usbDetector.on('add', this.showLandingPage.bind(this));
   }
 }
