@@ -34,6 +34,8 @@ Finish the [Getting Started Guide](https://microsoft.github.io/azure-iot-develop
 1. Please select the board **IoT DevKit**. Find **Door Monitor** 
 
 1. Click **Open Sample** button. A new VS Code window with a project folder in it opens.
+![open door monitor](Images/devkit-door-monitor/door-monitor-open.gif)
+
 
 ## Deploy SendGrid service in Azure
 
@@ -111,6 +113,7 @@ Your API key is displayed only one time. Be sure to copy and store it safely, as
     * Select an existing IoT Hub or create a new IoT Hub.
     * Select an existing IoT Hub device or create a new IoT Hub device. 
     * Create a new Function App.
+![door monitor provision](Images/devkit-door-monitor/door-monitor-provision.gif)
 
 ## Deploy Azure Functions
 
@@ -133,7 +136,7 @@ Your API key is displayed only one time. Be sure to copy and store it safely, as
 
 1. The screen displays the DevKit ID and 'Configuration'.
 1. This sets the connection string that is retrieved from the `Azure Provision` step.
-
+![door monitor set connection string](Images/devkit-door-monitor/door-monitor-connectionstring.gif)
 
 ## Build and upload the device code
 
