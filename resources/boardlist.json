@@ -20,6 +20,12 @@
             "id": "iotbutton",
             "platform": "teXXmo – Microsoft Azure IoT Developer Kit",
             "helpUrl": "https://aka.ms/button"
+        },
+        {
+            "name": "Raspberry Pi",
+            "id": "raspberrypi",
+            "platform": "Raspberry Pi",
+            "helpUrl": "https://www.raspberrypi.org/"
         }
     ]
 }
