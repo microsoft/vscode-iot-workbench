@@ -17,6 +17,8 @@ client.open(err => {
       client.sendEvent(message, err => {
         if (err) {
           console.warn('Send message to IoT Hub failed: ' + err.toString());
+        } else {
+          console.log('Message sent to IoT Hub.');
         }
       });
     }, 2000);
