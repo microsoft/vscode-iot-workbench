@@ -108,7 +108,7 @@ You can get back the Function App name from the VS Code **OUTPUT** window if you
 
 	![iot-workbench-device-upload](media/devkit-translator/iot-workbench-device-upload.png)
 
-2. VS Code then starts verifying and uploading the Arduino sketch to your DevKit.
+2. VS Code then starts verifying and uploading the code to your DevKit.
 
 	![iot-workbench-device-uploaded](media/devkit-translator/iot-workbench-device-uploaded.png)
 
