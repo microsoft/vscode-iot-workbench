@@ -34,7 +34,7 @@ Finish the [Getting Started Guide](https://microsoft.github.io/azure-iot-develop
 1. Please select the board **IoT DevKit**. Find **Door Monitor** 
 
 1. Click **Open Sample** button. A new VS Code window with a project folder in it opens.
-![open door monitor](Images/devkit-door-monitor/door-monitor-open.gif)
+![open door monitor](Images/devkit-door-monitor/door-monitor-open.jpg)
 
 
 ## Deploy SendGrid service in Azure
@@ -109,11 +109,13 @@ Your API key is displayed only one time. Be sure to copy and store it safely, as
 
 1. Press **F1** or **Ctrl + Shift + P** in Visual Studio Code - **IoT Workbench:Cloud** and click **Azure Provision**
 1. You need to login with your Azure subscrption if you didn't do that before.
-1. A popup window will open and guide you to provision the required Azure services. The whole process includes:
+1. A popup window will open and guide you to provision the required Azure services. 
+![door monitor provision](Images/devkit-door-monitor/door-monitor-provision.jpg)
+The whole process includes:
     * Select an existing IoT Hub or create a new IoT Hub.
     * Select an existing IoT Hub device or create a new IoT Hub device. 
     * Create a new Function App.
-![door monitor provision](Images/devkit-door-monitor/door-monitor-provision.gif)
+
 
 ## Deploy Azure Functions
 
@@ -129,6 +131,11 @@ Your API key is displayed only one time. Be sure to copy and store it safely, as
 ## Config IoT Hub Connection String
 
 1. Open the command palette and select **IoT Workbench: Device**, then select **Config Device Settings** and select **Select IoT Hub Device Connection String**.
+
+1. You could either select the device connection string from the `Azure Provision` step or input a new device connection string.
+
+![door monitor connection](Images/devkit-door-monitor/config-device-connection.jpg)
+
 1. VS Code prompts you to enter configuration mode. To do so:
 
    * Hold down button A
@@ -136,7 +143,7 @@ Your API key is displayed only one time. Be sure to copy and store it safely, as
 
 1. The screen displays the DevKit ID and 'Configuration'.
 1. This sets the connection string that is retrieved from the `Azure Provision` step.
-![door monitor set connection string](Images/devkit-door-monitor/door-monitor-connectionstring.gif)
+
 
 ## Build and upload the device code
 
