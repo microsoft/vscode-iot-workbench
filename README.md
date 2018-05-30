@@ -1,4 +1,4 @@
-# Visual Studio Code extension for IoT Workbench 
+# IoT Workbench for Visual Studio Code (Preview)  
 
 [![Gitter](https://img.shields.io/badge/chat-on%20gitter-blue.svg)](https://gitter.im/Microsoft/vscode-iot-workbench)
 [![Travis CI](https://travis-ci.org/Microsoft/vscode-iot-workbench.svg?branch=master)](https://travis-ci.org/Microsoft/vscode-iot-workbench)
