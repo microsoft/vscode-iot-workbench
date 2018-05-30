@@ -40,38 +40,38 @@ An active Azure subscription. If you do not have one, you can register via one o
 ### B. Open IoT Workbench Examples
 
 Use `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select **IoT Workbench: Examples**.
-![iot-workbench-examples-cmd](images/iot-workbench-examples-cmd.png)
+![iot-workbench-examples-cmd](media/iot-workbench-examples-cmd.png)
 
 Select **IoT DevKit**.
-![iot-workbench-examples-board](images/iot-workbench-examples-board.png)
+![iot-workbench-examples-board](media/iot-workbench-examples-board.png)
 
 Then the **IoT Workbench Example** window is showed up.
-![iot-workbench-examples](images/iot-workbench-examples.png)
+![iot-workbench-examples](media/iot-workbench-examples.png)
 
 Find **DevKit Translator** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
-![iot-workbench-example-devkit-translator](images/devkit-translator/iot-workbench-example.png)
+![iot-workbench-example-devkit-translator](media/devkit-translator/iot-workbench-example.png)
 
 ## Provision Azure services
 
 In the solution window, open the command palette and select **IoT Workbench: Cloud**.
-![iot-workbench-cloud](images/devkit-translator/iot-workbench-cloud.png)
+![iot-workbench-cloud](media/devkit-translator/iot-workbench-cloud.png)
 
 Select **Azure Provision**.
-![iot-workbench-cloud-provision](images/devkit-translator/iot-workbench-cloud-provision.png)
+![iot-workbench-cloud-provision](media/devkit-translator/iot-workbench-cloud-provision.png)
 
 Then VS Code guides you through provisioning the required Azure services.
-![iot-workbench-cloud-provision-steps](images/devkit-translator/iot-workbench-cloud-provision-steps.png)
+![iot-workbench-cloud-provision-steps](media/devkit-translator/iot-workbench-cloud-provision-steps.png)
 
 
 ## Deploy Azure Functions
 
 Open the command palette and select **IoT Workbench: Cloud**, then select **Azure Deploy**.
 
-![iot-workbench-cloud-provision-deploy](images/devkit-translator/iot-workbench-cloud-provision-deploy.png)
+![iot-workbench-cloud-provision-deploy](media/devkit-translator/iot-workbench-cloud-provision-deploy.png)
 
 After Azure Function deploys successfully, fill in the azure_config.h file with function app name. You can navigate to [Azure portal](https://portal.azure.com/) to find it:
 
-![images/devkit-translator/azure-function](images/devkit-translator/azure-function.png)
+![azure-function](media/devkit-translator/azure-function.png)
 
 > [!NOTE]
 > If the Azure Function does not work properly, check this [FAQs](https://microsoft.github.io/azure-iot-developer-kit/docs/faq#compilation-error-for-azure-function) section to resolve it.
@@ -80,15 +80,15 @@ After Azure Function deploys successfully, fill in the azure_config.h file with 
 
 1. Open the command palette and select **IoT Workbench: Device**.
 
-	![iot-workbench-device](images/devkit-translator/iot-workbench-device.png)
+	![iot-workbench-device](media/devkit-translator/iot-workbench-device.png)
 
 2. Select **Config Device Settings**.
 
-	![iot-workbench-device-string1](images/devkit-translator/iot-workbench-device-string1.png)
+	![iot-workbench-device-string1](media/devkit-translator/iot-workbench-device-string1.png)
 
 3. Select **Select IoT Hub Device Connection String**.
 
-	![iot-workbench-device-string2](images/devkit-translator/iot-workbench-device-string2.png)
+	![iot-workbench-device-string2](media/devkit-translator/iot-workbench-device-string2.png)
 
 4. VS Code prompts you to enter configuration mode. To do so:
 
@@ -102,11 +102,11 @@ After Azure Function deploys successfully, fill in the azure_config.h file with 
 
 1. Open the command palette and select **IoT Workbench: Device**, then select **Device Upload**.
 
-	![iot-workbench-device-upload](images/devkit-translator/iot-workbench-device-upload.png)
+	![iot-workbench-device-upload](media/devkit-translator/iot-workbench-device-upload.png)
 
 2. VS Code then starts verifying and uploading the Arduino sketch to your DevKit.
 
-	![iot-workbench-device-uploaded](images/devkit-translator/iot-workbench-device-uploaded.png)
+	![iot-workbench-device-uploaded](media/devkit-translator/iot-workbench-device-uploaded.png)
 
 3. The DevKit reboots and starts running the code.
 
@@ -121,7 +121,7 @@ To select another language for translation:
 
 2. Press button B to scroll all supported source languages.
    
-	![select-language](images/devkit-translator/select-language.png)
+	![select-language](media/devkit-translator/select-language.png)
 
 3. Press button A to confirm your choice of source language.
 
@@ -130,7 +130,7 @@ To select another language for translation:
 
 5. The translated text in English shows on the screen.
    
-	![translation-result](images/devkit-translator/translation-result.png)
+	![translation-result](media/devkit-translator/translation-result.png)
 
 6. On the translation result screen, you can:
 	- Press button A and B to scroll and select the source language.
@@ -138,7 +138,7 @@ To select another language for translation:
 
 ## How it works
 
-![diagram](images/devkit-translator/diagram.png)
+![diagram](media/devkit-translator/diagram.png)
 
 The IoT DevKit records your voice then posts an HTTP request to trigger Azure Functions. Azure Functions calls the cognitive service speech translator API to do the translation. After Azure Functions gets the translation text, it sends a C2D message to the device. Then the translation is displayed on the screen.
 
