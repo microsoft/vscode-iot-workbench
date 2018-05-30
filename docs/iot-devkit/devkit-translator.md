@@ -1,5 +1,5 @@
 ---
-title: IoT DevKit translator using Azure Function and Cognitive Services | Microsoft Docs
+title: IoT DevKit translator using Azure Functions and Cognitive Services | Microsoft Docs
 description: Use microphone on IoT DevKit to receive voice message and Azure Cognitive Services for processing it into translated text in English
 author: liydu
 manager: jeffya
@@ -11,7 +11,7 @@ ms.date: 05/30/2018
 ms.author: liydu, arthma
 ---
 
-# Use IoT DevKit AZ3166 with Azure Function and Cognitive Services to make a language translator
+# Use IoT DevKit AZ3166 with Azure Functions and Cognitive Services to make a language translator
 
 In this article, you learn how to make IoT DevKit as a language translator by using [Azure Cognitive Services](https://azure.microsoft.com/services/cognitive-services/). It records your voice and translates it to English text shown on the DevKit screen.
 
@@ -69,16 +69,16 @@ Open the command palette and select **IoT Workbench: Cloud**, then select **Azur
 
 ![iot-workbench-cloud-provision-deploy](media/devkit-translator/iot-workbench-cloud-provision-deploy.png)
 
-After Azure Function deploys successfully, fill in the azure_config.h file with function app name. 
+After the Function deploys successfully, fill in the azure_config.h file with Function App name. 
 
 ![update-app-name](media/devkit-translator/update-app-name.png)
 
-You can get the function app name from the VS Code **OUTPUT** window if you forgot it.
+You can get back the Function App name from the VS Code **OUTPUT** window if you forgot it.
 
 ![azure-function](media/devkit-translator/azure-function.png)
 
 > [!NOTE]
-> If the Azure Function does not work properly, check this [FAQs](https://microsoft.github.io/azure-iot-developer-kit/docs/faq#compilation-error-for-azure-function) section to resolve it.
+> If the Function App does not work properly, check this [FAQs](https://microsoft.github.io/azure-iot-developer-kit/docs/faq#compilation-error-for-azure-function) section to resolve it.
 
 ## Config IoT Hub Connection String
 
@@ -159,12 +159,12 @@ If you encounter problems, refer to [FAQs](https://microsoft.github.io/azure-iot
 
 ## Next Steps
 
-Now you make the IoT DevKit as a translator by using Azure Function and Cognitive Services. In this tutorial, you learned how to:
+Now you make the IoT DevKit as a translator by using Azure Functions and Cognitive Services. In this tutorial, you learned how to:
 
 > [!div class="checklist"]
 > * Use Visual Studio Code task to automate cloud provisions
 > * Configure Azure IoT device connection string
-> * Deploy Azure Function
+> * Deploy Azure Functions
 > * Test the voice message translation
 
 Advance to the other tutorials to learn:
