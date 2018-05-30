@@ -36,7 +36,6 @@ export abstract class ArduinoDeviceBase implements Device {
 
   abstract name: string;
 
-
   constructor(
       context: vscode.ExtensionContext, devicePath: string,
       deviceType: DeviceType) {
@@ -47,8 +46,6 @@ export abstract class ArduinoDeviceBase implements Device {
     this.vscodeFolderPath =
         path.join(this.deviceFolder, FileNames.vscodeSettingsFolderName);
   }
-
-
 
   getDeviceType(): DeviceType {
     return this.deviceType;
