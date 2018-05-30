@@ -69,7 +69,11 @@ Open the command palette and select **IoT Workbench: Cloud**, then select **Azur
 
 ![iot-workbench-cloud-provision-deploy](media/devkit-translator/iot-workbench-cloud-provision-deploy.png)
 
-After Azure Function deploys successfully, fill in the azure_config.h file with function app name. You can navigate to [Azure portal](https://portal.azure.com/) to find it:
+After Azure Function deploys successfully, fill in the azure_config.h file with function app name. 
+
+![update-app-name](media/devkit-translator/update-app-name.png)
+
+You can get the function app name from the VS Code **OUTPUT** window if you forgot it.
 
 ![azure-function](media/devkit-translator/azure-function.png)
 
