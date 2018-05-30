@@ -29,7 +29,7 @@ An active Azure subscription. If you do not have one, you can register via one o
 * Activate a [free 30-day trial Microsoft Azure account](https://azure.microsoft.com/free/)
 * Claim your [Azure credit](https://azure.microsoft.com/pricing/member-offers/msdn-benefits-details/) if you are MSDN or Visual Studio subscriber
 
-## Step 1. Open the project folder
+## Open the project folder
 
 ### A. Start VS Code
 
@@ -39,11 +39,11 @@ An active Azure subscription. If you do not have one, you can register via one o
 
 ### B. Open IoT Workbench Examples
 
-Use `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select **IoT Workbench: Examples**. 
+Use `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select **IoT Workbench: Examples**.
 ![mini-solution-examples-command](images/iot-workbench-examples-cmd.png)
 
-Select **IoT DevKit**. 
-![mini-solution-examples-board](images/iot-workbench-examples-board.png)
+Select **IoT DevKit**.
+![mini-solution-examples-command](images/iot-workbench-examples-board.png)
 
 Then the **IoT Workbench Example** window is showed up.
 ![mini-solution-examples](images/iot-workbench-examples.png)
@@ -51,28 +51,51 @@ Then the **IoT Workbench Example** window is showed up.
 Find **DevKit Translator** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
 ![mini-solution-examples](images/devkit-translator/iot-workbench-example.png)
 
-## Step 2. Provision Azure services
+## Provision Azure services
 
-In the solution window, type `Ctrl+P` (macOS: `Cmd+P`) and enter `task cloud-provision`.
+In the solution window, open the command palette and select **IoT Workbench: Cloud**.
+![mini-solution-examples](images/devkit-translator/iot-workbench-cloud.png)
 
-In the VS Code terminal, an interactive command line will guide you to provision all necessary Azure services:
+Select **Azure Provision**.
+![mini-solution-examples](images/devkit-translator/iot-workbench-cloud-provision.png)
 
-![Cloud provision task](media/iot-hub-arduino-iot-devkit-az3166-translator/cloud-provision.png)
+Then VS Code guides you through provisioning the required Azure services.
+![mini-solution-examples](images/devkit-translator/iot-workbench-cloud-provision-steps.png)
 
-## Step 3. Deploy Azure Functions
 
-Use `Ctrl+P` (macOS: `Cmd+P`) to run `task cloud-deploy` to deploy the Azure Functions code. This process usually takes 2 to 5 minutes to complete:
+## Deploy Azure Functions
 
-![Cloud deploy task](media/iot-hub-arduino-iot-devkit-az3166-translator/cloud-deploy.png)
+Open the command palette and select **IoT Workbench: Cloud**, then select **Azure Deploy**.
+
+![mini-solution-examples](images/devkit-translator/iot-workbench-cloud-provision-deploy.png)
 
 After Azure Function deploys successfully, fill in the azure_config.h file with function app name. You can navigate to [Azure portal](https://portal.azure.com/) to find it:
 
-![Find Azure Function app name](media/iot-hub-arduino-iot-devkit-az3166-translator/azure-function.png)
+![mini-solution-examples](images/devkit-translator/azure-function.png)
 
 > [!NOTE]
 > If the Azure Function does not work properly, check this [FAQs](https://microsoft.github.io/azure-iot-developer-kit/docs/faq#compilation-error-for-azure-function) section to resolve it.
 
-## Step 4. Build and upload the device code
+## Config IoT Hub Connection String
+
+1. Open the command palette and select **IoT Workbench: Device**.
+![mini-solution-examples](images/devkit-translator/iot-workbench-device.png)
+
+2. Select **Config Device Settings**.
+![mini-solution-examples](images/devkit-translator/iot-workbench-device-string1.png)
+
+3. Select **Select IoT Hub Device Connection String**.
+![mini-solution-examples](images/devkit-translator/iot-workbench-device-string2.png)
+
+4. VS Code prompts you to enter configuration mode. To do so:
+
+   * Hold down button A
+   * Push and release the reset button.
+
+5. The screen displays the DevKit ID and 'Configuration'.
+6. This sets the connection string that is retrieved from the `Provision Azure services` step.
+
+## Build and upload the device code
 
 1. Use `Ctrl+P` (macOS: `Cmd+P`) to run `task config-device-connection`.
 
