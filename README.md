@@ -34,7 +34,7 @@ Currently this extension supports the following operatings systems:
 
 ### MXChip IoT DevKit
 
-Please follow the [guide](./docs/IoTDevKit.md) to setup IoT DevKit.
+Please follow the [guide](docs/IoTDevKit.md) to setup IoT DevKit.
 
 ## Commands
 
