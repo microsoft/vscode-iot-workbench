@@ -1,16 +1,3 @@
----
-title: IoT DevKit translator using Azure Functions and Cognitive Services | Microsoft Docs
-description: Use microphone on IoT DevKit to receive voice message and Azure Cognitive Services for processing it into translated text in English
-author: liydu
-manager: jeffya
-ms.service: iot-hub
-services: iot-hub
-ms.topic: conceptual
-ms.tgt_pltfrm: arduino
-ms.date: 05/30/2018
-ms.author: liydu, arthma
----
-
 # Use IoT DevKit AZ3166 with Azure Functions and Cognitive Services to make a language translator
 
 In this article, you learn how to make IoT DevKit as a language translator by using [Azure Cognitive Services](https://azure.microsoft.com/services/cognitive-services/). It records your voice and translates it to English text shown on the DevKit screen.
@@ -157,13 +144,10 @@ If you encounter problems, refer to [FAQs](https://microsoft.github.io/azure-iot
 
 Now you make the IoT DevKit as a translator by using Azure Functions and Cognitive Services. In this tutorial, you learned how to:
 
-> [!div class="checklist"]
-> * Use Visual Studio Code task to automate cloud provisions
-> * Configure Azure IoT device connection string
-> * Deploy Azure Functions
-> * Test the voice message translation
+- [x] Use Azure IoT Workbench to build a Azure IoT solution includes both device and cloud
+- [x] Configure Azure IoT device connection string
+- [x] Deploy Azure Functions
+- [x] Test the voice message translation
 
 Advance to the other tutorials to learn:
-
-> [!div class="nextstepaction"]
-> [Connect IoT DevKit AZ3166 to Azure IoT Remote Monitoring solution accelerator](https://docs.microsoft.com/azure/iot-hub/iot-hub-arduino-iot-devkit-az3166-devkit-remote-monitoring)
+[Connect IoT DevKit AZ3166 to Azure IoT Remote Monitoring solution accelerator](https://docs.microsoft.com/azure/iot-hub/iot-hub-arduino-iot-devkit-az3166-devkit-remote-monitoring)
