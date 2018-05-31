@@ -56,7 +56,7 @@ This connection string will be used in the next section.
 
 ## Open the Remote Monitoring sample
 
-### A. Start VS Code     
+### A. Start VS Code 
 
 * Make sure your DevKit is not connected to your PC.
 * Start VS Code.
