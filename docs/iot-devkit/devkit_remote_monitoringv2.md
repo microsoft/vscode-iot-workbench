@@ -10,8 +10,8 @@ The [MXChip IoT DevKit](https://aka.ms/iot-devkit) is an all-in-one Arduino comp
 
 Finish the [Getting Started Guide](https://docs.microsoft.com/azure/iot-hub/iot-hub-arduino-iot-devkit-az3166-get-started) to:
 
-* Have your DevKit connected to Wi-Fi
-* Prepare the development environment
+* Have your DevKit connected to Wi-Fi.
+* Prepare the development environment.
 
 ## Before you start
 
@@ -58,13 +58,10 @@ This connection string will be used in the next section.
 
 ### A. Start VS Code     
 
-- Make sure your DevKit is not connected to your PC. 
-
-- Start VS Code 
-
-- Connect the DevKit to your computer. 
-
-- Make sure [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed. 
+* Make sure your DevKit is not connected to your PC.
+* Start VS Code.
+* Connect the DevKit to your computer.
+* Make sure [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
 
 ### B. Open IoT Workbench Examples
 

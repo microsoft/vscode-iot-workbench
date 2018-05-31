@@ -8,22 +8,22 @@ The [MXChip IoT DevKit](https://aka.ms/iot-devkit) is an all-in-one Arduino comp
 
 Finish the [Getting Started Guide](https://docs.microsoft.com/azure/iot-hub/iot-hub-arduino-iot-devkit-az3166-get-started) to:
 
-* Have your DevKit connected to Wi-Fi
-* Prepare the development environment
+* Have your DevKit connected to Wi-Fi.
+* Prepare the development environment.
 
 An active Azure subscription. If you do not have one, you can register via one of these two methods:
 
-* Activate a [free 30-day trial Microsoft Azure account](https://azure.microsoft.com/free/)
-* Claim your [Azure credit](https://azure.microsoft.com/pricing/member-offers/msdn-benefits-details/) if you are MSDN or Visual Studio subscriber
+* Activate a [free 30-day trial Microsoft Azure account](https://azure.microsoft.com/free/).
+* Claim your [Azure credit](https://azure.microsoft.com/pricing/member-offers/msdn-benefits-details/) if you are MSDN or Visual Studio subscriber.
 
 ## Open the project folder
 
 ### A. Start VS Code
 
-- Make sure your DevKit is not connected to your PC.
-- Start VS Code.
-- Connect the DevKit to your computer.
-- Make sure [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
+* Make sure your DevKit is not connected to your PC.
+* Start VS Code.
+* Connect the DevKit to your computer.
+* Make sure [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
 
 ### B. Open IoT Workbench Examples
 
@@ -147,10 +147,10 @@ If you encounter problems, refer to [FAQs](https://microsoft.github.io/azure-iot
 
 Now you make the IoT DevKit as a translator by using Azure Functions and Cognitive Services. In this tutorial, you learned how to:
 
-- [x] Use Azure IoT Workbench to build a Azure IoT solution includes both device and cloud
-- [x] Configure Azure IoT device connection string
-- [x] Deploy Azure Functions
-- [x] Test the voice message translation
+- [x] Use Azure IoT Workbench to build a Azure IoT solution includes both device and cloud.
+- [x] Configure Azure IoT device connection string.
+- [x] Deploy Azure Functions.
+- [x] Test the voice message translation.
 
 Advance to the other tutorials to learn:
 
