@@ -150,4 +150,5 @@ Now you make the IoT DevKit as a translator by using Azure Functions and Cogniti
 - [x] Test the voice message translation
 
 Advance to the other tutorials to learn:
-[Connect IoT DevKit AZ3166 to Azure IoT Remote Monitoring solution accelerator](https://docs.microsoft.com/azure/iot-hub/iot-hub-arduino-iot-devkit-az3166-devkit-remote-monitoring)
+
+* [Connect IoT DevKit AZ3166 to Azure IoT Remote Monitoring solution accelerator](https://docs.microsoft.com/azure/iot-hub/iot-hub-arduino-iot-devkit-az3166-devkit-remote-monitoring)
