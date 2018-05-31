@@ -1,6 +1,5 @@
 # Connect MXChip IoT DevKit AZ3166 to the IoT Remote Monitoring solution accelerator
 
-
 In this tutorial, you learn how to run a sample app on your DevKit to send sensor data to your Azure IoT Suite.
 
 The [MXChip IoT DevKit](https://aka.ms/iot-devkit) is an all-in-one Arduino compatible board with rich peripherals and sensors. You can develop for it using [Azure IoT Workbench ](https://aka.ms/azure-iot-workbench). And it comes with a growing [projects catalog](https://microsoft.github.io/azure-iot-developer-kit/docs/projects/) to guide you prototype Internet of Things (IoT) solutions that take advantage of Microsoft Azure services.
@@ -56,12 +55,12 @@ This connection string will be used in the next section.
 
 ## Open the Remote Monitoring sample
 
-### A. Start VS Code 
+### A. Start VS Code
 
-* Make sure your DevKit is not connected to your PC.
-* Start VS Code.
-* Connect the DevKit to your computer.
-* Make sure [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
+* Make sure your DevKit is not connected to your PC.
+* Start VS Code.
+* Connect the DevKit to your computer.
+* Make sure [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
 
 ### B. Open IoT Workbench Examples
 
