@@ -36,6 +36,20 @@ Currently this extension supports the following operatings systems:
 
 Please follow the [guide](docs/IoTDevKit.md) to setup IoT DevKit.
 
+## Tutorials:
+Here are a set of tutorials that will help you get started:
+
+* MXChip IoT DevKit
+
+  * [Shake, Shake for a Tweet](./docs/iot-devkit/devkit-shakeshake.md)
+  * [Remote Monitoring](./docs/iot-devkit/devkit_remote_monitoringv2.md)
+  * [DevKit Translator](./docs/iot-devkit/devkit-translator.md)
+  * [Door Monitor](./docs/iot-devkit/devkit_door_monitor.md)
+
+* teXXmo IoT button
+
+  * [Get Started](./docs/iot-button/teXXmo_IoT_button_get_started.md)
+
 ## Commands
 
 | Command | Description |
