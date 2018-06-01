@@ -34,7 +34,7 @@ Finish the [Getting Started Guide](https://microsoft.github.io/azure-iot-develop
 1. Please select the board **IoT DevKit**. Find **Door Monitor** 
 
 1. Click **Open Sample** button. A new VS Code window with a project folder in it opens.
-![open door monitor](Images/devkit-door-monitor/door-monitor-open.jpg)
+![open door monitor](media/devkit-door-monitor/door-monitor-open.jpg)
 
 
 ## Deploy SendGrid service in Azure
@@ -54,7 +54,7 @@ Click the **Deploy to Azure** button, below.
 
 You then see the following page.
 
-![SendGrid Deployment](Images/devkit-door-monitor/sendgrid-deploy.png)
+![SendGrid Deployment](media/devkit-door-monitor/sendgrid-deploy.png)
 > [!NOTE]
 > If you do not see the above page, you may need to first sign in to your Azure account.
 
@@ -75,13 +75,13 @@ Complete the sign-up form:
 
 After the deployment succeeds, click it and then click the **Manage** button. You are taken to your SendGrid page, and need to verify your email address.
 
-![SendGrid Manage](Images/devkit-door-monitor/sendgrid-manage.png)
+![SendGrid Manage](media/devkit-door-monitor/sendgrid-manage.png)
 
 On the SendGrid page, click **Settings** > **API Keys** > **Create API Key**. Input the **API Key Name** and click **Create & View**.
 
-![SendGrid Create API First](Images/devkit-door-monitor/sendgrid-create-api-first.png)
+![SendGrid Create API First](media/devkit-door-monitor/sendgrid-create-api-first.png)
 
-![SendGrid Create API Second](Images/devkit-door-monitor/sendgrid-create-api-second.png)
+![SendGrid Create API Second](media/devkit-door-monitor/sendgrid-create-api-second.png)
 
 Your API key is displayed only one time. Be sure to copy and store it safely, as it is used in the next step.
 
@@ -96,21 +96,21 @@ Your API key is displayed only one time. Be sure to copy and store it safely, as
 1. Click **New Step** to add a step to the workflow and **Add an action**.
 1. Search for the key word of **Send email** action.
     > NOTE: You are more than welcome to use any action you want to perform on an IoT event
-![SendGrid action](Images/devkit-door-monitor/logic-app-sendgrid.JPG)
+![SendGrid action](media/devkit-door-monitor/logic-app-sendgrid.JPG)
 
 1. Select the **SendGrid - Send email(V2)** action and provide the detailed information of the email. For **Email body**, please use the dynamic content of **Body**.
 1. Authenticate this logic app by using the SendGrid API key you created before.
 
 1. Click the **Save** button to save this serverless workflow.
 1. Click the **When a HTTP request is received** card to open and reveal the URL generated after saving.  Copy that URL.
-![capture URL](Images/devkit-door-monitor/capture-url.jpg)
+![capture URL](media/devkit-door-monitor/capture-url.jpg)
 
 ## Provision Azure services
 
 1. Press **F1** or **Ctrl + Shift + P** in Visual Studio Code - **IoT Workbench:Cloud** and click **Azure Provision**
 1. You need to login with your Azure subscrption if you didn't do that before.
 1. A popup window will open and guide you to provision the required Azure services. 
-![door monitor provision](Images/devkit-door-monitor/door-monitor-provision.jpg)
+![door monitor provision](media/devkit-door-monitor/door-monitor-provision.jpg)
 The whole process includes:
     * Select an existing IoT Hub or create a new IoT Hub.
     * Select an existing IoT Hub device or create a new IoT Hub device. 
@@ -134,7 +134,7 @@ The whole process includes:
 
 1. You could either select the device connection string from the `Azure Provision` step or input a new device connection string.
 
-![door monitor connection](Images/devkit-door-monitor/config-device-connection.jpg)
+![door monitor connection](media/devkit-door-monitor/config-device-connection.jpg)
 
 1. VS Code prompts you to enter configuration mode. To do so:
 
@@ -158,9 +158,9 @@ The program first initializes when the DevKit is in the presence of a stable mag
 
 After initialization, `Door closed` is displayed on the screen. When there is a change in the magnetic field, the state changes to `Door opened`. Each time the door state changes, you receive an email notification. (These email messages may take up to five minutes to be received.)
 
-![Magnets close to the sensor: Door Closed](Images/devkit-door-monitor/test-door-closed.jpg "Magnets close to the sensor: Door Closed")
+![Magnets close to the sensor: Door Closed](media/devkit-door-monitor/test-door-closed.jpg "Magnets close to the sensor: Door Closed")
 
-![Magnet moved away from the sensor: Door Opened](Images/devkit-door-monitor/test-door-opened.jpg "Magnet moved away from the sensor: Door Opened")
+![Magnet moved away from the sensor: Door Opened](media/devkit-door-monitor/test-door-opened.jpg "Magnet moved away from the sensor: Door Opened")
 
 ## Problems and feedback
 
