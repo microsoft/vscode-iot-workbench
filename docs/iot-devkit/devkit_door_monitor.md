@@ -1,6 +1,6 @@
 # Door Monitor          
 
-The MXChip IoT DevKit contains a built-in magnetic sensor. In this project, you detect the presence or absence of a nearby strong magnetic field--in this case, coming from a small. permanent magnet.
+The MXChip IoT DevKit contains a built-in magnetic sensor. In this tutorial, you detect the presence or absence of a nearby strong magnetic field--in this case, coming from a small. permanent magnet.
 
 ## What you learn
 
@@ -25,17 +25,24 @@ Finish the [Getting Started Guide](https://microsoft.github.io/azure-iot-develop
   * Activate a [free 30-day trial Microsoft Azure account](https://azure.microsoft.com/free/).
   * Claim your [Azure credit](https://azure.microsoft.com/pricing/member-offers/msdn-benefits-details/) if you are an MSDN or Visual Studio subscriber.
 
-## Open the DoorMonitor sample
 
-1. Start VS Code. Make sure [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
+## Open the project folder
+
+### A. Start VS Code
+
+* Make sure your DevKit is not connected to your PC.
+* Start Visual Studio Code.
+* Connect the DevKit to your computer.
+* Make sure [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
+
+### B. Open IoT Workbench Examples
 
 1. Use `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select the command of **IoT Workbench: Examples**. 
 
-1. Please select the board **IoT DevKit**. Find **Door Monitor** 
-
-1. Click **Open Sample** button. A new VS Code window with a project folder in it opens.
+1. Please select the board **IoT DevKit** and find **Door Monitor** 
 ![open door monitor](media/devkit-door-monitor/door-monitor-open.jpg)
 
+1. Click **Open Sample** button. A new VS Code window with a project folder in it opens.
 
 ## Deploy SendGrid service in Azure
 
@@ -126,7 +133,7 @@ The whole process includes:
     ```
     > NOTE: replace the URL with the unique URL of your workflow
 1. Press **F1** or **Ctrl + Shift + P** in Visual Studio Code - **IoT Workbench:Cloud** and click **Azure Deploy**. This command will deploy the function code to Azure Functions App.
-
+![door monitor deploy](media/devkit-door-monitor/azure-deploy.jpg)
 
 ## Config IoT Hub Connection String
 
@@ -138,17 +145,21 @@ The whole process includes:
 
 1. VS Code prompts you to enter configuration mode. To do so:
 
-   * Hold down button A
-   * Push and release the reset button.
+   * Hold down button **A**
+   * Push and release the **Reset** button.
 
 1. The screen displays the DevKit ID and 'Configuration'.
+   ![IoT DevKit Configuration Mode](media/devkit-configuration-mode.png) 
 1. This sets the connection string that is retrieved from the `Azure Provision` step.
 
 
 ## Build and upload the device code
 
 1. Open the command palette and select **IoT Workbench: Device**, then select **Device Upload**.
+![door monitor device upload](media/devkit-door-monitor/device-upload.jpg)
+
 1. VS Code then starts verifying and uploading the Arduino sketch to your DevKit:
+![door monitor compile](media/devkit-door-monitor/door-monitor-compile.jpg)
 
 1. The DevKit reboots and starts running the code.
 
