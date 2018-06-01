@@ -1,6 +1,6 @@
 # Shake, Shake for a Tweet -- Retrieve a Twitter message with Azure Functions!
 
-In this project, you learn how to use the motion sensor to trigger an event using Azure Functions. The app retrieves a random tweet with a #hashtag you configure in your Arduino sketch. The tweet displays on the DevKit screen.
+In this tutorial, you learn how to use the motion sensor to trigger an event using Azure Functions. The app retrieves a random tweet with a #hashtag you configure in your Arduino sketch. The tweet displays on the DevKit screen.
 
 ## Open the project folder
 
