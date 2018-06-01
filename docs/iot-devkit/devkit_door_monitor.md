@@ -48,8 +48,7 @@ Finish the [Getting Started Guide](https://microsoft.github.io/azure-iot-develop
 
 [SendGrid](https://sendgrid.com/) is a cloud-based email delivery platform. This service will be used to send email notifications.
 
-> [!NOTE]
-> If you have already deployed a SendGrid service, you may proceed directly to [Deploy IoT Hub in Azure](#deploy-iot-hub-in-azure).
+> NOTE: If you have already deployed a SendGrid service, you may proceed directly to [Deploy IoT Hub in Azure](#deploy-iot-hub-in-azure).
 
 ### SendGrid Deployment
 
