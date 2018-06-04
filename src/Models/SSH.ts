@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import {reject} from 'bluebird';
+import {resolve} from 'bluebird';
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as ssh2 from 'ssh2';
@@ -33,12 +33,12 @@ export class SSH {
               .on('end',
                   () => {
                     this._connected = false;
-                    return reject(false);
+                    return resolve(false);
                   })
               .on('close',
                   () => {
                     this._connected = false;
-                    return reject(false);
+                    return resolve(false);
                   })
               .connect({host, port, username, password});
         });
@@ -49,11 +49,11 @@ export class SSH {
         (resolve: (value: boolean) => void,
          reject: (reason: boolean) => void) => {
           if (!this._connected) {
-            return reject(false);
+            return resolve(false);
           }
 
           if (!fs.existsSync(filePath)) {
-            return reject(false);
+            return resolve(false);
           }
 
           filePath = filePath.replace(/[\\\/]+/g, '/');
@@ -65,30 +65,108 @@ export class SSH {
 
           if (this._channel) {
             this._channel.show();
+            this._channel.appendLine('');
           }
 
           const conn = this._client;
           conn.sftp(async (err, sftp) => {
             if (err) {
-              throw err;
+              if (this._channel) {
+                this._channel.appendLine(`SFTP Error:`);
+                this._channel.appendLine(err.message);
+              }
+              return resolve(false);
             }
 
-            sftp.mkdir(remoteRootPath, async err => {
-              if (err) {
-                return reject(false);
+            const rootPathExist = await this.isExist(sftp, remoteRootPath);
+
+            if (rootPathExist) {
+              const overwriteOption =
+                  await vscode.window.showInformationMessage(
+                      `${remoteRootPath} exists, overwrite?`, 'Yes', 'No',
+                      'Cancel');
+              if (overwriteOption === 'Cancel') {
+                return resolve(true);
               }
 
-              for (const file of files) {
-                const res = await this.uploadSingleFile(
-                    sftp, file, rootPath, remoteRootPath);
-                if (!res) {
-                  return reject(false);
+              if (overwriteOption === 'No') {
+                const raspiPathOption: vscode.InputBoxOptions = {
+                  value: 'IoTProject',
+                  prompt: `Please input Raspberry Pi path here.`,
+                  ignoreFocusOut: true
+                };
+                let raspiPath =
+                    await vscode.window.showInputBox(raspiPathOption);
+                if (raspiPath === undefined) {
+                  return false;
                 }
+                raspiPath = raspiPath || 'IoTProject';
+                const res = await this.upload(filePath, raspiPath);
+                return resolve(res);
+              }
+
+              const rmDirRes = await this.shell(`rm -rf ${remoteRootPath}`);
+              if (!rmDirRes) {
+                if (this._channel) {
+                  this._channel.appendLine(
+                      `Directory Error: remove ${remoteRootPath} failed.`);
+                }
+                return resolve(false);
+              }
+            }
+
+            const rootPathCreated = await this.ensureDir(sftp, remoteRootPath);
+
+            if (!rootPathCreated) {
+              if (this._channel) {
+                this._channel.appendLine(`Directory Error: ${remoteRootPath}`);
+                this._channel.appendLine(err);
+              }
+              return resolve(false);
+            }
+
+            for (const file of files) {
+              const res = await this.uploadSingleFile(
+                  sftp, file, rootPath, remoteRootPath);
+              if (!res) {
+                return resolve(false);
+              }
+            }
+
+            return resolve(true);
+          });
+        });
+  }
+
+  private async isExist(sftp: ssh2.SFTPWrapper, remotePath: string) {
+    return new Promise(
+        (resolve: (value: boolean) => void,
+         reject: (reason: boolean) => void) => {
+          sftp.readdir(remotePath, (err, list) => {
+            if (err) {
+              return resolve(false);
+            }
+            return resolve(true);
+          });
+        });
+  }
+
+  private async ensureDir(sftp: ssh2.SFTPWrapper, remotePath: string) {
+    return new Promise(
+        async (
+            resolve: (value: boolean) => void,
+            reject: (reason: boolean) => void) => {
+          const dirExist = await this.isExist(sftp, remotePath);
+          if (!dirExist) {
+            sftp.mkdir(remotePath, async err => {
+              if (err) {
+                return resolve(false);
               }
 
               return resolve(true);
             });
-          });
+          }
+          return resolve(true);
         });
   }
 
@@ -96,8 +174,9 @@ export class SSH {
       sftp: ssh2.SFTPWrapper, filePath: string, rootPath: string,
       remoteRootPath: string) {
     return new Promise(
-        (resolve: (value: boolean) => void,
-         reject: (reason: boolean) => void) => {
+        async (
+            resolve: (value: boolean) => void,
+            reject: (reason: boolean) => void) => {
           const relativePath =
               filePath.replace(/[\\\/]+/g, '/').substr(rootPath.length + 1);
           if (/(^|\/)node_modules(\/|$)/.test(relativePath) ||
@@ -110,20 +189,14 @@ export class SSH {
               path.join(remoteRootPath, relativePath).replace(/[\\\/]+/g, '/');
 
           if (fs.isDirectorySync(filePath)) {
-            sftp.mkdir(remotePath, err => {
-              if (err) {
-                if (this._channel) {
-                  this._channel.appendLine(`Directory Error: ${relativePath}`);
-                }
-
-                return reject(false);
-              }
-
+            const pathCreated = await this.ensureDir(sftp, remotePath);
+            if (!pathCreated) {
               if (this._channel) {
-                this._channel.appendLine(`Directory Created: ${relativePath}`);
+                this._channel.appendLine(`Directory Error: ${relativePath}`);
               }
-              return resolve(true);
-            });
+              return resolve(false);
+            }
+            return resolve(true);
           } else {
             sftp.fastPut(filePath, remotePath, err => {
               if (err) {
@@ -131,7 +204,7 @@ export class SSH {
                   this._channel.appendLine(`File Error: ${relativePath}`);
                 }
 
-                return reject(false);
+                return resolve(false);
               }
 
               if (this._channel) {
@@ -148,21 +221,25 @@ export class SSH {
         (resolve: (value: boolean) => void,
          reject: (reason: boolean) => void) => {
           if (!this._connected) {
-            return reject(false);
+            return resolve(false);
           }
 
           let timeoutCounter: NodeJS.Timer;
 
           if (timeout) {
             timeoutCounter = setTimeout(() => {
-              return reject(false);
+              return resolve(false);
             }, timeout);
           }
 
           const conn = this._client;
           conn.shell((err, stream) => {
             if (err) {
-              throw err;
+              if (this._channel) {
+                this._channel.appendLine(`Shell Error:`);
+                this._channel.appendLine(err.message);
+              }
+              return resolve(false);
             }
 
             if (this._channel) {
@@ -197,7 +274,8 @@ export class SSH {
                   }
                 });
 
-            stream.end(command + '\n');
+            stream.setWindow(10, 500, 10, 100);
+            stream.end(command + '\nexit\n');
           });
         });
   }

@@ -248,6 +248,9 @@ export class RaspberryPiDevice implements Device {
     }
 
     await ssh.close();
+    if (this.channel) {
+      this.channel.appendLine('Uploaded project to Raspberry Pi.');
+    }
     return true;
   }
 
