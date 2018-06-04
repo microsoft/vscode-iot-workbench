@@ -86,6 +86,7 @@ export class SSH {
                       `${remoteRootPath} exists, overwrite?`, 'Yes', 'No',
                       'Cancel');
               if (overwriteOption === 'Cancel') {
+                vscode.window.showWarningMessage('Device upload cancelled.');
                 return resolve(true);
               }
 

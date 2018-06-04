@@ -251,6 +251,8 @@ export class RaspberryPiDevice implements Device {
     if (this.channel) {
       this.channel.appendLine('Uploaded project to Raspberry Pi.');
     }
+
+    vscode.window.showInformationMessage('Uploaded project to Raspberry Pi.');
     return true;
   }
 
