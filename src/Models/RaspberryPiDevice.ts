@@ -173,10 +173,19 @@ export class RaspberryPiDevice implements Device {
   }
 
   async upload(): Promise<boolean> {
+    if (!fs.existsSync(path.join(this.deviceFolder, 'config.json'))) {
+      const option = await vscode.window.showInformationMessage(
+          'No config file found. Have you configured device connection string?',
+          'Upload anyway', 'Cancel');
+      if (option === 'Cancel') {
+        return true;
+      }
+    }
     if (!RaspberryPiUploadConfig.updated) {
       const res = await this.configSSH();
       if (!res) {
-        return false;
+        vscode.window.showWarningMessage('Configure SSH cancelled.');
+        return true;
       }
     }
 
@@ -191,6 +200,7 @@ export class RaspberryPiDevice implements Device {
           this.deviceFolder, RaspberryPiUploadConfig.projectPath as string);
     } else {
       await ssh.close();
+      this.channel.appendLine('SSH connection failed.');
       return false;
     }
 
@@ -200,6 +210,7 @@ export class RaspberryPiDevice implements Device {
           `cd ${RaspberryPiUploadConfig.projectPath} && npm install`);
     } else {
       await ssh.close();
+      this.channel.appendLine('SFTP upload failed.');
       return false;
     }
 
