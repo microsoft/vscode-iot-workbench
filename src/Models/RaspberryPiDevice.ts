@@ -20,6 +20,14 @@ const constants = {
   defaultSketchFileName: 'app.js'
 };
 
+class RaspberryPiUploadConfig {
+  static host = 'raspberrypi';
+  static port = 22;
+  static user = 'pi';
+  static password = 'raspberry';
+  static projectPath = 'IoTProject';
+  static updated = false;
+}
 
 export class RaspberryPiDevice implements Device {
   private deviceType: DeviceType;
@@ -165,75 +173,22 @@ export class RaspberryPiDevice implements Device {
   }
 
   async upload(): Promise<boolean> {
-    // Raspberry Pi host
-    const raspiHostOption: vscode.InputBoxOptions = {
-      value: 'raspberrypi',
-      prompt: `Please input Raspberry Pi ip or hostname here.`,
-      ignoreFocusOut: true
-    };
-    let raspiHost = await vscode.window.showInputBox(raspiHostOption);
-    if (raspiHost === undefined) {
-      return false;
+    if (!RaspberryPiUploadConfig.updated) {
+      const res = await this.configSSH();
+      if (!res) {
+        return false;
+      }
     }
-    raspiHost = raspiHost || 'raspberrypi';
-
-    // Raspberry Pi SSH port
-    const raspiPortOption: vscode.InputBoxOptions = {
-      value: '22',
-      prompt: `Please input Raspberry Pi SSH port here.`,
-      ignoreFocusOut: true
-    };
-    const raspiPortString = await vscode.window.showInputBox(raspiPortOption);
-    if (raspiPortString === undefined) {
-      return false;
-    }
-    const raspiPort = raspiPortString && !isNaN(Number(raspiPortString)) ?
-        Number(raspiPortString) :
-        22;
-
-    // Raspberry Pi user name
-    const raspiUserOption: vscode.InputBoxOptions = {
-      value: 'pi',
-      prompt: `Please input Raspberry Pi user name here.`,
-      ignoreFocusOut: true
-    };
-    let raspiUser = await vscode.window.showInputBox(raspiUserOption);
-    if (raspiUser === undefined) {
-      return false;
-    }
-    raspiUser = raspiUser || 'pi';
-
-    // Raspberry Pi user password
-    const raspiPasswordOption: vscode.InputBoxOptions = {
-      value: 'raspberry',
-      prompt: `Please input Raspberry Pi password here.`,
-      ignoreFocusOut: true
-    };
-    let raspiPassword = await vscode.window.showInputBox(raspiPasswordOption);
-    if (raspiPassword === undefined) {
-      return false;
-    }
-    raspiPassword = raspiPassword || 'raspberry';
-
-    // Raspberry Pi path
-    const raspiPathOption: vscode.InputBoxOptions = {
-      value: 'IoTProject',
-      prompt: `Please input Raspberry Pi path here.`,
-      ignoreFocusOut: true
-    };
-    let raspiPath = await vscode.window.showInputBox(raspiPathOption);
-    if (raspiPath === undefined) {
-      return false;
-    }
-    raspiPath = raspiPath || 'IoTProject';
 
     const ssh = new SSH(this.channel);
 
-    const sshConnected =
-        await ssh.connect(raspiHost, raspiPort, raspiUser, raspiPassword);
+    const sshConnected = await ssh.connect(
+        RaspberryPiUploadConfig.host, RaspberryPiUploadConfig.port,
+        RaspberryPiUploadConfig.user, RaspberryPiUploadConfig.password);
     let sshUploaded: boolean;
     if (sshConnected) {
-      sshUploaded = await ssh.upload(this.deviceFolder, raspiPath as string);
+      sshUploaded = await ssh.upload(
+          this.deviceFolder, RaspberryPiUploadConfig.projectPath as string);
     } else {
       await ssh.close();
       return false;
@@ -241,7 +196,8 @@ export class RaspberryPiDevice implements Device {
 
     let sshNpmInstalled: boolean;
     if (sshUploaded) {
-      sshNpmInstalled = await ssh.shell(`cd ${raspiPath} && npm install`);
+      sshNpmInstalled = await ssh.shell(
+          `cd ${RaspberryPiUploadConfig.projectPath} && npm install`);
     } else {
       await ssh.close();
       return false;
@@ -257,6 +213,123 @@ export class RaspberryPiDevice implements Device {
   }
 
   async configDeviceSettings(): Promise<boolean> {
+    const configSelectionItems: vscode.QuickPickItem[] = [
+      {
+        label: 'Config Raspberry Pi SSH',
+        description: 'Config Raspberry Pi SSH',
+        detail: 'Config SSH'
+      },
+      {
+        label: 'Config connection of IoT Hub Device',
+        description: 'Config connection of IoT Hub Device',
+        detail: 'Config IoT Hub Device'
+      }
+    ];
+
+    const configSelection =
+        await vscode.window.showQuickPick(configSelectionItems, {
+          ignoreFocusOut: true,
+          matchOnDescription: true,
+          matchOnDetail: true,
+          placeHolder: 'Select an option',
+        });
+
+    if (!configSelection) {
+      return false;
+    }
+
+    if (configSelection.detail === 'Config SSH') {
+      try {
+        const res = await this.configSSH();
+        return res;
+      } catch (error) {
+        vscode.window.showWarningMessage('Config SSH failed.');
+        return false;
+      }
+    } else {
+      try {
+        const res = await this.configHub();
+        return res;
+      } catch (error) {
+        vscode.window.showWarningMessage('Config IoT Hub failed.');
+        return false;
+      }
+    }
+  }
+
+  async configSSH(): Promise<boolean> {
+    // Raspberry Pi host
+    const raspiHostOption: vscode.InputBoxOptions = {
+      value: RaspberryPiUploadConfig.host,
+      prompt: `Please input Raspberry Pi ip or hostname here.`,
+      ignoreFocusOut: true
+    };
+    let raspiHost = await vscode.window.showInputBox(raspiHostOption);
+    if (raspiHost === undefined) {
+      return false;
+    }
+    raspiHost = raspiHost || RaspberryPiUploadConfig.host;
+
+    // Raspberry Pi SSH port
+    const raspiPortOption: vscode.InputBoxOptions = {
+      value: RaspberryPiUploadConfig.port.toString(),
+      prompt: `Please input Raspberry Pi SSH port here.`,
+      ignoreFocusOut: true
+    };
+    const raspiPortString = await vscode.window.showInputBox(raspiPortOption);
+    if (raspiPortString === undefined) {
+      return false;
+    }
+    const raspiPort = raspiPortString && !isNaN(Number(raspiPortString)) ?
+        Number(raspiPortString) :
+        RaspberryPiUploadConfig.port;
+
+    // Raspberry Pi user name
+    const raspiUserOption: vscode.InputBoxOptions = {
+      value: RaspberryPiUploadConfig.user,
+      prompt: `Please input Raspberry Pi user name here.`,
+      ignoreFocusOut: true
+    };
+    let raspiUser = await vscode.window.showInputBox(raspiUserOption);
+    if (raspiUser === undefined) {
+      return false;
+    }
+    raspiUser = raspiUser || RaspberryPiUploadConfig.user;
+
+    // Raspberry Pi user password
+    const raspiPasswordOption: vscode.InputBoxOptions = {
+      value: RaspberryPiUploadConfig.password,
+      prompt: `Please input Raspberry Pi password here.`,
+      ignoreFocusOut: true
+    };
+    let raspiPassword = await vscode.window.showInputBox(raspiPasswordOption);
+    if (raspiPassword === undefined) {
+      return false;
+    }
+    raspiPassword = raspiPassword || RaspberryPiUploadConfig.password;
+
+    // Raspberry Pi path
+    const raspiPathOption: vscode.InputBoxOptions = {
+      value: RaspberryPiUploadConfig.projectPath,
+      prompt: `Please input Raspberry Pi path here.`,
+      ignoreFocusOut: true
+    };
+    let raspiPath = await vscode.window.showInputBox(raspiPathOption);
+    if (raspiPath === undefined) {
+      return false;
+    }
+    raspiPath = raspiPath || RaspberryPiUploadConfig.projectPath;
+
+    RaspberryPiUploadConfig.host = raspiHost;
+    RaspberryPiUploadConfig.port = raspiPort;
+    RaspberryPiUploadConfig.user = raspiUser;
+    RaspberryPiUploadConfig.password = raspiPassword;
+    RaspberryPiUploadConfig.projectPath = raspiPath;
+    RaspberryPiUploadConfig.updated = true;
+    return true;
+  }
+
+  async configHub(): Promise<boolean> {
     try {
       const deviceFolderPath = this.deviceFolder;
 
