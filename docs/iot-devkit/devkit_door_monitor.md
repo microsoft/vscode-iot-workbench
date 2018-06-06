@@ -14,7 +14,7 @@ In this tutorial, you learn:
 
 ## What you need
 
-Finish the [Getting Started Guide](./devkit-get-started) to:
+Finish the [Getting Started Guide](./devkit-get-started.md) to:
 
 * Have your IoT DevKit connected to Wi-Fi.
 * Prepare the development environment.

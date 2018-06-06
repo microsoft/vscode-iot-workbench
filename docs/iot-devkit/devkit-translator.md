@@ -6,7 +6,7 @@ The [MXChip IoT DevKit](https://aka.ms/iot-devkit) is an all-in-one Arduino comp
 
 ## What you need
 
-Finish the [Getting Started Guide](./devkit-get-started) to:
+Finish the [Getting Started Guide](./devkit-get-started.md) to:
 
 * Have your DevKit connected to Wi-Fi.
 * Prepare the development environment.
@@ -167,8 +167,4 @@ Now you make the IoT DevKit as a translator by using Azure Functions and Cogniti
 - [x] Deploy Azure Functions.
 - [x] Test the voice message translation.
 
-Advance to the other tutorials to learn:
-
-* [Connect IoT DevKit AZ3166 to Azure IoT Remote Monitoring solution accelerator](./devkit_remote_monitoringv2)
-
-And check our [Projects Catalog](https://aka.ms/devkit/project-catalog) for more samples you can build with the IoT DevKit and Azure multiple services.
+Check our [Projects Catalog](https://aka.ms/devkit/project-catalog) for more samples you can build with the IoT DevKit and Azure multiple services.

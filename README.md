@@ -40,11 +40,11 @@ Please follow the [guide](docs/IoTDevKit.md) to setup IoT DevKit.
 Here are a set of tutorials that will help you get started:
 
 * MXChip IoT DevKit
-  * [Get Started](./docs/iot-devkit/devkit-get-started)
-  * [Shake, Shake for a Tweet](./docs/iot-devkit/devkit-shakeshake)
-  * [Remote Monitoring](./docs/iot-devkit/devkit_remote_monitoringv2)
-  * [DevKit Translator](./docs/iot-devkit/devkit-translator)
-  * [Door Monitor](./docs/iot-devkit/devkit_door_monitor)
+  * [Get Started](./docs/iot-devkit/devkit-get-started.md)
+  * [Shake, Shake for a Tweet](./docs/iot-devkit/devkit-shakeshake.md)
+  * [Remote Monitoring](./docs/iot-devkit/devkit_remote_monitoringv2.md)
+  * [DevKit Translator](./docs/iot-devkit/devkit-translator.md)
+  * [Door Monitor](./docs/iot-devkit/devkit_door_monitor.md)
 
 * teXXmo IoT button
 
