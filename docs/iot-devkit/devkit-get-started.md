@@ -1,18 +1,18 @@
 # Get Started with MXChip IoT DevKit 
 
-For first-time users of the MXChip IoT DevKit (a.k.a. DevKit), follow these quick steps to:
+For first-time users of the MXChip IoT DevKit (a.k.a. IoT DevKit), follow these quick steps to:
 - Prepare your development environment.
 - Send temperature and humidity data from built-in DevKit sensors to the Azure IoT Hub.
 
-If you have already done this, you can try more samples from the [Projects Catalog](https://microsoft.github.io/azure-iot-developer-kit/docs/projects/) or build your own IoT application.
+If you have already done this, you can try more samples from the [Projects Catalog](https://aka.ms/devkit/project-catalog) or build your own IoT application.
 
 ## What you learn
 
-* How to connect the DevKit to a wireless access point.
+* How to connect the IoT DevKit to a wireless access point.
 * How to install the development environment.
-* How to create an IoT Hub and register a device for the DevKit.
-* How to collect sensor data by running a sample application on the DevKit.
-* How to send the DevKit sensor data to your IoT hub.
+* How to create an IoT Hub and register a device for the IoT DevKit.
+* How to collect sensor data by running a sample application on the IoT DevKit.
+* How to send the IoT DevKit sensor data to your IoT hub.
 
 ## What you need
 
@@ -24,9 +24,9 @@ If you have already done this, you can try more samples from the [Projects Catal
 
 ## Prepare your hardware
 
-To connect the DevKit to your computer:
+To connect the IoT DevKit to your computer:
 
-1. Connect the Micro-USB end to the DevKit.
+1. Connect the Micro-USB end to the IoT DevKit.
 2. Connect the USB end to your computer.
 3. The green LED for power confirms the connection.
 
@@ -36,23 +36,23 @@ To connect the DevKit to your computer:
 
 IoT projects rely on internet connectivity. Use AP Mode on the DevKit to configure and connect to Wi-Fi.
 
-1. Hold down button B, push and release the reset button, and then release button B. Your DevKit enters AP mode for configuring the Wi-Fi connection. The screen displays the service set identifier (SSID) of the DevKit and the configuration portal IP address:
+1. Hold down button **B**, push and release the **Reset** button, and then release button **B**. Your IoT DevKit enters AP mode for configuring the Wi-Fi connection. The screen displays the service set identifier (SSID) of the DevKit and the configuration portal IP address:
 
     ![Reset button, button B, and SSID](media/iot-devkit-get-started/wifi-ap.jpg)
 
-2. Use a Web browser on a different Wi-Fi enabled device (computer or mobile phone) to connect to the DevKit SSID displayed in the previous step. If it asks for a password, leave it empty.
+2. Use a Web browser on a different Wi-Fi enabled device (computer or mobile phone) to connect to the IoT DevKit SSID displayed in the previous step. If it asks for a password, leave it empty.
 
     ![Network info and Connect button](media/iot-devkit-get-started/connect-ssid.png)
 
-3. Open **192.168.0.1** in the browser. Select the Wi-Fi network that you want the DevKit to connect to, type the password for the Wi-Fi conection, and then click **Connect**.
+3. Open **192.168.0.1** in the browser. Select the Wi-Fi network that you want the IoT DevKit to connect to, type the password for the Wi-Fi conection, and then click **Connect**.
 
     ![Password box and Connect button](media/iot-devkit-get-started/wifi-portal.png)
 
-4. The DevKit reboots in a few seconds. You then see the Wi-Fi name and assigned IP address on the screen of the DevKit:
+4. The IoT DevKit reboots in a few seconds. You then see the Wi-Fi name and assigned IP address on the screen of the IoT DevKit:
 
     ![Wi-Fi name and IP address](media/iot-devkit-get-started/wifi-ip.jpg)
 
-> Note:  After connected to internet, the currently-installed and latest available version of the DevKit's firmware is displayed on the DevKit screen. If the DevKit is not running on the latest available version, follow the [firmware upgrading guide](https://microsoft.github.io/azure-iot-developer-kit/docs/firmware-upgrading/) to install the latest version.
+> Note:  After connected to internet, the currently-installed and latest available version of the IoT DevKit's firmware is displayed on the screen. If it's not running on the latest available version, follow the [firmware upgrading guide](https://microsoft.github.io/azure-iot-developer-kit/docs/firmware-upgrading/) to install the latest version.
 
 ## Install development environment
 
@@ -60,7 +60,7 @@ We recommend [Azure IoT Workbench](https://marketplace.visualstudio.com/items?it
 
 Azure IoT Workbench provides an integrated experience to develop IoT solutions. It helps both on device and cloud development using Azure IoT and other services. You can watch this [Channel9 video](https://channel9.msdn.com/Shows/Internet-of-Things-Show/IoT-Workbench-extension-for-VS-Code) to have an overview of what it does.
 
-Follow these steps to prepare the development environment for IoT DevKit:
+Follow these steps to prepare the development environment for the IoT DevKit:
 
 1. Download and install [Arduino IDE](https://www.arduino.cc/en/Main/Software). It provides the necessary toolchain for compiling and uploading Arduino code.
    * Windows: Use Windows Installer version
@@ -96,7 +96,7 @@ Follow these steps to prepare the development environment for IoT DevKit:
 		"arduino.additionalUrls": "https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/master/package_azureboard_index.json"
 		```
 
-5. Click `F1` to open the command palette, type and select **Arduino: Board Manager**. Search for **AZ3166** and install the latest version.
+5. Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type and select **Arduino: Board Manager**. Search for **AZ3166** and install the latest version.
 
     ![Install DevKit SDK](media/iot-devkit-get-started/install-sdk.png)
 
@@ -125,16 +125,15 @@ Follow these steps to prepare the development environment for IoT DevKit:
 ## Build your first project
 
 Now you are all set with preparing and configuring your development environment. Let us build a "Hello World" sample for IoT: sending temperature telemetry data to Azure IoT Hub.
-
-### Open IoT Workbench Examples
-
-Make sure your DevKit is **not connected** to your computer. Start VS Code first, and then connect the DevKit to your computer.
+Make sure your IoT DevKit is **not connected** to your computer. Start VS Code first, and then connect the IoT DevKit to your computer.
 
 In the bottom right status bar, check the **MXCHIP AZ3166** is shown as selected board and serial port with **STMicroelectronics** is used.
 
 ![Select board and serial port](media/iot-devkit-get-started/select-board.png)
 
-Use `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select **IoT Workbench: Examples**.
+### Open IoT Workbench Examples
+
+Use `F1` or`Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select **IoT Workbench: Examples**.
 
 ![IoT Workbench: Examples](media/iot-workbench-examples-cmd.png)
 
@@ -154,15 +153,19 @@ Find **Get Started** and click **Open Sample** button. A new VS Code window with
 
 In the solution window, open the command palette and select **IoT Workbench: Cloud**.
 
-![IoT Workbench: Cloud](media/iot-devkit-get-started/iot-workbench-cloud.png)
+![IoT Workbench: Cloud](media/iot-workbench-cloud.png)
 
 Select **Azure Provision**.
 
-![IoT Workbench: Cloud -> Provision](media/iot-devkit-get-started/iot-workbench-cloud-provision.png)
+![IoT Workbench: Cloud -> Provision](media/iot-workbench-cloud-provision.png)
 
 Then VS Code guides you through provisioning the required Azure services.
 
-![IoT Workbench: Cloud -> Provision steps](media/iot-devkit-get-started/iot-workbench-cloud-provision-steps.png)
+![IoT Workbench: Cloud -> Provision steps](media/iot-workbench-cloud-provision-steps2.png)
+
+The whole process includes:
+* Select an existing IoT Hub or create a new IoT Hub.
+* Select an existing IoT Hub device or create a new IoT Hub device. 
 
 ### Config IoT Hub Connection String
 
@@ -177,19 +180,19 @@ Then VS Code guides you through provisioning the required Azure services.
 
 3. Open the command palette and select **IoT Workbench: Device**.
 
-	![IoT Workbench: Device](media/iot-devkit-get-started/iot-workbench-device.png)
+	![IoT Workbench: Device](media/iot-workbench-device.png)
 
 4. Select **Config Device Settings**.
 
-	![IoT Workbench: Device -> Settings](media/iot-devkit-get-started/iot-workbench-device-settings.png)
+	![IoT Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
 
 5. Select **Select IoT Hub Device Connection String**.
 
-	![IoT Workbench: Device -> Connection string](media/iot-devkit-get-started/iot-workbench-device-string.png)
+	![IoT Workbench: Device -> Connection string](media/iot-workbench-device-string1.png)
 
-    This sets the connection string that is retrieved from the `Provision Azure services` step.
+   This sets the connection string that is retrieved from the `Provision Azure services` step.
 
-6. Popup configuration success notification once it's done.
+6. The configuration success notification popup bottom right corner once it's done.
 
     ![IoT DevKit Connection String OK](media/iot-workbench-connection-done.png) 
 
@@ -197,7 +200,7 @@ Then VS Code guides you through provisioning the required Azure services.
 
 1. Open the command palette and select **IoT Workbench: Device**, then select **Device Upload**.
 
-	![IoT Workbench: Device -> Upload](media/iot-devkit-get-started/iot-workbench-device-upload.png)
+	![IoT Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
 
 2. VS Code then starts verifying and uploading the code to your DevKit.
 
@@ -208,43 +211,32 @@ Then VS Code guides you through provisioning the required Azure services.
 ## Test the project
 
 Click the power plug icon on the status bar to open the Serial Monitor:
-![Open serial monitor](media/connect-iothub/serial-monitor.png)
+![Open serial monitor](media/iot-devkit-get-started/serial-monitor.png)
 
 The sample application is running successfully when you see the following results:
 
 * The Serial Monitor displays the message sent to the IoT Hub.
 * The LED on the MXChip IoT DevKit is blinking.
 
-![Final output in VS Code](media/connect-iothub/result-serial-output.png)
+![Final output in VS Code](media/iot-devkit-get-started/serial-monitor-result.png)
 
-You can use [Azure IoT Toolkit](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-toolkit) to monitor device-to-cloud (D2C) messages in IoT Hub.
+You can use [Azure IoT Toolkit](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-toolkit) to monitor device-to-cloud (D2C) messages in IoT Hub:
 
-1. Log in [Azure portal](https://portal.azure.com), find the IoT Hub you created.
-    ![azure-portal-iot-hub](media/connect-iothub/azure-iot-hub-portal.png)
+1. Expand **AZURE IOT HUB DEVICES** on the bottom left corner, click the device that you have created at **Provision Azure service** step and open the context menu, then click **IoT: Start monitoring D2C message** in context menu.
 
-1. In the **Shared access policies pane**, click the **iothubowner policy**, and write down the Connection string of your IoT hub.
-    ![azure-portal-iot-hub-conn-string](media/connect-iothub/azure-portal-conn-string.png)
+	![azure-iot-toolkit-output-console](media/iot-devkit-get-started/monitor-d2c-message.png)
 
-1. Expand **AZURE IOT HUB DEVICES** on the bottom left corner.
-    ![azure-iot-toolkit-iot-hub-devices](media/connect-iothub/azure-iot-toolkit-devices.png)
+2. In **OUTPUT** pane, you can see the incoming D2C messages to the IoT Hub.
 
-1. Click **Set IoT Hub Connection String** in context menu.
-    ![azure-iot-toolkit-iot-hub-conn-string](media/connect-iothub/azure-iot-toolkit-conn-string.png)
-
-1. Click **IoT: Start monitoring D2C message** in context menu.
-
-1. In **OUTPUT** pane, you can see the incoming D2C messages to the IoT Hub.
-    ![azure-iot-toolkit-output-console](media/connect-iothub/azure-iot-toolkit-console.png)
+	![azure-iot-toolkit-output-console](media/iot-devkit-get-started/monitor-d2c-message-result.png)
 
 ## Problems and feedback
 
-If you encounter problems, you can refer to [FAQs](https://microsoft.github.io/azure-iot-developer-kit/docs/faq/) or reach out to us from [Gitter channel](https://gitter.im/Microsoft/azure-iot-developer-kit).
+If you encounter problems, you can refer to [FAQs](https://microsoft.github.io/azure-iot-developer-kit/docs/faq/) or reach out to us from:
+* [Gitter.im](http://gitter.im/Microsoft/azure-iot-developer-kit)
+* [Stackoverflow](https://stackoverflow.com/questions/tagged/iot-devkit)
 
 ## Next Steps
 
 You have successfully connected an MXChip IoT DevKit to your IoT hub, and you have sent the captured sensor data to your IoT hub. 
-Check our [Projects Catalog](https://microsoft.github.io/azure-iot-developer-kit/docs/projects/) for more samples you can build with the DevKit and Azure multiple services.
-
-```
-
-```
+Check our [Projects Catalog](https://aka.ms/devkit/project-catalog) for more samples you can build with the IoT DevKit and Azure multiple services.

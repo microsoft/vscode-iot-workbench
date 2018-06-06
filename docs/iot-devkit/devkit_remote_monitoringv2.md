@@ -2,7 +2,7 @@
 
 In this tutorial, you learn how to run a sample app on your DevKit to send sensor data to your Azure IoT Suite.
 
-The [MXChip IoT DevKit](https://aka.ms/iot-devkit) is an all-in-one Arduino compatible board with rich peripherals and sensors. You can develop for it using [Azure IoT Workbench ](https://aka.ms/azure-iot-workbench). And it comes with a growing [projects catalog](https://microsoft.github.io/azure-iot-developer-kit/docs/projects/) to guide you prototype Internet of Things (IoT) solutions that take advantage of Microsoft Azure services.
+The [MXChip IoT DevKit](https://aka.ms/iot-devkit) is an all-in-one Arduino compatible board with rich peripherals and sensors. You can develop for it using [Azure IoT Workbench ](https://aka.ms/azure-iot-workbench). And it comes with a growing [projects catalog](https://aka.ms/devkit/project-catalog) to guide you prototype Internet of Things (IoT) solutions that take advantage of Microsoft Azure services.
 
 
 ## What you need
@@ -64,7 +64,7 @@ This connection string will be used in the next section.
 
 ### B. Open IoT Workbench Examples
 
-Use `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select **IoT Workbench: Examples**.
+Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select **IoT Workbench: Examples**.
 
 ![IoT Workbench: Examples](media/iot-workbench-examples-cmd.png)
 
@@ -90,19 +90,19 @@ Find **Remote Monitoring** and click **Open Sample** button. A new VS Code windo
 
 2. The screen displays the DevKit ID and 'Configuration'.
 
-   ![IoT DevKit Configuration Mode](media/devkit-configuration-mode.png) 
+	![IoT DevKit Configuration Mode](media/devkit-configuration-mode.png) 
 
 3. Open the command palette and select **IoT Workbench: Device**.
 
-   ![IoT Workbench:Device](media/iot-devkit-remote-monitoring/iot-workbench-device.png)         
+	![IoT Workbench:Device](media/iot-workbench-device.png)         
 
 4. Select **Config Device Settings**.       
 
-   ![IoT Workbench:Device -> Settings](media/iot-devkit-remote-monitoring/iot-workbench-device-settings.png) 
+	![IoT Workbench:Device -> Settings](media/iot-workbench-device-settings.png) 
 
 5. Select **Select IoT Hub Device Connection String**. 
 
-   ![IoT Workbench:Device -> Connection string](media/iot-devkit-remote-monitoring/iot-workbench-device-string.png) 
+	![IoT Workbench:Device -> Connection string](media/iot-workbench-device-string2.png) 
 
 6. The popup menu asks you to Input IoT Hub Device Connection String. Select that option and paste the connection string.
 
@@ -115,11 +115,11 @@ Go back to the Visual Studio Code:
 
 1. Open the command palette and select **IoT Workbench: Device**, then select **Device Upload**. 
 
-   ![IoT Workbench: Device - > Upload](media/iot-devkit-remote-monitoring/iot-workbench-device-upload.png)
+	![IoT Workbench: Device - > Upload](media/iot-workbench-device-upload.png)
 
 2. VS Code then starts verifying and uploading the code to your DevKit.
 
-   ![IoT Workbench: Device - > Uploaded](media/iot-devkit-remote-monitoring/iot-workbench-device-uploaded.png)
+	![IoT Workbench: Device - > Uploaded](media/iot-devkit-remote-monitoring/iot-workbench-device-uploaded.png)
 
 3. The DevKit reboots and starts running the code.
 
@@ -131,7 +131,7 @@ When the sample app runs, DevKit sends sensor data over Wi-Fi to your Azure IoT 
 
 2. Click on the device name (AZ3166) a tab opens on the right side of the dashboard, where you can see the MX Chip sensors chart in real time.
 
-   ![Sensor data in Azure IoT Suite](media/iot-devkit-remote-monitoring/azure-iot-suite-dashboard.png)
+	![Sensor data in Azure IoT Suite](media/iot-devkit-remote-monitoring/azure-iot-suite-dashboard.png)
 
 ## Send a C2D message
 Remote Monitoring v2 allows you to invoke remote method on the device.
@@ -151,12 +151,6 @@ In several seconds, your physical MX Chip should change the color of the RGB led
 
 ![IoT DevKit red led](media/iot-devkit-remote-monitoring/azure-iot-suite-devkit-led.png)
 
-
-## Change device ID
-
-You can change the device ID in IoT Hub by following [this guide](https://microsoft.github.io/azure-iot-developer-kit/docs/customize-device-id/).
-
-
 ## Problems and feedback
 
 If you encounter problems, refer to [FAQs](https://microsoft.github.io/azure-iot-developer-kit/docs/faq/) or reach out to us from the following channels:
@@ -166,7 +160,6 @@ If you encounter problems, refer to [FAQs](https://microsoft.github.io/azure-iot
 
 ## Next steps
 
-Now that you have learned how to connect a DevKit device to your Azure IoT Suite and visualize the sensor data, here are the suggested next steps:
+Now that you have learned how to connect a IoT DevKit device to your Azure IoT Suite and visualize the sensor data.
 
-* [Azure IoT Suite overview](https://docs.microsoft.com/azure/iot-suite/)
-* [Connect an MXChip IoT DevKit device to your Microsoft IoT Central application](https://docs.microsoft.com/en-us/microsoft-iot-central/howto-connect-devkit)
+Check our [Projects Catalog](https://aka.ms/devkit/project-catalog) for more samples you can build with the IoT DevKit and Azure multiple services.

@@ -41,10 +41,10 @@ Here are a set of tutorials that will help you get started:
 
 * MXChip IoT DevKit
   * [Get Started](./docs/iot-devkit/devkit-get-started)
-  * [Shake, Shake for a Tweet](./docs/iot-devkit/devkit-shakeshake.md)
-  * [Remote Monitoring](./docs/iot-devkit/devkit_remote_monitoringv2.md)
-  * [DevKit Translator](./docs/iot-devkit/devkit-translator.md)
-  * [Door Monitor](./docs/iot-devkit/devkit_door_monitor.md)
+  * [Shake, Shake for a Tweet](./docs/iot-devkit/devkit-shakeshake)
+  * [Remote Monitoring](./docs/iot-devkit/devkit_remote_monitoringv2)
+  * [DevKit Translator](./docs/iot-devkit/devkit-translator)
+  * [Door Monitor](./docs/iot-devkit/devkit_door_monitor)
 
 * teXXmo IoT button
 
@@ -90,7 +90,7 @@ There are a couple of ways you can contribute to this repo:
 - **Code**: Contribute bug fixes, features or design changes:
   - Clone the repository locally and open in VS Code.
   - Install [TSLint for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=eg2.tslint).
-  - Open the terminal (press <code>Ctrl + &#96;</code>) and run `npm install`.
+  - Open the terminal (press `Ctrl + &#96;`) and run `npm install`.
   - To build, press `F1` and type in `Tasks: Run Build Task`.
   - Debug: press `F5` to start debugging the extension.
   - Run `gts check` and `gts fix` to follow TypeScript style guide.  
