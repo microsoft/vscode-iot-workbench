@@ -18,36 +18,43 @@ An active Azure subscription. If you do not have one, you can register via one o
 
 ## Open the project folder
 
-### A. Start VS Code
+### Start VS Code
 
 * Make sure your DevKit is not connected to your PC.
 * Start VS Code.
 * Connect the DevKit to your computer.
 * Make sure [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
 
-### B. Open IoT Workbench Examples
+### Open IoT Workbench Examples
 
 Use `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select **IoT Workbench: Examples**.
+
 ![IoT Workbench: Examples](media/iot-workbench-examples-cmd.png)
 
 Select **IoT DevKit**.
+
 ![IoT Workbench: Examples -> Select board](media/iot-workbench-examples-board.png)
 
 Then the **IoT Workbench Example** window is showed up.
+
 ![IoT Workbench, Examples window](media/iot-workbench-examples.png)
 
 Find **DevKit Translator** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
+
 ![IoT Workbench, select DevKit Translator example](media/devkit-translator/iot-workbench-example.png)
 
 ## Provision Azure services
 
 In the solution window, open the command palette and select **IoT Workbench: Cloud**.
+
 ![IoT Workbench: Cloud](media/devkit-translator/iot-workbench-cloud.png)
 
 Select **Azure Provision**.
+
 ![IoT Workbench: Cloud -> Provision](media/devkit-translator/iot-workbench-cloud-provision.png)
 
 Then VS Code guides you through provisioning the required Azure services.
+
 ![IoT Workbench: Cloud -> Provision steps](media/devkit-translator/iot-workbench-cloud-provision-steps.png)
 
 
@@ -90,7 +97,11 @@ You can get back the Function App name from the VS Code **OUTPUT** window if you
 
 	![IoT Workbench: Device -> Connection string](media/devkit-translator/iot-workbench-device-string.png)
 
-6. This sets the connection string that is retrieved from the `Provision Azure services` step.
+	This sets the connection string that is retrieved from the `Provision Azure services` step.
+
+6. Popup configuration success notification once it's done.
+
+    ![IoT DevKit Connection String OK](media/iot-workbench-connection-done.png) 
 
 ## Build and upload the device code
 

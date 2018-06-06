@@ -7,7 +7,7 @@ The [MXChip IoT DevKit](https://aka.ms/iot-devkit) is an all-in-one Arduino comp
 
 ## What you need
 
-Finish the [Getting Started Guide](https://docs.microsoft.com/azure/iot-hub/iot-hub-arduino-iot-devkit-az3166-get-started) to:
+Finish the [Getting Started Guide](./devkit-get-started) to:
 
 * Have your DevKit connected to Wi-Fi.
 * Prepare the development environment.
@@ -69,12 +69,15 @@ Use `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **Io
 ![IoT Workbench: Examples](media/iot-workbench-examples-cmd.png)
 
 Select **IoT DevKit**.
+
 ![IoT Workbench: Examples -> Select board](media/iot-workbench-examples-board.png)
 
 Then the **IoT Workbench Example** window is showed up.
+
 ![IoT Workbench, Examples window](media/iot-workbench-examples.png)
 
 Find **Remote Monitoring** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
+
 ![IoT Workbench, select Remote Monitoring example](media/iot-devkit-remote-monitoring/iot-workbench-example.png)
 
 ## Config IoT Hub Connection String
