@@ -71,6 +71,10 @@ export class RaspberryPiDevice implements Device {
     if (!fs.existsSync(deviceFolderPath)) {
       throw new Error('Unable to find the device folder inside the project.');
     }
+
+    if (!fs.existsSync(path.join(deviceFolderPath, 'node_modules'))) {
+      cp.exec('npm install', {cwd: deviceFolderPath});
+    }
     return true;
   }
 
