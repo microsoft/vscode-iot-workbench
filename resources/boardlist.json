@@ -25,7 +25,8 @@
             "name": "Raspberry Pi",
             "id": "raspberrypi",
             "platform": "Raspberry Pi",
-            "helpUrl": "https://www.raspberrypi.org/"
+            "helpUrl": "https://www.raspberrypi.org/",
+            "exampleUrl": "https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/gallery/workbench-example-raspi.json"
         }
     ]
 }
