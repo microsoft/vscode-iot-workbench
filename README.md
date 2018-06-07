@@ -36,6 +36,20 @@ Currently this extension supports the following operatings systems:
 
 Please follow the [guide](docs/IoTDevKit.md) to setup IoT DevKit.
 
+## Tutorials:
+Here are a set of tutorials that will help you get started:
+
+* MXChip IoT DevKit
+  * [Get Started](./docs/iot-devkit/devkit-get-started.md)
+  * [Shake, Shake for a Tweet](./docs/iot-devkit/devkit-shakeshake.md)
+  * [Remote Monitoring](./docs/iot-devkit/devkit_remote_monitoringv2.md)
+  * [DevKit Translator](./docs/iot-devkit/devkit-translator.md)
+  * [Door Monitor](./docs/iot-devkit/devkit_door_monitor.md)
+
+* teXXmo IoT button
+
+  * [Get Started](./docs/iot-button/teXXmo_IoT_button_get_started.md)
+
 ## Commands
 
 | Command | Description |
@@ -49,15 +63,15 @@ Please follow the [guide](docs/IoTDevKit.md) to setup IoT DevKit.
 
 ### Create New Project
 
-<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/new.gif">
+<img width="760" src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/new.gif">
 
 ### Provision Azure Service
 
-<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/provision.gif">
+<img width="760" src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/provision.gif">
 
 ### Example Gallery
 
-<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/example.gif">
+<img width="760" src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/example.gif">
 
 #### Note: 
 When invoking the **Azure Provision** command with Azure IoT Hub and Azure Functions, by default, Azure Functions would use the IoT Hub consumer group of `$Default`. To switch to another consumer group, please follow the [guide](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-create-through-portal) to create a new consumer group in Azure Poral. Then in IoT project, modify the following setting in **function.json**:
