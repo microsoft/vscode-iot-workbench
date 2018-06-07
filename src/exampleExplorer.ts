@@ -195,9 +195,9 @@ export class ExampleExplorer {
       boardItemList.push({
         name: board.name,
         id: board.id,
-        platform: board.platform,
+        detailInfo: board.detailInfo,
         label: board.name,
-        description: board.platform,
+        description: board.detailInfo,
       });
     });
 

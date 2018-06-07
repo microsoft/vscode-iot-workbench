@@ -3,7 +3,7 @@
         {
             "name": "IoT DevKit",
             "id": "devkit",
-            "platform": "MXChip - Microsoft Azure IoT Developer Kit",
+            "detailInfo": "MXChip - Microsoft Azure IoT Developer Kit",
             "defaultBaudRate": 115200,
             "vendorId": "0483",
             "productId": "374b",
@@ -18,7 +18,7 @@
         {
             "name": "IoT button",
             "id": "iotbutton",
-            "platform": "teXXmo – Microsoft Azure IoT Developer Kit",
+            "detailInfo": "teXXmo – Microsoft Azure IoT Developer Kit",
             "helpUrl": "https://aka.ms/button"
         },
         {
