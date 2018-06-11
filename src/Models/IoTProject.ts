@@ -17,13 +17,15 @@ import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Deployable} from './Interfaces/Deployable';
 import {Device, DeviceType} from './Interfaces/Device';
-import {ProjectTemplate, ProjectTemplateType} from './Interfaces/ProjectTemplate';
+import * as template from './Interfaces/ProjectTemplate';
 import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
 import {Workspace} from './Interfaces/Workspace';
 import {IoTButtonDevice} from './IoTButtonDevice';
+import {NucleoF767Device} from './NucleoF767Device';
 import {IoTHub} from './IoTHub';
 import {IoTHubDevice} from './IoTHubDevice';
+import {Board} from './Interfaces/Board';
 
 const constants = {
   deviceDefaultFolderName: 'Device',
@@ -39,7 +41,7 @@ interface ProjectSetting {
 export class IoTProject {
   private componentList: Component[];
   private projectRootPath = '';
-  private projectTemplateItem: ProjectTemplate|null = null;
+  private projectTemplateItem: template.ProjectTemplateBasic|null = null;
   private extensionContext: vscode.ExtensionContext;
   private channel: vscode.OutputChannel;
   private telemetryContext: TelemetryContext;
@@ -95,6 +97,10 @@ export class IoTProject {
       } else if (boardId === IoTButtonDevice.boardId) {
         const device =
             new IoTButtonDevice(this.extensionContext, deviceLocation);
+        this.componentList.push(device);
+      } else if (boardId === NucleoF767Device.boardId){
+        const device =
+            new NucleoF767Device(this.extensionContext, this.channel, deviceLocation);
         this.componentList.push(device);
       }
     }
@@ -229,8 +235,8 @@ export class IoTProject {
   }
 
   async create(
-      rootFolderPath: string, projectTemplateItem: ProjectTemplate,
-      boardId: string, openInNewWindow: boolean): Promise<boolean> {
+      rootFolderPath: string, projectTemplateItem: template.ProjectTemplateBasic,
+      board: Board, openInNewWindow: boolean): Promise<boolean> {
     if (!fs.existsSync(rootFolderPath)) {
       throw new Error(
           'Unable to find the root path, please open the folder and initialize project again.');
@@ -251,17 +257,24 @@ export class IoTProject {
 
     workspace.folders.push({path: constants.deviceDefaultFolderName});
     let device: Component;
-    if (boardId === AZ3166Device.boardId) {
+    if (board.id === AZ3166Device.boardId) {
+      const projectTemplate = projectTemplateItem as template.ArduinoProjectTemplate;
       device = new AZ3166Device(
-          this.extensionContext, deviceDir, projectTemplateItem.sketch);
-    } else if (boardId === IoTButtonDevice.boardId) {
+          this.extensionContext, deviceDir, projectTemplate.sketch);
+    } else if (board.id === IoTButtonDevice.boardId) {
+      const projectTemplate = projectTemplateItem as template.SimpleProjectTemplate;
       device = new IoTButtonDevice(
-          this.extensionContext, deviceDir, projectTemplateItem.sketch);
+          this.extensionContext, deviceDir, projectTemplate.additionalFiles);
+    } else if (board.id === NucleoF767Device.boardId) {
+      const projectTemplate = projectTemplateItem as template.MbedProjectTemplate;
+      device = new NucleoF767Device(
+          this.extensionContext, this.channel, deviceDir, projectTemplate.type, 
+          projectTemplate.additionalFiles, projectTemplate.profile, projectTemplate.libraries);
     } else {
       throw new Error('The specified board is not supported.');
     }
 
-    workspace.settings[`IoTWorkbench.${ConfigKey.boardId}`] = boardId;
+    workspace.settings[`IoTWorkbench.${ConfigKey.boardId}`] = board.id;
     this.componentList.push(device);
 
     // TODO: Consider naming for project level settings.
@@ -272,19 +285,19 @@ export class IoTProject {
     workspace.settings[`IoTWorkbench.${ConfigKey.devicePath}`] =
         constants.deviceDefaultFolderName;
 
-    const type: ProjectTemplateType = (ProjectTemplateType)
-        [projectTemplateItem.type as keyof typeof ProjectTemplateType];
+    const type: template.ProjectTemplateType = (template.ProjectTemplateType)
+        [projectTemplateItem.type as keyof typeof template.ProjectTemplateType];
 
     switch (type) {
-      case ProjectTemplateType.Basic:
+      case template.ProjectTemplateType.Basic:
         // Save data to configFile
         break;
-      case ProjectTemplateType.IotHub: {
+      case template.ProjectTemplateType.IotHub: {
         const iothub = new IoTHub(this.channel);
         this.componentList.push(iothub);
         break;
       }
-      case ProjectTemplateType.AzureFunctions: {
+      case template.ProjectTemplateType.AzureFunctions: {
         const iothub = new IoTHub(this.channel);
 
         const functionDir = path.join(

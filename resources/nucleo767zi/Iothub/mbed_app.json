@@ -1,0 +1,14 @@
+{
+    "config": {
+        "network-interface": {
+            "help": "options are ETHERNET,WIFI_ESP8266,MESH_LOWPAN_ND,MESH_THREAD,SPWFSAINTERFACE",
+            "value": "ETHERNET"
+        },
+        "mesh_radio_type": {
+        	"help": "options are ATMEL, MCR20",
+        	"value": "ATMEL"
+        }
+    },
+    "macros": [ "MBEDTLS_USER_CONFIG_FILE=\"mbedtls_entropy_config.h\"", "MBEDTLS_NO_DEFAULT_ENTROPY_SOURCES","MBEDTLS_SHA1_C", "MBEDTLS_MD5_C", "MBEDTLS_SSL_PROTO_TLS1_1", "MBED_HEAP_STATS_ENABLED", "MBED_STACK_STATS_ENABLED=1"  ]
+}
+ 

@@ -193,6 +193,7 @@ export class ExampleExplorer {
     const boards = boardProvider.list.filter(board => board.exampleUrl);
     boards.forEach((board: Board) => {
       boardItemList.push({
+        platform: board.platform,
         name: board.name,
         id: board.id,
         detailInfo: board.detailInfo,

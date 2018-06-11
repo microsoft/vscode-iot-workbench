@@ -20,7 +20,7 @@ import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames} from '../constants';
 import {DialogResponses} from '../DialogResponses';
-import {ProjectTemplate, ProjectTemplateType} from '../Models/Interfaces/ProjectTemplate';
+import {ArduinoProjectTemplate, ProjectTemplateType} from '../Models/Interfaces/ProjectTemplate';
 import {IoTProject} from '../Models/IoTProject';
 import {delay, getRegistryValues} from '../utils';
 

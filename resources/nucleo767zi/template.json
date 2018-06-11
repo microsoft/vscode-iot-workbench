@@ -1,0 +1,48 @@
+{
+    "templates": [
+        {
+            "description": "",
+            "detail": "Create project with device only code.",
+            "label": "Device only",
+            "type": "Basic",
+			"profile": "develop.json",
+            "additionalFiles": "main.cpp"
+        },
+        {
+            "description": "",
+            "detail": "Create project that connects to Azure IoT Hub, such as sending sensor data to cloud.",
+            "label": "With Azure IoT Hub",
+            "type": "IotHub",
+			"profile": "develop.json",
+			"additionalFiles": ["main.cpp","mbedtls_entropy_config.h","iothub_client_sample_mqtt.h","iothub_client_sample_mqtt.c","mbed_app.json"],
+			"libraries": [
+				{
+					"name": "AzureIoT",
+					"url": "https://github.com/lirenhe/AzureIoT_mbed/"
+				},
+				{
+					"name": "EasyConnect",
+					"url": "https://github.com/ARMmbed/easy-connect/"
+				}
+			]
+        },
+        {
+            "description": "",
+            "detail": "Create project that connects to Azure IoT Hub and processes device data further in Azure Functions.",
+            "label": "With Azure Functions",
+            "type": "AzureFunctions",
+			"profile": "develop.json",
+			"additionalFiles": ["main.cpp","mbedtls_entropy_config.h","iothub_client_sample_mqtt.h","iothub_client_sample_mqtt.c","mbed_app.json"],
+			"libraries": [
+				{
+					"name": "AzureIoT",
+					"url": "https://github.com/lirenhe/AzureIoT_mbed/"
+				},
+				{
+					"name": "EasyConnect",
+					"url": "https://github.com/ARMmbed/easy-connect/"
+				}
+			]
+        }
+    ]
+}

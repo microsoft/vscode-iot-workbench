@@ -8,7 +8,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import {IoTProject} from './Models/IoTProject';
-import {ProjectTemplate, ProjectTemplateType} from './Models/Interfaces/ProjectTemplate';
+import {ProjectTemplateBasic, ArduinoProjectTemplate, ProjectTemplateType} from './Models/Interfaces/ProjectTemplate';
 import {DialogResponses} from './DialogResponses';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import * as utils from './utils';
@@ -118,6 +118,7 @@ export class ProjectInitializer {
             const boards = boardProvider.list;
             boards.forEach((board: Board) => {
               boardItemList.push({
+                platform: board.platform,
                 name: board.name,
                 id: board.id,
                 detailInfo: board.detailInfo,
@@ -156,7 +157,7 @@ export class ProjectInitializer {
 
             const projectTemplateList: vscode.QuickPickItem[] = [];
 
-            templateJson.templates.forEach((element: ProjectTemplate) => {
+            templateJson.templates.forEach((element: ProjectTemplateBasic) => {
               projectTemplateList.push({
                 label: element.label,
                 description: element.description,
@@ -182,7 +183,7 @@ export class ProjectInitializer {
             }
 
             const result =
-                templateJson.templates.find((template: ProjectTemplate) => {
+                templateJson.templates.find((template: ProjectTemplateBasic) => {
                   return template.label === selection.label;
                 });
 
@@ -192,7 +193,7 @@ export class ProjectInitializer {
 
             const project = new IoTProject(context, channel, telemetryContext);
             return await project.create(
-                rootPath, result, boardSelection.id, openInNewWindow);
+                rootPath, result, boardSelection, openInNewWindow);
           } catch (error) {
             throw error;
           }

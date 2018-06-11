@@ -6,6 +6,8 @@ import * as path from 'path';
 import {setTimeout} from 'timers';
 import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
+import * as cp from 'child_process';
+import * as os from 'os';
 
 import {ConfigHandler} from './configHandler';
 import {AzureFunctionsLanguage, ConfigKey} from './constants';
@@ -88,4 +90,46 @@ export function getScriptTemplateNameFromLanguage(language: string): string|
     default:
       return undefined;
   }
+}
+
+export function checkMbedExists(): Promise<void>{
+  const platform = os.platform();
+  const command = (platform === 'win32')? 'where mbed' : 'which mbed';
+  return new Promise((resolve, reject) => {
+    const process = cp.spawn(command, [], { shell: true } );
+    process.on('close', (status) =>{
+      if(status){
+        console.log(status);
+        reject();
+      } 
+      else{
+        resolve();
+      }
+    });
+  });
+}
+
+export function runCommand(command: string, workingDir: string, 
+  outputChannel: vscode.OutputChannel): Thenable<object>{
+  return new Promise((resolve, reject) => {
+    const stdout = "";
+    const stderr = "";
+    const process = cp.spawn(command, [], { cwd:workingDir, shell: true} );
+    process.stdout.on('data', (data: string)=>{
+      console.log(data);
+      outputChannel.appendLine(data)
+    });
+    process.stderr.on('data', (data: string)=>{
+      console.log(data);
+      outputChannel.appendLine(data)
+    });
+    process.on("error", (error) => reject({ error, stderr, stdout }));
+    process.on('close', (status) =>{
+      if (status === 0) {
+        resolve({ status, stdout, stderr });
+    } else {
+        reject({ status, stdout, stderr });
+    }
+    });
+  });
 }

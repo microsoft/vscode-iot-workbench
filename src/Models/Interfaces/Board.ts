@@ -10,6 +10,7 @@ export interface BoardInstallation {
 }
 
 export interface Board {
+  platform: string;
   name: string;
   id: string;
   detailInfo: string;

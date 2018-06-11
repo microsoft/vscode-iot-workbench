@@ -73,6 +73,7 @@ export class DeviceOperator {
     const boards = boardProvider.list.filter(board => board.installation);
     boards.forEach((board: Board) => {
       boardItemList.push({
+        platform: board.platform,
         name: board.name,
         id: board.id,
         detailInfo: board.detailInfo,

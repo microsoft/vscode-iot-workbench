@@ -1,6 +1,7 @@
 {
     "boards": [
         {
+            "platform": "Arduino",
             "name": "IoT DevKit",
             "id": "devkit",
             "detailInfo": "MXChip - Microsoft Azure IoT Developer Kit",
@@ -16,10 +17,18 @@
             }
         },
         {
+            "platform": "Simple",
             "name": "IoT button",
             "id": "iotbutton",
             "detailInfo": "teXXmo – Microsoft Azure IoT Developer Kit",
             "helpUrl": "https://aka.ms/button"
+        },
+        {
+            "platform": "Mbed",
+            "name": "Nucleo-F767ZI",
+            "id": "nucleo767zi",
+            "detailInfo": "MBED – Nucleo-F767ZI",
+            "helpUrl": "http://www.st.com/en/evaluation-tools/nucleo-f767zi.html"
         }
     ]
 }

@@ -12,9 +12,10 @@ interface BoardList {
 }
 
 export interface BoardOption {
+  platform?: string;
   name?: string;
   id?: string;
-  platform?: string;
+  detailInfo?: string;
   defaultBaudRate?: number;
   vendorId?: string|number;
   productId?: string|number;

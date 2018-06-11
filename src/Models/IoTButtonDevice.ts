@@ -10,7 +10,7 @@ import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames} from '../constants';
-import {ProjectTemplate, ProjectTemplateType} from '../Models/Interfaces/ProjectTemplate';
+import {ProjectTemplateType} from '../Models/Interfaces/ProjectTemplate';
 import {IoTProject} from '../Models/IoTProject';
 
 import {Component, ComponentType} from './Interfaces/Component';
@@ -28,7 +28,7 @@ export class IoTButtonDevice implements Device {
   private componentType: ComponentType;
   private deviceFolder: string;
   private extensionContext: vscode.ExtensionContext;
-  private inputFileName = '';
+  private inputFiles: string[] = [];
 
   private static _boardId = 'iotbutton';
 
@@ -38,13 +38,13 @@ export class IoTButtonDevice implements Device {
 
   constructor(
       context: vscode.ExtensionContext, devicePath: string,
-      inputFileName?: string) {
+      inputFiles?: string[]) {
     this.deviceType = DeviceType.IoT_Button;
     this.componentType = ComponentType.Device;
     this.deviceFolder = devicePath;
     this.extensionContext = context;
-    if (inputFileName) {
-      this.inputFileName = inputFileName;
+    if (inputFiles) {
+      this.inputFiles = inputFiles;
     }
   }
 
@@ -68,7 +68,7 @@ export class IoTButtonDevice implements Device {
   }
 
   async create(): Promise<boolean> {
-    if (!this.inputFileName) {
+    if (!this.inputFiles || this.inputFiles.length === 0) {
       throw new Error('No user data file found.');
     }
     const deviceFolderPath = this.deviceFolder;
@@ -89,8 +89,8 @@ export class IoTButtonDevice implements Device {
     // Create an empty userdata.json
     const userdataJsonFilePath = this.extensionContext.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, IoTButtonDevice._boardId,
-        this.inputFileName));
-    const newUserdataPath = path.join(deviceFolderPath, this.inputFileName);
+        this.inputFiles[0]));
+    const newUserdataPath = path.join(deviceFolderPath, this.inputFiles[0]);
 
     try {
       const content = fs.readFileSync(userdataJsonFilePath).toString();
