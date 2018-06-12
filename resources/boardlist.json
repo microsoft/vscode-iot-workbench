@@ -3,7 +3,7 @@
         {
             "name": "IoT DevKit",
             "id": "devkit",
-            "platform": "MXChip - Microsoft Azure IoT Developer Kit",
+            "detailInfo": "MXChip - Microsoft Azure IoT Developer Kit",
             "defaultBaudRate": 115200,
             "vendorId": "0483",
             "productId": "374b",
@@ -18,7 +18,7 @@
         {
             "name": "IoT button",
             "id": "iotbutton",
-            "platform": "teXXmo – Microsoft Azure IoT Developer Kit",
+            "detailInfo": "teXXmo – Microsoft Azure IoT Developer Kit",
             "helpUrl": "https://aka.ms/button"
         },
         {
@@ -32,7 +32,12 @@
                 "additionalUrl": "https://raw.githubusercontent.com/lirenhe/arduino-esp32/master/package/package_esp32_index.json",
                 "packageName": "esp32",
                 "architecture": "esp32"
-            }
+            },
+            "name": "Raspberry Pi",
+            "id": "raspberrypi",
+            "detailInfo": "Raspberry Pi",
+            "helpUrl": "https://www.raspberrypi.org/",
+            "exampleUrl": "https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/gallery/workbench-example-raspi.json"
         }
     ]
 }

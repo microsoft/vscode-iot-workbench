@@ -34,21 +34,17 @@ Currently this extension supports the following operatings systems:
 
 ### MXChip IoT DevKit
 
-Please follow the [guide](docs/IoTDevKit.md) to setup IoT DevKit.
-
-## Tutorials:
+Please follow the [guide](docs/iot-devkit.md) to setup IoT DevKit.
 Here are a set of tutorials that will help you get started:
+* [Get Started](./docs/iot-devkit/devkit-get-started.md)
+* [Shake, Shake for a Tweet](./docs/iot-devkit/devkit-shakeshake.md)
+* [Remote Monitoring](./docs/iot-devkit/devkit_remote_monitoringv2.md)
+* [DevKit Translator](./docs/iot-devkit/devkit-translator.md)
+* [Door Monitor](./docs/iot-devkit/devkit_door_monitor.md)
 
-* MXChip IoT DevKit
-  * [Get Started](./docs/iot-devkit/devkit-get-started.md)
-  * [Shake, Shake for a Tweet](./docs/iot-devkit/devkit-shakeshake.md)
-  * [Remote Monitoring](./docs/iot-devkit/devkit_remote_monitoringv2.md)
-  * [DevKit Translator](./docs/iot-devkit/devkit-translator.md)
-  * [Door Monitor](./docs/iot-devkit/devkit_door_monitor.md)
-
-* teXXmo IoT button
-
-  * [Get Started](./docs/iot-button/teXXmo_IoT_button_get_started.md)
+### teXXmo IoT button
+Here are a set of tutorials that will help you get started:
+* [Get Started](./docs/iot-button/teXXmo_IoT_button_get_started.md)
 
 ## Commands
 
