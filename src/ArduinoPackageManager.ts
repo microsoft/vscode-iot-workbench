@@ -42,15 +42,15 @@ export class ArduinoPackageManager {
   }
 
   static async installBoard(board: Board) {
-    if (!board || !board.installation) {
-      return;
-    }
+    // if (!board || !board.installation) {
+    //   return;
+    // }
 
-    await ArduinoPackageManager.setAdditionalUrl(
-        board.installation.additionalUrl);
-    await vscode.commands.executeCommand(
-        'arduino.installBoard', board.installation.packageName,
-        board.installation.architecture);
+    // await ArduinoPackageManager.setAdditionalUrl(
+    //     board.installation.additionalUrl);
+    // await vscode.commands.executeCommand(
+    //     'arduino.installBoard', board.installation.packageName,
+    //     board.installation.architecture);
     return;
   }
 }
