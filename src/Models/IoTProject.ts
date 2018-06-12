@@ -13,6 +13,7 @@ import {TelemetryContext, TelemetryWorker} from '../telemetry';
 import {checkAzureLogin} from './Apis';
 import {AZ3166Device} from './AZ3166Device';
 import {AzureFunctions} from './AzureFunctions';
+import {Esp32Device} from './Esp32Device';
 import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Deployable} from './Interfaces/Deployable';
@@ -97,6 +98,8 @@ export class IoTProject {
         const device =
             new IoTButtonDevice(this.extensionContext, deviceLocation);
         this.componentList.push(device);
+      } else if (boardId === Esp32Device.boardId) {
+        const device = new Esp32Device(this.extensionContext, deviceLocation);
       } else if (boardId === RaspberryPiDevice.boardId) {
         const device = new RaspberryPiDevice(
             this.extensionContext, deviceLocation, this.channel);
@@ -261,6 +264,9 @@ export class IoTProject {
           this.extensionContext, deviceDir, projectTemplateItem.sketch);
     } else if (boardId === IoTButtonDevice.boardId) {
       device = new IoTButtonDevice(
+          this.extensionContext, deviceDir, projectTemplateItem.sketch);
+    } else if (boardId === Esp32Device.boardId) {
+      device = new Esp32Device(
           this.extensionContext, deviceDir, projectTemplateItem.sketch);
     } else if (boardId === RaspberryPiDevice.boardId) {
       device = new RaspberryPiDevice(

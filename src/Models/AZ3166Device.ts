@@ -24,6 +24,7 @@ import {ProjectTemplate, ProjectTemplateType} from '../Models/Interfaces/Project
 import {IoTProject} from '../Models/IoTProject';
 import {delay, getRegistryValues} from '../utils';
 
+import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 import {Board} from './Interfaces/Board';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
@@ -36,13 +37,8 @@ interface SerialPortInfo {
 }
 
 const constants = {
-  defaultSketchFileName: 'device.ino',
-  arduinoJsonFileName: 'arduino.json',
   boardInfo: 'AZ3166:stm32f4:MXCHIP_AZ3166',
   uploadMethod: 'upload_method=OpenOCDMethod',
-  cppPropertiesFileName: 'c_cpp_properties.json',
-  cppPropertiesFileNameMac: 'c_cpp_properties_macos.json',
-  cppPropertiesFileNameWin: 'c_cpp_properties_win32.json',
   outputPath: './.build',
   platformLocalFileName: 'platform.local.txt',
   cExtraFlag: 'compiler.c.extra_flags=-DCORRELATIONID="',
@@ -54,7 +50,7 @@ async function cmd(command: string) {
   exec(command, Promise.resolve);
 }
 
-export class AZ3166Device implements Device {
+export class AZ3166Device extends ArduinoDeviceBase {
   // tslint:disable-next-line: no-any
   static get serialport(): any {
     if (!AZ3166Device._serialport) {
@@ -67,10 +63,6 @@ export class AZ3166Device implements Device {
   // tslint:disable-next-line: no-any
   private static _serialport: any;
 
-  private deviceType: DeviceType;
-  private componentType: ComponentType;
-  private deviceFolder: string;
-  private extensionContext: vscode.ExtensionContext;
   private sketchName = '';
   private static _boardId = 'devkit';
 
@@ -81,24 +73,13 @@ export class AZ3166Device implements Device {
   constructor(
       context: vscode.ExtensionContext, devicePath: string,
       sketchName?: string) {
-    this.deviceType = DeviceType.MXChip_AZ3166;
-    this.componentType = ComponentType.Device;
-    this.deviceFolder = devicePath;
-    this.extensionContext = context;
+    super(context, devicePath, DeviceType.MXChip_AZ3166);
     if (sketchName) {
       this.sketchName = sketchName;
     }
   }
 
   name = 'AZ3166';
-
-  getDeviceType(): DeviceType {
-    return this.deviceType;
-  }
-
-  getComponentType(): ComponentType {
-    return this.componentType;
-  }
 
   get board() {
     const boardProvider = new BoardProvider(this.extensionContext);
@@ -113,50 +94,11 @@ export class AZ3166Device implements Device {
       throw new Error('Unable to find the device folder inside the project.');
     }
 
-    const vscodeFolderPath =
-        path.join(deviceFolderPath, FileNames.vscodeSettingsFolderName);
-    if (!fs.existsSync(vscodeFolderPath)) {
-      fs.mkdirSync(vscodeFolderPath);
+    if (!this.board) {
+      throw new Error('Unable to find the board in the config file.');
     }
 
-    // Create c_cpp_properties.json file
-    const cppPropertiesFilePath =
-        path.join(vscodeFolderPath, constants.cppPropertiesFileName);
-
-    if (fs.existsSync(cppPropertiesFilePath)) {
-      return true;
-    }
-
-    try {
-      const plat = os.platform();
-
-      if (plat === 'win32') {
-        const propertiesFilePathWin32 =
-            this.extensionContext.asAbsolutePath(path.join(
-                FileNames.resourcesFolderName, AZ3166Device.boardId,
-                constants.cppPropertiesFileNameWin));
-        const propertiesContentWin32 =
-            fs.readFileSync(propertiesFilePathWin32).toString();
-        const pattern = /{ROOTPATH}/gi;
-        const localAppData: string = process.env.LOCALAPPDATA;
-        const replaceStr = propertiesContentWin32.replace(
-            pattern, localAppData.replace(/\\/g, '\\\\'));
-        fs.writeFileSync(cppPropertiesFilePath, replaceStr);
-      }
-      // TODO: Let's use the same file for Linux and MacOS for now. Need to
-      // revisit this part.
-      else {
-        const propertiesFilePathMac =
-            this.extensionContext.asAbsolutePath(path.join(
-                FileNames.resourcesFolderName, AZ3166Device.boardId,
-                constants.cppPropertiesFileNameMac));
-        const propertiesContentMac =
-            fs.readFileSync(propertiesFilePathMac).toString();
-        fs.writeFileSync(cppPropertiesFilePath, propertiesContentMac);
-      }
-    } catch (error) {
-      throw new Error(`Create cpp properties file failed: ${error.message}`);
-    }
+    this.generateCppPropertiesFile(this.board);
 
     // Enable logging on IoT Devkit
     await this.generatePlatformLocal();
@@ -173,145 +115,45 @@ export class AZ3166Device implements Device {
     if (!fs.existsSync(deviceFolderPath)) {
       throw new Error('Unable to find the device folder inside the project.');
     }
-
-    try {
-      const iotworkbenchprojectFilePath =
-          path.join(deviceFolderPath, FileNames.iotworkbenchprojectFileName);
-      fs.writeFileSync(iotworkbenchprojectFilePath, ' ');
-    } catch (error) {
-      throw new Error(
-          `Device: create iotworkbenchproject file failed: ${error.message}`);
+    if (!this.board) {
+      throw new Error('Unable to find the board in the config file.');
     }
 
-    const vscodeFolderPath =
-        path.join(deviceFolderPath, FileNames.vscodeSettingsFolderName);
-    if (!fs.existsSync(vscodeFolderPath)) {
-      fs.mkdirSync(vscodeFolderPath);
-    }
-
-    // Get arduino sketch file name from user input or use defalt sketch name
-    const option: vscode.InputBoxOptions = {
-      value: constants.defaultSketchFileName,
-      prompt: `Please input device sketch file name here.`,
-      ignoreFocusOut: true,
-      validateInput: (sketchFileName: string) => {
-        if (!sketchFileName ||
-            /^([a-z_]|[a-z_][-a-z0-9_.]*[a-z0-9_])(\.ino)?$/i.test(
-                sketchFileName)) {
-          return '';
-        }
-        return 'Sketch file name can only contain alphanumeric and cannot start with number.';
-      }
-    };
-
-    let sketchFileName = await vscode.window.showInputBox(option);
-
-
-    if (sketchFileName === undefined) {
-      return false;
-    } else if (!sketchFileName) {
-      sketchFileName = constants.defaultSketchFileName;
-    } else {
-      sketchFileName = sketchFileName.trim();
-      if (!/\.ino$/i.test(sketchFileName)) {
-        sketchFileName += '.ino';
-      }
-    }
-
-    // Create arduino.json config file
-    const arduinoJSONFilePath =
-        path.join(vscodeFolderPath, constants.arduinoJsonFileName);
-    const arduinoJSONObj = {
-      'board': constants.boardInfo,
-      'sketch': sketchFileName,
-      'configuration': constants.uploadMethod,
-      'output': constants.outputPath
-    };
-
-    try {
-      fs.writeFileSync(
-          arduinoJSONFilePath, JSON.stringify(arduinoJSONObj, null, 4));
-    } catch (error) {
-      throw new Error(
-          `Device: create arduino config file failed: ${error.message}`);
-    }
-
-    // Create settings.json config file
-    const settingsJSONFilePath =
-        path.join(vscodeFolderPath, FileNames.settingsJsonFileName);
-    const settingsJSONObj = {
-      'files.exclude': {'.build': true, '.iotworkbenchproject': true},
-      'C_Cpp.intelliSenseEngine': 'Tag Parser'
-    };
-
-    try {
-      fs.writeFileSync(
-          settingsJSONFilePath, JSON.stringify(settingsJSONObj, null, 4));
-    } catch (error) {
-      throw new Error(
-          `Device: create arduino config file failed: ${error.message}`);
-    }
-
-    // Create c_cpp_properties.json file
-    this.load();
-
-    // Create an empty arduino sketch
-    const sketchTemplateFilePath =
-        this.extensionContext.asAbsolutePath(path.join(
-            FileNames.resourcesFolderName, AZ3166Device.boardId,
-            this.sketchName));
-    const newSketchFilePath = path.join(deviceFolderPath, sketchFileName);
-
-    try {
-      const content = fs.readFileSync(sketchTemplateFilePath).toString();
-      fs.writeFileSync(newSketchFilePath, content);
-    } catch (error) {
-      throw new Error(`Create arduino sketch file failed: ${error.message}`);
-    }
-
+    this.generateCommonFiles();
+    this.generateCppPropertiesFile(this.board);
+    await this.generateSketchFile(
+        this.sketchName, this.board, constants.boardInfo,
+        constants.uploadMethod);
     return true;
   }
 
-  async compile(): Promise<boolean> {
-    try {
-      // Enable logging on IoT Devkit
-      await this.generatePlatformLocal();
-
-      await vscode.commands.executeCommand('arduino.verify');
-      return true;
-    } catch (error) {
-      throw error;
-    }
+  async preCompileAction(): Promise<boolean> {
+    await this.generatePlatformLocal();
+    return true;
   }
 
-  async upload(): Promise<boolean> {
-    try {
-      const isStlinkInstalled = await this.stlinkDriverInstalled();
-      if (!isStlinkInstalled) {
-        const message =
-            'The ST-LINK driver for DevKit is not installed. Install now?';
-        const result: vscode.MessageItem|undefined =
-            await vscode.window.showWarningMessage(
-                message, DialogResponses.yes, DialogResponses.skipForNow,
-                DialogResponses.cancel);
-        if (result === DialogResponses.yes) {
-          // Open the download page
-          const installUri =
-              'http://www.st.com/en/development-tools/stsw-link009.html';
-          opn(installUri);
-          return true;
-        } else if (result !== DialogResponses.cancel) {
-          return false;
-        }
+  async preUploadAction(): Promise<boolean> {
+    const isStlinkInstalled = await this.stlinkDriverInstalled();
+    if (!isStlinkInstalled) {
+      const message =
+          'The ST-LINK driver for DevKit is not installed. Install now?';
+      const result: vscode.MessageItem|undefined =
+          await vscode.window.showWarningMessage(
+              message, DialogResponses.yes, DialogResponses.skipForNow,
+              DialogResponses.cancel);
+      if (result === DialogResponses.yes) {
+        // Open the download page
+        const installUri =
+            'http://www.st.com/en/development-tools/stsw-link009.html';
+        opn(installUri);
+        return true;
+      } else if (result !== DialogResponses.cancel) {
+        return false;
       }
-      // Enable logging on IoT Devkit
-      await this.generatePlatformLocal();
-
-      await vscode.commands.executeCommand('arduino.upload');
-      return true;
-    } catch (error) {
-      throw error;
     }
+    // Enable logging on IoT Devkit
+    await this.generatePlatformLocal();
+    return true;
   }
 
   async configDeviceSettings(): Promise<boolean> {

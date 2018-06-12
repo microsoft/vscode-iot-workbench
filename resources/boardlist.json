@@ -22,6 +22,17 @@
             "helpUrl": "https://aka.ms/button"
         },
         {
+            "name": "ESP32 Arduino",
+            "id": "esp32",
+            "platform": "ESP32",
+            "defaultBaudRate": 115200,
+            "vendorId": "10c4",
+            "productId": "ea60",
+            "installation": {
+                "additionalUrl": "https://raw.githubusercontent.com/lirenhe/arduino-esp32/master/package/package_esp32_index.json",
+                "packageName": "esp32",
+                "architecture": "esp32"
+            },
             "name": "Raspberry Pi",
             "id": "raspberrypi",
             "detailInfo": "Raspberry Pi",
