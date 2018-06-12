@@ -29,7 +29,7 @@
             "vendorId": "10c4",
             "productId": "ea60",
             "installation": {
-                "additionalUrl": "https://raw.githubusercontent.com/lirenhe/arduino-esp32/master/package/package_esp32_index.json",
+                "additionalUrl": "https://azureboard.blob.core.windows.net/iotworkbench/package_esp32_index.json",
                 "packageName": "esp32",
                 "architecture": "esp32"
             }
