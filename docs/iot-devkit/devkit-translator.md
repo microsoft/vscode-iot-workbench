@@ -45,6 +45,18 @@ Find **DevKit Translator** and click **Open Sample** button. A new VS Code windo
 
 ![IoT Workbench, select DevKit Translator example](media/devkit-translator/iot-workbench-example.png)
 
+## Provision Cognitive Service
+  1. Login to http://portal.azure.com
+  1. Select the **+ New** option.
+  1. Select **AI + Machine Learning** from the list of services.
+  1. Select **Translator Speech**. You may need to click "See all" or search to see it.
+	![create speech service](media/devkit-translator/create-speech-api.jpg)
+  1. Fill out the rest of the form, and click the **Create** button.
+  1. You are now subscribed to Microsoft Translator Speech API.
+  1. Go to **All Resources** and select the Microsoft Translator you created.
+  1. Go to the **Keys** option and copy your subscription key to access the service. We will use that value in later sections.
+	![get speech key](media/devkit-translator/speech-key.jpg)
+
 ## Provision Azure services
 
 In the solution window, open the command palette and select **IoT Workbench: Cloud**.
@@ -63,6 +75,15 @@ The whole process includes:
 * Select an existing IoT Hub or create a new IoT Hub.
 * Select an existing IoT Hub device or create a new IoT Hub device. 
 * Create a new Function App.
+
+Please take a note of the device name you created. It will be used in next section.
+
+## Modify code for Azure Functions
+Open **devkit-traslater\run.csx** and modify the following line with the device name and subscription key you provisioned in previous step:
+```cpp
+    string subscriptionKey = "";
+    string deviceName = "";
+```
 
 ## Deploy Azure Functions
 
