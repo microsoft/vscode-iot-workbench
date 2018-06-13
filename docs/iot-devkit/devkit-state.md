@@ -42,9 +42,9 @@ Then the **IoT Workbench Example** window is showed up.
 
 ![IoT Workbench, Examples window](media/iot-workbench-examples.png)
 
-Find **Shake, Shake for a Tweet** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
+Find **DevKit State** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
 
-![IoT Workbench, select DevKit Translator example](media/devkit-state/open-example-devkitstate.jpg)
+![IoT Workbench, select DevKit State example](media/devkit-state/open-example-devkitstate.jpg)
 
 ## Provision Azure Services
 
@@ -124,7 +124,7 @@ Open the command palette and select **IoT Workbench: Cloud**, then select **Azur
 ## Monitor DevKit State in Browser
 
 1. Open `web\index.html` in browser.
-2. Input the function app name you write down.
+2. Input the Function App name you write down.
 3. Click connect button.
 4. You should see DevKit state in a few seconds.
 ![web page](media/devkit-state/devkit-state-function-app-name.png)
