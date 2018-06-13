@@ -54,7 +54,7 @@ Find **DevKit Translator** and click **Open Sample** button. A new VS Code windo
   1. Fill out the rest of the form, and click the **Create** button.
   1. You are now subscribed to Microsoft Translator Speech API.
   1. Go to **All Resources** and select the Microsoft Translator you created.
-  1. Go to the **Keys** option and copy your subscription key to access the service. We will use the that key value in later sections.
+  1. Go to the **Keys** option and copy your subscription key to access the service. We will use that value in later sections.
 	![get speech key](media/devkit-translator/speech-key.jpg)
 
 ## Provision Azure services
