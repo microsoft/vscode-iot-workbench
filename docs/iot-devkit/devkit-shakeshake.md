@@ -75,6 +75,14 @@ static const char* iot_event = "{\"topic\":\"iot\"}";
 
 Replace the string `iot` within the curly braces with your preferred hashtag. DevKit later retrieves a random tweet that includes the hashtag you specify in this step.
 
+## Modify code for Azure Functions
+Open **shakeshake\run.csx** and look for this line of code::
+```cpp
+    string deviceName = "AZ3166";
+```
+
+Replace **AZ3166** with the device name you provisioned in previous step.
+
 ## Deploy Azure Functions
 
 Open the command palette and select **IoT Workbench: Cloud**, then select **Azure Deploy**.
@@ -163,11 +171,9 @@ For testing purposes, this sample project uses a pre-configured Twitter bearer t
 
 3. Use [some utility](https://gearside.com/nebula/utilities/twitter-bearer-token-generator/) to generate a Twitter bearer token from these two keys.
 
-4. In the [Azure portal](https://portal.azure.com/){:target="_blank"}, get into the **Resource Group** and find the Azure Function (Type: App Service) for your "Shake, Shake" project. The name always contains 'shake...' string.
+4. Update the following line in `shakeshake/run.csx` with your own token:
+![update-token](media/iot-devkit-shakeshake/update-twitter-token.jpg)
 
-	![azure-function](media/iot-devkit-shakeshake/devkit-azure-function.png)
-
-5. Update the code for `run.csx` within **Functions > shakeshake-cs** with your own token:
 
 	```csharp
 	...
@@ -175,9 +181,8 @@ For testing purposes, this sample project uses a pre-configured Twitter bearer t
 	...
 	```
 	
-	![twitter-token](media/iot-devkit-shakeshake/devkit-twitter-token.png)
 
-6. Save the file and click **Run**.
+5. Open the command palette and select **IoT Workbench: Cloud**, then select **Azure Deploy**.
 
 ## Next Steps
 
