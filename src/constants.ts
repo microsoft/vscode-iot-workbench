@@ -10,7 +10,6 @@ export class ConfigKey {
   static readonly functionAppId = 'functionAppId';
   static readonly functionPath = 'FunctionPath';
   static readonly boardId = 'BoardId';
-  static readonly mbedProfile = 'mbedprofile';
 }
 
 export class EventNames {

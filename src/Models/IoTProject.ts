@@ -98,9 +98,9 @@ export class IoTProject {
         const device =
             new IoTButtonDevice(this.extensionContext, deviceLocation);
         this.componentList.push(device);
-      } else if (boardId === NucleoF767Device.boardId){
-        const device =
-            new NucleoF767Device(this.extensionContext, this.channel, deviceLocation);
+      } else if (boardId === NucleoF767Device.boardId) {
+        const device = new NucleoF767Device(
+            this.extensionContext, this.channel, deviceLocation);
         this.componentList.push(device);
       }
     }
@@ -235,8 +235,9 @@ export class IoTProject {
   }
 
   async create(
-      rootFolderPath: string, projectTemplateItem: template.ProjectTemplateBasic,
-      board: Board, openInNewWindow: boolean): Promise<boolean> {
+      rootFolderPath: string,
+      projectTemplateItem: template.ProjectTemplateBasic, board: Board,
+      openInNewWindow: boolean): Promise<boolean> {
     if (!fs.existsSync(rootFolderPath)) {
       throw new Error(
           'Unable to find the root path, please open the folder and initialize project again.');
@@ -258,18 +259,22 @@ export class IoTProject {
     workspace.folders.push({path: constants.deviceDefaultFolderName});
     let device: Component;
     if (board.id === AZ3166Device.boardId) {
-      const projectTemplate = projectTemplateItem as template.ArduinoProjectTemplate;
+      const projectTemplate =
+          projectTemplateItem as template.ArduinoProjectTemplate;
       device = new AZ3166Device(
           this.extensionContext, deviceDir, projectTemplate.sketch);
     } else if (board.id === IoTButtonDevice.boardId) {
-      const projectTemplate = projectTemplateItem as template.SimpleProjectTemplate;
+      const projectTemplate =
+          projectTemplateItem as template.SimpleProjectTemplate;
       device = new IoTButtonDevice(
           this.extensionContext, deviceDir, projectTemplate.additionalFiles);
     } else if (board.id === NucleoF767Device.boardId) {
-      const projectTemplate = projectTemplateItem as template.MbedProjectTemplate;
+      const projectTemplate =
+          projectTemplateItem as template.MbedProjectTemplate;
       device = new NucleoF767Device(
-          this.extensionContext, this.channel, deviceDir, projectTemplate.type, 
-          projectTemplate.additionalFiles, projectTemplate.profile, projectTemplate.libraries);
+          this.extensionContext, this.channel, deviceDir, projectTemplate.type,
+          projectTemplate.additionalFiles, projectTemplate.profile,
+          projectTemplate.libraries);
     } else {
       throw new Error('The specified board is not supported.');
     }

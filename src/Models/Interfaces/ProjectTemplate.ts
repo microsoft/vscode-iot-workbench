@@ -7,7 +7,7 @@ export enum ProjectTemplateType {
   AzureFunctions
 }
 
-export interface ProjectTemplateBasic{
+export interface ProjectTemplateBasic {
   label: string;
   detail: string;
   description: string;
@@ -15,16 +15,16 @@ export interface ProjectTemplateBasic{
 }
 
 
-export interface ArduinoProjectTemplate extends ProjectTemplateBasic{
+export interface ArduinoProjectTemplate extends ProjectTemplateBasic {
   sketch: string;
 }
 
-export interface MbedLibrary{
+export interface MbedLibrary {
   name: string;
   url: string;
 }
 
-export interface MbedProjectTemplate extends ProjectTemplateBasic{
+export interface MbedProjectTemplate extends ProjectTemplateBasic {
   type: string;
   profile: string;
   additionalFiles: string[];
@@ -32,6 +32,6 @@ export interface MbedProjectTemplate extends ProjectTemplateBasic{
 }
 
 // Consider a better name for this
-export interface SimpleProjectTemplate extends ProjectTemplateBasic{
+export interface SimpleProjectTemplate extends ProjectTemplateBasic {
   additionalFiles: string[];
 }

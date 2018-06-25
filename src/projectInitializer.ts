@@ -182,8 +182,8 @@ export class ProjectInitializer {
               telemetryContext.properties.template = selection.label;
             }
 
-            const result =
-                templateJson.templates.find((template: ProjectTemplateBasic) => {
+            const result = templateJson.templates.find(
+                (template: ProjectTemplateBasic) => {
                   return template.label === selection.label;
                 });
 
