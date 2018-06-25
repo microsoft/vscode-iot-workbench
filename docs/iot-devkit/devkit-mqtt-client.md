@@ -1,16 +1,20 @@
-# Use IoT DevKit AZ3166 to send messages to an MQTT server
+# Send messages to an MQTT server
 
-Internet of Things (IoT) systems often deal with intermittent, poor quality, or slow internet connections. MQTT is a machine-to-machine (M2M) connectivity protocol, which was developed with such challenges in mind. In this tutorial, you learn how to use the MQTT Client library to send messages to an MQTT server.
+Internet of Things (IoT) systems often deal with intermittent, poor quality, or slow internet connections. MQTT is a machine-to-machine (M2M) connectivity protocol, which was developed with such challenges in mind. 
+
+In this tutorial, you learn how to use the MQTT Client library to send messages to an MQTT server.
 
 The MQTT client library used here is part of the [Eclipse Paho](http://www.eclipse.org/paho/) project, which provides APIs for using MQTT over multiple means of transport.
 
-The [MXChip IoT DevKit](https://aka.ms/iot-devkit) is an all-in-one Arduino compatible board with rich peripherals and sensors. You can develop for it using [Azure IoT Workbench ](https://aka.ms/azure-iot-workbench). And it comes with a growing [projects catalog](https://aka.ms/devkit/project-catalog) to guide you prototype Internet of Things (IoT) solutions that take advantage of Microsoft Azure services.
+## About IoT DevKit
+
+The [MXChip IoT DevKit](https://aka.ms/iot-devkit) (a.k.a. IoT DevKit) is an all-in-one Arduino compatible board with rich peripherals and sensors. You can develop for it using [Azure IoT Workbench ](https://aka.ms/azure-iot-workbench). And it comes with a growing [projects catalog](https://aka.ms/devkit/project-catalog) to guide you prototype Internet of Things (IoT) solutions that take advantage of Microsoft Azure services.
 
 ## What you need
 
 Finish the [Getting Started Guide](./devkit-get-started.md) to:
 
-* Have your DevKit connected to Wi-Fi.
+* Have your IoT DevKit connected to Wi-Fi.
 * Prepare the development environment.
 
 ## Open the project folder
