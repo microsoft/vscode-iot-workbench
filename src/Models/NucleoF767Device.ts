@@ -6,7 +6,9 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import {volumelist} from 'volumelist';
+import * as copypaste from 'copy-paste';
 
+import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames} from '../constants';
 import {MbedLibrary, ProjectTemplateType} from '../Models/Interfaces/ProjectTemplate';
 import * as utils from '../utils';
@@ -262,6 +264,36 @@ export class NucleoF767Device implements Device {
   }
 
   async configDeviceSettings(): Promise<boolean> {
+    const configSelectionItems: vscode.QuickPickItem[] = [{
+      label: 'Copy device connection string',
+      description: 'Copy device connection string',
+      detail: 'Copy'
+    }];
+
+    const configSelection =
+        await vscode.window.showQuickPick(configSelectionItems, {
+          ignoreFocusOut: true,
+          matchOnDescription: true,
+          matchOnDetail: true,
+          placeHolder: 'Select an option',
+        });
+
+    if (!configSelection) {
+      return false;
+    }
+
+    if (configSelection.detail === 'Copy') {
+      const deviceConnectionString =
+          ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
+
+      if (!deviceConnectionString) {
+        throw new Error(
+            'Unable to get the device connection string, please invoke the command of Azure Provision first.');
+      }
+      copypaste.copy(deviceConnectionString);
+      return true;
+    }
+
     return false;
   }
 }
