@@ -1,18 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as cp from 'child_process';
 import * as fs from 'fs-plus';
 import * as os from 'os';
 import * as path from 'path';
-import * as request from 'request-promise';
-import {error} from 'util';
 import * as vscode from 'vscode';
+import {volumelist} from 'volumelist';
 
-import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames} from '../constants';
 import {MbedLibrary, ProjectTemplateType} from '../Models/Interfaces/ProjectTemplate';
-import {IoTProject} from '../Models/IoTProject';
 import * as utils from '../utils';
 
 import {Component, ComponentType} from './Interfaces/Component';
@@ -137,7 +133,6 @@ export class NucleoF767Device implements Device {
     }
 
     // Create mbed.json file
-    // Create arduino.json config file
     const mbedJSONFilePath =
         path.join(vscodeFolderPath, constants.mbedJsonFileName);
     const mbedJSONObj = {
@@ -222,6 +217,47 @@ export class NucleoF767Device implements Device {
   }
 
   async upload(): Promise<boolean> {
+    try {
+      await utils.checkMbedExists();
+    } catch {
+      throw new Error('Unable to detect the mbed.');
+    }
+
+
+    const volumes = await volumelist();
+
+    const driveSelection =
+          await vscode.window.showQuickPick(volumes, {
+            ignoreFocusOut: true,
+            matchOnDescription: true,
+            matchOnDetail: true,
+            placeHolder: 'Select a drive to copy firmware.',
+    });
+    if (!driveSelection) {
+      //cancelled
+      return false;
+    }
+    else{
+      let command = `mbed compile -m ${constants.MCU} -t ${constants.toochain}`;
+      if (this.profileFile) {
+        const profilePath = path.join(
+            this.deviceFolder, FileNames.vscodeSettingsFolderName,
+            this.profileFile);
+        command += ` --profile ${profilePath}`;
+      }
+
+      const plat = os.platform();
+      const firmwarePath = path.join('BUILD', constants.MCU, constants.toochain, 'device.bin');
+      if (plat === 'win32') {
+        command += ` && copy ${firmwarePath} ${driveSelection}`;
+      } else {
+        command += ` && cp ${firmwarePath} ${driveSelection}`;
+      }
+
+      this.channel.show();
+      this.channel.appendLine('Start compiling and uploading:');
+      await utils.runCommand(command, this.deviceFolder, this.channel);
+    }
     return true;
   }
 
