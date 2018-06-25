@@ -40,6 +40,8 @@ Here are a set of tutorials that will help you get started:
 * [Shake, Shake for a Tweet](./docs/iot-devkit/devkit-shakeshake.md)
 * [Remote Monitoring](./docs/iot-devkit/devkit_remote_monitoringv2.md)
 * [DevKit Translator](./docs/iot-devkit/devkit-translator.md)
+* [MQTT Client](./docs/iot-devkit/devkit-mqtt-client.md)
+* [DevKit State](./docs/iot-devkit/devkit-state.md)
 * [Door Monitor](./docs/iot-devkit/devkit_door_monitor.md)
 
 ### teXXmo IoT button
