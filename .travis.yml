@@ -23,9 +23,6 @@ install:
 - npm install
 
 script:
-- gts --version
-- cat node_modules/gts/tsconfig-google.json
-- gts fix
 - gts check
 - node genAiKey.js
 - vsce package
