@@ -48,7 +48,7 @@ export class UsbDetector {
       const board = boardProvider.find(
           {vendorId: device.vendorId, productId: device.productId});
 
-      if (board) {
+      if (board && board.exampleUrl) {
         ArduinoPackageManager.installBoard(board);
         vscode.commands.executeCommand(
             'vscode.previewHtml',

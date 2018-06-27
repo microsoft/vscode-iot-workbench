@@ -24,6 +24,7 @@ import {Workspace} from './Interfaces/Workspace';
 import {IoTButtonDevice} from './IoTButtonDevice';
 import {IoTHub} from './IoTHub';
 import {IoTHubDevice} from './IoTHubDevice';
+import {RaspberryPiDevice} from './RaspberryPiDevice';
 
 const constants = {
   deviceDefaultFolderName: 'Device',
@@ -95,6 +96,10 @@ export class IoTProject {
       } else if (boardId === IoTButtonDevice.boardId) {
         const device =
             new IoTButtonDevice(this.extensionContext, deviceLocation);
+        this.componentList.push(device);
+      } else if (boardId === RaspberryPiDevice.boardId) {
+        const device = new RaspberryPiDevice(
+            this.extensionContext, deviceLocation, this.channel);
         this.componentList.push(device);
       }
     }
@@ -257,6 +262,10 @@ export class IoTProject {
     } else if (boardId === IoTButtonDevice.boardId) {
       device = new IoTButtonDevice(
           this.extensionContext, deviceDir, projectTemplateItem.sketch);
+    } else if (boardId === RaspberryPiDevice.boardId) {
+      device = new RaspberryPiDevice(
+          this.extensionContext, deviceDir, this.channel,
+          projectTemplateItem.sketch);
     } else {
       throw new Error('The specified board is not supported.');
     }
