@@ -23,6 +23,9 @@ install:
 - npm install
 
 script:
+- tsc --version
+- gts --version
+- cat node_modules/gts/tsconfig-google.json
 - gts check
 - node genAiKey.js
 - vsce package
