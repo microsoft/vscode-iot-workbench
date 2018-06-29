@@ -47,8 +47,10 @@ Follow these steps to prepare the development environment for Raspberry Pi:
 1. Install [Visual Studio Code](https://code.visualstudio.com/), a cross platform source code editor with powerful developer tooling, like IntelliSense code completion and debugging.
 
 2. Look for **Azure IoT Workbench** in the extension marketplace and install it.
-    ![Install IoT Workbench](media/raspi-get-started/install-workbench.png)
-    Together with the IoT Workbench, other dependent extensions will be installed.
+
+  ![Install IoT Workbench](media/raspi-get-started/install-workbench.png)
+
+Together with the IoT Workbench, other dependent extensions will be installed.
 
 ## Build your first project
 
@@ -112,7 +114,7 @@ The whole process includes:
 
 5. The configuration success notification popup bottom right corner once it's done.
 
-    ![Raspberry Pi Connection String OK](media/iot-workbench-connection-done.png) 
+  ![Raspberry Pi Connection String OK](media/iot-workbench-connection-done.png) 
 
 ### Upload the device code
 
