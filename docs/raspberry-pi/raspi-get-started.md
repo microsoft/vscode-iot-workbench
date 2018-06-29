@@ -125,7 +125,8 @@ The whole process includes:
   ![IoT Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
 
 3. Select **Select Config Raspberry Pi SSH**.
-  ![IoT Workbench: Device -> Settings](media/iot-workbench-device-ssh.png)
+
+  ![IoT Workbench: Device -> SSH](media/iot-workbench-device-ssh.png)
 
 4. Input Raspberry Pi host name or IP, ssh port, user name, password and project name.
 
