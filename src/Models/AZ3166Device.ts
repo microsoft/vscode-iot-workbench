@@ -455,17 +455,18 @@ export class AZ3166Device extends ArduinoDeviceBase {
           setTimeout(() => {
             if (errorRejected) return;
             // Prompt user to enter configuration mode
-            vscode.window
-                .showInformationMessage(
-                    'Please hold down button A and then push and release the reset button to enter configuration mode.')
-                .then(() => {
-                  if (!gotData || !configMode) {
+
+            if (!gotData || !configMode) {
+              vscode.window
+                  .showInformationMessage(
+                      'Please hold down button A and then push and release the reset button to enter configuration mode.')
+                  .then(() => {
                     // tslint:disable-next-line: no-any
                     port.write('\r\nhelp\r\n', (error: any) => {
                       rejectIfError(error);
                     });
-                  }
-                });
+                  });
+            }
           }, 10000);
         });
   }

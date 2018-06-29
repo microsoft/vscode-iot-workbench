@@ -1,6 +1,6 @@
-# Shake, Shake for a Tweet -- Retrieve a Twitter message with Azure Functions!
+# DevKit State
 
-In this tutorial, you learn how to use the motion sensor to trigger an event using Azure Functions. The app retrieves a random tweet with a #hashtag you configure in your Arduino sketch. The tweet displays on the IoT DevKit screen.
+In this tutorial, you can monitor the MXChip IoT DevKit WiFi information and sensor states and control the color of the user LED using Azure IoT Hub device twins.
 
 ## About IoT DevKit
 
@@ -17,6 +17,7 @@ An active Azure subscription. If you do not have one, you can register via one o
 
 - Activate a [free 30-day trial Microsoft Azure account](https://azure.microsoft.com/free/).
 - Claim your [Azure credit](https://azure.microsoft.com/pricing/member-offers/msdn-benefits-details/) if you are MSDN or Visual Studio subscriber.
+
 
 ## Open the project folder
 
@@ -41,11 +42,11 @@ Then the **IoT Workbench Example** window is showed up.
 
 ![IoT Workbench, Examples window](media/iot-workbench-examples.png)
 
-Find **Shake, Shake for a Tweet** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
+Find **DevKit State** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
 
-![IoT Workbench, select DevKit Translator example](media/devkit-translator/iot-workbench-example.png)
+![IoT Workbench, select DevKit State example](media/devkit-state/open-example-devkitstate.jpg)
 
-## Provision Azure services
+## Provision Azure Services
 
 In the solution window, open the command palette and select **IoT Workbench: Cloud**.
 
@@ -65,23 +66,13 @@ The whole process includes:
 - Select an existing IoT Hub device or create a new IoT Hub device. 
 - Create a new Function App.
 
-## Modify the #hashtag
-
-Open `ShakeShake.ino` and look for this line of code:
-
-```cpp
-static const char* iot_event = "{\"topic\":\"iot\"}";
-```
-
-Replace the string `iot` within the curly braces with your preferred hashtag. DevKit later retrieves a random tweet that includes the hashtag you specify in this step.
+Please take a note of the Function App name and IoT Hub device name you created. It will be used in the next section.
 
 ## Modify code for Azure Functions
-Open **shakeshake\run.csx** and look for this line of code::
+Open **devkit-state\run.csx** and modify the following line with the device name you provisioned in previous step:
 ```cpp
-    string deviceName = "AZ3166";
+static string deviceName = "";
 ```
-
-Replace **AZ3166** with the device name you provisioned in previous step.
 
 ## Deploy Azure Functions
 
@@ -126,66 +117,20 @@ Open the command palette and select **IoT Workbench: Cloud**, then select **Azur
 
 2. VS Code then starts verifying and uploading the code to your DevKit.
 
-   ![IoT Workbench: Device -> Uploaded](media/iot-devkit-shakeshake/iot-workbench-device-uploaded.png)
+   ![IoT Workbench: Device -> Uploaded](media/devkit-state/devkitstate-device-upload.jpg)
 
 3. The IoT DevKit reboots and starts running the code.
 
-## Test the project
+## Monitor DevKit State in Browser
 
-After app initialization, click and release button **A**, then gently shake the DevKit board. This action retrieves a random tweet, which contains the hashtag you specified earlier. Within a few seconds, a tweet displays on your DevKit screen:
+1. Open `web\index.html` in browser.
+2. Input the Function App name you write down.
+3. Click connect button.
+4. You should see DevKit state in a few seconds.
+![web page](media/devkit-state/devkit-state-function-app-name.png)
 
-**Arduino application initializing...**
-![Arduino-application-initializing](media/iot-devkit-shakeshake/devkit-result-1.png)
+## Control DevKit User LED
 
-**Press A to shake...**
-![Press-A-to-shake](media/iot-devkit-shakeshake/devkit-result-2.png)
-
-**Ready to shake...**
-![Ready-to-shake](media/iot-devkit-shakeshake/devkit-result-3.png)
-
-**Processing...**
-![Processing](media/iot-devkit-shakeshake/devkit-result-4.png)
-
-**Press B to read...**
-![Press-B-to-read](media/iot-devkit-shakeshake/devkit-result-5.png)
-
-**Display a random tweet...**
-![Display-a-random-tweet](media/iot-devkit-shakeshake/devkit-result-6.png)
-
-- Press button **A** again, then shake for a new tweet.
-- Press button **B** to scroll through the rest of the tweet.
-
-## How it works
-
-![diagram](media/iot-devkit-shakeshake/devkit-diagram.png)
-
-The Arduino sketch sends an event to the Azure IoT Hub. This event triggers the Azure Functions app. Azure Functions app contains the logic to connect to Twitter's API and retrieve a tweet. It then wraps the tweet text into a C2D (Cloud-to-device) message and sends it back to the device.
-
-## Optional: Use your own Twitter bearer token
-
-For testing purposes, this sample project uses a pre-configured Twitter bearer token. However, there is a [rate limit](https://dev.twitter.com/rest/reference/get/search/tweets) for every Twitter account. If you want to consider using your own token, follow these steps:
-
-1. Go to [Twitter Developer portal](https://dev.twitter.com/) to register a new Twitter app.
-
-2. [Get Consumer Key and Consumer Secrets](https://support.yapsody.com/hc/en-us/articles/203068116-How-do-I-get-a-Twitter-Consumer-Key-and-Consumer-Secret-key-) of your app.
-
-3. Use [some utility](https://gearside.com/nebula/utilities/twitter-bearer-token-generator/) to generate a Twitter bearer token from these two keys.
-
-4. Update the following line in `shakeshake/run.csx` with your own token:
-![update-token](media/iot-devkit-shakeshake/update-twitter-token.jpg)
-
-
-	```csharp
-	...
-	string authHeader = "Bearer " + "[your own token]";
-	...
-	```
-	
-
-5. Open the command palette and select **IoT Workbench: Cloud**, then select **Azure Deploy**.
-
-## Next Steps
-
-Now you make the IoT DevKit as a Twitter Reader by using Azure Functions.
-
-Check our [Projects Catalog](https://aka.ms/devkit/project-catalog) for more samples you can build with the IoT DevKit and Azure multiple services.
+1. Click User LED or RGB LED on the web page
+2. You should see the state of the leds changed in few seconds
+![devkit state](media/devkit-state/devkit-state.gif)

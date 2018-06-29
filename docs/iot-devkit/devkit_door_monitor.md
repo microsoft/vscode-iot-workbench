@@ -12,6 +12,10 @@ In this tutorial, you learn:
 > - Mount a magnet to the edge of a door.
 > - Mount the DevKit on the door jamb close to the magnet. Opening or closing the door will trigger the sensor, resulting in your receiving an email notification of the event.
 
+## About IoT DevKit
+
+The [MXChip IoT DevKit](https://aka.ms/iot-devkit) (a.k.a. IoT DevKit) is an all-in-one Arduino compatible board with rich peripherals and sensors. You can develop for it using [Azure IoT Workbench ](https://aka.ms/azure-iot-workbench). And it comes with a growing [projects catalog](https://aka.ms/devkit/project-catalog) to guide you prototype Internet of Things (IoT) solutions that take advantage of Microsoft Azure services.
+
 ## What you need
 
 Finish the [Getting Started Guide](./devkit-get-started.md) to:

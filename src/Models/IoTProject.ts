@@ -287,8 +287,8 @@ export class IoTProject {
     workspace.settings[`IoTWorkbench.${ConfigKey.devicePath}`] =
         constants.deviceDefaultFolderName;
 
-    const type: ProjectTemplateType =
-        (ProjectTemplateType)[projectTemplateItem.type as keyof typeof ProjectTemplateType];
+    const type: ProjectTemplateType = (ProjectTemplateType)
+        [projectTemplateItem.type as keyof typeof ProjectTemplateType];
 
     switch (type) {
       case ProjectTemplateType.Basic:
