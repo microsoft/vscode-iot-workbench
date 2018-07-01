@@ -102,7 +102,7 @@ The whole process includes:
 
   ![IoT Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
 
-3. Select **Select Config connection of IoT Hub Device**.
+3. Select **Config connection of IoT Hub Device**.
 
   ![IoT Workbench: Device -> Connection string](media/iot-workbench-device-string.png)
 
