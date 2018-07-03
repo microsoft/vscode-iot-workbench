@@ -47,7 +47,7 @@ Then the **IoT Workbench Example** window is showed up.
 
 Find **Simple LED** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
 
-![IoT Workbench, select Simple LED example](media/raspi-simple-led/open-example-simple-led.jpg)
+![IoT Workbench, select Simple LED example](media/raspi-simple-led/open-example-simple-led.png)
 
 ## Provision Azure Services
 
@@ -141,3 +141,5 @@ var functionName = '';
 
 1. Open `web\index.html` in browser.
 2. Click the switch to control the LED.
+
+![IoT Workbench: Cloud -> Deploy](media/raspi-simple-led/web.png)
