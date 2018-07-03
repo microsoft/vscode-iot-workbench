@@ -1,6 +1,12 @@
 # Change Log
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
 
+## Version 0.1.6
+- Release date: July 12, 2018
+
+### Added
+- Add Raspberry Pi into supported IoT hardware list.
+
 ## Version 0.1.2
 - Release date: May 14, 2018
 
