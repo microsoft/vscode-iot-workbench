@@ -136,7 +136,7 @@ Open the command palette and select **IoT Workbench: Cloud**, then select **Azur
 
 7. Login Raspberry Pi and run node code.
 
-  ![Run code on Raspberry Pi](media/raspi-simaple-led/run-code.png)
+  ![Run code on Raspberry Pi](media/raspi-simple-led/run-code.png)
 
 ## Control LED in Browser
 
