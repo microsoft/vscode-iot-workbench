@@ -11,6 +11,7 @@ IoT Workbench aims to support multiple popular IoT development boards and kits. 
 
 - [MXChip IoT DevKit](https://aka.ms/iot-devkit)
 - [teXXmo IoT button](https://aka.ms/button)
+- [Raspberry Pi](https://www.raspberrypi.org/)
 
 Please find the [Setup Guide](#setup-guide) section below to configure your hardware.
 
@@ -35,7 +36,9 @@ Currently this extension supports the following operatings systems:
 ### MXChip IoT DevKit
 
 Please follow the [guide](docs/iot-devkit.md) to setup IoT DevKit.
+
 Here are a set of tutorials that will help you get started:
+
 * [Get Started](./docs/iot-devkit/devkit-get-started.md)
 * [Shake, Shake for a Tweet](./docs/iot-devkit/devkit-shakeshake.md)
 * [Remote Monitoring](./docs/iot-devkit/devkit_remote_monitoringv2.md)
@@ -45,8 +48,17 @@ Here are a set of tutorials that will help you get started:
 * [Door Monitor](./docs/iot-devkit/devkit_door_monitor.md)
 
 ### teXXmo IoT button
+
 Here are a set of tutorials that will help you get started:
+
 * [Get Started](./docs/iot-button/teXXmo_IoT_button_get_started.md)
+
+### Raspberry Pi
+
+Here are a set of tutorials that will help you get started:
+
+* [Get Started](./docs/raspberry-pi/raspi-get-started.md)
+* [Simple LED](./docs/raspberry-pi/raspi-simple-led.md)
 
 ## Commands
 
