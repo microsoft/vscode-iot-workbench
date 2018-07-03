@@ -2,7 +2,7 @@
 
 Follow these quick steps to:
 - Prepare your development environment.
-- Send magnetoresistive sensor data from GY-271 electronic compass to the Azure IoT Hub.
+- Send magnetoresistive sensor data from [GY-271 electronic compass](http://www.robotpark.com/image/data/PRO/91457/GY_271_ELECTRONIC_COMPASS.pdf) to the Azure IoT Hub.
 
 ## What you learn
 
@@ -138,7 +138,11 @@ The whole process includes:
 
 6. VS Code then starts uploading the code to Raspberry Pi and install node modules.
 
+  ![IoT Workbench: Device -> Upload](media/iot-workbench-device-upload2.png)
+
 7. Login Raspberry Pi and run node code.
+
+  ![Run code on Raspberry Pi](media/raspi-get-started/run-code.png)
 
 ## Test the project
 

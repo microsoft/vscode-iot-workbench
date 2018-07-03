@@ -24,6 +24,8 @@ Connect LED VCC to GPIO 4, and GND to Ground.
 | VCC     | 4                 |
 | GND     | Ground            |
 
+![Hardware connections](media/raspi-simple-led/connect.jpg)
+
 ## Open the project folder
 
 ### Start VS Code
@@ -130,7 +132,11 @@ Open the command palette and select **IoT Workbench: Cloud**, then select **Azur
 
 6. VS Code then starts uploading the code to Raspberry Pi and install node modules.
 
+  ![IoT Workbench: Device -> Upload](media/iot-workbench-device-upload2.png)
+
 7. Login Raspberry Pi and run node code.
+
+  ![Run code on Raspberry Pi](media/raspi-simaple-led/run-code.png)
 
 ## Control LED in Browser
 
