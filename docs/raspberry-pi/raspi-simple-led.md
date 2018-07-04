@@ -4,12 +4,12 @@ In this tutorial, you can control the LED connected to Raspberry Pi GPIO using A
 
 ## What you need
 
-Finish the [Getting Started Guide](./raspi-get-started.md) to prepare the development environment.
+* Finish the [Getting Started Guide](./raspi-get-started.md) to prepare the development environment.
+* Enable SSH on Raspberry Pi and install Node.js. You can follow [this documentation](https://www.w3schools.com/nodejs/nodejs_raspberrypi.asp).
+* An active Azure subscription. If you do not have one, you can register via one of these two methods:
 
-An active Azure subscription. If you do not have one, you can register via one of these two methods:
-
-- Activate a [free 30-day trial Microsoft Azure account](https://azure.microsoft.com/free/).
-- Claim your [Azure credit](https://azure.microsoft.com/pricing/member-offers/msdn-benefits-details/) if you are MSDN or Visual Studio subscriber.
+  - Activate a [free 30-day trial Microsoft Azure account](https://azure.microsoft.com/free/).
+  - Claim your [Azure credit](https://azure.microsoft.com/pricing/member-offers/msdn-benefits-details/) if you are MSDN or Visual Studio subscriber.
 
 ## Prepare your hardware
 
@@ -102,13 +102,13 @@ Open the command palette and select **IoT Workbench: Cloud**, then select **Azur
 
 4. Select **Select IoT Hub Device Connection String**.
 
-   ![IoT Workbench: Device -> Connection string](media/iot-workbench-device-string1.png)
+  ![IoT Workbench: Device -> Connection string](media/iot-workbench-device-string1.png)
 
-   This sets the connection string that is retrieved from the `Provision Azure services` step.
+  This sets the connection string that is retrieved from the `Provision Azure services` step.
 
 5. The configuration success notification popup bottom right corner once it's done.
 
-   ![Raspberry Pi Connection String OK](media/iot-workbench-connection-done.png) 
+  ![Raspberry Pi Connection String OK](media/iot-workbench-connection-done.png) 
 
 ## Upload the device code
 
@@ -135,6 +135,26 @@ Open the command palette and select **IoT Workbench: Cloud**, then select **Azur
   ![IoT Workbench: Device -> Upload](media/iot-workbench-device-upload2.png)
 
 7. Login Raspberry Pi and run node code.
+
+Use command below to connect your Raspberry Pi with SSH. Change `pi` to your own user name, and `raspberrypi` to real Raspberry Pi host or IP.
+
+```bash
+ssh pi@raspberrypi
+```
+
+Then switch to the project folder, such as IoTProject.
+
+```bash
+cd IoTProject
+```
+
+Run the Node script.
+
+```bash
+node app.js
+```
+
+If you cannot execute ssh command in the terminal on Windows, you can use any other SSH client, such [PuTTY](https://www.putty.org/).
 
   ![Run code on Raspberry Pi](media/raspi-simple-led/run-code.png)
 
