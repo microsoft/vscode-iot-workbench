@@ -256,6 +256,9 @@ export class RaspberryPiDevice implements Device {
     if (configSelection.detail === 'Config SSH') {
       try {
         const res = await this.configSSH();
+        if (res) {
+          vscode.window.showInformationMessage('Config SSH successfully.');
+        }
         return res;
       } catch (error) {
         vscode.window.showWarningMessage('Config SSH failed.');
