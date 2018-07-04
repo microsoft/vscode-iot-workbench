@@ -14,6 +14,7 @@ Follow these quick steps to:
 ## What you need
 
 * A Raspberry Pi.
+* Enable SSH on Raspberry Pi and install Node.js. You can follow [this documentation](https://www.w3schools.com/nodejs/nodejs_raspberrypi.asp).
 * A GY-271 electronic compass.
 * A computer running Windows 10 or macOS 10.10+.
 * An active Azure subscription. [Activate a free 30-day trial Microsoft Azure account](https://azure.microsoft.com/en-us/free/).
@@ -141,6 +142,26 @@ The whole process includes:
   ![IoT Workbench: Device -> Upload](media/iot-workbench-device-upload2.png)
 
 7. Login Raspberry Pi and run node code.
+
+Use command below to connect your Raspberry Pi with SSH. Change `pi` to your own user name, and `raspberrypi` to real Raspberry Pi host or IP.
+
+```bash
+ssh pi@raspberrypi
+```
+
+Then switch to the project folder, such as IoTProject.
+
+```bash
+cd IoTProject
+```
+
+Run the Node script.
+
+```bash
+node app.js
+```
+
+If you cannot execute ssh command in the terminal on Windows, you can use any other SSH client, such [PuTTY](https://www.putty.org/).
 
   ![Run code on Raspberry Pi](media/raspi-get-started/run-code.png)
 
