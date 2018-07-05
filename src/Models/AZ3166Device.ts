@@ -50,10 +50,10 @@ const constants = {
   traceExtraFlag: ' -DENABLETRACE='
 };
 
-const options = {
-  ConnectionString: 0,
-  UDS: 1
-};
+enum configDeviceOptions {
+  ConnectionString,
+  UDS
+}
 
 async function cmd(command: string) {
   exec(command, Promise.resolve);
@@ -432,10 +432,10 @@ export class AZ3166Device implements Device {
         const plat = os.platform();
         if (plat === 'win32') {
           res = await this.flushDeviceConfig(
-              deviceConnectionString, options.ConnectionString);
+              deviceConnectionString, configDeviceOptions.ConnectionString);
         } else {
           res = await this.flushDeviceConfigUnix(
-              deviceConnectionString, options.ConnectionString);
+              deviceConnectionString, configDeviceOptions.ConnectionString);
         }
 
         if (res === false) {
@@ -456,7 +456,7 @@ export class AZ3166Device implements Device {
           prompt: `Please input UDS here.`,
           ignoreFocusOut: true,
           validateInput: (UDS: string) => {
-            if (/^([0-9a-f]){64,64}$/i.test(UDS) === false) {
+            if (/^([0-9a-f]){64}$/i.test(UDS) === false) {
               return 'The format of the UDS is invalid. Please provide a valid UDS.';
             }
             return '';
@@ -475,9 +475,9 @@ export class AZ3166Device implements Device {
         let res: boolean;
         const plat = os.platform();
         if (plat === 'win32') {
-          res = await this.flushDeviceConfig(UDS, options.UDS);
+          res = await this.flushDeviceConfig(UDS, configDeviceOptions.UDS);
         } else {
-          res = await this.flushDeviceConfigUnix(UDS, options.UDS);
+          res = await this.flushDeviceConfigUnix(UDS, configDeviceOptions.UDS);
         }
 
         if (res === false) {
@@ -503,7 +503,7 @@ export class AZ3166Device implements Device {
             const list = await SerialPortLite.list();
             let devkitConnected = false;
             const az3166 = this.board;
-            if (option === options.ConnectionString) {
+            if (option === configDeviceOptions.ConnectionString) {
               command = 'set_az_iothub';
             } else {
               command = 'set_dps_uds';
@@ -590,7 +590,7 @@ export class AZ3166Device implements Device {
           } catch (error) {
             reject(error);
           }
-          if (option === options.ConnectionString) {
+          if (option === configDeviceOptions.ConnectionString) {
             command = 'set_az_iothub';
           } else {
             command = 'set_dps_uds';
