@@ -50,6 +50,11 @@ const constants = {
   traceExtraFlag: ' -DENABLETRACE='
 };
 
+const options = {
+  ConnectionString: 0,
+  UDS: 1
+};
+
 async function cmd(command: string) {
   exec(command, Promise.resolve);
 }
@@ -329,16 +334,18 @@ export class AZ3166Device implements Device {
     ];
 
     const configSelection =
-    await vscode.window.showQuickPick(configSelectionItems, {
-      ignoreFocusOut: true,
-      matchOnDescription: true,
-      matchOnDetail: true,
-      placeHolder: 'Select an option',
-    });
+        await vscode.window.showQuickPick(configSelectionItems, {
+          ignoreFocusOut: true,
+          matchOnDescription: true,
+          matchOnDetail: true,
+          placeHolder: 'Select an option',
+        });
 
     if (!configSelection) {
       return false;
     }
+
+
 
     if (configSelection.detail === 'Config Connection String') {
       try {
@@ -424,10 +431,11 @@ export class AZ3166Device implements Device {
         let res: boolean;
         const plat = os.platform();
         if (plat === 'win32') {
-          res = await this.flushDeviceConfig(deviceConnectionString, 0);
+          res = await this.flushDeviceConfig(
+              deviceConnectionString, options.ConnectionString);
         } else {
-          res =
-              await this.flushDeviceConfigUnix(deviceConnectionString, 0);
+          res = await this.flushDeviceConfigUnix(
+              deviceConnectionString, options.ConnectionString);
         }
 
         if (res === false) {
@@ -440,31 +448,24 @@ export class AZ3166Device implements Device {
       } catch (error) {
         throw error;
       }
-    }else{
+    } else {
       try {
         const option: vscode.InputBoxOptions = {
           value:
-            '19e25a259d0c2be03a02d416c05c48ccd0cc7d1743458aae1cb488b074993eae',
+              '19e25a259d0c2be03a02d416c05c48ccd0cc7d1743458aae1cb488b074993eae',
           prompt: `Please input UDS here.`,
-            ignoreFocusOut: true
+          ignoreFocusOut: true,
+          validateInput: (UDS: string) => {
+            if (/^([0-9a-f]){64,64}$/i.test(UDS) === false) {
+              return 'The format of the UDS is invalid. Please provide a valid UDS.';
+            }
+            return '';
+          }
         };
 
-        let UDS = await vscode.window.showInputBox(option);
-        if (!UDS) {
-          return false;
-        }
-        let uds_test = /^(0[xX]){0,1}([A-Fa-f0-9]){64,64}$/;
-        if (uds_test.test(UDS) == false) {
-            throw new Error(
-            'The format of the UDS is invalid. Please provide a valid UDS.');
-        }
+        const UDS = await vscode.window.showInputBox(option);
 
-        uds_test = /^(0[xX])/;
-        if(uds_test.test(UDS) == true){
-          UDS = UDS.substring(2);
-        }
-        
-        if (!UDS) {
+        if (UDS === undefined) {
           return false;
         }
 
@@ -474,17 +475,15 @@ export class AZ3166Device implements Device {
         let res: boolean;
         const plat = os.platform();
         if (plat === 'win32') {
-          res = await this.flushDeviceConfig(UDS, 1);
+          res = await this.flushDeviceConfig(UDS, options.UDS);
         } else {
-          res =
-              await this.flushDeviceConfigUnix(UDS, 1);
+          res = await this.flushDeviceConfigUnix(UDS, options.UDS);
         }
 
         if (res === false) {
           return false;
         } else {
-          vscode.window.showInformationMessage(
-              'Configure UDS successfully.');
+          vscode.window.showInformationMessage('Configure UDS successfully.');
           return true;
         }
       } catch (error) {
@@ -493,24 +492,21 @@ export class AZ3166Device implements Device {
     }
   }
 
-  //choice 0: config connection string
-  //choice 1: config UDS
-  async flushDeviceConfigUnix(configValue: string, choice: number):
+  async flushDeviceConfigUnix(configValue: string, option: number):
       Promise<boolean> {
-
     return new Promise(
         async (
             resolve: (value: boolean) => void,
             reject: (reason: Error) => void) => {
-          let mode = '';
+          let command = '';
           try {
             const list = await SerialPortLite.list();
             let devkitConnected = false;
             const az3166 = this.board;
-            if (choice == 0){
-              mode = 'set_az_iothub';
-            }else{
-              mode = 'set_dps_uds';
+            if (option === options.ConnectionString) {
+              command = 'set_az_iothub';
+            } else {
+              command = 'set_dps_uds';
             }
             if (!az3166) {
               return reject(
@@ -551,8 +547,7 @@ export class AZ3166Device implements Device {
                   await cmd(
                       'screen -X -S devkit quit && sleep 1 && rm -f screenlog.*');
                   const res = await SerialPortLite.write(
-                      device.port, `${mode} "${configValue}"\r`,
-                      115200);
+                      device.port, `${command} "${configValue}"\r`, 115200);
                   return resolve(res);
                 } else {
                   fs.watchFile(screenLogFile, async () => {
@@ -564,8 +559,7 @@ export class AZ3166Device implements Device {
                       await cmd(
                           'screen -X -S devkit quit && sleep 1 && rm -f screenlog.*');
                       const res = await SerialPortLite.write(
-                          device.port, `${mode} "${configValue}"\r`,
-                          115200);
+                          device.port, `${command} "${configValue}"\r`, 115200);
                       return resolve(res);
                     }
                   });
@@ -581,28 +575,25 @@ export class AZ3166Device implements Device {
         });
   }
 
-  //choice 0: config connection string
-  //choice 1: config UDS
-  async flushDeviceConfig(configValue: string, choice: number):
+  async flushDeviceConfig(configValue: string, option: number):
       Promise<boolean> {
     return new Promise(
         async (
             resolve: (value: boolean) => void,
             reject: (value: Error) => void) => {
           let comPort = '';
-          let mode = '';
+          let command = '';
           try {
-
             // Chooes COM port that AZ3166 is connected
             comPort = await this.chooseCOM();
             console.log(`Opening ${comPort}.`);
           } catch (error) {
             reject(error);
           }
-          if (choice == 0){
-              mode = 'set_az_iothub';
-            }else{
-              mode = 'set_dps_uds';
+          if (option === options.ConnectionString) {
+            command = 'set_az_iothub';
+          } else {
+            command = 'set_dps_uds';
           }
           let configMode = false;
           let errorRejected = false;
@@ -641,7 +632,7 @@ export class AZ3166Device implements Device {
 
           const executeSetAzIoTHub = async () => {
             try {
-              const data = `${mode} "${configValue}"\r\n`;
+              const data = `${command} "${configValue}"\r\n`;
               await this.sendDataViaSerialPort(port, data.slice(0, 120));
               if (data.length > 120) {
                 await delay(1000);
