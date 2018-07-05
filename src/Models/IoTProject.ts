@@ -100,6 +100,7 @@ export class IoTProject {
         this.componentList.push(device);
       } else if (boardId === Esp32Device.boardId) {
         const device = new Esp32Device(this.extensionContext, deviceLocation);
+        this.componentList.push(device);
       } else if (boardId === RaspberryPiDevice.boardId) {
         const device = new RaspberryPiDevice(
             this.extensionContext, deviceLocation, this.channel);
