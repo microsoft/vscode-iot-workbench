@@ -450,9 +450,17 @@ export class AZ3166Device implements Device {
       }
     } else {
       try {
+        function generateRandomHex(): string {
+          const chars = '0123456789abcdef'.split('');
+          let hexNum = '';
+          for (let i = 0; i < 64; i++) {
+            hexNum += chars[Math.floor(Math.random() * 16)];
+          }
+          return hexNum;
+        }
+
         const option: vscode.InputBoxOptions = {
-          value:
-              '19e25a259d0c2be03a02d416c05c48ccd0cc7d1743458aae1cb488b074993eae',
+          value: generateRandomHex(),
           prompt: `Please input UDS here.`,
           ignoreFocusOut: true,
           validateInput: (UDS: string) => {
