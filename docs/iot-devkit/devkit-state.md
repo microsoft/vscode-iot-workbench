@@ -23,10 +23,9 @@ An active Azure subscription. If you do not have one, you can register via one o
 
 ### Start VS Code
 
-- Start VS Code.
-- Connect the DevKit to your computer.
-- Connect the IoT DevKit to your computer.
+- Start Visual Studio Code.
 - Make sure [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
+- Connect IoT DevKit to your PC.
 
 ### Open IoT Workbench Examples
 
