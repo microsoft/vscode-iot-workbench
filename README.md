@@ -108,16 +108,16 @@ There are a couple of ways you can contribute to this repo:
 
   - Create a git repo to host the code of your example project.
   - Write a tutorial to describe how to run the example.
-  - Submit a [new issue](https://github.com/Microsoft/vscode-iot-workbench/issues/new) and provide the follow information:
+  - Submit a [new issue](https://github.com/Microsoft/vscode-iot-workbench/issues/new) and provide the following information:
   
   | Item | Description |
   | --- | --- |
   | `Name` | Name of the example to be displayed in example gallery. |
   | `Folder name` | Name of the folder to host the example. |
   | `Description` | A short statement to describe the example. |
-  | `Location` | URL of the Github repo. |
+  | `Location` | URL of the GitHub repo. |
   | `Image` | URL of the image shown in example gallery for your example, if not provided, the default image will be used. |
-  | `Tutorial` | URL of tutorial that describe how to run the example. |
+  | `Tutorial` | URL of tutorial that describes how to run the example. |
   | `Difficulty` | Difficulty of the example, easy, medium or difficult. |
 
 ## Code of Conduct
