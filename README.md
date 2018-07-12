@@ -104,6 +104,21 @@ There are a couple of ways you can contribute to this repo:
   - To build, press `F1` and type in `Tasks: Run Build Task`.
   - Debug: press `F5` to start debugging the extension.
   - Run `gts check` and `gts fix` to follow TypeScript style guide.  
+- **Example**: Contribute examples for the supported devices.
+
+  - Create a git repo to host the code of your example project.
+  - Write a tutorial to describe how to run the example.
+  - Submit a [new issue](https://github.com/Microsoft/vscode-iot-workbench/issues/new) and provide the follow information:
+  
+  | Item | Description |
+  | --- | --- |
+  | `Name` | Name of the example to be displayed in example gallery. |
+  | `Folder name` | Name of the folder to host the example. |
+  | `Description` | A short statement to describe the example. |
+  | `Location` | URL of the Github repo. |
+  | `Image` | URL of the image shown in example gallery for your example, if not provided, the default image will be used. |
+  | `Tutorial URL` | URL of tutorial that describe how to run the example. |
+  | `Difficulty` | Difficulty of the example, easy, medium or difficult. |
 
 ## Code of Conduct
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct). For more information please see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/#howadopt) or contact opencode@microsoft.com with any additional questions or comments.
