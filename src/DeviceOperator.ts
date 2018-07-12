@@ -12,6 +12,8 @@ import {TelemetryContext} from './telemetry';
 import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
+import {ConfigHandler} from './configHandler';
+import {ConfigKey} from './constants';
 
 export class DeviceOperator {
   async compile(
@@ -69,45 +71,22 @@ export class DeviceOperator {
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     const boardProvider = new BoardProvider(context);
-    const boardItemList: BoardQuickPickItem[] = [];
-    const boards = boardProvider.list.filter(board => board.installation);
-    boards.forEach((board: Board) => {
-      boardItemList.push({
-        name: board.name,
-        id: board.id,
-        detailInfo: board.detailInfo,
-        label: board.name,
-        description: board.detailInfo,
-      });
-    });
-
-    const boardSelection = await vscode.window.showQuickPick(boardItemList, {
-      ignoreFocusOut: true,
-      matchOnDescription: true,
-      matchOnDetail: true,
-      placeHolder: 'Select a board',
-    });
-
-    if (!boardSelection) {
-      telemetryContext.properties.errorMessage = 'Board selection canceled.';
-      telemetryContext.properties.result = 'Canceled';
-      return false;
-    } else {
-      telemetryContext.properties.board = boardSelection.label;
-      try {
-        const board = boardProvider.find({id: boardSelection.id});
-
-        if (board) {
-          await ArduinoPackageManager.installBoard(board);
-        }
-      } catch (error) {
-        throw new Error(`Device package for ${
-            boardSelection.label} installation failed: ${error.message}`);
-      }
+    const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
+    const board = boardProvider.find({id: boardId});
+    if (board === undefined) {
+      throw new Error(`Board Id ${boardId} not found.`);
     }
-
+    try {
+      telemetryContext.properties.board = board.name;
+      if (board) {
+        await ArduinoPackageManager.installBoard(board);
+      }
+    } catch (error) {
+      throw new Error(`Device package for ${board.name} installation failed: ${
+          error.message}`);
+    }
     vscode.window.showInformationMessage(
-        `Device package for ${boardSelection.label} has been installed.`);
+        `Device package for ${board.name} has been installed.`);
     return true;
   }
 }
