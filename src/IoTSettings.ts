@@ -11,16 +11,16 @@ export class IoTWorkbenchSettings {
   private _workbenchPath: string;
 
   constructor() {
-    const homeDitr = os.homedir();
+    const homeDir = os.homedir();
     const platform = os.platform();
     if (platform === 'win32') {
       this._workbenchPath =
-          path.join(homeDitr, 'Documents', 'IoTWorkbenchProjects');
+          path.join(homeDir, 'Documents', 'IoTWorkbenchProjects');
     } else if (platform === 'linux') {
-      this._workbenchPath = path.join(homeDitr, 'IoTWorkbenchProjects');
+      this._workbenchPath = path.join(homeDir, 'IoTWorkbenchProjects');
     } else if (platform === 'darwin') {
       this._workbenchPath =
-          path.join(homeDitr, 'Documents', 'IoTWorkbenchProjects');
+          path.join(homeDir, 'Documents', 'IoTWorkbenchProjects');
     } else {
       this._workbenchPath = '/IoTWorkbenchProjects';
     }
