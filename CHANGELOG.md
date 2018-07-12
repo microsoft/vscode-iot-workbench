@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
 ## Version 0.1.7
-- Release date: July 13, 2018
+- Release date: July 12, 2018
 
 ### Fixed
 - Hot fix for VS Code 1.25.0 breaking change.
