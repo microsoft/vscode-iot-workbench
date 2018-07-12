@@ -50,6 +50,11 @@ const constants = {
   traceExtraFlag: ' -DENABLETRACE='
 };
 
+enum configDeviceOptions {
+  ConnectionString,
+  UDS
+}
+
 async function cmd(command: string) {
   exec(command, Promise.resolve);
 }
@@ -316,118 +321,202 @@ export class AZ3166Device implements Device {
   }
 
   async configDeviceSettings(): Promise<boolean> {
-    try {
-      // Get IoT Hub device connection string from config
-      let deviceConnectionString =
-          ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
-
-      let hostName = '';
-      let deviceId = '';
-      if (deviceConnectionString) {
-        const hostnameMatches =
-            deviceConnectionString.match(/HostName=(.*?)(;|$)/);
-        if (hostnameMatches) {
-          hostName = hostnameMatches[0];
-        }
-
-        const deviceIDMatches =
-            deviceConnectionString.match(/DeviceId=(.*?)(;|$)/);
-        if (deviceIDMatches) {
-          deviceId = deviceIDMatches[0];
-        }
+    const configSelectionItems: vscode.QuickPickItem[] = [
+      {
+        label: 'Config Device Connection String',
+        description: 'Config Device Connection String',
+        detail: 'Config Connection String'
+      },
+      {
+        label: 'Config Device UDS',
+        description: 'Config Device UDS',
+        detail: 'Config UDS'
       }
+    ];
 
-      let deviceConnectionStringSelection: vscode.QuickPickItem[] = [];
-      if (deviceId && hostName) {
-        deviceConnectionStringSelection = [
-          {
-            label: 'Select IoT Hub Device Connection String',
-            description: '',
-            detail: `Device Information: ${hostName} ${deviceId}`
-          },
-          {
+    const configSelection =
+        await vscode.window.showQuickPick(configSelectionItems, {
+          ignoreFocusOut: true,
+          matchOnDescription: true,
+          matchOnDetail: true,
+          placeHolder: 'Select an option',
+        });
+
+    if (!configSelection) {
+      return false;
+    }
+
+
+
+    if (configSelection.detail === 'Config Connection String') {
+      try {
+        // Get IoT Hub device connection string from config
+        let deviceConnectionString =
+            ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
+
+        let hostName = '';
+        let deviceId = '';
+        if (deviceConnectionString) {
+          const hostnameMatches =
+              deviceConnectionString.match(/HostName=(.*?)(;|$)/);
+          if (hostnameMatches) {
+            hostName = hostnameMatches[0];
+          }
+
+          const deviceIDMatches =
+              deviceConnectionString.match(/DeviceId=(.*?)(;|$)/);
+          if (deviceIDMatches) {
+            deviceId = deviceIDMatches[0];
+          }
+        }
+
+        let deviceConnectionStringSelection: vscode.QuickPickItem[] = [];
+        if (deviceId && hostName) {
+          deviceConnectionStringSelection = [
+            {
+              label: 'Select IoT Hub Device Connection String',
+              description: '',
+              detail: `Device Information: ${hostName} ${deviceId}`
+            },
+            {
+              label: 'Input IoT Hub Device Connection String',
+              description: '',
+              detail: 'Input another...'
+            }
+          ];
+        } else {
+          deviceConnectionStringSelection = [{
             label: 'Input IoT Hub Device Connection String',
             description: '',
             detail: 'Input another...'
+          }];
+        }
+
+        const selection =
+            await vscode.window.showQuickPick(deviceConnectionStringSelection, {
+              ignoreFocusOut: true,
+              placeHolder: 'Choose IoT Hub Device Connection String'
+            });
+
+        if (!selection) {
+          return false;
+        }
+
+        if (selection.detail === 'Input another...') {
+          const option: vscode.InputBoxOptions = {
+            value:
+                'HostName=<Host Name>;DeviceId=<Device Name>;SharedAccessKey=<Device Key>',
+            prompt: `Please input device connection string here.`,
+            ignoreFocusOut: true
+          };
+
+          deviceConnectionString = await vscode.window.showInputBox(option);
+          if (!deviceConnectionString) {
+            return false;
           }
-        ];
-      } else {
-        deviceConnectionStringSelection = [{
-          label: 'Input IoT Hub Device Connection String',
-          description: '',
-          detail: 'Input another...'
-        }];
-      }
+          if ((deviceConnectionString.indexOf('HostName') === -1) ||
+              (deviceConnectionString.indexOf('DeviceId') === -1) ||
+              (deviceConnectionString.indexOf('SharedAccessKey') === -1)) {
+            throw new Error(
+                'The format of the IoT Hub Device connection string is invalid. Please provide a valid Device connection string.');
+          }
+        }
 
-      const selection =
-          await vscode.window.showQuickPick(deviceConnectionStringSelection, {
-            ignoreFocusOut: true,
-            placeHolder: 'Choose IoT Hub Device Connection String'
-          });
-
-      if (!selection) {
-        return false;
-      }
-
-      if (selection.detail === 'Input another...') {
-        const option: vscode.InputBoxOptions = {
-          value:
-              'HostName=<Host Name>;DeviceId=<Device Name>;SharedAccessKey=<Device Key>',
-          prompt: `Please input device connection string here.`,
-          ignoreFocusOut: true
-        };
-
-        deviceConnectionString = await vscode.window.showInputBox(option);
         if (!deviceConnectionString) {
           return false;
         }
-        if ((deviceConnectionString.indexOf('HostName') === -1) ||
-            (deviceConnectionString.indexOf('DeviceId') === -1) ||
-            (deviceConnectionString.indexOf('SharedAccessKey') === -1)) {
-          throw new Error(
-              'The format of the IoT Hub Device connection string is invalid. Please provide a valid Device connection string.');
+
+        console.log(deviceConnectionString);
+
+        // Set selected connection string to device
+        let res: boolean;
+        const plat = os.platform();
+        if (plat === 'win32') {
+          res = await this.flushDeviceConfig(
+              deviceConnectionString, configDeviceOptions.ConnectionString);
+        } else {
+          res = await this.flushDeviceConfigUnix(
+              deviceConnectionString, configDeviceOptions.ConnectionString);
         }
-      }
 
-      if (!deviceConnectionString) {
-        return false;
+        if (res === false) {
+          return false;
+        } else {
+          vscode.window.showInformationMessage(
+              'Configure Device connection string successfully.');
+          return true;
+        }
+      } catch (error) {
+        throw error;
       }
+    } else {
+      try {
+        function generateRandomHex(): string {
+          const chars = '0123456789abcdef'.split('');
+          let hexNum = '';
+          for (let i = 0; i < 64; i++) {
+            hexNum += chars[Math.floor(Math.random() * 16)];
+          }
+          return hexNum;
+        }
 
-      console.log(deviceConnectionString);
+        const option: vscode.InputBoxOptions = {
+          value: generateRandomHex(),
+          prompt: `Please input UDS here.`,
+          ignoreFocusOut: true,
+          validateInput: (UDS: string) => {
+            if (/^([0-9a-f]){64}$/i.test(UDS) === false) {
+              return 'The format of the UDS is invalid. Please provide a valid UDS.';
+            }
+            return '';
+          }
+        };
 
-      // Set selected connection string to device
-      let res: boolean;
-      const plat = os.platform();
-      if (plat === 'win32') {
-        res = await this.flushDeviceConnectionString(deviceConnectionString);
-      } else {
-        res =
-            await this.flushDeviceConnectionStringUnix(deviceConnectionString);
+        const UDS = await vscode.window.showInputBox(option);
+
+        if (UDS === undefined) {
+          return false;
+        }
+
+        console.log(UDS);
+
+        // Set selected connection string to device
+        let res: boolean;
+        const plat = os.platform();
+        if (plat === 'win32') {
+          res = await this.flushDeviceConfig(UDS, configDeviceOptions.UDS);
+        } else {
+          res = await this.flushDeviceConfigUnix(UDS, configDeviceOptions.UDS);
+        }
+
+        if (res === false) {
+          return false;
+        } else {
+          vscode.window.showInformationMessage('Configure UDS successfully.');
+          return true;
+        }
+      } catch (error) {
+        throw error;
       }
-
-      if (res === false) {
-        return false;
-      } else {
-        vscode.window.showInformationMessage(
-            'Configure Device connection string successfully.');
-        return true;
-      }
-    } catch (error) {
-      throw error;
     }
   }
 
-  async flushDeviceConnectionStringUnix(connectionString: string):
+  async flushDeviceConfigUnix(configValue: string, option: number):
       Promise<boolean> {
     return new Promise(
         async (
             resolve: (value: boolean) => void,
             reject: (reason: Error) => void) => {
+          let command = '';
           try {
             const list = await SerialPortLite.list();
             let devkitConnected = false;
             const az3166 = this.board;
-
+            if (option === configDeviceOptions.ConnectionString) {
+              command = 'set_az_iothub';
+            } else {
+              command = 'set_dps_uds';
+            }
             if (!az3166) {
               return reject(
                   new Error('AZ3166 is not found in the board list.'));
@@ -467,8 +556,7 @@ export class AZ3166Device implements Device {
                   await cmd(
                       'screen -X -S devkit quit && sleep 1 && rm -f screenlog.*');
                   const res = await SerialPortLite.write(
-                      device.port, `set_az_iothub "${connectionString}"\r`,
-                      115200);
+                      device.port, `${command} "${configValue}"\r`, 115200);
                   return resolve(res);
                 } else {
                   fs.watchFile(screenLogFile, async () => {
@@ -480,8 +568,7 @@ export class AZ3166Device implements Device {
                       await cmd(
                           'screen -X -S devkit quit && sleep 1 && rm -f screenlog.*');
                       const res = await SerialPortLite.write(
-                          device.port, `set_az_iothub "${connectionString}"\r`,
-                          115200);
+                          device.port, `${command} "${configValue}"\r`, 115200);
                       return resolve(res);
                     }
                   });
@@ -497,13 +584,14 @@ export class AZ3166Device implements Device {
         });
   }
 
-  async flushDeviceConnectionString(connectionString: string):
+  async flushDeviceConfig(configValue: string, option: number):
       Promise<boolean> {
     return new Promise(
         async (
             resolve: (value: boolean) => void,
             reject: (value: Error) => void) => {
           let comPort = '';
+          let command = '';
           try {
             // Chooes COM port that AZ3166 is connected
             comPort = await this.chooseCOM();
@@ -511,7 +599,11 @@ export class AZ3166Device implements Device {
           } catch (error) {
             reject(error);
           }
-
+          if (option === configDeviceOptions.ConnectionString) {
+            command = 'set_az_iothub';
+          } else {
+            command = 'set_dps_uds';
+          }
           let configMode = false;
           let errorRejected = false;
           let commandExecuted = false;
@@ -549,7 +641,7 @@ export class AZ3166Device implements Device {
 
           const executeSetAzIoTHub = async () => {
             try {
-              const data = `set_az_iothub "${connectionString}"\r\n`;
+              const data = `${command} "${configValue}"\r\n`;
               await this.sendDataViaSerialPort(port, data.slice(0, 120));
               if (data.length > 120) {
                 await delay(1000);
