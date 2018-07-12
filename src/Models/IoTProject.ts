@@ -25,6 +25,7 @@ import {IoTButtonDevice} from './IoTButtonDevice';
 import {IoTHub} from './IoTHub';
 import {IoTHubDevice} from './IoTHubDevice';
 import {RaspberryPiDevice} from './RaspberryPiDevice';
+import {Simulator} from './Simulator';
 
 const constants = {
   deviceDefaultFolderName: 'Device',
@@ -100,6 +101,10 @@ export class IoTProject {
       } else if (boardId === RaspberryPiDevice.boardId) {
         const device = new RaspberryPiDevice(
             this.extensionContext, deviceLocation, this.channel);
+        this.componentList.push(device);
+      } else if (boardId === Simulator.boardId) {
+        const device =
+            new Simulator(this.extensionContext, deviceLocation, this.channel);
         this.componentList.push(device);
       }
     }
@@ -264,6 +269,10 @@ export class IoTProject {
           this.extensionContext, deviceDir, projectTemplateItem.sketch);
     } else if (boardId === RaspberryPiDevice.boardId) {
       device = new RaspberryPiDevice(
+          this.extensionContext, deviceDir, this.channel,
+          projectTemplateItem.sketch);
+    } else if (boardId === Simulator.boardId) {
+      device = new Simulator(
           this.extensionContext, deviceDir, this.channel,
           projectTemplateItem.sketch);
     } else {
