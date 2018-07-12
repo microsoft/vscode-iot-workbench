@@ -32,7 +32,7 @@
             "name": "Simulator",
             "id": "simulator",
             "detailInfo": "Simulate the connection between device and IoT hub",
-            "helpUrl": "https://www.raspberrypi.org/",
+            "helpUrl": "https://github.com/Microsoft/vscode-iot-workbench",
             "exampleUrl": "https://raw.githubusercontent.com/ab-sin-the/my-test-folder/master/simulator-example.json"
         }
     ]
