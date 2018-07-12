@@ -1,5 +1,5 @@
 {
-  "name": "iot-workbench-raspi",
+  "name": "iot-workbench-simulator",
   "version": "0.1.0",
   "main": "app.js",
   "dependencies": {
