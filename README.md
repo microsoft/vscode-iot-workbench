@@ -117,7 +117,7 @@ There are a couple of ways you can contribute to this repo:
   | `Description` | A short statement to describe the example. |
   | `Location` | URL of the Github repo. |
   | `Image` | URL of the image shown in example gallery for your example, if not provided, the default image will be used. |
-  | `Tutorial URL` | URL of tutorial that describe how to run the example. |
+  | `Tutorial` | URL of tutorial that describe how to run the example. |
   | `Difficulty` | Difficulty of the example, easy, medium or difficult. |
 
 ## Code of Conduct
