@@ -11,3 +11,7 @@ export interface AzureComponentConfig {
   dependencies: string[];
   componentInfo?: ComponentInfo;
 }
+
+export interface AzureConfigs{
+  componentConfigs: AzureComponentConfig[];
+}

@@ -10,7 +10,7 @@ import {ConfigHandler} from '../configHandler';
 import {AzureComponentsStorage, ConfigKey} from '../constants';
 
 import {getExtension} from './Apis';
-import {AzureComponentConfig} from './AzureComponentConfig';
+import {AzureComponentConfig, AzureConfigs} from './AzureComponentConfig';
 import {extensionName} from './Interfaces/Api';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
@@ -47,11 +47,11 @@ export class IoTHub implements Component, Provisionable {
       return false;
     }
 
-    let azureConfigs: AzureComponentConfig[] = [];
+    let azureConfigs: AzureConfigs;
 
     try {
       azureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, 'utf8'));
-      const iotHubConfig = azureConfigs.find(
+      const iotHubConfig = azureConfigs.componentConfigs.find(
           config => config.type === ComponentType[this.componentType]);
       if (iotHubConfig) {
         this.componentId = iotHubConfig.id;
@@ -162,7 +162,9 @@ export class IoTHub implements Component, Provisionable {
         this.projectRootPath, AzureComponentsStorage.folderName,
         AzureComponentsStorage.fileName);
 
-    let azureConfigs: AzureComponentConfig[] = [];
+    let azureConfigs: AzureConfigs = { 
+      componentConfigs: [] 
+    };
 
     try {
       azureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, 'utf8'));
@@ -172,7 +174,7 @@ export class IoTHub implements Component, Provisionable {
     }
 
     const iotHubConfig =
-        azureConfigs.find(config => config.id === (this.id));
+        azureConfigs.componentConfigs.find(config => config.id === (this.id));
     if (iotHubConfig) {
       // TODO: update the existing setting for the provision result
     } else {
@@ -183,7 +185,7 @@ export class IoTHub implements Component, Provisionable {
         dependencies: [],
         type: ComponentType[this.componentType]
       };
-      azureConfigs.push(newIoTHubConfig);
+      azureConfigs.componentConfigs.push(newIoTHubConfig);
       fs.writeFileSync(
           azureConfigFilePath, JSON.stringify(azureConfigs, null, 4));
     }

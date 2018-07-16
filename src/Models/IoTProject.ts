@@ -12,7 +12,7 @@ import {TelemetryContext, TelemetryWorker} from '../telemetry';
 
 import {checkAzureLogin} from './Apis';
 import {AZ3166Device} from './AZ3166Device';
-import {AzureComponentConfig} from './AzureComponentConfig';
+import {AzureConfigs} from './AzureComponentConfig';
 import {AzureFunctions} from './AzureFunctions';
 import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
@@ -259,7 +259,9 @@ export class IoTProject {
     }
 
     // initialize the storage for azure component settings
-    const azureConfig: AzureComponentConfig[] = [];
+    const azureConfigs: AzureConfigs = {
+      componentConfigs: [] 
+    };
     const azureConfigFolderPath =
         path.join(this.projectRootPath, AzureComponentsStorage.folderName);
     if (!fs.existsSync(azureConfigFolderPath)) {
@@ -267,7 +269,7 @@ export class IoTProject {
     }
     const azureConfigFilePath =
         path.join(azureConfigFolderPath, AzureComponentsStorage.fileName);
-    fs.writeFileSync(azureConfigFilePath, JSON.stringify(azureConfig, null, 4));
+    fs.writeFileSync(azureConfigFilePath, JSON.stringify(azureConfigs, null, 4));
 
     workspace.folders.push({path: constants.deviceDefaultFolderName});
     let device: Component;

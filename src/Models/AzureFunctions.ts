@@ -22,7 +22,7 @@ import {StringDictionary} from 'azure-arm-website/lib/models';
 import {getExtension} from './Apis';
 import {extensionName} from './Interfaces/Api';
 import {Guid} from 'guid-typescript';
-import {AzureComponentConfig} from './AzureComponentConfig';
+import {AzureComponentConfig, AzureConfigs} from './AzureComponentConfig';
 
 export class AzureFunctions implements Component, Provisionable {
   dependencies: string[] = [];
@@ -117,7 +117,7 @@ export class AzureFunctions implements Component, Provisionable {
       return false;
     }
 
-    let azureConfigs: AzureComponentConfig[] = [];
+    let azureConfigs: AzureConfigs;
 
     try {
       azureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, 'utf8'));
@@ -126,7 +126,7 @@ export class AzureFunctions implements Component, Provisionable {
     }
 
     const azureFunctionsConfig =
-        azureConfigs.find(config => config.folder === this.functionFolder);
+        azureConfigs.componentConfigs.find(config => config.folder === this.functionFolder);
     if (azureFunctionsConfig) {
       this.componentId = azureFunctionsConfig.id;
       this.dependencies = azureFunctionsConfig.dependencies;
@@ -295,7 +295,9 @@ export class AzureFunctions implements Component, Provisionable {
         this.azureFunctionsPath, '..', AzureComponentsStorage.folderName,
         AzureComponentsStorage.fileName);
 
-    let azureConfigs: AzureComponentConfig[] = [];
+    let azureConfigs: AzureConfigs = { 
+        componentConfigs: [] 
+    };
 
     try {
       azureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, 'utf8'));
@@ -305,7 +307,7 @@ export class AzureFunctions implements Component, Provisionable {
     }
 
     const azureFunctionsConfig =
-        azureConfigs.find(config => config.id === (this.id));
+        azureConfigs.componentConfigs.find(config => config.id === (this.id));
     if (azureFunctionsConfig) {
       // TODO: update the existing setting for the provision result
     } else {
@@ -316,7 +318,7 @@ export class AzureFunctions implements Component, Provisionable {
         dependencies: this.dependencies,
         type: ComponentType[this.componentType]
       };
-      azureConfigs.push(newAzureFunctionsConfig);
+      azureConfigs.componentConfigs.push(newAzureFunctionsConfig);
       fs.writeFileSync(
           azureConfigFilePath, JSON.stringify(azureConfigs, null, 4));
     }
