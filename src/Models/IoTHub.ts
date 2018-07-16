@@ -172,12 +172,12 @@ export class IoTHub implements Component, Provisionable {
     }
 
     const iotHubConfig =
-        azureConfigs.find(config => config.id === (this.id.toString()));
+        azureConfigs.find(config => config.id === (this.id));
     if (iotHubConfig) {
       // TODO: update the existing setting for the provision result
     } else {
       const newIoTHubConfig: AzureComponentConfig = {
-        id: this.id.toString(),
+        id: this.id,
         folder: '',
         name: '',
         dependencies: [],

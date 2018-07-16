@@ -305,12 +305,12 @@ export class AzureFunctions implements Component, Provisionable {
     }
 
     const azureFunctionsConfig =
-        azureConfigs.find(config => config.id === (this.id.toString()));
+        azureConfigs.find(config => config.id === (this.id));
     if (azureFunctionsConfig) {
       // TODO: update the existing setting for the provision result
     } else {
       const newAzureFunctionsConfig: AzureComponentConfig = {
-        id: this.id.toString(),
+        id: this.id,
         folder: this.functionFolder,
         name: '',
         dependencies: this.dependencies,
