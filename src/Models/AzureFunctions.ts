@@ -126,9 +126,7 @@ export class AzureFunctions implements Component, Provisionable {
         azureConfigs.find(config => config.folder === this.functionFolder);
     if (azureFunctionsConfig) {
       this.id = Guid.parse(azureFunctionsConfig.id);
-      if (azureFunctionsConfig.dependencies) {
-        this.dependencies = azureFunctionsConfig.dependencies;
-      }
+      this.dependencies = azureFunctionsConfig.dependencies;
 
       // Load other information from config file.
     }

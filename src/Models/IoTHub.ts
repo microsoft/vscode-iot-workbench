@@ -52,10 +52,7 @@ export class IoTHub implements Component, Provisionable {
           config => config.type === ComponentType[this.componentType]);
       if (iotHubConfig) {
         this.id = Guid.parse(iotHubConfig.id);
-        if (iotHubConfig.dependencies) {
-          this.dependencies = iotHubConfig.dependencies;
-        }
-
+        this.dependencies = iotHubConfig.dependencies;
         // Load other information from config file.
       }
     } catch (error) {
@@ -180,6 +177,7 @@ export class IoTHub implements Component, Provisionable {
         id: this.id.toString(),
         folder: '',
         name: '',
+        dependencies: [],
         type: ComponentType[this.componentType]
       };
       azureConfigs.push(newIoTHubConfig);

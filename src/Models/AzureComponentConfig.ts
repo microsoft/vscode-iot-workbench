@@ -8,6 +8,6 @@ export interface AzureComponentConfig {
   type: string;
   name: string;
   folder: string;
-  dependencies?: string[];
+  dependencies: string[];
   componentInfo?: ComponentInfo;
 }
