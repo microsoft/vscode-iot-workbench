@@ -12,6 +12,4 @@ export interface AzureComponentConfig {
   componentInfo?: ComponentInfo;
 }
 
-export interface AzureConfigs{
-  componentConfigs: AzureComponentConfig[];
-}
+export interface AzureConfigs { componentConfigs: AzureComponentConfig[]; }

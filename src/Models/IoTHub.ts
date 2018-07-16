@@ -162,9 +162,7 @@ export class IoTHub implements Component, Provisionable {
         this.projectRootPath, AzureComponentsStorage.folderName,
         AzureComponentsStorage.fileName);
 
-    let azureConfigs: AzureConfigs = { 
-      componentConfigs: [] 
-    };
+    let azureConfigs: AzureConfigs = {componentConfigs: []};
 
     try {
       azureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, 'utf8'));

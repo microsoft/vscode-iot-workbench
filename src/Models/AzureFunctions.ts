@@ -125,8 +125,8 @@ export class AzureFunctions implements Component, Provisionable {
       return false;
     }
 
-    const azureFunctionsConfig =
-        azureConfigs.componentConfigs.find(config => config.folder === this.functionFolder);
+    const azureFunctionsConfig = azureConfigs.componentConfigs.find(
+        config => config.folder === this.functionFolder);
     if (azureFunctionsConfig) {
       this.componentId = azureFunctionsConfig.id;
       this.dependencies = azureFunctionsConfig.dependencies;
@@ -295,9 +295,7 @@ export class AzureFunctions implements Component, Provisionable {
         this.azureFunctionsPath, '..', AzureComponentsStorage.folderName,
         AzureComponentsStorage.fileName);
 
-    let azureConfigs: AzureConfigs = { 
-        componentConfigs: [] 
-    };
+    let azureConfigs: AzureConfigs = {componentConfigs: []};
 
     try {
       azureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, 'utf8'));

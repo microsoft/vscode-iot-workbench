@@ -259,9 +259,7 @@ export class IoTProject {
     }
 
     // initialize the storage for azure component settings
-    const azureConfigs: AzureConfigs = {
-      componentConfigs: [] 
-    };
+    const azureConfigs: AzureConfigs = {componentConfigs: []};
     const azureConfigFolderPath =
         path.join(this.projectRootPath, AzureComponentsStorage.folderName);
     if (!fs.existsSync(azureConfigFolderPath)) {
@@ -269,7 +267,8 @@ export class IoTProject {
     }
     const azureConfigFilePath =
         path.join(azureConfigFolderPath, AzureComponentsStorage.fileName);
-    fs.writeFileSync(azureConfigFilePath, JSON.stringify(azureConfigs, null, 4));
+    fs.writeFileSync(
+        azureConfigFilePath, JSON.stringify(azureConfigs, null, 4));
 
     workspace.folders.push({path: constants.deviceDefaultFolderName});
     let device: Component;
