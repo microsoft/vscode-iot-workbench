@@ -31,7 +31,10 @@ class RaspberryPiUploadConfig {
 }
 
 export class RaspberryPiDevice implements Device {
-  id: Guid;
+  private componentId: string;
+  get id() {
+    return this.componentId;
+  }
   private deviceType: DeviceType;
   private componentType: ComponentType;
   private deviceFolder: string;
@@ -52,7 +55,7 @@ export class RaspberryPiDevice implements Device {
     this.deviceFolder = devicePath;
     this.extensionContext = context;
     this.channel = channel;
-    this.id = Guid.create();
+    this.componentId = Guid.create().toString();
     if (sketchName) {
       this.sketchName = sketchName;
     }

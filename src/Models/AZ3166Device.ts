@@ -73,7 +73,10 @@ export class AZ3166Device implements Device {
   // tslint:disable-next-line: no-any
   private static _serialport: any;
 
-  id: Guid;
+  private componentId: string;
+  get id() {
+    return this.componentId;
+  }
 
   private deviceType: DeviceType;
   private componentType: ComponentType;
@@ -93,7 +96,7 @@ export class AZ3166Device implements Device {
     this.componentType = ComponentType.Device;
     this.deviceFolder = devicePath;
     this.extensionContext = context;
-    this.id = Guid.create();
+    this.componentId = Guid.create().toString();
     if (sketchName) {
       this.sketchName = sketchName;
     }

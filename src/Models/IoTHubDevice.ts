@@ -21,13 +21,17 @@ interface DeviceInfo {
 export class IoTHubDevice implements Component, Provisionable {
   private componentType: ComponentType;
   private channel: vscode.OutputChannel;
-  id: Guid;
+  private componentId: string;
+  get id() {
+    return this.componentId;
+  }
+
   dependencies: string[] = [];
 
   constructor(channel: vscode.OutputChannel) {
     this.componentType = ComponentType.IoTHubDevice;
     this.channel = channel;
-    this.id = Guid.create();
+    this.componentId = Guid.create().toString();
   }
 
   name = 'IoT Hub Device';

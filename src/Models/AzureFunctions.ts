@@ -25,7 +25,6 @@ import {Guid} from 'guid-typescript';
 import {AzureComponentConfig} from './AzureComponentConfig';
 
 export class AzureFunctions implements Component, Provisionable {
-  id: Guid;
   dependencies: string[] = [];
   private componentType: ComponentType;
   private channel: vscode.OutputChannel;
@@ -35,6 +34,10 @@ export class AzureFunctions implements Component, Provisionable {
   private functionLanguage: string|null;
   private functionFolder: string;
 
+  private componentId: string;
+  get id() {
+    return this.componentId;
+  }
   private async getSubscriptionList(): Promise<vscode.QuickPickItem[]> {
     const subscriptionList: vscode.QuickPickItem[] = [];
     if (!this.azureAccountExtension) {
@@ -92,7 +95,7 @@ export class AzureFunctions implements Component, Provisionable {
     this.azureFunctionsPath = azureFunctionsPath;
     this.functionLanguage = language;
     this.functionFolder = functionFolder;
-    this.id = Guid.create();
+    this.componentId = Guid.create().toString();
     if (dependencyComponents && dependencyComponents.length > 0) {
       dependencyComponents.forEach(
           component => this.dependencies.push(component.id.toString()));
@@ -125,7 +128,7 @@ export class AzureFunctions implements Component, Provisionable {
     const azureFunctionsConfig =
         azureConfigs.find(config => config.folder === this.functionFolder);
     if (azureFunctionsConfig) {
-      this.id = Guid.parse(azureFunctionsConfig.id);
+      this.componentId = azureFunctionsConfig.id;
       this.dependencies = azureFunctionsConfig.dependencies;
 
       // Load other information from config file.

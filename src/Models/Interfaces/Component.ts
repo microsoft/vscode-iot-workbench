@@ -11,7 +11,7 @@ export enum ComponentType {
 
 export interface Component {
   name: string;
-  id: Guid;
+  id: string;
   load(): Promise<boolean>;
   create(): Promise<boolean>;
   getComponentType(): ComponentType;

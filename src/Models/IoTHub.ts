@@ -16,16 +16,19 @@ import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
 
 export class IoTHub implements Component, Provisionable {
-  id: Guid;
   dependencies: string[] = [];
   private componentType: ComponentType;
   private channel: vscode.OutputChannel;
   private projectRootPath: string;
+  private componentId: string;
+  get id() {
+    return this.componentId;
+  }
 
   constructor(projectRoot: string, channel: vscode.OutputChannel) {
     this.componentType = ComponentType.IoTHub;
     this.channel = channel;
-    this.id = Guid.create();
+    this.componentId = Guid.create().toString();
     this.projectRootPath = projectRoot;
   }
 
@@ -51,7 +54,7 @@ export class IoTHub implements Component, Provisionable {
       const iotHubConfig = azureConfigs.find(
           config => config.type === ComponentType[this.componentType]);
       if (iotHubConfig) {
-        this.id = Guid.parse(iotHubConfig.id);
+        this.componentId = iotHubConfig.id;
         this.dependencies = iotHubConfig.dependencies;
         // Load other information from config file.
       }

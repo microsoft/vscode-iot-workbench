@@ -25,12 +25,16 @@ const constants = {
 
 
 export class IoTButtonDevice implements Device {
-  id: Guid;
   private deviceType: DeviceType;
   private componentType: ComponentType;
   private deviceFolder: string;
   private extensionContext: vscode.ExtensionContext;
   private inputFileName = '';
+
+  private componentId: string;
+  get id() {
+    return this.componentId;
+  }
 
   private static _boardId = 'iotbutton';
 
@@ -45,7 +49,7 @@ export class IoTButtonDevice implements Device {
     this.componentType = ComponentType.Device;
     this.deviceFolder = devicePath;
     this.extensionContext = context;
-    this.id = Guid.create();
+    this.componentId = Guid.create().toString();
     if (inputFileName) {
       this.inputFileName = inputFileName;
     }
