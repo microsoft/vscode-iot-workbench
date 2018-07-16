@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 import * as fs from 'fs-plus';
+import {Guid} from 'guid-typescript';
 import * as os from 'os';
 import * as path from 'path';
 import * as request from 'request-promise';
@@ -24,6 +25,7 @@ const constants = {
 
 
 export class IoTButtonDevice implements Device {
+  id: Guid;
   private deviceType: DeviceType;
   private componentType: ComponentType;
   private deviceFolder: string;
@@ -43,12 +45,14 @@ export class IoTButtonDevice implements Device {
     this.componentType = ComponentType.Device;
     this.deviceFolder = devicePath;
     this.extensionContext = context;
+    this.id = Guid.create();
     if (inputFileName) {
       this.inputFileName = inputFileName;
     }
   }
 
   name = 'IoTButton';
+
 
   getDeviceType(): DeviceType {
     return this.deviceType;

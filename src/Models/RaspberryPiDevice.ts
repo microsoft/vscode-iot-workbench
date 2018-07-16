@@ -3,6 +3,7 @@
 
 import * as cp from 'child_process';
 import * as fs from 'fs-plus';
+import {Guid} from 'guid-typescript';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
@@ -30,6 +31,7 @@ class RaspberryPiUploadConfig {
 }
 
 export class RaspberryPiDevice implements Device {
+  id: Guid;
   private deviceType: DeviceType;
   private componentType: ComponentType;
   private deviceFolder: string;
@@ -50,6 +52,7 @@ export class RaspberryPiDevice implements Device {
     this.deviceFolder = devicePath;
     this.extensionContext = context;
     this.channel = channel;
+    this.id = Guid.create();
     if (sketchName) {
       this.sketchName = sketchName;
     }

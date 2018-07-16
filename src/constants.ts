@@ -44,3 +44,8 @@ export enum AzureFunctionsLanguage {
   CSharpScript = 'C#Script',
   JavaScript = 'JavaScript'
 }
+
+export class AzureComponentsStorage {
+  static readonly folderName = '.azurecomponent';
+  static readonly fileName = 'azureconfig';
+}

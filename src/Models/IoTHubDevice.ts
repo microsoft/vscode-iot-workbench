@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 import * as iothub from 'azure-iothub';
+import {Guid} from 'guid-typescript';
 import {clearInterval} from 'timers';
 import * as vscode from 'vscode';
 
@@ -20,10 +21,13 @@ interface DeviceInfo {
 export class IoTHubDevice implements Component, Provisionable {
   private componentType: ComponentType;
   private channel: vscode.OutputChannel;
+  id: Guid;
+  dependencies: string[] = [];
 
   constructor(channel: vscode.OutputChannel) {
     this.componentType = ComponentType.IoTHubDevice;
     this.channel = channel;
+    this.id = Guid.create();
   }
 
   name = 'IoT Hub Device';

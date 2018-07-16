@@ -7,11 +7,12 @@ import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
-import {EventNames} from '../constants';
+import {AzureComponentsStorage, EventNames} from '../constants';
 import {TelemetryContext, TelemetryWorker} from '../telemetry';
 
 import {checkAzureLogin} from './Apis';
 import {AZ3166Device} from './AZ3166Device';
+import {AzureComponentConfig} from './AzureComponentConfig';
 import {AzureFunctions} from './AzureFunctions';
 import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
@@ -82,6 +83,8 @@ export class IoTProject {
       return false;
     }
 
+    this.projectRootPath =
+        path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, '..');
     const deviceLocation = path.join(
         vscode.workspace.workspaceFolders[0].uri.fsPath, '..', devicePath);
 
@@ -104,7 +107,7 @@ export class IoTProject {
       }
     }
 
-    const iotHub = new IoTHub(this.channel);
+    const iotHub = new IoTHub(this.projectRootPath, this.channel);
     this.componentList.push(iotHub);
     const device = new IoTHubDevice(this.channel);
     this.componentList.push(device);
@@ -119,7 +122,8 @@ export class IoTProject {
           vscode.workspace.workspaceFolders[0].uri.fsPath, '..', functionPath);
 
       if (functionLocation) {
-        const functionApp = new AzureFunctions(functionLocation, this.channel);
+        const functionApp =
+            new AzureFunctions(functionLocation, functionPath, this.channel);
         this.componentList.push(functionApp);
       }
     }
@@ -254,6 +258,17 @@ export class IoTProject {
       fs.mkdirSync(deviceDir);
     }
 
+    // initialize the storage for azure component settings
+    const azureConfig: AzureComponentConfig[] = [];
+    const azureConfigFolderPath =
+        path.join(this.projectRootPath, AzureComponentsStorage.folderName);
+    if (!fs.existsSync(azureConfigFolderPath)) {
+      fs.mkdirSync(azureConfigFolderPath);
+    }
+    const azureConfigFilePath =
+        path.join(azureConfigFolderPath, AzureComponentsStorage.fileName);
+    fs.writeFileSync(azureConfigFilePath, JSON.stringify(azureConfig, null, 4));
+
     workspace.folders.push({path: constants.deviceDefaultFolderName});
     let device: Component;
     if (boardId === AZ3166Device.boardId) {
@@ -289,12 +304,12 @@ export class IoTProject {
         // Save data to configFile
         break;
       case ProjectTemplateType.IotHub: {
-        const iothub = new IoTHub(this.channel);
+        const iothub = new IoTHub(this.projectRootPath, this.channel);
         this.componentList.push(iothub);
         break;
       }
       case ProjectTemplateType.AzureFunctions: {
-        const iothub = new IoTHub(this.channel);
+        const iothub = new IoTHub(this.projectRootPath, this.channel);
 
         const functionDir = path.join(
             this.projectRootPath, constants.functionDefaultFolderName);
@@ -305,7 +320,9 @@ export class IoTProject {
 
         workspace.folders.push({path: constants.functionDefaultFolderName});
 
-        const azureFunctions = new AzureFunctions(functionDir, this.channel);
+        const azureFunctions = new AzureFunctions(
+            functionDir, constants.functionDefaultFolderName, this.channel,
+            null, [iothub] /*Dependencies*/);
         settings.projectsettings.push({
           name: ConfigKey.functionPath,
           value: constants.functionDefaultFolderName

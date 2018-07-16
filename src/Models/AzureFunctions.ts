@@ -14,21 +14,26 @@ import {Provisionable} from './Interfaces/Provisionable';
 import {Deployable} from './Interfaces/Deployable';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, AzureFunctionsLanguage} from '../constants';
+import {ConfigKey, AzureFunctionsLanguage, AzureComponentsStorage} from '../constants';
 
 import {ServiceClientCredentials} from 'ms-rest';
 import {AzureAccount, AzureResourceFilter} from '../azure-account.api';
 import {StringDictionary} from 'azure-arm-website/lib/models';
 import {getExtension} from './Apis';
 import {extensionName} from './Interfaces/Api';
+import {Guid} from 'guid-typescript';
+import {AzureComponentConfig} from './AzureComponentConfig';
 
 export class AzureFunctions implements Component, Provisionable {
+  id: Guid;
+  dependencies: string[] = [];
   private componentType: ComponentType;
   private channel: vscode.OutputChannel;
   private azureFunctionsPath: string;
   private azureAccountExtension: AzureAccount|undefined =
       getExtension(extensionName.AzureAccount);
   private functionLanguage: string|null;
+  private functionFolder: string;
 
   private async getSubscriptionList(): Promise<vscode.QuickPickItem[]> {
     const subscriptionList: vscode.QuickPickItem[] = [];
@@ -79,12 +84,19 @@ export class AzureFunctions implements Component, Provisionable {
   }
 
   constructor(
-      azureFunctionsPath: string, channel: vscode.OutputChannel,
-      language: string|null = null) {
+      azureFunctionsPath: string, functionFolder: string,
+      channel: vscode.OutputChannel, language: string|null = null,
+      dependencyComponents: Component[]|null = null) {
     this.componentType = ComponentType.AzureFunctions;
     this.channel = channel;
     this.azureFunctionsPath = azureFunctionsPath;
     this.functionLanguage = language;
+    this.functionFolder = functionFolder;
+    this.id = Guid.create();
+    if (dependencyComponents && dependencyComponents.length > 0) {
+      dependencyComponents.forEach(
+          component => this.dependencies.push(component.id.toString()));
+    }
   }
 
   name = 'Azure Functions';
@@ -94,6 +106,32 @@ export class AzureFunctions implements Component, Provisionable {
   }
 
   async load(): Promise<boolean> {
+    const azureConfigFilePath = path.join(
+        this.azureFunctionsPath, '..', AzureComponentsStorage.folderName,
+        AzureComponentsStorage.fileName);
+
+    if (!fs.existsSync(azureConfigFilePath)) {
+      return false;
+    }
+
+    let azureConfigs: AzureComponentConfig[] = [];
+
+    try {
+      azureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, 'utf8'));
+    } catch (error) {
+      return false;
+    }
+
+    const azureFunctionsConfig =
+        azureConfigs.find(config => config.folder === this.functionFolder);
+    if (azureFunctionsConfig) {
+      this.id = Guid.parse(azureFunctionsConfig.id);
+      if (azureFunctionsConfig.dependencies) {
+        this.dependencies = azureFunctionsConfig.dependencies;
+      }
+
+      // Load other information from config file.
+    }
     return true;
   }
 
@@ -142,6 +180,7 @@ export class AzureFunctions implements Component, Provisionable {
             path: '%eventHubConnectionPath%',
             consumerGroup: '$Default'
           });
+      this.updateConfigSettings();
       return true;
     } catch (error) {
       throw error;
@@ -247,6 +286,38 @@ export class AzureFunctions implements Component, Provisionable {
         this.channel.appendLine('.');
       }
       throw error;
+    }
+  }
+
+  private updateConfigSettings(): void {
+    const azureConfigFilePath = path.join(
+        this.azureFunctionsPath, '..', AzureComponentsStorage.folderName,
+        AzureComponentsStorage.fileName);
+
+    let azureConfigs: AzureComponentConfig[] = [];
+
+    try {
+      azureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, 'utf8'));
+    } catch (error) {
+      const e = new Error('Invalid azure components config file.');
+      throw e;
+    }
+
+    const azureFunctionsConfig =
+        azureConfigs.find(config => config.id === (this.id.toString()));
+    if (azureFunctionsConfig) {
+      // TODO: update the existing setting for the provision result
+    } else {
+      const newAzureFunctionsConfig: AzureComponentConfig = {
+        id: this.id.toString(),
+        folder: this.functionFolder,
+        name: '',
+        dependencies: this.dependencies,
+        type: ComponentType[this.componentType]
+      };
+      azureConfigs.push(newAzureFunctionsConfig);
+      fs.writeFileSync(
+          azureConfigFilePath, JSON.stringify(azureConfigs, null, 4));
     }
   }
 }

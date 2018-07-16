@@ -1,22 +1,32 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import * as fs from 'fs-plus';
+import {Guid} from 'guid-typescript';
+import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey} from '../constants';
+import {AzureComponentsStorage, ConfigKey} from '../constants';
+
 import {getExtension} from './Apis';
+import {AzureComponentConfig} from './AzureComponentConfig';
 import {extensionName} from './Interfaces/Api';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
 
 export class IoTHub implements Component, Provisionable {
+  id: Guid;
+  dependencies: string[] = [];
   private componentType: ComponentType;
   private channel: vscode.OutputChannel;
+  private projectRootPath: string;
 
-  constructor(channel: vscode.OutputChannel) {
+  constructor(projectRoot: string, channel: vscode.OutputChannel) {
     this.componentType = ComponentType.IoTHub;
     this.channel = channel;
+    this.id = Guid.create();
+    this.projectRootPath = projectRoot;
   }
 
   name = 'IoT Hub';
@@ -26,11 +36,37 @@ export class IoTHub implements Component, Provisionable {
   }
 
   async load(): Promise<boolean> {
+    const azureConfigFilePath = path.join(
+        this.projectRootPath, AzureComponentsStorage.folderName,
+        AzureComponentsStorage.fileName);
+
+    if (!fs.existsSync(azureConfigFilePath)) {
+      return false;
+    }
+
+    let azureConfigs: AzureComponentConfig[] = [];
+
+    try {
+      azureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, 'utf8'));
+      const iotHubConfig = azureConfigs.find(
+          config => config.type === ComponentType[this.componentType]);
+      if (iotHubConfig) {
+        this.id = Guid.parse(iotHubConfig.id);
+        if (iotHubConfig.dependencies) {
+          this.dependencies = iotHubConfig.dependencies;
+        }
+
+        // Load other information from config file.
+      }
+    } catch (error) {
+      return false;
+    }
     return true;
   }
 
 
   async create(): Promise<boolean> {
+    this.updateConfigSettings();
     return true;
   }
 
@@ -118,6 +154,37 @@ export class IoTHub implements Component, Provisionable {
     } else {
       throw new Error(
           'IoT Hub provision failed. Please check output window for detail.');
+    }
+  }
+
+  private updateConfigSettings(): void {
+    const azureConfigFilePath = path.join(
+        this.projectRootPath, AzureComponentsStorage.folderName,
+        AzureComponentsStorage.fileName);
+
+    let azureConfigs: AzureComponentConfig[] = [];
+
+    try {
+      azureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, 'utf8'));
+    } catch (error) {
+      const e = new Error('Invalid azure components config file.');
+      throw e;
+    }
+
+    const iotHubConfig =
+        azureConfigs.find(config => config.id === (this.id.toString()));
+    if (iotHubConfig) {
+      // TODO: update the existing setting for the provision result
+    } else {
+      const newIoTHubConfig: AzureComponentConfig = {
+        id: this.id.toString(),
+        folder: '',
+        name: '',
+        type: ComponentType[this.componentType]
+      };
+      azureConfigs.push(newIoTHubConfig);
+      fs.writeFileSync(
+          azureConfigFilePath, JSON.stringify(azureConfigs, null, 4));
     }
   }
 }
