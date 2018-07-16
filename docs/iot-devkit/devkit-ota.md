@@ -41,7 +41,9 @@ Then the **IoT Workbench Example** window is showed up.
 
 ![IoT Workbench, Examples window](media/iot-workbench-examples.png)
 
-Find **DevKit OTA update** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
+Find **Firmware OTA** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
+
+![Open firmware OTA](media/firmware-ota/open-sample.png)
 
 ## Provision Azure service
 
