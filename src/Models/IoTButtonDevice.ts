@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 import * as fs from 'fs-plus';
+import {Guid} from 'guid-typescript';
 import * as os from 'os';
 import * as path from 'path';
 import * as request from 'request-promise';
@@ -30,6 +31,11 @@ export class IoTButtonDevice implements Device {
   private extensionContext: vscode.ExtensionContext;
   private inputFileName = '';
 
+  private componentId: string;
+  get id() {
+    return this.componentId;
+  }
+
   private static _boardId = 'iotbutton';
 
   static get boardId() {
@@ -43,12 +49,14 @@ export class IoTButtonDevice implements Device {
     this.componentType = ComponentType.Device;
     this.deviceFolder = devicePath;
     this.extensionContext = context;
+    this.componentId = Guid.create().toString();
     if (inputFileName) {
       this.inputFileName = inputFileName;
     }
   }
 
   name = 'IoTButton';
+
 
   getDeviceType(): DeviceType {
     return this.deviceType;

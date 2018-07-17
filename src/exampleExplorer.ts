@@ -8,7 +8,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import {Example} from './Models/Interfaces/Example';
 import request = require('request-promise');
-import unzip = require('unzip');
+import AdmZip = require('adm-zip');
 import {setInterval, setTimeout} from 'timers';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import * as utils from './utils';
@@ -76,28 +76,19 @@ export class ExampleExplorer {
     const zipData = await request(options).promise() as string;
     const tempPath = path.join(fsPath, '.temp');
     fs.writeFileSync(path.join(tempPath, 'example.zip'), zipData);
-    const stream = fs.createReadStream(path.join(tempPath, 'example.zip'))
-                       .pipe(unzip.Extract({path: tempPath}));
-
-    return new Promise(
-        (resolve: (value: boolean) => void,
-         reject: (reason: Error) => void) => {
-          stream.on('finish', () => {
-            clearInterval(loading);
-            channel.appendLine('');
-            channel.appendLine('Example loaded.');
-            setTimeout(async () => {
-              await this.moveTempFiles(fsPath);
-              resolve(true);
-            }, 1000);
-          });
-
-          stream.on('error', (error: Error) => {
-            clearInterval(loading);
-            channel.appendLine('');
-            reject(error);
-          });
-        });
+    const zip = new AdmZip(path.join(tempPath, 'example.zip'));
+    try {
+      zip.extractAllTo(tempPath, true);
+      clearInterval(loading);
+      channel.appendLine('');
+      channel.appendLine('Example loaded.');
+      await this.moveTempFiles(fsPath);
+      return true;
+    } catch (error) {
+      clearInterval(loading);
+      channel.appendLine('');
+      throw error;
+    }
   }
 
   private async GenerateExampleFolder(exampleName: string) {
