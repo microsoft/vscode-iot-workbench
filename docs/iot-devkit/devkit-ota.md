@@ -60,7 +60,7 @@ Then VS Code guides you through provisioning the required Azure services.
 ![IoT Workbench: Cloud -> Provision steps](media/iot-workbench-cloud-provision-steps2.png)
 
 The whole process includes:
-* Select an existing IoT Hub or create a new IoT Hub.
+* Select an existing IoT Hub or create a new IoT Hub, remember your IoT Hub name as we will use it later.
 * Select an existing IoT Hub device or create a new IoT Hub device. 
 
 ## Config IoT Hub Connection String
@@ -92,22 +92,10 @@ The whole process includes:
 
     ![IoT DevKit Connection String OK](media/iot-workbench-connection-done.png) 
 
-## Build and upload the device code
-
-1. Open the command palette and select **IoT Workbench: Device**, then select **Device Upload**.
-
-	![IoT Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
-
-2. VS Code then starts verifying and uploading the code to your DevKit.
-
-	![IoT Workbench: Device -> Uploaded](media/firmware-ota/iot-workbench-device-uploaded.png)
-
-3. The DevKit reboots and starts running the code.
-
-## Test the project
+## Configure in IoT Hub
 In order to trigger firmware update event on DevKit, you need to use Azure portal to set automatic device management configuration.
 
-1. In the [Azure portal](https://portal.azure.com), go to your IoT hub.
+1. In the [Azure portal](https://portal.azure.com), go to the IoT hub you previously provisioned.
 
 2. In Section **AUTOMATIC DEVICE MANAGEMENT**, select **IoT device configuration**.
 
@@ -145,6 +133,18 @@ In order to trigger firmware update event on DevKit, you need to use Azure porta
 	![IoT Hub: Set Condition](media/firmware-ota/iothub-set-condition.png)
 
 7. In step 5, review your configuration information, then select **Submit**.
+
+## Build and upload the device code
+
+1. Open the command palette and select **IoT Workbench: Device**, then select **Device Upload**.
+
+	![IoT Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
+
+2. VS Code then starts verifying and uploading the code to your DevKit.
+
+	![IoT Workbench: Device -> Uploaded](media/firmware-ota/iot-workbench-device-uploaded.png)
+
+3. The DevKit reboots and starts running the code.
 
 If DevKit is currently connected to a WiFi network, it would get the firmware update information and start to download and verify the firmware specified in the URL. During the whole update process, the device will report its status to IoT Hub via device twin. 
 
