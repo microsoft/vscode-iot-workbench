@@ -124,13 +124,15 @@ In order to trigger firmware update event on DevKit, you need to use Azure porta
 	```json
 	{
 		"fwVersion": "1.3.7.56",
-		"fwPackageURI": "https://azureboard2.azureedge.net/prod/devkit-firmware-1.3.7.56.bin",
+		"fwPackageURI": "https://raw.githubusercontent.com/IoTDevEnvExamples/FirmwareOTA/master/Device/tool/devkit-firmware-1.3.7.56.bin",
 		"fwPackageCheckValue": "AAAA",
 		"fwSize": 0
 	}
 	```
 
-	Download the firmware from the URL. Run **CRC16Calculator.exe**(or **CRC16Calculator.out** in Mac) in command line, and set the path to the downloaded firmware .bin file as running argument. You would see the size of the .bin file and its CRC-16 checksum represented in 4-digit hexadecimal form.
+	In this example, we use DevKit 1.3.7.56 as the firmware to be upgraded. Since we set the firmware version in the example code to be 1.1.1, the upgrade will always proceed.
+
+	The .bin file of the firmware is already in the example directory. Run **CRC16Calculator.exe**(or **CRC16Calculator.out** in Mac) under the **tool/** folder in command line, and set **devkit-firmware-1.3.7.56.bin** as running argument. You would see the size of the .bin file and its CRC-16 checksum represented in 4-digit hexadecimal form.
 	
 	![Calculate checksum](media/firmware-ota/checksum-calculate.png)
 	
