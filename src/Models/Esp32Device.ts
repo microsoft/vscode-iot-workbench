@@ -6,6 +6,7 @@ import * as fs from 'fs-plus';
 import * as os from 'os';
 import * as path from 'path';
 import {error} from 'util';
+import {Guid} from 'guid-typescript';
 import * as vscode from 'vscode';
 
 import {BoardProvider} from '../boardProvider';
@@ -29,6 +30,11 @@ export class Esp32Device extends ArduinoDeviceBase {
   private sketchFileTemplateName = '';
   private static _boardId = 'esp32';
 
+  private componentId: string;
+  get id() {
+    return this.componentId;
+  }
+
   static get boardId() {
     return Esp32Device._boardId;
   }
@@ -45,6 +51,7 @@ export class Esp32Device extends ArduinoDeviceBase {
       context: vscode.ExtensionContext, devicePath: string,
       sketchFileTemplateName?: string) {
     super(context, devicePath, DeviceType.IoT_Button);
+    this.componentId = Guid.create().toString();
     if (sketchFileTemplateName) {
       this.sketchFileTemplateName = sketchFileTemplateName;
     }

@@ -35,6 +35,7 @@ export abstract class ArduinoDeviceBase implements Device {
   protected extensionContext: vscode.ExtensionContext;
 
   abstract name: string;
+  abstract id: string;
 
   constructor(
       context: vscode.ExtensionContext, devicePath: string,
@@ -133,7 +134,8 @@ export abstract class ArduinoDeviceBase implements Device {
         const propertiesContentWin32 =
             fs.readFileSync(propertiesFilePathWin32).toString();
         const pattern = /{ROOTPATH}/gi;
-        const localAppData: string = process.env.LOCALAPPDATA;
+        const homeDir = os.homedir();
+        const localAppData: string = path.join(homeDir, 'AppData', 'Local');
         const replaceStr = propertiesContentWin32.replace(
             pattern, localAppData.replace(/\\/g, '\\\\'));
         fs.writeFileSync(cppPropertiesFilePath, replaceStr);
