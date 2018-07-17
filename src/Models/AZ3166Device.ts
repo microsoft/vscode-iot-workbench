@@ -6,6 +6,7 @@ import {exec} from 'child_process';
 import * as crypto from 'crypto';
 import * as fs from 'fs-plus';
 import * as getmac from 'getmac';
+import {Guid} from 'guid-typescript';
 import * as _ from 'lodash';
 import * as opn from 'opn';
 import * as os from 'os';
@@ -68,6 +69,11 @@ export class AZ3166Device extends ArduinoDeviceBase {
   // tslint:disable-next-line: no-any
   private static _serialport: any;
 
+  private componentId: string;
+  get id() {
+    return this.componentId;
+  }
+
   private sketchName = '';
   private static _boardId = 'devkit';
 
@@ -79,6 +85,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
       context: vscode.ExtensionContext, devicePath: string,
       sketchName?: string) {
     super(context, devicePath, DeviceType.MXChip_AZ3166);
+    this.componentId = Guid.create().toString();
     if (sketchName) {
       this.sketchName = sketchName;
     }
@@ -668,13 +675,13 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
     // TODO: Currently, we do not support portable Arduino installation.
     let _arduinoPackagePath = '';
+    const homeDir = os.homedir();
     if (plat === 'win32') {
-      _arduinoPackagePath = path.join(
-          process.env['USERPROFILE'], 'AppData', 'Local', 'Arduino15',
-          'packages');
+      _arduinoPackagePath =
+          path.join(homeDir, 'AppData', 'Local', 'Arduino15', 'packages');
     } else if (plat === 'darwin') {
       _arduinoPackagePath =
-          path.join(process.env.HOME, 'Library', 'Arduino15', 'packages');
+          path.join(homeDir, 'Library', 'Arduino15', 'packages');
     }
 
     const arduinoPackagePath =
