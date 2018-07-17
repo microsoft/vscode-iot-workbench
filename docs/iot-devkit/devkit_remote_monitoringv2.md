@@ -59,10 +59,9 @@ This connection string will be used in the next section.
 
 ### A. Start VS Code
 
-* Make sure your DevKit is not connected to your PC.
-* Start VS Code.
-* Connect the DevKit to your computer.
+* Start Visual Studio Code.
 * Make sure [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
+* Connect IoT DevKit to your PC.
 
 ### B. Open IoT Workbench Examples
 
