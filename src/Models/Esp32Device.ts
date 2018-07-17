@@ -3,10 +3,10 @@
 
 import * as copypaste from 'copy-paste';
 import * as fs from 'fs-plus';
+import {Guid} from 'guid-typescript';
 import * as os from 'os';
 import * as path from 'path';
 import {error} from 'util';
-import {Guid} from 'guid-typescript';
 import * as vscode from 'vscode';
 
 import {BoardProvider} from '../boardProvider';
