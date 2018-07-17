@@ -47,5 +47,5 @@ export enum AzureFunctionsLanguage {
 
 export class AzureComponentsStorage {
   static readonly folderName = '.azurecomponent';
-  static readonly fileName = 'azureconfig';
+  static readonly fileName = 'azureconfig.json';
 }
