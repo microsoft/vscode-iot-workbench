@@ -89,7 +89,7 @@ A typical **Unique Device Secret (UDS)** is a 64 characters long hexadecimal dig
 4. Note down the generated uds string and then press enter.
 ![Config UDS string](media/devkit-dps/config-uds-string.png)
 
-Here you may need to close serial monitor and let devkit enter configuration mode. After UDS string configed successfully, you will see a Visual Studio Code notification.
+Here you may need to close [serial monitor](./devkit-get-started.md/#Serial_monitor_usage) and let devkit enter configuration mode. After UDS string configed successfully, you will see a Visual Studio Code notification.
 ![Config UDS string successfully](media/devkit-dps/config-uds-string-notification.png)
 
 ## Generate X.509 certificate
@@ -98,7 +98,7 @@ Open integrated terminal in Visual Studio Code and run dps_cert_gen in tool fold
 
 ![Generate X.509 certificate](media/devkit-dps/generate-cert.png)
 
-**Note:** If you have changed the `built.path` configuration for Arduino to other folder. You need to find **.ino.bin** and **.ino.elf** file in the folder you configured. Here we input **.build\DevKitDPS** because compiled file are in **.\build** folder.
+**Note:** Here we input **.build\DevKitDPS** when program ask for project name. Then the program will find compiled file with path **.build\DevKitDPS.ino.bin** and **.build\DevKitDPS.ino.elf**. Output compiled binary file to **.build** path is our default setting. If you changed build path or .ino file name before, you will need to provide a path to your compiled output file.
 
 ## Create a device enrollment entry in the Device Provisioning Service
 
@@ -112,7 +112,7 @@ Open integrated terminal in Visual Studio Code and run dps_cert_gen in tool fold
 
 ## Start the DevKit
 
-1. Launch VS Code and open serial monitor.
+1. Launch VS Code and open [serial monitor](./devkit-get-started.md/#Serial_monitor_usage).
 
 2. Press the **Reset** button on your DevKit.
 
