@@ -46,6 +46,7 @@ Here are a set of tutorials that will help you get started:
 * [MQTT Client](./docs/iot-devkit/devkit-mqtt-client.md)
 * [DevKit State](./docs/iot-devkit/devkit-state.md)
 * [Door Monitor](./docs/iot-devkit/devkit_door_monitor.md)
+* [DevKit DPS](./docs/iot-devkit/devkit_dps.md)
 
 ### teXXmo IoT button
 
