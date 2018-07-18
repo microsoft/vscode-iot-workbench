@@ -23,6 +23,7 @@ import {getExtension} from './Apis';
 import {extensionName} from './Interfaces/Api';
 import {Guid} from 'guid-typescript';
 import {AzureComponentConfig, AzureConfigs} from './AzureComponentConfig';
+import {Azure} from './Azure';
 
 export class AzureFunctions implements Component, Provisionable {
   dependencies: string[] = [];
@@ -188,15 +189,12 @@ export class AzureFunctions implements Component, Provisionable {
     }
   }
 
-  async provision(): Promise<boolean> {
+  async provision(azure: Azure): Promise<boolean> {
     try {
-      const subscription = await vscode.window.showQuickPick(
-          this.getSubscriptionList(),
-          {placeHolder: 'Select Subscription', ignoreFocusOut: true});
-      if (!subscription || !subscription.description) {
+      const subscriptionId = azure.subscriptionId;
+      if (!subscriptionId) {
         return false;
       }
-      const subscriptionId = subscription.description;
       const functionAppId: string|undefined =
           await vscode.commands.executeCommand<string>(
               'azureFunctions.createFunctionApp', subscriptionId);
