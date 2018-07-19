@@ -5,7 +5,7 @@ import * as vscode from 'vscode';
 
 import {AzureComponentsStorage, FileNames} from '../constants';
 
-import {ARMTemplate, Azure, AzureComponent} from './Azure';
+import {ARMTemplate, Azure, AzureConfigFileHandler} from './Azure';
 import {AzureComponentConfig, AzureConfigs, ComponentInfo, Dependency, DependencyConfig, DependencyType} from './AzureComponentConfig';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Deployable} from './Interfaces/Deployable';
@@ -18,7 +18,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
   private channel: vscode.OutputChannel;
   private projectRootPath: string;
   private componentId: string;
-  private azureComponent: AzureComponent;
+  private azureComponent: AzureConfigFileHandler;
   private extensionContext: vscode.ExtensionContext;
   private queryPath: string;
   get id() {
@@ -34,7 +34,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     this.channel = channel;
     this.componentId = Guid.create().toString();
     this.projectRootPath = projectRoot;
-    this.azureComponent = new AzureComponent(projectRoot);
+    this.azureComponent = new AzureConfigFileHandler(projectRoot);
     this.extensionContext = context;
     if (dependencyComponents && dependencyComponents.length > 0) {
       dependencyComponents.forEach(

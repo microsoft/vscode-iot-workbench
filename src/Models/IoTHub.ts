@@ -10,7 +10,7 @@ import {ConfigHandler} from '../configHandler';
 import {AzureComponentsStorage, ConfigKey} from '../constants';
 
 import {getExtension} from './Apis';
-import {Azure, AzureComponent} from './Azure';
+import {Azure, AzureConfigFileHandler} from './Azure';
 import {AzureComponentConfig, AzureConfigs, ComponentInfo, DependencyConfig} from './AzureComponentConfig';
 import {extensionName} from './Interfaces/Api';
 import {Component, ComponentType} from './Interfaces/Component';
@@ -22,7 +22,7 @@ export class IoTHub implements Component, Provisionable {
   private channel: vscode.OutputChannel;
   private projectRootPath: string;
   private componentId: string;
-  private azureComponent: AzureComponent;
+  private azureComponent: AzureConfigFileHandler;
   get id() {
     return this.componentId;
   }
@@ -32,7 +32,7 @@ export class IoTHub implements Component, Provisionable {
     this.channel = channel;
     this.componentId = Guid.create().toString();
     this.projectRootPath = projectRoot;
-    this.azureComponent = new AzureComponent(projectRoot);
+    this.azureComponent = new AzureConfigFileHandler(projectRoot);
   }
 
   name = 'IoT Hub';

@@ -37,7 +37,7 @@ export interface ARMParameterTemplate {
 
 export interface ARMTemplate { parameters: ARMParameterTemplate; }
 
-export class AzureComponent {
+export class AzureConfigFileHandler {
   private projectRootPath: string;
   private configFilePath: string;
 

@@ -12,7 +12,7 @@ import {TelemetryContext, TelemetryWorker} from '../telemetry';
 
 import {checkAzureLogin} from './Apis';
 import {AZ3166Device} from './AZ3166Device';
-import {Azure, AzureComponent} from './Azure';
+import {Azure, AzureConfigFileHandler} from './Azure';
 import {AzureConfigs, Dependency, DependencyType} from './AzureComponentConfig';
 import {AzureFunctions} from './AzureFunctions';
 import {Compilable} from './Interfaces/Compilable';
@@ -110,7 +110,7 @@ export class IoTProject {
       }
     }
 
-    const azureComponent = new AzureComponent(this.projectRootPath);
+    const azureComponent = new AzureConfigFileHandler(this.projectRootPath);
     const componentConfigs = azureComponent.getAllComponents();
     const components: {[key: string]: Component} = {};
 
