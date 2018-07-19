@@ -3,15 +3,15 @@ import {Component} from './Interfaces/Component';
 // TODO: need to check what value should be included here
 export interface ComponentInfo { values: {[key: string]: string}; }
 
-export enum ComponentDependencyType {
+export enum DependencyType {
   Other,
   Input,
   Output
 }
 
-export interface ComponentDependency {
+export interface DependencyConfig {
   id: string;
-  type: ComponentDependencyType;
+  type: DependencyType;
 }
 
 export interface AzureComponentConfig {
@@ -19,13 +19,13 @@ export interface AzureComponentConfig {
   type: string;
   name: string;
   folder: string;
-  dependencies: ComponentDependency[];
+  dependencies: DependencyConfig[];
   componentInfo?: ComponentInfo;
 }
 
 export interface AzureConfigs { componentConfigs: AzureComponentConfig[]; }
 
-export interface DependentComponent {
+export interface Dependency {
   component: Component;
-  type: ComponentDependencyType;
+  type: DependencyType;
 }

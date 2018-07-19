@@ -11,13 +11,13 @@ import {AzureComponentsStorage, ConfigKey} from '../constants';
 
 import {getExtension} from './Apis';
 import {Azure, AzureComponent} from './Azure';
-import {AzureComponentConfig, AzureConfigs, ComponentDependency, ComponentInfo} from './AzureComponentConfig';
+import {AzureComponentConfig, AzureConfigs, ComponentInfo, DependencyConfig} from './AzureComponentConfig';
 import {extensionName} from './Interfaces/Api';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
 
 export class IoTHub implements Component, Provisionable {
-  dependencies: ComponentDependency[] = [];
+  dependencies: DependencyConfig[] = [];
   private componentType: ComponentType;
   private channel: vscode.OutputChannel;
   private projectRootPath: string;

@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import {Azure} from '../Azure';
-import {ComponentDependency} from '../AzureComponentConfig';
+import {DependencyConfig} from '../AzureComponentConfig';
 
 export interface Provisionable {
-  dependencies: ComponentDependency[];
+  dependencies: DependencyConfig[];
   provision(azure: Azure): Promise<boolean>;
 }

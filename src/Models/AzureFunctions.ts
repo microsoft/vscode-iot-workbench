@@ -22,11 +22,11 @@ import {StringDictionary} from 'azure-arm-website/lib/models';
 import {getExtension} from './Apis';
 import {extensionName} from './Interfaces/Api';
 import {Guid} from 'guid-typescript';
-import {AzureComponentConfig, AzureConfigs, ComponentDependency, DependentComponent} from './AzureComponentConfig';
+import {AzureComponentConfig, AzureConfigs, DependencyConfig, Dependency} from './AzureComponentConfig';
 import {Azure} from './Azure';
 
 export class AzureFunctions implements Component, Provisionable, Deployable {
-  dependencies: ComponentDependency[] = [];
+  dependencies: DependencyConfig[] = [];
   private componentType: ComponentType;
   private channel: vscode.OutputChannel;
   private azureFunctionsPath: string;
@@ -65,7 +65,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
   constructor(
       azureFunctionsPath: string, functionFolder: string,
       channel: vscode.OutputChannel, language: string|null = null,
-      dependencyComponents: DependentComponent[]|null = null) {
+      dependencyComponents: Dependency[]|null = null) {
     this.componentType = ComponentType.AzureFunctions;
     this.channel = channel;
     this.azureFunctionsPath = azureFunctionsPath;

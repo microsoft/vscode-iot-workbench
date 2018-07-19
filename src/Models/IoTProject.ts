@@ -13,7 +13,7 @@ import {TelemetryContext, TelemetryWorker} from '../telemetry';
 import {checkAzureLogin} from './Apis';
 import {AZ3166Device} from './AZ3166Device';
 import {Azure, AzureComponent} from './Azure';
-import {AzureConfigs, ComponentDependencyType, DependentComponent} from './AzureComponentConfig';
+import {AzureConfigs, Dependency, DependencyType} from './AzureComponentConfig';
 import {AzureFunctions} from './AzureFunctions';
 import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
@@ -152,7 +152,7 @@ export class IoTProject {
           break;
         }
         case 'StreamAnalyticsJob': {
-          const dependencies: DependentComponent[] = [];
+          const dependencies: Dependency[] = [];
           for (const dependent of componentConfig.dependencies) {
             const component = components[dependent.id];
             if (!component) {
@@ -380,10 +380,8 @@ export class IoTProject {
 
         const azureFunctions = new AzureFunctions(
             functionDir, constants.functionDefaultFolderName, this.channel,
-            null, [{
-              component: iothub,
-              type: ComponentDependencyType.Input
-            }] /*Dependencies*/);
+            null,
+            [{component: iothub, type: DependencyType.Input}] /*Dependencies*/);
         settings.projectsettings.push({
           name: ConfigKey.functionPath,
           value: constants.functionDefaultFolderName
@@ -411,8 +409,7 @@ export class IoTProject {
 
         const asa = new StreamAnalyticsJob(
             queryPath, this.extensionContext, this.projectRootPath,
-            this.channel,
-            [{component: iothub, type: ComponentDependencyType.Input}]);
+            this.channel, [{component: iothub, type: DependencyType.Input}]);
 
         workspace.folders.push({path: constants.asaFolderName});
         workspace.settings[`IoTWorkbench.${ConfigKey.asaPath}`] =

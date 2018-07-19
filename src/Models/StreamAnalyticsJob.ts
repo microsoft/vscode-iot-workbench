@@ -6,14 +6,14 @@ import * as vscode from 'vscode';
 import {AzureComponentsStorage, FileNames} from '../constants';
 
 import {ARMTemplate, Azure, AzureComponent} from './Azure';
-import {AzureComponentConfig, AzureConfigs, ComponentDependency, ComponentDependencyType, ComponentInfo, DependentComponent} from './AzureComponentConfig';
+import {AzureComponentConfig, AzureConfigs, ComponentInfo, Dependency, DependencyConfig, DependencyType} from './AzureComponentConfig';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Deployable} from './Interfaces/Deployable';
 import {Provisionable} from './Interfaces/Provisionable';
 
 export class StreamAnalyticsJob implements Component, Provisionable,
                                            Deployable {
-  dependencies: ComponentDependency[] = [];
+  dependencies: DependencyConfig[] = [];
   private componentType: ComponentType;
   private channel: vscode.OutputChannel;
   private projectRootPath: string;
@@ -28,7 +28,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
   constructor(
       queryPath: string, context: vscode.ExtensionContext, projectRoot: string,
       channel: vscode.OutputChannel,
-      dependencyComponents: DependentComponent[]|null = null) {
+      dependencyComponents: Dependency[]|null = null) {
     this.queryPath = queryPath;
     this.componentType = ComponentType.StreamAnalyticsJob;
     this.channel = channel;
@@ -119,7 +119,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
       if (!componentConfig) {
         throw new Error(`Cannot find component with id ${dependency.id}.`);
       }
-      if (dependency.type === ComponentDependencyType.Input) {
+      if (dependency.type === DependencyType.Input) {
         switch (componentConfig.type) {
           case 'IoTHub': {
             if (!componentConfig.componentInfo) {

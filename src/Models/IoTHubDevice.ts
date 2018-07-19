@@ -10,7 +10,7 @@ import {ConfigKey} from '../constants';
 
 import {getExtension} from './Apis';
 import {Azure} from './Azure';
-import {ComponentDependency} from './AzureComponentConfig';
+import {DependencyConfig} from './AzureComponentConfig';
 import {extensionName} from './Interfaces/Api';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
@@ -23,7 +23,7 @@ export class IoTHubDevice implements Component, Provisionable {
     return this.componentId;
   }
 
-  dependencies: ComponentDependency[] = [];
+  dependencies: DependencyConfig[] = [];
 
   constructor(channel: vscode.OutputChannel) {
     this.componentType = ComponentType.IoTHubDevice;
