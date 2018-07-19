@@ -5,7 +5,7 @@
     "streamAnalyticsJobName": {
       "type": "string"
     },
-    "query": {
+    "$$StreamAnalytics/query.asaql": {
       "type": "string"
     }
   },
@@ -29,7 +29,7 @@
           "name": "Transformation",
           "properties": {
             "streamingUnits": 1,
-            "query": "[parameters('query')]"
+            "query": "[parameters('$$StreamAnalytics/query.asaql')]"
           }
         }
       }

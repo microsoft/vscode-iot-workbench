@@ -216,27 +216,31 @@ export class Azure {
     return subscriptionList;
   }
 
-  private async _getCredential(): Promise<ServiceClientCredentials|undefined> {
-    this._subscriptionId = await this._getSubscription();
-
+  private _getCredentialBySubscriptionId(subscriptionId: string):
+      ServiceClientCredentials|undefined {
     if (!this._azureAccountExtension) {
       throw new Error('Azure account extension is not found.');
     }
+
+    const subscriptions: AzureResourceFilter[] =
+        this._azureAccountExtension.filters;
+    const subscription = subscriptions.find(
+        sub => sub.subscription.subscriptionId === subscriptionId);
+    if (subscription) {
+      return subscription.session.credentials;
+    }
+
+    return undefined;
+  }
+
+  private async _getCredential(): Promise<ServiceClientCredentials|undefined> {
+    this._subscriptionId = await this._getSubscription();
 
     if (!this._subscriptionId) {
       return undefined;
     }
 
-    const subscriptions: AzureResourceFilter[] =
-        this._azureAccountExtension.filters;
-    for (let i = 0; i < subscriptions.length; i++) {
-      const subscription: AzureResourceFilter = subscriptions[i];
-      if (subscription.subscription.subscriptionId === this._subscriptionId) {
-        return subscription.session.credentials;
-      }
-    }
-
-    return undefined;
+    return this._getCredentialBySubscriptionId(this._subscriptionId);
   }
 
   private async _getResourceClient() {
@@ -250,6 +254,15 @@ export class Azure {
     if (credential) {
       const client =
           new ResourceManagementClient(credential, this._subscriptionId);
+      return client;
+    }
+    return undefined;
+  }
+
+  private _getSubscriptionClientBySubscriptionId(substriptionId: string) {
+    const credential = this._getCredentialBySubscriptionId(substriptionId);
+    if (credential) {
+      const client = new ResourceManagementClient(credential, substriptionId);
       return client;
     }
     return undefined;
@@ -653,6 +666,20 @@ export class Azure {
 
   get resourceGroup() {
     return this._resourceGroup;
+  }
+
+  getClient() {
+    if (!this.subscriptionId) {
+      return undefined;
+    }
+
+    const client =
+        this._getSubscriptionClientBySubscriptionId(this.subscriptionId);
+    if (!client) {
+      return undefined;
+    }
+
+    return client;
   }
 }
 

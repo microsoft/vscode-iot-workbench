@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey} from '../constants';
+import {ConfigKey, FileNames} from '../constants';
 import {AzureComponentsStorage, EventNames} from '../constants';
 import {TelemetryContext, TelemetryWorker} from '../telemetry';
 
@@ -32,6 +32,7 @@ import {StreamAnalyticsJob} from './StreamAnalyticsJob';
 const constants = {
   deviceDefaultFolderName: 'Device',
   functionDefaultFolderName: 'Functions',
+  asaFolderName: 'StreamAnalytics',
   workspaceConfigFilePath: 'project.code-workspace'
 };
 
@@ -159,9 +160,12 @@ export class IoTProject {
             }
             dependencies.push(component);
           }
+          const queryPath = path.join(
+              vscode.workspace.workspaceFolders[0].uri.fsPath, '..',
+              constants.asaFolderName, 'query.asaql');
           const asa = new StreamAnalyticsJob(
-              this.extensionContext, this.projectRootPath, this.channel,
-              dependencies);
+              queryPath, this.extensionContext, this.projectRootPath,
+              this.channel, dependencies);
           await asa.load();
           components[asa.id] = asa;
           this.componentList.push(asa);
@@ -391,9 +395,25 @@ export class IoTProject {
       }
       case ProjectTemplateType.StreamAnalytics: {
         const iothub = new IoTHub(this.projectRootPath, this.channel);
+        const asaDir = path.join(this.projectRootPath, constants.asaFolderName);
+
+        if (!fs.existsSync(asaDir)) {
+          fs.mkdirSync(asaDir);
+        }
+
+        const asaFilePath = this.extensionContext.asAbsolutePath(
+            path.join(FileNames.resourcesFolderName, 'asaql', 'query.asaql'));
+        const queryPath = path.join(asaDir, 'query.asaql');
+        fs.copyFileSync(asaFilePath, queryPath);
+
         const asa = new StreamAnalyticsJob(
-            this.extensionContext, this.projectRootPath, this.channel,
-            [iothub]);
+            queryPath, this.extensionContext, this.projectRootPath,
+            this.channel, [iothub]);
+
+        workspace.folders.push({path: constants.asaFolderName});
+        workspace.settings[`IoTWorkbench.${ConfigKey.asaPath}`] =
+            constants.asaFolderName;
+
         this.componentList.push(iothub);
         this.componentList.push(asa);
         break;

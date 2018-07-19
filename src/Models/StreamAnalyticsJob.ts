@@ -6,11 +6,13 @@ import * as vscode from 'vscode';
 import {AzureComponentsStorage, FileNames} from '../constants';
 
 import {ARMTemplate, Azure, AzureComponent} from './Azure';
-import {AzureComponentConfig, AzureConfigs} from './AzureComponentConfig';
+import {AzureComponentConfig, AzureConfigs, ComponentInfo} from './AzureComponentConfig';
 import {Component, ComponentType} from './Interfaces/Component';
+import {Deployable} from './Interfaces/Deployable';
 import {Provisionable} from './Interfaces/Provisionable';
 
-export class StreamAnalyticsJob implements Component, Provisionable {
+export class StreamAnalyticsJob implements Component, Provisionable,
+                                           Deployable {
   dependencies: string[] = [];
   private componentType: ComponentType;
   private channel: vscode.OutputChannel;
@@ -18,14 +20,16 @@ export class StreamAnalyticsJob implements Component, Provisionable {
   private componentId: string;
   private azureComponent: AzureComponent;
   private extensionContext: vscode.ExtensionContext;
+  private queryPath: string;
   get id() {
     return this.componentId;
   }
 
   constructor(
-      context: vscode.ExtensionContext, projectRoot: string,
+      queryPath: string, context: vscode.ExtensionContext, projectRoot: string,
       channel: vscode.OutputChannel,
       dependencyComponents: Component[]|null = null) {
+    this.queryPath = queryPath;
     this.componentType = ComponentType.StreamAnalyticsJob;
     this.channel = channel;
     this.componentId = Guid.create().toString();
@@ -75,10 +79,14 @@ export class StreamAnalyticsJob implements Component, Provisionable {
     return true;
   }
 
-  private updateConfigSettings(): void {
-    const asaConfig = this.azureComponent.getComponentById(this.id);
-    if (asaConfig) {
-      // TODO: update the existing setting for the provision result
+  private updateConfigSettings(componentInfo?: ComponentInfo): void {
+    const asaComponentIndex =
+        this.azureComponent.getComponentIndexById(this.id);
+    if (asaComponentIndex > -1) {
+      if (!componentInfo) {
+        return;
+      }
+      this.azureComponent.updateComponent(asaComponentIndex, componentInfo);
     } else {
       const newAsaConfig: AzureComponentConfig = {
         id: this.id,
@@ -96,12 +104,8 @@ export class StreamAnalyticsJob implements Component, Provisionable {
         FileNames.resourcesFolderName, 'arm', 'streamanalytics.json'));
     const asaArmTemplate =
         JSON.parse(fs.readFileSync(asaArmTemplatePath, 'utf8')) as ARMTemplate;
-    const asaArmParameters = {
-      query: {value: 'SELECT * FROM [input] INTO [output]'}
-    };
 
-    const asaDeploy =
-        await azure.deployARMTemplate(asaArmTemplate, asaArmParameters);
+    const asaDeploy = await azure.deployARMTemplate(asaArmTemplate);
     if (!asaDeploy || !asaDeploy.properties || !asaDeploy.properties.outputs ||
         !asaDeploy.properties.outputs.streamAnalyticsJobName) {
       throw new Error('Provision Stream Analytics Job failed.');
@@ -174,6 +178,77 @@ export class StreamAnalyticsJob implements Component, Provisionable {
               `Not supported ASA input type: ${componentConfig.type}.`);
         }
       }
+    }
+
+    this.updateConfigSettings({
+      values: {
+        subscriptId: azure.subscriptionId as string,
+        resourceGroup: azure.resourceGroup as string,
+        streamAnalyticsJobName:
+            asaDeploy.properties.outputs.streamAnalyticsJobName.value
+      }
+    });
+
+    if (this.channel) {
+      this.channel.show();
+      this.channel.appendLine('Stream Analytics Job provision succeeded.');
+    }
+    return true;
+  }
+
+  async deploy(): Promise<boolean> {
+    const componentConfig = this.azureComponent.getComponentById(this.id);
+    if (!componentConfig) {
+      throw new Error(`Cannot find component with id ${this.id}.`);
+    }
+
+    const componentInfo = componentConfig.componentInfo;
+    if (!componentInfo) {
+      throw new Error(`You must provision Stream Analytics Job first.`);
+    }
+
+    const subscriptId = componentInfo.values.subscriptId;
+    const resourceGroup = componentInfo.values.resourceGroup;
+    const streamAnalyticsJobName = componentInfo.values.streamAnalyticsJobName;
+    const azure = new Azure(this.extensionContext, this.channel, subscriptId);
+    const azureClient = azure.getClient();
+    if (!azureClient) {
+      throw new Error('Initialize Azure client failed.');
+    }
+
+    const resourceId = `/subscriptions/${subscriptId}/resourceGroups/${
+        resourceGroup}/providers/Microsoft.StreamAnalytics/streamingjobs/${
+        streamAnalyticsJobName}/transformations/Transformation`;
+    const apiVersion = '2015-10-01';
+    if (!fs.existsSync(this.queryPath)) {
+      throw new Error(`Cannot find query file at ${this.queryPath}`);
+    }
+    const query = fs.readFileSync(this.queryPath, 'utf8');
+    const parameters = {properties: {streamingUnits: 1, query}};
+
+    let deployPendding: NodeJS.Timer|null = null;
+    try {
+      if (this.channel) {
+        this.channel.show();
+        this.channel.appendLine('Deploying Azure Functions App...');
+        deployPendding = setInterval(() => {
+          this.channel.append('.');
+        }, 1000);
+      }
+      const deployment = await azureClient.resources.createOrUpdateById(
+          resourceId, apiVersion, parameters);
+      if (this.channel && deployPendding) {
+        clearInterval(deployPendding);
+        this.channel.appendLine('.');
+        this.channel.appendLine(JSON.stringify(deployment, null, 4));
+        this.channel.appendLine('Stream Analytics Job query deploy succeeded.');
+      }
+    } catch (error) {
+      if (this.channel && deployPendding) {
+        clearInterval(deployPendding);
+        this.channel.appendLine('.');
+      }
+      throw error;
     }
     return true;
   }

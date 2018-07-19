@@ -25,7 +25,7 @@ import {Guid} from 'guid-typescript';
 import {AzureComponentConfig, AzureConfigs} from './AzureComponentConfig';
 import {Azure} from './Azure';
 
-export class AzureFunctions implements Component, Provisionable {
+export class AzureFunctions implements Component, Provisionable, Deployable {
   dependencies: string[] = [];
   private componentType: ComponentType;
   private channel: vscode.OutputChannel;
