@@ -153,7 +153,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
             const asaIoTHubArmTemplatePath =
                 this.extensionContext.asAbsolutePath(path.join(
                     FileNames.resourcesFolderName, 'arm',
-                    'streamanalytics-iothub.json'));
+                    'streamanalytics-input-iothub.json'));
             const asaIoTHubArmTemplate =
                 JSON.parse(fs.readFileSync(asaIoTHubArmTemplatePath, 'utf8')) as
                 ARMTemplate;
