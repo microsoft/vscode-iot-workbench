@@ -4,6 +4,7 @@ import {Component} from './Interfaces/Component';
 export interface ComponentInfo { values: {[key: string]: string}; }
 
 export enum ComponentDependencyType {
+  Other,
   Input,
   Output
 }
