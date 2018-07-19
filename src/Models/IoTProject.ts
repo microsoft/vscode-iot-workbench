@@ -13,12 +13,12 @@ import {TelemetryContext, TelemetryWorker} from '../telemetry';
 import {checkAzureLogin} from './Apis';
 import {AZ3166Device} from './AZ3166Device';
 import {Azure, AzureComponent} from './Azure';
-import {AzureConfigs} from './AzureComponentConfig';
+import {AzureConfigs, ComponentDependencyType, DependentComponent} from './AzureComponentConfig';
 import {AzureFunctions} from './AzureFunctions';
 import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Deployable} from './Interfaces/Deployable';
-import {Device, DeviceType} from './Interfaces/Device';
+import {Device} from './Interfaces/Device';
 import {ProjectTemplate, ProjectTemplateType} from './Interfaces/ProjectTemplate';
 import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
@@ -152,13 +152,13 @@ export class IoTProject {
           break;
         }
         case 'StreamAnalyticsJob': {
-          const dependencies: Component[] = [];
+          const dependencies: DependentComponent[] = [];
           for (const dependent of componentConfig.dependencies) {
-            const component = components[dependent];
+            const component = components[dependent.id];
             if (!component) {
               throw new Error(`Cannot find component with id ${dependent}.`);
             }
-            dependencies.push(component);
+            dependencies.push({component, type: dependent.type});
           }
           const queryPath = path.join(
               vscode.workspace.workspaceFolders[0].uri.fsPath, '..',
@@ -380,7 +380,10 @@ export class IoTProject {
 
         const azureFunctions = new AzureFunctions(
             functionDir, constants.functionDefaultFolderName, this.channel,
-            null, [iothub] /*Dependencies*/);
+            null, [{
+              component: iothub,
+              type: ComponentDependencyType.Input
+            }] /*Dependencies*/);
         settings.projectsettings.push({
           name: ConfigKey.functionPath,
           value: constants.functionDefaultFolderName
@@ -408,7 +411,8 @@ export class IoTProject {
 
         const asa = new StreamAnalyticsJob(
             queryPath, this.extensionContext, this.projectRootPath,
-            this.channel, [iothub]);
+            this.channel,
+            [{component: iothub, type: ComponentDependencyType.Input}]);
 
         workspace.folders.push({path: constants.asaFolderName});
         workspace.settings[`IoTWorkbench.${ConfigKey.asaPath}`] =

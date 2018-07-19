@@ -6,14 +6,14 @@ import * as vscode from 'vscode';
 import {AzureComponentsStorage, FileNames} from '../constants';
 
 import {ARMTemplate, Azure, AzureComponent} from './Azure';
-import {AzureComponentConfig, AzureConfigs, ComponentInfo} from './AzureComponentConfig';
+import {AzureComponentConfig, AzureConfigs, ComponentDependency, ComponentDependencyType, ComponentInfo, DependentComponent} from './AzureComponentConfig';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Deployable} from './Interfaces/Deployable';
 import {Provisionable} from './Interfaces/Provisionable';
 
 export class StreamAnalyticsJob implements Component, Provisionable,
                                            Deployable {
-  dependencies: string[] = [];
+  dependencies: ComponentDependency[] = [];
   private componentType: ComponentType;
   private channel: vscode.OutputChannel;
   private projectRootPath: string;
@@ -28,7 +28,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
   constructor(
       queryPath: string, context: vscode.ExtensionContext, projectRoot: string,
       channel: vscode.OutputChannel,
-      dependencyComponents: Component[]|null = null) {
+      dependencyComponents: DependentComponent[]|null = null) {
     this.queryPath = queryPath;
     this.componentType = ComponentType.StreamAnalyticsJob;
     this.channel = channel;
@@ -38,7 +38,8 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     this.extensionContext = context;
     if (dependencyComponents && dependencyComponents.length > 0) {
       dependencyComponents.forEach(
-          component => this.dependencies.push(component.id));
+          dependency => this.dependencies.push(
+              {id: dependency.component.id, type: dependency.type}));
     }
   }
 
@@ -112,71 +113,75 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     }
     this.channel.appendLine(JSON.stringify(asaDeploy, null, 4));
 
-    for (const id of this.dependencies) {
-      const componentConfig = this.azureComponent.getComponentById(id);
+    for (const dependency of this.dependencies) {
+      const componentConfig =
+          this.azureComponent.getComponentById(dependency.id);
       if (!componentConfig) {
-        throw new Error(`Cannot find component with id ${id}.`);
+        throw new Error(`Cannot find component with id ${dependency.id}.`);
       }
+      if (dependency.type === ComponentDependencyType.Input) {
+        switch (componentConfig.type) {
+          case 'IoTHub': {
+            if (!componentConfig.componentInfo) {
+              return false;
+            }
+            const iotHubConnectionString =
+                componentConfig.componentInfo.values.iotHubConnectionString;
+            let iotHubName = '';
+            let iotHubKeyName = '';
+            let iotHubKey = '';
+            const iotHubNameMatches =
+                iotHubConnectionString.match(/HostName=(.*?)\./);
+            const iotHubKeyMatches =
+                iotHubConnectionString.match(/SharedAccessKey=(.*?)(;|$)/);
+            const iotHubKeyNameMatches =
+                iotHubConnectionString.match(/SharedAccessKeyName=(.*?)(;|$)/);
+            if (iotHubNameMatches) {
+              iotHubName = iotHubNameMatches[1];
+            }
+            if (iotHubKeyMatches) {
+              iotHubKey = iotHubKeyMatches[1];
+            }
+            if (iotHubKeyNameMatches) {
+              iotHubKeyName = iotHubKeyNameMatches[1];
+            }
 
-      switch (componentConfig.type) {
-        case 'IoTHub': {
-          if (!componentConfig.componentInfo) {
-            return false;
-          }
-          const iotHubConnectionString =
-              componentConfig.componentInfo.values.iotHubConnectionString;
-          let iotHubName = '';
-          let iotHubKeyName = '';
-          let iotHubKey = '';
-          const iotHubNameMatches =
-              iotHubConnectionString.match(/HostName=(.*?)\./);
-          const iotHubKeyMatches =
-              iotHubConnectionString.match(/SharedAccessKey=(.*?)(;|$)/);
-          const iotHubKeyNameMatches =
-              iotHubConnectionString.match(/SharedAccessKeyName=(.*?)(;|$)/);
-          if (iotHubNameMatches) {
-            iotHubName = iotHubNameMatches[1];
-          }
-          if (iotHubKeyMatches) {
-            iotHubKey = iotHubKeyMatches[1];
-          }
-          if (iotHubKeyNameMatches) {
-            iotHubKeyName = iotHubKeyNameMatches[1];
-          }
+            if (!iotHubName || !iotHubKeyName || !iotHubKey) {
+              throw new Error('Cannot parse IoT Hub connection string.');
+            }
 
-          if (!iotHubName || !iotHubKeyName || !iotHubKey) {
-            throw new Error('Cannot parse IoT Hub connection string.');
+            const asaIoTHubArmTemplatePath =
+                this.extensionContext.asAbsolutePath(path.join(
+                    FileNames.resourcesFolderName, 'arm',
+                    'streamanalytics-iothub.json'));
+            const asaIoTHubArmTemplate =
+                JSON.parse(fs.readFileSync(asaIoTHubArmTemplatePath, 'utf8')) as
+                ARMTemplate;
+            const asaIotHubArmParameters = {
+              streamAnalyticsJobName: {
+                value: asaDeploy.properties.outputs.streamAnalyticsJobName.value
+              },
+              inputName: {value: `iothub-${componentConfig.id}`},
+              iotHubName: {value: iotHubName},
+              iotHubKeyName: {value: iotHubKeyName},
+              iotHubKey: {value: iotHubKey}
+            };
+
+            const asaInputDeploy = await azure.deployARMTemplate(
+                asaIoTHubArmTemplate, asaIotHubArmParameters);
+            if (!asaInputDeploy) {
+              throw new Error('Provision Stream Analytics Job failed.');
+            }
+
+            break;
           }
-
-          const asaIoTHubArmTemplatePath =
-              this.extensionContext.asAbsolutePath(path.join(
-                  FileNames.resourcesFolderName, 'arm',
-                  'streamanalytics-iothub.json'));
-          const asaIoTHubArmTemplate =
-              JSON.parse(fs.readFileSync(asaIoTHubArmTemplatePath, 'utf8')) as
-              ARMTemplate;
-          const asaIotHubArmParameters = {
-            streamAnalyticsJobName: {
-              value: asaDeploy.properties.outputs.streamAnalyticsJobName.value
-            },
-            inputName: {value: `iothub-${componentConfig.id}`},
-            iotHubName: {value: iotHubName},
-            iotHubKeyName: {value: iotHubKeyName},
-            iotHubKey: {value: iotHubKey}
-          };
-
-          const asaInputDeploy = await azure.deployARMTemplate(
-              asaIoTHubArmTemplate, asaIotHubArmParameters);
-          if (!asaInputDeploy) {
-            throw new Error('Provision Stream Analytics Job failed.');
+          default: {
+            throw new Error(
+                `Not supported ASA input type: ${componentConfig.type}.`);
           }
-
-          break;
         }
-        default: {
-          throw new Error(
-              `Not supported ASA input type: ${componentConfig.type}.`);
-        }
+      } else {
+        // asa output
       }
     }
 

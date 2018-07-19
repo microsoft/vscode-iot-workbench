@@ -13,9 +13,9 @@ import {ConfigHandler} from '../configHandler';
 
 import {getExtension} from './Apis';
 import {extensionName} from './Interfaces/Api';
-import {AzureComponentsStorage, ConfigKey} from '../constants';
+import {AzureComponentsStorage} from '../constants';
 import {AzureComponentConfig, AzureConfigs, ComponentInfo} from './AzureComponentConfig';
-import {Component, ComponentType} from './Interfaces/Component';
+import {ComponentType} from './Interfaces/Component';
 
 export interface ARMParameters {
   [key: string]: {value: string|number|boolean|null};
@@ -67,7 +67,7 @@ export class AzureComponent {
 
           let hold = false;
           for (const dependency of componentConfig.dependencies) {
-            if (sortedComponentIds.indexOf(dependency) === -1) {
+            if (sortedComponentIds.indexOf(dependency.id) === -1) {
               hold = true;
               break;
             }

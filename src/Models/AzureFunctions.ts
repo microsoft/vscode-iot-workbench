@@ -22,11 +22,11 @@ import {StringDictionary} from 'azure-arm-website/lib/models';
 import {getExtension} from './Apis';
 import {extensionName} from './Interfaces/Api';
 import {Guid} from 'guid-typescript';
-import {AzureComponentConfig, AzureConfigs} from './AzureComponentConfig';
+import {AzureComponentConfig, AzureConfigs, ComponentDependency, DependentComponent} from './AzureComponentConfig';
 import {Azure} from './Azure';
 
 export class AzureFunctions implements Component, Provisionable, Deployable {
-  dependencies: string[] = [];
+  dependencies: ComponentDependency[] = [];
   private componentType: ComponentType;
   private channel: vscode.OutputChannel;
   private azureFunctionsPath: string;
@@ -38,31 +38,6 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
   private componentId: string;
   get id() {
     return this.componentId;
-  }
-  private async getSubscriptionList(): Promise<vscode.QuickPickItem[]> {
-    const subscriptionList: vscode.QuickPickItem[] = [];
-    if (!this.azureAccountExtension) {
-      throw new Error('Azure account extension is not found.');
-    }
-
-    const subscriptions = this.azureAccountExtension.filters;
-    subscriptions.forEach(item => {
-      subscriptionList.push({
-        label: item.subscription.displayName,
-        description: item.subscription.subscriptionId
-      } as vscode.QuickPickItem);
-    });
-
-    if (subscriptionList.length === 0) {
-      subscriptionList.push({
-        label: 'No subscription found',
-        description: '',
-        detail:
-            'Click Azure account at bottom left corner and choose Select All'
-      } as vscode.QuickPickItem);
-    }
-
-    return subscriptionList;
   }
 
   private async getCredentialFromSubscriptionId(subscriptionId: string):
@@ -90,7 +65,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
   constructor(
       azureFunctionsPath: string, functionFolder: string,
       channel: vscode.OutputChannel, language: string|null = null,
-      dependencyComponents: Component[]|null = null) {
+      dependencyComponents: DependentComponent[]|null = null) {
     this.componentType = ComponentType.AzureFunctions;
     this.channel = channel;
     this.azureFunctionsPath = azureFunctionsPath;
@@ -99,7 +74,8 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     this.componentId = Guid.create().toString();
     if (dependencyComponents && dependencyComponents.length > 0) {
       dependencyComponents.forEach(
-          component => this.dependencies.push(component.id.toString()));
+          dependency => this.dependencies.push(
+              {id: dependency.component.id.toString(), type: dependency.type}));
     }
   }
 

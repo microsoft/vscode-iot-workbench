@@ -3,7 +3,6 @@
 
 import * as iothub from 'azure-iothub';
 import {Guid} from 'guid-typescript';
-import {clearInterval} from 'timers';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
@@ -11,13 +10,10 @@ import {ConfigKey} from '../constants';
 
 import {getExtension} from './Apis';
 import {Azure} from './Azure';
+import {ComponentDependency} from './AzureComponentConfig';
 import {extensionName} from './Interfaces/Api';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
-
-interface DeviceInfo {
-  iothubDeviceConnectionString: string;
-}
 
 export class IoTHubDevice implements Component, Provisionable {
   private componentType: ComponentType;
@@ -27,7 +23,7 @@ export class IoTHubDevice implements Component, Provisionable {
     return this.componentId;
   }
 
-  dependencies: string[] = [];
+  dependencies: ComponentDependency[] = [];
 
   constructor(channel: vscode.OutputChannel) {
     this.componentType = ComponentType.IoTHubDevice;
