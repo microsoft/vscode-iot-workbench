@@ -6,6 +6,7 @@ import {exec} from 'child_process';
 import * as crypto from 'crypto';
 import * as fs from 'fs-plus';
 import * as getmac from 'getmac';
+import {Guid} from 'guid-typescript';
 import * as _ from 'lodash';
 import * as opn from 'opn';
 import * as os from 'os';
@@ -72,6 +73,11 @@ export class AZ3166Device implements Device {
   // tslint:disable-next-line: no-any
   private static _serialport: any;
 
+  private componentId: string;
+  get id() {
+    return this.componentId;
+  }
+
   private deviceType: DeviceType;
   private componentType: ComponentType;
   private deviceFolder: string;
@@ -90,6 +96,7 @@ export class AZ3166Device implements Device {
     this.componentType = ComponentType.Device;
     this.deviceFolder = devicePath;
     this.extensionContext = context;
+    this.componentId = Guid.create().toString();
     if (sketchName) {
       this.sketchName = sketchName;
     }
@@ -143,7 +150,8 @@ export class AZ3166Device implements Device {
         const propertiesContentWin32 =
             fs.readFileSync(propertiesFilePathWin32).toString();
         const pattern = /{ROOTPATH}/gi;
-        const localAppData: string = process.env.LOCALAPPDATA;
+        const homeDir = os.homedir();
+        const localAppData: string = path.join(homeDir, 'AppData', 'Local');
         const replaceStr = propertiesContentWin32.replace(
             pattern, localAppData.replace(/\\/g, '\\\\'));
         fs.writeFileSync(cppPropertiesFilePath, replaceStr);
@@ -826,13 +834,13 @@ export class AZ3166Device implements Device {
 
     // TODO: Currently, we do not support portable Arduino installation.
     let _arduinoPackagePath = '';
+    const homeDir = os.homedir();
     if (plat === 'win32') {
-      _arduinoPackagePath = path.join(
-          process.env['USERPROFILE'], 'AppData', 'Local', 'Arduino15',
-          'packages');
+      _arduinoPackagePath =
+          path.join(homeDir, 'AppData', 'Local', 'Arduino15', 'packages');
     } else if (plat === 'darwin') {
       _arduinoPackagePath =
-          path.join(process.env.HOME, 'Library', 'Arduino15', 'packages');
+          path.join(homeDir, 'Library', 'Arduino15', 'packages');
     }
 
     const arduinoPackagePath =

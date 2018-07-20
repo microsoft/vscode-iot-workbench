@@ -1,0 +1,15 @@
+{
+    "folders": [
+        {
+            "path": "Device"
+        }
+    ],
+    "settings": {
+        "IoTWorkbench.BoardId": "simulator",
+        "IoTWorkbench.DevicePath": "Device",
+        "IoTWorkbench.iothubConnectionString": "HostName=t-yiwche-test.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=guuXHrCOlGcXb2Ij3Smufql+56nnbTjCA8VOvSEUpH8=",
+        "IoTWorkbench.eventHubConnectionString": "Endpoint=sb://iothub-ns-t-yiwche-t-574575-ef16fdee03.servicebus.windows.net/;SharedAccessKeyName=iothubowner;SharedAccessKey=guuXHrCOlGcXb2Ij3Smufql+56nnbTjCA8VOvSEUpH8=",
+        "IoTWorkbench.eventHubConnectionPath": "t-yiwche-test",
+        "IoTWorkbench.iothubDeviceConnectionString": "HostName=t-yiwche-test.azure-devices.net;DeviceId=Evan;SharedAccessKey=9R+g7HKX9z4Ocdf2TnG+NSB9nQob1onF1yOOy5tpGLc="
+    }
+}

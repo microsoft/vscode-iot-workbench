@@ -1,0 +1,4 @@
+{
+  "main": "RemoteMonitoring.json",
+  "connectionString": "HostName=t-yiwche-test.azure-devices.net;DeviceId=Evan;SharedAccessKey=9R+g7HKX9z4Ocdf2TnG+NSB9nQob1onF1yOOy5tpGLc="
+}
