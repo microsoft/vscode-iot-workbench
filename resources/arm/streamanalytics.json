@@ -1,0 +1,44 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "streamAnalyticsJobName": {
+      "type": "string"
+    },
+    "$$StreamAnalytics/query.asaql": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.StreamAnalytics/streamingjobs",
+      "name": "[parameters('streamAnalyticsJobName')]",
+      "apiVersion": "2016-03-01",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "sku": {
+          "name": "Standard"
+        },
+        "eventsOutOfOrderPolicy": "Adjust",
+        "outputErrorPolicy": "Stop",
+        "eventsOutOfOrderMaxDelayInSeconds": 0,
+        "eventsLateArrivalMaxDelayInSeconds": 5,
+        "dataLocale": "en-US",
+        "compatibilityLevel": "1.0",
+        "transformation": {
+          "name": "Transformation",
+          "properties": {
+            "streamingUnits": 1,
+            "query": "[parameters('$$StreamAnalytics/query.asaql')]"
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "streamAnalyticsJobName": {
+      "type": "string",
+      "value": "[parameters('streamAnalyticsJobName')]"
+    }
+  }
+}
