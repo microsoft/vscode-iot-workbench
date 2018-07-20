@@ -12,9 +12,9 @@ import {TelemetryContext, TelemetryWorker} from '../telemetry';
 
 import {checkAzureLogin} from './Apis';
 import {AZ3166Device} from './AZ3166Device';
-import {Azure, AzureConfigFileHandler} from './Azure';
-import {AzureConfigs, Dependency, DependencyType} from './AzureComponentConfig';
+import {AzureConfigFileHandler, AzureConfigs, Dependency, DependencyType} from './AzureComponentConfig';
 import {AzureFunctions} from './AzureFunctions';
+import {AzureUtility} from './AzureUtility';
 import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Deployable} from './Interfaces/Deployable';
@@ -111,7 +111,7 @@ export class IoTProject {
     }
 
     const azureComponent = new AzureConfigFileHandler(this.projectRootPath);
-    const componentConfigs = azureComponent.getAllComponents();
+    const componentConfigs = azureComponent.getSortedComponents();
     const components: {[key: string]: Component} = {};
 
     for (const componentConfig of componentConfigs) {
@@ -123,10 +123,6 @@ export class IoTProject {
           this.componentList.push(iotHub);
           const device = new IoTHubDevice(this.channel);
           this.componentList.push(device);
-
-          if (!vscode.workspace.workspaceFolders) {
-            return false;
-          }
 
           break;
         }
@@ -226,12 +222,11 @@ export class IoTProject {
     // Ensure azure login before component provision
     let subscriptionId: string|undefined = '';
     let resourceGroup: string|undefined = '';
-    let azure: Azure|null = null;
     if (provisionItemList.length > 0) {
       await checkAzureLogin();
-      azure = new Azure(this.extensionContext, this.channel);
-      resourceGroup = await azure.getResourceGroup();
-      subscriptionId = azure.subscriptionId;
+      AzureUtility.init(this.extensionContext, this.channel);
+      resourceGroup = await AzureUtility.getResourceGroup();
+      subscriptionId = AzureUtility.subscriptionId;
       if (!resourceGroup || !subscriptionId) {
         return false;
       }
@@ -257,7 +252,7 @@ export class IoTProject {
             }],
             {ignoreFocusOut: true, placeHolder: 'Provision process'});
 
-        const res = await item.provision(azure);
+        const res = await item.provision();
         if (res === false) {
           vscode.window.showWarningMessage('Provision canceled.');
           return false;
@@ -290,6 +285,8 @@ export class IoTProject {
       await vscode.window.showWarningMessage(
           'The project does not contain any Azure components to be deployed, Azure Deploy skipped.');
     }
+
+    vscode.window.showInformationMessage('Azure deploy succeeded.');
 
     return needDeploy;
   }

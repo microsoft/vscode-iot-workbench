@@ -5,8 +5,8 @@ import * as vscode from 'vscode';
 
 import {AzureComponentsStorage, FileNames} from '../constants';
 
-import {ARMTemplate, Azure, AzureConfigFileHandler} from './Azure';
-import {AzureComponentConfig, AzureConfigs, ComponentInfo, Dependency, DependencyConfig, DependencyType} from './AzureComponentConfig';
+import {AzureComponentConfig, AzureConfigFileHandler, AzureConfigs, ComponentInfo, Dependency, DependencyConfig, DependencyType} from './AzureComponentConfig';
+import {ARMTemplate, AzureUtility} from './AzureUtility';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Deployable} from './Interfaces/Deployable';
 import {Provisionable} from './Interfaces/Provisionable';
@@ -100,13 +100,13 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     }
   }
 
-  async provision(azure: Azure): Promise<boolean> {
+  async provision(): Promise<boolean> {
     const asaArmTemplatePath = this.extensionContext.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, 'arm', 'streamanalytics.json'));
     const asaArmTemplate =
         JSON.parse(fs.readFileSync(asaArmTemplatePath, 'utf8')) as ARMTemplate;
 
-    const asaDeploy = await azure.deployARMTemplate(asaArmTemplate);
+    const asaDeploy = await AzureUtility.deployARMTemplate(asaArmTemplate);
     if (!asaDeploy || !asaDeploy.properties || !asaDeploy.properties.outputs ||
         !asaDeploy.properties.outputs.streamAnalyticsJobName) {
       throw new Error('Provision Stream Analytics Job failed.');
@@ -167,7 +167,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
               iotHubKey: {value: iotHubKey}
             };
 
-            const asaInputDeploy = await azure.deployARMTemplate(
+            const asaInputDeploy = await AzureUtility.deployARMTemplate(
                 asaIoTHubArmTemplate, asaIotHubArmParameters);
             if (!asaInputDeploy) {
               throw new Error('Provision Stream Analytics Job failed.');
@@ -187,8 +187,8 @@ export class StreamAnalyticsJob implements Component, Provisionable,
 
     this.updateConfigSettings({
       values: {
-        subscriptId: azure.subscriptionId as string,
-        resourceGroup: azure.resourceGroup as string,
+        subscriptId: AzureUtility.subscriptionId as string,
+        resourceGroup: AzureUtility.resourceGroup as string,
         streamAnalyticsJobName:
             asaDeploy.properties.outputs.streamAnalyticsJobName.value
       }
@@ -215,8 +215,8 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     const subscriptId = componentInfo.values.subscriptId;
     const resourceGroup = componentInfo.values.resourceGroup;
     const streamAnalyticsJobName = componentInfo.values.streamAnalyticsJobName;
-    const azure = new Azure(this.extensionContext, this.channel, subscriptId);
-    const azureClient = azure.getClient();
+    AzureUtility.init(this.extensionContext, this.channel, subscriptId);
+    const azureClient = AzureUtility.getClient();
     if (!azureClient) {
       throw new Error('Initialize Azure client failed.');
     }
@@ -231,26 +231,26 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     const query = fs.readFileSync(this.queryPath, 'utf8');
     const parameters = {properties: {streamingUnits: 1, query}};
 
-    let deployPendding: NodeJS.Timer|null = null;
+    let deployPending: NodeJS.Timer|null = null;
     try {
       if (this.channel) {
         this.channel.show();
-        this.channel.appendLine('Deploying Azure Functions App...');
-        deployPendding = setInterval(() => {
+        this.channel.appendLine('Deploying Stream Analytics Job...');
+        deployPending = setInterval(() => {
           this.channel.append('.');
         }, 1000);
       }
       const deployment = await azureClient.resources.createOrUpdateById(
           resourceId, apiVersion, parameters);
-      if (this.channel && deployPendding) {
-        clearInterval(deployPendding);
+      if (this.channel && deployPending) {
+        clearInterval(deployPending);
         this.channel.appendLine('.');
         this.channel.appendLine(JSON.stringify(deployment, null, 4));
         this.channel.appendLine('Stream Analytics Job query deploy succeeded.');
       }
     } catch (error) {
-      if (this.channel && deployPendding) {
-        clearInterval(deployPendding);
+      if (this.channel && deployPending) {
+        clearInterval(deployPending);
         this.channel.appendLine('.');
       }
       throw error;

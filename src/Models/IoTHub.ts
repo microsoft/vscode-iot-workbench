@@ -10,8 +10,8 @@ import {ConfigHandler} from '../configHandler';
 import {AzureComponentsStorage, ConfigKey} from '../constants';
 
 import {getExtension} from './Apis';
-import {Azure, AzureConfigFileHandler} from './Azure';
-import {AzureComponentConfig, AzureConfigs, ComponentInfo, DependencyConfig} from './AzureComponentConfig';
+import {AzureComponentConfig, AzureConfigFileHandler, AzureConfigs, ComponentInfo, DependencyConfig} from './AzureComponentConfig';
+import {AzureUtility} from './AzureUtility';
 import {extensionName} from './Interfaces/Api';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
@@ -73,7 +73,7 @@ export class IoTHub implements Component, Provisionable {
     return true;
   }
 
-  async provision(azure: Azure): Promise<boolean> {
+  async provision(): Promise<boolean> {
     const provisionIothubSelection: vscode.QuickPickItem[] = [
       {
         label: 'Select an existing IoT Hub',

@@ -9,8 +9,8 @@ import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
 
 import {getExtension} from './Apis';
-import {Azure} from './Azure';
 import {DependencyConfig} from './AzureComponentConfig';
+import {AzureUtility} from './AzureUtility';
 import {extensionName} from './Interfaces/Api';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
@@ -45,7 +45,7 @@ export class IoTHubDevice implements Component, Provisionable {
     return true;
   }
 
-  async provision(azure: Azure): Promise<boolean> {
+  async provision(): Promise<boolean> {
     const iotHubConnectionString =
         ConfigHandler.get<string>(ConfigKey.iotHubConnectionString);
     if (!iotHubConnectionString) {

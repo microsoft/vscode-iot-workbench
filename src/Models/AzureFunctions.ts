@@ -23,7 +23,7 @@ import {getExtension} from './Apis';
 import {extensionName} from './Interfaces/Api';
 import {Guid} from 'guid-typescript';
 import {AzureComponentConfig, AzureConfigs, DependencyConfig, Dependency} from './AzureComponentConfig';
-import {Azure} from './Azure';
+import {AzureUtility} from './AzureUtility';
 
 export class AzureFunctions implements Component, Provisionable, Deployable {
   dependencies: DependencyConfig[] = [];
@@ -165,9 +165,9 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     }
   }
 
-  async provision(azure: Azure): Promise<boolean> {
+  async provision(): Promise<boolean> {
     try {
-      const subscriptionId = azure.subscriptionId;
+      const subscriptionId = AzureUtility.subscriptionId;
       if (!subscriptionId) {
         return false;
       }
@@ -234,11 +234,11 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
   }
 
   async deploy(): Promise<boolean> {
-    let deployPendding: NodeJS.Timer|null = null;
+    let deployPending: NodeJS.Timer|null = null;
     if (this.channel) {
       this.channel.show();
       this.channel.appendLine('Deploying Azure Functions App...');
-      deployPendding = setInterval(() => {
+      deployPending = setInterval(() => {
         this.channel.append('.');
       }, 1000);
     }
@@ -250,14 +250,14 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
       await vscode.commands.executeCommand(
           'azureFunctions.deploy', azureFunctionsPath, functionAppId);
       console.log(azureFunctionsPath, functionAppId);
-      if (this.channel && deployPendding) {
-        clearInterval(deployPendding);
+      if (this.channel && deployPending) {
+        clearInterval(deployPending);
         this.channel.appendLine('.');
       }
       return true;
     } catch (error) {
-      if (this.channel && deployPendding) {
-        clearInterval(deployPendding);
+      if (this.channel && deployPending) {
+        clearInterval(deployPending);
         this.channel.appendLine('.');
       }
       throw error;
