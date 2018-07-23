@@ -232,7 +232,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
 
     this.updateConfigSettings({
       values: {
-        subscriptId: AzureUtility.subscriptionId as string,
+        subscriptionId: AzureUtility.subscriptionId as string,
         resourceGroup: AzureUtility.resourceGroup as string,
         streamAnalyticsJobName:
             asaDeploy.properties.outputs.streamAnalyticsJobName.value
@@ -257,16 +257,16 @@ export class StreamAnalyticsJob implements Component, Provisionable,
       throw new Error(`You must provision Stream Analytics Job first.`);
     }
 
-    const subscriptId = componentInfo.values.subscriptId;
+    const subscriptionId = componentInfo.values.subscriptionId;
     const resourceGroup = componentInfo.values.resourceGroup;
     const streamAnalyticsJobName = componentInfo.values.streamAnalyticsJobName;
-    AzureUtility.init(this.extensionContext, this.channel, subscriptId);
+    AzureUtility.init(this.extensionContext, this.channel, subscriptionId);
     const azureClient = AzureUtility.getClient();
     if (!azureClient) {
       throw new Error('Initialize Azure client failed.');
     }
 
-    const resourceId = `/subscriptions/${subscriptId}/resourceGroups/${
+    const resourceId = `/subscriptions/${subscriptionId}/resourceGroups/${
         resourceGroup}/providers/Microsoft.StreamAnalytics/streamingjobs/${
         streamAnalyticsJobName}/transformations/Transformation`;
     const apiVersion = '2015-10-01';

@@ -176,15 +176,15 @@ export class CosmosDB implements Component, Provisionable {
 
     collection = collection.trim();
 
-    const cosmosDBAPIres =
+    const cosmosDBApiRes =
         await this.ensureCollection(account, key, database, collection);
-    if (!cosmosDBAPIres) {
+    if (!cosmosDBApiRes) {
       throw new Error('Error occurred when create collection.');
     }
 
     this.updateConfigSettings({
       values: {
-        subscriptId: AzureUtility.subscriptionId as string,
+        subscriptionId: AzureUtility.subscriptionId as string,
         resourceGroup: AzureUtility.resourceGroup as string,
         cosmosDBAccountName:
             cosmosDBDeploy.properties.outputs.cosmosDBAccountName.value,
