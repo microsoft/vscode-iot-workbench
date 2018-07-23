@@ -7,7 +7,8 @@ export enum ComponentType {
   IoTHub,
   AzureFunctions,
   IoTHubDevice,
-  StreamAnalyticsJob
+  StreamAnalyticsJob,
+  CosmosDB
 }
 
 export interface Component {
