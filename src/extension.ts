@@ -255,6 +255,9 @@ export async function activate(context: vscode.ExtensionContext) {
   const examples = vscode.commands.registerCommand(
       'iotworkbench.examples', examplesProvider);
 
+  const exampleInitialize = vscode.commands.registerCommand(
+      'iotworkbench.exampleInitialize', examplesInitializeProvider);
+
   const helpInit =
       vscode.commands.registerCommand('iotworkbench.help', async () => {
         await HelpProvider.open(context);
