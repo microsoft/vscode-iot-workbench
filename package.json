@@ -138,6 +138,7 @@
     "update:package": "rm -rf node_modules && npm update --save-dev && npm update --save"
   },
   "devDependencies": {
+    "@types/adm-zip": "^0.4.31",
     "@types/body-parser": "^1.16.8",
     "@types/express": "^4.11.1",
     "@types/fs-plus": "^3.0.0",
@@ -154,8 +155,13 @@
     "vscode": "^1.1.6"
   },
   "dependencies": {
+    "adm-zip": "^0.4.11",
     "azure-arm-resource": "^3.1.0-preview",
     "azure-arm-website": "^3.0.0-preview",
+    "azure-iot-device": "^1.7.1",
+    "azure-iot-device-amqp": "^1.7.1",
+    "azure-iot-device-http": "^1.7.1",
+    "azure-iot-device-mqtt": "^1.7.1",
     "azure-iothub": "^1.2.3",
     "body-parser": "^1.18.2",
     "eventemitter2": "^5.0.0",
@@ -169,9 +175,9 @@
     "request-promise": "^4.2.2",
     "serialport-lite": "^0.1.2",
     "ssh2": "^0.6.1",
-    "unzip": "^0.1.11",
     "vscode-extension-telemetry": "^0.0.15",
-    "winreg": "^1.2.3"
+    "winreg": "^1.2.3",
+    "guid-typescript": "^1.0.7"
   },
   "extensionDependencies": [
     "vsciot-vscode.azure-iot-toolkit",
