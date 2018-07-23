@@ -10,12 +10,10 @@ import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames} from '../constants';
-import {ProjectTemplate, ProjectTemplateType} from '../Models/Interfaces/ProjectTemplate';
-import {IoTProject} from '../Models/IoTProject';
-import {SSH} from '../Models/SSH';
 
-import {Component, ComponentType} from './Interfaces/Component';
+import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
+import {SSH} from './SSH';
 
 const constants = {
   defaultSketchFileName: 'app.js'

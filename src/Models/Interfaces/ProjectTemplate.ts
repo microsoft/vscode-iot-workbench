@@ -4,7 +4,8 @@
 export enum ProjectTemplateType {
   Basic = 1,
   IotHub,
-  AzureFunctions
+  AzureFunctions,
+  StreamAnalytics
 }
 
 export interface ProjectTemplate {

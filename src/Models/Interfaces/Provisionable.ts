@@ -1,8 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import {Guid} from 'guid-typescript';
+
+import {DependencyConfig} from '../AzureComponentConfig';
+import {AzureUtility} from '../AzureUtility';
 
 export interface Provisionable {
-  dependencies: string[];
+  dependencies: DependencyConfig[];
   provision(): Promise<boolean>;
 }
