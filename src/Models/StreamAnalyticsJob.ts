@@ -18,7 +18,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
   private channel: vscode.OutputChannel;
   private projectRootPath: string;
   private componentId: string;
-  private azureComponent: AzureConfigFileHandler;
+  private azureConfigHandler: AzureConfigFileHandler;
   private extensionContext: vscode.ExtensionContext;
   private queryPath: string;
   get id() {
@@ -34,7 +34,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     this.channel = channel;
     this.componentId = Guid.create().toString();
     this.projectRootPath = projectRoot;
-    this.azureComponent = new AzureConfigFileHandler(projectRoot);
+    this.azureConfigHandler = new AzureConfigFileHandler(projectRoot);
     this.extensionContext = context;
     if (dependencyComponents && dependencyComponents.length > 0) {
       dependencyComponents.forEach(
@@ -82,12 +82,12 @@ export class StreamAnalyticsJob implements Component, Provisionable,
 
   private updateConfigSettings(componentInfo?: ComponentInfo): void {
     const asaComponentIndex =
-        this.azureComponent.getComponentIndexById(this.id);
+        this.azureConfigHandler.getComponentIndexById(this.id);
     if (asaComponentIndex > -1) {
       if (!componentInfo) {
         return;
       }
-      this.azureComponent.updateComponent(asaComponentIndex, componentInfo);
+      this.azureConfigHandler.updateComponent(asaComponentIndex, componentInfo);
     } else {
       const newAsaConfig: AzureComponentConfig = {
         id: this.id,
@@ -96,7 +96,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
         dependencies: this.dependencies,
         type: ComponentType[this.componentType]
       };
-      this.azureComponent.appendComponent(newAsaConfig);
+      this.azureConfigHandler.appendComponent(newAsaConfig);
     }
   }
 
@@ -115,7 +115,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
 
     for (const dependency of this.dependencies) {
       const componentConfig =
-          this.azureComponent.getComponentById(dependency.id);
+          this.azureConfigHandler.getComponentById(dependency.id);
       if (!componentConfig) {
         throw new Error(`Cannot find component with id ${dependency.id}.`);
       }
@@ -202,7 +202,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
   }
 
   async deploy(): Promise<boolean> {
-    const componentConfig = this.azureComponent.getComponentById(this.id);
+    const componentConfig = this.azureConfigHandler.getComponentById(this.id);
     if (!componentConfig) {
       throw new Error(`Cannot find component with id ${this.id}.`);
     }
