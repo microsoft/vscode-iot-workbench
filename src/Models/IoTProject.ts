@@ -27,6 +27,7 @@ import {IoTButtonDevice} from './IoTButtonDevice';
 import {IoTHub} from './IoTHub';
 import {IoTHubDevice} from './IoTHubDevice';
 import {RaspberryPiDevice} from './RaspberryPiDevice';
+import {Simulator} from './Simulator';
 import {StreamAnalyticsJob} from './StreamAnalyticsJob';
 
 const constants = {

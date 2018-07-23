@@ -18,7 +18,7 @@ export interface CommandItem extends vscode.QuickPickItem {
    * workspace configuration contains
    * the specific field.
    */
-  only?: string;
+  only?: string|string[];
   /**
    * Show the menu item when only the
    * deviceId of current workspace is in

@@ -1,0 +1,4 @@
+{
+  "main": "ResponseTwinDesiredProperty.json",
+  "connectionString": "HostName=t-yiwche-test.azure-devices.net;DeviceId=HaoCai;SharedAccessKey=PfjPjKVI9V5FlksUL1abKVnCfH/50Kus94mNh+PRUOA="
+}
