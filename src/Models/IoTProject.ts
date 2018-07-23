@@ -44,12 +44,9 @@ interface ProjectSetting {
 export class IoTProject {
   private componentList: Component[];
   private projectRootPath = '';
-  private projectTemplateItem: ProjectTemplate|null = null;
   private extensionContext: vscode.ExtensionContext;
   private channel: vscode.OutputChannel;
   private telemetryContext: TelemetryContext;
-
-  private addComponent(comp: Component) {}
 
   private canProvision(comp: {}): comp is Provisionable {
     return (comp as Provisionable).provision !== undefined;
@@ -268,7 +265,6 @@ export class IoTProject {
   }
 
   async deploy(): Promise<boolean> {
-    const needDeploy = false;
     let azureLoggedIn = false;
 
     const deployItemList: string[] = [];
@@ -332,7 +328,6 @@ export class IoTProject {
     }
 
     this.projectRootPath = rootFolderPath;
-    this.projectTemplateItem = projectTemplateItem;
 
     const workspace: Workspace = {folders: [], settings: {}};
 
