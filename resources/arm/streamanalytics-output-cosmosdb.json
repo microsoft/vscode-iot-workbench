@@ -1,0 +1,41 @@
+
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "streamAnalyticsJobName": {
+      "type": "string"
+    },
+    "outputName": {
+      "type": "string"
+    },
+    "cosmosDBName": {
+      "type": "string"
+    },
+    "cosmosDBDatabase": {
+      "type": "string"
+    },
+    "cosmosDBCollection": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.StreamAnalytics/streamingjobs/outputs",
+      "name": "[concat(parameters('streamAnalyticsJobName'), '/', parameters('outputName'))]",
+      "apiVersion": "2016-03-01",
+      "scale": null,
+      "properties": {
+        "datasource": {
+          "type": "Microsoft.Storage/DocumentDB",
+          "properties": {
+            "accountId": "[parameters('cosmosDBName')]",
+            "accountKey": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBName')), '2015-04-08').primaryMasterKey]",
+            "database": "[parameters('cosmosDBDatabase')]",
+            "collectionNamePattern": "[parameters('cosmosDBCollection')]"
+          }
+        }
+      }
+    }
+  ]
+}
