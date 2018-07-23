@@ -233,7 +233,7 @@ export async function activate(context: vscode.ExtensionContext) {
     {
       label: 'Azure Deploy',
       description: '',
-      detail: 'Deploy Azure Functions code to Azure',
+      detail: 'Deploy Azure Services',
       only: [ConfigKey.functionPath, ConfigKey.asaPath],
       click: azureDeployProvider
     }

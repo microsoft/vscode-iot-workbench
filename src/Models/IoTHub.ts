@@ -22,7 +22,7 @@ export class IoTHub implements Component, Provisionable {
   private channel: vscode.OutputChannel;
   private projectRootPath: string;
   private componentId: string;
-  private azureComponent: AzureConfigFileHandler;
+  private azureConfigFileHandler: AzureConfigFileHandler;
   get id() {
     return this.componentId;
   }
@@ -32,7 +32,7 @@ export class IoTHub implements Component, Provisionable {
     this.channel = channel;
     this.componentId = Guid.create().toString();
     this.projectRootPath = projectRoot;
-    this.azureComponent = new AzureConfigFileHandler(projectRoot);
+    this.azureConfigFileHandler = new AzureConfigFileHandler(projectRoot);
   }
 
   name = 'IoT Hub';
@@ -170,13 +170,14 @@ export class IoTHub implements Component, Provisionable {
 
   private updateConfigSettings(componentInfo?: ComponentInfo): void {
     const iotHubComponentIndex =
-        this.azureComponent.getComponentIndexById(this.id);
+        this.azureConfigFileHandler.getComponentIndexById(this.id);
 
     if (iotHubComponentIndex > -1) {
       if (!componentInfo) {
         return;
       }
-      this.azureComponent.updateComponent(iotHubComponentIndex, componentInfo);
+      this.azureConfigFileHandler.updateComponent(
+          iotHubComponentIndex, componentInfo);
     } else {
       const newIoTHubConfig: AzureComponentConfig = {
         id: this.id,
@@ -186,7 +187,7 @@ export class IoTHub implements Component, Provisionable {
         type: ComponentType[this.componentType],
         componentInfo
       };
-      this.azureComponent.appendComponent(newIoTHubConfig);
+      this.azureConfigFileHandler.appendComponent(newIoTHubConfig);
     }
   }
 }

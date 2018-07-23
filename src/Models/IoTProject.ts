@@ -44,12 +44,9 @@ interface ProjectSetting {
 export class IoTProject {
   private componentList: Component[];
   private projectRootPath = '';
-  private projectTemplateItem: ProjectTemplate|null = null;
   private extensionContext: vscode.ExtensionContext;
   private channel: vscode.OutputChannel;
   private telemetryContext: TelemetryContext;
-
-  private addComponent(comp: Component) {}
 
   private canProvision(comp: {}): comp is Provisionable {
     return (comp as Provisionable).provision !== undefined;
@@ -110,8 +107,9 @@ export class IoTProject {
       }
     }
 
-    const azureComponent = new AzureConfigFileHandler(this.projectRootPath);
-    const componentConfigs = azureComponent.getSortedComponents();
+    const azureConfigFileHandler =
+        new AzureConfigFileHandler(this.projectRootPath);
+    const componentConfigs = azureConfigFileHandler.getSortedComponents();
     const components: {[key: string]: Component} = {};
 
     for (const componentConfig of componentConfigs) {
@@ -244,13 +242,17 @@ export class IoTProject {
             _provisionItemList[i] = `${i + 1}. ${provisionItemList[i]}`;
           }
         }
-        await vscode.window.showQuickPick(
+        const selection = await vscode.window.showQuickPick(
             [{
               label: _provisionItemList.join('   -   '),
               description: '',
               detail: 'Click to continue'
             }],
             {ignoreFocusOut: true, placeHolder: 'Provision process'});
+
+        if (!selection) {
+          return false;
+        }
 
         const res = await item.provision();
         if (res === false) {
@@ -263,14 +265,45 @@ export class IoTProject {
   }
 
   async deploy(): Promise<boolean> {
-    let needDeploy = false;
     let azureLoggedIn = false;
 
+    const deployItemList: string[] = [];
     for (const item of this.componentList) {
       if (this.canDeploy(item)) {
-        needDeploy = true;
-        if (!azureLoggedIn) {
-          azureLoggedIn = await checkAzureLogin();
+        deployItemList.push(item.name);
+      }
+    }
+
+    if (deployItemList && deployItemList.length <= 0) {
+      await vscode.window.showWarningMessage(
+          'The project does not contain any Azure components to be deployed, Azure Deploy skipped.');
+      return false;
+    }
+
+    if (!azureLoggedIn) {
+      azureLoggedIn = await checkAzureLogin();
+    }
+
+    for (const item of this.componentList) {
+      const _deployItemList: string[] = [];
+      if (this.canDeploy(item)) {
+        for (let i = 0; i < deployItemList.length; i++) {
+          if (deployItemList[i] === item.name) {
+            _deployItemList[i] = `>> ${i + 1}. ${deployItemList[i]}`;
+          } else {
+            _deployItemList[i] = `${i + 1}. ${deployItemList[i]}`;
+          }
+        }
+        const selection = await vscode.window.showQuickPick(
+            [{
+              label: _deployItemList.join('   -   '),
+              description: '',
+              detail: 'Click to continue'
+            }],
+            {ignoreFocusOut: true, placeHolder: 'Deploy process'});
+
+        if (!selection) {
+          return false;
         }
 
         const res = await item.deploy();
@@ -281,14 +314,9 @@ export class IoTProject {
       }
     }
 
-    if (!needDeploy) {
-      await vscode.window.showWarningMessage(
-          'The project does not contain any Azure components to be deployed, Azure Deploy skipped.');
-    }
-
     vscode.window.showInformationMessage('Azure deploy succeeded.');
 
-    return needDeploy;
+    return true;
   }
 
   async create(
@@ -300,7 +328,6 @@ export class IoTProject {
     }
 
     this.projectRootPath = rootFolderPath;
-    this.projectTemplateItem = projectTemplateItem;
 
     const workspace: Workspace = {folders: [], settings: {}};
 
