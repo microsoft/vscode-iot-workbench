@@ -10,17 +10,19 @@ import {ConfigHandler} from '../configHandler';
 import {AzureComponentsStorage, ConfigKey} from '../constants';
 
 import {getExtension} from './Apis';
-import {AzureComponentConfig, AzureConfigs} from './AzureComponentConfig';
+import {AzureComponentConfig, AzureConfigFileHandler, AzureConfigs, ComponentInfo, DependencyConfig} from './AzureComponentConfig';
+import {AzureUtility} from './AzureUtility';
 import {extensionName} from './Interfaces/Api';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
 
 export class IoTHub implements Component, Provisionable {
-  dependencies: string[] = [];
+  dependencies: DependencyConfig[] = [];
   private componentType: ComponentType;
   private channel: vscode.OutputChannel;
   private projectRootPath: string;
   private componentId: string;
+  private azureConfigFileHandler: AzureConfigFileHandler;
   get id() {
     return this.componentId;
   }
@@ -30,6 +32,7 @@ export class IoTHub implements Component, Provisionable {
     this.channel = channel;
     this.componentId = Guid.create().toString();
     this.projectRootPath = projectRoot;
+    this.azureConfigFileHandler = new AzureConfigFileHandler(projectRoot);
   }
 
   name = 'IoT Hub';
@@ -144,6 +147,14 @@ export class IoTHub implements Component, Provisionable {
       await ConfigHandler.update(
           ConfigKey.eventHubConnectionPath, eventHubConnectionPath);
 
+      this.updateConfigSettings({
+        values: {
+          iotHubConnectionString: iothub.iotHubConnectionString,
+          eventHubConnectionString,
+          eventHubConnectionPath
+        }
+      });
+
       if (this.channel) {
         this.channel.show();
         this.channel.appendLine('IoT Hub provision succeeded.');
@@ -157,35 +168,26 @@ export class IoTHub implements Component, Provisionable {
     }
   }
 
-  private updateConfigSettings(): void {
-    const azureConfigFilePath = path.join(
-        this.projectRootPath, AzureComponentsStorage.folderName,
-        AzureComponentsStorage.fileName);
+  private updateConfigSettings(componentInfo?: ComponentInfo): void {
+    const iotHubComponentIndex =
+        this.azureConfigFileHandler.getComponentIndexById(this.id);
 
-    let azureConfigs: AzureConfigs = {componentConfigs: []};
-
-    try {
-      azureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, 'utf8'));
-    } catch (error) {
-      const e = new Error('Invalid azure components config file.');
-      throw e;
-    }
-
-    const iotHubConfig =
-        azureConfigs.componentConfigs.find(config => config.id === (this.id));
-    if (iotHubConfig) {
-      // TODO: update the existing setting for the provision result
+    if (iotHubComponentIndex > -1) {
+      if (!componentInfo) {
+        return;
+      }
+      this.azureConfigFileHandler.updateComponent(
+          iotHubComponentIndex, componentInfo);
     } else {
       const newIoTHubConfig: AzureComponentConfig = {
         id: this.id,
         folder: '',
         name: '',
         dependencies: [],
-        type: ComponentType[this.componentType]
+        type: ComponentType[this.componentType],
+        componentInfo
       };
-      azureConfigs.componentConfigs.push(newIoTHubConfig);
-      fs.writeFileSync(
-          azureConfigFilePath, JSON.stringify(azureConfigs, null, 4));
+      this.azureConfigFileHandler.appendComponent(newIoTHubConfig);
     }
   }
 }

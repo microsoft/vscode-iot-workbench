@@ -11,7 +11,7 @@ import * as _ from 'lodash';
 import * as opn from 'opn';
 import * as os from 'os';
 import * as path from 'path';
-import {SerialPortLite} from 'serialport-lite';
+import {SerialPortLite} from 'serialport-lite/dist';
 import {resolve} from 'url';
 import {error} from 'util';
 import * as vscode from 'vscode';
@@ -21,13 +21,13 @@ import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames} from '../constants';
 import {DialogResponses} from '../DialogResponses';
-import {ProjectTemplate, ProjectTemplateType} from '../Models/Interfaces/ProjectTemplate';
-import {IoTProject} from '../Models/IoTProject';
 import {delay, getRegistryValues} from '../utils';
 
 import {Board} from './Interfaces/Board';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
+import {ProjectTemplate, ProjectTemplateType} from './Interfaces/ProjectTemplate';
+import {IoTProject} from './IoTProject';
 
 interface SerialPortInfo {
   comName: string;
