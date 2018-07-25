@@ -181,13 +181,58 @@ export class StreamAnalyticsJob implements Component, Provisionable,
           }
         }
       } else {
-        // asa output
+        switch (componentConfig.type) {
+          case 'CosmosDB': {
+            if (!componentConfig.componentInfo) {
+              return false;
+            }
+            const cosmosDBAccountName =
+                componentConfig.componentInfo.values.cosmosDBAccountName;
+            const cosmosDBDatabase =
+                componentConfig.componentInfo.values.cosmosDBDatabase;
+            const cosmosDBCollection =
+                componentConfig.componentInfo.values.cosmosDBCollection;
+            if (!cosmosDBAccountName || !cosmosDBDatabase ||
+                !cosmosDBCollection) {
+              throw new Error('Cannot get Cosmos DB connection information.');
+            }
+
+            const asaCosmosDBArmTemplatePath =
+                this.extensionContext.asAbsolutePath(path.join(
+                    FileNames.resourcesFolderName, 'arm',
+                    'streamanalytics-output-cosmosdb.json'));
+            const asaCosmosDBArmTemplate =
+                JSON.parse(fs.readFileSync(
+                    asaCosmosDBArmTemplatePath, 'utf8')) as ARMTemplate;
+            const asaCosmosArmParameters = {
+              streamAnalyticsJobName: {
+                value: asaDeploy.properties.outputs.streamAnalyticsJobName.value
+              },
+              outputName: {value: `cosmosdb-${componentConfig.id}`},
+              cosmosDBName: {value: cosmosDBAccountName},
+              cosmosDBDatabase: {value: cosmosDBDatabase},
+              cosmosDBCollection: {value: cosmosDBCollection}
+            };
+
+            const asaOutputDeploy = await AzureUtility.deployARMTemplate(
+                asaCosmosDBArmTemplate, asaCosmosArmParameters);
+            if (!asaOutputDeploy) {
+              throw new Error('Provision Stream Analytics Job failed.');
+            }
+
+            break;
+          }
+          default: {
+            throw new Error(
+                `Not supported ASA output type: ${componentConfig.type}.`);
+          }
+        }
       }
     }
 
     this.updateConfigSettings({
       values: {
-        subscriptId: AzureUtility.subscriptionId as string,
+        subscriptionId: AzureUtility.subscriptionId as string,
         resourceGroup: AzureUtility.resourceGroup as string,
         streamAnalyticsJobName:
             asaDeploy.properties.outputs.streamAnalyticsJobName.value
@@ -212,16 +257,16 @@ export class StreamAnalyticsJob implements Component, Provisionable,
       throw new Error(`You must provision Stream Analytics Job first.`);
     }
 
-    const subscriptId = componentInfo.values.subscriptId;
+    const subscriptionId = componentInfo.values.subscriptionId;
     const resourceGroup = componentInfo.values.resourceGroup;
     const streamAnalyticsJobName = componentInfo.values.streamAnalyticsJobName;
-    AzureUtility.init(this.extensionContext, this.channel, subscriptId);
+    AzureUtility.init(this.extensionContext, this.channel, subscriptionId);
     const azureClient = AzureUtility.getClient();
     if (!azureClient) {
       throw new Error('Initialize Azure client failed.');
     }
 
-    const resourceId = `/subscriptions/${subscriptId}/resourceGroups/${
+    const resourceId = `/subscriptions/${subscriptionId}/resourceGroups/${
         resourceGroup}/providers/Microsoft.StreamAnalytics/streamingjobs/${
         streamAnalyticsJobName}/transformations/Transformation`;
     const apiVersion = '2015-10-01';

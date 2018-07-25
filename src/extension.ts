@@ -310,6 +310,7 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(iotcloudMenu);
   context.subscriptions.push(projectInit);
   context.subscriptions.push(examples);
+  context.subscriptions.push(exampleInitialize);
   context.subscriptions.push(helpInit);
   context.subscriptions.push(workbenchPath);
 

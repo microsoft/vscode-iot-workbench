@@ -15,6 +15,7 @@ import {AZ3166Device} from './AZ3166Device';
 import {AzureConfigFileHandler, AzureConfigs, Dependency, DependencyType} from './AzureComponentConfig';
 import {AzureFunctions} from './AzureFunctions';
 import {AzureUtility} from './AzureUtility';
+import {CosmosDB} from './CosmosDB';
 import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Deployable} from './Interfaces/Deployable';
@@ -169,6 +170,23 @@ export class IoTProject {
           await asa.load();
           components[asa.id] = asa;
           this.componentList.push(asa);
+          break;
+        }
+        case 'CosmosDB': {
+          const dependencies: Dependency[] = [];
+          for (const dependent of componentConfig.dependencies) {
+            const component = components[dependent.id];
+            if (!component) {
+              throw new Error(`Cannot find component with id ${dependent}.`);
+            }
+            dependencies.push({component, type: dependent.type});
+          }
+          const cosmosDB = new CosmosDB(
+              this.extensionContext, this.projectRootPath, this.channel,
+              dependencies);
+          await cosmosDB.load();
+          components[cosmosDB.id] = cosmosDB;
+          this.componentList.push(cosmosDB);
           break;
         }
         default: {
@@ -431,6 +449,8 @@ export class IoTProject {
       }
       case ProjectTemplateType.StreamAnalytics: {
         const iothub = new IoTHub(this.projectRootPath, this.channel);
+        const cosmosDB = new CosmosDB(
+            this.extensionContext, this.projectRootPath, this.channel);
         const asaDir = path.join(this.projectRootPath, constants.asaFolderName);
 
         if (!fs.existsSync(asaDir)) {
@@ -444,13 +464,17 @@ export class IoTProject {
 
         const asa = new StreamAnalyticsJob(
             queryPath, this.extensionContext, this.projectRootPath,
-            this.channel, [{component: iothub, type: DependencyType.Input}]);
+            this.channel, [
+              {component: iothub, type: DependencyType.Input},
+              {component: cosmosDB, type: DependencyType.Other}
+            ]);
 
         workspace.folders.push({path: constants.asaFolderName});
         workspace.settings[`IoTWorkbench.${ConfigKey.asaPath}`] =
             constants.asaFolderName;
 
         this.componentList.push(iothub);
+        this.componentList.push(cosmosDB);
         this.componentList.push(asa);
         break;
       }
