@@ -20,6 +20,13 @@
             "label": "With Azure Functions",
             "type": "AzureFunctions",
             "sketch": "iothub.ino"
+        },
+        {
+            "description": "",
+            "detail": "Create project that processes device data from IoT Hub in Stream Analytics and store the result in Cosmos DB.",
+            "label": "With Stream Analytic1s and Cosmos DB",
+            "type": "StreamAnalytics",
+            "sketch": "iothub.ino"
         }
     ]
 }
