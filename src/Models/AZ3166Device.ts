@@ -118,6 +118,31 @@ export class AZ3166Device implements Device {
     return az3166;
   }
 
+  get version() {
+    const plat = os.platform();
+    let packageRootPath = '';
+    let version = '0.0.1';
+
+    if (plat === 'win32') {
+      const homeDir = os.homedir();
+      const localAppData: string = path.join(homeDir, 'AppData', 'Local');
+      packageRootPath = path.join(
+          localAppData, 'Arduino15', 'packages', 'AZ3166', 'hardware',
+          'stm32f4');
+    } else {
+      packageRootPath = '~/Library/Arduino15/packages/AZ3166/hardware/stm32f4';
+    }
+
+    if (fs.existsSync(packageRootPath)) {
+      const versions = fs.readdirSync(packageRootPath);
+      if (versions[0]) {
+        version = versions[0];
+      }
+    }
+
+    return version;
+  }
+
   async load(): Promise<boolean> {
     const deviceFolderPath = this.deviceFolder;
 
@@ -149,11 +174,14 @@ export class AZ3166Device implements Device {
                 constants.cppPropertiesFileNameWin));
         const propertiesContentWin32 =
             fs.readFileSync(propertiesFilePathWin32).toString();
-        const pattern = /{ROOTPATH}/gi;
+        const rootPathPattern = /{ROOTPATH}/g;
+        const versionPattern = /{VERSION}/g;
         const homeDir = os.homedir();
         const localAppData: string = path.join(homeDir, 'AppData', 'Local');
-        const replaceStr = propertiesContentWin32.replace(
-            pattern, localAppData.replace(/\\/g, '\\\\'));
+        const replaceStr =
+            propertiesContentWin32
+                .replace(rootPathPattern, localAppData.replace(/\\/g, '\\\\'))
+                .replace(versionPattern, this.version);
         fs.writeFileSync(cppPropertiesFilePath, replaceStr);
       }
       // TODO: Let's use the same file for Linux and MacOS for now. Need to
