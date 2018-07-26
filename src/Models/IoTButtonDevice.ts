@@ -3,18 +3,14 @@
 
 import * as fs from 'fs-plus';
 import {Guid} from 'guid-typescript';
-import * as os from 'os';
 import * as path from 'path';
 import * as request from 'request-promise';
-import {error} from 'util';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames} from '../constants';
-import {ProjectTemplate, ProjectTemplateType} from '../Models/Interfaces/ProjectTemplate';
-import {IoTProject} from '../Models/IoTProject';
 
-import {Component, ComponentType} from './Interfaces/Component';
+import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
 
 const constants = {

@@ -57,26 +57,7 @@ Find **MQTT Client** and click **Open Sample** button. A new VS Code window with
 
 ## Test the project
 
-In VS Code, follow this procedure to open and set up the Serial Monitor:
-
-* Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **Select Serial Port**, and then select **Arduino: Select Serial Port**.
-
-  ![Select serial port](media/iot-devkit-mqtt-client/select-serial-port.png)
-
-* Click the **COM[X]** on the status bar to set the right COM port with **STMicroelectronics**:
-
-  ![Select serial port](media/iot-devkit-mqtt-client/select-devkit-com-port.png)
-
-* Click the power plug icon on the status bar of Visual Studio Code:
-  
-  ![Open serial monitor](media/iot-devkit-mqtt-client/open-serial-monitor.png)
-
-* When the icon changes to an **X**, click the baud rate on the left and select **115200** from the drop-down list to increase the Baud rate.
-
-  ![Select baud rate](media/iot-devkit-mqtt-client/select-baud-rate.png)
-
-  ![Select baud rate 115200](media/iot-devkit-mqtt-client/select-baud-rate-115200.png)
-
+Open [serial monitor](./devkit-get-started.md/#Serial_monitor_usage).
 
 The sample application is running successfully when you see the Serial Monitor displays all the messages sent by the sample sketch.
 

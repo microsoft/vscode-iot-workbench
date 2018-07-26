@@ -22,10 +22,11 @@ import {StringDictionary} from 'azure-arm-website/lib/models';
 import {getExtension} from './Apis';
 import {extensionName} from './Interfaces/Api';
 import {Guid} from 'guid-typescript';
-import {AzureComponentConfig, AzureConfigs} from './AzureComponentConfig';
+import {AzureComponentConfig, AzureConfigs, DependencyConfig, Dependency} from './AzureComponentConfig';
+import {AzureUtility} from './AzureUtility';
 
-export class AzureFunctions implements Component, Provisionable {
-  dependencies: string[] = [];
+export class AzureFunctions implements Component, Provisionable, Deployable {
+  dependencies: DependencyConfig[] = [];
   private componentType: ComponentType;
   private channel: vscode.OutputChannel;
   private azureFunctionsPath: string;
@@ -37,31 +38,6 @@ export class AzureFunctions implements Component, Provisionable {
   private componentId: string;
   get id() {
     return this.componentId;
-  }
-  private async getSubscriptionList(): Promise<vscode.QuickPickItem[]> {
-    const subscriptionList: vscode.QuickPickItem[] = [];
-    if (!this.azureAccountExtension) {
-      throw new Error('Azure account extension is not found.');
-    }
-
-    const subscriptions = this.azureAccountExtension.filters;
-    subscriptions.forEach(item => {
-      subscriptionList.push({
-        label: item.subscription.displayName,
-        description: item.subscription.subscriptionId
-      } as vscode.QuickPickItem);
-    });
-
-    if (subscriptionList.length === 0) {
-      subscriptionList.push({
-        label: 'No subscription found',
-        description: '',
-        detail:
-            'Click Azure account at bottom left corner and choose Select All'
-      } as vscode.QuickPickItem);
-    }
-
-    return subscriptionList;
   }
 
   private async getCredentialFromSubscriptionId(subscriptionId: string):
@@ -89,7 +65,7 @@ export class AzureFunctions implements Component, Provisionable {
   constructor(
       azureFunctionsPath: string, functionFolder: string,
       channel: vscode.OutputChannel, language: string|null = null,
-      dependencyComponents: Component[]|null = null) {
+      dependencyComponents: Dependency[]|null = null) {
     this.componentType = ComponentType.AzureFunctions;
     this.channel = channel;
     this.azureFunctionsPath = azureFunctionsPath;
@@ -98,7 +74,8 @@ export class AzureFunctions implements Component, Provisionable {
     this.componentId = Guid.create().toString();
     if (dependencyComponents && dependencyComponents.length > 0) {
       dependencyComponents.forEach(
-          component => this.dependencies.push(component.id.toString()));
+          dependency => this.dependencies.push(
+              {id: dependency.component.id.toString(), type: dependency.type}));
     }
   }
 
@@ -190,13 +167,10 @@ export class AzureFunctions implements Component, Provisionable {
 
   async provision(): Promise<boolean> {
     try {
-      const subscription = await vscode.window.showQuickPick(
-          this.getSubscriptionList(),
-          {placeHolder: 'Select Subscription', ignoreFocusOut: true});
-      if (!subscription || !subscription.description) {
+      const subscriptionId = AzureUtility.subscriptionId;
+      if (!subscriptionId) {
         return false;
       }
-      const subscriptionId = subscription.description;
       const functionAppId: string|undefined =
           await vscode.commands.executeCommand<string>(
               'azureFunctions.createFunctionApp', subscriptionId);
@@ -260,11 +234,11 @@ export class AzureFunctions implements Component, Provisionable {
   }
 
   async deploy(): Promise<boolean> {
-    let deployPendding: NodeJS.Timer|null = null;
+    let deployPending: NodeJS.Timer|null = null;
     if (this.channel) {
       this.channel.show();
       this.channel.appendLine('Deploying Azure Functions App...');
-      deployPendding = setInterval(() => {
+      deployPending = setInterval(() => {
         this.channel.append('.');
       }, 1000);
     }
@@ -276,14 +250,14 @@ export class AzureFunctions implements Component, Provisionable {
       await vscode.commands.executeCommand(
           'azureFunctions.deploy', azureFunctionsPath, functionAppId);
       console.log(azureFunctionsPath, functionAppId);
-      if (this.channel && deployPendding) {
-        clearInterval(deployPendding);
+      if (this.channel && deployPending) {
+        clearInterval(deployPending);
         this.channel.appendLine('.');
       }
       return true;
     } catch (error) {
-      if (this.channel && deployPendding) {
-        clearInterval(deployPendding);
+      if (this.channel && deployPending) {
+        clearInterval(deployPending);
         this.channel.appendLine('.');
       }
       throw error;
