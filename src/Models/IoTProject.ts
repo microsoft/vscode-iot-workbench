@@ -126,17 +126,14 @@ export class IoTProject {
           break;
         }
         case 'AzureFunctions': {
-          if (!componentConfig.componentInfo ||
-              !componentConfig.componentInfo.values ||
-              !componentConfig.componentInfo.values.functionPath) {
+          const functionPath =
+              ConfigHandler.get<string>(ConfigKey.functionPath);
+          if (!functionPath) {
             return false;
           }
-          const functionPath =
-              componentConfig.componentInfo.values.functionPath;
           const functionLocation = path.join(
               vscode.workspace.workspaceFolders[0].uri.fsPath, '..',
               functionPath);
-
           if (functionLocation) {
             const functionApp = new AzureFunctions(
                 functionLocation, functionPath, this.channel);
