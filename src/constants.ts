@@ -43,7 +43,8 @@ export class FileNames {
 
 export enum AzureFunctionsLanguage {
   CSharpScript = 'C#Script',
-  JavaScript = 'JavaScript'
+  JavaScript = 'JavaScript',
+  CSharpLibrary = 'C#'
 }
 
 export class AzureComponentsStorage {

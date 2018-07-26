@@ -125,7 +125,8 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     if (!this.functionLanguage) {
       const picks: vscode.QuickPickItem[] = [
         {label: AzureFunctionsLanguage.CSharpScript, description: ''},
-        {label: AzureFunctionsLanguage.JavaScript, description: ''}
+        {label: AzureFunctionsLanguage.JavaScript, description: ''},
+        {label: AzureFunctionsLanguage.CSharpLibrary, description: ''}
       ];
 
       const languageSelection = await vscode.window.showQuickPick(picks, {
