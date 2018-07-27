@@ -80,7 +80,7 @@ export class CosmosDB implements Component, Provisionable {
     return true;
   }
 
-  private updateConfigSettings(componentInfo?: ComponentInfo): void {
+  updateConfigSettings(componentInfo?: ComponentInfo): void {
     const cosmosDBComponentIndex =
         this.azureConfigHandler.getComponentIndexById(this.id);
     if (cosmosDBComponentIndex > -1) {
