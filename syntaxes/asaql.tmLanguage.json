@@ -1,0 +1,21 @@
+
+{
+  "name": "ASAQL",
+  "scopeName": "source.sql.asaql",
+  "fileTypes": [
+    "asaql"
+  ],
+  "patterns": [
+    {
+      "include": "source.sql"
+    },
+    {
+      "match": "(?i:\b(select(\\s+distinct)?|insert\\s+(ignore\\s+)?into|update|delete|from|set|where|group\\sby|or|like|and|union(\\s+all)?|having|order\\sby|timestamp\\sby|limit|(inner|cross)\\s+join|join|straight_join|full\\s+outer\\s+join|(left|right)(\\s+outer)?\\s+join|natural(\\s+(left|right)(\\s+outer)?)?\\s+join)\b)",
+      "name": "keyword.other.DML.sql"
+    },
+    {
+      "match": "(?i)\\b(avg|count|collect|collecttop|max|min|sum|percentile_cont|topone|stdev|stdevp|var|varp|percentile_disc|tumblingwindow)\\b",
+      "name": "support.function.aggregate.sql"
+    }
+  ]
+}

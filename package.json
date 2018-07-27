@@ -121,6 +121,24 @@
           }
         }
       }
+    ],
+    "languages": [
+      {
+        "id": "asaql",
+        "extensions": [
+          ".asaql"
+        ],
+        "aliases": [
+          "ASAQL"
+        ]
+      }
+    ],
+    "grammars": [
+      {
+        "language": "asaql",
+        "scopeName": "source.sql.asaql",
+        "path": "./syntaxes/asaql.tmLanguage.json"
+      }
     ]
   },
   "scripts": {
