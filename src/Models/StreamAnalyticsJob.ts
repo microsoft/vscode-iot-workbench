@@ -80,7 +80,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     return true;
   }
 
-  private updateConfigSettings(componentInfo?: ComponentInfo): void {
+  updateConfigSettings(componentInfo?: ComponentInfo): void {
     const asaComponentIndex =
         this.azureConfigHandler.getComponentIndexById(this.id);
     if (asaComponentIndex > -1) {

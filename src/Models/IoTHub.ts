@@ -168,7 +168,7 @@ export class IoTHub implements Component, Provisionable {
     }
   }
 
-  private updateConfigSettings(componentInfo?: ComponentInfo): void {
+  updateConfigSettings(componentInfo?: ComponentInfo): void {
     const iotHubComponentIndex =
         this.azureConfigFileHandler.getComponentIndexById(this.id);
 
