@@ -16,6 +16,7 @@ import {AzureConfigFileHandler, AzureConfigs, Dependency, DependencyType} from '
 import {AzureFunctions} from './AzureFunctions';
 import {AzureUtility} from './AzureUtility';
 import {CosmosDB} from './CosmosDB';
+import {Esp32Device} from './Esp32Device';
 import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Deployable} from './Interfaces/Deployable';
@@ -104,6 +105,8 @@ export class IoTProject {
         device = new AZ3166Device(this.extensionContext, deviceLocation);
       } else if (boardId === IoTButtonDevice.boardId) {
         device = new IoTButtonDevice(this.extensionContext, deviceLocation);
+      } else if (boardId === Esp32Device.boardId) {
+        device = new Esp32Device(this.extensionContext, deviceLocation);
       } else if (boardId === RaspberryPiDevice.boardId) {
         device = new RaspberryPiDevice(
             this.extensionContext, deviceLocation, this.channel);
@@ -396,6 +399,9 @@ export class IoTProject {
           this.extensionContext, deviceDir, projectTemplateItem.sketch);
     } else if (boardId === IoTButtonDevice.boardId) {
       device = new IoTButtonDevice(
+          this.extensionContext, deviceDir, projectTemplateItem.sketch);
+    } else if (boardId === Esp32Device.boardId) {
+      device = new Esp32Device(
           this.extensionContext, deviceDir, projectTemplateItem.sketch);
     } else if (boardId === RaspberryPiDevice.boardId) {
       device = new RaspberryPiDevice(
