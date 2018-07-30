@@ -104,8 +104,7 @@ export class IoTProject {
       if (boardId === AZ3166Device.boardId) {
         device = new AZ3166Device(this.extensionContext, deviceLocation);
       } else if (boardId === IoTButtonDevice.boardId) {
-        device =
-            new IoTButtonDevice(this.extensionContext, deviceLocation);
+        device = new IoTButtonDevice(this.extensionContext, deviceLocation);
       } else if (boardId === Esp32Device.boardId) {
         device = new Esp32Device(this.extensionContext, deviceLocation);
       } else if (boardId === RaspberryPiDevice.boardId) {

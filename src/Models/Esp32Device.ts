@@ -50,8 +50,7 @@ export class Esp32Device extends ArduinoDeviceBase {
       const homeDir = os.homedir();
       const localAppData: string = path.join(homeDir, 'AppData', 'Local');
       packageRootPath = path.join(
-          localAppData, 'Arduino15', 'packages', 'esp32', 'hardware',
-          'esp32');
+          localAppData, 'Arduino15', 'packages', 'esp32', 'hardware', 'esp32');
     } else {
       packageRootPath = '~/Library/Arduino15/packages/esp32/hardware/esp32';
     }
