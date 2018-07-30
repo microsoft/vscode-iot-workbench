@@ -99,6 +99,31 @@ export class AZ3166Device extends ArduinoDeviceBase {
     return az3166;
   }
 
+  get version() {
+    const plat = os.platform();
+    let packageRootPath = '';
+    let version = '0.0.1';
+
+    if (plat === 'win32') {
+      const homeDir = os.homedir();
+      const localAppData: string = path.join(homeDir, 'AppData', 'Local');
+      packageRootPath = path.join(
+          localAppData, 'Arduino15', 'packages', 'AZ3166', 'hardware',
+          'stm32f4');
+    } else {
+      packageRootPath = '~/Library/Arduino15/packages/AZ3166/hardware/stm32f4';
+    }
+
+    if (fs.existsSync(packageRootPath)) {
+      const versions = fs.readdirSync(packageRootPath);
+      if (versions[0]) {
+        version = versions[0];
+      }
+    }
+
+    return version;
+  }
+
   async load(): Promise<boolean> {
     const deviceFolderPath = this.deviceFolder;
 
