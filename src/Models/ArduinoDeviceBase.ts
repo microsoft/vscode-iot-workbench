@@ -92,6 +92,8 @@ export abstract class ArduinoDeviceBase implements Device {
 
   abstract async preUploadAction(): Promise<boolean>;
 
+  abstract get version(): string;
+
   // Helper functions:
   generateCommonFiles(): void {
     const deviceFolderPath = this.deviceFolder;
@@ -133,11 +135,14 @@ export abstract class ArduinoDeviceBase implements Device {
                 constants.cppPropertiesFileNameWin));
         const propertiesContentWin32 =
             fs.readFileSync(propertiesFilePathWin32).toString();
-        const pattern = /{ROOTPATH}/gi;
+        const rootPathPattern = /{ROOTPATH}/g;
+        const versionPattern = /{VERSION}/g;
         const homeDir = os.homedir();
         const localAppData: string = path.join(homeDir, 'AppData', 'Local');
-        const replaceStr = propertiesContentWin32.replace(
-            pattern, localAppData.replace(/\\/g, '\\\\'));
+        const replaceStr =
+            propertiesContentWin32
+                .replace(rootPathPattern, localAppData.replace(/\\/g, '\\\\'))
+                .replace(versionPattern, this.version);
         fs.writeFileSync(cppPropertiesFilePath, replaceStr);
       }
       // TODO: Let's use the same file for Linux and MacOS for now. Need to
@@ -210,8 +215,7 @@ export abstract class ArduinoDeviceBase implements Device {
     const settingsJSONFilePath =
         path.join(this.vscodeFolderPath, FileNames.settingsJsonFileName);
     const settingsJSONObj = {
-      'files.exclude': {'.build': true, '.iotworkbenchproject': true},
-      'C_Cpp.intelliSenseEngine': 'Tag Parser'
+      'files.exclude': {'.build': true, '.iotworkbenchproject': true}
     };
 
     try {

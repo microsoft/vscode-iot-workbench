@@ -6,19 +6,15 @@ import * as fs from 'fs-plus';
 import {Guid} from 'guid-typescript';
 import * as os from 'os';
 import * as path from 'path';
-import {error} from 'util';
 import * as vscode from 'vscode';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, FileNames} from '../constants';
-import {ProjectTemplate, ProjectTemplateType} from '../Models/Interfaces/ProjectTemplate';
-import {IoTProject} from '../Models/IoTProject';
+import {ConfigKey} from '../constants';
+
 
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
-import {Board} from './Interfaces/Board';
-import {Component, ComponentType} from './Interfaces/Component';
-import {Device, DeviceType} from './Interfaces/Device';
+import {DeviceType} from './Interfaces/Device';
 
 const constants = {
   defaultBoardInfo: 'esp32:esp32:m5stack-core-esp32',
@@ -43,6 +39,31 @@ export class Esp32Device extends ArduinoDeviceBase {
     const boardProvider = new BoardProvider(this.extensionContext);
     const esp32 = boardProvider.find({id: Esp32Device._boardId});
     return esp32;
+  }
+
+  get version() {
+    const plat = os.platform();
+    let packageRootPath = '';
+    let version = '0.0.1';
+
+    if (plat === 'win32') {
+      const homeDir = os.homedir();
+      const localAppData: string = path.join(homeDir, 'AppData', 'Local');
+      packageRootPath = path.join(
+          localAppData, 'Arduino15', 'packages', 'esp32', 'hardware',
+          'esp32');
+    } else {
+      packageRootPath = '~/Library/Arduino15/packages/esp32/hardware/esp32';
+    }
+
+    if (fs.existsSync(packageRootPath)) {
+      const versions = fs.readdirSync(packageRootPath);
+      if (versions[0]) {
+        version = versions[0];
+      }
+    }
+
+    return version;
   }
 
   name = 'Esp32Arduino';
