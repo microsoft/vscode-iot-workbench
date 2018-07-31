@@ -101,6 +101,10 @@ export class StreamAnalyticsJob implements Component, Provisionable,
   }
 
   async provision(): Promise<boolean> {
+    if (this.channel) {
+      this.channel.show();
+      this.channel.appendLine('Deploying Stream Analytics Job...');
+    }
     const asaArmTemplatePath = this.extensionContext.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, 'arm', 'streamanalytics.json'));
     const asaArmTemplate =
