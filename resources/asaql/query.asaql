@@ -1,6 +1,6 @@
 SELECT
     *
-FROM
-    [input]
 INTO
     [output]
+FROM
+    [input]

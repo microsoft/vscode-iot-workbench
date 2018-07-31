@@ -1,0 +1,32 @@
+{
+    "templates": [
+        {
+            "description": "",
+            "detail": "Create project with device only code.",
+            "label": "Device only",
+            "type": "Basic",
+            "sketch": "emptySketch.ino"
+        },
+        {
+            "description": "",
+            "detail": "Create project that connects to Azure IoT Hub, such as sending sensor data to cloud.",
+            "label": "With Azure IoT Hub",
+            "type": "IotHub",
+            "sketch": "iothub.ino"
+        },
+        {
+            "description": "",
+            "detail": "Create project that connects to Azure IoT Hub and processes device data further in Azure Functions.",
+            "label": "With Azure Functions",
+            "type": "AzureFunctions",
+            "sketch": "iothub.ino"
+        },
+        {
+            "description": "",
+            "detail": "Create project that processes device data from IoT Hub in Stream Analytics and store the result in Cosmos DB.",
+            "label": "With Stream Analytic1s and Cosmos DB",
+            "type": "StreamAnalytics",
+            "sketch": "iothub.ino"
+        }
+    ]
+}
