@@ -80,7 +80,7 @@ export class CosmosDB implements Component, Provisionable {
     return true;
   }
 
-  private updateConfigSettings(componentInfo?: ComponentInfo): void {
+  updateConfigSettings(componentInfo?: ComponentInfo): void {
     const cosmosDBComponentIndex =
         this.azureConfigHandler.getComponentIndexById(this.id);
     if (cosmosDBComponentIndex > -1) {
@@ -102,6 +102,10 @@ export class CosmosDB implements Component, Provisionable {
   }
 
   async provision(): Promise<boolean> {
+    if (this.channel) {
+      this.channel.show();
+      this.channel.appendLine('Deploying Cosmos DB...');
+    }
     const cosmosDBArmTemplatePath = this.extensionContext.asAbsolutePath(
         path.join(FileNames.resourcesFolderName, 'arm', 'cosmosdb.json'));
     const cosmosDBArmTemplate =
@@ -135,7 +139,7 @@ export class CosmosDB implements Component, Provisionable {
     const key = cosmosDBDeploy.properties.outputs.cosmosDBAccountKey.value;
 
     let database = await vscode.window.showInputBox({
-      prompt: `Cosmos DB Database`,
+      prompt: `Input value for Cosmos DB Database`,
       ignoreFocusOut: true,
       validateInput: async (value: string) => {
         value = value.trim();
@@ -156,7 +160,7 @@ export class CosmosDB implements Component, Provisionable {
     database = database.trim();
 
     let collection = await vscode.window.showInputBox({
-      prompt: `Cosmos DB Collection`,
+      prompt: `Input value for Cosmos DB Collection`,
       ignoreFocusOut: true,
       validateInput: async (value: string) => {
         value = value.trim();

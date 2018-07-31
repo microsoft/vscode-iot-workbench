@@ -12,6 +12,7 @@ IoT Workbench aims to support multiple popular IoT development boards and kits. 
 - [MXChip IoT DevKit](https://aka.ms/iot-devkit)
 - [teXXmo IoT button](https://aka.ms/button)
 - [Raspberry Pi](https://www.raspberrypi.org/)
+- [ESP32](https://www.espressif.com/en/products/hardware/esp-wroom-32/overview)
 
 Please find the [Setup Guide](#setup-guide) section below to configure your hardware.
 
@@ -60,6 +61,12 @@ Here are a set of tutorials that will help you get started:
 
 * [Get Started](./docs/raspberry-pi/raspi-get-started.md)
 * [Simple LED](./docs/raspberry-pi/raspi-simple-led.md)
+
+### ESP32
+
+Here are a set of tutorials that will help you get started:
+
+* [Get Started](./docs/esp32/esp32-get-started.md)
 
 ## Commands
 

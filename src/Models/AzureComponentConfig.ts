@@ -1,4 +1,3 @@
-
 import * as fs from 'fs-plus';
 import * as path from 'path';
 
@@ -46,6 +45,22 @@ export class AzureConfigFileHandler {
     this.configFilePath = path.join(
         this.projectRootPath, AzureComponentsStorage.folderName,
         AzureComponentsStorage.fileName);
+  }
+
+  createIfNotExists() {
+    const azureConfigs: AzureConfigs = {componentConfigs: []};
+    const azureConfigFolderPath =
+        path.join(this.projectRootPath, AzureComponentsStorage.folderName);
+    if (!fs.existsSync(azureConfigFolderPath)) {
+      fs.mkdirSync(azureConfigFolderPath);
+    }
+    const azureConfigFilePath =
+        path.join(azureConfigFolderPath, AzureComponentsStorage.fileName);
+
+    if (!fs.existsSync(azureConfigFilePath)) {
+      fs.writeFileSync(
+          azureConfigFilePath, JSON.stringify(azureConfigs, null, 4));
+    }
   }
 
   getSortedComponents() {

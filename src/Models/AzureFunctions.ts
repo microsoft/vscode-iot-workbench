@@ -23,7 +23,7 @@ import {getExtension} from './Apis';
 import {extensionName} from './Interfaces/Api';
 import {Guid} from 'guid-typescript';
 
-import {AzureComponentConfig, AzureConfigs, DependencyConfig, Dependency} from './AzureComponentConfig';
+import {AzureComponentConfig, AzureConfigs, ComponentInfo, DependencyConfig, Dependency} from './AzureComponentConfig';
 import {AzureUtility} from './AzureUtility';
 
 export class AzureFunctions implements Component, Provisionable, Deployable {
@@ -265,7 +265,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     }
   }
 
-  private updateConfigSettings(): void {
+  updateConfigSettings(componentInfo?: ComponentInfo): void {
     const azureConfigFilePath = path.join(
         this.azureFunctionsPath, '..', AzureComponentsStorage.folderName,
         AzureComponentsStorage.fileName);

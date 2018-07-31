@@ -260,7 +260,8 @@ export class AzureUtility {
 
   private static _getKeyDisplayName(key: string) {
     key = key.replace(/^\$*/, '');
-    const keyDisplayName = key.replace(/([A-Z][^A-Z])/g, ' $1');
+    const keyDisplayName = key.replace(/([A-Z][^A-Z])/g, ' $1')
+                               .replace(/([a-z])([A-Z])/g, '$1 $2');
     return keyDisplayName.substr(0, 1).toUpperCase() + keyDisplayName.substr(1);
   }
 
@@ -489,7 +490,6 @@ export class AzureUtility {
     let deployPending: NodeJS.Timer|null = null;
     if (AzureUtility._channel) {
       AzureUtility._channel.show();
-      AzureUtility._channel.appendLine('Deploying Azure Resource...');
       deployPending = setInterval(() => {
         if (AzureUtility._channel) {
           AzureUtility._channel.append('.');

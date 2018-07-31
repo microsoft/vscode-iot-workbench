@@ -16,6 +16,7 @@ import {AzureConfigFileHandler, AzureConfigs, Dependency, DependencyType} from '
 import {AzureFunctions} from './AzureFunctions';
 import {AzureUtility} from './AzureUtility';
 import {CosmosDB} from './CosmosDB';
+import {Esp32Device} from './Esp32Device';
 import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Deployable} from './Interfaces/Deployable';
@@ -87,6 +88,11 @@ export class IoTProject {
 
     this.projectRootPath =
         path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, '..');
+
+    const azureConfigFileHandler =
+        new AzureConfigFileHandler(this.projectRootPath);
+    azureConfigFileHandler.createIfNotExists();
+
     const deviceLocation = path.join(
         vscode.workspace.workspaceFolders[0].uri.fsPath, '..', devicePath);
 
@@ -95,28 +101,51 @@ export class IoTProject {
       if (!boardId) {
         return false;
       }
+      let device = null;
       if (boardId === AZ3166Device.boardId) {
-        const device = new AZ3166Device(this.extensionContext, deviceLocation);
-        this.componentList.push(device);
+        device = new AZ3166Device(this.extensionContext, deviceLocation);
       } else if (boardId === IoTButtonDevice.boardId) {
-        const device =
-            new IoTButtonDevice(this.extensionContext, deviceLocation);
-        this.componentList.push(device);
+        device = new IoTButtonDevice(this.extensionContext, deviceLocation);
+      } else if (boardId === Esp32Device.boardId) {
+        device = new Esp32Device(this.extensionContext, deviceLocation);
       } else if (boardId === RaspberryPiDevice.boardId) {
-        const device = new RaspberryPiDevice(
+        device = new RaspberryPiDevice(
             this.extensionContext, deviceLocation, this.channel);
+      }
+      if (device) {
         this.componentList.push(device);
-      } else if (boardId === Simulator.boardId) {
-        const device =
-            new Simulator(this.extensionContext, deviceLocation, this.channel);
-        this.componentList.push(device);
+
+        await device.load();
       }
     }
 
-
-    const azureConfigFileHandler =
-        new AzureConfigFileHandler(this.projectRootPath);
     const componentConfigs = azureConfigFileHandler.getSortedComponents();
+    if (!componentConfigs || componentConfigs.length === 0) {
+      // Support backward compact
+      const iotHub = new IoTHub(this.projectRootPath, this.channel);
+      await iotHub.updateConfigSettings();
+      await iotHub.load();
+      this.componentList.push(iotHub);
+      const device = new IoTHubDevice(this.channel);
+      this.componentList.push(device);
+
+      const functionPath = ConfigHandler.get<string>(ConfigKey.functionPath);
+      if (functionPath) {
+        const functionLocation = path.join(
+            vscode.workspace.workspaceFolders[0].uri.fsPath, '..',
+            functionPath);
+        const functionApp = new AzureFunctions(
+            functionLocation, functionPath, this.channel, null,
+            [{component: iotHub, type: DependencyType.Input}]);
+        await functionApp.updateConfigSettings();
+        await functionApp.load();
+        this.componentList.push(functionApp);
+      }
+
+      return true;
+    }
+
+
     const components: {[key: string]: Component} = {};
 
     for (const componentConfig of componentConfigs) {
@@ -132,17 +161,14 @@ export class IoTProject {
           break;
         }
         case 'AzureFunctions': {
-          if (!componentConfig.componentInfo ||
-              !componentConfig.componentInfo.values ||
-              !componentConfig.componentInfo.values.functionPath) {
+          const functionPath =
+              ConfigHandler.get<string>(ConfigKey.functionPath);
+          if (!functionPath) {
             return false;
           }
-          const functionPath =
-              componentConfig.componentInfo.values.functionPath;
           const functionLocation = path.join(
               vscode.workspace.workspaceFolders[0].uri.fsPath, '..',
               functionPath);
-
           if (functionLocation) {
             const functionApp = new AzureFunctions(
                 functionLocation, functionPath, this.channel);
@@ -364,16 +390,9 @@ export class IoTProject {
     }
 
     // initialize the storage for azure component settings
-    const azureConfigs: AzureConfigs = {componentConfigs: []};
-    const azureConfigFolderPath =
-        path.join(this.projectRootPath, AzureComponentsStorage.folderName);
-    if (!fs.existsSync(azureConfigFolderPath)) {
-      fs.mkdirSync(azureConfigFolderPath);
-    }
-    const azureConfigFilePath =
-        path.join(azureConfigFolderPath, AzureComponentsStorage.fileName);
-    fs.writeFileSync(
-        azureConfigFilePath, JSON.stringify(azureConfigs, null, 4));
+    const azureConfigFileHandler =
+        new AzureConfigFileHandler(this.projectRootPath);
+    azureConfigFileHandler.createIfNotExists();
 
     workspace.folders.push({path: constants.deviceDefaultFolderName});
     let device: Component;
@@ -382,6 +401,9 @@ export class IoTProject {
           this.extensionContext, deviceDir, projectTemplateItem.sketch);
     } else if (boardId === IoTButtonDevice.boardId) {
       device = new IoTButtonDevice(
+          this.extensionContext, deviceDir, projectTemplateItem.sketch);
+    } else if (boardId === Esp32Device.boardId) {
+      device = new Esp32Device(
           this.extensionContext, deviceDir, projectTemplateItem.sketch);
     } else if (boardId === RaspberryPiDevice.boardId) {
       device = new RaspberryPiDevice(
