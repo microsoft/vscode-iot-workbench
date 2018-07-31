@@ -13,13 +13,6 @@
             "label": "With Azure Functions",
             "type": "AzureFunctions",
             "sketch": "userdata.json"
-        },
-        {
-            "description": "",
-            "detail": "Create project that connects to Azure IoT Hub and processes device data further in Stream Analytics.",
-            "label": "With Stream Analytics",
-            "type": "StreamAnalytics",
-            "sketch": "userdata.json"
         }
     ]
 }
