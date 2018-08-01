@@ -1,6 +1,10 @@
-# Use IoT DevKit AZ3166 with IoT Hub to make OTA firmware update
+# Use IoT DevKit AZ3166 with IoT Hub to make OTA (Over-the-Air) firmware update
 
-In this tutorial, you learn how to let IoT DevKit to upgrade its firmware via IoT Hub.
+You may need to update the firmware on the devices connected to your IoT hub. For example, you might want to add new features to the firmware or apply security patches. In many IoT scenarios, it's impractical to physically visit and then manually apply firmware updates to your devices. 
+
+In this tutorial, you will learn how to let IoT DevKit to upgrade its firmware via IoT Hub.
+
+IoT Hub [automatic device management](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-auto-device-config) uses configuration to update a set of *device twin desired properties* on all your devices. The desired properties specify the details of the firmware update that's required. While the IoT DevKit is running the firmware update process, it report its status to IoT Hub using *device twin reported properties*. 
 
 ## About IoT DevKit
 
@@ -22,10 +26,11 @@ An active Azure subscription. If you do not have one, you can register via one o
 
 ### Start VS Code
 
-* Make sure your DevKit is not connected to your PC.
-* Start VS Code.
-* Connect the IoT DevKit to your computer.
+* Start Visual Studio Code.
 * Make sure [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
+* Connect the IoT DevKit to your computer.
+* Make sure the [bootloader](https://microsoft.github.io/azure-iot-developer-kit/docs/firmware-upgrading/) on your IoT DevKit and the [SDK](https://microsoft.github.io/azure-iot-developer-kit/versions/) are both updated to [v1.4.0](https://github.com/Microsoft/devkit-sdk/releases/tag/1.4.0) or higher.
+
 
 ### Open IoT Workbench Examples
 
@@ -92,76 +97,225 @@ The whole process includes:
 
     ![IoT DevKit Connection String OK](media/iot-workbench-connection-done.png) 
 
-## Configure in IoT Hub
-In order to trigger firmware update event on DevKit, you need to use Azure portal to set automatic device management configuration.
+## Prepare the firmware for OTA update 
 
-1. In the [Azure portal](https://portal.azure.com), go to the IoT hub you previously provisioned.
+In this section, you will build a firmware with new version and upload to the Azure storage.
 
-2. In Section **AUTOMATIC DEVICE MANAGEMENT**, select **IoT device configuration**.
+### Build the new firmware
 
-3. Select **Add Configuration** and create a new configuration.
+The initial version of the device firmware is 1.0.0, to complete this tutorial you should have a firmware with higher version.
 
-	![IoT Hub: Add Configuration](media/firmware-ota/iothub-add-configuration.png)
+1. Open the FirmwareOTA.ino, change the version from "1.0.0" to "1.0.1".
 
-4. Give your OTA configuration a unique name, for example, "ota-firmware-update", and add labels to help track our configurations if necessary. Select **Next** to move to next step.
+![Firmware version](media/firmware-ota/version-1-0-1.png)
 
-	![IoT Hub: Set Name](media/firmware-ota/iothub-configuration-naming.png)
+2. Open the command palette and select **IoT Workbench: Device**, then select **Device Compile** to compile the code.
 
-5. Specifies the target content to be set in targeted device twins. Set **Device Twin Path** as "properties.desired.firmware", and set **Content** in the following JSON format:
+![IoT Workbench Compile](media/iot-workbench-device-compile.png)
 
-	```json
-	{
-		"fwVersion": "1.3.7.56",
-		"fwPackageURI": "https://raw.githubusercontent.com/IoTDevEnvExamples/FirmwareOTA/master/Device/tool/devkit-firmware-1.3.7.56.bin",
-		"fwPackageCheckValue": "AAAA",
-		"fwSize": 0
-	}
-	```
+3. VS Code then compile the code and generate the **.bin** file and put it under the *.build* folder.
 
-	In this example, we use DevKit 1.3.7.56 as the firmware to be upgraded. Since we set the firmware version in the example code to be 1.1.1, the upgrade will always proceed.
+![Compile done](media/firmware-ota/compile-done.png)
 
-	The .bin file of the firmware is already in the example directory. Run **CRC16Calculator.exe**(or **CRC16Calculator.out** in Mac) under the **tool/** folder in command line, and set **devkit-firmware-1.3.7.56.bin** as running argument. You would see the size of the .bin file and its CRC-16 checksum represented in 4-digit hexadecimal form.
-	
-	![Calculate checksum](media/firmware-ota/checksum-calculate.png)
-	
-	Set them as the value of **fwPackageCheckValue** and **fwSize** in desired properties of JSON twin. Select **Next** to move to next step.
+### File size of the firmware
 
-	![IoT Hub: Set Device Twin](media/firmware-ota/iothub-set-device-twin.png)
+1. Right click on the *FimwareOTA.ino* file, select **Copy Path**, then you have the path in clipboard.
 
-6. Select **Next** to skip step 3 of creating configuration. In step 4, set the **Priority** of the configuration as 10, and set **Target Condition** as "*", which means that the configuration would target all devices. Select **Next**.
+![Copy Path](media/firmware-ota/copy-path.png)
 
-	![IoT Hub: Set Condition](media/firmware-ota/iothub-set-condition.png)
+2. Open a **File Explorer** window and paste the path in, navigate to *.build* folder, you can see the *FirmwareOTA.ino.bin* which is the new firmware will be used in next steps.
 
-7. In step 5, review your configuration information, then select **Submit**.
+![File Path](media/firmware-ota/bin-file.png)
 
-## Build and upload the device code
+3. Write down the file size of this file for further usage.
 
-1. Open the command palette and select **IoT Workbench: Device**, then select **Device Upload**.
+![File Size](media/firmware-ota/file-size.png)
 
-	![IoT Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
+### Calculate the CRC value
 
-2. VS Code then starts verifying and uploading the code to your DevKit.
+A check value is mandatory to ensure the integrity of the firmware during upgrade.
 
-	![IoT Workbench: Device -> Uploaded](media/firmware-ota/iot-workbench-device-uploaded.png)
+Here we use [pycrc](https://github.com/tpircher/pycrc) (you can pick up any other CRC tools you like) :
 
-3. The DevKit reboots and starts running the code.
+* [Download and install the Python](https://wiki.python.org/moin/BeginnersGuide/Download) if you don't have it installed.
 
-If DevKit is currently connected to a WiFi network, it would get the firmware update information and start to download and verify the firmware specified in the URL. During the whole update process, the device will report its status to IoT Hub via device twin. 
+* Clone the [pycrc](https://github.com/tpircher/pycrc) from github
 
-![OTA Running](media/firmware-ota/ota-running.png)
+  ```git clone https://github.com/tpircher/pycrc```
 
-To see the reported status,
+* Run and calculate the CRC value
 
-1. In Section **EXPLORERS** in your IoT Hub portal, select **IoT devices**, then select your device by its device id in the list.
+  ``` python pycrc.py --model=xmodem --check-file <path>\FirmwareOTA.ino.bin```
 
-	![IoT Hub: Find Device](media/firmware-ota/iothub-find-device.png)
+Write down the CRC value for further usage.
 
-2. Select **Device Twin** tab.
+### Upload the firmware to cloud
 
-	![IoT Hub: See Device Twin](media/firmware-ota/iothub-see-device-twin.png)
+You need upload the firmware to cloud for the device to download and upgrade.
 
-3. In **Device Twin** tab you will see the complete device twin JSON of your device. In **"reported"** object you will see the reported status of the OTA process.
+1. Create a Azure Storage Account.
 
-	![IoT Hub: View Device Twin](media/firmware-ota/iothub-view-device-twin.png)
+   Follow this [tutorial](https://docs.microsoft.com/en-us/azure/storage/common/storage-quickstart-create-account) to create a new Storage Account, or skip this step if you want to use a existing one.
 
-After the process the device would restart automatically and apply the new firmware to the device.
+2. Create a public container for storing firmware files.
+
+   ![Create Folder](media/firmware-ota/blob-folder.png)
+
+3. Upload firmware file to the blob container.
+
+   You can use [Azure portal](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-portal), [Storage Explorer](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-storage-explorer) or [CLI](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-cli) to complete this step.
+
+4. After the firmware file is uploaded, write down the URL for further usage.
+
+## Create a configuration
+
+1. In the [Azure portal](https://portal.azure.com/), go to your IoT hub.
+2. Select **IoT device configuration**.
+3. Select **Add Configuration**.
+
+There are five steps to create a configuration. The following sections walk through each one. 
+
+### Step 1: Name and Label
+
+1. Give your configuration a unique name that is up to 128 lowercase letters. Avoid spaces and the following invalid characters: `& ^ [ ] { } \ | " < > /`.
+2. Add labels to help track your configurations. Labels are **Name**, **Value** pairs that describe your configuration. For example, `HostPlatform, Linux` or `Version, 3.0.1`.
+3. Select **Next** to move to step two. 
+
+### Step 2: Specify Settings
+
+This section specifies the target content to be set in targeted device twins. There are two inputs for each set of settings. The first is the device twin path, which is the path to the JSON section within the twin desired properties that will be set.  The second is the JSON content to be inserted in that section. 
+
+For OTA, the device twin path is:  **properties.desired.firmware** .
+
+and the content includes:
+
+* "fwVersion" : [firmware version](#build-the-new-firmware).
+* "fwPackageURI" : [URL of the firmware](#upload-the-firmware-to-cloud)
+* "fwPackageCheckValue" : [CRC value of the firmware](#calculate-the-crc-value)
+* "fwSize" : [file size of the firmware](#file-size-of-the-firmware)
+
+The Settings may like this:
+![Configuration settings](media/firmware-ota/configuration-settings.png)
+
+### Step 3: Specify Metrics (optional)
+
+Metrics provide summary counts of the various states that a device may report back as a result of applying configuration content. For example, you may create a metric for pending settings changes, a metric for errors, and a metric for successful settings changes.
+
+1. Enter a name for **Metric Name**
+2. Enter a query for **Metric Criteria**.  The query is based on device twin reported properties.  The metric represents the number of rows returned by the query.
+
+Here you can just skip this step.
+
+### Step 4 Target Devices
+
+Use the tags property from your device twins to target the specific devices that should receive this configuration.  You can also target devices by device twin reported properties.
+
+ Since multiple configurations may target the same device, you should give each configuration a priority number. If there's ever a conflict, the configuration with the highest priority wins. 
+
+1. Enter a positive integer for the configuration **Priority**. Highest numerical value is considered the highest priority. If two configurations have the same priority number, the one that was created most recently wins. 
+
+2. Enter a **Target condition** to determine which devices will be targeted with this configuration. The condition is based on device twin tags or device twin reported properties and should match the expression format. For example, `tags.environment='test'` or `properties.reported.chillerProperties.model='4000x'`. 
+
+
+Here just you can set the **Priority**  ```10``` and specify `*` to target all devices.
+
+![Target devices](media/firmware-ota/target-devices.png)
+
+Select **Next** to move on to the final step.
+
+### Step 5 Review Configuration
+
+Review your configuration information, then select **Submit**.
+
+## Start OTA firmware update
+
+Now everything on Azure cloud is ready, let's upload the device code and begin the firmware update process.
+
+### Build and upload the device code
+
+1. Set back the version to 1.0.0
+
+  ![Version 1.0.0](media/firmware-ota/version-1-0-0.png)
+
+2. Open the command palette and select **IoT Workbench: Device**, then select **Device Upload**.
+
+  ![IoT Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
+
+3. VS Code then start verifying and uploading the code to your IoT DevKit.
+
+  ![IoT Workbench: Device -> Uploaded](media/firmware-ota/upload-done.png)
+
+4. The DevKit reboot and start running.
+
+### Update the firmware Over-the-Air 
+
+After reboot, the screen of IoT DevKit show version 1.0.0, and is checking for the new firmware.
+
+![ota-1](media/firmware-ota/ota-1.jpg)
+
+
+
+After a while, IoT DevKit get the new firmware information from Azure IoT Hub, and start downloading.
+
+![ota-2](media/firmware-ota/ota-2.jpg)
+
+
+
+The download may take 1 minute (depend on the speed of the network). After downloaded the new firmware to device, it verify the file size and CRC value whether it's the same as the firmware information in [device twins](#step-2:-specify-settings).  
+
+Display "passed" if match.
+
+![ota-3](media/firmware-ota/ota-3.jpg) 
+
+
+
+Then the device will reboot after counting down from 5 - 0.
+
+![ota-4](media/firmware-ota/ota-4.jpg) 
+
+
+
+After reboot, the  underlying bootloader in IoT DevKit upgrade the firmware to the new version, it might take several seconds. 
+
+During this stage you can see the RGB LEG show RED and the screen is black.
+
+![ota-5](media/firmware-ota/ota-5.jpg) 
+
+
+
+Then the IoT DevKit run the new firmware with version 1.0.1.
+
+![ota-6](media/firmware-ota/ota-6.jpg) 
+
+
+
+### Firmware update status
+
+During the whole update process, the device report its status via *device twin reported properties* to Azure IoT Hub. 
+
+You can check them by using the Azure IoT Toolkit extension:
+
+1. In Explorer of VS Code, click "Azure IoT Hub Devices" in the bottom left corner.
+
+   ![Toolkit - 1](media/firmware-ota/az-toolkit-1.png)
+
+2. Right click on the device you created, here is AZ3166, select **Edit Device Twin**.
+
+   ![Toolkit - 2](media/firmware-ota/az-toolkit-2.png)
+
+3. In **azure-iot-device-twin.json** window you can see the complete device twins includes the firmware update status.
+
+   ![Toolkit - 3](media/firmware-ota/az-toolkit-3.png)
+
+
+## Problems and feedback
+
+If you encounter problems, you can refer to [FAQs](https://microsoft.github.io/azure-iot-developer-kit/docs/faq/) or connect using the following channels:
+
+- [Gitter.im](http://gitter.im/Microsoft/azure-iot-developer-kit)
+- [Stackoverflow](https://stackoverflow.com/questions/tagged/iot-devkit)
+
+## Next Steps
+
+In this tutorial, you learned how to implement a OTA firmware update process by using MXChip IoT DevKit and  IoT Hub [automatic device management](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-auto-device-config).
+Check our [Projects Catalog](https://aka.ms/devkit/project-catalog) for more samples you can build with the IoT DevKit and Azure multiple services.
