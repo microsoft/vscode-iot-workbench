@@ -80,7 +80,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     return true;
   }
 
-  private updateConfigSettings(componentInfo?: ComponentInfo): void {
+  updateConfigSettings(componentInfo?: ComponentInfo): void {
     const asaComponentIndex =
         this.azureConfigHandler.getComponentIndexById(this.id);
     if (asaComponentIndex > -1) {
@@ -101,6 +101,10 @@ export class StreamAnalyticsJob implements Component, Provisionable,
   }
 
   async provision(): Promise<boolean> {
+    if (this.channel) {
+      this.channel.show();
+      this.channel.appendLine('Deploying Stream Analytics Job...');
+    }
     const asaArmTemplatePath = this.extensionContext.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, 'arm', 'streamanalytics.json'));
     const asaArmTemplate =

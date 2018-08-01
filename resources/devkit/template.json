@@ -23,8 +23,8 @@
         },
         {
             "description": "",
-            "detail": "Create project that connects to Azure IoT Hub and processes device data further in Stream Analytics.",
-            "label": "With Stream Analytics",
+            "detail": "Create project that processes device data from IoT Hub in Stream Analytics and store the result in Cosmos DB.",
+            "label": "With Stream Analytics and Cosmos DB",
             "type": "StreamAnalytics",
             "sketch": "simple_iothub.ino"
         }

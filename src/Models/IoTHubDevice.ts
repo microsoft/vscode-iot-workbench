@@ -9,7 +9,7 @@ import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
 
 import {getExtension} from './Apis';
-import {DependencyConfig} from './AzureComponentConfig';
+import {ComponentInfo, DependencyConfig} from './AzureComponentConfig';
 import {AzureUtility} from './AzureUtility';
 import {extensionName} from './Interfaces/Api';
 import {Component, ComponentType} from './Interfaces/Component';
@@ -102,6 +102,8 @@ export class IoTHubDevice implements Component, Provisionable {
       throw error;
     }
   }
+
+  updateConfigSettings(componentInfo?: ComponentInfo): void {}
 }
 
 async function getProvisionIothubDeviceSelection(
