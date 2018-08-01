@@ -153,7 +153,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     try {
       await vscode.commands.executeCommand(
           'azureFunctions.createNewProject', azureFunctionsPath,
-          this.functionLanguage, '~1', false /* openFolder */, templateName,
+          this.functionLanguage, 'beta', false /* openFolder */, templateName,
           'IoTHubTrigger1', {
             connection: 'eventHubConnectionString',
             path: '%eventHubConnectionPath%',
@@ -248,8 +248,9 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
       const azureFunctionsPath = this.azureFunctionsPath;
       const functionAppId = ConfigHandler.get(ConfigKey.functionAppId);
 
+      const subPath = path.join(azureFunctionsPath, "bin/Release/netstandard2.0/publish");
       await vscode.commands.executeCommand(
-          'azureFunctions.deploy', azureFunctionsPath, functionAppId);
+          'azureFunctions.deploy', subPath, functionAppId);
       console.log(azureFunctionsPath, functionAppId);
       if (this.channel && deployPending) {
         clearInterval(deployPending);
