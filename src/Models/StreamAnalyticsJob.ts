@@ -1,6 +1,7 @@
 import * as fs from 'fs-plus';
 import {Guid} from 'guid-typescript';
 import * as path from 'path';
+import {resolve} from 'url';
 import * as vscode from 'vscode';
 
 import {AzureComponentsStorage, FileNames} from '../constants';
@@ -270,6 +271,16 @@ export class StreamAnalyticsJob implements Component, Provisionable,
       throw new Error('Initialize Azure client failed.');
     }
 
+    // Stop Job
+    const jobStopped = await this.stop();
+    if (!jobStopped) {
+      if (this.channel) {
+        this.channel.show();
+        this.channel.appendLine('Stop Stream Analytics Job failed.');
+      }
+      return false;
+    }
+
     const resourceId = `/subscriptions/${subscriptionId}/resourceGroups/${
         resourceGroup}/providers/Microsoft.StreamAnalytics/streamingjobs/${
         streamAnalyticsJobName}/transformations/Transformation`;
@@ -297,6 +308,16 @@ export class StreamAnalyticsJob implements Component, Provisionable,
         this.channel.appendLine(JSON.stringify(deployment, null, 4));
         this.channel.appendLine('Stream Analytics Job query deploy succeeded.');
       }
+
+      // Start Job
+      const jobStarted = await this.start();
+      if (!jobStarted) {
+        if (this.channel) {
+          this.channel.show();
+          this.channel.appendLine('Start Stream Analytics Job failed.');
+        }
+        return false;
+      }
     } catch (error) {
       if (this.channel && deployPending) {
         clearInterval(deployPending);
@@ -305,5 +326,127 @@ export class StreamAnalyticsJob implements Component, Provisionable,
       throw error;
     }
     return true;
+  }
+
+  async stop() {
+    const componentConfig = this.azureConfigHandler.getComponentById(this.id);
+    if (!componentConfig) {
+      throw new Error(`Cannot find component with id ${this.id}.`);
+    }
+
+    const componentInfo = componentConfig.componentInfo;
+    if (!componentInfo) {
+      throw new Error(`You must provision Stream Analytics Job first.`);
+    }
+
+    const subscriptionId = componentInfo.values.subscriptionId;
+    const resourceGroup = componentInfo.values.resourceGroup;
+    const streamAnalyticsJobName = componentInfo.values.streamAnalyticsJobName;
+    AzureUtility.init(this.extensionContext, this.channel, subscriptionId);
+    const azureClient = AzureUtility.getClient();
+    if (!azureClient) {
+      throw new Error('Initialize Azure client failed.');
+    }
+
+    if (this.channel) {
+      this.channel.show();
+      this.channel.appendLine('Stopping Stream Analytics Job...');
+    }
+
+    const stopResource = `/subscriptions/${subscriptionId}/resourceGroups/${
+        resourceGroup}/providers/Microsoft.StreamAnalytics/streamingjobs/${
+        streamAnalyticsJobName}/stop?api-version=2015-10-01`;
+    await AzureUtility.postRequest(stopResource);
+
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        clearTimeout(timer);
+        return resolve(false);
+      }, 10 * 60 * 1000);
+
+      const timer = setInterval(async () => {
+        const state: string = await this.getState();
+        if (state === 'Stopped') {
+          clearTimeout(timeout);
+          clearInterval(timer);
+          return resolve(true);
+        }
+      }, 1000);
+    });
+  }
+
+  async start() {
+    const componentConfig = this.azureConfigHandler.getComponentById(this.id);
+    if (!componentConfig) {
+      throw new Error(`Cannot find component with id ${this.id}.`);
+    }
+
+    const componentInfo = componentConfig.componentInfo;
+    if (!componentInfo) {
+      throw new Error(`You must provision Stream Analytics Job first.`);
+    }
+
+    const subscriptionId = componentInfo.values.subscriptionId;
+    const resourceGroup = componentInfo.values.resourceGroup;
+    const streamAnalyticsJobName = componentInfo.values.streamAnalyticsJobName;
+    AzureUtility.init(this.extensionContext, this.channel, subscriptionId);
+    const azureClient = AzureUtility.getClient();
+    if (!azureClient) {
+      throw new Error('Initialize Azure client failed.');
+    }
+
+    if (this.channel) {
+      this.channel.show();
+      this.channel.appendLine('Starting Stream Analytics Job...');
+    }
+
+    const stopResource = `/subscriptions/${subscriptionId}/resourceGroups/${
+        resourceGroup}/providers/Microsoft.StreamAnalytics/streamingjobs/${
+        streamAnalyticsJobName}/start?api-version=2015-10-01`;
+    await AzureUtility.postRequest(stopResource);
+
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        clearTimeout(timer);
+        return resolve(false);
+      }, 10 * 60 * 1000);
+
+      const timer = setInterval(async () => {
+        const state: string = await this.getState();
+        if (state === 'Running') {
+          clearTimeout(timeout);
+          clearInterval(timer);
+          return resolve(true);
+        }
+      }, 1000);
+    });
+  }
+
+  async getState() {
+    const componentConfig = this.azureConfigHandler.getComponentById(this.id);
+    if (!componentConfig) {
+      throw new Error(`Cannot find component with id ${this.id}.`);
+    }
+
+    const componentInfo = componentConfig.componentInfo;
+    if (!componentInfo) {
+      throw new Error(`You must provision Stream Analytics Job first.`);
+    }
+
+    const subscriptionId = componentInfo.values.subscriptionId;
+    const resourceGroup = componentInfo.values.resourceGroup;
+    const streamAnalyticsJobName = componentInfo.values.streamAnalyticsJobName;
+    AzureUtility.init(this.extensionContext, this.channel, subscriptionId);
+    const azureClient = AzureUtility.getClient();
+    if (!azureClient) {
+      throw new Error('Initialize Azure client failed.');
+    }
+
+    const resourceId = `/subscriptions/${subscriptionId}/resourceGroups/${
+        resourceGroup}/providers/Microsoft.StreamAnalytics/streamingjobs/${
+        streamAnalyticsJobName}`;
+    const apiVersion = '2015-10-01';
+    const res = await azureClient.resources.getById(resourceId, apiVersion);
+    return res.properties.jobState;
   }
 }
