@@ -1,4 +1,4 @@
-# Use IoT DevKit AZ3166 with IoT Hub to make OTA (Over-the-Air) firmware update
+# IoT DevKit OTA (Over-the-Air) firmware update
 
 You may need to update the firmware on the devices connected to your IoT hub. For example, you might want to add new features to the firmware or apply security patches. In many IoT scenarios, it's impractical to physically visit and then manually apply firmware updates to your devices. 
 
@@ -107,29 +107,29 @@ The initial version of the device firmware is 1.0.0, to complete this tutorial y
 
 1. Open the FirmwareOTA.ino, change the version from "1.0.0" to "1.0.1".
 
-![Firmware version](media/firmware-ota/version-1-0-1.png)
+	![Firmware version](media/firmware-ota/version-1-0-1.png)
 
 2. Open the command palette and select **IoT Workbench: Device**, then select **Device Compile** to compile the code.
 
-![IoT Workbench Compile](media/iot-workbench-device-compile.png)
+	![IoT Workbench Compile](media/iot-workbench-device-compile.png)
 
 3. VS Code then compile the code and generate the **.bin** file and put it under the *.build* folder.
 
-![Compile done](media/firmware-ota/compile-done.png)
+	![Compile done](media/firmware-ota/compile-done.png)
 
 ### File size of the firmware
 
 1. Right click on the *FimwareOTA.ino* file, select **Copy Path**, then you have the path in clipboard.
 
-![Copy Path](media/firmware-ota/copy-path.png)
+	![Copy Path](media/firmware-ota/copy-path.png)
 
 2. Open a **File Explorer** window and paste the path in, navigate to *.build* folder, you can see the *FirmwareOTA.ino.bin* which is the new firmware will be used in next steps.
 
-![File Path](media/firmware-ota/bin-file.png)
+	![File Path](media/firmware-ota/bin-file.png)
 
 3. Write down the file size of this file for further usage.
 
-![File Size](media/firmware-ota/file-size.png)
+	![File Size](media/firmware-ota/file-size.png)
 
 ### Calculate the CRC value
 
@@ -235,15 +235,15 @@ Now everything on Azure cloud is ready, let's upload the device code and begin t
 
 1. Set back the version to 1.0.0
 
-  ![Version 1.0.0](media/firmware-ota/version-1-0-0.png)
+   ![Version 1.0.0](media/firmware-ota/version-1-0-0.png)
 
 2. Open the command palette and select **IoT Workbench: Device**, then select **Device Upload**.
 
-  ![IoT Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
+   ![IoT Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
 
 3. VS Code then start verifying and uploading the code to your IoT DevKit.
 
-  ![IoT Workbench: Device -> Uploaded](media/firmware-ota/upload-done.png)
+   ![IoT Workbench: Device -> Uploaded](media/firmware-ota/upload-done.png)
 
 4. The DevKit reboot and start running.
 
