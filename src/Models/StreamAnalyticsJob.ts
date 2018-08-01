@@ -1,7 +1,6 @@
 import * as fs from 'fs-plus';
 import {Guid} from 'guid-typescript';
 import * as path from 'path';
-import {resolve} from 'url';
 import * as vscode from 'vscode';
 
 import {AzureComponentsStorage, FileNames} from '../constants';
