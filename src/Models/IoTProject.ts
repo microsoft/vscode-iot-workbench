@@ -475,7 +475,11 @@ export class IoTProject {
         const asaFilePath = this.extensionContext.asAbsolutePath(
             path.join(FileNames.resourcesFolderName, 'asaql', 'query.asaql'));
         const queryPath = path.join(asaDir, 'query.asaql');
-        fs.copyFileSync(asaFilePath, queryPath);
+        const asaQueryContent =
+            fs.readFileSync(asaFilePath, 'utf8')
+                .replace(/\[input\]/, `"iothub-${iothub.id}"`)
+                .replace(/\[output\]/, `"cosmosdb-${cosmosDB.id}"`);
+        fs.writeFileSync(queryPath, asaQueryContent);
 
         const asa = new StreamAnalyticsJob(
             queryPath, this.extensionContext, this.projectRootPath,
