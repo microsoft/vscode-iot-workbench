@@ -114,6 +114,7 @@ The initial version of the device firmware is 1.0.0, to complete this tutorial y
 
 1. Open the FirmwareOTA.ino, change the version from "1.0.0" to "1.0.1".
 
+<<<<<<< HEAD
    ![Firmware version](media/firmware-ota/version-1-0-1.png)
 
 2. Open the command palette and select **IoT Workbench: Device**, then select **Device Compile** to compile the code.
@@ -123,11 +124,23 @@ The initial version of the device firmware is 1.0.0, to complete this tutorial y
 3. VS Code then compile the code and generate the **.bin** file and put it under the *.build* folder.
 
    ![Compile done](media/firmware-ota/compile-done.png)
+=======
+	![Firmware version](media/firmware-ota/version-1-0-1.png)
+
+2. Open the command palette and select **IoT Workbench: Device**, then select **Device Compile** to compile the code.
+
+	![IoT Workbench Compile](media/iot-workbench-device-compile.png)
+
+3. VS Code then compile the code and generate the **.bin** file and put it under the *.build* folder.
+
+	![Compile done](media/firmware-ota/compile-done.png)
+>>>>>>> master
 
 ### File size of the firmware
 
 1. Right click on the *FimwareOTA.ino* file, select **Copy Path**, then you have the path in clipboard.
 
+<<<<<<< HEAD
    ![Copy Path](media/firmware-ota/copy-path.png)
 
 2. Open a **File Explorer** window and paste the path in, navigate to *.build* folder, you can see the *FirmwareOTA.ino.bin* which is the new firmware will be used in next steps.
@@ -137,6 +150,17 @@ The initial version of the device firmware is 1.0.0, to complete this tutorial y
 3. Write down the file size of this file for further usage.
 
    ![File Size](media/firmware-ota/file-size.png)
+=======
+	![Copy Path](media/firmware-ota/copy-path.png)
+
+2. Open a **File Explorer** window and paste the path in, navigate to *.build* folder, you can see the *FirmwareOTA.ino.bin* which is the new firmware will be used in next steps.
+
+	![File Path](media/firmware-ota/bin-file.png)
+
+3. Write down the file size of this file for further usage.
+
+	![File Size](media/firmware-ota/file-size.png)
+>>>>>>> master
 
 ### Calculate the CRC value
 
