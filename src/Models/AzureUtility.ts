@@ -1,8 +1,9 @@
 import {ResourceManagementClient, ResourceModels, SubscriptionClient} from 'azure-arm-resource';
 import * as fs from 'fs-plus';
-import {ServiceClientCredentials, WebResource} from 'ms-rest';
+import {HttpMethods, ServiceClientCredentials, WebResource} from 'ms-rest';
 import * as path from 'path';
 import * as vscode from 'vscode';
+
 import request = require('request-promise');
 import rq = require('request');
 
@@ -546,21 +547,26 @@ export class AzureUtility {
     return client;
   }
 
-  // tslint:disable-next-line: no-any
-  static async postRequest(resource: string, body: any = null) {
+  static async request(
+      // tslint:disable-next-line: no-any
+      method: HttpMethods, resource: string, body: any = null) {
     const credential = await AzureUtility._getCredential();
     if (!credential) {
       return undefined;
     }
 
     const httpRequest = new WebResource();
-    httpRequest.method = 'POST';
+    httpRequest.method = method;
     httpRequest.url = 'https://management.azure.com' + resource;
     httpRequest.body = body;
+    if (method === 'GET' || method === 'DELETE') {
+      delete httpRequest.body;
+    }
 
     const httpRequestOption: (rq.UrlOptions&request.RequestPromiseOptions) =
         httpRequest;
     httpRequestOption.simple = false;
+    httpRequestOption.json = true;
 
     return new Promise((resolve, reject) => {
       credential.signRequest(httpRequest, async err => {
@@ -572,5 +578,14 @@ export class AzureUtility {
         }
       });
     });
+  }
+
+  // tslint:disable-next-line: no-any
+  static async postRequest(resource: string, body: any = null) {
+    return AzureUtility.request('POST', resource, body);
+  }
+
+  static async getRequest(resource: string) {
+    return AzureUtility.request('GET', resource);
   }
 }

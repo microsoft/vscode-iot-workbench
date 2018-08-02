@@ -31,6 +31,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
   private resourceGroup: string|null = null;
   private streamAnalyticsJobName: string|null = null;
   private azureClient: ResourceManagementClient|null = null;
+  private catchedStreamAnalyticsList: Array<{name: string}> = [];
 
   private initAzureClient() {
     if (this.subscriptionId && this.resourceGroup &&
@@ -90,6 +91,10 @@ export class StreamAnalyticsJob implements Component, Provisionable,
         }
       }, 1000);
     });
+  }
+
+  private getStreamAnalyticsByNameFromCache(name: string) {
+    return this.catchedStreamAnalyticsList.find(item => item.name === name);
   }
 
   get id() {
@@ -171,22 +176,66 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     }
   }
 
-  async provision(): Promise<boolean> {
-    if (this.channel) {
-      this.channel.show();
-      this.channel.appendLine('Deploying Stream Analytics Job...');
+  async getStreamAnalyticsInResourceGroup() {
+    this.initAzureClient();
+    const resource = `/subscriptions/${this.subscriptionId}/resourceGroups/${
+        this.resourceGroup}/providers/Microsoft.StreamAnalytics/streamingjobs?api-version=2015-10-01`;
+    const asaListRes = await AzureUtility.getRequest(resource) as
+        {value: Array<{name: string, properties: {jobState: string}}>};
+    const asaList: vscode.QuickPickItem[] =
+        [{label: '$(plus) Create Resource Group', description: ''}];
+    for (const item of asaListRes.value) {
+      asaList.push({label: item.name, description: item.properties.jobState});
     }
-    const asaArmTemplatePath = this.extensionContext.asAbsolutePath(path.join(
-        FileNames.resourcesFolderName, 'arm', 'streamanalytics.json'));
-    const asaArmTemplate =
-        JSON.parse(fs.readFileSync(asaArmTemplatePath, 'utf8')) as ARMTemplate;
 
-    const asaDeploy = await AzureUtility.deployARMTemplate(asaArmTemplate);
-    if (!asaDeploy || !asaDeploy.properties || !asaDeploy.properties.outputs ||
-        !asaDeploy.properties.outputs.streamAnalyticsJobName) {
-      throw new Error('Provision Stream Analytics Job failed.');
+    this.catchedStreamAnalyticsList = asaListRes.value;
+    return asaList;
+  }
+
+  async provision(): Promise<boolean> {
+    const asaList = this.getStreamAnalyticsInResourceGroup();
+    const asaNameChoose = await vscode.window.showQuickPick(
+        asaList,
+        {placeHolder: 'Select Azure Stream Analytics', ignoreFocusOut: true});
+    if (!asaNameChoose) {
+      return false;
     }
-    this.channel.appendLine(JSON.stringify(asaDeploy, null, 4));
+
+    let streamAnalyticsJobName = '';
+
+    if (!asaNameChoose.description) {
+      if (this.channel) {
+        this.channel.show();
+        this.channel.appendLine('Deploying Stream Analytics Job...');
+      }
+      const asaArmTemplatePath = this.extensionContext.asAbsolutePath(path.join(
+          FileNames.resourcesFolderName, 'arm', 'streamanalytics.json'));
+      const asaArmTemplate =
+          JSON.parse(fs.readFileSync(asaArmTemplatePath, 'utf8')) as
+          ARMTemplate;
+
+      const asaDeploy = await AzureUtility.deployARMTemplate(asaArmTemplate);
+      if (!asaDeploy || !asaDeploy.properties ||
+          !asaDeploy.properties.outputs ||
+          !asaDeploy.properties.outputs.streamAnalyticsJobName) {
+        throw new Error('Provision Stream Analytics Job failed.');
+      }
+      this.channel.appendLine(JSON.stringify(asaDeploy, null, 4));
+
+      streamAnalyticsJobName =
+          asaDeploy.properties.outputs.streamAnalyticsJobName;
+    } else {
+      if (this.channel) {
+        this.channel.show();
+        this.channel.appendLine('Deploying Stream Analytics Job...');
+      }
+      streamAnalyticsJobName = asaNameChoose.label;
+      const asaDetail =
+          this.getStreamAnalyticsByNameFromCache(streamAnalyticsJobName);
+      if (asaDetail) {
+        this.channel.appendLine(JSON.stringify(asaDetail, null, 4));
+      }
+    }
 
     for (const dependency of this.dependencies) {
       const componentConfig =
@@ -233,9 +282,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
                 JSON.parse(fs.readFileSync(asaIoTHubArmTemplatePath, 'utf8')) as
                 ARMTemplate;
             const asaIotHubArmParameters = {
-              streamAnalyticsJobName: {
-                value: asaDeploy.properties.outputs.streamAnalyticsJobName.value
-              },
+              streamAnalyticsJobName: {value: streamAnalyticsJobName},
               inputName: {value: `iothub-${componentConfig.id}`},
               iotHubName: {value: iotHubName},
               iotHubKeyName: {value: iotHubKeyName},
@@ -280,9 +327,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
                 JSON.parse(fs.readFileSync(
                     asaCosmosDBArmTemplatePath, 'utf8')) as ARMTemplate;
             const asaCosmosArmParameters = {
-              streamAnalyticsJobName: {
-                value: asaDeploy.properties.outputs.streamAnalyticsJobName.value
-              },
+              streamAnalyticsJobName: {value: streamAnalyticsJobName},
               outputName: {value: `cosmosdb-${componentConfig.id}`},
               cosmosDBName: {value: cosmosDBAccountName},
               cosmosDBDatabase: {value: cosmosDBDatabase},
@@ -309,8 +354,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
       values: {
         subscriptionId: AzureUtility.subscriptionId as string,
         resourceGroup: AzureUtility.resourceGroup as string,
-        streamAnalyticsJobName:
-            asaDeploy.properties.outputs.streamAnalyticsJobName.value
+        streamAnalyticsJobName
       }
     });
 
