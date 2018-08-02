@@ -1,8 +1,10 @@
 import {ResourceManagementClient, ResourceModels, SubscriptionClient} from 'azure-arm-resource';
 import * as fs from 'fs-plus';
-import {ServiceClientCredentials} from 'ms-rest';
+import {ServiceClientCredentials, WebResource} from 'ms-rest';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import request = require('request-promise');
+import rq = require('request');
 
 import {AzureAccount, AzureResourceFilter} from '../azure-account.api';
 import {ConfigHandler} from '../configHandler';
@@ -542,5 +544,33 @@ export class AzureUtility {
     }
 
     return client;
+  }
+
+  // tslint:disable-next-line: no-any
+  static async postRequest(resource: string, body: any = null) {
+    const credential = await AzureUtility._getCredential();
+    if (!credential) {
+      return undefined;
+    }
+
+    const httpRequest = new WebResource();
+    httpRequest.method = 'POST';
+    httpRequest.url = 'https://management.azure.com' + resource;
+    httpRequest.body = body;
+
+    const httpRequestOption: (rq.UrlOptions&request.RequestPromiseOptions) =
+        httpRequest;
+    httpRequestOption.simple = false;
+
+    return new Promise((resolve, reject) => {
+      credential.signRequest(httpRequest, async err => {
+        if (!err) {
+          const res = await request(httpRequestOption);
+          return resolve(res);
+        } else {
+          throw err;
+        }
+      });
+    });
   }
 }
