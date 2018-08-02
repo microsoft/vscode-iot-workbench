@@ -399,10 +399,10 @@ export class StreamAnalyticsJob implements Component, Provisionable,
       this.channel.appendLine('Starting Stream Analytics Job...');
     }
 
-    const stopResource = `/subscriptions/${subscriptionId}/resourceGroups/${
+    const startResource = `/subscriptions/${subscriptionId}/resourceGroups/${
         resourceGroup}/providers/Microsoft.StreamAnalytics/streamingjobs/${
         streamAnalyticsJobName}/start?api-version=2015-10-01`;
-    await AzureUtility.postRequest(stopResource);
+    await AzureUtility.postRequest(startResource);
 
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
