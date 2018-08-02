@@ -1,4 +1,4 @@
-# IoT DevKit OTA (Over-the-Air) firmware update
+# Update IoT DevKit firmware OTA (Over-the-Air) through Azure IoT Hub Automatic Device Management
 
 You may need to update the firmware on the devices connected to your IoT hub. For example, you might want to add new features to the firmware or apply security patches. In many IoT scenarios, it's impractical to physically visit and then manually apply firmware updates to your devices. 
 
