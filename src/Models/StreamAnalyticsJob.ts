@@ -83,13 +83,14 @@ export class StreamAnalyticsJob implements Component, Provisionable,
 
       const timer = setInterval(async () => {
         const state: string = await this.getState();
-        if (state ===
-            (action === StreamAnalyticsAction.Start ? 'Running' : 'Stopped')) {
+        if (action === StreamAnalyticsAction.Start && state === 'Running' ||
+            action === StreamAnalyticsAction.Stop && state === 'Stopped' ||
+            action === StreamAnalyticsAction.Stop && state === 'Created') {
           clearTimeout(timeout);
           clearInterval(timer);
           return resolve(true);
         }
-      }, 1000);
+      }, 5000);
     });
   }
 
@@ -370,6 +371,14 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     const azureClient = this.azureClient || this.initAzureClient();
 
     // Stop Job
+    let stopPending: NodeJS.Timer|null = null;
+    if (this.channel) {
+      this.channel.show();
+      this.channel.appendLine('Stopping Stream Analytics Job...');
+      stopPending = setInterval(() => {
+        this.channel.append('.');
+      }, 1000);
+    }
     const jobStopped = await this.stop();
     if (!jobStopped) {
       if (this.channel) {
@@ -377,6 +386,12 @@ export class StreamAnalyticsJob implements Component, Provisionable,
         this.channel.appendLine('Stop Stream Analytics Job failed.');
       }
       return false;
+    } else {
+      if (this.channel && stopPending) {
+        clearInterval(stopPending);
+        this.channel.appendLine('.');
+        this.channel.appendLine('Stop Stream Analytics Job succeeded.');
+      }
     }
 
     const resourceId = `/subscriptions/${this.subscriptionId}/resourceGroups/${
@@ -408,6 +423,14 @@ export class StreamAnalyticsJob implements Component, Provisionable,
       }
 
       // Start Job
+      let startPending: NodeJS.Timer|null = null;
+      if (this.channel) {
+        this.channel.show();
+        this.channel.appendLine('Starting Stream Analytics Job...');
+        startPending = setInterval(() => {
+          this.channel.append('.');
+        }, 1000);
+      }
       const jobStarted = await this.start();
       if (!jobStarted) {
         if (this.channel) {
@@ -415,6 +438,12 @@ export class StreamAnalyticsJob implements Component, Provisionable,
           this.channel.appendLine('Start Stream Analytics Job failed.');
         }
         return false;
+      } else {
+        if (this.channel && startPending) {
+          clearInterval(startPending);
+          this.channel.appendLine('.');
+          this.channel.appendLine('Start Stream Analytics Job succeeded.');
+        }
       }
     } catch (error) {
       if (this.channel && deployPending) {
