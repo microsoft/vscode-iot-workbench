@@ -104,7 +104,7 @@ export class CosmosDB implements Component, Provisionable {
   async provision(): Promise<boolean> {
     if (this.channel) {
       this.channel.show();
-      this.channel.appendLine('Deploying Cosmos DB...');
+      this.channel.appendLine('Creating Cosmos DB...');
     }
     const cosmosDBArmTemplatePath = this.extensionContext.asAbsolutePath(
         path.join(FileNames.resourcesFolderName, 'arm', 'cosmosdb.json'));

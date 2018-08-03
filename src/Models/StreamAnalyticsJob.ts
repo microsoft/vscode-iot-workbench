@@ -83,18 +83,36 @@ export class StreamAnalyticsJob implements Component, Provisionable,
 
       const timer = setInterval(async () => {
         const state: string = await this.getState();
-        if (state ===
-            (action === StreamAnalyticsAction.Start ? 'Running' : 'Stopped')) {
+        if (action === StreamAnalyticsAction.Start && state === 'Running' ||
+            action === StreamAnalyticsAction.Stop && state === 'Stopped' ||
+            action === StreamAnalyticsAction.Stop && state === 'Created') {
           clearTimeout(timeout);
           clearInterval(timer);
           return resolve(true);
         }
-      }, 1000);
+      }, 5000);
     });
   }
 
   private getStreamAnalyticsByNameFromCache(name: string) {
     return this.catchedStreamAnalyticsList.find(item => item.name === name);
+  }
+
+  private async getStreamAnalyticsInResourceGroup() {
+    const resource = `/subscriptions/${
+        AzureUtility.subscriptionId}/resourceGroups/${
+        AzureUtility
+            .resourceGroup}/providers/Microsoft.StreamAnalytics/streamingjobs?api-version=2015-10-01`;
+    const asaListRes = await AzureUtility.getRequest(resource) as
+        {value: Array<{name: string, properties: {jobState: string}}>};
+    const asaList: vscode.QuickPickItem[] =
+        [{label: '$(plus) Create New Stream Analytics Job', description: ''}];
+    for (const item of asaListRes.value) {
+      asaList.push({label: item.name, description: item.properties.jobState});
+    }
+
+    this.catchedStreamAnalyticsList = asaListRes.value;
+    return asaList;
   }
 
   get id() {
@@ -176,27 +194,11 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     }
   }
 
-  async getStreamAnalyticsInResourceGroup() {
-    this.initAzureClient();
-    const resource = `/subscriptions/${this.subscriptionId}/resourceGroups/${
-        this.resourceGroup}/providers/Microsoft.StreamAnalytics/streamingjobs?api-version=2015-10-01`;
-    const asaListRes = await AzureUtility.getRequest(resource) as
-        {value: Array<{name: string, properties: {jobState: string}}>};
-    const asaList: vscode.QuickPickItem[] =
-        [{label: '$(plus) Create Resource Group', description: ''}];
-    for (const item of asaListRes.value) {
-      asaList.push({label: item.name, description: item.properties.jobState});
-    }
-
-    this.catchedStreamAnalyticsList = asaListRes.value;
-    return asaList;
-  }
-
   async provision(): Promise<boolean> {
     const asaList = this.getStreamAnalyticsInResourceGroup();
     const asaNameChoose = await vscode.window.showQuickPick(
         asaList,
-        {placeHolder: 'Select Azure Stream Analytics', ignoreFocusOut: true});
+        {placeHolder: 'Select Stream Analytics Job', ignoreFocusOut: true});
     if (!asaNameChoose) {
       return false;
     }
@@ -206,7 +208,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     if (!asaNameChoose.description) {
       if (this.channel) {
         this.channel.show();
-        this.channel.appendLine('Deploying Stream Analytics Job...');
+        this.channel.appendLine('Creating Stream Analytics Job...');
       }
       const asaArmTemplatePath = this.extensionContext.asAbsolutePath(path.join(
           FileNames.resourcesFolderName, 'arm', 'streamanalytics.json'));
@@ -223,11 +225,11 @@ export class StreamAnalyticsJob implements Component, Provisionable,
       this.channel.appendLine(JSON.stringify(asaDeploy, null, 4));
 
       streamAnalyticsJobName =
-          asaDeploy.properties.outputs.streamAnalyticsJobName;
+          asaDeploy.properties.outputs.streamAnalyticsJobName.value;
     } else {
       if (this.channel) {
         this.channel.show();
-        this.channel.appendLine('Deploying Stream Analytics Job...');
+        this.channel.appendLine('Creating Stream Analytics Job...');
       }
       streamAnalyticsJobName = asaNameChoose.label;
       const asaDetail =
@@ -369,6 +371,14 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     const azureClient = this.azureClient || this.initAzureClient();
 
     // Stop Job
+    let stopPending: NodeJS.Timer|null = null;
+    if (this.channel) {
+      this.channel.show();
+      this.channel.appendLine('Stopping Stream Analytics Job...');
+      stopPending = setInterval(() => {
+        this.channel.append('.');
+      }, 1000);
+    }
     const jobStopped = await this.stop();
     if (!jobStopped) {
       if (this.channel) {
@@ -376,6 +386,12 @@ export class StreamAnalyticsJob implements Component, Provisionable,
         this.channel.appendLine('Stop Stream Analytics Job failed.');
       }
       return false;
+    } else {
+      if (this.channel && stopPending) {
+        clearInterval(stopPending);
+        this.channel.appendLine('.');
+        this.channel.appendLine('Stop Stream Analytics Job succeeded.');
+      }
     }
 
     const resourceId = `/subscriptions/${this.subscriptionId}/resourceGroups/${
@@ -407,6 +423,14 @@ export class StreamAnalyticsJob implements Component, Provisionable,
       }
 
       // Start Job
+      let startPending: NodeJS.Timer|null = null;
+      if (this.channel) {
+        this.channel.show();
+        this.channel.appendLine('Starting Stream Analytics Job...');
+        startPending = setInterval(() => {
+          this.channel.append('.');
+        }, 1000);
+      }
       const jobStarted = await this.start();
       if (!jobStarted) {
         if (this.channel) {
@@ -414,6 +438,12 @@ export class StreamAnalyticsJob implements Component, Provisionable,
           this.channel.appendLine('Start Stream Analytics Job failed.');
         }
         return false;
+      } else {
+        if (this.channel && startPending) {
+          clearInterval(startPending);
+          this.channel.appendLine('.');
+          this.channel.appendLine('Start Stream Analytics Job succeeded.');
+        }
       }
     } catch (error) {
       if (this.channel && deployPending) {

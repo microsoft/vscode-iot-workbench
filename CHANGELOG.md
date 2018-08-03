@@ -1,5 +1,11 @@
 # Change Log
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
+## Version 0.1.8
+- Release date: August 1, 2018
+
+### Fixed
+- Update the node module dependency.
+
 ## Version 0.1.7
 - Release date: July 12, 2018
 
