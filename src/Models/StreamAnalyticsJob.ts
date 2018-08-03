@@ -97,6 +97,23 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     return this.catchedStreamAnalyticsList.find(item => item.name === name);
   }
 
+  private async getStreamAnalyticsInResourceGroup() {
+    const resource = `/subscriptions/${
+        AzureUtility.subscriptionId}/resourceGroups/${
+        AzureUtility
+            .resourceGroup}/providers/Microsoft.StreamAnalytics/streamingjobs?api-version=2015-10-01`;
+    const asaListRes = await AzureUtility.getRequest(resource) as
+        {value: Array<{name: string, properties: {jobState: string}}>};
+    const asaList: vscode.QuickPickItem[] =
+        [{label: '$(plus) Create Resource Group', description: ''}];
+    for (const item of asaListRes.value) {
+      asaList.push({label: item.name, description: item.properties.jobState});
+    }
+
+    this.catchedStreamAnalyticsList = asaListRes.value;
+    return asaList;
+  }
+
   get id() {
     return this.componentId;
   }
@@ -176,22 +193,6 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     }
   }
 
-  async getStreamAnalyticsInResourceGroup() {
-    this.initAzureClient();
-    const resource = `/subscriptions/${this.subscriptionId}/resourceGroups/${
-        this.resourceGroup}/providers/Microsoft.StreamAnalytics/streamingjobs?api-version=2015-10-01`;
-    const asaListRes = await AzureUtility.getRequest(resource) as
-        {value: Array<{name: string, properties: {jobState: string}}>};
-    const asaList: vscode.QuickPickItem[] =
-        [{label: '$(plus) Create Resource Group', description: ''}];
-    for (const item of asaListRes.value) {
-      asaList.push({label: item.name, description: item.properties.jobState});
-    }
-
-    this.catchedStreamAnalyticsList = asaListRes.value;
-    return asaList;
-  }
-
   async provision(): Promise<boolean> {
     const asaList = this.getStreamAnalyticsInResourceGroup();
     const asaNameChoose = await vscode.window.showQuickPick(
@@ -206,7 +207,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     if (!asaNameChoose.description) {
       if (this.channel) {
         this.channel.show();
-        this.channel.appendLine('Deploying Stream Analytics Job...');
+        this.channel.appendLine('Creating Stream Analytics Job...');
       }
       const asaArmTemplatePath = this.extensionContext.asAbsolutePath(path.join(
           FileNames.resourcesFolderName, 'arm', 'streamanalytics.json'));
@@ -223,11 +224,11 @@ export class StreamAnalyticsJob implements Component, Provisionable,
       this.channel.appendLine(JSON.stringify(asaDeploy, null, 4));
 
       streamAnalyticsJobName =
-          asaDeploy.properties.outputs.streamAnalyticsJobName;
+          asaDeploy.properties.outputs.streamAnalyticsJobName.value;
     } else {
       if (this.channel) {
         this.channel.show();
-        this.channel.appendLine('Deploying Stream Analytics Job...');
+        this.channel.appendLine('Creating Stream Analytics Job...');
       }
       streamAnalyticsJobName = asaNameChoose.label;
       const asaDetail =
