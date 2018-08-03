@@ -1,14 +1,13 @@
-# Device registration with DPS
+# Use Azure IoT Hub Device Provisioning Service auto-provisioning to register the MXChip IoT DevKit with IoT Hub
 
-Microsoft Azure provides a rich set of integrated public cloud services for all your IoT solution needs. The IoT Hub Device Provisioning Service is a helper service for IoT Hub that enables zero-touch, just-in-time provisioning to the right IoT hub without requiring human intervention, enabling customers to provision millions of devices in a secure and scalable manner.
+This article describes how to use Azure IoT Hub Device Provisioning Service [auto-provisioning](https://docs.microsoft.com/en-us/azure/iot-dps/concepts-auto-provisioning), to register the MXChip IoT DevKit with Azure IoT Hub. In this tutorial, you learn how to:
 
-## What you learn
+- Configure the global endpoint of the device provisioning service on a device.
+- Use a unique device secret (UDS) to generate an X.509 certificate.
+- Enroll an individual device.
+- Verify that the device is registered.
 
-In this tutorial, you learn:
-- How to set up the Device Provisioning Service configuration on the device.
-- How to save Unique Device Secret on STSAFE security chip.
-- How to generate X.509 certificate.
-- How to create a device enrollment entry in the Device Provisioning Service.
+The [MXChip IoT DevKit](https://aka.ms/iot-devkit) is an all-in-one Arduino-compatible board with rich peripherals and sensors. You can develop for it by using the [Visual Studio Code extension for Arduino](https://aka.ms/arduino). The DevKit comes with a growing [projects catalog](https://microsoft.github.io/azure-iot-developer-kit/docs/projects/) to guide your prototype Internet of Things (IoT) solutions that take advantage of Azure services.
 
 ## What you need
 
@@ -53,12 +52,12 @@ Find **DevKit DPS** and click **Open Sample** button. A new VS Code window with 
 ## Build and upload the device code
 
 1. In the Azure portal, select the **Overview** blade for your Device Provisioning Service and note down the **Global device endpoint** and **ID Scope** value.
-  ![DPS Global Endpoint and ID Scope](media/devkit-dps/copy-endpoint.png)
+    ![DPS Global Endpoint and ID Scope](media/devkit-dps/copy-endpoint.png)
 
 
 2. Open **DevKitDPS.ino**, Find and replace `[Global Device Endpoint]` and `[ID Scope]` with the values you just note down.
-  ![DPS Global Endpoint and ID Scope](media/devkit-dps/paste-endpoint.png)
-  You can leave the **registrationId** as blank, the application will generate one for you based on the MAC address and firmware version. If you want to customized it, the Registration ID has to use alphanumeric, lowercase, and hyphen combinations only with maximum 128 characters long. See [Manage device enrollments with Azure portal](https://docs.microsoft.com/en-us/azure/iot-dps/how-to-manage-enrollments) for more details.
+    ![DPS Global Endpoint and ID Scope](media/devkit-dps/paste-endpoint.png)
+    You can leave the **registrationId** as blank, the application will generate one for you based on the MAC address and firmware version. If you want to customized it, the Registration ID has to use alphanumeric, lowercase, and hyphen combinations only with maximum 128 characters long. See [Manage device enrollments with Azure portal](https://docs.microsoft.com/en-us/azure/iot-dps/how-to-manage-enrollments) for more details.
 
 3. Open the command palette and select **IoT Workbench: Device**, then select **Device Upload**. 
 
@@ -71,7 +70,7 @@ Find **DevKit DPS** and click **Open Sample** button. A new VS Code window with 
 5. The DevKit reboots and starts running the code.
 
 6. Note down **DevKit MAC Address** and **DevKit Firmware Version** value from serial monitor.
-  ![Firmware version](media/devkit-dps/copy-mac-address.png)
+    ![Firmware version](media/devkit-dps/copy-mac-address.png)
 
 ## Save Unique Device Secret on STSAFE security chip
 
@@ -102,12 +101,12 @@ Open integrated terminal in Visual Studio Code and run dps_cert_gen in tool fold
 ## Create a device enrollment entry in the Device Provisioning Service
 
 1. In the Azure portal, navigate to your provisioning service. Click **Manage enrollments**, and select the **Add individual enrollments** tab.
-  ![Individual enrollments](media/devkit-dps/add-enrollment.png)
+    ![Individual enrollments](media/devkit-dps/add-enrollment.png)
 
 2. Upload the **.pem** certificate you just have.
 
 3. Leave the rest as default and click **Save**.
-  ![Individual enrollments](media/devkit-dps/add-enrollment-2.png)
+    ![Individual enrollments](media/devkit-dps/add-enrollment-2.png)
 
 ## Start the DevKit
 
@@ -126,7 +125,7 @@ Once your device boots, the following actions should take place:
 3. On successful registration, the Device Provisioning Service sends the IoT hub URI, device ID and the encrypted key back to the device.
 4. The IoT Hub client application on the device then connects to your hub.
 5. On successful connection to the hub, you should see the device appear in the IoT hub's Device Explorer.
-  ![Device registered](media/devkit-dps/device-registered.png)
+    ![Device registered](media/devkit-dps/device-registered.png)
 
 ## Problems and feedback
 
