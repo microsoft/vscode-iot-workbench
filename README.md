@@ -12,6 +12,7 @@ IoT Workbench aims to support multiple popular IoT development boards and kits. 
 - [MXChip IoT DevKit](https://aka.ms/iot-devkit)
 - [teXXmo IoT button](https://aka.ms/button)
 - [Raspberry Pi](https://www.raspberrypi.org/)
+- [ESP32](https://www.espressif.com/en/products/hardware/esp-wroom-32/overview)
 
 Please find the [Setup Guide](#setup-guide) section below to configure your hardware.
 
@@ -46,6 +47,7 @@ Here are a set of tutorials that will help you get started:
 * [MQTT Client](./docs/iot-devkit/devkit-mqtt-client.md)
 * [DevKit State](./docs/iot-devkit/devkit-state.md)
 * [Door Monitor](./docs/iot-devkit/devkit_door_monitor.md)
+* [DevKit DPS](./docs/iot-devkit/devkit_dps.md)
 
 ### teXXmo IoT button
 
@@ -59,6 +61,12 @@ Here are a set of tutorials that will help you get started:
 
 * [Get Started](./docs/raspberry-pi/raspi-get-started.md)
 * [Simple LED](./docs/raspberry-pi/raspi-simple-led.md)
+
+### ESP32
+
+Here are a set of tutorials that will help you get started:
+
+* [Get Started](./docs/esp32/esp32-get-started.md)
 
 ## Commands
 
@@ -104,6 +112,21 @@ There are a couple of ways you can contribute to this repo:
   - To build, press `F1` and type in `Tasks: Run Build Task`.
   - Debug: press `F5` to start debugging the extension.
   - Run `gts check` and `gts fix` to follow TypeScript style guide.  
+- **Example**: Contribute examples for the supported devices.
+
+  - Create a git repo to host the code of your example project.
+  - Write a tutorial to describe how to run the example.
+  - Submit a [new issue](https://github.com/Microsoft/vscode-iot-workbench/issues/new) and provide the following information:
+  
+  | Item | Description |
+  | --- | --- |
+  | `Name` | Name of the example to be displayed in example gallery. |
+  | `Folder name` | Name of the folder to host the example. |
+  | `Description` | A short statement to describe the example. |
+  | `Location` | URL of the GitHub repo. |
+  | `Image` | URL of the image shown in example gallery for your example, if not provided, the default image will be used. |
+  | `Tutorial` | URL of tutorial that describes how to run the example. |
+  | `Difficulty` | Difficulty of the example, easy, medium or difficult. |
 
 ## Code of Conduct
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct). For more information please see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/#howadopt) or contact opencode@microsoft.com with any additional questions or comments.

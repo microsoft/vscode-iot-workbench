@@ -3,18 +3,17 @@
 
 import * as cp from 'child_process';
 import * as fs from 'fs-plus';
+import {Guid} from 'guid-typescript';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames} from '../constants';
-import {ProjectTemplate, ProjectTemplateType} from '../Models/Interfaces/ProjectTemplate';
-import {IoTProject} from '../Models/IoTProject';
-import {SSH} from '../Models/SSH';
 
-import {Component, ComponentType} from './Interfaces/Component';
+import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
+import {SSH} from './SSH';
 
 const constants = {
   defaultSketchFileName: 'app.js'
@@ -30,6 +29,10 @@ class RaspberryPiUploadConfig {
 }
 
 export class RaspberryPiDevice implements Device {
+  private componentId: string;
+  get id() {
+    return this.componentId;
+  }
   private deviceType: DeviceType;
   private componentType: ComponentType;
   private deviceFolder: string;
@@ -50,6 +53,7 @@ export class RaspberryPiDevice implements Device {
     this.deviceFolder = devicePath;
     this.extensionContext = context;
     this.channel = channel;
+    this.componentId = Guid.create().toString();
     if (sketchName) {
       this.sketchName = sketchName;
     }

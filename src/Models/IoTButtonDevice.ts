@@ -2,18 +2,15 @@
 // Licensed under the MIT License.
 
 import * as fs from 'fs-plus';
-import * as os from 'os';
+import {Guid} from 'guid-typescript';
 import * as path from 'path';
 import * as request from 'request-promise';
-import {error} from 'util';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames} from '../constants';
-import {ProjectTemplate, ProjectTemplateType} from '../Models/Interfaces/ProjectTemplate';
-import {IoTProject} from '../Models/IoTProject';
 
-import {Component, ComponentType} from './Interfaces/Component';
+import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
 
 const constants = {
@@ -30,6 +27,11 @@ export class IoTButtonDevice implements Device {
   private extensionContext: vscode.ExtensionContext;
   private inputFileName = '';
 
+  private componentId: string;
+  get id() {
+    return this.componentId;
+  }
+
   private static _boardId = 'iotbutton';
 
   static get boardId() {
@@ -43,12 +45,14 @@ export class IoTButtonDevice implements Device {
     this.componentType = ComponentType.Device;
     this.deviceFolder = devicePath;
     this.extensionContext = context;
+    this.componentId = Guid.create().toString();
     if (inputFileName) {
       this.inputFileName = inputFileName;
     }
   }
 
   name = 'IoTButton';
+
 
   getDeviceType(): DeviceType {
     return this.deviceType;

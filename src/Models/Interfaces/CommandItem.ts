@@ -18,5 +18,5 @@ export interface CommandItem extends vscode.QuickPickItem {
    * workspace configuration contains
    * the specific field.
    */
-  only?: string;
+  only?: string|string[];
 }

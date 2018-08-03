@@ -14,46 +14,30 @@ import {Provisionable} from './Interfaces/Provisionable';
 import {Deployable} from './Interfaces/Deployable';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, AzureFunctionsLanguage} from '../constants';
+import {ConfigKey, AzureFunctionsLanguage, AzureComponentsStorage} from '../constants';
 
 import {ServiceClientCredentials} from 'ms-rest';
 import {AzureAccount, AzureResourceFilter} from '../azure-account.api';
 import {StringDictionary} from 'azure-arm-website/lib/models';
 import {getExtension} from './Apis';
 import {extensionName} from './Interfaces/Api';
+import {Guid} from 'guid-typescript';
+import {AzureComponentConfig, AzureConfigs, ComponentInfo, DependencyConfig, Dependency} from './AzureComponentConfig';
+import {AzureUtility} from './AzureUtility';
 
-export class AzureFunctions implements Component, Provisionable {
+export class AzureFunctions implements Component, Provisionable, Deployable {
+  dependencies: DependencyConfig[] = [];
   private componentType: ComponentType;
   private channel: vscode.OutputChannel;
   private azureFunctionsPath: string;
   private azureAccountExtension: AzureAccount|undefined =
       getExtension(extensionName.AzureAccount);
   private functionLanguage: string|null;
+  private functionFolder: string;
 
-  private async getSubscriptionList(): Promise<vscode.QuickPickItem[]> {
-    const subscriptionList: vscode.QuickPickItem[] = [];
-    if (!this.azureAccountExtension) {
-      throw new Error('Azure account extension is not found.');
-    }
-
-    const subscriptions = this.azureAccountExtension.filters;
-    subscriptions.forEach(item => {
-      subscriptionList.push({
-        label: item.subscription.displayName,
-        description: item.subscription.subscriptionId
-      } as vscode.QuickPickItem);
-    });
-
-    if (subscriptionList.length === 0) {
-      subscriptionList.push({
-        label: 'No subscription found',
-        description: '',
-        detail:
-            'Click Azure account at bottom left corner and choose Select All'
-      } as vscode.QuickPickItem);
-    }
-
-    return subscriptionList;
+  private componentId: string;
+  get id() {
+    return this.componentId;
   }
 
   private async getCredentialFromSubscriptionId(subscriptionId: string):
@@ -79,12 +63,20 @@ export class AzureFunctions implements Component, Provisionable {
   }
 
   constructor(
-      azureFunctionsPath: string, channel: vscode.OutputChannel,
-      language: string|null = null) {
+      azureFunctionsPath: string, functionFolder: string,
+      channel: vscode.OutputChannel, language: string|null = null,
+      dependencyComponents: Dependency[]|null = null) {
     this.componentType = ComponentType.AzureFunctions;
     this.channel = channel;
     this.azureFunctionsPath = azureFunctionsPath;
     this.functionLanguage = language;
+    this.functionFolder = functionFolder;
+    this.componentId = Guid.create().toString();
+    if (dependencyComponents && dependencyComponents.length > 0) {
+      dependencyComponents.forEach(
+          dependency => this.dependencies.push(
+              {id: dependency.component.id.toString(), type: dependency.type}));
+    }
   }
 
   name = 'Azure Functions';
@@ -94,6 +86,30 @@ export class AzureFunctions implements Component, Provisionable {
   }
 
   async load(): Promise<boolean> {
+    const azureConfigFilePath = path.join(
+        this.azureFunctionsPath, '..', AzureComponentsStorage.folderName,
+        AzureComponentsStorage.fileName);
+
+    if (!fs.existsSync(azureConfigFilePath)) {
+      return false;
+    }
+
+    let azureConfigs: AzureConfigs;
+
+    try {
+      azureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, 'utf8'));
+    } catch (error) {
+      return false;
+    }
+
+    const azureFunctionsConfig = azureConfigs.componentConfigs.find(
+        config => config.folder === this.functionFolder);
+    if (azureFunctionsConfig) {
+      this.componentId = azureFunctionsConfig.id;
+      this.dependencies = azureFunctionsConfig.dependencies;
+
+      // Load other information from config file.
+    }
     return true;
   }
 
@@ -142,6 +158,7 @@ export class AzureFunctions implements Component, Provisionable {
             path: '%eventHubConnectionPath%',
             consumerGroup: '$Default'
           });
+      this.updateConfigSettings();
       return true;
     } catch (error) {
       throw error;
@@ -150,13 +167,10 @@ export class AzureFunctions implements Component, Provisionable {
 
   async provision(): Promise<boolean> {
     try {
-      const subscription = await vscode.window.showQuickPick(
-          this.getSubscriptionList(),
-          {placeHolder: 'Select Subscription', ignoreFocusOut: true});
-      if (!subscription || !subscription.description) {
+      const subscriptionId = AzureUtility.subscriptionId;
+      if (!subscriptionId) {
         return false;
       }
-      const subscriptionId = subscription.description;
       const functionAppId: string|undefined =
           await vscode.commands.executeCommand<string>(
               'azureFunctions.createFunctionApp', subscriptionId);
@@ -220,11 +234,11 @@ export class AzureFunctions implements Component, Provisionable {
   }
 
   async deploy(): Promise<boolean> {
-    let deployPendding: NodeJS.Timer|null = null;
+    let deployPending: NodeJS.Timer|null = null;
     if (this.channel) {
       this.channel.show();
       this.channel.appendLine('Deploying Azure Functions App...');
-      deployPendding = setInterval(() => {
+      deployPending = setInterval(() => {
         this.channel.append('.');
       }, 1000);
     }
@@ -236,17 +250,49 @@ export class AzureFunctions implements Component, Provisionable {
       await vscode.commands.executeCommand(
           'azureFunctions.deploy', azureFunctionsPath, functionAppId);
       console.log(azureFunctionsPath, functionAppId);
-      if (this.channel && deployPendding) {
-        clearInterval(deployPendding);
+      if (this.channel && deployPending) {
+        clearInterval(deployPending);
         this.channel.appendLine('.');
       }
       return true;
     } catch (error) {
-      if (this.channel && deployPendding) {
-        clearInterval(deployPendding);
+      if (this.channel && deployPending) {
+        clearInterval(deployPending);
         this.channel.appendLine('.');
       }
       throw error;
+    }
+  }
+
+  updateConfigSettings(componentInfo?: ComponentInfo): void {
+    const azureConfigFilePath = path.join(
+        this.azureFunctionsPath, '..', AzureComponentsStorage.folderName,
+        AzureComponentsStorage.fileName);
+
+    let azureConfigs: AzureConfigs = {componentConfigs: []};
+
+    try {
+      azureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, 'utf8'));
+    } catch (error) {
+      const e = new Error('Invalid azure components config file.');
+      throw e;
+    }
+
+    const azureFunctionsConfig =
+        azureConfigs.componentConfigs.find(config => config.id === (this.id));
+    if (azureFunctionsConfig) {
+      // TODO: update the existing setting for the provision result
+    } else {
+      const newAzureFunctionsConfig: AzureComponentConfig = {
+        id: this.id,
+        folder: this.functionFolder,
+        name: '',
+        dependencies: this.dependencies,
+        type: ComponentType[this.componentType]
+      };
+      azureConfigs.componentConfigs.push(newAzureFunctionsConfig);
+      fs.writeFileSync(
+          azureConfigFilePath, JSON.stringify(azureConfigs, null, 4));
     }
   }
 }

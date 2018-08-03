@@ -208,10 +208,66 @@ The whole process includes:
 
 3. The DevKit reboots and starts running the code.
 
+## Serial monitor usage
+
+### Use status bar
+
+* **Select Serial Port** :
+
+  Click the **Select Serial Port** on the status bar and choose COM port with **STMicroelectronics** :
+
+  ![Serial port init](media/iot-devkit-get-started/serial-monitor-init.png)
+
+  ![Select port init](media/iot-devkit-get-started/select-port.png)
+
+  And you will see selected port on status bar:
+
+  ![After select port](media/iot-devkit-get-started/after-select-port.png)
+
+* **Open Serial Monitor** : 
+
+  Click the power plug icon on the status bar :
+
+  ![Open serial monitor](media/iot-devkit-get-started/open-serial-monitor.png)
+
+  And you will see result in OUTPUT view:
+
+  ![After open serial monitor](media/iot-devkit-get-started/after-open-serial-monitor.png)
+
+* **Change Baud Rate** : 
+
+  Click the baud rate button on the status bar and choose new baud rate:
+
+  ![Click baud rate](media/iot-devkit-get-started/baud-rate.png)
+	
+	![Select baud rate](media/iot-devkit-get-started/select-baud-rate.png)
+
+  And you will see new baud rate on status bar:
+
+	![After baud rate](media/iot-devkit-get-started/after-baud-rate.png)
+
+* **Close Serial Monitor** : 
+
+  Click the close icon on the status bar :
+
+  ![Close serial monitor](media/iot-devkit-get-started/close-serial-monitor.png)
+
+  And you will see result in OUTPUT view:
+
+  ![After close serial monitor](media/iot-devkit-get-started/after-close-serial-monitor.png)
+
+
+### Use command palette
+
+* **Arduino: Change Baud Rate** : Change the baud rate of selected serial port.
+* **Arduino: Close Serial Monitor** : Stop serial monitor and release the serial port.
+* **Arduino: Open Serial Monitor** : Open serial monitor in the intergrated output window.
+* **Arduino: Select Serial Port** : Change the current serial port.
+* **Arduino: Send Text to Serial Port** : Send a line of text via the current serial port.
+
 ## Test the project
 
-Click the power plug icon on the status bar to open the Serial Monitor:
-![Open serial monitor](media/iot-devkit-get-started/serial-monitor.png)
+Open [serial monitor](#Serial_monitor_usage).
 
 The sample application is running successfully when you see the following results:
 

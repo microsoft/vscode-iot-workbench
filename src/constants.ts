@@ -10,6 +10,7 @@ export class ConfigKey {
   static readonly functionAppId = 'functionAppId';
   static readonly functionPath = 'FunctionPath';
   static readonly boardId = 'BoardId';
+  static readonly asaPath = 'StreamAnalyticsPath';
 }
 
 export class EventNames {
@@ -43,4 +44,9 @@ export class FileNames {
 export enum AzureFunctionsLanguage {
   CSharpScript = 'C#Script',
   JavaScript = 'JavaScript'
+}
+
+export class AzureComponentsStorage {
+  static readonly folderName = '.azurecomponent';
+  static readonly fileName = 'azureconfig.json';
 }
