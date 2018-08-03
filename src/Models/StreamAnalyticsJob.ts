@@ -198,7 +198,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     const asaList = this.getStreamAnalyticsInResourceGroup();
     const asaNameChoose = await vscode.window.showQuickPick(
         asaList,
-        {placeHolder: 'Select Azure Stream Analytics', ignoreFocusOut: true});
+        {placeHolder: 'Select Stream Analytics Job', ignoreFocusOut: true});
     if (!asaNameChoose) {
       return false;
     }
