@@ -1,7 +1,7 @@
 {
   "name": "vscode-iot-workbench",
   "displayName": "Azure IoT Workbench",
-  "description": "Azure IoT Workbench for Visual Studio Code",
+  "description": "Develop and deploy IoT solution with multiple Azure services and popular IoT devices​",
   "repository": {
     "type": "git",
     "url": "https://github.com/Microsoft/vscode-iot-workbench.git"
@@ -37,32 +37,32 @@
     "commands": [
       {
         "command": "iotworkbench.initializeProject",
-        "title": "New",
+        "title": "Create a new IoT project",
         "category": "IoT Workbench"
       },
       {
         "command": "iotworkbench.examples",
-        "title": "Examples",
+        "title": "Load existing examples of IoT Workbench project",
         "category": "IoT Workbench"
       },
       {
         "command": "iotworkbench.device",
-        "title": "Device",
+        "title": "Compile, upload device code and config device settings",
         "category": "IoT Workbench"
       },
       {
         "command": "iotworkbench.cloud",
-        "title": "Cloud",
+        "title": "Provison and deploy Azure services",
         "category": "IoT Workbench"
       },
       {
         "command": "iotworkbench.help",
-        "title": "Help",
+        "title": "Open helper for the device",
         "category": "IoT Workbench"
       },
       {
         "command": "iotworkbench.workbench",
-        "title": "Set Workbench Path",
+        "title": "Set the default path for IoT Workbench",
         "category": "IoT Workbench"
       }
     ],
