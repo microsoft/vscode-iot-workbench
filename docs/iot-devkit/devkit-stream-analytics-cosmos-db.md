@@ -1,5 +1,19 @@
 # Stream Analytics and Cosmos DB
 
+In this tutorial, you will learn how to send data to Stream Analytics Job and export it to Cosmos DB with Azure Stream Analytics Query Langauge.
+
+## What you need
+
+Finish the [Getting Started Guide](./devkit-get-started.md) to:
+
+- Have your DevKit connected to Wi-Fi.
+- Prepare the development environment.
+
+An active Azure subscription. If you do not have one, you can register via one of these two methods:
+
+- Activate a [free 30-day trial Microsoft Azure account](https://azure.microsoft.com/free/).
+- Claim your [Azure credit](https://azure.microsoft.com/pricing/member-offers/msdn-benefits-details/) if you are MSDN or Visual Studio subscriber.
+
 ## Create a New Project
 
 Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select **IoT Workbench: New**.
