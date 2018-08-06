@@ -3,7 +3,7 @@
 [![Gitter](https://img.shields.io/badge/chat-on%20gitter-blue.svg)](https://gitter.im/Microsoft/vscode-iot-workbench)
 [![Travis CI](https://travis-ci.org/Microsoft/vscode-iot-workbench.svg?branch=master)](https://travis-ci.org/Microsoft/vscode-iot-workbench)
 
-Welcome to **Azure IoT Workbench** <sup>preview</sup> for Visual Studio Code! The IoT Workbench extension makes it easy to code, build, deploy and debug your IoT project in Visual Studio Code, with a rich set of functionalities.
+Welcome to **Azure IoT Workbench** <sup>preview</sup> for Visual Studio Code! The IoT Workbench extension makes it easy to code, build, deploy and debug your IoT project with multiple Azure services and popular IoT development boards .
 
 ## Prerequisites
 
@@ -74,10 +74,10 @@ Here are a set of tutorials that will help you get started:
 | --- | --- |
 | `IoT Workbench: New`  | Create new IoT Workbench projects. |
 | `IoT Workbench: Examples` | Load existing examples of IoT Workbench project. |
-| `IoT Workbench: Cloud` | Provison Azure services and deploy Azure Functions. |
+| `IoT Workbench: Cloud` | Provison and deploy Azure services. |
 | `IoT Workbench: Device`  | Compile, upload device code and config device settings. |
 | `IoT Workbench: Set Workbench Path` | Set the default path for IoT Workbench. |
-| `IoT Workbench: Help` | Open help URL. |
+| `IoT Workbench: Help` | Open helper for the device. |
 
 ### Create New Project
 

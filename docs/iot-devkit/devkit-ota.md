@@ -211,7 +211,9 @@ Metrics provide summary counts of the various states that a device may report ba
 2. Enter a query for **Metric Criteria**.  The query is based on device twin reported properties.  The metric represents the number of rows returned by the query.
 
 Here you can add bellowing 5 metrics to monitor the OTA status:
+
 **Current**: 
+
 ``` 
 SELECT deviceId FROM devices WHERE properties.reported.firmware.fwUpdateStatus='Current' AND properties.reported.firmware.type='IoTDevKit' 
 ```
