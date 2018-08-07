@@ -226,11 +226,11 @@ IoT Workbench will stop Stream Analytics Job, update query and restart Stream An
 
 1. Open the command palette and select **IoT Workbench: Device**, then select **Device Upload**.
 
-   ![IoT Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
+![IoT Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
 
 2. VS Code then starts verifying and uploading the code to your DevKit.
 
-   ![IoT Workbench: Device -> Uploaded](media/iot-workbench-stream-analytics-and-cosmos-db-upload.png)
+![IoT Workbench: Device -> Uploaded](media/iot-workbench-stream-analytics-and-cosmos-db-upload.png)
 
 3. The IoT DevKit reboots and starts running the code.
 
