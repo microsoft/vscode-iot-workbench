@@ -54,7 +54,8 @@ export class ContentProvider implements vscode.TextDocumentContentProvider {
       return res.json({code: 1});
     }
     const exampleExplorer = this._exampleExplorer;
-    exampleExplorer.setSelectedExample(req.query.name, req.query.url);
+    exampleExplorer.setSelectedExample(
+        req.query.name, req.query.url, req.query.board);
     await vscode.commands.executeCommand('iotworkbench.exampleInitialize');
     return res.json({code: 0});
   }

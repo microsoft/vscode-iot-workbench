@@ -25,6 +25,7 @@ export class EventNames {
   static readonly configDeviceSettingsEvent =
       'IoTWorkbench.ConfigDeviceSettingsEvent';
   static readonly loadExampleEvent = 'IoTWorkbench.loadExample';
+  static readonly detectBoard = 'IoTWorkbench.DetectBoard';
 }
 
 export class ContentView {
