@@ -160,7 +160,7 @@ void loop() {
 
 ## Provision Azure Service
 
-Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select **IoT Workbench: Cloud**, **Azure Provision**.
+Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select **IoT Workbench: Cloud** -> **Azure Provision**.
 
 ![Azure Provision](media/iot-workbench-cloud-provision2.png)
 
@@ -178,9 +178,9 @@ You can change Azure Stream Analytics Job Query by editing `StreamAnalytics/quer
 
 ![Azure Stream Analytics Query](media/iot-workbench-stream-analytics-and-cosmos-db-query.png)
 
-Output and input have already been generated automatically by default (in the example above, the output is `cosmosdb-a94a5672-867c-6b4e-db41-872d6e01e4bf`, and input is `iothub-ff8feba1-b114-48de-d8c4-d25e7efa4864`). And you have no need to change them. `*` here is the same as SQL, means data in all feilds.
+Output and input have already been generated automatically by default (in the example above, the output is `cosmosdb-a94a5672-867c-6b4e-db41-872d6e01e4bf`, and input is `iothub-ff8feba1-b114-48de-d8c4-d25e7efa4864`). And you have no need to change them. `*` means selecting data in all fields, which is the same as SQL.
 
-You can select specific feild data from input and export it into output. For example, your device sends data in such JSON format to IoT Hub:
+You can select specific field data from input and export it into output. For example, your device sends data in the following JSON format:
 
 ```json
 {
@@ -199,7 +199,7 @@ INTO
     "cosmosdb-a94a5672-867c-6b4e-db41-872d6e01e4bf"
 ```
 
-Azure Steam Analytics Query Language (ASAQL) has windowing functions support. A window contains event data along a timeline and enables you to perform various operations against the events within that window. For example, you may want to calculate the average of the values of payload fields in a given window.
+Azure Steam Analytics Query Language (ASAQL) has native support for windowing functions. Windowing functions enable you to perform various operations against the event data along a timeline. Such as calculating the average of the values of payload fields in a given window.
 
 ```sql
 SELECT
@@ -212,7 +212,7 @@ GROUP BY
     TumblingWindow(minute, 5)
 ```
 
-You can learn more about ASAQL windowing functions from [here](https://msdn.microsoft.com/azure/stream-analytics/reference/windowing-azure-stream-analytics).
+You can learn more about ASAQL windowing functions from [here](https://docs.microsoft.com/en-us/azure/stream-analytics/stream-analytics-window-functions).
 
 Deploy the query by executing **IoT Workbench: Cloud** command and select **Azure Deploy**.
 
