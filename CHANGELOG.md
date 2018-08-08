@@ -7,7 +7,7 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 ### Added
 - Add ESP32 into supported IoT hardware list.
 - Add UDS configuration support for IoT DevKit.
-- Add new template for Azure Steam Analytics.
+- Add new template for Azure Steam Analytics and Cosmos DB.
 
 ### Fixed
 - Replace tag parser for intellisense setting.
