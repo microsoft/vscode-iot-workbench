@@ -96,6 +96,9 @@ Follow these steps to prepare the development environment for the IoT DevKit:
 		"arduino.additionalUrls": "https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/master/package_azureboard_index.json"
 		```
 
+	![Config settings](media/iot-devkit-get-started/iot-workbench-setting.png)
+
+
 5. Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type and select **Arduino: Board Manager**. Search for **AZ3166** and install the latest version.
 
     ![Install DevKit SDK](media/iot-devkit-get-started/install-sdk.png)
