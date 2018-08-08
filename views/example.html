@@ -465,7 +465,7 @@ ul.example-list > li:hover > .header > img,
       <div class="description" v-if="featuredExample.description">{{ featuredExample.description }}</div>
       <div class="buttons">
         <button v-on:click="openLink(featuredExample.tutorial)" v-if="featuredExample.tutorial">View Tutorial</button>
-        <button v-on:click="callAPI(getProjectName(featuredExample), featuredExample.url)">Open Sample</button>
+        <button v-on:click="callAPI(getProjectName(featuredExample), featuredExample.url, boardId)">Open Sample</button>
       </div>
     </div>
   </div>
@@ -481,7 +481,7 @@ ul.example-list > li:hover > .header > img,
         <div class="buttons">
           <!-- Fake button. The entire block is clickable. -->
           <div v-if="example.tutorial" class="example-link tutorial">View Tutorial</div>
-          <button v-on:click.stop="callAPI(getProjectName(example), example.url)">Open Sample</button>
+          <button v-on:click.stop="callAPI(getProjectName(example), example.url, boardId)">Open Sample</button>
         </div>
       </div>
     </li>

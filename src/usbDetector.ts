@@ -9,7 +9,8 @@ import * as vscode from 'vscode';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 import {ConfigHandler} from './configHandler';
-import {ConfigKey, ContentView} from './constants';
+import {ConfigKey, ContentView, EventNames} from './constants';
+import {callWithTelemetry, TelemetryContext, TelemetryWorker} from './telemetry';
 
 export interface DeviceInfo {
   vendorId: number;
@@ -25,7 +26,20 @@ export class UsbDetector {
   private static _usbDetector: any =
       require('../../vendor/node-usb-native').detector;
 
-  constructor(private context: vscode.ExtensionContext) {}
+  constructor(
+      private context: vscode.ExtensionContext,
+      private channel: vscode.OutputChannel) {}
+
+  getBoardFromDeviceInfo(device: DeviceInfo) {
+    if (device.vendorId && device.productId) {
+      const boardProvider = new BoardProvider(this.context);
+      const board = boardProvider.find(
+          {vendorId: device.vendorId, productId: device.productId});
+
+      return board;
+    }
+    return undefined;
+  }
 
   showLandingPage(device: DeviceInfo) {
     // if current workspace is iot workbench workspace
@@ -43,18 +57,22 @@ export class UsbDetector {
     //   }
     // }
 
-    if (device.vendorId && device.productId) {
-      const boardProvider = new BoardProvider(this.context);
-      const board = boardProvider.find(
-          {vendorId: device.vendorId, productId: device.productId});
+    const board = this.getBoardFromDeviceInfo(device);
 
-      if (board && board.exampleUrl) {
-        ArduinoPackageManager.installBoard(board);
-        vscode.commands.executeCommand(
-            'vscode.previewHtml',
-            ContentView.workbenchExampleURI + '?' + board.id,
-            vscode.ViewColumn.One, 'IoT Workbench Examples');
-      }
+    if (board) {
+      callWithTelemetry(
+          EventNames.detectBoard, this.channel, this.context, () => {
+            if (board.exampleUrl) {
+              ArduinoPackageManager.installBoard(board);
+              vscode.commands.executeCommand(
+                  'vscode.previewHtml',
+                  ContentView.workbenchExampleURI + '?' +
+                      encodeURIComponent(
+                          'board=' + board.id +
+                          '&url=' + encodeURIComponent(board.exampleUrl || '')),
+                  vscode.ViewColumn.One, 'IoT Workbench Examples');
+            }
+          }, {board: board.name});
     }
   }
 

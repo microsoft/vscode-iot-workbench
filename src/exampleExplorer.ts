@@ -9,12 +9,11 @@ import * as vscode from 'vscode';
 import {Example} from './Models/Interfaces/Example';
 import request = require('request-promise');
 import AdmZip = require('adm-zip');
-import {setInterval, setTimeout} from 'timers';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import * as utils from './utils';
 import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {TelemetryContext} from './telemetry';
-import {ContentView} from './constants';
+import {ContentView, FileNames} from './constants';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 
@@ -22,6 +21,7 @@ export class ExampleExplorer {
   private exampleList: Example[] = [];
   private _exampleName = '';
   private _exampleUrl = '';
+  private _boardId = '';
 
   private async moveTempFiles(fsPath: string) {
     const tempPath = path.join(fsPath, '.temp');
@@ -242,9 +242,10 @@ export class ExampleExplorer {
     }
   }
 
-  setSelectedExample(name: string, url: string) {
+  setSelectedExample(name: string, url: string, boardId: string) {
     this._exampleName = name;
     this._exampleUrl = url;
+    this._boardId = boardId;
   }
 
   private async initializeExampleInternal(
@@ -254,7 +255,13 @@ export class ExampleExplorer {
       return false;
     }
 
+    const boardList = context.asAbsolutePath(
+        path.join(FileNames.resourcesFolderName, FileNames.boardListFileName));
+    const boardsJson: {boards: Board[]} = require(boardList);
+
     telemetryContext.properties.Example = this._exampleName;
+    const board = boardsJson.boards.find(board => board.id === this._boardId);
+    telemetryContext.properties.board = board ? board.name : '';
 
     const url = this._exampleUrl;
     const fsPath = await this.GenerateExampleFolder(this._exampleName);

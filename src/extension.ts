@@ -279,7 +279,7 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(helpInit);
   context.subscriptions.push(workbenchPath);
 
-  const usbDetector = new UsbDetector(context);
+  const usbDetector = new UsbDetector(context, outputChannel);
   usbDetector.startListening();
 }
 

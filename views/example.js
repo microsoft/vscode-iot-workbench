@@ -5,12 +5,14 @@ var example = new Vue({
     publishDate: '',
     featuredExample: null,
     examples: [],
-    blogs: []
+    blogs: [],
+    boardId: ''
   },
   created: function() {
     const query = parseQuery(location.href);
     const url = query.url ||
         'https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/gallery/workbench-example-devkit-v2.json';
+    this.boardId = query.board || '';
     httpRequest(url, function(data) {
       var examples = [];
       var aside = [];
@@ -54,8 +56,8 @@ var example = new Vue({
     
       return 'example_' + new Date().getTime();
     },
-    callAPI: function(name, url) {
-      var apiUrl = `/api/example?name=${encodeURIComponent(name)}&url=${encodeURIComponent(url)}`;
+    callAPI: function(name, url, boardId) {
+      var apiUrl = `/api/example?name=${encodeURIComponent(name)}&url=${encodeURIComponent(url)}&board=${boardId}`;
       httpRequest(apiUrl);
     },
     openLink: openLink
