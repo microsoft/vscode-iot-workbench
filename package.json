@@ -37,32 +37,32 @@
     "commands": [
       {
         "command": "iotworkbench.initializeProject",
-        "title": "Create a new IoT project",
+        "title": "New",
         "category": "IoT Workbench"
       },
       {
         "command": "iotworkbench.examples",
-        "title": "Load existing examples of IoT Workbench project",
+        "title": "Examples",
         "category": "IoT Workbench"
       },
       {
         "command": "iotworkbench.device",
-        "title": "Compile, upload device code and config device settings",
+        "title": "Device",
         "category": "IoT Workbench"
       },
       {
         "command": "iotworkbench.cloud",
-        "title": "Provison and deploy Azure services",
+        "title": "Cloud",
         "category": "IoT Workbench"
       },
       {
         "command": "iotworkbench.help",
-        "title": "Open helper for the device",
+        "title": "Help",
         "category": "IoT Workbench"
       },
       {
         "command": "iotworkbench.workbench",
-        "title": "Set the default path for IoT Workbench",
+        "title": "Set Workbench Path",
         "category": "IoT Workbench"
       }
     ],
