@@ -84,12 +84,23 @@ export async function callWithTelemetry(
     callback: (
         context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
         // tslint:disable-next-line:no-any
-        telemetrycontext: TelemetryContext) => any): Promise<any> {
+        telemetrycontext: TelemetryContext) => any,
+    // tslint:disable-next-line:no-any
+    additionalProperties?: {[key: string]: string}): Promise<any> {
   const start: number = Date.now();
-  const telemetryContext: TelemetryContext = {
-    properties: {result: 'Succeeded', error: '', errorMessage: ''},
-    measurements: {duration: 0}
-  };
+  const properties:
+      TelemetryProperties = {result: 'Succeeded', error: '', errorMessage: ''};
+
+  if (additionalProperties) {
+    for (const key of Object.keys(additionalProperties)) {
+      if (!properties.hasOwnProperty(key)) {
+        properties[key] = additionalProperties[key];
+      }
+    }
+  }
+
+  const telemetryContext:
+      TelemetryContext = {properties, measurements: {duration: 0}};
 
   try {
     return await Promise.resolve(
