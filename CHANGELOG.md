@@ -1,5 +1,17 @@
 # Change Log
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
+
+## Version 0.1.9
+- Release date: August 10, 2018
+
+### Added
+- Add ESP32 into supported IoT hardware list.
+- Add UDS configuration support for IoT DevKit.
+- Add new template for Azure Steam Analytics.
+
+### Fixed
+- Replace tag parser for intellisense setting.
+
 ## Version 0.1.8
 - Release date: August 1, 2018
 
