@@ -48,6 +48,7 @@ Here are a set of tutorials that will help you get started:
 * [DevKit State](./docs/iot-devkit/devkit-state.md)
 * [Door Monitor](./docs/iot-devkit/devkit_door_monitor.md)
 * [DevKit DPS](./docs/iot-devkit/devkit_dps.md)
+* [DevKit OTA](./docs/iot-devkit/devkit-ota.md)
 * [Stream Analytics and Cosmos DB](./docs/iot-devkit/devkit-stream-analytics-cosmos-db.md)
 
 ### teXXmo IoT button
