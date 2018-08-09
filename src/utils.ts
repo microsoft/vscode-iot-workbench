@@ -6,8 +6,9 @@ import * as path from 'path';
 import {setTimeout} from 'timers';
 import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
+
 import {ConfigHandler} from './configHandler';
-import {ConfigKey} from './constants';
+import {AzureFunctionsLanguage, ConfigKey} from './constants';
 
 export function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -74,5 +75,17 @@ export function fileExistsSync(filePath: string): boolean {
     return fs.statSync(filePath).isFile();
   } catch (e) {
     return false;
+  }
+}
+
+export function getScriptTemplateNameFromLanguage(language: string): string|
+    undefined {
+  switch (language) {
+    case AzureFunctionsLanguage.CSharpScript:
+      return 'IoTHubTrigger-CSharp';
+    case AzureFunctionsLanguage.JavaScript:
+      return 'IoTHubTrigger-JavaScript';
+    default:
+      return undefined;
   }
 }

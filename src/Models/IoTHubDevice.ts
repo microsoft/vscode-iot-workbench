@@ -2,28 +2,33 @@
 // Licensed under the MIT License.
 
 import * as iothub from 'azure-iothub';
-import {clearInterval} from 'timers';
+import {Guid} from 'guid-typescript';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
 
 import {getExtension} from './Apis';
+import {ComponentInfo, DependencyConfig} from './AzureComponentConfig';
+import {AzureUtility} from './AzureUtility';
 import {extensionName} from './Interfaces/Api';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
 
-interface DeviceInfo {
-  iothubDeviceConnectionString: string;
-}
-
 export class IoTHubDevice implements Component, Provisionable {
   private componentType: ComponentType;
   private channel: vscode.OutputChannel;
+  private componentId: string;
+  get id() {
+    return this.componentId;
+  }
+
+  dependencies: DependencyConfig[] = [];
 
   constructor(channel: vscode.OutputChannel) {
     this.componentType = ComponentType.IoTHubDevice;
     this.channel = channel;
+    this.componentId = Guid.create().toString();
   }
 
   name = 'IoT Hub Device';
@@ -97,6 +102,8 @@ export class IoTHubDevice implements Component, Provisionable {
       throw error;
     }
   }
+
+  updateConfigSettings(componentInfo?: ComponentInfo): void {}
 }
 
 async function getProvisionIothubDeviceSelection(

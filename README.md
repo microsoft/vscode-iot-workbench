@@ -1,17 +1,18 @@
-<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/logo.png" align="right" width="128" height="128">
-
-# Visual Studio Code extension for IoT Workbench 
+# Azure IoT Workbench <sup>preview</sup> for Visual Studio Code
 
 [![Gitter](https://img.shields.io/badge/chat-on%20gitter-blue.svg)](https://gitter.im/Microsoft/vscode-iot-workbench)
 [![Travis CI](https://travis-ci.org/Microsoft/vscode-iot-workbench.svg?branch=master)](https://travis-ci.org/Microsoft/vscode-iot-workbench)
 
-Welcome to Visual Studio Code extension for **IoT Workbench** <sup>preview</sup> ! The IoT Workbench extension makes it easy to code, build, deploy and debug your IoT project in Visual Studio Code, with a rich set of functionalities.
+Welcome to **Azure IoT Workbench** <sup>preview</sup> for Visual Studio Code! The IoT Workbench extension makes it easy to code, build, deploy and debug your IoT project with multiple Azure services and popular IoT development boards .
 
 ## Prerequisites
 
 IoT Workbench aims to support multiple popular IoT development boards and kits. It currently supports following IoT hardware:
 
 - [MXChip IoT DevKit](https://aka.ms/iot-devkit)
+- [teXXmo IoT button](https://aka.ms/button)
+- [Raspberry Pi](https://www.raspberrypi.org/)
+- [ESP32](https://www.espressif.com/en/products/hardware/esp-wroom-32/overview)
 
 Please find the [Setup Guide](#setup-guide) section below to configure your hardware.
 
@@ -35,7 +36,39 @@ Currently this extension supports the following operatings systems:
 
 ### MXChip IoT DevKit
 
-Please follow the [guide](./docs/IoTDevKit.md) to setup IoT DevKit.
+Please follow the [guide](docs/iot-devkit.md) to setup IoT DevKit.
+
+Here are a set of tutorials that will help you get started:
+
+* [Get Started](./docs/iot-devkit/devkit-get-started.md)
+* [Shake, Shake for a Tweet](./docs/iot-devkit/devkit-shakeshake.md)
+* [Remote Monitoring](./docs/iot-devkit/devkit_remote_monitoringv2.md)
+* [DevKit Translator](./docs/iot-devkit/devkit-translator.md)
+* [MQTT Client](./docs/iot-devkit/devkit-mqtt-client.md)
+* [DevKit State](./docs/iot-devkit/devkit-state.md)
+* [Door Monitor](./docs/iot-devkit/devkit_door_monitor.md)
+* [DevKit DPS](./docs/iot-devkit/devkit_dps.md)
+* [DevKit OTA](./docs/iot-devkit/devkit-ota.md)
+* [Stream Analytics and Cosmos DB](./docs/iot-devkit/devkit-stream-analytics-cosmos-db.md)
+
+### teXXmo IoT button
+
+Here are a set of tutorials that will help you get started:
+
+* [Get Started](./docs/iot-button/teXXmo_IoT_button_get_started.md)
+
+### Raspberry Pi
+
+Here are a set of tutorials that will help you get started:
+
+* [Get Started](./docs/raspberry-pi/raspi-get-started.md)
+* [Simple LED](./docs/raspberry-pi/raspi-simple-led.md)
+
+### ESP32
+
+Here are a set of tutorials that will help you get started:
+
+* [Get Started](./docs/esp32/esp32-get-started.md)
 
 ## Commands
 
@@ -43,22 +76,22 @@ Please follow the [guide](./docs/IoTDevKit.md) to setup IoT DevKit.
 | --- | --- |
 | `IoT Workbench: New`  | Create new IoT Workbench projects. |
 | `IoT Workbench: Examples` | Load existing examples of IoT Workbench project. |
-| `IoT Workbench: Cloud` | Provison Azure services and deploy Azure Functions. |
+| `IoT Workbench: Cloud` | Provison and deploy Azure services. |
 | `IoT Workbench: Device`  | Compile, upload device code and config device settings. |
 | `IoT Workbench: Set Workbench Path` | Set the default path for IoT Workbench. |
-| `IoT Workbench: Help` | Open help URL. |
+| `IoT Workbench: Help` | Open helper for the device. |
 
 ### Create New Project
 
-<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/new.gif">
+<img width="760" src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/new.gif">
 
 ### Provision Azure Service
 
-<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/provision.gif">
+<img width="760" src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/provision.gif">
 
 ### Example Gallery
 
-<img src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/example.gif">
+<img width="760" src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/example.gif">
 
 #### Note: 
 When invoking the **Azure Provision** command with Azure IoT Hub and Azure Functions, by default, Azure Functions would use the IoT Hub consumer group of `$Default`. To switch to another consumer group, please follow the [guide](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-create-through-portal) to create a new consumer group in Azure Poral. Then in IoT project, modify the following setting in **function.json**:
@@ -81,6 +114,21 @@ There are a couple of ways you can contribute to this repo:
   - To build, press `F1` and type in `Tasks: Run Build Task`.
   - Debug: press `F5` to start debugging the extension.
   - Run `gts check` and `gts fix` to follow TypeScript style guide.  
+- **Example**: Contribute examples for the supported devices.
+
+  - Create a git repo to host the code of your example project.
+  - Write a tutorial to describe how to run the example.
+  - Submit a [new issue](https://github.com/Microsoft/vscode-iot-workbench/issues/new) and provide the following information:
+  
+  | Item | Description |
+  | --- | --- |
+  | `Name` | Name of the example to be displayed in example gallery. |
+  | `Folder name` | Name of the folder to host the example. |
+  | `Description` | A short statement to describe the example. |
+  | `Location` | URL of the GitHub repo. |
+  | `Image` | URL of the image shown in example gallery for your example, if not provided, the default image will be used. |
+  | `Tutorial` | URL of tutorial that describes how to run the example. |
+  | `Difficulty` | Difficulty of the example, easy, medium or difficult. |
 
 ## Code of Conduct
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct). For more information please see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/#howadopt) or contact opencode@microsoft.com with any additional questions or comments.

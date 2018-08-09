@@ -18,11 +18,11 @@ env:
 
 install:
 - npm install -g vsce
-- npm install -g typescript
-- npm install -g gts
 - npm install
 
 script:
+- tsc --version
+- gts --version
 - gts check
 - node genAiKey.js
 - vsce package

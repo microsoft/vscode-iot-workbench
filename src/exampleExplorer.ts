@@ -8,13 +8,12 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import {Example} from './Models/Interfaces/Example';
 import request = require('request-promise');
-import unzip = require('unzip');
-import {setInterval, setTimeout} from 'timers';
+import AdmZip = require('adm-zip');
 import {IoTWorkbenchSettings} from './IoTSettings';
 import * as utils from './utils';
 import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {TelemetryContext} from './telemetry';
-import {ContentView} from './constants';
+import {ContentView, FileNames} from './constants';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 
@@ -22,6 +21,7 @@ export class ExampleExplorer {
   private exampleList: Example[] = [];
   private _exampleName = '';
   private _exampleUrl = '';
+  private _boardId = '';
 
   private async moveTempFiles(fsPath: string) {
     const tempPath = path.join(fsPath, '.temp');
@@ -76,28 +76,19 @@ export class ExampleExplorer {
     const zipData = await request(options).promise() as string;
     const tempPath = path.join(fsPath, '.temp');
     fs.writeFileSync(path.join(tempPath, 'example.zip'), zipData);
-    const stream = fs.createReadStream(path.join(tempPath, 'example.zip'))
-                       .pipe(unzip.Extract({path: tempPath}));
-
-    return new Promise(
-        (resolve: (value: boolean) => void,
-         reject: (reason: Error) => void) => {
-          stream.on('finish', () => {
-            clearInterval(loading);
-            channel.appendLine('');
-            channel.appendLine('Example loaded.');
-            setTimeout(async () => {
-              await this.moveTempFiles(fsPath);
-              resolve(true);
-            }, 1000);
-          });
-
-          stream.on('error', (error: Error) => {
-            clearInterval(loading);
-            channel.appendLine('');
-            reject(error);
-          });
-        });
+    const zip = new AdmZip(path.join(tempPath, 'example.zip'));
+    try {
+      zip.extractAllTo(tempPath, true);
+      clearInterval(loading);
+      channel.appendLine('');
+      channel.appendLine('Example loaded.');
+      await this.moveTempFiles(fsPath);
+      return true;
+    } catch (error) {
+      clearInterval(loading);
+      channel.appendLine('');
+      throw error;
+    }
   }
 
   private async GenerateExampleFolder(exampleName: string) {
@@ -195,9 +186,9 @@ export class ExampleExplorer {
       boardItemList.push({
         name: board.name,
         id: board.id,
-        platform: board.platform,
+        detailInfo: board.detailInfo,
         label: board.name,
-        description: board.platform,
+        description: board.detailInfo,
       });
     });
 
@@ -251,9 +242,10 @@ export class ExampleExplorer {
     }
   }
 
-  setSelectedExample(name: string, url: string) {
+  setSelectedExample(name: string, url: string, boardId: string) {
     this._exampleName = name;
     this._exampleUrl = url;
+    this._boardId = boardId;
   }
 
   private async initializeExampleInternal(
@@ -263,7 +255,13 @@ export class ExampleExplorer {
       return false;
     }
 
+    const boardList = context.asAbsolutePath(
+        path.join(FileNames.resourcesFolderName, FileNames.boardListFileName));
+    const boardsJson: {boards: Board[]} = require(boardList);
+
     telemetryContext.properties.Example = this._exampleName;
+    const board = boardsJson.boards.find(board => board.id === this._boardId);
+    telemetryContext.properties.board = board ? board.name : '';
 
     const url = this._exampleUrl;
     const fsPath = await this.GenerateExampleFolder(this._exampleName);

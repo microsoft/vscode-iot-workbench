@@ -11,11 +11,8 @@ import {ProjectInitializer} from './projectInitializer';
 import {DeviceOperator} from './DeviceOperator';
 import {AzureOperator} from './AzureOperator';
 import {IoTProject} from './Models/IoTProject';
-import {ExceptionHelper} from './exceptionHelper';
-import {setTimeout} from 'timers';
 import {ExampleExplorer} from './exampleExplorer';
 import {IoTWorkbenchSettings} from './IoTSettings';
-import {AzureFunctions} from './Models/AzureFunctions';
 import {CommandItem} from './Models/Interfaces/CommandItem';
 import {ConfigHandler} from './configHandler';
 import {ConfigKey, EventNames, ContentView} from './constants';
@@ -27,13 +24,26 @@ import {HelpProvider} from './helpProvider';
 function filterMenu(commands: CommandItem[]) {
   for (let i = 0; i < commands.length; i++) {
     const command = commands[i];
-    let filtered = false;
+    let filtered = true;
     if (command.only) {
-      const hasRequiredConfig = ConfigHandler.get(command.only);
-      if (!hasRequiredConfig) {
+      let commandList: string[] = [];
+      if (typeof command.only === 'string') {
+        commandList = [command.only];
+      } else {
+        commandList = command.only;
+      }
+
+      for (const key of commandList) {
+        const hasRequiredConfig = ConfigHandler.get(key);
+        if (hasRequiredConfig) {
+          filtered = false;
+          break;
+        }
+      }
+
+      if (filtered) {
         commands.splice(i, 1);
         i--;
-        filtered = true;
       }
     }
 
@@ -223,50 +233,9 @@ export async function activate(context: vscode.ExtensionContext) {
     {
       label: 'Azure Deploy',
       description: '',
-      detail: 'Deploy Azure Functions code to Azure',
-      only: ConfigKey.functionPath,
+      detail: 'Deploy Azure Services',
+      only: [ConfigKey.functionPath, ConfigKey.asaPath],
       click: azureDeployProvider
-    }
-  ];
-
-  const menu: CommandItem[] = [
-    {
-      label: 'Project Setup',
-      description: '',
-      detail: 'Start from here',
-      children: [
-        {
-          label: 'Initialize Project',
-          description: '',
-          detail: 'Create a new project',
-          click: projectInitProvider
-        },
-        {
-          label: 'Example Projects',
-          description: '',
-          detail: 'Load an example project',
-          click: examplesProvider
-        }
-      ]
-    },
-    {
-      label: 'Develop for Azure',
-      description: '',
-      detail: 'Development on cloud side',
-      children: [
-        {
-          label: 'Azure Provision',
-          description: '',
-          detail: 'Setup cloud services on Azure',
-          click: azureProvisionProvider
-        },
-        {
-          label: 'Azure Deploy',
-          description: '',
-          detail: 'Deploy local code to Azure',
-          click: azureDeployProvider
-        }
-      ]
     }
   ];
 
@@ -306,10 +275,11 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(iotcloudMenu);
   context.subscriptions.push(projectInit);
   context.subscriptions.push(examples);
+  context.subscriptions.push(exampleInitialize);
   context.subscriptions.push(helpInit);
   context.subscriptions.push(workbenchPath);
 
-  const usbDetector = new UsbDetector(context);
+  const usbDetector = new UsbDetector(context, outputChannel);
   usbDetector.startListening();
 }
 

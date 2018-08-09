@@ -1,0 +1,7 @@
+{
+    "sketch": "device.ino",
+    "board": "arduino:avr:diecimila",
+    "output": null,
+    "_debugger": null,
+    "configuration": "cpu=atmega328"
+}
