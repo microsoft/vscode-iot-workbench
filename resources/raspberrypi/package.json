@@ -1,0 +1,8 @@
+{
+  "name": "iot-workbench-raspi",
+  "version": "0.1.0",
+  "main": "app.js",
+  "dependencies": {
+    "azure-iot-device-mqtt": "^1.4.3"
+  }
+}

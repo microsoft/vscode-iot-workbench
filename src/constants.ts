@@ -10,6 +10,7 @@ export class ConfigKey {
   static readonly functionAppId = 'functionAppId';
   static readonly functionPath = 'FunctionPath';
   static readonly boardId = 'BoardId';
+  static readonly asaPath = 'StreamAnalyticsPath';
 }
 
 export class EventNames {
@@ -24,6 +25,7 @@ export class EventNames {
   static readonly configDeviceSettingsEvent =
       'IoTWorkbench.ConfigDeviceSettingsEvent';
   static readonly loadExampleEvent = 'IoTWorkbench.loadExample';
+  static readonly detectBoard = 'IoTWorkbench.DetectBoard';
 }
 
 export class ContentView {
@@ -38,4 +40,14 @@ export class FileNames {
   static readonly iotworkbenchprojectFileName = '.iotworkbenchproject';
   static readonly settingsJsonFileName = 'settings.json';
   static readonly vscodeSettingsFolderName = '.vscode';
+}
+
+export enum AzureFunctionsLanguage {
+  CSharpScript = 'C#Script',
+  JavaScript = 'JavaScript'
+}
+
+export class AzureComponentsStorage {
+  static readonly folderName = '.azurecomponent';
+  static readonly fileName = 'azureconfig.json';
 }

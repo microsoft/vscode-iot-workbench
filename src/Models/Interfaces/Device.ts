@@ -7,7 +7,9 @@ import {Uploadable} from './Uploadable';
 
 export enum DeviceType {
   MXChip_AZ3166 = 1,
-  IoT_Button = 2
+  IoT_Button = 2,
+  Esp32 = 3,
+  Raspberry_Pi = 4
 }
 
 export interface Device extends Component, Compilable, Uploadable {

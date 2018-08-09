@@ -1,0 +1,10 @@
+-- Need help with your query?
+-- Check out some of the most common Stream Analytics query patterns:
+-- https://go.microsoft.com/fwLink/?LinkID=619153
+
+SELECT
+    *
+INTO
+    [output]
+FROM
+    [input]

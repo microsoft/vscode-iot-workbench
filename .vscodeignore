@@ -2,7 +2,11 @@
 .vscode-test/**
 out/test/**
 out/**/*.map
+out/**/*.ts
 src/**
+gif/**
+hooks/**
+test/**
+docs/**
 .gitignore
 tsconfig.json
-gif/**
