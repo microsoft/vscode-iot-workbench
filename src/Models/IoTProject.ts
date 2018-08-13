@@ -29,6 +29,7 @@ import {IoTButtonDevice} from './IoTButtonDevice';
 import {IoTHub} from './IoTHub';
 import {IoTHubDevice} from './IoTHubDevice';
 import {RaspberryPiDevice} from './RaspberryPiDevice';
+import {Simulator} from './Simulator';
 import {StreamAnalyticsJob} from './StreamAnalyticsJob';
 
 const constants = {
@@ -113,6 +114,7 @@ export class IoTProject {
       }
       if (device) {
         this.componentList.push(device);
+
         await device.load();
       }
     }
@@ -407,6 +409,10 @@ export class IoTProject {
       device = new RaspberryPiDevice(
           this.extensionContext, deviceDir, this.channel,
           projectTemplateItem.sketch);
+    } else if (boardId === Simulator.boardId) {
+      device = new Simulator(
+          this.extensionContext, deviceDir, this.channel,
+          projectTemplateItem.sketch);
     } else {
       throw new Error('The specified board is not supported.');
     }
@@ -448,6 +454,7 @@ export class IoTProject {
 
         const azureFunctions = new AzureFunctions(
             functionDir, constants.functionDefaultFolderName, this.channel,
+
             null,
             [{component: iothub, type: DependencyType.Input}] /*Dependencies*/);
         settings.projectsettings.push({

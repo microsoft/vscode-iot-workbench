@@ -117,13 +117,15 @@ export class ProjectInitializer {
 
             const boards = boardProvider.list;
             boards.forEach((board: Board) => {
-              boardItemList.push({
-                name: board.name,
-                id: board.id,
-                detailInfo: board.detailInfo,
-                label: board.name,
-                description: board.detailInfo,
-              });
+              if (board.name !== 'Simulator') {
+                boardItemList.push({
+                  name: board.name,
+                  id: board.id,
+                  detailInfo: board.detailInfo,
+                  label: board.name,
+                  description: board.detailInfo,
+                });
+              }
             });
 
             const boardSelection =

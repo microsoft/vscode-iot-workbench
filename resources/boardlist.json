@@ -41,6 +41,13 @@
             "detailInfo": "Raspberry Pi",
             "helpUrl": "https://www.raspberrypi.org/",
             "exampleUrl": "https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/gallery/workbench-example-raspi.json"
+        },
+        {
+            "name": "Simulator",
+            "id": "simulator",
+            "detailInfo": "Simulate the connection between device and IoT hub",
+            "helpUrl": "https://github.com/Microsoft/vscode-iot-workbench",
+            "exampleUrl": "https://raw.githubusercontent.com/ab-sin-the/my-test-folder/master/simulator-example.json"
         }
     ]
 }
