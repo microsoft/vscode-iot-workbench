@@ -148,6 +148,12 @@ export async function activate(context: vscode.ExtensionContext) {
         projectInitializerBinder);
   };
 
+  const crcGenerateProvider = async () => {
+    callWithTelemetry(
+        EventNames.generateOtaCrc, outputChannel, context,
+        deviceOperator.generateCrc);
+  };
+
   const azureProvisionProvider = async () => {
     callWithTelemetry(
         EventNames.azureProvisionEvent, outputChannel, context,
@@ -220,6 +226,12 @@ export async function activate(context: vscode.ExtensionContext) {
       description: '',
       detail: 'Download device board package',
       click: devicePackageManager
+    },
+    {
+      label: 'Generate CRC',
+      description: '',
+      detail: 'Generate CRC for OTA',
+      click: crcGenerateProvider
     }
   ];
 
