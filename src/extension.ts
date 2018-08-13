@@ -20,11 +20,16 @@ import {ContentProvider} from './contentProvider';
 import {TelemetryContext, callWithTelemetry, TelemetryWorker} from './telemetry';
 import {UsbDetector} from './usbDetector';
 import {HelpProvider} from './helpProvider';
+import {AZ3166Device} from './Models/AZ3166Device';
+import {IoTButtonDevice} from './Models/IoTButtonDevice';
+import {RaspberryPiDevice} from './Models/RaspberryPiDevice';
+import {Esp32Device} from './Models/Esp32Device';
 
 function filterMenu(commands: CommandItem[]) {
   for (let i = 0; i < commands.length; i++) {
     const command = commands[i];
     let filtered = true;
+    let containDeviceId = false;
     if (command.only) {
       let commandList: string[] = [];
       if (typeof command.only === 'string') {
@@ -46,7 +51,19 @@ function filterMenu(commands: CommandItem[]) {
         i--;
       }
     }
-
+    if (command.deviceIds) {
+      const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
+      for (const requiredDivice of command.deviceIds) {
+        if (requiredDivice === boardId) {
+          containDeviceId = true;
+        }
+      }
+      if (!containDeviceId) {
+        commands.splice(i, 1);
+        i--;
+        filtered = true;
+      }
+    }
     if (!filtered && command.children) {
       command.children = filterMenu(command.children);
     }
@@ -213,25 +230,36 @@ export async function activate(context: vscode.ExtensionContext) {
       label: 'Device Compile',
       description: '',
       detail: 'Compile device side code',
-      click: deviceCompileProvider
+      click: deviceCompileProvider,
+      deviceIds: [AZ3166Device.boardId, Esp32Device.boardId]
     },
     {
       label: 'Device Upload',
       description: '',
       detail: 'Upload code to device',
-      click: deviceUploadProvider
+      click: deviceUploadProvider,
+      deviceIds: [
+        AZ3166Device.boardId, RaspberryPiDevice.boardId, Esp32Device.boardId
+      ]
     },
     {
       label: 'Install Device SDK',
       description: '',
       detail: 'Download device board package',
-      click: devicePackageManager
+      click: devicePackageManager,
+      deviceIds: [
+        AZ3166Device.boardId, IoTButtonDevice.boardId,
+        RaspberryPiDevice.boardId, Esp32Device.boardId
+      ]
     },
     {
       label: 'Generate CRC',
       description: '',
       detail: 'Generate CRC for OTA',
-      click: crcGenerateProvider
+      click: crcGenerateProvider,
+      deviceIds: [
+        AZ3166Device.boardId, Esp32Device.boardId
+      ]
     }
   ];
 

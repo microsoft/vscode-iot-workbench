@@ -2,7 +2,7 @@
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
 
 ## Version 0.1.9
-- Release date: August 10, 2018
+- Release date: August 13, 2018
 
 ### Added
 - Add ESP32 into supported IoT hardware list.
