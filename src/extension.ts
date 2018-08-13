@@ -165,6 +165,12 @@ export async function activate(context: vscode.ExtensionContext) {
         projectInitializerBinder);
   };
 
+  const crcGenerateProvider = async () => {
+    callWithTelemetry(
+        EventNames.generateOtaCrc, outputChannel, context,
+        deviceOperator.generateCrc);
+  };
+
   const azureProvisionProvider = async () => {
     callWithTelemetry(
         EventNames.azureProvisionEvent, outputChannel, context,
@@ -244,6 +250,15 @@ export async function activate(context: vscode.ExtensionContext) {
       deviceIds: [
         AZ3166Device.boardId, IoTButtonDevice.boardId,
         RaspberryPiDevice.boardId, Esp32Device.boardId
+      ]
+    },
+    {
+      label: 'Generate CRC',
+      description: '',
+      detail: 'Generate CRC for OTA',
+      click: crcGenerateProvider,
+      deviceIds: [
+        AZ3166Device.boardId, Esp32Device.boardId
       ]
     }
   ];
