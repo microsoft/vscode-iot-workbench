@@ -118,12 +118,17 @@ export class DeviceOperator {
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     if (!vscode.workspace.workspaceFolders) {
+      vscode.window.showWarningMessage('No workspace opened.');
+      channel.show();
       channel.appendLine('No workspace opened.');
       return false;
     }
 
     const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
     if (!devicePath) {
+      vscode.window.showWarningMessage(
+          'No device path found in workspace configuration.');
+      channel.show();
       channel.appendLine('No device path found in workspace configuration.');
       return false;
     }
@@ -132,12 +137,17 @@ export class DeviceOperator {
         '.build');
 
     if (!deviceBuildLocation) {
+      vscode.window.showWarningMessage(
+          'No device compile output folder found.');
+      channel.show();
       channel.appendLine('No device compile output folder found.');
       return false;
     }
 
     const binFiles = fs.listSync(deviceBuildLocation, ['bin']);
     if (!binFiles || !binFiles.length) {
+      vscode.window.showWarningMessage('No bin file found.');
+      channel.show();
       channel.appendLine('No bin file found.');
       return false;
     }
@@ -151,19 +161,20 @@ export class DeviceOperator {
       for (const file of binFiles) {
         const fileName = path.basename(file);
         binFilePickItems.push({label: fileName, description: file});
-        const choice = await vscode.window.showQuickPick(binFilePickItems, {
-          ignoreFocusOut: true,
-          matchOnDescription: true,
-          matchOnDetail: true,
-          placeHolder: 'Select bin file',
-        });
-
-        if (!choice) {
-          return false;
-        }
-
-        binFilePath = choice.description;
       }
+
+      const choice = await vscode.window.showQuickPick(binFilePickItems, {
+        ignoreFocusOut: true,
+        matchOnDescription: true,
+        matchOnDetail: true,
+        placeHolder: 'Select bin file',
+      });
+
+      if (!choice) {
+        return false;
+      }
+
+      binFilePath = choice.description;
     }
 
     if (!binFilePath || !fs.existsSync(binFilePath)) {
@@ -171,8 +182,13 @@ export class DeviceOperator {
     }
 
     const res = OTA.generateCrc(binFilePath);
+
+    vscode.window.showInformationMessage('Generate CRC succeeded.');
+
+    channel.show();
     channel.appendLine('========== CRC Information ==========');
     channel.appendLine('');
+    channel.appendLine('fwPath: ' + binFilePath);
     channel.appendLine('fwPackageCheckValue: ' + res.crc);
     channel.appendLine('fwSize: ' + res.size);
     channel.appendLine('');
