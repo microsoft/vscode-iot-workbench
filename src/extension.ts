@@ -257,9 +257,7 @@ export async function activate(context: vscode.ExtensionContext) {
       description: '',
       detail: 'Generate CRC for OTA',
       click: crcGenerateProvider,
-      deviceIds: [
-        AZ3166Device.boardId, Esp32Device.boardId
-      ]
+      deviceIds: [AZ3166Device.boardId, Esp32Device.boardId]
     }
   ];
 
