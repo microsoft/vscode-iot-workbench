@@ -49,28 +49,13 @@ Find **DevKit DPS** and click **Open Sample** button. A new VS Code window with 
 
 ![Open DevKit DPS](media/devkit-dps/open-sample.png)
 
-## Build and upload the device code
+### Update the Global Device Endpoint and ID Scope in device code
 
-1. In the Azure portal, select the **Overview** blade for your Device Provisioning Service and note down the **Global device endpoint** and **ID Scope** value.
+1. In the Azure portal, go to your DPS instance, select the **Overview** blade for your Device Provisioning Service and note down the **Global device endpoint** and **ID Scope** value.
     ![DPS Global Endpoint and ID Scope](media/devkit-dps/copy-endpoint.png)
-
 
 2. Open **DevKitDPS.ino**, Find and replace `[Global Device Endpoint]` and `[ID Scope]` with the values you just note down.
     ![DPS Global Endpoint and ID Scope](media/devkit-dps/paste-endpoint.png)
-    You can leave the **registrationId** as blank, the application will generate one for you based on the MAC address and firmware version. If you want to customized it, the Registration ID has to use alphanumeric, lowercase, and hyphen combinations only with maximum 128 characters long. See [Manage device enrollments with Azure portal](https://docs.microsoft.com/en-us/azure/iot-dps/how-to-manage-enrollments) for more details.
-
-3. Open the command palette and select **IoT Workbench: Device**, then select **Device Upload**. 
-
-	![IoT Workbench: Device - > Upload](media/iot-workbench-device-upload.png)
-
-4. VS Code then starts verifying and uploading the code to your DevKit.
-
-	![IoT Workbench: Device - > Uploaded](media/devkit-dps/device-uploaded.png)
-
-5. The DevKit reboots and starts running the code.
-
-6. Note down **DevKit MAC Address** and **DevKit Firmware Version** value from serial monitor.
-    ![Firmware version](media/devkit-dps/copy-mac-address.png)
 
 ## Save Unique Device Secret on STSAFE security chip
 
@@ -89,6 +74,25 @@ A typical **Unique Device Secret (UDS)** is a 64 characters long hexadecimal dig
 
 Here you may need to close [serial monitor](./devkit-get-started.md/#Serial_monitor_usage) and let devkit enter configuration mode. After UDS string configed successfully, you will see a Visual Studio Code notification.
 ![Config UDS string successfully](media/devkit-dps/config-uds-string-notification.png)
+
+## Build and upload the device code
+
+1. Open **DevKitDPS.ino** and find **registrationId**, give a new value. 
+
+   The Registration ID has to use alphanumeric, lowercase, and hyphen combinations only with maximum 128 characters long. See [Manage device enrollments with Azure portal](https://docs.microsoft.com/en-us/azure/iot-dps/how-to-manage-enrollments) for more details.
+
+   > You can leave the **registrationId** as blank, the application will generate one for you based on the MAC address and firmware version. If you want to customized it, 
+
+2. Open the command palette and select **IoT Workbench: Device**, then select **Device Upload**. 
+   ![IoT Workbench: Device - > Upload](media/iot-workbench-device-upload.png)
+
+3. VS Code then starts verifying and uploading the code to your DevKit.
+   ![IoT Workbench: Device - > Uploaded](media/devkit-dps/device-uploaded.png)
+
+4. The DevKit reboots and starts running the code.
+
+5. If you  leave the **registrationId** as blank, please note down **DevKit MAC Address** and **DevKit Firmware Version** value from serial monitor.
+   ![Firmware version](media/devkit-dps/copy-mac-address.png)
 
 ## Generate X.509 certificate
 
