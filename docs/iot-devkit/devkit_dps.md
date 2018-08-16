@@ -96,9 +96,19 @@ Here you may need to close [serial monitor](./devkit-get-started.md/#Serial_moni
 
 ## Generate X.509 certificate
 
-Open integrated terminal in Visual Studio Code and run dps_cert_gen in tool folder. Input information just noted down. And you will see a **.pem** file generated in your folder.
+Open integrated terminal in Visual Studio Code and run **dps_cert_gen in tool folder**. Input information just noted down.
 
-![Generate X.509 certificate](media/devkit-dps/generate-cert.png)
+1. Specified the **registrationId**
+
+   ![Generate X.509 certificate](media/devkit-dps/generate-cert-2.png)
+
+2. Not specified the **registrationId**
+
+   ![Generate X.509 certificate](media/devkit-dps/generate-cert-1.png)
+
+And you will see a **.pem** file generated in your folder.
+
+
 
 **Note:** Here we input **.build\DevKitDPS** when program ask for project name. Then the program will find compiled file with path **.build\DevKitDPS.ino.bin** and **.build\DevKitDPS.ino.elf**. Output compiled binary file to **.build** path is our default setting. If you changed build path or .ino file name before, you will need to provide a path to your compiled output file.
 
