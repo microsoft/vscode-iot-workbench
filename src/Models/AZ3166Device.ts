@@ -728,7 +728,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
     if (!fs.existsSync(arduinoPackagePath)) {
       throw new Error(
-          'Unable to find the Arduino package path, please install the lastest Arduino package for Devkit.');
+          'Unable to find the Arduino package path, please install the latest Arduino package for Devkit.');
     }
 
     const files = fs.readdirSync(arduinoPackagePath);
