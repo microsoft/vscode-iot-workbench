@@ -1,12 +1,12 @@
 # Stream Analytics and Cosmos DB
 
-In this tutorial, you will learn how to send data to Stream Analytics Job and export it to Cosmos DB with Azure Stream Analytics Query Langauge.
+In this tutorial, you will learn how to send data from Esp32 device to Stream Analytics Job and export it to Cosmos DB with Azure Stream Analytics Query Langauge.
 
 ## What you need
 
-Finish the [Getting Started Guide](./devkit-get-started.md) to:
+Finish the [Getting Started Guide](./esp32-get-started.md) to:
 
-- Have your DevKit connected to Wi-Fi.
+- Get basic knowledge of Esp32 device.
 - Prepare the development environment.
 
 An active Azure subscription. If you do not have one, you can register via one of these two methods:
@@ -14,149 +14,32 @@ An active Azure subscription. If you do not have one, you can register via one o
 - Activate a [free 30-day trial Microsoft Azure account](https://azure.microsoft.com/free/).
 - Claim your [Azure credit](https://azure.microsoft.com/pricing/member-offers/msdn-benefits-details/) if you are MSDN or Visual Studio subscriber.
 
-## Create a New Project
+## Open the project folder
 
-Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select **IoT Workbench: New**.
+### Start VS Code
 
-![IoT Workbench: New](media/iot-workbench-new-cmd.png)
+- Start Visual Studio Code.
+- Make sure [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
+- Connect Esp32 to your PC.
 
-Select **IoT DevKit**.
+### Open IoT Workbench Examples
 
-![IoT Workbench: New -> IoT DevKit](media/iot-workbench-new-devkit.png)
+Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select **IoT Workbench: Examples**.
 
-Select **With Stream Analytics and Cosmos DB**.
+![IoT Workbench: Examples](media/iot-workbench-examples-cmd.png)
 
-![IoT Workbench: New -> With Stream Analytics and Cosmos DB](media/iot-workbench-stream-analytics-and-cosmos-db.png)
+Select **ESP32 Arduino**.
 
-A new project will be opened in a new window with two folders named Device and StreamAnalytics.
+![IoT Workbench: Examples -> Select board](media/iot-workbench-examples-board.png)
 
-![With Stream Analytics and Cosmos DB Project Folder](media/iot-workbench-stream-analytics-and-cosmos-db-project-files.png)
+Then the **IoT Workbench Example** window is showed up.
 
-## Send DevKit Temperature Sensor Data to IoT Hub
+![IoT Workbench, Examples window](media/iot-workbench-examples.png)
 
-Open `Device/device.ino`, include temperature sensor header file.
+Find **Esp32 ASA CosmodDB** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
 
-```cpp
-#include "HTS221Sensor.h"
-```
+![IoT Workbench, select Esp32 State example](media/devkit-state/open-example-devkitstate.jpg)
 
-Declare two variables for I2C and the sensor instance.
-
-```cpp
-DevI2C *i2c;
-HTS221Sensor *sensor;
-```
-
-Create a new function to initialize the sensor.
-
-```cpp
-void initSensor() {
-  i2c = new DevI2C(D14, D15);
-  sensor = new HTS221Sensor(*i2c);
-  sensor->init(NULL);
-}
-```
-
-Next create a new function to read the sensor data.
-
-```cpp
-float readTemperature() {
-  sensor->reset();
-  float temperature = 0;
-  sensor->getTemperature(&temperature);
-  return temperature;
-}
-```
-
-Call `initSensor` function in `setup` to initialize the sensor when the device start up.
-
-```cpp
-void setup() {
-  initSensor();
-  // ...
-}
-```
-
-In the loop function, declare a variable to store temperature sensor data, then send the JSON string to IoT Hub.
-
-```cpp
-void loop() {
-  // ...
-  float temperature = readTemperature();
-  snprintf(buff, 128, "{\"temperature\":%.2f}", temperature);
-  // ...
-}
-```
-
-The complete code of `device.ino` is shown as below:
-
-```cpp
-#include "AZ3166WiFi.h"
-#include "DevKitMQTTClient.h"
-#include "HTS221Sensor.h"
-
-static bool hasWifi = false;
-static bool hasIoTHub = false;
-DevI2C *i2c;
-HTS221Sensor *sensor;
-
-void initSensor() {
-  i2c = new DevI2C(D14, D15);
-  sensor = new HTS221Sensor(*i2c);
-  sensor->init(NULL);
-}
-
-float readTemperature() {
-  sensor->reset();
-  float temperature = 0;
-  sensor->getTemperature(&temperature);
-  return temperature;
-}
-
-void setup() {
-  // put your setup code here, to run once:
-  initSensor();
-  if (WiFi.begin() == WL_CONNECTED)
-  {
-    hasWifi = true;
-    Screen.print(1, "Running...");
-
-    if (!DevKitMQTTClient_Init())
-    {
-      hasIoTHub = false;
-      return;
-    }
-    hasIoTHub = true;
-  }
-  else
-  {
-    hasWifi = false;
-    Screen.print(1, "No Wi-Fi");
-  }
-}
-
-void loop() {
-  // put your main code here, to run repeatedly:
-  if (hasIoTHub && hasWifi)
-  {
-    char buff[128];
-    float temperature = readTemperature();
-
-    // replace the following line with your data sent to Azure IoTHub
-    snprintf(buff, 128, "{\"temperature\":%.2f}", temperature);
-    
-    if (DevKitMQTTClient_SendEvent(buff))
-    {
-      Screen.print(1, "Sending...");
-    }
-    else
-    {
-      Screen.print(1, "Failure...");
-    }
-    delay(2000);
-  }
-}
-```
 
 ## Provision Azure Service
 
@@ -179,6 +62,7 @@ You can change Azure Stream Analytics Job Query by editing `StreamAnalytics/quer
 ![Azure Stream Analytics Query](media/iot-workbench-stream-analytics-and-cosmos-db-query.png)
 
 Output and input have already been generated automatically by default (in the example above, the output is `cosmosdb-a94a5672-867c-6b4e-db41-872d6e01e4bf`, and input is `iothub-ff8feba1-b114-48de-d8c4-d25e7efa4864`). And you have no need to change them. `*` means selecting data in all fields, which is the same as SQL.
+
 
 You can select specific field data from input and export it into output. For example, your device sends data in the following JSON format:
 
@@ -211,6 +95,10 @@ FROM
 GROUP BY
     TumblingWindow(minute, 5)
 ```
+
+
+You can design the condition used to store the data into cosmosdb. In this example, only if average temperature larger than 40 and average humidity larger than 30 over past one minute will the data be saved.
+
 
 You can learn more about ASAQL windowing functions from [here](https://docs.microsoft.com/en-us/azure/stream-analytics/stream-analytics-window-functions).
 
