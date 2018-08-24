@@ -21,7 +21,7 @@ An active Azure subscription. If you do not have one, you can register via one o
 
 - Start Visual Studio Code.
 - Make sure [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
-- Connect IoT DevKit to your PC.
+- Connect Esp32 to your PC.
 
 ### Open IoT Workbench Examples
 
@@ -29,7 +29,7 @@ Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, t
 
 ![IoT Workbench: Examples](media/iot-workbench-examples-cmd.png)
 
-Select **IoT DevKit**.
+Select **ESP32 Arduino**.
 
 ![IoT Workbench: Examples -> Select board](media/iot-workbench-examples-board.png)
 
@@ -37,9 +37,9 @@ Then the **IoT Workbench Example** window is showed up.
 
 ![IoT Workbench, Examples window](media/iot-workbench-examples.png)
 
-Find **DevKit State** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
+Find **Esp32 State** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
 
-![IoT Workbench, select DevKit State example](media/devkit-state/open-example-devkitstate.jpg)
+![IoT Workbench, select Esp32 State example](media/devkit-state/open-example-devkitstate.jpg)
 
 ## Provision Azure Services
 
@@ -64,7 +64,7 @@ The whole process includes:
 Please take a note of the Function App name and IoT Hub device name you created. It will be used in the next section.
 
 ## Modify code for Azure Functions
-Open **devkit-state\run.csx** and modify the following line with the device name you provisioned in previous step:
+Open **esp32-state\run.csx** and modify the following line with the device name you provisioned in previous step:
 ```cpp
 static string deviceName = "";
 ```
@@ -77,20 +77,11 @@ Open the command palette and select **IoT Workbench: Cloud**, then select **Azur
 
 ## Config IoT Hub Connection String
 
-1. Switch the IoT DevKit into **Configuration mode**. To do so:
-
-   - Hold down button **A**.
-   - Push and release the **Reset** button.
-
-2. The screen displays the DevKit ID and 'Configuration'.
-
-   ![IoT DevKit Configuration Mode](media/devkit-configuration-mode.png) 
-
-3. Open the command palette and select **IoT Workbench: Device**.
+1. Open the command palette and select **IoT Workbench: Device**
 
    ![IoT Workbench: Device](media/iot-workbench-device.png)
 
-4. Select **Config Device Settings**.
+2. Choose **Config Device Settings** option
 
    ![IoT Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
 
@@ -116,15 +107,15 @@ Open the command palette and select **IoT Workbench: Cloud**, then select **Azur
 
 3. The IoT DevKit reboots and starts running the code.
 
-## Monitor DevKit State in Browser
+## Monitor Wifi information in Browser
 
 1. Open `web\index.html` in browser.
 2. Input the Function App name you write down.
 3. Click connect button.
-4. You should see DevKit state in a few seconds.
+4. You should see wifi information in a few seconds.
 ![web page](media/devkit-state/devkit-state-function-app-name.png)
 
-## Control DevKit User LED
+## Restart Esp32 Device
 
 1. Click User LED or RGB LED on the web page
 2. You should see the state of the leds changed in few seconds
