@@ -38,7 +38,7 @@ Then the **IoT Workbench Example** window is showed up.
 
 Find **Esp32 ASA CosmodDB** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
 
-![IoT Workbench, select Esp32 State example](media/devkit-state/open-example-devkitstate.jpg)
+![IoT Workbench, select Esp32 ASA CosmosDB](media/devkit-state/open-example-devkitstate.jpg)
 
 
 ## Provision Azure Service
@@ -110,17 +110,48 @@ IoT Workbench will stop Stream Analytics Job, update query and restart Stream An
 
 ![Azure Deply Query](media/iot-workbench-stream-analytics-and-cosmos-db-deploy-query.png)
 
-## Build and Upload the Device Code
+## Config Device Code
+
+1. Open the source file(.ino) for device code and update the following lines with your WiFi ssid and password:
+    ```csharp
+		// Please input the SSID and password of WiFi
+		const char* ssid     = "";
+		const char* password = "";
+    ```
+
+2. Open the command palette and select **IoT Workbench: Device**.
+
+	![IoT Workbench: Device](media/iot-workbench-device.png)
+
+3. Select **Config Device Settings**.
+
+	![IoT Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
+
+4. Select **Copy device connection string**.
+
+	![IoT Workbench: Device copy connection string](media/esp32-get-started/copy-connection-string.png)
+
+   This copies the connection string that is retrieved from the `Provision Azure services` step.
+
+5. Paste the device connection string into the following line in device code
+    ```csharp
+	/*String containing Hostname, Device Id & Device Key in the format:                         */
+	/*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
+	/*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
+	static const char* connectionString = "";
+    ```
+
+## Build and upload the device code
 
 1. Open the command palette and select **IoT Workbench: Device**, then select **Device Upload**.
 
-![IoT Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
+	![IoT Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
 
 2. VS Code then starts verifying and uploading the code to your DevKit.
 
-![IoT Workbench: Device -> Uploaded](media/iot-workbench-stream-analytics-and-cosmos-db-upload.png)
+	![IoT Workbench: Device -> Uploaded](media/esp32-get-started/esp32-device-uploaded.png)
 
-3. The IoT DevKit reboots and starts running the code.
+3. The ESP32 device reboots and starts running the code.
 
 ## Explore Data in Cosmos DB
 

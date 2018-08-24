@@ -1,14 +1,13 @@
-# Esp32 State
+# Stream Analytics and Cosmos DB
 
-In this tutorial, you can monitor Wifi surrounding Esp32 device and let the device restart using Azure IoT Hub device twins.
+In this tutorial, you will learn how to send data to Stream Analytics Job and export it to Cosmos DB with Azure Stream Analytics Query Langauge.
 
 ## What you need
 
-Finish the [Getting Started Guide](./esp32-get-started.md) to:
+Finish the [Getting Started Guide](./devkit-get-started.md) to:
 
-- Get basic knowledge of Esp32 device.
+- Have your DevKit connected to Wi-Fi.
 - Prepare the development environment.
-- 
 
 An active Azure subscription. If you do not have one, you can register via one of these two methods:
 
@@ -38,9 +37,9 @@ Then the **IoT Workbench Example** window is showed up.
 
 ![IoT Workbench, Examples window](media/iot-workbench-examples.png)
 
-Find **Esp32 State** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
+Find **M5Stack Email Receiver** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
 
-![IoT Workbench, select Esp32 State example](media/devkit-state/open-example-devkitstate.jpg)
+![IoT Workbench, select M5Stack Email Receiver example](media/devkit-state/open-example-devkitstate.jpg)
 
 ## Provision Azure Services
 
@@ -75,6 +74,18 @@ static string deviceName = "";
 Open the command palette and select **IoT Workbench: Cloud**, then select **Azure Deploy**.
 
 ![IoT Workbench: Cloud -> Deploy](media/iot-workbench-cloud-deploy.png)
+
+
+## Creating Azure Logic App
+
+1. Open [Azure Portal](https://portal.azure.com)
+2. Select the **+** or **Create a resource** button and under **Enterprise Integration** choose **Logic App**.
+3. Give it a Name, Resource Group, and Region (any will do) and click **Create**.
+4. After the logic app is created, open it.
+5. The designer should automatically load - if not click the **Edit** button.
+6. Select the **When an HTTP request is received** trigger.
+7. Click **New Step** to add a step to the workflow and **Add an action**.
+8. Search for the key word of **Send email** action.
 
 ## Config Device Code
 
@@ -117,18 +128,7 @@ Open the command palette and select **IoT Workbench: Cloud**, then select **Azur
 
 	![IoT Workbench: Device -> Uploaded](media/esp32-get-started/esp32-device-uploaded.png)
 
-3. The ESP32 device reboots and starts running the code.
+3. The M5Stack device reboots and starts running the code.
 
-## Monitor Wifi information in Browser
 
-1. Open `web\index.html` in browser.
-2. Input the Function App name you write down.
-3. Click connect button.
-4. You should see wifi information in a few seconds.
-![web page](media/devkit-state/devkit-state-function-app-name.png)
-
-## Restart Esp32 Device
-
-1. Click User LED or RGB LED on the web page
-2. You should see the state of the leds changed in few seconds
-![devkit state](media/devkit-state/devkit-state.gif)
+## Send Email to Gmail Account to test the project
