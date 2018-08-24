@@ -76,29 +76,41 @@ You can write query as below:
 
 ```sql
 SELECT
-    temperature
+    average_temperature
 FROM
-    "iothub-ff8feba1-b114-48de-d8c4-d25e7efa4864"
+    "iothub-8341d26d-3fd9-3f82-aabf-3000238ff89f"
 INTO
-    "cosmosdb-a94a5672-867c-6b4e-db41-872d6e01e4bf"
+    "cosmosdb-2923606a-2f1c-e8c0-74e6-037933217447"
 ```
 
 Azure Steam Analytics Query Language (ASAQL) has native support for windowing functions. Windowing functions enable you to perform various operations against the event data along a timeline. Such as calculating the average of the values of payload fields in a given window.
 
 ```sql
 SELECT
-    AVG(temperature) as avg_temp
+    AVG(temperature) as average_temperature
 INTO
-    "cosmosdb-a94a5672-867c-6b4e-db41-872d6e01e4bf"
+    "cosmosdb-2923606a-2f1c-e8c0-74e6-037933217447"
 FROM
-    "iothub-ff8feba1-b114-48de-d8c4-d25e7efa4864"
+    "iothub-8341d26d-3fd9-3f82-aabf-3000238ff89f"
 GROUP BY
-    TumblingWindow(minute, 5)
+    TumblingWindow(minute, 1)
 ```
 
 
-You can design the condition used to store the data into cosmosdb. In this example, only if average temperature larger than 40 and average humidity larger than 30 over past one minute will the data be saved.
+You can design the conditions used to store the data into cosmosdb. In this example, only if average temperature larger than 30 and average humidity larger than 40 over past one minute will the data be saved.
 
+```sql
+SELECT
+    AVG(Temperature) as average_temperature, AVG(Humidity) as average_humidity
+INTO
+    "cosmosdb-2923606a-2f1c-e8c0-74e6-037933217447"
+FROM
+    "iothub-8341d26d-3fd9-3f82-aabf-3000238ff89f"
+GROUP BY
+    TumblingWindow(minute, 1)
+HAVING
+    AVG(Temperature) > 30 AND AVG(Humidity) > 40
+```
 
 You can learn more about ASAQL windowing functions from [here](https://docs.microsoft.com/en-us/azure/stream-analytics/stream-analytics-window-functions).
 
