@@ -61,22 +61,13 @@ You can change Azure Stream Analytics Job Query by editing `StreamAnalytics/quer
 
 ![Azure Stream Analytics Query](media/iot-workbench-stream-analytics-and-cosmos-db-query.png)
 
-Output and input have already been generated automatically by default (in the example above, the output is `cosmosdb-a94a5672-867c-6b4e-db41-872d6e01e4bf`, and input is `iothub-ff8feba1-b114-48de-d8c4-d25e7efa4864`). And you have no need to change them. `*` means selecting data in all fields, which is the same as SQL.
+Output and input have already been generated automatically by default (in the example above, the output is `cosmosdb-2923606a-2f1c-e8c0-74e6-037933217447`, and input is `iothub-8341d26d-3fd9-3f82-aabf-3000238ff89f`). And you have no need to change them. `AVG(Temperature) as average_temperature, AVG(Humidity) as average_humidity` means calculating the average of variable `Temperature` and `Humidity` and represent them as `average_temperature` and `average_humidity` respectively.
 
-
-You can select specific field data from input and export it into output. For example, your device sends data in the following JSON format:
-
-```json
-{
-    "temperature": 42
-}
-```
-
-You can write query as below:
+You can select data in all fileds by writing query as below.
 
 ```sql
 SELECT
-    average_temperature
+    *
 FROM
     "iothub-8341d26d-3fd9-3f82-aabf-3000238ff89f"
 INTO
@@ -97,7 +88,7 @@ GROUP BY
 ```
 
 
-You can design the conditions used to store the data into cosmosdb. In this example, only if average temperature larger than 30 and average humidity larger than 40 over past one minute will the data be saved.
+You can design the conditions need to be satisfied to store the data into cosmosdb. In this example, only when average temperature is larger than 30 and average humidity is larger than 40 over past one minute will the data be saved.
 
 ```sql
 SELECT
