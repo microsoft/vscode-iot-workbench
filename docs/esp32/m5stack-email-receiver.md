@@ -109,6 +109,7 @@ Open the command palette and select **IoT Workbench: Cloud**, then select **Azur
 		{
 			"action": "new"
 		}
+13. Click **Save** and logic app will run automatically.
 
 You can refer to the following graph to config this action.
 ![Function Config](media/m5stack-email-receiver/m5stack-email-receiver-function-config.png)
@@ -156,5 +157,13 @@ You can refer to the following graph to config this action.
 
 3. The M5Stack device reboots and starts running the code.
 
+>Note: M5Stack-Core-ESP32 is set as the default board after the IoT project is created. To change the setting, use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type and select **Arduino: Board Config**. Change to use other ESP32 board in the **Arduino Board Configuration** window.
+
+>![change board](media/esp32-get-started/change-board.png)
+
 
 ## Send Email to Gmail Account to test the project
+
+When your device is connected to Wifi and IotHub, you can send an email to the Gmail account you choose and wait for a while to see the email on the LCD screen. The logic app will check the inbox of your email with the interval you choose. To accelerate, you can click **Run Trigger** in the logic app panel.
+
+![email display](media/m5stack-email-receiver/m5stack-email-display.jpg)
