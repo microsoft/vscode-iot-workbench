@@ -98,7 +98,7 @@ Open the command palette and select **IoT Workbench: Cloud**, then select **Azur
 11. In the **Request Body** part, enter a json format email content.
 
 		{
-			"Body": Body
+			"Body": Body,
 			"From": From,
 			"Subject": Subject
 		}
