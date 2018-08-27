@@ -137,4 +137,4 @@ Click Restart button on the web page. You may need to wait for a while to see 'R
 ![devkit state](media/esp32-state/esp32-state.gif)
 
 You can also see the restart information from device.
-![devkit state](media/esp32-state/esp32-state-device-restart)
+![restart information](media/esp32-state/esp32-state-device-restart.png)
