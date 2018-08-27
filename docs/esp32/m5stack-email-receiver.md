@@ -96,16 +96,20 @@ Open the command palette and select **IoT Workbench: Cloud**, then select **Azur
 9. Click **New Step** and choose **Azure Functions**.
 10. Select the function you deploy in the previous step.
 11. In the **Request Body** part, enter a json format email content.
+
 		```JSON
 		"Body": Body
 		"From": From,
 		"Subject": Subject
 		```
+
 		You can select **Body**, **From** and **Subject** from Dynamic content in the right panel.
 12. Choose **Method: PUT** and input the following json to **Queries**
+
 		```JSON	
 			"action": "new"
 		```
+
 13. Click **Save** and logic app will run automatically.
 
 You can refer to the following graph to config this action.
