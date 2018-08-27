@@ -9,6 +9,8 @@ Finish the [Getting Started Guide](./esp32-get-started.md) to:
 - Get basic knowledge of Esp32 device.
 - Prepare the development environment.
 
+Follow this [M5Stack Documentation](http://www.m5stack.com/assets/docs/index.html#installing-the-esp32-arduino-core/) to deploy the library of M5Stack.
+
 An active Azure subscription. If you do not have one, you can register via one of these two methods:
 
 - Activate a [free 30-day trial Microsoft Azure account](https://azure.microsoft.com/free/).
@@ -16,10 +18,6 @@ An active Azure subscription. If you do not have one, you can register via one o
 
 A Gmail account. If you do not have one, you can register from [this website](https://accounts.google.com/signup/v2/webcreateaccount?flowName=GlifWebSignIn&flowEntry=SignUp/)
 
-Open **File > Preference > Settings** and add following lines to configure Arduino.
-		```JSON
-		"arduino.additionalUrls": "http://www.M5Stack.com/download/package_m5stack_index.json"
-		```
 
 ## Open the project folder
 
