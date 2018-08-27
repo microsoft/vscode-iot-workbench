@@ -136,5 +136,5 @@ Open the command palette and select **IoT Workbench: Cloud**, then select **Azur
 Click Restart button on the web page. You may need to wait for a while to see 'Restarting'.
 ![devkit state](media/esp32-state/esp32-state.gif)
 
-You can also see the restart information from device.
+You can also see the restart information from serial monitor.
 ![restart information](media/esp32-state/esp32-state-device-restart.png)
