@@ -154,7 +154,7 @@ IoT Workbench will stop Stream Analytics Job, update query and restart Stream An
 
 	![IoT Workbench: Device -> Uploaded](media/esp32-get-started/esp32-device-uploaded.png)
 
-3. The ESP32 device will reboot and starts running the code.
+3. The ESP32 device reboots and starts running the code.
 
 >Note: M5Stack-Core-ESP32 is set as the default board after the IoT project is created. To change the setting, use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type and select **Arduino: Board Config**. Change to use other ESP32 board in the **Arduino Board Configuration** window.
 

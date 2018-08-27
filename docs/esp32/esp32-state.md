@@ -1,6 +1,6 @@
 # Esp32 State
 
-In this tutorial, you can monitor Wifi surrounding Esp32 device and let the device restart using Azure IoT Hub device twins.
+In this tutorial, you can monitor Wifi status (SSID and RSSI) surrounding the Esp32 device and let the device restart using Azure IoT Hub device twins.
 
 ## What you need
 
@@ -119,16 +119,22 @@ Open the command palette and select **IoT Workbench: Cloud**, then select **Azur
 
 3. The ESP32 device reboots and starts running the code.
 
+>Note: M5Stack-Core-ESP32 is set as the default board after the IoT project is created. To change the setting, use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type and select **Arduino: Board Config**. Change to use other ESP32 board in the **Arduino Board Configuration** window.
+
+>![change board](media/esp32-get-started/change-board.png)
+
 ## Monitor Wifi information in Browser
 
 1. Open `web\index.html` in browser.
 2. Input the Function App name you write down.
 3. Click connect button.
 4. You should see wifi information in a few seconds.
-![web page](media/devkit-state/devkit-state-function-app-name.png)
+![web page](media/esp32-state/esp32-state-function-app-name.png)
 
 ## Restart Esp32 Device
 
-1. Click User LED or RGB LED on the web page
-2. You should see the state of the leds changed in few seconds
-![devkit state](media/devkit-state/devkit-state.gif)
+Click Restart button on the web page. You may need to wait for a while to see 'Restarting'.
+![devkit state](media/esp32-state/esp32-state.gif)
+
+You can also see the restart information from device.
+![devkit state](media/esp32-state/esp32-state-device-restart)
