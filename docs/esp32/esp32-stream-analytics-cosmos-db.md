@@ -38,7 +38,7 @@ Then the **IoT Workbench Example** window is showed up.
 
 Find **Esp32 ASA CosmodDB** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
 
-![IoT Workbench, select Esp32 ASA CosmosDB](media/esp32-steam-analytics-cosmos-db/open-example-esp32asa-cosmosdb.jpg)
+![IoT Workbench, select Esp32 ASA CosmosDB](media/esp32-stream-analytics-cosmos-db/open-example-esp32asa-cosmosdb.jpg)
 
 
 ## Provision Azure Service
