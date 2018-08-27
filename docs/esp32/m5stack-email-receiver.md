@@ -1,12 +1,12 @@
-# Stream Analytics and Cosmos DB
+# M5Stack Email Receiver
 
-In this tutorial, you will learn how to send data to Stream Analytics Job and export it to Cosmos DB with Azure Stream Analytics Query Langauge.
+In this tutorial, you will learn how to use M5Stack Board to receive email from Gmail and display it with LCD screen.
 
 ## What you need
 
-Finish the [Getting Started Guide](./devkit-get-started.md) to:
+Finish the [Getting Started Guide](./esp32-get-started.md) to:
 
-- Have your DevKit connected to Wi-Fi.
+- Get basic knowledge of Esp32 device.
 - Prepare the development environment.
 
 An active Azure subscription. If you do not have one, you can register via one of these two methods:
@@ -14,6 +14,12 @@ An active Azure subscription. If you do not have one, you can register via one o
 - Activate a [free 30-day trial Microsoft Azure account](https://azure.microsoft.com/free/).
 - Claim your [Azure credit](https://azure.microsoft.com/pricing/member-offers/msdn-benefits-details/) if you are MSDN or Visual Studio subscriber.
 
+A Gmail account. If you do not have one, you can register from [this website](https://accounts.google.com/signup/v2/webcreateaccount?flowName=GlifWebSignIn&flowEntry=SignUp/)
+
+Open **File > Preference > Settings** and add following lines to configure Arduino.
+		```JSON
+		"arduino.additionalUrls": "http://www.M5Stack.com/download/package_m5stack_index.json"
+		```
 
 ## Open the project folder
 
@@ -21,7 +27,7 @@ An active Azure subscription. If you do not have one, you can register via one o
 
 - Start Visual Studio Code.
 - Make sure [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
-- Connect Esp32 to your PC.
+- Connect M5Stack to your PC.
 
 ### Open IoT Workbench Examples
 
@@ -64,7 +70,7 @@ The whole process includes:
 Please take a note of the Function App name and IoT Hub device name you created. It will be used in the next section.
 
 ## Modify code for Azure Functions
-Open **esp32-state\run.csx** and modify the following line with the device name you provisioned in previous step:
+Open **email-receiver\run.csx** and modify the following line with the device name you provisioned in previous step:
 ```cpp
 static string deviceName = "";
 ```
@@ -83,9 +89,29 @@ Open the command palette and select **IoT Workbench: Cloud**, then select **Azur
 3. Give it a Name, Resource Group, and Region (any will do) and click **Create**.
 4. After the logic app is created, open it.
 5. The designer should automatically load - if not click the **Edit** button.
-6. Select the **When an HTTP request is received** trigger.
-7. Click **New Step** to add a step to the workflow and **Add an action**.
-8. Search for the key word of **Send email** action.
+6. Select **Blank Logic App** Option to create a blank template.
+7. Search for **Gmail** and select **When a new email arrives** as trigger.
+![Gmail Trigger](media/m5stack-email-receiver/m5stack-email-receiver-gmail-trigger.png)
+8. Sign in with your Gmail account to create a connection. You can also modify the checking interval, the default value is 3 minutes.
+9. Click **New Step** and choose **Azure Functions**.
+10. Select the function you deploy in the previous step.
+11. In the **Request Body** part, enter a json format email content.
+		```JSON
+		{
+		"Body": Body,
+		"From": From,
+		"Subject": Subject
+		}
+		```
+		You can select **Body**, **From** and **Subject** from Dynamic content in the right panel.
+12. Choose **Method: PUT** and input the following json to **Queries**
+		```JSON	
+		{
+			"action": "new"
+		}
+
+You can refer to the following graph to config this action.
+![Function Config](media/m5stack-email-receiver/m5stack-email-receiver-function-config.png)
 
 ## Config Device Code
 

@@ -3,7 +3,7 @@
 For first-time users of ESP32 devices, follow these quick steps to:
 - Prepare your development environment.
 - Send information from the device to the Azure IoT Hub 
-- SUse Azure Functions to process the data sent to Azure IoT Hub.
+- Use Azure Functions to process the data sent to Azure IoT Hub.
 
 ## What you learn
 
