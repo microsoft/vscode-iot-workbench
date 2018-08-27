@@ -8,7 +8,7 @@ Finish the [Getting Started Guide](./esp32-get-started.md) to:
 
 - Get basic knowledge of Esp32 device.
 - Prepare the development environment.
-- 
+
 
 An active Azure subscription. If you do not have one, you can register via one of these two methods:
 
