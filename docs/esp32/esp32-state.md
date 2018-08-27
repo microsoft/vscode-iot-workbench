@@ -40,7 +40,7 @@ Then the **IoT Workbench Example** window is showed up.
 
 Find **Esp32 State** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
 
-![IoT Workbench, select Esp32 State example](media/devkit-state/open-example-devkitstate.jpg)
+![IoT Workbench, select Esp32 State example](media/esp32-state/open-example-esp32.jpg)
 
 ## Provision Azure Services
 

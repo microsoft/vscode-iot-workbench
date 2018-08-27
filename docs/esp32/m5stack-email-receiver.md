@@ -43,7 +43,7 @@ Then the **IoT Workbench Example** window is showed up.
 
 Find **M5Stack Email Receiver** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
 
-![IoT Workbench, select M5Stack Email Receiver example](media/devkit-state/open-example-devkitstate.jpg)
+![IoT Workbench, select M5Stack Email Receiver example](media/m5stack-email-receiver/open-example-m5stack-email-receiver.jpg)
 
 ## Provision Azure Services
 
