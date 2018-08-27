@@ -98,20 +98,18 @@ Open the command palette and select **IoT Workbench: Cloud**, then select **Azur
 11. In the **Request Body** part, enter a json format email content.
 
 		{
-		"Body": Body
-		"From": From,
-		"Subject": Subject
+			"Body": Body
+			"From": From,
+			"Subject": Subject
 		}
 
-		You can select **Body**, **From** and **Subject** from Dynamic content in the right panel.
+You can select **Body**, **From** and **Subject** from Dynamic content in the right panel.
 
 12. Choose **Method: PUT** and input the following json to **Queries**
 
-		```
 		{
 			"action": "new"
 		}
-		```
 
 13. Click **Save** and logic app will run automatically.
 
