@@ -78,7 +78,7 @@ Azure Steam Analytics Query Language (ASAQL) has native support for windowing fu
 
 ```sql
 SELECT
-    AVG(temperature) as average_temperature
+    AVG(Temperature) as average_temperature, AVG(Humidity) as average_humidity
 INTO
     "cosmosdb-2923606a-2f1c-e8c0-74e6-037933217447"
 FROM
@@ -111,7 +111,7 @@ Deploy the query by executing **IoT Workbench: Cloud** command and select **Azur
 
 IoT Workbench will stop Stream Analytics Job, update query and restart Stream Analytics Job automatically.
 
-![Azure Deply Query](media/iot-workbench-stream-analytics-and-cosmos-db-deploy-query.png)
+![Azure Deply Query](media/esp32-stream-analytics-cosmos-db/iot-workbench-stream-analytics-and-cosmos-db-deploy-query.png)
 
 ## Config Device Code
 
@@ -154,7 +154,7 @@ IoT Workbench will stop Stream Analytics Job, update query and restart Stream An
 
 	![IoT Workbench: Device -> Uploaded](media/esp32-get-started/esp32-device-uploaded.png)
 
-3. The ESP32 device reboots and starts running the code.
+3. The ESP32 device will reboot and starts running the code.
 
 ## Explore Data in Cosmos DB
 
