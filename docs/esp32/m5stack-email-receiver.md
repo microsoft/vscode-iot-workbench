@@ -6,7 +6,7 @@ In this tutorial, you will learn how to use M5Stack Board to receive email from 
 
 Finish the [Getting Started Guide](./esp32-get-started.md) to:
 
-- Get basic knowledge of Esp32 device.
+- Get basic knowledge of ESP32 device.
 - Prepare the development environment.
 
 Follow this [M5Stack Documentation](http://www.m5stack.com/assets/docs/index.html#installing-the-esp32-arduino-core/) to deploy the library of M5Stack.
@@ -37,7 +37,7 @@ Select **ESP32 Arduino**.
 
 ![IoT Workbench: Examples -> Select board](media/iot-workbench-examples-board.png)
 
-Then the **IoT Workbench Example** window is showed up.
+Then the **IoT Workbench Example** window is shown up.
 
 ![IoT Workbench, Examples window](media/iot-workbench-examples.png)
 
@@ -95,19 +95,19 @@ Open the command palette and select **IoT Workbench: Cloud**, then select **Azur
 10. Select the function you deploy in the previous step.
 11. In the **Request Body** part, enter a json format email content.
 
-		{
+		```JSON
 			"Body": Body,
 			"From": From,
 			"Subject": Subject
-		}
+		```
 
 You can select **Body**, **From** and **Subject** from Dynamic content in the right panel.
 
 12. Choose **Method: PUT** and input the following json to **Queries**
 
-		{
+		```JSON
 			"action": "new"
-		}
+		```
 
 13. Click **Save** and logic app will run automatically.
 
@@ -164,6 +164,6 @@ You can refer to the following graph to config this action.
 
 ## Send Email to Gmail Account to test the project
 
-When your device is connected to Wifi and IotHub, you can send an email to the Gmail account you choose and wait for a while to see the email on the LCD screen. The logic app will check the inbox of your email with the interval you choose. To accelerate, you can click **Run Trigger** in the logic app panel.
+When your device is connected to WiFi and IotHub, you can send an email to the Gmail account you choose and wait for a while to see the email on the LCD screen. The logic app will check the inbox of your email with the interval you choose. To accelerate, you can click **Run Trigger** in the logic app panel.
 
 ![email display](media/m5stack-email-receiver/m5stack-email-display.jpg)

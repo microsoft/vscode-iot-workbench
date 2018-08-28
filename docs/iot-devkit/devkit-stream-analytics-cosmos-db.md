@@ -164,7 +164,7 @@ Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, t
 
 ![Azure Provision](media/iot-workbench-cloud-provision2.png)
 
-Select subscription and resource group you want to create Azure services in. A guide line show what service will be created.
+Select subscription and resource group you want to create Azure services in. A guide line shows what service will be created.
 
 ![Azure Provision Step](media/iot-workbench-stream-analytics-and-cosmos-db-provision-step.png)
 

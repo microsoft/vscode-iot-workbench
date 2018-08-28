@@ -1,12 +1,12 @@
 # Stream Analytics and Cosmos DB
 
-In this tutorial, you will learn how to send data from Esp32 device to Stream Analytics Job and export it to Cosmos DB with Azure Stream Analytics Query Langauge.
+In this tutorial, you will learn how to send data from ESP32 device to Stream Analytics Job and export it to Cosmos DB with Azure Stream Analytics Query Langauge.
 
 ## What you need
 
 Finish the [Getting Started Guide](./esp32-get-started.md) to:
 
-- Get basic knowledge of Esp32 device.
+- Get basic knowledge of ESP32 device.
 - Prepare the development environment.
 
 An active Azure subscription. If you do not have one, you can register via one of these two methods:
@@ -20,7 +20,7 @@ An active Azure subscription. If you do not have one, you can register via one o
 
 - Start Visual Studio Code.
 - Make sure [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
-- Connect Esp32 to your PC.
+- Connect ESP32 to your PC.
 
 ### Open IoT Workbench Examples
 
@@ -32,13 +32,13 @@ Select **ESP32 Arduino**.
 
 ![IoT Workbench: Examples -> Select board](media/iot-workbench-examples-board.png)
 
-Then the **IoT Workbench Example** window is showed up.
+Then the **IoT Workbench Example** window is shown up.
 
 ![IoT Workbench, Examples window](media/iot-workbench-examples.png)
 
-Find **Esp32 ASA CosmodDB** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
+Find **ESP32 ASA CosmodDB** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
 
-![IoT Workbench, select Esp32 ASA CosmosDB](media/esp32-stream-analytics-cosmos-db/open-example-esp32asa-cosmosdb.jpg)
+![IoT Workbench, select ESP32 ASA CosmosDB](media/esp32-stream-analytics-cosmos-db/open-example-esp32asa-cosmosdb.jpg)
 
 
 ## Provision Azure Service
@@ -47,7 +47,7 @@ Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, t
 
 ![Azure Provision](media/iot-workbench-cloud-provision2.png)
 
-Select subscription and resource group you want to create Azure services in. A guide line show what service will be created.
+Select subscription and resource group you want to create Azure services in. A guide line shows what service will be created.
 
 ![Azure Provision Step](media/iot-workbench-stream-analytics-and-cosmos-db-provision-step.png)
 
@@ -88,7 +88,7 @@ GROUP BY
 ```
 
 
-You can design the conditions need to be satisfied to store the data into cosmosdb. In this example, only when average temperature is larger than 30 and average humidity is larger than 40 over past one minute will the data be saved.
+You can design the conditions need to be satisfied to store the data into cosmosdb. In this example, only when average temperature is higher than 30 and average humidity is higher than 40 over past one minute will the data be saved.
 
 ```sql
 SELECT

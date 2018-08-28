@@ -1,12 +1,12 @@
-# Esp32 State
+# ESP32 State
 
-In this tutorial, you can monitor Wifi status (SSID and RSSI) surrounding the Esp32 device and let the device restart using Azure IoT Hub device twins.
+In this tutorial, you can monitor WiFi status (SSID and RSSI) surrounding the ESP32 device and let the device restart using Azure IoT Hub device twins.
 
 ## What you need
 
 Finish the [Getting Started Guide](./esp32-get-started.md) to:
 
-- Get basic knowledge of Esp32 device.
+- Get basic knowledge of ESP32 device.
 - Prepare the development environment.
 
 
@@ -22,7 +22,7 @@ An active Azure subscription. If you do not have one, you can register via one o
 
 - Start Visual Studio Code.
 - Make sure [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
-- Connect Esp32 to your PC.
+- Connect ESP32 to your PC.
 
 ### Open IoT Workbench Examples
 
@@ -34,13 +34,13 @@ Select **ESP32 Arduino**.
 
 ![IoT Workbench: Examples -> Select board](media/iot-workbench-examples-board.png)
 
-Then the **IoT Workbench Example** window is showed up.
+Then the **IoT Workbench Example** window is shown up.
 
 ![IoT Workbench, Examples window](media/iot-workbench-examples.png)
 
-Find **Esp32 State** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
+Find **ESP32 State** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
 
-![IoT Workbench, select Esp32 State example](media/esp32-state/open-example-esp32state.jpg)
+![IoT Workbench, select ESP32 State example](media/esp32-state/open-example-esp32state.jpg)
 
 ## Provision Azure Services
 
@@ -65,6 +65,7 @@ The whole process includes:
 Please take a note of the Function App name and IoT Hub device name you created. It will be used in the next section.
 
 ## Modify code for Azure Functions
+
 Open **esp32-state\run.csx** and modify the following line with the device name you provisioned in previous step:
 ```cpp
 static string deviceName = "";
@@ -123,15 +124,15 @@ Open the command palette and select **IoT Workbench: Cloud**, then select **Azur
 
 >![change board](media/esp32-get-started/change-board.png)
 
-## Monitor Wifi information in Browser
+## Monitor WiFi information in Browser
 
 1. Open `web\index.html` in browser.
 2. Input the Function App name you write down.
 3. Click connect button.
-4. You should see wifi information in a few seconds.
+4. You should see wiFi information in a few seconds.
 ![web page](media/esp32-state/esp32-state-function-app-name.png)
 
-## Restart Esp32 Device
+## Restart ESP32 Device
 
 Click Restart button on the web page. You may need to wait for a while to see 'Restarting'.
 ![devkit state](media/esp32-state/esp32-state.gif)
