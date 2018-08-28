@@ -3,6 +3,7 @@
 For first-time users of ESP32 devices, follow these quick steps to:
 - Prepare your development environment.
 - Send information from the device to the Azure IoT Hub 
+- Listen to cloud to device message with ESP32
 
 ## What you learn
 
@@ -157,6 +158,8 @@ The whole process includes:
 
 ## Test the project
 
+### Send D2C message
+
 Open serial monitor:
 
 The sample application is running successfully when you see the following results:
@@ -164,6 +167,10 @@ The sample application is running successfully when you see the following result
 * The Serial Monitor displays the message sent to the IoT Hub.
 
 ![azure-iot-toolkit-output-console](media/esp32-get-started/monitor-d2c-message.png)
+
+### Listen to C2D message
+
+You can send message to your device with Azure Portal. Make sure that serial monitor is open. Then you can see the message from serial monitor.
 
 ## Problems and feedback
 
