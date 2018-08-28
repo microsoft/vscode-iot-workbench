@@ -95,7 +95,7 @@ Open the command palette and select **IoT Workbench: Cloud**, then select **Azur
 10. Select the function you deploy in the previous step.
 11. In the **Request Body** part, enter a json format email content.
 
-	```JSON
+	```js
 	{
 		"Body": Body,
 		"From": From,
