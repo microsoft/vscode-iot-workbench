@@ -66,6 +66,8 @@ Here are a set of tutorials that will help you get started:
 
 ### ESP32
 
+Please follow the [guide](docs/esp32.md) to setup ESP32 device.
+
 Here are a set of tutorials that will help you get started:
 
 * [Get Started](./docs/esp32/esp32-get-started.md)
