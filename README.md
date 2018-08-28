@@ -71,6 +71,9 @@ Please follow the [guide](docs/esp32.md) to setup ESP32 device.
 Here are a set of tutorials that will help you get started:
 
 * [Get Started](./docs/esp32/esp32-get-started.md)
+* [Stream Analytics and Cosmos DB](./docs/esp32/esp32-stream-analytics-cosmos-db.md)
+* [ESP32 State](./docs/esp32/esp32-state.md)
+* [M5Stack Email Receiver](./docs/esp32/m5stack-email-receiver.md)
 
 ## Commands
 

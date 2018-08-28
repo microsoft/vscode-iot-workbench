@@ -18,7 +18,7 @@ Follow these steps to prepare the development environment for ESP32 devices:
 2. Install [Visual Studio Code](https://code.visualstudio.com/), a cross platform source code editor with powerful developer tooling, like IntelliSense code completion and debugging.
 
 3. Look for **Azure IoT Workbench** in the extension marketplace and install it.
-    ![Install IoT Workbench](/esp32/media/esp32-get-started/install-workbench.png)
+    ![Install IoT Workbench](esp32/media/esp32-get-started/install-workbench.png)
     Together with the IoT Workbench, other dependent extensions will be installed.
 
 4. Open **File > Preference > Settings** and add following lines to configure Arduino.
@@ -46,7 +46,7 @@ Follow these steps to prepare the development environment for ESP32 devices:
 
 5. Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type and select **Arduino: Board Manager**. Search for **esp32** and install the latest version.
 
-    ![Install DevKit SDK](media/esp32-get-started/esp32-install-sdk.jpg)
+    ![Install DevKit SDK](esp32/media/esp32-get-started/esp32-install-sdk.jpg)
 
 ## Problems and feedback
 
