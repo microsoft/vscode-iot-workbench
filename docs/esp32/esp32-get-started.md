@@ -170,7 +170,9 @@ The sample application is running successfully when you see the following result
 
 ### Listen to C2D message
 
-You can send message to your device with Azure Portal. Make sure that serial monitor is open. Then you can see the message from serial monitor.
+You can send message to your device with Azure Portal or other API. Please Make sure that serial monitor is open. Then you can see the message content from serial monitor.
+
+![azure-iot-toolkit-output-console](media/esp32-get-started/monitor-c2d-message.png)
 
 ## Problems and feedback
 
