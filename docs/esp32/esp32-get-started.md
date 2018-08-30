@@ -93,7 +93,7 @@ Then the **IoT Workbench Example** window is shown up.
 
 Find **ESP32 Get Started** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
 
-![IoT Workbench, select ESP32 Get Started example](media/esp32-get-started/open-example-esp32getstarted.jpg)
+![IoT Workbench, select ESP32 Get Started example](media/esp32-get-started/open-example-esp32-get-started.jpg)
 
 ### Provision Azure service
 
