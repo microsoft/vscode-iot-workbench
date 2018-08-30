@@ -3,7 +3,7 @@
 For first-time users of ESP32 devices, follow these quick steps to:
 - Prepare your development environment.
 - Send information from the device to the Azure IoT Hub 
-- SUse Azure Functions to process the data sent to Azure IoT Hub.
+- Listen to cloud to device message with ESP32
 
 ## What you learn
 
@@ -72,32 +72,28 @@ Follow these steps to prepare the development environment for ESP32 devices:
 
 ## Build your first project
 
-Now you are all set with preparing and configuring your development environment. Let us build a "Hello World" sample for IoT: sending sample telemetry data to Azure IoT Hub and use Azure Functions to process the data.
+Now you are all set with preparing and configuring your development environment. Let us build a "Hello World" sample for IoT: sending simulated telemetry data to Azure IoT Hub.
 Make sure your device is **not connected** to your computer. Start VS Code first, and then connect the ESP32 device to your computer.
 
-### Create a new IoT Workbench Project
+## Open the project folder
 
-Use `F1` or`Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select **IoT Workbench: New**.
+### Open IoT Workbench Examples
 
-Then select **ESP32 Arduino**.
-    
-![IoT Workbench: New -> Select board](media/esp32-get-started/new-select-board.jpg)
+Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select **IoT Workbench: Examples**.
 
-Then select **With Azure Functions** as the project template.
-    
-![IoT Workbench, project template](media/esp32-get-started/project-template.jpg)
+![IoT Workbench: Examples](media/iot-workbench-examples-cmd.png)
 
-Provide the name of the **.ino** file and select **C#Script** as the Azure Functions language. VS Code would restart and open the created IoT Project.
+Select **ESP32 Arduino**.
 
-![create project](media/esp32-get-started/create-project.png)
+![IoT Workbench: Examples -> Select board](media/iot-workbench-examples-board.png)
 
->Note: M5Stack-Core-ESP32 is set as the default board after the IoT project is created. To change the setting, use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type and select **Arduino: Board Config**. Change to use other ESP32 board in the **Arduino Board Configuration** window.
+Then the **IoT Workbench Example** window is shown up.
 
->![change board](media/esp32-get-started/change-board.png)
+![IoT Workbench, Examples window](media/iot-workbench-examples.png)
 
-In the bottom right status bar, check the serial port with **Silicon Labs** is used.
+Find **ESP32 Get Started** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
 
-![Select serial port](media/esp32-get-started/select-port.png)
+![IoT Workbench, select ESP32 Get Started example](media/esp32-get-started/open-example-esp32getstarted.jpg)
 
 ### Provision Azure service
 
@@ -111,32 +107,11 @@ Select **Azure Provision**.
 
 Then VS Code guides you through provisioning the required Azure services.
 
-![IoT Workbench: Cloud -> Provision steps](media/iot-workbench-cloud-provision-steps3.png)
+![IoT Workbench: Cloud -> Provision steps](media/iot-workbench-cloud-provision-steps2.png)
 
 The whole process includes:
 * Select an existing IoT Hub or create a new IoT Hub.
 * Select an existing IoT Hub device or create a new IoT Hub device. 
-* Create a new Azure Functions application.
-
-### Deploy Azure Functions
-
-1. In Visual Studio Code, open the `run.csx` file (default named `Functions\IoTHubTrigger1\run.csx`) to view the code for your function. 
-
-	The source code of the Azure Functions:
-
-	```csharp
-	using System;
-
-	public static void Run(string myIoTHubMessage, TraceWriter log)
-	{
-		log.Info($"C# IoT Hub trigger function processed a message: {myIoTHubMessage}");
-	}
-				
-	```
-    > NOTE: In this tutorial, we will use this source code from Azure Functions template directly. User could always modify the code to meet their own business needs.
-
-1. Press **F1** or **Ctrl + Shift + P** in Visual Studio Code - **IoT Workbench:Cloud** and click **Azure Deploy**. This command will deploy the function code to Azure Functions App.
-
 
 ### Config Device Code
 
@@ -147,21 +122,21 @@ The whole process includes:
 		const char* password = "";
     ```
 
-1. Open the command palette and select **IoT Workbench: Device**.
+2. Open the command palette and select **IoT Workbench: Device**.
 
 	![IoT Workbench: Device](media/iot-workbench-device.png)
 
-1. Select **Config Device Settings**.
+3. Select **Config Device Settings**.
 
 	![IoT Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
 
-1. Select **Copy device connection string**.
+4. Select **Copy device connection string**.
 
 	![IoT Workbench: Device copy connection string](media/esp32-get-started/copy-connection-string.png)
 
    This copies the connection string that is retrieved from the `Provision Azure services` step.
 
-1. Paste the device connection string into the following line in device code
+5. Paste the device connection string into the following line in device code
     ```csharp
 	/*String containing Hostname, Device Id & Device Key in the format:                         */
 	/*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
@@ -183,6 +158,8 @@ The whole process includes:
 
 ## Test the project
 
+### Send D2C message
+
 Open serial monitor:
 
 The sample application is running successfully when you see the following results:
@@ -191,15 +168,11 @@ The sample application is running successfully when you see the following result
 
 ![azure-iot-toolkit-output-console](media/esp32-get-started/monitor-d2c-message.png)
 
-You can use [Azure Functions](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions) to monitor streaming log of Azure Functions execution:
+### Listen to C2D message
 
-1. Expand Azure Functions on the left bar, click the Subscription that you used in Provision Azure service step and open the Azure Functions, then right-click Functions: **Start streaming logs**.
+You can send message to your device with Azure Portal or other API. Please Make sure that serial monitor is open. Then you can see the message content from serial monitor.
 
-	![!azure-functions streaming log](media/esp32-get-started/azure-function-streaming-log.png)
-
-1. In **OUTPUT** pane, you can see the streaming logs from Azure Functions.
-
-	![azure-iot-toolkit-output-console](media/esp32-get-started/azure-function-streaming-result.png)
+![azure-iot-toolkit-output-console](media/esp32-get-started/monitor-c2d-message.png)
 
 ## Problems and feedback
 

@@ -28,6 +28,7 @@
             "defaultBaudRate": 115200,
             "vendorId": "10c4",
             "productId": "ea60",
+            "exampleUrl": "https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/gallery/workbench-example-esp32.json",
             "helpUrl": "https://github.com/espressif/arduino-esp32",
             "installation": {
                 "additionalUrl": "https://dl.espressif.com/dl/package_esp32_index.json",

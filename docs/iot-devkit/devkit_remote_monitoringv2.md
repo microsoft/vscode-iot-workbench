@@ -73,7 +73,7 @@ Select **IoT DevKit**.
 
 ![IoT Workbench: Examples -> Select board](media/iot-workbench-examples-board.png)
 
-Then the **IoT Workbench Example** window is showed up.
+Then the **IoT Workbench Example** window is shown up.
 
 ![IoT Workbench, Examples window](media/iot-workbench-examples.png)
 
