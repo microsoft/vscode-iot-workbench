@@ -32,6 +32,7 @@ export class EventNames {
 export class ContentView {
   static readonly workbenchContentProtocol = 'iot-workbench';
   static readonly workbenchExampleURI = 'iot-workbench://example';
+  static readonly workbenchHelpURI = 'iot-workbench://help';
 }
 
 export class FileNames {

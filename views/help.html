@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+@font-face {
+  font-family: 'Press Start 2P';
+  font-style: normal;
+  font-weight: 400;
+  src: url(fonts/Press-Start-2P-Regular.woff2) format('woff2');
+}
+@keyframes pumping {
+  0% {
+    transform: rotate(10deg);
+  }
+  50% {
+    transform: rotate(-30deg);
+  }
+  100% {
+    transform: rotate(10deg);
+  }
+}
+
+@keyframes pumping_bridle {
+  0% {
+    top: 220px;
+  }
+  50% {
+    top: 150px;
+  }
+  100% {
+    top: 220px;
+  }
+}
+
+@keyframes pumping_counter_weight {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pumping_crank_move {
+  0% {
+    top: 180px;
+  }
+  50% {
+    top: 260px;
+  }
+  100% {
+    top: 180px;
+  }
+}
+
+@keyframes pumping_crank_rotate {
+  0% {
+    transform: rotate(5deg);
+  }
+  25% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+  75% {
+    transform: rotate(10deg);
+  }
+  100% {
+    transform: rotate(5deg);
+  }
+}
+
+@keyframes pumping_gear {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes iot_data {
+  0% {
+    top: 175px;
+  }
+  50% {
+    top: 125px;
+  }
+  100% {
+    top: 175px;
+  }
+}
+
+@keyframes main_button {
+  0% {
+    background-position-x: -100px;
+  }
+  100% {
+    background-position-x: 1000px;
+  }
+}
+
+.pumpjack {
+  width: 430px;
+  height: 430px;
+  position: absolute;
+  overflow: hidden;
+  bottom: 0;
+  filter: blur(1px);
+}
+
+.pumpjack .hourse_head_walking_beam {
+  position: absolute;
+  width: 320px;
+  height: 200px;
+  top: 90px;
+  left: 75px;
+  transform-origin: 120px 80px;
+  transform: rotate(10deg);
+  animation: pumping 5s ease-in-out infinite;
+}
+
+.pumpjack .hourse_head {
+  width: 55px;
+  height: 200px;
+  background: black;
+  border-top-left-radius: 20px 60px;
+  border-bottom-left-radius: 20px 140px;
+  border-top-right-radius: 30px 100px;
+  border-bottom-right-radius: 30px 100px;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.pumpjack .walking_beam {
+  width: 265px;
+  height: 40px;
+  background: black;
+  position: absolute;
+  left: 20px;
+  top: 60px;
+}
+
+.pumpjack .walking_beam:before {
+  content: "";
+  display: block;
+  height: 20px;
+  border-top: 20px solid transparent;
+  border-right: 20px solid black;
+  position: absolute;
+  left: -20px;
+  top: 0;
+}
+
+.pumpjack .samson_post {
+  width: 200px;
+  height: 250px;
+  position: absolute;
+  bottom: 0;
+  left: 70px;
+}
+
+.pumpjack .samson_post_a {
+  width: 20px;
+  height: 280px;
+  background: black;
+  transform: rotate(25deg);
+  transform-origin: left bottom;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+
+.pumpjack .samson_post_b {
+  width: 20px;
+  height: 254px;
+  background: black;
+  transform: rotate(-5deg);
+  transform-origin: right bottom;
+  position: absolute;
+  left: 140px;
+  bottom: 0;
+}
+
+.pumpjack .samson_post_c {
+  width: 20px;
+  height: 260px;
+  background: black;
+  transform: rotate(-14deg);
+  transform-origin: right bottom;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+
+.pumpjack .bridle {
+  width: 2px;
+  height: 300px;
+  background: black;
+  position: absolute;
+  top: 220px;
+  left: 385px;
+  animation: pumping_bridle 5s ease-in-out infinite;
+}
+
+.pumpjack .bridle::before {
+  content: "";
+  display: block;
+  width: 4px;
+  height: 10px;
+  background: black;
+  left: -1px;
+  top: 180px;
+  position: absolute;
+}
+
+.pumpjack .counter_weight {
+  width: 200px;
+  height: 180px;
+  position: absolute;
+  top: 255px;
+}
+
+.pumpjack .counter_weight_a,
+.pumpjack .counter_weight_b {
+  width: 160px;
+  height: 80px;
+  border-top-left-radius: 80px 60px;
+  border-top-right-radius: 80px 60px;
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+  background: black;
+  position: absolute;
+  transform-origin: 80px 60px;
+  animation: pumping_counter_weight 5s linear infinite;
+}
+
+.pumpjack .counter_weight_a {
+  top: 25px;
+  left: 5px
+}
+
+.pumpjack .counter_weight_b {
+  top: 15px;
+  left: 35px;
+}
+
+.pumpjack .crank {
+  width: 180px;
+  height: 120px;
+  position: absolute;
+  top: 180px;
+  left: 15px;
+  animation: pumping_crank_move 5s linear infinite;
+}
+
+.pumpjack .crank_a,
+.pumpjack .crank_b {
+  width: 10px;
+  height: 150px;
+  background: black;
+  position: absolute;
+  transform-origin: 50% 50%;
+  animation: pumping_crank_rotate 5s linear infinite;
+}
+
+.pumpjack .crank_a {
+  bottom: 0px;
+  left: 80px;
+}
+
+.pumpjack .crank_b {
+  bottom: 10px;
+  left: 110px;
+}
+
+.pumpjack .gear_reducer {
+  width: 100px;
+  height: 100px;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  background: black;
+  position: absolute;
+  left: 50px;
+  bottom: 0;
+}
+
+.pumpjack .gear {
+  width: 40px;
+  height: 40px;
+  border-radius: 40px;
+  border: 4px solid black;
+  position: absolute;
+  left: 30px;
+  bottom: 60px;
+  animation: pumping_gear 1s linear infinite;
+}
+
+.pumpjack .gear_a,
+.pumpjack .gear_b,
+.pumpjack .gear_c {
+  width: 4px;
+  height: 40px;
+  background: black;
+  position: absolute;
+  left: 18px;
+  top: 0;
+  transform-origin: 50% 50%;
+}
+
+.pumpjack .gear_b {
+  transform: rotate(60deg);
+}
+
+.pumpjack .gear_c {
+  transform: rotate(-60deg);
+}
+
+.pumpjack .ladder {
+  width: 30px;
+  height: 200px;
+  border-left: 4px solid black;
+  border-right: 4px solid black;
+  position: absolute;
+  left: 165px;
+  bottom: 0;
+  background-image: repeating-linear-gradient(black, black 2px, transparent 2px, transparent 10px);
+}
+
+body {
+  margin: 0;
+  background: black;
+  font-family: sans-serif;
+  min-width: 900px;
+  cursor: default;
+}
+
+.header {
+  position: relative;
+  height: 500px;
+  background: linear-gradient(to bottom, #163C52 0%,#4F4F47 30%,#C5752D 60%,#B7490F 80%, #2F1107 98%, black 100%);
+}
+
+.iot_data {
+  font-family: 'Press Start 2P';
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  left: 450px;
+  top: 175px;
+  font-size: 10px;
+  padding: 0 20px;
+  border-left: 2px solid rgba(0, 0, 0, 0.7);
+  border-right: 2px solid rgba(0, 0, 0, 0.7);
+  opacity: 0.35;
+  animation: iot_data 5s ease-in-out infinite;
+}
+
+.iot_data td:first-child {
+  padding-right: 50px;
+}
+
+.logo {
+  height: 70px;
+  line-height: 70px;
+  background: url(images/logo-white.png) no-repeat;
+  background-size: 70px 70px;
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  font-size: 50px;
+  vertical-align: middle;
+  padding-left: 90px;
+  color: white;
+  opacity: 0.25;
+}
+
+.tower {
+  width: 88px;
+  height: 300px;
+  background: url(images/tower.png) no-repeat;
+  background-size: 88px 300px;
+  position: absolute;
+  bottom: 0;
+  right: 120px;
+  opacity: 0.5;
+  filter: blur(2px);
+}
+
+.resource {
+  width: 130px;
+  text-align: center;
+  position: absolute;
+  color: black;
+  padding: 10px 0;
+  top: 20px;
+  right: 60px;
+  font-weight: bold;
+}
+
+.resource_links {
+  opacity: 0;
+  width: 130px;
+  height: 0;
+  position: absolute;
+  right: 40px;
+  transition: all 0.3s;
+  transition-delay: 0.5s;
+  padding: 20px;
+  overflow: hidden;
+  z-index: 100;
+}
+
+.resource:hover + .resource_links {
+  height: 320px;
+  opacity: 1;
+}
+
+.resource_links:hover {
+  height: 320px;
+  opacity: 1;
+}
+
+.resource_links .link {
+  position: relative;
+  left: 0;
+  margin-bottom: 5px;
+  padding: 10px 0;
+  text-align: center;
+  background: black;
+  color: rgba(255, 255, 255, 0.5);
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.resource_links .link:hover {
+  color: rgba(255, 255, 255, 1);
+  left: -10px;
+}
+
+.main_button {
+  height: 100px;
+  font-size: 70px;
+  position: absolute;
+  left: 50%;
+  font-weight: bold;
+  background-image: linear-gradient(60deg, transparent, transparent 50px, yellow 50px, yellow 100px, transparent 100px, transparent 500px);
+  background-color: orange;
+  -webkit-background-clip: text;
+  background-repeat: no-repeat;
+  color: transparent;
+  animation: main_button 1.5s ease-in infinite;
+  text-shadow: 0 0 rgba(0, 0, 0, 0.15);
+  transition: all 0.3s;
+  cursor: pointer;
+  transform: rotate3d(-1, 1, 0, 45deg);
+  margin-left: -100px;
+}
+
+.main_button:hover {
+  text-shadow: 0 0 rgba(0, 0, 0, 0);
+  font-size: 74px;
+}
+
+.start_button {
+  top: 200px;
+}
+
+.new_button {
+  top: 300px;
+}
+
+.examples_button {
+  top: 400px;
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo">Azure IoT Workbench</div>
+  <div class="pumpjack">
+    <div class="hourse_head_walking_beam">
+      <div class="hourse_head"></div>
+      <div class="walking_beam"></div>
+    </div>
+    <div class="samson_post">
+      <div class="samson_post_a"></div>
+      <div class="samson_post_b"></div>
+      <div class="samson_post_c"></div>
+    </div>
+    <div class="bridle"></div>
+    <div class="counter_weight">
+      <div class="counter_weight_a"></div>
+      <div class="counter_weight_b"></div>
+    </div>
+    <div class="crank">
+      <div class="crank_a"></div>
+      <div class="crank_b"></div>
+    </div>
+    <div class="gear_reducer"></div>
+    <div class="gear">
+      <div class="gear_a"></div>
+      <div class="gear_b"></div>
+      <div class="gear_c"></div>
+    </div>
+    <div class="ladder"></div>
+  </div>
+  <div class="tower"></div>
+  <div class="iot_data">
+    <table>
+      <tr>
+        <td>DEVICE ID</td>
+        <td>OW-LZ89</td>
+      </tr>
+      <tr>
+        <td>BHP/Bar</td>
+        <td id="bhp">490.2</td>
+      </tr>
+      <tr>
+        <td>BBL/Day</td>
+        <td id="bbl">347.8</td>
+      </tr>
+      <tr>
+        <td>TEMP/F</td>
+        <td id="tmp">132.9</td>
+      </tr>
+    </table>
+  </div>
+  <div class="resource">/ Resources /</div>
+  <div class="resource_links">
+    <div class="link" onclick="openLink('https://github.com/Microsoft/vscode-iot-workbench')">GitHub</div>
+    <div class="link" onclick="openLink('https://blogs.msdn.microsoft.com/iotdev/')">Blog</div>
+    <div class="link" onclick="openLink('https://microsoft.github.io/azure-iot-developer-kit/')">IoT DevKit</div>
+    <div class="link" onclick="openLink('https://aka.ms/button')">IoT Button</div>
+    <div class="link" onclick="openLink('https://github.com/espressif/arduino-esp32')">ESP32</div>
+    <div class="link" onclick="openLink('https://www.raspberrypi.org/')">Raspberry Pi</div>
+  </div>
+  <div class="main_button start_button" onclick="openLink('https://github.com/Microsoft/vscode-iot-workbench/blob/master/README.md')">How To Start &#x2771;&#x2771;</div>
+  <div class="main_button new_button" onclick="httpRequest('/api/new')">New Project &#x2771;&#x2771;</div>
+  <div class="main_button examples_button" onclick="httpRequest('/api/example')">Examples &#x2771;&#x2771;</div>
+</div>
+
+<script>
+function updateIotData() {
+  if (Math.random() > 0.6) {
+    document.getElementById('bhp').innerHTML = (490.2 + Math.random() * 10 - 5).toFixed(1);
+  }
+
+  if (Math.random() > 0.6) {
+    document.getElementById('bbl').innerHTML = (347.8 + Math.random() * 10 - 5).toFixed(1);
+  }
+
+  if (Math.random() > 0.6) {
+    document.getElementById('tmp').innerHTML = (132.9 + Math.random() * 5 - 2.5).toFixed(1);
+  }
+}
+
+setInterval(updateIotData, 1000);
+
+function openLink(url) {
+  if (!url) {
+    return;
+  }
+  var apiUrl = `/api/link?url=${url}`;
+  httpRequest(apiUrl);
+}
+
+function httpRequest(url, callback) {
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4) {
+      if (xhr.status === 200) {
+        if (callback) {
+          callback(xhr.responseText);
+        }
+      } else {
+        if (callback) {
+          callback(null);
+        }
+      }
+    }
+  }
+  xhr.open('GET', url, true);
+  xhr.send();
+}
+</script>
+</body>
+</html>
