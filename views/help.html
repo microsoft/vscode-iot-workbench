@@ -495,17 +495,19 @@ body {
   height: 80px;
   position: absolute;
   background: black;
+  border: 5px solid black;
+  border-right: none;
 }
 
 .road_sign_board::before {
   content: "";
   display: block;
-  border-left: 50px solid black;
-  border-top: 40px solid transparent;
-  border-bottom: 40px solid transparent;
+  border-left: 56px solid black;
+  border-top: 46px solid transparent;
+  border-bottom: 46px solid transparent;
   position: absolute;
-  top: 0;
-  right: -50px;
+  top: -6px;
+  right: -56px;
   z-index: 10;
 }
 
@@ -516,11 +518,17 @@ body {
 }
 
 .road_sign_board:hover {
-  border: 5px solid orange;
+  border-color: orange;
   border-right: none;
   z-index: 10;
-  margin-top: -5px;
-  margin-left: -5px;
+}
+
+.road_sign_board:hover::before {
+  border-left: 50px solid black;
+  border-top: 40px solid transparent;
+  border-bottom: 40px solid transparent;
+  top: 0;
+  right: -50px;
 }
 
 .road_sign_board:hover::after {
