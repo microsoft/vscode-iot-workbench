@@ -87,7 +87,12 @@
           },
           "azureFunctions.deploySubpath": {
             "scope": "resource"
-          },
+          }
+        }
+      },
+      {
+        "title": "IoT Workbench Configuration",
+        "properties": {
           "IoTWorkbench.workbench": {
             "type": "string"
           },
@@ -118,6 +123,10 @@
           },
           "IoTWorkbench.BoardId": {
             "type": "string"
+          },
+          "IoTWorkbench.ShownHelpPage": {
+            "type": "boolean",
+            "default": false
           }
         }
       }
