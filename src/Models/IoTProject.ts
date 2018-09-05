@@ -34,8 +34,7 @@ import {StreamAnalyticsJob} from './StreamAnalyticsJob';
 const constants = {
   deviceDefaultFolderName: 'Device',
   functionDefaultFolderName: 'Functions',
-  asaFolderName: 'StreamAnalytics',
-  workspaceConfigFilePath: 'project.code-workspace'
+  asaFolderName: 'StreamAnalytics'
 };
 
 interface ProjectSetting {
@@ -522,7 +521,7 @@ export class IoTProject {
     }
 
     const workspaceConfigFilePath =
-        path.join(this.projectRootPath, constants.workspaceConfigFilePath);
+        path.join(this.projectRootPath, FileNames.workspaceConfigFilePath);
 
     fs.writeFileSync(
         workspaceConfigFilePath, JSON.stringify(workspace, null, 4));

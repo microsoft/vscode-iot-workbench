@@ -11,6 +11,7 @@ export class ConfigKey {
   static readonly functionPath = 'FunctionPath';
   static readonly boardId = 'BoardId';
   static readonly asaPath = 'StreamAnalyticsPath';
+  static readonly pnpDeviceModelPath = 'PnPDeviceModelPath';
 }
 
 export class EventNames {
@@ -41,6 +42,7 @@ export class FileNames {
   static readonly iotworkbenchprojectFileName = '.iotworkbenchproject';
   static readonly settingsJsonFileName = 'settings.json';
   static readonly vscodeSettingsFolderName = '.vscode';
+  static readonly workspaceConfigFilePath = 'project.code-workspace';
 }
 
 export enum AzureFunctionsLanguage {

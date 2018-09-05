@@ -10,12 +10,12 @@ import * as vscode from 'vscode';
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames} from '../constants';
-import {ProjectTemplate, ProjectTemplateType} from '../Models/Interfaces/ProjectTemplate';
-import {IoTProject} from '../Models/IoTProject';
 
 import {Board} from './Interfaces/Board';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
+import {ProjectTemplate, ProjectTemplateType} from './Interfaces/ProjectTemplate';
+import {IoTProject} from './IoTProject';
 
 const constants = {
   defaultSketchFileName: 'device.ino',

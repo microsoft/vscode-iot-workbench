@@ -1,0 +1,557 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "entityName": {
+            "type": "string",
+            "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+        },
+        "entityDisplayName": {
+            "type": "string"
+        },
+        "interfaceSchemas": {
+            "type": "array",
+            "items": {
+                "allOf": [
+                    {
+                        "type": "object",
+                        "properties": {
+                            "@id": {
+                                "type": "string",
+                                "format": "uri"
+                            },
+                            "comment": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "oneOf": [
+                            {
+                                "$ref": "#/definitions/schemaArray"
+                            },
+                            {
+                                "$ref": "#/definitions/schemaEnum"
+                            },
+                            {
+                                "$ref": "#/definitions/schemaObject"
+                            },
+                            {
+                                "$ref": "#/definitions/schemaMap"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        "schema": {
+            "oneOf": [
+                {
+                    "type": "string",
+                    "enum": [
+                        "boolean",
+                        "bytes",
+                        "date",
+                        "dateTime",
+                        "double",
+                        "duration",
+                        "float",
+                        "integer",
+                        "long",
+                        "string",
+                        "time"
+                    ]
+                }, {
+                    "$ref": "#/definitions/schemaArray"
+                }, {
+                    "$ref": "#/definitions/schemaEnum"
+                }, {
+                    "$ref": "#/definitions/schemaObject"
+                }, {
+                    "$ref": "#/definitions/schemaMap"
+                }, {
+                    "$ref": "#/definitions/constantBoolean"
+                }, {
+                    "$ref": "#/definitions/constantBytes"
+                },{
+                    "$ref": "#/definitions/constantDate"
+                },{
+                    "$ref": "#/definitions/constantDateTime"
+                },{
+                    "$ref": "#/definitions/constantDouble"
+                },{
+                    "$ref": "#/definitions/constantDuration"
+                },{
+                    "$ref": "#/definitions/constantFloat"
+                },{
+                    "$ref": "#/definitions/constantInteger"
+                },{
+                    "$ref": "#/definitions/constantLong"
+                },{
+                    "$ref": "#/definitions/constantString"
+                },{
+                    "$ref": "#/definitions/constantTime"
+                }
+            ]
+        },
+        "schemaArray": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "enum": [
+                        "Array"
+                    ]
+                },
+                "elementSchema": {
+                    "$ref": "#/definitions/schema"
+                }
+            }
+        },
+        "schemaEnum": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "enum": [
+                        "Enum"
+                    ]
+                },
+                "schemaenumValues": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schemaEnumValue"
+                    }
+                }
+            }
+        },
+        "schemaEnumValue": {
+            "type": "object",
+            "properties": {
+                "displayName": {
+                    "$ref": "#/definitions/entityDisplayName"
+                },
+                "enumValue": {
+                    "type": ["string", "integer"]
+                }
+            }
+        },
+        "schemaObject": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "enum": [
+                        "Object"
+                    ]
+                },
+                "fields": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "$ref": "#/definitions/entityName"
+                            },
+                            "schema": {
+                                "$ref": "#/definitions/schema"
+                            },
+                            "displayUnit": {
+                                "type": "string",
+                                "enum": [
+                                    "mps",
+                                    "mg",
+                                    "g",
+                                    "mm Hg",
+                                    "ppm",
+                                    "g/m3",
+                                    "%",
+                                    "lux",
+                                    "fps",
+                                    "mph",
+                                    "kPa",
+                                    "psi",
+                                    "inH₂O",
+                                    "inHg",
+                                    "dps",
+                                    "mdps",
+                                    "rps",
+                                    "dB",
+                                    "sone",
+                                    "phon",
+                                    "Hz",
+                                    "°C",
+                                    "°F",
+                                    "mgauss"
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "schemaMap": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "enum": [
+                        "Map"
+                    ]
+                },
+                "mapKey": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "$ref": "#/definitions/entityName"
+                        },
+                        "displayName": {
+                            "$ref": "#/definitions/entityDisplayName"
+                        },
+                        "schema": {
+                            "$ref": "#/definitions/schema"
+                        }
+                    }
+                },
+                "valueSchema": {
+                    "$ref": "#/definitions/schema"
+                }
+            }
+        },
+        "constantBoolean": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "enum": [
+                        "Schemas/Boolean"
+                    ]
+                },
+                "Schemas/Boolean/constant": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "constantBytes": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "enum": [
+                        "Schemas/Bytes"
+                    ]
+                },
+                "Schemas/Bytes/constant": {
+                    "type": "integer"
+                }
+            }
+        },
+        "constantDate": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "enum": [
+                        "Schemas/Date"
+                    ]
+                },
+                "Schemas/Date/constant": {
+                    "type": "string",
+                    "format": ""
+                }
+            }
+        },
+        "constantDateTime": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "enum": [
+                        "Schemas/DateTime"
+                    ]
+                },
+                "Schemas/DateTime/constant": {
+                    "type": "string",
+                    "format": "date-time"
+                }
+            }
+        },
+        "constantDouble": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "enum": [
+                        "Schemas/Double"
+                    ]
+                },
+                "Schemas/Double/constant": {
+                    "type": "number"
+                }
+            }
+        },
+        "constantDuration": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "enum": [
+                        "Schemas/Duration"
+                    ]
+                },
+                "Schemas/Duration/constant": {
+                    "type": "string"
+                }
+            }
+        },
+        "constantFloat": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "enum": [
+                        "Schemas/Float"
+                    ]
+                },
+                "Schemas/Float/constant": {
+                    "type": "number"
+                }
+            }
+        },
+        "constantInteger": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "enum": [
+                        "Schemas/Integer"
+                    ]
+                },
+                "Schemas/Integer/constant": {
+                    "type": "integer"
+                }
+            }
+        },
+        "constantLong": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "enum": [
+                        "Schemas/Long"
+                    ]
+                },
+                "Schemas/Long/constant": {
+                    "type": "integer"
+                }
+            }
+        },
+        "constantString": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "enum": [
+                        "Schemas/String"
+                    ]
+                },
+                "Schemas/String/constant": {
+                    "type": "string"
+                }
+            }
+        },
+        "constantTime": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "enum": [
+                        "Schemas/Time"
+                    ]
+                },
+                "Schemas/Time/constant": {
+                    "type": "string"
+                }
+            }
+        },
+        "context": {
+            "additionalProperties": true,
+            "properties": {
+                "@context": {
+                    "oneOf": [
+                        {
+                            "description": "Used to define the short-hand names that are used throughout a JSON-LD document.",
+                            "type": ["object", "array"]
+                        },
+                        {
+                            "type": "string",
+                            "enum": [
+                                "http://aziot.cloudapp.net/v1/contexts/Interface.json",
+                                "http://aziot.cloudapp.net/v1/contexts/Template.json"
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        "graph": {
+            "additionalProperties": true,
+            "properties": {
+                "@graph": {
+                    "description": "Used to express a graph.",
+                    "type": ["array", "object"],
+                    "additionalItems": {
+                        "anyOf": [{ "$ref": "#/definitions/common" }]
+                    }
+                }
+            }
+        },
+        "common": {
+            "additionalProperties": {
+                "anyOf": [{ "$ref": "#/definitions/common" }]
+            },
+            "properties": {
+                "@id": {
+                    "description": "Used to uniquely identify things that are being described in the document with IRIs or blank node identifiers.",
+                    "type": "string",
+                    "format": "uri"
+                },
+                "@value": {
+                    "description": "Used to specify the data that is associated with a particular property in the graph.",
+                    "type": ["string", "boolean", "number", "null"]
+                },
+                "@language": {
+                    "description": "Used to specify the language for a particular string value or the default language of a JSON-LD document.",
+                    "type": ["string", "null"]
+                },
+                "@type": {
+                    "description": "Used to set the data type of a node or typed value.",
+                    "type": ["string", "null", "array"]
+                },
+                "@container": {
+                    "description": "Used to set the default container type for a term.",
+                    "type": ["string", "null"],
+                    "enum": ["@language", "@list", "@index", "@set"]
+                },
+                "@list": {
+                    "description": "Used to express an ordered set of data."
+                },
+                "@set": {
+                    "description": "Used to express an unordered set of data and to ensure that values are always represented as arrays."
+                },
+                "@reverse": {
+                    "description": "Used to express reverse properties.",
+                    "type": ["string", "object", "null"],
+                    "additionalProperties": {
+                        "anyOf": [{ "$ref": "#/definitions/common" }]
+                    }
+                },
+                "@base": {
+                    "description": "Used to set the base IRI against which relative IRIs are resolved",
+                    "type": ["string", "null"],
+                    "format": "uri"
+                },
+                "@vocab": {
+                    "description": "Used to expand properties and values in @type with a common prefix IRI",
+                    "type": ["string", "null"],
+                    "format": "uri"
+                }
+            }
+        },
+        "interface": {
+            "properties": {
+                "displayName": {
+                    "type": "string"
+                },
+                "schemas": {
+                    "$ref": "#/definitions/interfaceSchemas"
+                },
+                "contents": {
+                    "description": "Azure specific properties",
+                    "type": "array",
+                    "items": {
+                        "oneOf": [
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "@type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Property"
+                                        ]
+                                    },
+                                    "name": {
+                                        "$ref": "#/definitions/entityName"
+                                    },
+                                    "displayName": {
+                                        "$ref": "#/definitions/entityDisplayName"
+                                    },
+                                    "writable": {
+                                        "type": "boolean"
+                                    },
+                                    "schema": {
+                                        "$ref": "#/definitions/schema"
+                                    }
+                                }
+                            }, {
+                                "type": "object",
+                                "properties": {
+                                    "@type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Event"
+                                        ]
+                                    },
+                                    "name": {
+                                        "$ref": "#/definitions/entityName"
+                                    },
+                                    "displayName": {
+                                        "$ref": "#/definitions/entityDisplayName"
+                                    },
+                                    "schema": {
+                                        "$ref": "#/definitions/schema"
+                                    }
+                                }
+                            }, {
+                                "type": "object",
+                                "properties": {
+                                    "@type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Command"
+                                        ]
+                                    },
+                                    "name": {
+                                        "$ref": "#/definitions/entityName"
+                                    },
+                                    "displayName": {
+                                        "$ref": "#/definitions/entityDisplayName"
+                                    },
+                                    "executionType": {
+                                        "type": "string",
+                                        "enum": [
+                                            "asynchronousCommand",
+                                            "synchronousCommand"
+                                        ]
+                                    },
+                                    "requestSchema": {
+                                        "$ref": "#/definitions/schema"
+                                    },
+                                    "responseSchema": {
+                                        "$ref": "#/definitions/schema"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "allOf": [
+        { "$ref": "#/definitions/context" },
+        { "$ref": "#/definitions/graph" },
+        { "$ref": "#/definitions/common" },
+        { "$ref": "#/definitions/interface" }
+    ],
+    "type": ["object", "array"]
+}

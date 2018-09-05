@@ -64,7 +64,12 @@
         "command": "iotworkbench.workbench",
         "title": "Set Workbench Path",
         "category": "IoT Workbench"
-      }
+      },
+      {
+        "command": "iotworkbench.devicemodel",
+        "title": "Plug & Play Device Model",
+        "category": "IoT Workbench"
+    }
     ],
     "configuration": [
       {

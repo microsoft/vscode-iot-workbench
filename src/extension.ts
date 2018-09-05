@@ -24,6 +24,9 @@ import {AZ3166Device} from './Models/AZ3166Device';
 import {IoTButtonDevice} from './Models/IoTButtonDevice';
 import {RaspberryPiDevice} from './Models/RaspberryPiDevice';
 import {Esp32Device} from './Models/Esp32Device';
+import {DeviceModelOperator} from './pnp/DeviceModelOperator';
+import {CodeGenerator} from './pnp/CodeGenerator';
+
 
 function filterMenu(commands: CommandItem[]) {
   for (let i = 0; i < commands.length; i++) {
@@ -122,6 +125,9 @@ export async function activate(context: vscode.ExtensionContext) {
   // Initialize Telemetry
   TelemetryWorker.Initialize(context);
 
+  const deviceModelOperator = new DeviceModelOperator();
+  const codeGenerator = new CodeGenerator();
+
   const telemetryContext: TelemetryContext = {
     properties: {result: 'Succeeded', error: '', errorMessage: ''},
     measurements: {duration: 0}
@@ -219,6 +225,18 @@ export async function activate(context: vscode.ExtensionContext) {
         initializeExampleBinder);
   };
 
+  const deviceModelCreateInterfaceProvider = async () => {
+    deviceModelOperator.CreateInterface(context, outputChannel);
+  };
+
+  const deviceModelCreateTemplateProvider = async () => {
+    deviceModelOperator.CreateTemplate(context, outputChannel);
+  };
+
+  const deviceCodeGenProvider = async () => {
+    codeGenerator.GenerateDeviceCode(context, outputChannel);
+  };
+
   const menuForDevice: CommandItem[] = [
     {
       label: 'Config Device Settings',
@@ -277,6 +295,28 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   ];
 
+  const menuForDeviceModel: CommandItem[] = [
+    {
+      label: 'Create new Plug & Play interface',
+      description: '',
+      detail: 'Create an interface for device model',
+      click: deviceModelCreateInterfaceProvider
+    },
+    {
+      label: 'Create new Plug & Play template',
+      description: '',
+      detail: 'Create a template for device model',
+      click: deviceModelCreateTemplateProvider
+    },
+    {
+      label: 'Generate code on Device',
+      description: '',
+      detail: 'Generate code on Device side.',
+      click: deviceCodeGenProvider
+    }
+  ];
+
+
   const iotdeviceMenu =
       vscode.commands.registerCommand('iotworkbench.device', async () => {
         renderMenu('IoT Workbench: Device', menuForDevice);
@@ -309,6 +349,12 @@ export async function activate(context: vscode.ExtensionContext) {
         return;
       });
 
+  const iotdeviceModelMenu =
+      vscode.commands.registerCommand('iotworkbench.devicemodel', async () => {
+        renderMenu(
+            'IoT Workbench: Plug & Play Device Model', menuForDeviceModel);
+      });
+
   context.subscriptions.push(iotdeviceMenu);
   context.subscriptions.push(iotcloudMenu);
   context.subscriptions.push(projectInit);
@@ -316,6 +362,7 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(exampleInitialize);
   context.subscriptions.push(helpInit);
   context.subscriptions.push(workbenchPath);
+  context.subscriptions.push(iotdeviceModelMenu);
 
   const usbDetector = new UsbDetector(context, outputChannel);
   usbDetector.startListening();

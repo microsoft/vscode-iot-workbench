@@ -1,0 +1,7 @@
+{
+    "@id": "http://example.com/sampletemplate/1.0.0",
+    "@type": "Template",
+    "displayName": "sampleTemplate",
+    "implements":[],
+    "@context": "http://aziot.cloudapp.net/v1/contexts/Template.json"
+}
