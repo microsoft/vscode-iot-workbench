@@ -66,8 +66,8 @@
         "category": "IoT Workbench"
       },
       {
-        "command": "iotworkbench.devicemodel",
-        "title": "Plug & Play Device Model",
+        "command": "iotworkbench.pnp",
+        "title": "Plug and Play",
         "category": "IoT Workbench"
     }
     ],
