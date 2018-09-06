@@ -233,8 +233,8 @@ export async function activate(context: vscode.ExtensionContext) {
     deviceModelOperator.CreateTemplate(context, outputChannel);
   };
 
-  const deviceCodeGenProvider = async () => {
-    codeGenerator.GenerateDeviceCode(context, outputChannel);
+  const scaffoldingDeviceStubProvider = async () => {
+    codeGenerator.ScaffoldingDeviceStub(context, outputChannel);
   };
 
   const menuForDevice: CommandItem[] = [
@@ -312,7 +312,7 @@ export async function activate(context: vscode.ExtensionContext) {
       label: 'Scaffolding Code stub',
       description: '',
       detail: 'Scaffolding Code stub on device.',
-      click: deviceCodeGenProvider
+      click: scaffoldingDeviceStubProvider
     }
   ];
 
@@ -351,8 +351,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const iotdeviceModelMenu =
       vscode.commands.registerCommand('iotworkbench.pnp', async () => {
-        renderMenu(
-            'IoT Workbench: Plug and Play', menuForDeviceModel);
+        renderMenu('IoT Workbench: Plug and Play', menuForDeviceModel);
       });
 
   context.subscriptions.push(iotdeviceMenu);

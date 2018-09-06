@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import * as cp from 'child_process';
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import {setTimeout} from 'timers';
@@ -88,4 +89,30 @@ export function getScriptTemplateNameFromLanguage(language: string): string|
     default:
       return undefined;
   }
+}
+
+export function runCommand(
+    command: string, workingDir: string,
+    outputChannel: vscode.OutputChannel): Thenable<object> {
+  return new Promise((resolve, reject) => {
+    const stdout = '';
+    const stderr = '';
+    const process = cp.spawn(command, [], {cwd: workingDir, shell: true});
+    process.stdout.on('data', (data: string) => {
+      console.log(data);
+      outputChannel.appendLine(data);
+    });
+    process.stderr.on('data', (data: string) => {
+      console.log(data);
+      outputChannel.appendLine(data);
+    });
+    process.on('error', (error) => reject({error, stderr, stdout}));
+    process.on('close', (status) => {
+      if (status === 0) {
+        resolve({status, stdout, stderr});
+      } else {
+        reject({status, stdout, stderr});
+      }
+    });
+  });
 }
