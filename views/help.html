@@ -106,31 +106,21 @@
   }
 }
 
-@keyframes main_button {
-  0% {
-    background-position-x: -100px;
-  }
-  100% {
-    background-position-x: 1000px;
-  }
-}
-
-@keyframes resource {
-  0% {
-    background-position-x: -50px;
-  }
-  100% {
-    background-position-x: 500px;
-  }
-}
-
 .pumpjack {
   width: 430px;
   height: 430px;
   position: absolute;
   overflow: hidden;
   bottom: 0;
-  filter: blur(1px);
+  left: 10px;
+  filter: drop-shadow(2px 0 0 orange)
+          drop-shadow(3px 0 0 orange)
+          drop-shadow(0 -2px 0 orange)
+          drop-shadow(0 -3px 0 orange)
+          drop-shadow(-2px 0 0 orange)
+          drop-shadow(-3px 0 0 orange)
+          drop-shadow(0 2px 0 orange)
+          drop-shadow(0 3px 0 orange);
 }
 
 .pumpjack .hourse_head_walking_beam {
@@ -365,11 +355,21 @@ body {
 }
 
 .header {
-  position: relative;
   height: 80%;
   min-height: 500px;
-  background: linear-gradient(to bottom, #163C52 0%,#4F4F47 30%,#C5752D 60%,#B7490F 80%, #2F1107 98%, black 100%);
+  border-bottom: 10px solid black;
+  background-color: orange;
+}
+
+.header .inner {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  min-width: 800px;
+  max-width: 1200px;
+  margin: 0 auto;
   transition: all 0.5s;
+  overflow: hidden;
 }
 
 .iot_data {
@@ -378,10 +378,8 @@ body {
   left: 450px;
   bottom: 325px;
   font-size: 10px;
-  padding: 0 20px;
-  border-left: 2px solid rgba(0, 0, 0, 0.7);
-  border-right: 2px solid rgba(0, 0, 0, 0.7);
-  opacity: 0.35;
+  padding: 10px;
+  background: orange;
   animation: iot_data 5s ease-in-out infinite;
 }
 
@@ -390,18 +388,17 @@ body {
 }
 
 .logo {
-  height: 70px;
-  line-height: 70px;
-  background: url(images/logo-white.png) no-repeat;
-  background-size: 70px 70px;
+  height: 30px;
+  line-height: 30px;
+  background: url(images/logo-black.png) no-repeat;
+  background-size: 30px;
   position: absolute;
   left: 20px;
   top: 20px;
-  font-size: 50px;
+  font-size: 24px;
   vertical-align: middle;
-  padding-left: 90px;
-  color: white;
-  opacity: 0.25;
+  padding-left: 42px;
+  color: black;
 }
 
 .tower {
@@ -411,26 +408,27 @@ body {
   background-size: 88px 300px;
   position: absolute;
   bottom: 0;
-  right: 120px;
-  opacity: 0.5;
-  filter: blur(2px);
+  right: 60px;
+  filter: drop-shadow(2px 0 0 orange)
+          drop-shadow(3px 0 0 orange)
+          drop-shadow(0 -2px 0 orange)
+          drop-shadow(0 -3px 0 orange)
+          drop-shadow(-2px 0 0 orange)
+          drop-shadow(-3px 0 0 orange)
+          drop-shadow(0 2px 0 orange)
+          drop-shadow(0 3px 0 orange);
 }
 
 .resource {
   width: 130px;
   text-align: center;
   position: absolute;
-  color: transparent;
-  padding: 10px 0;
+  color: black;
+  padding: 5px 0;
   top: 20px;
-  right: 60px;
-  font-weight: bold;
-  -webkit-background-clip: text;
-  background-image: linear-gradient(60deg, transparent, transparent 20px, gray 20px, gray 40px, transparent 40px, transparent 300px);
-  background-color: black;
-  background-repeat: no-repeat;
-  animation: resource 1.5s ease-in infinite;
+  right: 10px;
   cursor: pointer;
+  background: orange;
 }
 
 .resource_links {
@@ -438,7 +436,7 @@ body {
   width: 130px;
   height: 0;
   position: absolute;
-  right: 40px;
+  right: -10px;
   transition: all 0.3s;
   transition-delay: 0.3s;
   padding: 20px;
@@ -459,17 +457,17 @@ body {
 .resource_links .link {
   position: relative;
   left: 0;
-  margin-bottom: 5px;
+  margin-top: -5px;
   padding: 10px 0;
   text-align: center;
   background: black;
-  color: rgba(255, 255, 255, 0.5);
+  color: orange;
+  border: 5px solid orange;
   transition: all 0.3s;
   cursor: pointer;
 }
 
 .resource_links .link:hover {
-  color: rgba(255, 255, 255, 1);
   left: -10px;
 }
 
@@ -477,28 +475,17 @@ body {
   height: 80px;
   line-height: 80px;
   font-size: 42px;
-  left: 50%;
   padding: 0 10px;
   font-weight: bold;
-  background-image: linear-gradient(60deg, transparent, transparent 50px, yellow 50px, yellow 100px, transparent 100px, transparent 500px);
-  background-color: orange;
-  -webkit-background-clip: text;
-  background-repeat: no-repeat;
-  color: transparent;
-  animation: main_button 1.5s ease-in infinite;
+  color: orange;
   cursor: pointer;
+  position: relative;
+  left: 0;
+  transition: 0.15s all ease-out;
 }
 
-.start_button {
-  top: 200px;
-}
-
-.new_button {
-  top: 300px;
-}
-
-.examples_button {
-  top: 400px;
+.main_button:hover {
+  left: 10px;
 }
 
 .road_sign {
@@ -506,8 +493,7 @@ body {
   height: 400px;
   position: absolute;
   bottom: 0;
-  left: 50%;
-  margin-left: 50px;
+  right: 30px;
 }
 
 .road_sign::before {
@@ -521,49 +507,37 @@ body {
   position: absolute;
   top: 0;
   left: 180px;
+  filter: drop-shadow(2px 0 0 orange)
+          drop-shadow(3px 0 0 orange)
+          drop-shadow(0 -2px 0 orange)
+          drop-shadow(0 -3px 0 orange)
+          drop-shadow(-2px 0 0 orange)
+          drop-shadow(-3px 0 0 orange)
+          drop-shadow(0 2px 0 orange)
+          drop-shadow(0 3px 0 orange);
 }
 
 .road_sign_board {
   height: 80px;
   position: absolute;
   background: black;
-  border: 5px solid black;
+  border: 5px solid orange;
   border-right: none;
 }
 
 .road_sign_board::before {
   content: "";
   display: block;
-  border-left: 56px solid black;
-  border-top: 46px solid transparent;
-  border-bottom: 46px solid transparent;
-  position: absolute;
-  top: -6px;
-  right: -56px;
-  z-index: 10;
-}
-
-.road_sign_start {
-  width: 350px;
-  top: 10px;
-  transform: rotate3d(-1, 1, -0.2, 45deg);
-}
-
-.road_sign_board:hover {
-  border-color: orange;
-  border-right: none;
-  z-index: 10;
-}
-
-.road_sign_board:hover::before {
   border-left: 50px solid black;
   border-top: 40px solid transparent;
   border-bottom: 40px solid transparent;
-  top: 0;
+  position: absolute;
+  top: 0px;
   right: -50px;
+  z-index: 10;
 }
 
-.road_sign_board:hover::after {
+.road_sign_board::after {
   content: "";
   display: block;
   border-left: 56px solid orange;
@@ -572,6 +546,12 @@ body {
   position: absolute;
   top: -6px;
   right: -56px;
+}
+
+.road_sign_start {
+  width: 350px;
+  top: 10px;
+  transform: rotate3d(-1, 1, -0.2, 45deg);
 }
 
 .road_sign_new {
@@ -653,78 +633,86 @@ body[data-show-how-to-start="true"] .how_to_start {
 .how_to_start .inner .content img {
   max-width: 100%;
 }
+
+@media (max-width: 1100px) {
+  .iot_data {
+    opacity: 0;
+  }
+}
 </style>
 </head>
 <body data-show-how-to-start="false">
 <div class="header">
-  <div class="logo">Azure IoT Workbench</div>
-  <div class="pumpjack">
-    <div class="hourse_head_walking_beam">
-      <div class="hourse_head"></div>
-      <div class="walking_beam"></div>
-    </div>
-    <div class="samson_post">
-      <div class="samson_post_a"></div>
-      <div class="samson_post_b"></div>
-      <div class="samson_post_c"></div>
-    </div>
-    <div class="bridle"></div>
-    <div class="counter_weight">
-      <div class="counter_weight_a"></div>
-      <div class="counter_weight_b"></div>
-    </div>
-    <div class="crank">
-      <div class="crank_a"></div>
-      <div class="crank_b"></div>
-    </div>
-    <div class="gear_reducer"></div>
-    <div class="gear">
-      <div class="gear_a"></div>
-      <div class="gear_b"></div>
-      <div class="gear_c"></div>
-    </div>
-    <div class="ladder"></div>
-  </div>
-  <div class="tower"></div>
-  <div class="iot_data">
-    <table>
-      <tr>
-        <td>DEVICE ID</td>
-        <td>OW-LZ89</td>
-      </tr>
-      <tr>
-        <td>BHP/Bar</td>
-        <td id="bhp">490.2</td>
-      </tr>
-      <tr>
-        <td>BBL/Day</td>
-        <td id="bbl">347.8</td>
-      </tr>
-      <tr>
-        <td>TEMP/F</td>
-        <td id="tmp">132.9</td>
-      </tr>
-    </table>
-  </div>
-  <div class="resource">/ Resources /</div>
-  <div class="resource_links">
-    <div class="link" onclick="openLink('https://github.com/Microsoft/vscode-iot-workbench')">GitHub</div>
-    <div class="link" onclick="openLink('https://blogs.msdn.microsoft.com/iotdev/')">Blog</div>
-    <div class="link" onclick="openLink('https://microsoft.github.io/azure-iot-developer-kit/')">IoT DevKit</div>
-    <div class="link" onclick="openLink('https://aka.ms/button')">IoT Button</div>
-    <div class="link" onclick="openLink('https://github.com/espressif/arduino-esp32')">ESP32</div>
-    <div class="link" onclick="openLink('https://www.raspberrypi.org/')">Raspberry Pi</div>
-  </div>
-  <div class="road_sign">
-    <div class="road_sign_board road_sign_start">
-      <div class="main_button start_button" onclick="showHowToStart()">How To Start &#x2771;&#x2771;</div>
-    </div>
-    <div class="road_sign_board road_sign_new">
-      <div class="main_button new_button" onclick="httpRequest('/api/new')">New Project &#x2771;&#x2771;</div>
-    </div>
-    <div class="road_sign_board road_sign_example">
-      <div class="main_button examples_button" onclick="httpRequest('/api/example')">Examples &#x2771;&#x2771;</div>
-    </div>
+  <div class="inner">
+      <div class="logo">Azure IoT Workbench</div>
+      <div class="pumpjack">
+        <div class="hourse_head_walking_beam">
+          <div class="hourse_head"></div>
+          <div class="walking_beam"></div>
+        </div>
+        <div class="samson_post">
+          <div class="samson_post_a"></div>
+          <div class="samson_post_b"></div>
+          <div class="samson_post_c"></div>
+        </div>
+        <div class="bridle"></div>
+        <div class="counter_weight">
+          <div class="counter_weight_a"></div>
+          <div class="counter_weight_b"></div>
+        </div>
+        <div class="crank">
+          <div class="crank_a"></div>
+          <div class="crank_b"></div>
+        </div>
+        <div class="gear_reducer"></div>
+        <div class="gear">
+          <div class="gear_a"></div>
+          <div class="gear_b"></div>
+          <div class="gear_c"></div>
+        </div>
+        <div class="ladder"></div>
+      </div>
+      <!-- <div class="tower"></div> -->
+      <div class="iot_data">
+        <table>
+          <tr>
+            <td>DEVICE ID</td>
+            <td>OW-LZ89</td>
+          </tr>
+          <tr>
+            <td>BHP/Bar</td>
+            <td id="bhp">490.2</td>
+          </tr>
+          <tr>
+            <td>BBL/Day</td>
+            <td id="bbl">347.8</td>
+          </tr>
+          <tr>
+            <td>TEMP/F</td>
+            <td id="tmp">132.9</td>
+          </tr>
+        </table>
+      </div>
+      <div class="resource">/ Resources /</div>
+      <div class="resource_links">
+        <div class="link" onclick="openLink('https://github.com/Microsoft/vscode-iot-workbench')">GitHub</div>
+        <div class="link" onclick="openLink('https://blogs.msdn.microsoft.com/iotdev/')">Blog</div>
+        <div class="link" onclick="openLink('https://microsoft.github.io/azure-iot-developer-kit/')">IoT DevKit</div>
+        <div class="link" onclick="openLink('https://aka.ms/button')">IoT Button</div>
+        <div class="link" onclick="openLink('https://github.com/espressif/arduino-esp32')">ESP32</div>
+        <div class="link" onclick="openLink('https://www.raspberrypi.org/')">Raspberry Pi</div>
+      </div>
+      <div class="road_sign">
+        <div class="road_sign_board road_sign_start">
+          <div class="main_button start_button" onclick="showHowToStart()">How To Start &#x2771;&#x2771;</div>
+        </div>
+        <div class="road_sign_board road_sign_new">
+          <div class="main_button new_button" onclick="httpRequest('/api/new')">New Project &#x2771;&#x2771;</div>
+        </div>
+        <div class="road_sign_board road_sign_example">
+          <div class="main_button examples_button" onclick="httpRequest('/api/example')">Examples &#x2771;&#x2771;</div>
+        </div>
+      </div>
   </div>
 </div>
 <div class="how_to_start">
