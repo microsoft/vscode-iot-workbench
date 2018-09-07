@@ -28,19 +28,19 @@
     transform: rotate(10deg);
   }
   50% {
-    transform: rotate(-30deg);
+    transform: rotate(-27deg);
   }
   100% {
     transform: rotate(10deg);
   }
 }
 
-@keyframes pumping_bridle {
+@keyframes polished_rod {
   0% {
     top: 220px;
   }
   50% {
-    top: 150px;
+    top: 90px;
   }
   100% {
     top: 220px;
@@ -97,13 +97,13 @@
 
 @keyframes iot_data {
   0% {
-    bottom: 300px;
+    bottom: 220px;
   }
   50% {
-    bottom: 350px;
+    bottom: 270px;
   }
   100% {
-    bottom: 300px;
+    bottom: 220px;
   }
 }
 
@@ -214,20 +214,18 @@
   height: 300px;
   background: black;
   position: absolute;
-  top: 220px;
-  left: 385px;
-  animation: pumping_bridle 5s ease-in-out infinite;
+  top: 180px;
+  left: 391px;
 }
 
-.pumpjack .bridle::before {
-  content: "";
-  display: block;
+.pumpjack .bridle .polished_rod {
   width: 4px;
   height: 10px;
   background: black;
   left: -1px;
   top: 180px;
   position: absolute;
+  animation: polished_rod 5s ease-in-out infinite;
 }
 
 .pumpjack .counter_weight {
@@ -656,7 +654,9 @@ body[data-show-how-to-start="true"] .how_to_start {
           <div class="samson_post_b"></div>
           <div class="samson_post_c"></div>
         </div>
-        <div class="bridle"></div>
+        <div class="bridle">
+          <div class="polished_rod"></div>
+        </div>
         <div class="counter_weight">
           <div class="counter_weight_a"></div>
           <div class="counter_weight_b"></div>
