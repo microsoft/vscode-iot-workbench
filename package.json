@@ -69,7 +69,7 @@
         "command": "iotworkbench.pnp",
         "title": "Plug and Play",
         "category": "IoT Workbench"
-    }
+      }
     ],
     "configuration": [
       {

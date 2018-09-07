@@ -3,7 +3,7 @@
 
 export class PnPFileNames {
   static readonly resourcesFolderName = 'resources';
-  static readonly deviceModelFolderName = 'deviceModel';
+  static readonly deviceModelFolderName = 'DeviceModel';
   static readonly iotworkbenchprojectFileName = '.vscode-pnp';
   static readonly settingsJsonFileName = 'settings.json';
   static readonly vscodeSettingsFolderName = '.vscode';

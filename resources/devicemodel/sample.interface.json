@@ -1,34 +1,21 @@
-{
-    "@id": "http://example.com/sampleinterface/1.0.0",
-    "@type": "Interface",
-    "displayName": "sampleinterface",
-    "contents": [
-        {
-            "@type": "Event",
-            "name": "sampleEvent",
-            "schema": "double"
-        },
-        {
-            "@type": "Property",
-            "name": "sampleProperty",
-            "schema": "double"
-        }
+{ 
+    "@id": "http://example.com/helloworld/1.0.0", 
+    "@type": "Interface", 
+    "displayName": "Hello World", 
+    "contents": [ 
+      { 
+        "@type": "Event", 
+        "comment": "This shows an event that contains a single value (temperature).", 
+        "name": "temperature", 
+        "schema": "double" 
+      }, 
+      { 
+        "@type": "Event", 
+        "comment": "This shows an event that contains a single value (humidity).", 
+        "name": "humidity", 
+        "schema": "double" 
+      }
     ],
-    "schemas": [
-        {
-            "@id": "http://example.com/Types/sampleSchema",
-            "@type": "Object",
-            "fields": [
-                {
-                    "name": "lat",
-                    "schema": "double"
-                },
-                {
-                    "name": "lon",
-                    "schema": "double"
-                }
-            ]
-        }
-    ],
-    "@context": "http://aziot.cloudapp.net/v1/contexts/Interface.json"
-}
+    "@context": "http://aziot.cloudapp.net/v1/contexts/Interface.json" 
+  } 
+  
