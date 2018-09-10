@@ -213,6 +213,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
                 resourceGroup, siteName);
         console.log(appSettings);
         appSettings.properties = appSettings.properties || {};
+        appSettings.properties['FUNCTIONS_EXTENSION_VERSION'] = '~1';
         appSettings.properties['eventHubConnectionString'] =
             eventHubConnectionString || '';
         appSettings.properties['eventHubConnectionPath'] =

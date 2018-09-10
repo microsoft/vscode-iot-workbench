@@ -215,7 +215,7 @@ export class ExampleExplorer {
                 encodeURIComponent(
                     'board=' + board.id +
                     '&url=' + encodeURIComponent(board.exampleUrl || '')),
-            vscode.ViewColumn.One, 'IoT Workbench Examples');
+            vscode.ViewColumn.One, 'Examples - Azure IoT Workbench');
         return true;
       }
     }

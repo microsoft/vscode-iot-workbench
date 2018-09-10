@@ -1,6 +1,14 @@
 # Change Log
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
 
+## Version 0.1.10
+- Release date: September 10, 2018
+
+### Added
+- Add generate CRC command for OTA.
+- Add ESP32 examples.
+- Add welcome page.
+
 ## Version 0.1.9
 - Release date: August 13, 2018
 

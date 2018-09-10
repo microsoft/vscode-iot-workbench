@@ -11,6 +11,7 @@ export class ConfigKey {
   static readonly functionPath = 'FunctionPath';
   static readonly boardId = 'BoardId';
   static readonly asaPath = 'StreamAnalyticsPath';
+  static readonly shownHelpPage = 'ShownHelpPage';
   static readonly pnpDeviceModelPath = 'PnPDeviceModelPath';
 }
 
@@ -33,6 +34,7 @@ export class EventNames {
 export class ContentView {
   static readonly workbenchContentProtocol = 'iot-workbench';
   static readonly workbenchExampleURI = 'iot-workbench://example';
+  static readonly workbenchHelpURI = 'iot-workbench://help';
 }
 
 export class FileNames {
