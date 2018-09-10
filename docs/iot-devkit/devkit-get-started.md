@@ -73,8 +73,10 @@ Follow these steps to prepare the development environment for the IoT DevKit:
     ![Install IoT Workbench](media/iot-devkit-get-started/install-workbench.png)
     Together with the IoT Workbench, other dependent extensions will be installed.
 
-4. Open **File > Preference > Settings** and add following lines to configure Arduino.
+4. Open **File > Preference > Settings** and add following lines to set the configurations for Arduino.
 
+	![Config settings](media/iot-devkit-get-started/iot-workbench-setting.png)
+	
 	* Windows
 
 		```JSON
@@ -141,7 +143,7 @@ Select **IoT DevKit**.
     
 ![IoT Workbench: Examples -> Select board](media/iot-workbench-examples-board.png)
 
-Then the **IoT Workbench Example** window is showed up.
+Then the **IoT Workbench Example** window is shown up.
     
 ![IoT Workbench, Examples window](media/iot-workbench-examples.png)
 

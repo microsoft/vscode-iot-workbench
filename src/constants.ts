@@ -11,6 +11,7 @@ export class ConfigKey {
   static readonly functionPath = 'FunctionPath';
   static readonly boardId = 'BoardId';
   static readonly asaPath = 'StreamAnalyticsPath';
+  static readonly shownHelpPage = 'ShownHelpPage';
 }
 
 export class EventNames {
@@ -25,11 +26,14 @@ export class EventNames {
   static readonly configDeviceSettingsEvent =
       'IoTWorkbench.ConfigDeviceSettingsEvent';
   static readonly loadExampleEvent = 'IoTWorkbench.loadExample';
+  static readonly detectBoard = 'IoTWorkbench.DetectBoard';
+  static readonly generateOtaCrc = 'IoTWorkbench.GenerateOtaCrc';
 }
 
 export class ContentView {
   static readonly workbenchContentProtocol = 'iot-workbench';
   static readonly workbenchExampleURI = 'iot-workbench://example';
+  static readonly workbenchHelpURI = 'iot-workbench://help';
 }
 
 export class FileNames {

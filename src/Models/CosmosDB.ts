@@ -22,6 +22,7 @@ export class CosmosDB implements Component, Provisionable {
   private componentId: string;
   private azureConfigHandler: AzureConfigFileHandler;
   private extensionContext: vscode.ExtensionContext;
+  private catchedCosmosDbList: Array<{name: string}> = [];
   get id() {
     return this.componentId;
   }
@@ -102,98 +103,151 @@ export class CosmosDB implements Component, Provisionable {
   }
 
   async provision(): Promise<boolean> {
-    if (this.channel) {
-      this.channel.show();
-      this.channel.appendLine('Deploying Cosmos DB...');
-    }
-    const cosmosDBArmTemplatePath = this.extensionContext.asAbsolutePath(
-        path.join(FileNames.resourcesFolderName, 'arm', 'cosmosdb.json'));
-    const cosmosDBArmTemplate =
-        JSON.parse(fs.readFileSync(cosmosDBArmTemplatePath, 'utf8')) as
-        ARMTemplate;
-
-    const cosmosDBDeploy =
-        await AzureUtility.deployARMTemplate(cosmosDBArmTemplate);
-    if (!cosmosDBDeploy || !cosmosDBDeploy.properties ||
-        !cosmosDBDeploy.properties.outputs ||
-        !cosmosDBDeploy.properties.outputs.cosmosDBAccountName ||
-        !cosmosDBDeploy.properties.outputs.cosmosDBAccountKey) {
-      throw new Error('Provision Cosmos DB failed.');
-    }
-    this.channel.appendLine(JSON.stringify(cosmosDBDeploy, null, 4));
-
-    for (const dependency of this.dependencies) {
-      const componentConfig =
-          this.azureConfigHandler.getComponentById(dependency.id);
-      if (!componentConfig) {
-        throw new Error(`Cannot find component with id ${dependency.id}.`);
-      }
-      if (dependency.type === DependencyType.Input) {
-        // CosmosDB input
-      } else {
-        // CosmosDB output
-      }
-    }
-
-    const account = cosmosDBDeploy.properties.outputs.cosmosDBAccountName.value;
-    const key = cosmosDBDeploy.properties.outputs.cosmosDBAccountKey.value;
-
-    let database = await vscode.window.showInputBox({
-      prompt: `Input value for Cosmos DB Database`,
-      ignoreFocusOut: true,
-      validateInput: async (value: string) => {
-        value = value.trim();
-        if (!value) {
-          return 'Please fill this field.';
-        }
-        if (!/^[^\\\/#\?]+/.test(value)) {
-          return 'May not end with space nor contain "\\", "/", "#", "?".';
-        }
-        return;
-      }
-    });
-
-    if (!database) {
+    const cosmosDbList = this.getCosmosDbInResourceGroup();
+    const cosmosDbNameChoose = await vscode.window.showQuickPick(
+        cosmosDbList, {placeHolder: 'Select Cosmos DB', ignoreFocusOut: true});
+    if (!cosmosDbNameChoose) {
       return false;
     }
 
-    database = database.trim();
+    let cosmosDbName = '';
+    let cosmosDbKey = '';
 
-    let collection = await vscode.window.showInputBox({
-      prompt: `Input value for Cosmos DB Collection`,
-      ignoreFocusOut: true,
-      validateInput: async (value: string) => {
-        value = value.trim();
-        if (!value) {
-          return 'Please fill this field.';
-        }
-        if (!/^[^\\\/#\?]+/.test(value)) {
-          return 'May not end with space nor contain "\\", "/", "#", "?".';
-        }
-        return;
+    if (!cosmosDbNameChoose.description) {
+      if (this.channel) {
+        this.channel.show();
+        this.channel.appendLine('Creating Cosmos DB...');
       }
-    });
+      const cosmosDBArmTemplatePath = this.extensionContext.asAbsolutePath(
+          path.join(FileNames.resourcesFolderName, 'arm', 'cosmosdb.json'));
+      const cosmosDBArmTemplate =
+          JSON.parse(fs.readFileSync(cosmosDBArmTemplatePath, 'utf8')) as
+          ARMTemplate;
 
-    if (!collection) {
+      const cosmosDBDeploy =
+          await AzureUtility.deployARMTemplate(cosmosDBArmTemplate);
+      if (!cosmosDBDeploy || !cosmosDBDeploy.properties ||
+          !cosmosDBDeploy.properties.outputs ||
+          !cosmosDBDeploy.properties.outputs.cosmosDBAccountName ||
+          !cosmosDBDeploy.properties.outputs.cosmosDBAccountKey) {
+        throw new Error('Provision Cosmos DB failed.');
+      }
+      this.channel.appendLine(JSON.stringify(cosmosDBDeploy, null, 4));
+
+      for (const dependency of this.dependencies) {
+        const componentConfig =
+            this.azureConfigHandler.getComponentById(dependency.id);
+        if (!componentConfig) {
+          throw new Error(`Cannot find component with id ${dependency.id}.`);
+        }
+        if (dependency.type === DependencyType.Input) {
+          // CosmosDB input
+        } else {
+          // CosmosDB output
+        }
+      }
+
+      cosmosDbName =
+          cosmosDBDeploy.properties.outputs.cosmosDBAccountName.value;
+      cosmosDbKey = cosmosDBDeploy.properties.outputs.cosmosDBAccountKey.value;
+    } else {
+      if (this.channel) {
+        this.channel.show();
+        this.channel.appendLine('Creating Cosmos DB...');
+      }
+
+      cosmosDbName = cosmosDbNameChoose.label;
+      const cosmosDbDetail = this.getCosmosDbByNameFromCache(cosmosDbName);
+      if (cosmosDbDetail) {
+        this.channel.appendLine(JSON.stringify(cosmosDbDetail, null, 4));
+      }
+      cosmosDbKey = await this.getCosmosDbKey(cosmosDbName);
+    }
+
+    const databaseList = this.getDatabases(cosmosDbName, cosmosDbKey);
+    const databaseChoose = await vscode.window.showQuickPick(
+        databaseList, {placeHolder: 'Select Database', ignoreFocusOut: true});
+    if (!databaseChoose) {
       return false;
     }
 
-    collection = collection.trim();
+    let database: string|undefined = '';
 
-    const cosmosDBApiRes =
-        await this.ensureCollection(account, key, database, collection);
-    if (!cosmosDBApiRes) {
-      throw new Error('Error occurred when create collection.');
+    if (!databaseChoose.description) {
+      database = await vscode.window.showInputBox({
+        prompt: `Input value for Cosmos DB Database`,
+        ignoreFocusOut: true,
+        validateInput: async (value: string) => {
+          value = value.trim();
+          if (!value) {
+            return 'Please fill this field.';
+          }
+          if (!/^[^\\\/#\?]+/.test(value)) {
+            return 'May not end with space nor contain "\\", "/", "#", "?".';
+          }
+          return;
+        }
+      });
+
+      if (!database || !database.trim()) {
+        return false;
+      }
+      database = database.trim();
+      const cosmosDBApiRes =
+          await this.ensureDatabase(cosmosDbName, cosmosDbKey, database);
+      if (!cosmosDBApiRes) {
+        throw new Error('Error occurred when create database.');
+      }
+    } else {
+      database = databaseChoose.label;
+    }
+
+    const collectionList =
+        this.getCollections(cosmosDbName, cosmosDbKey, database);
+    const collectionChoose = await vscode.window.showQuickPick(
+        collectionList,
+        {placeHolder: 'Select Collection', ignoreFocusOut: true});
+    if (!collectionChoose) {
+      return false;
+    }
+
+    let collection: string|undefined = '';
+
+    if (!collectionChoose.description) {
+      collection = await vscode.window.showInputBox({
+        prompt: `Input value for Cosmos DB Collection`,
+        ignoreFocusOut: true,
+        validateInput: async (value: string) => {
+          value = value.trim();
+          if (!value) {
+            return 'Please fill this field.';
+          }
+          if (!/^[^\\\/#\?]+/.test(value)) {
+            return 'May not end with space nor contain "\\", "/", "#", "?".';
+          }
+          return;
+        }
+      });
+
+      if (!collection || !collection.trim()) {
+        return false;
+      }
+      collection = collection.trim();
+      const cosmosDBApiRes = await this.ensureCollection(
+          cosmosDbName, cosmosDbKey, database, collection);
+      if (!cosmosDBApiRes) {
+        throw new Error('Error occurred when create collection.');
+      }
+    } else {
+      collection = collectionChoose.label;
     }
 
     this.updateConfigSettings({
       values: {
         subscriptionId: AzureUtility.subscriptionId as string,
         resourceGroup: AzureUtility.resourceGroup as string,
-        cosmosDBAccountName:
-            cosmosDBDeploy.properties.outputs.cosmosDBAccountName.value,
-        cosmosDBAccountKey:
-            cosmosDBDeploy.properties.outputs.cosmosDBAccountKey.value,
+        cosmosDBAccountName: cosmosDbName,
+        cosmosDBAccountKey: cosmosDbKey,
         cosmosDBDatabase: database,
         cosmosDBCollection: collection
       }
@@ -263,6 +317,19 @@ export class CosmosDB implements Component, Provisionable {
     return apiRes;
   }
 
+  async getDatabases(account: string, key: string) {
+    const getDatabasesRes =
+        await this._apiRequest(account, key, 'GET', 'dbs', 'dbs', '');
+    const listRes = getDatabasesRes.body as {Databases: Array<{id: string}>};
+    const databaseList: vscode.QuickPickItem[] =
+        [{label: '$(plus) Create New Database', description: ''}];
+    for (const item of listRes.Databases) {
+      databaseList.push({label: item.id, description: account});
+    }
+
+    return databaseList;
+  }
+
   async ensureDatabase(account: string, key: string, database: string) {
     const getDatabaseRes = await this._apiRequest(
         account, key, 'GET', `dbs/${database}`, 'dbs', `dbs/${database}`);
@@ -279,13 +346,24 @@ export class CosmosDB implements Component, Provisionable {
     return false;
   }
 
-  async ensureCollection(
-      account: string, key: string, database: string, collection: string) {
-    const databaseRes = await this.ensureDatabase(account, key, database);
-    if (!databaseRes) {
-      return false;
+  async getCollections(account: string, key: string, database: string) {
+    const getDCollectionsRes = await this._apiRequest(
+        account, key, 'GET', `dbs/${database}/colls`, 'colls',
+        `dbs/${database}`);
+    const listRes =
+        getDCollectionsRes.body as {DocumentCollections: Array<{id: string}>};
+    const collectionList: vscode.QuickPickItem[] =
+        [{label: '$(plus) Create New Collection', description: ''}];
+    for (const item of listRes.DocumentCollections) {
+      collectionList.push(
+          {label: item.id, description: `${account}/${database}`});
     }
 
+    return collectionList;
+  }
+
+  async ensureCollection(
+      account: string, key: string, database: string, collection: string) {
     const getCollectionRes = await this._apiRequest(
         account, key, 'GET', `dbs/${database}/colls/${collection}`, 'colls',
         `dbs/${database}/colls/${collection}`);
@@ -301,5 +379,36 @@ export class CosmosDB implements Component, Provisionable {
     }
 
     return false;
+  }
+
+  private getCosmosDbByNameFromCache(name: string) {
+    return this.catchedCosmosDbList.find(item => item.name === name);
+  }
+
+  private async getCosmosDbInResourceGroup() {
+    const resource = `/subscriptions/${
+        AzureUtility.subscriptionId}/resourceGroups/${
+        AzureUtility
+            .resourceGroup}/providers/Microsoft.DocumentDB/databaseAccounts?api-version=2015-04-08`;
+    const cosmosDbListRes = await AzureUtility.getRequest(resource) as
+        {value: Array<{name: string, location: string}>};
+    const cosmosDbList: vscode.QuickPickItem[] =
+        [{label: '$(plus) Create New Cosmos DB', description: ''}];
+    for (const item of cosmosDbListRes.value) {
+      cosmosDbList.push({label: item.name, description: item.location});
+    }
+    this.catchedCosmosDbList = cosmosDbListRes.value;
+    return cosmosDbList;
+  }
+
+  private async getCosmosDbKey(name: string) {
+    const resource = `/subscriptions/${
+        AzureUtility.subscriptionId}/resourceGroups/${
+        AzureUtility
+            .resourceGroup}/providers/Microsoft.DocumentDB/databaseAccounts/${
+        name}/listKeys?api-version=2015-04-08`;
+    const cosmosDbKeyListRes =
+        await AzureUtility.postRequest(resource) as {primaryMasterKey: string};
+    return cosmosDbKeyListRes.primaryMasterKey;
   }
 }

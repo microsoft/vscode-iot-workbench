@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 import {BoardProvider} from './boardProvider';
 import {ConfigHandler} from './configHandler';
-import {ConfigKey} from './constants';
+import {ConfigKey, ContentView} from './constants';
 
 export class HelpProvider {
   static async open(context: vscode.ExtensionContext) {
@@ -20,8 +20,8 @@ export class HelpProvider {
     }
 
     await vscode.commands.executeCommand(
-        'vscode.open',
-        vscode.Uri.parse('https://github.com/Microsoft/vscode-iot-workbench/'));
+        'vscode.previewHtml', ContentView.workbenchHelpURI,
+        vscode.ViewColumn.One, 'Welcome - Azure IoT Workbench');
     return;
   }
 }
