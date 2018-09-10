@@ -365,6 +365,17 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const usbDetector = new UsbDetector(context, outputChannel);
   usbDetector.startListening();
+
+  const shownHelpPage = ConfigHandler.get<boolean>(ConfigKey.shownHelpPage);
+  if (!shownHelpPage) {
+    // Do not execute help command here
+    // Help command may open board help link
+    vscode.commands.executeCommand(
+        'vscode.previewHtml', ContentView.workbenchHelpURI,
+        vscode.ViewColumn.One, 'Welcome - Azure IoT Workbench');
+    ConfigHandler.update(
+        ConfigKey.shownHelpPage, true, vscode.ConfigurationTarget.Global);
+  }
 }
 
 // this method is called when your extension is deactivated

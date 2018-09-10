@@ -25,6 +25,9 @@ export class ContentProvider implements vscode.TextDocumentContentProvider {
         '/api/link', async (req, res) => await this.openLink(req, res));
     this._webserver.addHandler(
         '/api/feed', async (req, res) => await this.getFeed(req, res));
+    this._webserver.addHandler('/api/new', async (req, res) => {
+      await vscode.commands.executeCommand('iotworkbench.initializeProject');
+    });
   }
 
   async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
@@ -33,6 +36,9 @@ export class ContentProvider implements vscode.TextDocumentContentProvider {
     switch (url) {
       case ContentView.workbenchExampleURI:
         type = 'example';
+        break;
+      case ContentView.workbenchHelpURI:
+        type = 'help';
         break;
       default:
         type = 'example';
@@ -51,7 +57,8 @@ export class ContentProvider implements vscode.TextDocumentContentProvider {
 
   private async loadExample(req: express.Request, res: express.Response) {
     if (!req.query.name || !req.query.url) {
-      return res.json({code: 1});
+      await vscode.commands.executeCommand('iotworkbench.examples');
+      return res.json({code: 0});
     }
     const exampleExplorer = this._exampleExplorer;
     exampleExplorer.setSelectedExample(
