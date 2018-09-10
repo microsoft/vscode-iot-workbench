@@ -1,7 +1,7 @@
 { 
-    "@id": "http://example.com/helloworld/1.0.0", 
+    "@id": "http://example.com/{INTERFACENAME}/1.0.0", 
     "@type": "Interface", 
-    "displayName": "Hello World", 
+    "displayName": "{INTERFACENAME}", 
     "contents": [ 
       { 
         "@type": "Event", 

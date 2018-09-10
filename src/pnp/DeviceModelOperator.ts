@@ -216,8 +216,14 @@ export class DeviceModelOperator {
         PnPFileNames.sampleInterfaceName));
 
     try {
+      const interfaceNamePattern = /{INTERFACENAME}/g;
       const content = fs.readFileSync(interfaceTemplate, 'utf8');
-      fs.writeFileSync(targetInterface, content);
+      const matchItems = interfaceFileName.match(/^(.*?)\.(interface)\.json$/);
+      if (!matchItems || !matchItems[1]) {
+        return false;
+      }
+      const replaceStr = content.replace(interfaceNamePattern, matchItems[1]);
+      fs.writeFileSync(targetInterface, replaceStr);
     } catch (error) {
       throw new Error(`Create sample interface file failed: ${error.message}`);
     }
@@ -306,7 +312,13 @@ export class DeviceModelOperator {
 
     try {
       const content = fs.readFileSync(template, 'utf8');
-      fs.writeFileSync(targetTemplate, content);
+      const templateNamePattern = /{TEMPLATENAME}/g;
+      const matchItems = templateFileName.match(/^(.*?)\.(template)\.json$/);
+      if (!matchItems || !matchItems[1]) {
+        return false;
+      }
+      const replaceStr = content.replace(templateNamePattern, matchItems[1]);
+      fs.writeFileSync(targetTemplate, replaceStr);
     } catch (error) {
       throw new Error(`Create sample template file failed: ${error.message}`);
     }
