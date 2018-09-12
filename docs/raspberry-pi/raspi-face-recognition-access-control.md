@@ -18,6 +18,7 @@ Connect Picamera to Raspberry Pi:
 
 You can follow the guide here <https://projects.raspberrypi.org/en/projects/getting-started-with-picamera/4>.
 
+![Camera connections](media/raspi-face-recognition-access-control/connect.jpg)
 
 Connect LED to Raspberry Pi:
 
