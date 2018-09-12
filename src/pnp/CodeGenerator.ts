@@ -19,7 +19,7 @@ const constants = {
 };
 
 export class CodeGenerator {
-  async ScaffoldingDeviceStub(
+  async ScaffoldDeviceStub(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
     const pnpDeviceModelFolder =
         ConfigHandler.get<string>(ConfigKey.pnpDeviceModelPath);
@@ -216,9 +216,9 @@ export class CodeGenerator {
         templateFilePath}" --language cpp  --output "${targetPath}"`;
 
     channel.show();
-    channel.appendLine('IoT Workbench: scaffolding code stub.');
+    channel.appendLine('IoT Workbench: scaffold code stub.');
     await utils.runCommand(command, cmdPath, channel);
-    channel.appendLine('IoT Workbench: scaffolding code stub completed.');
+    channel.appendLine('IoT Workbench: scaffold code stub completed.');
     return;
   }
 }
