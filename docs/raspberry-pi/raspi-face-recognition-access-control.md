@@ -70,21 +70,21 @@ Then the **IoT Workbench Example** window is shown up.
 
 Find **Face Recognition Access Control** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
 
-![IoT Workbench, select Simple LED example](media/raspi-simple-led/open-example-simple-led.png)
+![IoT Workbench, select face recognition access control example](media/raspi-face-recognition-access-control/open-example-face-control.png)
 
 ## Provision Cognitive Service
   1. Login to http://portal.azure.com
   2. Select the **Create a resource** option.
   3. Select **AI + Machine Learning** from the list of services.
   4. Select **Face**. You may need to click "See all" or search to see it.
-	[create speech service](media/raspi-face-recognition-access-control/create-face-api.jpg)
+	![create face service](media/raspi-face-recognition-access-control/create-face-api.jpg)
   5. Fill out the rest of the form, and click the **Create** button.
   6. You are now subscribed to Microsoft Face API.
   7. Go to **All Resources** and select the Microsoft Face you created.
   8. Copy your subscription endpoint to access the service. We will use that value in later sections.
   ![get face endpoint](media/raspi-face-recognition-access-control/face-endpoint.jpg)
   9. Go to the **Keys** option and copy your subscription key to access the service. We will use that value in later sections.
-	![get speech key](media/raspi-face-recognition-access-control/face-key.jpg)
+	![get face key](media/raspi-face-recognition-access-control/face-key.jpg)
   
 
 ## Provision Azure Services
@@ -111,12 +111,24 @@ Please take a note of the Function App name and IoT Hub device name you created.
 
 ## Modify code for Azure Functions
 
-Open **simple-led\run.csx** and modify the following line with the device name you provisioned in previous step:
+Open **raspberrypi-state\run.csx** and modify the following line with the device name you provisioned in previous step:
 ```cpp
 static string deviceName = "";
 ```
 
 ## Modify code for Raspberry Pi
+
+Open **Device\app.js** and modify the following lines with the subscription key and endpoint you recorded when provision face service.
+```cpp
+const subscriptionKey = ''; //face service key
+const endpoint = ''; //face service endpoint
+```
+
+Enter the **groupid** and **groupdname** you want to name your access control service in the same file.
+```cpp
+const groupid = '';
+const groupname = '';
+```
 
 
 ## Deploy Azure Functions
