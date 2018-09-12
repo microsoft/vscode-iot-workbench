@@ -216,12 +216,14 @@ If you cannot execute ssh command in the terminal on Windows, you can use any ot
 3. Click connect button.
 4. You can start adding and deleting person in a few seconds.
 ![Add person in web](media/raspi-face-recognition-access-control/web.jpg)
-5. When adding person, follow the command in Raspberry Pi terminal to record photos and train models.
+5. When adding person, follow the command in Raspberry Pi terminal to record photos and train the model.
 ![Add person in Raspberry Pi](media/raspi-face-recognition-access-control/add-person-raspberrypi.jpg)
 
 
 
 ## Acquire Access with Raspberrypi
 
-After addind some people, you can start trying to acquire control by push the button once. Once you push the button, the camera will take a photo and use that photo to determine whether you are allowed to enter. Here we use the LEDs to show the result. The green one will be on for two seconds if you are allowed. Similaryly, the red one will be on if you are denied. You can also see the result in the console.
+After adding some people, you can start trying to acquire access by pushing the button once. Once you push the button, the camera will take a photo and use that photo to determine whether you are allowed to enter.
+
+Here we use the LEDs to show the result. The green one will be on for two seconds if you are allowed. Similaryly, the red one will be on if you are denied. You can also see the result in the console.
 ![Result in the console](media/raspi-face-recognition-access-control/console-result.jpg)
