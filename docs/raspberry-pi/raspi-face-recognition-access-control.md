@@ -36,17 +36,17 @@ Connect Button one pin to 3.3V, one pin to Ground and another pin to GPIO 14. No
 ![Button connections](media/raspi-face-recognition-access-control/connect-button.jpg)
 
 
-Connect Red LED VCC to GPIO 3, GND to Ground and Green LED VCC to GPIO 4, GND to Ground .
+Connect Red LED VCC to GPIO 5, GND to Ground and Green LED VCC to GPIO 6, GND to Ground. Add a resistor to each circuit for protection.
 
 
 | LED Pin     | Raspberry Pi GPIO |
 | -------     | ----------------- |
-| RED VCC     | 3                 |
+| RED VCC     | 5                 |
 | RED GND     | Ground            |
-| GREEN VCC   | 4                 |
+| GREEN VCC   | 6                 |
 | GREEN GND   | Ground            |
 
-![Hardware connections](media/raspi-simple-led/connect.jpg)
+![Hardware connections](media/raspi-simple-led/connect-final.jpg)
 
 ## Open the project folder
 
