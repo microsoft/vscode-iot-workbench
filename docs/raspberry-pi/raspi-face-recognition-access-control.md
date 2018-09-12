@@ -207,16 +207,21 @@ node app.js
 
 If you cannot execute ssh command in the terminal on Windows, you can use any other SSH client, such [PuTTY](https://www.putty.org/).
 
-  ![Run code on Raspberry Pi](media/raspi-simple-led/run-code.png)
+  ![Run code on Raspberry Pi](media/raspi-face-recognition-access-control/run-code.jpg)
 
-## Control LED in Browser
-
-Open **web\index.html** and modify the following line with the function name you provisioned in previous step:
-```javascript
-var functionName = '';
-```
+## Control Access Rights in Browser
 
 1. Open `web\index.html` in browser.
-2. Click the switch to control the LED.
+2. Input the Function App name you write down.
+3. Click connect button.
+4. You can start adding and deleting person in a few seconds.
+![Add person in web](media/raspi-face-recognition-access-control/web.jpg)
+5. When adding person, follow the command in Raspberry Pi terminal to record photos and train models.
+![Add person in Raspberry Pi](media/raspi-face-recognition-access-control/add-person-raspberrypi.jpg)
 
-![IoT Workbench: Cloud -> Deploy](media/raspi-simple-led/web.png)
+
+
+## Acquire Access with Raspberrypi
+
+After addind some people, you can start trying to acquire control by push the button once. Once you push the button, the camera will take a photo and use that photo to determine whether you are allowed to enter. Here we use the LEDs to show the result. The green one will be on for two seconds if you are allowed. Similaryly, the red one will be on if you are denied. You can also see the result in the console.
+![Result in the console](media/raspi-face-recognition-access-control/console-result.jpg)
