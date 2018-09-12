@@ -226,4 +226,5 @@ If you cannot execute ssh command in the terminal on Windows, you can use any ot
 After adding some people, you can start trying to acquire access by pushing the button once. Once you push the button, the camera will take a photo and use that photo to determine whether you are allowed to enter.
 
 Here we use the LEDs to show the result. The green one will be on for two seconds if you are allowed. Similaryly, the red one will be on if you are denied. You can also see the result in the console.
+
 ![Result in the console](media/raspi-face-recognition-access-control/console-result.jpg)
