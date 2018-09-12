@@ -1,6 +1,6 @@
-# Simple LED
+# Face Recognition Access Control
 
-In this tutorial, you can control the LED connected to Raspberry Pi GPIO using Azure IoT Hub direct method.
+In this tutorial, you will build an access control system with Raspberry Pi and picamera. This access control systems use Azure IoT Hub direct method and Azure cognitive service.
 
 ## What you need
 
@@ -12,6 +12,12 @@ In this tutorial, you can control the LED connected to Raspberry Pi GPIO using A
   - Claim your [Azure credit](https://azure.microsoft.com/pricing/member-offers/msdn-benefits-details/) if you are MSDN or Visual Studio subscriber.
 
 ## Prepare your hardware
+
+
+Connect Picamera to Raspberry Pi:
+
+You can follow the guide here <https://projects.raspberrypi.org/en/projects/getting-started-with-picamera/4>.
+
 
 Connect LED to Raspberry Pi:
 
