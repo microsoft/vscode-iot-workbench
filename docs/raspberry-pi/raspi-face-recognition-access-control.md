@@ -36,12 +36,12 @@ Connect Button one pin to 3.3V, and another pin to GPIO 14.
 Connect Red LED VCC to GPIO 3, GND to Ground and Green LED VCC to GPIO 4, GND to Ground .
 
 
-| LED Pin | Raspberry Pi GPIO |
-| ------- | ----------------- |
+| LED Pin     | Raspberry Pi GPIO |
+| -------     | ----------------- |
 | RED VCC     | 3                 |
 | RED GND     | Ground            |
-| GREEN VCC     | 4                 |
-| GREEN GND     | Ground            |
+| GREEN VCC   | 4                 |
+| GREEN GND   | Ground            |
 ![Hardware connections](media/raspi-simple-led/connect.jpg)
 
 ## Open the project folder
