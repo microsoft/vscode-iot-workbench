@@ -24,13 +24,16 @@ You can follow the guide here <https://projects.raspberrypi.org/en/projects/gett
 
 You can find Raspberry Pi GPIO pin mapping from <https://www.raspberrypi.org/documentation/usage/gpio/>.
 
-Connect Button one pin to 3.3V, and another pin to GPIO 14.
+Connect Button one pin to 3.3V, one pin to Ground and another pin to GPIO 14. Notice that you should add a resist between the button and 3.3V to avoid large current.
 
 
 | Button | Raspberry Pi GPIO |
 | ------- | ----------------- |
-| PIN 1     | 14                 |
-| PIN 2     | 3.3V            |
+| PIN 1     | 3.3V                 |
+| PIN 2     | Ground            |
+| PIN 3     | 14            |
+
+![Button connections](media/raspi-face-recognition-access-control/button.jpg)
 
 
 Connect Red LED VCC to GPIO 3, GND to Ground and Green LED VCC to GPIO 4, GND to Ground .
