@@ -13,13 +13,13 @@ In this tutorial, you will build an access control system with Raspberry Pi and 
 
 ## Prepare your hardware
 
-###Connect Picamera to Raspberry Pi:
+### Connect Picamera to Raspberry Pi:
 
 You can follow the guide here <https://projects.raspberrypi.org/en/projects/getting-started-with-picamera/4>.
 
 ![Camera connections](media/raspi-face-recognition-access-control/connect.jpg)
 
-###Connect Button and LED to Raspberry Pi:
+### Connect Button and LED to Raspberry Pi:
 
 You can find Raspberry Pi GPIO pin mapping from <https://www.raspberrypi.org/documentation/usage/gpio/>.
 
@@ -68,9 +68,24 @@ Then the **IoT Workbench Example** window is shown up.
 
 ![IoT Workbench, Examples window](media/iot-workbench-examples.png)
 
-Find **Simple LED** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
+Find **Face Recognition Access Control** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
 
 ![IoT Workbench, select Simple LED example](media/raspi-simple-led/open-example-simple-led.png)
+
+## Provision Cognitive Service
+  1. Login to http://portal.azure.com
+  2. Select the **Create a resource** option.
+  3. Select **AI + Machine Learning** from the list of services.
+  4. Select **Face**. You may need to click "See all" or search to see it.
+	[create speech service](media/raspi-face-recognition-access-control/create-face-api.jpg)
+  5. Fill out the rest of the form, and click the **Create** button.
+  6. You are now subscribed to Microsoft Face API.
+  7. Go to **All Resources** and select the Microsoft Face you created.
+  8. Copy your subscription endpoint to access the service. We will use that value in later sections.
+  ![get face endpoint](media/raspi-face-recognition-access-control/face-endpoint.jpg)
+  9. Go to the **Keys** option and copy your subscription key to access the service. We will use that value in later sections.
+	![get speech key](media/raspi-face-recognition-access-control/face-key.jpg)
+  
 
 ## Provision Azure Services
 
@@ -100,6 +115,9 @@ Open **simple-led\run.csx** and modify the following line with the device name y
 ```cpp
 static string deviceName = "";
 ```
+
+## Modify code for Raspberry Pi
+
 
 ## Deploy Azure Functions
 
