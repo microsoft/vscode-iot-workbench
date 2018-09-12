@@ -14,17 +14,17 @@ In this tutorial, you will build an access control system with Raspberry Pi and 
 ## Prepare your hardware
 
 
-#Connect Picamera to Raspberry Pi:
+###Connect Picamera to Raspberry Pi:
 
 You can follow the guide here <https://projects.raspberrypi.org/en/projects/getting-started-with-picamera/4>.
 
 ![Camera connections](media/raspi-face-recognition-access-control/connect.jpg)
 
-#Connect Button and LED to Raspberry Pi:
+###Connect Button and LED to Raspberry Pi:
 
 You can find Raspberry Pi GPIO pin mapping from <https://www.raspberrypi.org/documentation/usage/gpio/>.
 
-Connect Button one pin to 3.3V, one pin to Ground and another pin to GPIO 14. Notice that you should add a resist between the button and 3.3V to avoid large current.
+Connect Button one pin to 3.3V, one pin to Ground and another pin to GPIO 14. Notice that you should add a resist between the button and Ground to avoid large current.
 
 
 | Button | Raspberry Pi GPIO |
@@ -33,7 +33,7 @@ Connect Button one pin to 3.3V, one pin to Ground and another pin to GPIO 14. No
 | PIN 2     | Ground            |
 | PIN 3     | 14            |
 
-![Button connections](media/raspi-face-recognition-access-control/button.jpg)
+![Button connections](media/raspi-face-recognition-access-control/connect-button.jpg)
 
 
 Connect Red LED VCC to GPIO 3, GND to Ground and Green LED VCC to GPIO 4, GND to Ground .
