@@ -1,6 +1,6 @@
 # Face Recognition Access Control
 
-In this tutorial, you will build an access control system with Raspberry Pi and picamera. This access control system usea Azure IoT Hub direct method and Azure cognitive service.
+In this tutorial, you will build an access control system with Raspberry Pi and picamera. This access control system uses Azure IoT Hub direct method and Azure cognitive service.
 
 ## What you need
 
