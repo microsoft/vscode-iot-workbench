@@ -237,6 +237,8 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
         if (this.functionLanguage !==
             AzureFunctionsLanguage.CSharpLibrary as string) {
           appSettings.properties['FUNCTIONS_EXTENSION_VERSION'] = '~1';
+        } else {
+          appSettings.properties['FUNCTIONS_EXTENSION_VERSION'] = '~2';
         }
         appSettings.properties['eventHubConnectionString'] =
             eventHubConnectionString || '';
