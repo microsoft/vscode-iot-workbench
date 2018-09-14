@@ -74,6 +74,10 @@ export class AZ3166Device extends ArduinoDeviceBase {
     return this.componentId;
   }
 
+  get folder() {
+    return path.basename(this.deviceFolder);
+  }
+
   private sketchName = '';
   private static _boardId = 'devkit';
 

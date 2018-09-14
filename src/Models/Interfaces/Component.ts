@@ -14,6 +14,7 @@ export enum ComponentType {
 export interface Component {
   name: string;
   id: string;
+  folder?: string;
   load(): Promise<boolean>;
   create(): Promise<boolean>;
   getComponentType(): ComponentType;
