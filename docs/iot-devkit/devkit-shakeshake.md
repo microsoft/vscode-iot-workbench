@@ -42,7 +42,7 @@ Then the **IoT Workbench Example** window is shown up.
 
 Find **Shake, Shake for a Tweet** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
 
-![IoT Workbench, select DevKit Translator example](media/devkit-translator/iot-workbench-example.png)
+![IoT Workbench, select "Shake, Shake for a Tweet" example](media/iot-devkit-shakeshake/iot-workbench-example.png)
 
 ## Provision Azure services
 
