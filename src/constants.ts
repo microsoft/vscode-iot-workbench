@@ -29,6 +29,7 @@ export class EventNames {
   static readonly loadExampleEvent = 'IoTWorkbench.loadExample';
   static readonly detectBoard = 'IoTWorkbench.DetectBoard';
   static readonly generateOtaCrc = 'IoTWorkbench.GenerateOtaCrc';
+  static readonly scaffoldDeviceStubEvent = 'IoTWorkbench.ScaffoldDeviceStub';
 }
 
 export class ContentView {

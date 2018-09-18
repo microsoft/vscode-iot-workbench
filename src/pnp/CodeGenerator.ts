@@ -11,8 +11,10 @@ import * as path from 'path';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames} from '../constants';
 import {AZ3166Device} from '../Models/AZ3166Device';
-import {Workspace} from '../Models/Interfaces/Workspace';
+import {IoTProject} from '../Models/IoTProject';
 import * as utils from '../utils';
+import {TelemetryContext} from '../telemetry';
+import {ProjectTemplate,} from '../Models/Interfaces/ProjectTemplate';
 
 const constants = {
   deviceDefaultFolderName: 'Device'
@@ -20,7 +22,8 @@ const constants = {
 
 export class CodeGenerator {
   async ScaffoldDeviceStub(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext) {
     const pnpDeviceModelFolder =
         ConfigHandler.get<string>(ConfigKey.pnpDeviceModelPath);
     if (!pnpDeviceModelFolder) {
@@ -88,7 +91,7 @@ export class CodeGenerator {
     if (languageSelection.label === 'C++') {
       const targetItems: vscode.QuickPickItem[] = [
         {label: 'MXChip IoT DevKit', description: ''},
-        {label: 'Export', description: ''}
+        {label: 'General', description: ''}
       ];
       const targetSelection = await vscode.window.showQuickPick(
           targetItems,
@@ -99,31 +102,33 @@ export class CodeGenerator {
       }
 
       if (targetSelection.label === 'MXChip IoT DevKit') {
-        await this.GenerateCppCodeForDevKit(
-            context, rootPath, templatePath, channel);
-      } else if (targetSelection.label === 'Export') {
-        await this.GenerateCppCodeForExport(templatePath, channel);
+        const path = await this.GetFolderForCodeGen(channel);
+        if (path !== null) {
+          await this.GenerateCppCodeForDevKit(
+              context, path, templatePath, channel, telemetryContext);
+        }
+      } else if (targetSelection.label === 'General') {
+        const path = await this.GetFolderForCodeGen(channel);
+        if (path !== null) {
+          await this.GenerateCppCode(path, templatePath, channel);
+        }
       }
     }
+    vscode.window.showInformationMessage('Scaffold device code stub completed');
     return true;
   }
 
   async GenerateCppCodeForDevKit(
       context: vscode.ExtensionContext, rootPath: string,
-      templateFilePath: string, channel: vscode.OutputChannel) {
-    let needReload = false;
-    let devicePath = '';
-    const deviceFolderName = ConfigHandler.get<string>(ConfigKey.devicePath);
-    if (!deviceFolderName) {
-      needReload = true;
+      templateFilePath: string, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext) {
+    const needReload = false;
 
-      // create and initialize the device folder
-      devicePath = path.join(rootPath, constants.deviceDefaultFolderName);
-      if (!fs.existsSync(devicePath)) {
-        fs.mkdirSync(devicePath);
-      }
-    } else {
-      devicePath = path.join(rootPath, deviceFolderName);
+    // Create the device path
+    const devicePath = path.join(rootPath, constants.deviceDefaultFolderName);
+
+    if (!fs.existsSync(devicePath)) {
+      fs.mkdirSync(devicePath);
     }
 
     // create the path for src. In Arduino, only files under src folder are
@@ -133,21 +138,16 @@ export class CodeGenerator {
       fs.mkdirSync(sourcePath);
     }
 
-    // initialize az3166 device
-    // if the ino file is already created, skip this step
-
-    const sketchFiles = fs.listSync(devicePath, ['ino']);
-    if (!sketchFiles || sketchFiles.length === 0) {
-      const devkitDevice =
-          new AZ3166Device(context, devicePath, 'emptySketch.ino');
-      await devkitDevice.create();
-    }
-
     // Generate the folder for the code stub
     const fileName = path.basename(templateFilePath);
     // myinterface.template.json => myinterface
+
+    const matchItems = fileName.match(/^(.*?)\.(interface|template)\.json$/);
+    if (!matchItems || !matchItems[1]) {
+      return false;
+    }
     const libPath =
-        path.join(sourcePath, fileName.substr(0, fileName.indexOf('.')));
+        path.join(sourcePath, matchItems[1]);  // Template or interface name
     if (!fs.existsSync(libPath)) {
       fs.mkdirSync(libPath);
     }
@@ -155,48 +155,52 @@ export class CodeGenerator {
     // Invoke PnP toolset to generate the code
     await this.GenerateCppCode(libPath, templateFilePath, channel);
 
-    if (needReload) {
-      // load the workspace file
-      const workspaceConfigFilePath =
-          path.join(rootPath, FileNames.workspaceConfigFilePath);
-      const workspace: Workspace =
-          JSON.parse(fs.readFileSync(workspaceConfigFilePath, 'utf8')) as
-          Workspace;
-      workspace.folders.push({path: constants.deviceDefaultFolderName});
-      workspace.settings[`IoTWorkbench.${ConfigKey.devicePath}`] =
-          constants.deviceDefaultFolderName;
-      workspace.settings[`IoTWorkbench.${ConfigKey.boardId}`] =
-          AZ3166Device.boardId;
+    // TODO: update the telemetry
+    const project: IoTProject =
+        new IoTProject(context, channel, telemetryContext);
 
-      fs.writeFileSync(
-          workspaceConfigFilePath, JSON.stringify(workspace, null, 4));
+    // Template select
+    const template = context.asAbsolutePath(path.join(
+        FileNames.resourcesFolderName, AZ3166Device.boardId,
+        FileNames.templateFileName));
+    const templateJson = require(template);
+    const result = templateJson.templates.find((template: ProjectTemplate) => {
+      return template.label === 'Device only';  // For the generated project, we
+                                                // use the template of device
+                                                // only
+    });
 
-      try {
-        vscode.commands.executeCommand('workbench.action.reloadWindow');
-        return true;
-      } catch (error) {
-        throw error;
-      }
-    }
+    await project.create(rootPath, result, AZ3166Device.boardId, true);
     return;
   }
 
-  async GenerateCppCodeForExport(
-      templateFilePath: string, channel: vscode.OutputChannel) {
+  async GetFolderForCodeGen(channel: vscode.OutputChannel):
+      Promise<string|null> {
     let rootPath: string;
     // Ask user to select a folder to export
     const options: vscode.OpenDialogOptions = {
       canSelectMany: false,
-      openLabel: 'Select a folder to export:',
+      openLabel: 'Select a folder',
       canSelectFolders: true,
       canSelectFiles: false
     };
+
     const folderUri = await vscode.window.showOpenDialog(options);
     if (folderUri && folderUri[0]) {
       console.log(`Selected folder: ${folderUri[0].fsPath}`);
       rootPath = folderUri[0].fsPath;
-      await this.GenerateCppCode(rootPath, templateFilePath, channel);
+
+      // if the selected folder is not empty, ask user to select another one.
+      const files = fs.readdirSync(rootPath);
+      if (files && files[0]) {
+        const message =
+            'An empty folder is required for the operation. Please use an empty folder.';
+        vscode.window.showWarningMessage(message);
+        return null;
+      }
+      return rootPath;
     }
+    return null;
   }
 
   async GenerateCppCode(

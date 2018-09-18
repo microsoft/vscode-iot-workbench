@@ -154,6 +154,9 @@ export async function activate(context: vscode.ExtensionContext) {
   const initializeExampleBinder =
       exampleExplorer.initializeExample.bind(exampleExplorer);
 
+  const codeGeneratorBinder =
+      codeGenerator.ScaffoldDeviceStub.bind(codeGenerator);
+
 
   const contentProvider =
       new ContentProvider(context.extensionPath, exampleExplorer);
@@ -234,7 +237,9 @@ export async function activate(context: vscode.ExtensionContext) {
   };
 
   const scaffoldDeviceStubProvider = async () => {
-    codeGenerator.ScaffoldDeviceStub(context, outputChannel);
+    callWithTelemetry(
+        EventNames.scaffoldDeviceStubEvent, outputChannel, context,
+        codeGeneratorBinder);
   };
 
   const menuForDevice: CommandItem[] = [
