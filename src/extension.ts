@@ -52,10 +52,19 @@ function filterMenu(commands: CommandItem[]) {
       }
     }
     if (command.deviceIds) {
-      const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
+      let boardIds = ConfigHandler.get<string|string[]>(ConfigKey.boardId);
+      if (typeof boardIds === 'string') {
+        boardIds = [boardIds];
+      }
+      if (!boardIds) {
+        containDeviceId = false;
+        continue;
+      }
       for (const requiredDivice of command.deviceIds) {
-        if (requiredDivice === boardId) {
-          containDeviceId = true;
+        for (const boardId of boardIds) {
+          if (requiredDivice === boardId) {
+            containDeviceId = true;
+          }
         }
       }
       if (!containDeviceId) {

@@ -82,12 +82,12 @@ export class IoTProject {
       return false;
     }
 
-    var devicePaths = ConfigHandler.get<string[]|string>(ConfigKey.devicePath);
-    
-    if (typeof devicePaths === 'string'){
+    let devicePaths = ConfigHandler.get<string[]|string>(ConfigKey.devicePath);
+
+    if (typeof devicePaths === 'string') {
       devicePaths = [devicePaths];
     }
-    
+
     if (!devicePaths) {
       return false;
     }
@@ -105,22 +105,32 @@ export class IoTProject {
           vscode.workspace.workspaceFolders[0].uri.fsPath, '..', devicePath));
     }
     if (deviceLocations !== undefined) {
-      const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
+      let boardId = ConfigHandler.get<string[]|string>(ConfigKey.boardId);
+      if (typeof boardId === 'string') {
+        boardId = [boardId];
+      }
       if (!boardId) {
         return false;
       }
+
+      if (boardId.length !== deviceLocations.length) {
+        throw Error('Board ID number not equal to device number!');
+      }
       const devices = [];
-      for (const deviceLocation of deviceLocations) {
-        if (boardId === AZ3166Device.boardId) {
-          devices.push(new AZ3166Device(this.extensionContext, deviceLocation));
-        } else if (boardId === IoTButtonDevice.boardId) {
-          devices.push(
-              new IoTButtonDevice(this.extensionContext, deviceLocation));
-        } else if (boardId === Esp32Device.boardId) {
-          devices.push(new Esp32Device(this.extensionContext, deviceLocation));
-        } else if (boardId === RaspberryPiDevice.boardId) {
+      for (const deviceCount in deviceLocations) {
+        if (boardId[deviceCount] === AZ3166Device.boardId) {
+          devices.push(new AZ3166Device(
+              this.extensionContext, deviceLocations[deviceCount]));
+        } else if (boardId[deviceCount] === IoTButtonDevice.boardId) {
+          devices.push(new IoTButtonDevice(
+              this.extensionContext, deviceLocations[deviceCount]));
+        } else if (boardId[deviceCount] === Esp32Device.boardId) {
+          devices.push(new Esp32Device(
+              this.extensionContext, deviceLocations[deviceCount]));
+        } else if (boardId[deviceCount] === RaspberryPiDevice.boardId) {
           devices.push(new RaspberryPiDevice(
-              this.extensionContext, deviceLocation, this.channel));
+              this.extensionContext, deviceLocations[deviceCount],
+              this.channel));
         }
       }
       if (devices) {
@@ -288,7 +298,7 @@ export class IoTProject {
   }
 
   async provision(): Promise<boolean> {
-    const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
+    const devicePath = ConfigHandler.get<string|string[]>(ConfigKey.devicePath);
     if (!devicePath) {
       throw new Error(
           'Cannot run IoT Workbench command in a non-IoTWorkbench project. Please initialize an IoT Workbench project first.');
