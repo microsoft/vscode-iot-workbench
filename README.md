@@ -63,6 +63,7 @@ Here are a set of tutorials that will help you get started:
 
 * [Get Started](./docs/raspberry-pi/raspi-get-started.md)
 * [Simple LED](./docs/raspberry-pi/raspi-simple-led.md)
+* [Face Recognition Access Control](./docs/raspberry-pi/raspi-face-recognition-access-control.md)
 
 ### ESP32
 
