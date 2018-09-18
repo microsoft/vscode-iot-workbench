@@ -82,8 +82,12 @@ export class IoTProject {
       return false;
     }
 
-    const devicePaths = ConfigHandler.get<string[]>(ConfigKey.devicePath);
-
+    var devicePaths = ConfigHandler.get<string[]|string>(ConfigKey.devicePath);
+    
+    if (typeof devicePaths === 'string'){
+      devicePaths = [devicePaths];
+    }
+    
     if (!devicePaths) {
       return false;
     }
