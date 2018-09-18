@@ -97,7 +97,7 @@
             "type": "string"
           },
           "IoTWorkbench.DevicePath": {
-            "type": "string"
+            "type": ["string", "array"] 
           },
           "IoTWorkbench.FunctionPath": {
             "type": "string"
@@ -122,7 +122,7 @@
             "default": false
           },
           "IoTWorkbench.BoardId": {
-            "type": "string"
+            "type": ["string", "array"] 
           },
           "IoTWorkbench.ShownHelpPage": {
             "type": "boolean",

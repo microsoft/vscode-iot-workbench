@@ -6,7 +6,17 @@ import {ConfigKey, ContentView} from './constants';
 
 export class HelpProvider {
   static async open(context: vscode.ExtensionContext) {
-    const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
+    let boardId = ConfigHandler.get<string|string[]>(ConfigKey.boardId);
+
+    if (typeof boardId === 'string') {
+      boardId = [boardId];
+    }
+
+    if (!boardId) {
+      return;
+    }
+    boardId = boardId[0];
+
 
     if (boardId) {
       const boardProvider = new BoardProvider(context);

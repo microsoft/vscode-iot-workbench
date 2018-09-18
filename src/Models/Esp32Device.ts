@@ -31,6 +31,10 @@ export class Esp32Device extends ArduinoDeviceBase {
     return this.componentId;
   }
 
+  get folder() {
+    return path.basename(this.deviceFolder);
+  }
+
   static get boardId() {
     return Esp32Device._boardId;
   }

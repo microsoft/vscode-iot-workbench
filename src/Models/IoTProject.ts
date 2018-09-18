@@ -45,6 +45,7 @@ interface ProjectSetting {
 
 export class IoTProject {
   private componentList: Component[];
+  private deviceFolderList: string[];
   private projectRootPath = '';
   private extensionContext: vscode.ExtensionContext;
   private channel: vscode.OutputChannel;
@@ -70,6 +71,7 @@ export class IoTProject {
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     this.componentList = [];
+    this.deviceFolderList = [];
     this.extensionContext = context;
     this.channel = channel;
     this.telemetryContext = telemetryContext;
@@ -80,11 +82,16 @@ export class IoTProject {
       return false;
     }
 
-    const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
-    if (!devicePath) {
-      return false;
+    let devicePaths = ConfigHandler.get<string[]|string>(ConfigKey.devicePath);
+
+    if (typeof devicePaths === 'string') {
+      devicePaths = [devicePaths];
     }
 
+    if (!devicePaths) {
+      return false;
+    }
+    this.deviceFolderList = devicePaths;
     this.projectRootPath =
         path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, '..');
 
@@ -92,31 +99,47 @@ export class IoTProject {
         new AzureConfigFileHandler(this.projectRootPath);
     azureConfigFileHandler.createIfNotExists();
 
-    const deviceLocation = path.join(
-        vscode.workspace.workspaceFolders[0].uri.fsPath, '..', devicePath);
-
-    if (deviceLocation !== undefined) {
-      const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
+    const deviceLocations = [];
+    for (const devicePath of devicePaths) {
+      deviceLocations.push(path.join(
+          vscode.workspace.workspaceFolders[0].uri.fsPath, '..', devicePath));
+    }
+    if (deviceLocations !== undefined) {
+      let boardId = ConfigHandler.get<string[]|string>(ConfigKey.boardId);
+      if (typeof boardId === 'string') {
+        boardId = [boardId];
+      }
       if (!boardId) {
         return false;
       }
-      let device = null;
-      if (boardId === AZ3166Device.boardId) {
-        device = new AZ3166Device(this.extensionContext, deviceLocation);
-      } else if (boardId === IoTButtonDevice.boardId) {
-        device = new IoTButtonDevice(this.extensionContext, deviceLocation);
-      } else if (boardId === Esp32Device.boardId) {
-        device = new Esp32Device(this.extensionContext, deviceLocation);
-      } else if (boardId === RaspberryPiDevice.boardId) {
-        device = new RaspberryPiDevice(
-            this.extensionContext, deviceLocation, this.channel);
+
+      if (boardId.length !== deviceLocations.length) {
+        throw Error('Board ID number not equal to device number!');
       }
-      if (device) {
-        this.componentList.push(device);
-        await device.load();
+      const devices = [];
+      for (const deviceCount in deviceLocations) {
+        if (boardId[deviceCount] === AZ3166Device.boardId) {
+          devices.push(new AZ3166Device(
+              this.extensionContext, deviceLocations[deviceCount]));
+        } else if (boardId[deviceCount] === IoTButtonDevice.boardId) {
+          devices.push(new IoTButtonDevice(
+              this.extensionContext, deviceLocations[deviceCount]));
+        } else if (boardId[deviceCount] === Esp32Device.boardId) {
+          devices.push(new Esp32Device(
+              this.extensionContext, deviceLocations[deviceCount]));
+        } else if (boardId[deviceCount] === RaspberryPiDevice.boardId) {
+          devices.push(new RaspberryPiDevice(
+              this.extensionContext, deviceLocations[deviceCount],
+              this.channel));
+        }
+      }
+      if (devices) {
+        for (const device of devices) {
+          this.componentList.push(device);
+          await device.load();
+        }
       }
     }
-
     const componentConfigs = azureConfigFileHandler.getSortedComponents();
     if (!componentConfigs || componentConfigs.length === 0) {
       // Support backward compact
@@ -224,13 +247,24 @@ export class IoTProject {
   }
 
   async compile(): Promise<boolean> {
+    let selection;
+    if (this.deviceFolderList.length > 1) {
+      selection = await vscode.window.showQuickPick(this.deviceFolderList, {
+        ignoreFocusOut: true,
+        placeHolder: 'Choose the device folder you want to compile'
+      });
+    } else {
+      selection = this.deviceFolderList[0];
+    }
     for (const item of this.componentList) {
       if (this.canCompile(item)) {
-        const res = await item.compile();
-        if (res === false) {
-          const error = new Error(
-              'Unable to compile the sketch, please check output window for detail.');
-          throw error;
+        if (item.folder === selection) {
+          const res = await item.compile();
+          if (res === false) {
+            const error = new Error(
+                'Unable to compile the sketch, please check output window for detail.');
+            throw error;
+          }
         }
       }
     }
@@ -238,13 +272,25 @@ export class IoTProject {
   }
 
   async upload(): Promise<boolean> {
+    let selection;
+    if (this.deviceFolderList.length > 1) {
+      selection = await vscode.window.showQuickPick(this.deviceFolderList, {
+        ignoreFocusOut: true,
+        placeHolder: 'Choose the device folder you want to upload'
+      });
+    } else {
+      selection = this.deviceFolderList[0];
+    }
+
     for (const item of this.componentList) {
       if (this.canUpload(item)) {
-        const res = await item.upload();
-        if (res === false) {
-          const error = new Error(
-              'Unable to upload the sketch, please check output window for detail.');
-          throw error;
+        if (item.folder === selection) {
+          const res = await item.upload();
+          if (res === false) {
+            const error = new Error(
+                'Unable to upload the sketch, please check output window for detail.');
+            throw error;
+          }
         }
       }
     }
@@ -252,7 +298,7 @@ export class IoTProject {
   }
 
   async provision(): Promise<boolean> {
-    const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
+    const devicePath = ConfigHandler.get<string|string[]>(ConfigKey.devicePath);
     if (!devicePath) {
       throw new Error(
           'Cannot run IoT Workbench command in a non-IoTWorkbench project. Please initialize an IoT Workbench project first.');
@@ -551,13 +597,24 @@ export class IoTProject {
   }
 
   async configDeviceSettings(): Promise<boolean> {
+    let selection;
+    if (this.deviceFolderList.length > 1) {
+      selection = await vscode.window.showQuickPick(this.deviceFolderList, {
+        ignoreFocusOut: true,
+        placeHolder: 'Choose the device folder you want to config'
+      });
+    } else {
+      selection = this.deviceFolderList[0];
+    }
     for (const component of this.componentList) {
-      if (component.getComponentType() === ComponentType.Device) {
-        const device = component as Device;
-        try {
-          await device.configDeviceSettings();
-        } catch (error) {
-          throw error;
+      if (component.folder === selection) {
+        if (component.getComponentType() === ComponentType.Device) {
+          const device = component as Device;
+          try {
+            await device.configDeviceSettings();
+          } catch (error) {
+            throw error;
+          }
         }
       }
     }

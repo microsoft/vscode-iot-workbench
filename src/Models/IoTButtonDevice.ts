@@ -32,6 +32,10 @@ export class IoTButtonDevice implements Device {
     return this.componentId;
   }
 
+  get folder() {
+    return path.basename(this.deviceFolder);
+  }
+
   private static _boardId = 'iotbutton';
 
   static get boardId() {
@@ -57,6 +61,7 @@ export class IoTButtonDevice implements Device {
   getDeviceType(): DeviceType {
     return this.deviceType;
   }
+
 
   getComponentType(): ComponentType {
     return this.componentType;

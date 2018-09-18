@@ -33,6 +33,9 @@ export class RaspberryPiDevice implements Device {
   get id() {
     return this.componentId;
   }
+  get folder() {
+    return path.basename(this.deviceFolder);
+  }
   private deviceType: DeviceType;
   private componentType: ComponentType;
   private deviceFolder: string;

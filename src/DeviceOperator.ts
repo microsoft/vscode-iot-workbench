@@ -124,14 +124,33 @@ export class DeviceOperator {
       return false;
     }
 
-    const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
-    if (!devicePath) {
+    let devicePaths = ConfigHandler.get<string|string[]>(ConfigKey.devicePath);
+    if (!devicePaths) {
       vscode.window.showWarningMessage(
           'No device path found in workspace configuration.');
       channel.show();
       channel.appendLine('No device path found in workspace configuration.');
       return false;
     }
+
+    if (typeof devicePaths === 'string') {
+      devicePaths = [devicePaths];
+    }
+
+    let devicePath;
+    if (devicePaths.length > 1) {
+      devicePath = await vscode.window.showQuickPick(devicePaths, {
+        ignoreFocusOut: true,
+        placeHolder: 'Choose the device folder you want to generate Crc'
+      });
+    } else {
+      devicePath = devicePaths[0];
+    }
+
+    if (!devicePath) {
+      return false;
+    }
+
     const deviceBuildLocation = path.join(
         vscode.workspace.workspaceFolders[0].uri.fsPath, '..', devicePath,
         '.build');
