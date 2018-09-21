@@ -102,9 +102,13 @@ export class IoTHub implements Component, Provisionable {
     }
 
     let iothub = null;
+    const subscriptionId = AzureUtility.subscriptionId;
+    const resourceGroup = AzureUtility.resourceGroup;
+
     switch (selection.detail) {
       case 'select':
-        iothub = await toolkit.azureIoTExplorer.selectIoTHub(this.channel);
+        iothub = await toolkit.azureIoTExplorer.selectIoTHub(
+            this.channel, subscriptionId);
         break;
       case 'create':
         if (this.channel) {
@@ -112,7 +116,8 @@ export class IoTHub implements Component, Provisionable {
           this.channel.appendLine('Creating new IoT Hub...');
         }
 
-        iothub = await toolkit.azureIoTExplorer.createIoTHub(this.channel);
+        iothub = await toolkit.azureIoTExplorer.createIoTHub(
+            this.channel, subscriptionId, resourceGroup);
         break;
       default:
         break;
