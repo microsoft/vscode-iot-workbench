@@ -158,7 +158,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
       if (this.functionLanguage === AzureFunctionsLanguage.CSharpLibrary) {
         await vscode.commands.executeCommand(
             'azureFunctions.createNewProject', azureFunctionsPath,
-            this.functionLanguage, 'beta', false /* openFolder */, templateName,
+            this.functionLanguage, '~2', false /* openFolder */, templateName,
             'IoTHubTrigger1', {
               connection: 'eventHubConnectionString',
               path: '%eventHubConnectionPath%',
@@ -190,9 +190,16 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
       if (!subscriptionId) {
         return false;
       }
+
+      const resourceGroup = AzureUtility.resourceGroup;
+      if (!resourceGroup) {
+        return false;
+      }
+
       const functionAppId: string|undefined =
           await vscode.commands.executeCommand<string>(
-              'azureFunctions.createFunctionApp', subscriptionId);
+              'azureFunctions.createFunctionApp', subscriptionId,
+              resourceGroup);
       if (functionAppId) {
         await ConfigHandler.update(ConfigKey.functionAppId, functionAppId);
         const eventHubConnectionString =
@@ -246,6 +253,9 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
             eventHubConnectionPath || '';
         appSettings.properties['iotHubConnectionString'] =
             iotHubConnectionString || '';
+        // see detail:
+        // https://github.com/Microsoft/vscode-iot-workbench/issues/436
+        appSettings.properties['WEBSITE_RUN_FROM_PACKAGE'] = '0';
 
         await client.webApps.updateApplicationSettings(
             resourceGroup, siteName, appSettings);
