@@ -100,19 +100,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
   }
 
   get version() {
-    const plat = os.platform();
-    let packageRootPath = '';
+    const packageRootPath = this.getArduinoPackagePath();
     let version = '0.0.1';
-
-    if (plat === 'win32') {
-      const homeDir = os.homedir();
-      const localAppData: string = path.join(homeDir, 'AppData', 'Local');
-      packageRootPath = path.join(
-          localAppData, 'Arduino15', 'packages', 'AZ3166', 'hardware',
-          'stm32f4');
-    } else {
-      packageRootPath = '~/Library/Arduino15/packages/AZ3166/hardware/stm32f4';
-    }
 
     if (fs.existsSync(packageRootPath)) {
       const versions = fs.readdirSync(packageRootPath);
@@ -696,21 +685,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
   }
 
   private async generatePlatformLocal() {
-    const plat = os.platform();
-
-    // TODO: Currently, we do not support portable Arduino installation.
-    let _arduinoPackagePath = '';
-    const homeDir = os.homedir();
-    if (plat === 'win32') {
-      _arduinoPackagePath =
-          path.join(homeDir, 'AppData', 'Local', 'Arduino15', 'packages');
-    } else if (plat === 'darwin') {
-      _arduinoPackagePath =
-          path.join(homeDir, 'Library', 'Arduino15', 'packages');
-    }
-
-    const arduinoPackagePath =
-        path.join(_arduinoPackagePath, 'AZ3166', 'hardware', 'stm32f4');
+    const arduinoPackagePath = this.getArduinoPackagePath();
 
     function getHashMacAsync() {
       return new Promise((resolve) => {
@@ -772,5 +747,25 @@ export class AZ3166Device extends ArduinoDeviceBase {
         throw e;
       }
     }
+  }
+
+  private getArduinoPackagePath() {
+    const plat = os.platform();
+
+    // TODO: Currently, we do not support portable Arduino installation.
+    let arduinoPackagePath = '';
+    const homeDir = os.homedir();
+
+    if (plat === 'win32') {
+      arduinoPackagePath =
+          path.join(homeDir, 'AppData', 'Local', 'Arduino15', 'packages');
+    } else if (plat === 'darwin') {
+      arduinoPackagePath =
+          path.join(homeDir, 'Library', 'Arduino15', 'packages');
+    } else if (plat === 'linux') {
+      arduinoPackagePath = path.join(homeDir, '.arduino15', 'packages');
+    }
+
+    return path.join(arduinoPackagePath, 'AZ3166', 'hardware', 'stm32f4');
   }
 }
