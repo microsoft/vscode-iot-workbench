@@ -253,6 +253,9 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
             eventHubConnectionPath || '';
         appSettings.properties['iotHubConnectionString'] =
             iotHubConnectionString || '';
+        // see detail:
+        // https://github.com/Microsoft/vscode-iot-workbench/issues/436
+        appSettings.properties['WEBSITE_RUN_FROM_PACKAGE'] = '0';
 
         await client.webApps.updateApplicationSettings(
             resourceGroup, siteName, appSettings);
