@@ -20,7 +20,7 @@ Follow these steps to prepare the development environment for the IoT DevKit:
 2. Install [Visual Studio Code](https://code.visualstudio.com/), a cross platform source code editor with powerful developer tooling, like IntelliSense code completion and debugging.
 
 3. Look for **Azure IoT Workbench** in the extension marketplace and install it.
-    ![Install IoT Workbench](media/iot-devkit-get-started/install-workbench.png)
+    ![Install IoT Workbench](iot-devkit/media/iot-devkit-get-started/install-workbench.png)
     Together with the IoT Workbench, other dependent extensions will be installed.
 
 4. Open **File > Preference > Settings** and add following lines to configure Arduino.
