@@ -190,9 +190,16 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
       if (!subscriptionId) {
         return false;
       }
+
+      const resourceGroup = AzureUtility.resourceGroup;
+      if (!resourceGroup) {
+        return false;
+      }
+
       const functionAppId: string|undefined =
           await vscode.commands.executeCommand<string>(
-              'azureFunctions.createFunctionApp', subscriptionId);
+              'azureFunctions.createFunctionApp', subscriptionId,
+              resourceGroup);
       if (functionAppId) {
         await ConfigHandler.update(ConfigKey.functionAppId, functionAppId);
         const eventHubConnectionString =
