@@ -123,37 +123,16 @@ The initial version of the device firmware is 1.0.0, to complete this tutorial y
 
    ![Compile done](media/firmware-ota/compile-done.png)
 
-### File size of the firmware
+### CRC value and file size of the firmware
 
-1. Right click on the *FimwareOTA.ino* file, select **Copy Path**, then you have the path in clipboard.
+1. Open the command palette and select **IoT Workbench: Device**, then select **Generate CRC**.
 
-   ![Copy Path](media/firmware-ota/copy-path.png)
+   ![Command CRC](media/firmware-ota/iot-workbench-device-crc.png)
 
-2. Open a **File Explorer** window and paste the path in, navigate to *.build* folder, you can see the *FirmwareOTA.ino.bin* which is the new firmware will be used in next steps.
+2. VS Code then generate the CRC value and print out in the OUTPUT windows, also have the full firmware filename and the file size. 
 
-   ![File Path](media/firmware-ota/bin-file.png)
+   ![Command CRC](media/firmware-ota/crc-info.png)
 
-3. Write down the file size of this file for further usage.
-
-   ![File Size](media/firmware-ota/file-size.png)
-
-### Calculate the CRC value
-
-A check value is mandatory to ensure the integrity of the firmware during upgrade.
-
-Here we use [pycrc](https://github.com/tpircher/pycrc) (you can pick up any other CRC tools you like) :
-
-* [Download and install the Python](https://wiki.python.org/moin/BeginnersGuide/Download) if you don't have it installed.
-
-* Clone the [pycrc](https://github.com/tpircher/pycrc) from github
-
-  ```git clone https://github.com/tpircher/pycrc```
-
-* Run and calculate the CRC value
-
-  ``` python pycrc.py --model=xmodem --check-file <path>\FirmwareOTA.ino.bin```
-
-Write down the CRC value for further usage.
 
 ### Upload the firmware to cloud
 
@@ -197,8 +176,8 @@ and the content includes:
 
 * "fwVersion" : [firmware version](#build-the-new-firmware).
 * "fwPackageURI" : [URL of the firmware](#upload-the-firmware-to-cloud)
-* "fwPackageCheckValue" : [CRC value of the firmware](#calculate-the-crc-value)
-* "fwSize" : [file size of the firmware](#file-size-of-the-firmware)
+* "fwPackageCheckValue" : [CRC value of the firmware](#crc-value-and-file-size-of-the-firmware)
+* "fwSize" : [file size of the firmware](#fcrc-value-and-file-size-of-the-firmware)
 
 The Settings may like this:
 ![Configuration settings](media/firmware-ota/configuration-settings.png)
