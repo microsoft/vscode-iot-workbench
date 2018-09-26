@@ -158,7 +158,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
       if (this.functionLanguage === AzureFunctionsLanguage.CSharpLibrary) {
         await vscode.commands.executeCommand(
             'azureFunctions.createNewProject', azureFunctionsPath,
-            this.functionLanguage, 'beta', false /* openFolder */, templateName,
+            this.functionLanguage, '~2', false /* openFolder */, templateName,
             'IoTHubTrigger1', {
               connection: 'eventHubConnectionString',
               path: '%eventHubConnectionPath%',
