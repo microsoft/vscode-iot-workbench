@@ -134,10 +134,16 @@ export async function activate(context: vscode.ExtensionContext) {
   };
   const iotProject = new IoTProject(context, outputChannel, telemetryContext);
   if (vscode.workspace.workspaceFolders) {
-    try {
-      await iotProject.load();
-    } catch (error) {
-      // do nothing as we are not sure whether the project is initialized.
+    const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+    const deviceModelResult =
+        await deviceModelOperator.Load(rootPath, context, outputChannel);
+
+    if (!deviceModelResult) {
+      try {
+        await iotProject.load();
+      } catch (error) {
+        // do nothing as we are not sure whether the project is initialized.
+      }
     }
   }
 

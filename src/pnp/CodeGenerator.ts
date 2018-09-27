@@ -24,31 +24,23 @@ export class CodeGenerator {
   async ScaffoldDeviceStub(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    const pnpDeviceModelFolder =
-        ConfigHandler.get<string>(ConfigKey.pnpDeviceModelPath);
-    if (!pnpDeviceModelFolder) {
-      const message = 'Unable to find the folder for device model.';
-      vscode.window.showErrorMessage(message);
-      return false;
-    }
-
     if (!vscode.workspace.workspaceFolders) {
       return false;
     }
 
-    const rootPath =
-        path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, '..');
-    const pnpDeviceModelPath = path.join(rootPath, pnpDeviceModelFolder);
-    if (!pnpDeviceModelPath) {
-      const message = 'Unable to find the folder for device model.';
-      vscode.window.showErrorMessage(message);
+    const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+
+    if (!rootPath) {
+      const message =
+          'Unable to find the folder for device model files. Please select a folder first';
+      vscode.window.showWarningMessage(message);
       return false;
     }
 
     // Step 1: list all template from device model folder for selection.
-    const templateFiles = fs.listSync(pnpDeviceModelPath);
+    const templateFiles = fs.listSync(rootPath);
     if (!templateFiles || templateFiles.length === 0) {
-      const message = 'Unable to find device model files in the device model.';
+      const message = 'Unable to find device model files in the folder.';
       vscode.window.showWarningMessage(message);
       return false;
     }
@@ -75,7 +67,7 @@ export class CodeGenerator {
       return;
     }
 
-    const templatePath = path.join(pnpDeviceModelPath, fileSelection.label);
+    const templatePath = path.join(rootPath, fileSelection.label);
 
     // select the target of the code stub
     const languageItems: vscode.QuickPickItem[] =
