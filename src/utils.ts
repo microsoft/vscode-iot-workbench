@@ -86,6 +86,8 @@ export function getScriptTemplateNameFromLanguage(language: string): string|
       return 'IoTHubTrigger-CSharp';
     case AzureFunctionsLanguage.JavaScript:
       return 'IoTHubTrigger-JavaScript';
+    case AzureFunctionsLanguage.CSharpLibrary:
+      return 'Azure.Function.CSharp.IotHubTrigger.2.x';
     default:
       return undefined;
   }

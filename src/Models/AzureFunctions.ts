@@ -107,6 +107,10 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     if (azureFunctionsConfig) {
       this.componentId = azureFunctionsConfig.id;
       this.dependencies = azureFunctionsConfig.dependencies;
+      if (azureFunctionsConfig.componentInfo) {
+        this.functionLanguage =
+            azureFunctionsConfig.componentInfo.values.functionLanguage;
+      }
 
       // Load other information from config file.
     }
@@ -125,7 +129,8 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     if (!this.functionLanguage) {
       const picks: vscode.QuickPickItem[] = [
         {label: AzureFunctionsLanguage.CSharpScript, description: ''},
-        {label: AzureFunctionsLanguage.JavaScript, description: ''}
+        {label: AzureFunctionsLanguage.JavaScript, description: ''},
+        {label: AzureFunctionsLanguage.CSharpLibrary, description: ''}
       ];
 
       const languageSelection = await vscode.window.showQuickPick(picks, {
@@ -150,15 +155,29 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     }
 
     try {
-      await vscode.commands.executeCommand(
-          'azureFunctions.createNewProject', azureFunctionsPath,
-          this.functionLanguage, '~1', false /* openFolder */, templateName,
-          'IoTHubTrigger1', {
-            connection: 'eventHubConnectionString',
-            path: '%eventHubConnectionPath%',
-            consumerGroup: '$Default'
-          });
-      this.updateConfigSettings();
+      if (this.functionLanguage === AzureFunctionsLanguage.CSharpLibrary) {
+        await vscode.commands.executeCommand(
+            'azureFunctions.createNewProject', azureFunctionsPath,
+            this.functionLanguage, '~2', false /* openFolder */, templateName,
+            'IoTHubTrigger1', {
+              connection: 'eventHubConnectionString',
+              path: '%eventHubConnectionPath%',
+              consumerGroup: '$Default',
+              namespace: 'IoTWorkbench'
+            });
+      } else {
+        await vscode.commands.executeCommand(
+            'azureFunctions.createNewProject', azureFunctionsPath,
+            this.functionLanguage, '~1', false /* openFolder */, templateName,
+            'IoTHubTrigger1', {
+              connection: 'eventHubConnectionString',
+              path: '%eventHubConnectionPath%',
+              consumerGroup: '$Default'
+            });
+      }
+
+      this.updateConfigSettings(
+          {values: {functionLanguage: this.functionLanguage}});
       return true;
     } catch (error) {
       throw error;
@@ -171,9 +190,16 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
       if (!subscriptionId) {
         return false;
       }
+
+      const resourceGroup = AzureUtility.resourceGroup;
+      if (!resourceGroup) {
+        return false;
+      }
+
       const functionAppId: string|undefined =
           await vscode.commands.executeCommand<string>(
-              'azureFunctions.createFunctionApp', subscriptionId);
+              'azureFunctions.createFunctionApp', subscriptionId,
+              resourceGroup);
       if (functionAppId) {
         await ConfigHandler.update(ConfigKey.functionAppId, functionAppId);
         const eventHubConnectionString =
@@ -213,13 +239,23 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
                 resourceGroup, siteName);
         console.log(appSettings);
         appSettings.properties = appSettings.properties || {};
-        appSettings.properties['FUNCTIONS_EXTENSION_VERSION'] = '~1';
+
+        // for c# library, use the default setting of ~2.
+        if (this.functionLanguage !==
+            AzureFunctionsLanguage.CSharpLibrary as string) {
+          appSettings.properties['FUNCTIONS_EXTENSION_VERSION'] = '~1';
+        } else {
+          appSettings.properties['FUNCTIONS_EXTENSION_VERSION'] = '~2';
+        }
         appSettings.properties['eventHubConnectionString'] =
             eventHubConnectionString || '';
         appSettings.properties['eventHubConnectionPath'] =
             eventHubConnectionPath || '';
         appSettings.properties['iotHubConnectionString'] =
             iotHubConnectionString || '';
+        // see detail:
+        // https://github.com/Microsoft/vscode-iot-workbench/issues/436
+        appSettings.properties['WEBSITE_RUN_FROM_PACKAGE'] = '0';
 
         await client.webApps.updateApplicationSettings(
             resourceGroup, siteName, appSettings);
@@ -247,10 +283,18 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     try {
       const azureFunctionsPath = this.azureFunctionsPath;
       const functionAppId = ConfigHandler.get(ConfigKey.functionAppId);
-
-      await vscode.commands.executeCommand(
-          'azureFunctions.deploy', azureFunctionsPath, functionAppId);
+      if (this.functionLanguage !==
+          AzureFunctionsLanguage.CSharpLibrary as string) {
+        await vscode.commands.executeCommand(
+            'azureFunctions.deploy', azureFunctionsPath, functionAppId);
+      } else {
+        const subPath =
+            path.join(azureFunctionsPath, 'bin/Release/netstandard2.0/publish');
+        await vscode.commands.executeCommand(
+            'azureFunctions.deploy', subPath, functionAppId);
+      }
       console.log(azureFunctionsPath, functionAppId);
+
       if (this.channel && deployPending) {
         clearInterval(deployPending);
         this.channel.appendLine('.');
@@ -289,7 +333,8 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
         folder: this.functionFolder,
         name: '',
         dependencies: this.dependencies,
-        type: ComponentType[this.componentType]
+        type: ComponentType[this.componentType],
+        componentInfo
       };
       azureConfigs.componentConfigs.push(newAzureFunctionsConfig);
       fs.writeFileSync(
