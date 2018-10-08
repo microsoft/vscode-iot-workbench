@@ -22,81 +22,49 @@ const constants = {
   defaultProjectName: 'IoTproject'
 };
 
-
 export class ProjectInitializer {
   async InitializeProject(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     let rootPath: string;
     let openInNewWindow = false;
-    if (!vscode.workspace.workspaceFolders) {
-      // Create a folder and select it as the root path
-      const options: vscode.OpenDialogOptions = {
-        canSelectMany: false,
-        openLabel: 'Select',
-        canSelectFolders: true,
-        canSelectFiles: false
-      };
 
-      const folderUri = await vscode.window.showOpenDialog(options);
-      if (folderUri && folderUri[0]) {
-        console.log(`Selected folder: ${folderUri[0].fsPath}`);
-        rootPath = folderUri[0].fsPath;
-      } else {
-        telemetryContext.properties.errorMessage = 'Folder selection canceled.';
-        telemetryContext.properties.result = 'Canceled';
-        return;
-      }
-    } else if (vscode.workspace.workspaceFolders.length > 1) {
-      const message =
-          'There are multiple workspaces in the project. Initialize new project in workbench directory?';
-      const result: vscode.MessageItem|undefined =
-          await vscode.window.showWarningMessage(
-              message, DialogResponses.yes, DialogResponses.cancel);
-      if (result === DialogResponses.yes) {
-        const projectFolder = await this.GenerateProjectFolder();
-        if (!projectFolder) {
-          telemetryContext.properties.errorMessage =
-              'Generate project folder canceled.';
-          telemetryContext.properties.result = 'Canceled';
+    try {
+      rootPath = await utils.selectWorkspaceItem(
+          'Select the folder that will contain your IoT Project:', {
+            canSelectFiles: false,
+            canSelectFolders: true,
+            canSelectMany: false,
+            defaultUri: vscode.workspace.workspaceFolders &&
+                    vscode.workspace.workspaceFolders.length > 0 ?
+                vscode.workspace.workspaceFolders[0].uri :
+                undefined,
+            openLabel: 'Select'
+          });
+
+      const files = fs.readdirSync(rootPath);
+      if (files && files[0]) {
+        const message =
+            'An empty folder is required to initialize the project. Initialize new project in workbench directory?';
+        const result: vscode.MessageItem|undefined =
+            await vscode.window.showWarningMessage(
+                message, DialogResponses.yes, DialogResponses.cancel);
+        if (result === DialogResponses.yes) {
+          const projectFolder = await this.GenerateProjectFolder();
+          if (!projectFolder) {
+            throw new Error('Generate Project Folder canceled');
+          }
+          rootPath = projectFolder;
+          openInNewWindow = true;
+        } else {
           return;
         }
-        rootPath = projectFolder;
-        openInNewWindow = true;
-      } else {
-        telemetryContext.properties.errorMessage =
-            'Initialize project folder canceled.';
-        telemetryContext.properties.result = 'Canceled';
-        return;
       }
-    } else {
-      rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    }
-
-    // if the selected folder is not empty, ask user to select another one.
-    const files = fs.readdirSync(rootPath);
-    if (files && files[0]) {
-      const message =
-          'An empty folder is required to initialize the project. Initialize new project in workbench directory?';
-      const result: vscode.MessageItem|undefined =
-          await vscode.window.showWarningMessage(
-              message, DialogResponses.yes, DialogResponses.cancel);
-      if (result === DialogResponses.yes) {
-        const projectFolder = await this.GenerateProjectFolder();
-        if (!projectFolder) {
-          telemetryContext.properties.errorMessage =
-              'Generate project folder canceled.';
-          telemetryContext.properties.result = 'Canceled';
-          return;
-        }
-        rootPath = projectFolder;
-        openInNewWindow = true;
-      } else {
-        telemetryContext.properties.errorMessage =
-            'Empty folder selection canceled.';
-        telemetryContext.properties.result = 'Canceled';
-        return;
-      }
+    } catch (error) {
+      telemetryContext.properties.errorMessage =
+          `Folder selection canceled.${error}`;
+      telemetryContext.properties.result = 'Canceled';
+      return;
     }
 
     // Initial project
