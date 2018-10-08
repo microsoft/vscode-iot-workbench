@@ -62,7 +62,7 @@ export class ProjectInitializer {
       }
     } catch (error) {
       telemetryContext.properties.errorMessage =
-          `Folder selection canceled.${error}`;
+          `Folder selection canceled. ${error}`;
       telemetryContext.properties.result = 'Canceled';
       return;
     }
