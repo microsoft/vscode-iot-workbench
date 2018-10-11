@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import TelemetryReporter from 'vscode-extension-telemetry';
 import {ExceptionHelper} from './exceptionHelper';
+import {NSAT} from './nsat';
 
 interface PackageInfo {
   name: string;
@@ -80,7 +81,7 @@ export class TelemetryWorker {
 
 export async function callWithTelemetry(
     eventName: string, outputChannel: vscode.OutputChannel,
-    context: vscode.ExtensionContext,
+    enableSurvey: boolean, context: vscode.ExtensionContext,
     callback: (
         context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
         // tslint:disable-next-line:no-any
@@ -115,6 +116,9 @@ export async function callWithTelemetry(
     telemetryContext.measurements.duration = (end - start) / 1000;
     try {
       TelemetryWorker.sendEvent(eventName, telemetryContext);
+      if (enableSurvey) {
+        NSAT.takeSurvey(context);
+      }
     } catch {
       // If sending telemetry failed, skip the error to avoid blocking user.
     }
