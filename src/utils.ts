@@ -93,6 +93,77 @@ export function getScriptTemplateNameFromLanguage(language: string): string|
   }
 }
 
+/**
+ * Provides additional options for QuickPickItems used in Azure Extensions
+ */
+export interface FolderQuickPickItem<T = undefined> extends
+    vscode.QuickPickItem {
+  data: T;
+}
+
+export async function selectWorkspaceFolder(
+    placeHolder: string,
+    getSubPath?: (f: vscode.WorkspaceFolder) =>
+        string | undefined): Promise<string> {
+  return await selectWorkspaceItem(
+      placeHolder, {
+        canSelectFiles: false,
+        canSelectFolders: true,
+        canSelectMany: false,
+        defaultUri: vscode.workspace.workspaceFolders &&
+                vscode.workspace.workspaceFolders.length > 0 ?
+            vscode.workspace.workspaceFolders[0].uri :
+            undefined,
+        openLabel: 'Select'
+      },
+      getSubPath);
+}
+
+export async function showOpenDialog(options: vscode.OpenDialogOptions):
+    Promise<vscode.Uri[]> {
+  const result: vscode.Uri[]|undefined =
+      await vscode.window.showOpenDialog(options);
+
+  if (result === undefined) {
+    throw new Error('User cancelled the operation.');
+  } else {
+    return result;
+  }
+}
+
+export async function selectWorkspaceItem(
+    placeHolder: string, options: vscode.OpenDialogOptions,
+    getSubPath?: (f: vscode.WorkspaceFolder) =>
+        string | undefined): Promise<string> {
+  let folder: FolderQuickPickItem<string|undefined>|undefined;
+  let folderPicks: Array<FolderQuickPickItem<string|undefined>> = [];
+  if (vscode.workspace.workspaceFolders) {
+    folderPicks =
+        vscode.workspace.workspaceFolders.map((f: vscode.WorkspaceFolder) => {
+          let subpath: string|undefined;
+          if (getSubPath) {
+            subpath = getSubPath(f);
+          }
+
+          const fsPath: string =
+              subpath ? path.join(f.uri.fsPath, subpath) : f.uri.fsPath;
+          return {
+            label: path.basename(fsPath),
+            description: fsPath,
+            data: fsPath
+          };
+        });
+  }
+  folderPicks.push({label: 'Browse...', description: '', data: undefined});
+  folder = await vscode.window.showQuickPick(folderPicks, {placeHolder});
+  if (folder === undefined) {
+    throw new Error('User cancelled the operation.');
+  }
+
+  return folder && folder.data ? folder.data :
+                                 (await showOpenDialog(options))[0].fsPath;
+}
+
 export function runCommand(
     command: string, workingDir: string,
     outputChannel: vscode.OutputChannel): Thenable<object> {
