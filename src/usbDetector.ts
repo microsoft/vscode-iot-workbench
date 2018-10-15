@@ -61,7 +61,7 @@ export class UsbDetector {
 
     if (board) {
       callWithTelemetry(
-          EventNames.detectBoard, this.channel, this.context, () => {
+          EventNames.detectBoard, this.channel, false, this.context, () => {
             if (board.exampleUrl) {
               ArduinoPackageManager.installBoard(board);
               vscode.commands.executeCommand(

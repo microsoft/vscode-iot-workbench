@@ -176,61 +176,61 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const projectInitProvider = async () => {
     callWithTelemetry(
-        EventNames.createNewProjectEvent, outputChannel, context,
+        EventNames.createNewProjectEvent, outputChannel, true, context,
         projectInitializerBinder);
   };
 
   const crcGenerateProvider = async () => {
     callWithTelemetry(
-        EventNames.generateOtaCrc, outputChannel, context,
+        EventNames.generateOtaCrc, outputChannel, false, context,
         deviceOperator.generateCrc);
   };
 
   const azureProvisionProvider = async () => {
     callWithTelemetry(
-        EventNames.azureProvisionEvent, outputChannel, context,
+        EventNames.azureProvisionEvent, outputChannel, true, context,
         azureOperator.Provision);
   };
 
   const azureDeployProvider = async () => {
     callWithTelemetry(
-        EventNames.azureDeployEvent, outputChannel, context,
+        EventNames.azureDeployEvent, outputChannel, true, context,
         azureOperator.Deploy);
   };
 
   const deviceCompileProvider = async () => {
     callWithTelemetry(
-        EventNames.deviceCompileEvent, outputChannel, context,
+        EventNames.deviceCompileEvent, outputChannel, true, context,
         deviceOperator.compile);
   };
 
   const deviceUploadProvider = async () => {
     callWithTelemetry(
-        EventNames.deviceUploadEvent, outputChannel, context,
+        EventNames.deviceUploadEvent, outputChannel, true, context,
         deviceOperator.upload);
   };
 
   const devicePackageManager = async () => {
     callWithTelemetry(
-        EventNames.devicePackageEvent, outputChannel, context,
+        EventNames.devicePackageEvent, outputChannel, true, context,
         deviceOperator.downloadPackage);
   };
 
   const deviceSettingsConfigProvider = async () => {
     callWithTelemetry(
-        EventNames.configDeviceSettingsEvent, outputChannel, context,
+        EventNames.configDeviceSettingsEvent, outputChannel, true, context,
         deviceOperator.configDeviceSettings);
   };
 
   const examplesProvider = async () => {
     callWithTelemetry(
-        EventNames.loadExampleEvent, outputChannel, context,
+        EventNames.loadExampleEvent, outputChannel, true, context,
         exampleSelectBoardBinder);
   };
 
   const examplesInitializeProvider = async () => {
     callWithTelemetry(
-        EventNames.loadExampleEvent, outputChannel, context,
+        EventNames.loadExampleEvent, outputChannel, true, context,
         initializeExampleBinder);
   };
 
@@ -244,7 +244,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const scaffoldDeviceStubProvider = async () => {
     callWithTelemetry(
-        EventNames.scaffoldDeviceStubEvent, outputChannel, context,
+        EventNames.scaffoldDeviceStubEvent, outputChannel, true, context,
         codeGeneratorBinder);
   };
 

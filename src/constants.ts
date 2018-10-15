@@ -28,6 +28,7 @@ export class EventNames {
   static readonly loadExampleEvent = 'IoTWorkbench.loadExample';
   static readonly detectBoard = 'IoTWorkbench.DetectBoard';
   static readonly generateOtaCrc = 'IoTWorkbench.GenerateOtaCrc';
+  static readonly nsatsurvery = 'IoTWorkbench.NSATSurvey';
   static readonly scaffoldDeviceStubEvent = 'IoTWorkbench.ScaffoldDeviceStub';
 }
 
@@ -56,4 +57,8 @@ export enum AzureFunctionsLanguage {
 export class AzureComponentsStorage {
   static readonly folderName = '.azurecomponent';
   static readonly fileName = 'azureconfig.json';
+}
+
+export class GlobalConstants {
+  static readonly extensionId = 'vsciot-vscode.vscode-iot-workbench';
 }
