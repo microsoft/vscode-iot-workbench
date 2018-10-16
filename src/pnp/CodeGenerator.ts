@@ -7,8 +7,10 @@ import * as os from 'os';
 import * as vscode from 'vscode';
 import * as fs from 'fs-plus';
 import * as path from 'path';
+import * as crypto from 'crypto';
 
-import {ConfigHandler} from '../configHandler';
+import request = require('request-promise');
+import AdmZip = require('adm-zip');
 import {ConfigKey, FileNames} from '../constants';
 import {AZ3166Device} from '../Models/AZ3166Device';
 import {IoTProject} from '../Models/IoTProject';
@@ -16,8 +18,21 @@ import * as utils from '../utils';
 import {TelemetryContext} from '../telemetry';
 import {ProjectTemplate,} from '../Models/Interfaces/ProjectTemplate';
 
+export interface CodeGeneratorConfig {
+  version: string;
+  win32Md5: string;
+  win32PackageUrl: string;
+  macOSMd5: string;
+  macOSPackageUrl: string;
+}
+
+
 const constants = {
-  deviceDefaultFolderName: 'Device'
+  deviceDefaultFolderName: 'Device',
+  codeGeneratorPath: 'PnP-CLI',
+  codeGeneratorVersionKey: 'pnp/codeGenVersion',
+  codeGenConfigUrl:
+      'https://az3166work.blob.core.windows.net/pnp/pnpcodegenerator.json'  // TODO: update this with the aka.ms/url
 };
 
 export class CodeGenerator {
@@ -29,6 +44,8 @@ export class CodeGenerator {
     }
 
     const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+    await this.UpgradeCodeGenLibrary(
+        rootPath, context, channel, telemetryContext);
 
     if (!rootPath) {
       const message =
@@ -203,7 +220,7 @@ export class CodeGenerator {
     const homeDir = os.homedir();
     let cmdPath = '';
     if (platform === 'win32' || platform === 'darwin') {
-      cmdPath = path.join(homeDir, 'PnP-CLI');
+      cmdPath = path.join(homeDir, constants.codeGeneratorPath);
     } else {
       return;
     }
@@ -217,4 +234,144 @@ export class CodeGenerator {
     channel.appendLine('IoT Workbench: scaffold code stub completed.');
     return;
   }
+
+  async UpgradeCodeGenLibrary(
+      rootPath: string, context: vscode.ExtensionContext,
+      channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext): Promise<boolean> {
+    channel.show();
+
+    // download the config file for code generator
+    const options: request.OptionsWithUri = {
+      method: 'GET',
+      uri: constants.codeGenConfigUrl,
+      encoding: 'utf8',
+      json: true
+    };
+    const pnpCodeGenConfig: CodeGeneratorConfig =
+        await request(options).promise();
+    if (!pnpCodeGenConfig) {
+      channel.appendLine(
+          'Unable to check the updated version the PnP Code Generator.');
+      return false;
+    }
+
+    // detect version for upgrade
+    let needUpgrade = false;
+    const platform = os.platform();
+    const homeDir = os.homedir();
+
+    const codeGenCommandPath = path.join(homeDir, constants.codeGeneratorPath);
+
+    // Can we find the target dir for PnP Code Generator?
+    if (!fs.isDirectorySync(codeGenCommandPath)) {
+      needUpgrade = true;
+    } else {
+      // Then check the version
+      const currentVersion =
+          context.globalState.get(constants.codeGeneratorVersionKey, '');
+      if (!currentVersion ||
+          compareVersion(pnpCodeGenConfig.version, currentVersion)) {
+        needUpgrade = true;
+      }
+    }
+
+    if (needUpgrade) {
+      channel.appendLine('Start upgrading PnP Code Generator...');
+
+      let downloadOption: request.OptionsWithUri;
+      let md5value: string;
+      if (platform === 'win32') {
+        downloadOption = {
+          method: 'GET',
+          uri: pnpCodeGenConfig.win32PackageUrl,
+          encoding: null  // Binary data
+        };
+        md5value = pnpCodeGenConfig.win32Md5;
+      } else {
+        downloadOption = {
+          method: 'GET',
+          uri: pnpCodeGenConfig.macOSPackageUrl,
+          encoding: null  // Binary data
+        };
+        md5value = pnpCodeGenConfig.macOSMd5;
+      }
+
+      const loading = setInterval(() => {
+        channel.append('.');
+      }, 1000);
+
+      try {
+        channel.appendLine('Step 1: Downloading updated PnP Code Generator...');
+        const zipData = await request(downloadOption).promise();
+        const tempPath =
+            path.join(os.tmpdir(), FileNames.iotworkbenchTempFolder);
+        const filePath = path.join(tempPath, `${md5value}.zip`);
+        fs.writeFileSync(filePath, zipData);
+        clearInterval(loading);
+        channel.appendLine('Download complete');
+
+        // Validate hash code
+        channel.appendLine('Step 2: Validating hash code');
+
+        const hashvalue = await fileHash(filePath);
+        if (hashvalue !== md5value) {
+          channel.appendLine('Validating hash code failed.');
+          return false;
+        } else {
+          channel.appendLine('Validating hash code successfully.');
+        }
+
+        channel.appendLine('Step 3: Extracting PnP Code Generator.');
+        const zip = new AdmZip(filePath);
+
+        zip.extractAllTo(codeGenCommandPath, true);
+        channel.appendLine('PnP Code Generator updated successfully.');
+        context.globalState.update(
+            constants.codeGeneratorVersionKey, pnpCodeGenConfig.version);
+        return true;
+      } catch (error) {
+        clearInterval(loading);
+        channel.appendLine('');
+        throw error;
+      }
+    }
+    return false;
+  }
+}
+
+function compareVersion(verion1: string, verion2: string) {
+  const ver1 = verion1.split('.');
+  const ver2 = verion2.split('.');
+  let i = 0;
+  let v1: number, v2: number;
+
+  /* default is 0, version format should be 1.1.0 */
+  while (i < 3) {
+    v1 = Number(ver1[i]);
+    v2 = Number(ver2[i]);
+    if (v1 > v2) return true;
+    if (v1 < v2) return false;
+    i++;
+  }
+  return false;
+}
+
+async function fileHash(filename: string, algorithm = 'md5') {
+  const hash = crypto.createHash(algorithm);
+  const input = fs.createReadStream(filename);
+  let hashvalue = '';
+  return new Promise((resolve, reject) => {
+    input.on('readable', () => {
+      const data = input.read();
+      if (data) {
+        hash.update(data);
+      }
+    });
+    input.on('error', reject);
+    input.on('end', () => {
+      hashvalue = hash.digest('hex');
+      return resolve(hashvalue);
+    });
+  });
 }

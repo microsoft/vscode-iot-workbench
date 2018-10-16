@@ -7,38 +7,44 @@ import * as vscode from 'vscode';
 import * as fs from 'fs-plus';
 import * as path from 'path';
 
-import {ConfigKey, FileNames} from '../constants';
 import {PnPFileNames} from './PnPConstants';
-import {ConfigHandler} from '../configHandler';
-import {Workspace} from '../Models/Interfaces/Workspace';
-import {fileExistsSync} from '../utils';
+import * as utils from '../utils';
 
 export class DeviceModelOperator {
   // Initial the folder for authoring device model, return the root path of the
   // workspace
   private async InitializeFolder(): Promise<string|null> {
     let rootPath: string;
-    if (!vscode.workspace.workspaceFolders) {
-      // Create a folder and select it as the root path
-      const options: vscode.OpenDialogOptions = {
-        canSelectMany: false,
-        openLabel: 'Select a folder to start',
-        canSelectFolders: true,
-        canSelectFiles: false
-      };
-      const folderUri = await vscode.window.showOpenDialog(options);
-      if (folderUri && folderUri[0]) {
-        console.log(`Selected folder: ${folderUri[0].fsPath}`);
-        rootPath = folderUri[0].fsPath;
-      } else {
-        return null;
+
+    try {
+      // Check whether current folder is for PnP
+      if (vscode.workspace.workspaceFolders) {
+        const folderPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+        const targetInterfaceSchema = path.join(
+            folderPath, PnPFileNames.vscodeSettingsFolderName,
+            PnPFileNames.schemaFolderName,
+            PnPFileNames.interfaceSchemaFileName);
+        if (fs.existsSync(targetInterfaceSchema)) {
+          return folderPath;
+        }
       }
-    } else {
-      rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+
+      rootPath = await utils.selectWorkspaceItem(
+          'Select the folder that will contain your PnP files:', {
+            canSelectFiles: false,
+            canSelectFolders: true,
+            canSelectMany: false,
+            defaultUri: vscode.workspace.workspaceFolders &&
+                    vscode.workspace.workspaceFolders.length > 0 ?
+                vscode.workspace.workspaceFolders[0].uri :
+                undefined,
+            openLabel: 'Select'
+          });
+    } catch (error) {
+      return null;
     }
     return rootPath;
   }
-
 
   private async InitializeDeviceModel(
       rootPath: string, context: vscode.ExtensionContext,
