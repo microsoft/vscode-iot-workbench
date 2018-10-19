@@ -29,10 +29,9 @@ export interface CodeGeneratorConfig {
 
 const constants = {
   deviceDefaultFolderName: 'Device',
-  codeGeneratorPath: 'PnP-CLI',
+  codeGeneratorPath: 'pnp-codegen',
   codeGeneratorVersionKey: 'pnp/codeGenVersion',
-  codeGenConfigUrl:
-      'https://az3166work.blob.core.windows.net/pnp/pnpcodegenerator.json'  // TODO: update this with the aka.ms/url
+  codeGenConfigUrl: 'https://aka.ms/iot-workbench/iot-pnp-config'
 };
 
 export class CodeGenerator {
@@ -44,14 +43,19 @@ export class CodeGenerator {
     }
 
     const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    await this.UpgradeCodeGenLibrary(
-        rootPath, context, channel, telemetryContext);
-
     if (!rootPath) {
       const message =
           'Unable to find the folder for device model files. Please select a folder first';
       vscode.window.showWarningMessage(message);
       return false;
+    }
+
+    const upgradestate: boolean = await this.UpgradeCodeGenerator(
+        rootPath, context, channel, telemetryContext);
+
+    if (!upgradestate) {
+      channel.appendLine(
+          'Unable to upgrade the Code Generator to the latest version.\r\n Trying to use the existing version.');
     }
 
     // Step 1: list all template from device model folder for selection.
@@ -235,7 +239,7 @@ export class CodeGenerator {
     return;
   }
 
-  async UpgradeCodeGenLibrary(
+  async UpgradeCodeGenerator(
       rootPath: string, context: vscode.ExtensionContext,
       channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext): Promise<boolean> {
@@ -336,7 +340,8 @@ export class CodeGenerator {
         throw error;
       }
     }
-    return false;
+    // No need to upgrade
+    return true;
   }
 }
 
