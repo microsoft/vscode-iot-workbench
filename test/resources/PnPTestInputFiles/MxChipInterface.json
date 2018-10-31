@@ -1,0 +1,175 @@
+{
+  "@id": "http://example.com/MXChip/1.0.0",
+  "@type": "Interface",
+  "displayName": "MXChip",
+  "contents": [
+    {
+      "@type": "Property",
+      "name": "dieNumber",
+      "displayName": "Die Number",
+      "schema": "double"
+    },
+    {
+      "@type": "Property",
+      "name": "setCurrent",
+      "displayName": "Current",
+      "writable": true,
+      "schema": "double",
+      "displayUnit": "amps"
+    },
+    {
+      "@type": "Property",
+      "name": "setVoltage",
+      "displayName": "Voltage",
+      "writable": true,
+      "schema": "double",
+      "displayUnit": "volts"
+    },
+    {
+      "@type": "Property",
+      "name": "fanSpeed",
+      "displayName": "Fan Speed",
+      "writable": true,
+      "schema": "double",
+      "displayUnit": "rpm"
+    },
+    {
+      "@type": "Property",
+      "name": "activateIR",
+      "displayName": "IR",
+      "writable": true,
+      "schema": "double"
+    },
+    {
+      "@type": "Command",
+      "name": "reboot",
+      "commandType": "synchronous",
+      "requestSchema": {
+        "@type": "Object",
+        "fields": [
+          {
+            "name": "rebootTime",
+            "schema": "dateTime"
+          }
+        ]
+      },
+      "responseSchema": "integer"
+    },
+    {
+      "@type": "Telemetry",
+      "name": "humidity",
+      "displayName": "Humidity",
+      "schema": "double",
+      "displayUnit": "%"
+    },
+    {
+      "@type": "Telemetry",
+      "name": "temperature",
+      "displayName": "Temperature",
+      "schema": "double",
+      "displayUnit": "°C"
+    },
+    {
+      "@type": "Telemetry",
+      "name": "pressure",
+      "displayName": "Pressure",
+      "schema": "double",
+      "displayUnit": "hPa"
+    },
+    {
+      "@type": "Telemetry",
+      "name": "state",
+      "schema": {
+        "@type": "Enum",
+        "enumValues": [
+          {
+            "displayName": "Offline",
+            "name": "offline",
+            "enumValue": 1
+          },
+          {
+            "displayName": "Online",
+            "name": "online",
+            "enumValue": 2
+          }
+        ]
+      }
+    },
+    {
+      "@type": "Telemetry",
+      "name": "magnetometer",
+      "displayName": "Magnetometer",
+      "schema": {
+        "@type": "Object",
+        "fields": [
+          {
+            "name": "x",
+            "schema": "double",
+            "displayUnit": "mgauss"
+          },
+          {
+            "name": "y",
+            "schema": "double",
+            "displayUnit": "mgauss"
+          },
+          {
+            "name": "z",
+            "schema": "double",
+            "displayUnit": "mgauss"
+          }
+        ]
+      }
+    },
+    {
+      "@type": "Telemetry",
+      "name": "accelerometer",
+      "displayName": "Accelerometer",
+      "schema": {
+        "@type": "Object",
+        "fields": [
+          {
+            "name": "x",
+            "schema": "double",
+            "displayUnit": "mg"
+          },
+          {
+            "name": "y",
+            "schema": "double",
+            "displayUnit": "mg"
+          },
+          {
+            "name": "z",
+            "schema": "double",
+            "displayUnit": "mg"
+          }
+        ]
+      }
+    },
+    {
+      "@type": "Telemetry",
+      "name": "gyroscope",
+      "displayName": "Gyroscope",
+      "schema": {
+        "@type": "Object",
+        "fields": [
+          {
+            "name": "x",
+            "schema": "double",
+            "displayUnit": "mdps"
+          },
+          {
+            "name": "y",
+            "schema": "double",
+            "displayUnit": "mdps"
+          },
+          {
+            "name": "z",
+            "schema": "double",
+            "displayUnit": "mdps"
+          }
+        ]
+      }
+    }
+  ],
+  "@context": "http://azureiot.com/v0/contexts/interface.json"
+}

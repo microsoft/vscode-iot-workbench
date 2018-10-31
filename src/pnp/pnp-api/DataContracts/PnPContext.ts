@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 export interface PnPContext {
-  resourceId: string;
+  resourceId?: string;
   content: string;
-  published: boolean;
-  etag: string;
-  tags: string[];
+  published?: boolean;
+  etag?: string;
+  tags?: string[];
 }
