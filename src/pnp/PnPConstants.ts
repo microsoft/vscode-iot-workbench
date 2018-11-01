@@ -4,6 +4,9 @@
 export class PnPFileNames {
   static readonly resourcesFolderName = 'resources';
   static readonly deviceModelFolderName = 'DeviceModel';
+  static readonly graphFileName = 'graph.json';
+  static readonly interfaceFileName = 'Interface.json';
+  static readonly templateFileName = 'Template.json';
   static readonly iotworkbenchprojectFileName = '.vscode-pnp';
   static readonly settingsJsonFileName = 'settings.json';
   static readonly vscodeSettingsFolderName = '.vscode';

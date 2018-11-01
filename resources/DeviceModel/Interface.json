@@ -1,0 +1,77 @@
+{
+    "@context": {
+        "@vocab": "http://azureiot.com/v0/classes/",
+        "@language": "en",
+        "Array": "Schemas/Array",
+        "Boolean": "Schemas/Boolean",
+        "boolean": "Schemas/Boolean/boolean",
+        "Bytes": "Schemas/Bytes",
+        "bytes": "Schemas/Bytes/bytes",
+        "comment": {
+            "@id": "Entity/comment",
+            "@language": null
+        },
+        "contents": "Interface/contents",
+        "Date": "Schemas/Date",
+        "date": "Schemas/Date/date",
+        "DateTime": "Schemas/DateTime",
+        "dateTime": "Schemas/DateTime/dateTime",
+        "description": {
+            "@id": "Entity/description",
+            "@container": "@language"
+        },
+        "displayName": {
+            "@id": "Entity/displayName",
+            "@container": "@language"
+        },
+        "displayUnit": {
+            "@id": "SchemaField/unit",
+            "@container": "@language"
+        },
+        "Double": "Schemas/Double",
+        "double": "Schemas/Double/double",
+        "Duration": "Schemas/Duration",
+        "duration": "Schemas/Duration/duration",
+        "elementSchema": {
+            "@id": "Schemas/Array/elementSchema",
+            "@type": "@vocab"
+        },
+        "Enum": "Schemas/Enum",
+        "enumValue": "EnumValue/value",
+        "enumValues": "Schemas/Enum/values",
+        "commandType": {
+            "@id": "Command/executionType",
+            "@type": "@vocab"
+        },
+        "fields": "Schemas/Object/fields",
+        "Float": "Schemas/Float",
+        "float": "Schemas/Float/float",
+        "Integer": "Schemas/Integer",
+        "integer": "Schemas/Integer/integer",
+        "Long": "Schemas/Long",
+        "long": "Schemas/Long/long",
+        "name": {
+            "@id": "NamedEntity/name",
+            "@language": null
+        },
+        "Object": "Schemas/Object",
+        "requestSchema": {
+            "@id": "Command/requestSchema",
+            "@type": "@vocab"
+        },
+        "responseSchema": {
+            "@id": "Command/responseSchema",
+            "@type": "@vocab"
+        },
+        "schema": {
+            "@id": "SchemaField/schema",
+            "@type": "@vocab"
+        },
+        "String": "Schemas/String",
+        "string": "Schemas/String/string",
+        "synchronous": "CommandExecutionType/synchronous",
+        "Time": "Schemas/Time",
+        "time": "Schemas/Time/time",
+        "writable": "Property/writable"
+    }
+} 

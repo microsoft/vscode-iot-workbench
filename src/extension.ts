@@ -24,9 +24,11 @@ import {AZ3166Device} from './Models/AZ3166Device';
 import {IoTButtonDevice} from './Models/IoTButtonDevice';
 import {RaspberryPiDevice} from './Models/RaspberryPiDevice';
 import {Esp32Device} from './Models/Esp32Device';
-import {DeviceModelOperator} from './pnp/DeviceModelOperator';
 import {CodeGenerator} from './pnp/CodeGenerator';
-
+import {PnPMetaModelUtility, PnPMetaModelContext} from './pnp/PnPMetaModelUtility';
+import {PnPMetaModelParser, PnPMetaModelGraph} from './pnp/PnPMetaModelGraph';
+import {DeviceModelOperator} from './pnp/DeviceModelOperator';
+import {PnPMetaModelJsonParser} from './pnp/PnPMetaModelJsonParser';
 
 function filterMenu(commands: CommandItem[]) {
   for (let i = 0; i < commands.length; i++) {
@@ -126,6 +128,115 @@ export async function activate(context: vscode.ExtensionContext) {
   TelemetryWorker.Initialize(context);
 
   const deviceModelOperator = new DeviceModelOperator();
+
+  // PnP Language Server
+  const pnpContext = new PnPMetaModelUtility(context);
+  const pnpInterface: PnPMetaModelContext = pnpContext.getInterface();
+  const pnpGraph: PnPMetaModelGraph = pnpContext.getGraph();
+  const pnpParser = new PnPMetaModelParser(pnpGraph, pnpInterface);
+
+  vscode.languages.registerHoverProvider(
+      {language: 'json', scheme: 'file', pattern: '**/*.interface.json'}, {
+        async provideHover(document, position, token):
+            Promise<vscode.Hover|null> {
+              const id = PnPMetaModelJsonParser.getIdAtPosition(
+                  document, position, pnpInterface);
+              let hoverText: string|undefined = undefined;
+              if (id) {
+                if (id === '@id') {
+                  hoverText = 'An identifier for PnP template.';
+                } else if (id === '@type') {
+                  hoverText = 'The type of template object.';
+                } else if (id === '@context') {
+                  hoverText = 'The context for PnP template or interface.';
+                } else {
+                  hoverText = pnpParser.getCommentFromId(id);
+                }
+              }
+              return hoverText ? new vscode.Hover(hoverText) : null;
+            }
+      });
+
+  vscode.languages.registerCompletionItemProvider(
+      {language: 'json', scheme: 'file', pattern: '**/*.interface.json'}, {
+        provideCompletionItems(document, position): vscode.CompletionList |
+        null {
+          const jsonInfo =
+              PnPMetaModelJsonParser.getJsonInfoAtPosition(document, position);
+          if (!jsonInfo) {
+            return null;
+          }
+          if (jsonInfo.isValue) {
+            let values: string[] = [];
+            if (jsonInfo.key === '@context') {
+              values = ['http://aziot.cloudapp.net/v1/contexts/Interface.json'];
+            } else if (jsonInfo.key === '@type') {
+              if (jsonInfo.lastKey) {
+                const id = pnpParser.getIdFromShortName(jsonInfo.lastKey);
+                values = pnpParser.getTypesFromId(id);
+              } else {
+                values = ['Interface'];
+              }
+
+            } else {
+              values = pnpParser.getStringValuesFromShortName(jsonInfo.key);
+            }
+
+            const range = PnPMetaModelJsonParser.getTokenRange(
+                jsonInfo.json.tokens, jsonInfo.offset);
+            const startPosition = document.positionAt(range.startIndex);
+            const endPosition = document.positionAt(range.endIndex);
+            const completionItems =
+                PnPMetaModelJsonParser.getCompletionItemsFromArray(
+                    values, startPosition, endPosition);
+            return new vscode.CompletionList(completionItems, false);
+          } else {
+            let keyList: Array<{label: string, type?: string}> = [];
+            const completionKeyList: Array<{label: string, type?: string}> = [];
+            if (!jsonInfo.type) {
+              const id = pnpParser.getIdFromShortName(jsonInfo.lastKey);
+              const values = pnpParser.getTypesFromId(id);
+              if (values.length === 1) {
+                jsonInfo.type = values[0];
+              }
+            }
+
+            if (jsonInfo.type) {
+              if (jsonInfo.type === 'Interface' &&
+                  jsonInfo.properties.indexOf('@context') === -1) {
+                completionKeyList.push({label: '@context'});
+              }
+              keyList = pnpParser.getTypedPropertiesFromType(jsonInfo.type);
+            } else {
+              keyList = [{label: '@type'}];
+            }
+
+            for (const key of keyList) {
+              if (jsonInfo.properties.indexOf(key.label) === -1) {
+                completionKeyList.push(key);
+              }
+            }
+
+            if ((jsonInfo.type === 'Interface' ||
+                 jsonInfo.type === 'Template') &&
+                jsonInfo.properties.indexOf('@id') === -1) {
+              completionKeyList.push({label: '@id', type: 'string'});
+            }
+
+            const range = PnPMetaModelJsonParser.getTokenRange(
+                jsonInfo.json.tokens, jsonInfo.offset);
+            const startPosition = document.positionAt(range.startIndex);
+            const endPosition = document.positionAt(range.endIndex);
+            const completionItems =
+                PnPMetaModelJsonParser.getCompletionItemsFromArray(
+                    completionKeyList, startPosition, endPosition);
+            console.log(completionItems);
+            return new vscode.CompletionList(completionItems, false);
+          }
+        }
+      },
+      '"');
+
   const codeGenerator = new CodeGenerator();
 
   const telemetryContext: TelemetryContext = {

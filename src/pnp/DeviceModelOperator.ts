@@ -16,19 +16,10 @@ export class DeviceModelOperator {
   private async InitializeFolder(): Promise<string|null> {
     let rootPath: string;
 
-    try {
-      // Check whether current folder is for PnP
-      if (vscode.workspace.workspaceFolders) {
-        const folderPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-        const targetInterfaceSchema = path.join(
-            folderPath, PnPFileNames.vscodeSettingsFolderName,
-            PnPFileNames.schemaFolderName,
-            PnPFileNames.interfaceSchemaFileName);
-        if (fs.existsSync(targetInterfaceSchema)) {
-          return folderPath;
-        }
-      }
-
+    if (vscode.workspace.workspaceFolders &&
+        vscode.workspace.workspaceFolders.length === 1) {
+      rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+    } else {
       rootPath = await utils.selectWorkspaceItem(
           'Select the folder that will contain your PnP files:', {
             canSelectFiles: false,
@@ -40,95 +31,9 @@ export class DeviceModelOperator {
                 undefined,
             openLabel: 'Select'
           });
-    } catch (error) {
-      return null;
     }
+
     return rootPath;
-  }
-
-  private async InitializeDeviceModel(
-      rootPath: string, context: vscode.ExtensionContext,
-      channel: vscode.OutputChannel) {
-    // Initial folder
-    await vscode.window.withProgress(
-        {
-          title: 'Device model initialization',
-          location: vscode.ProgressLocation.Window,
-        },
-        async (progress) => {
-          progress.report({
-            message: 'Initialize the folder for device model',
-          });
-
-          try {
-            // step 1: Copy json schema file
-            const intefaceSchemaFile = context.asAbsolutePath(path.join(
-                PnPFileNames.resourcesFolderName,
-                PnPFileNames.deviceModelFolderName,
-                PnPFileNames.interfaceSchemaFileName));
-
-            const templateSchemaFile = context.asAbsolutePath(path.join(
-                PnPFileNames.resourcesFolderName,
-                PnPFileNames.deviceModelFolderName,
-                PnPFileNames.templateSchemaFileName));
-
-            const vscodeFolderPath =
-                path.join(rootPath, PnPFileNames.vscodeSettingsFolderName);
-
-            if (!fs.existsSync(vscodeFolderPath)) {
-              fs.mkdirSync(vscodeFolderPath);
-            }
-
-            const schemaFolderPath =
-                path.join(vscodeFolderPath, PnPFileNames.schemaFolderName);
-            if (!fs.existsSync(schemaFolderPath)) {
-              fs.mkdirSync(schemaFolderPath);
-            }
-
-            const targetInterfaceSchema = path.join(
-                schemaFolderPath, PnPFileNames.interfaceSchemaFileName);
-            const targetTemplateSchema = path.join(
-                schemaFolderPath, PnPFileNames.templateSchemaFileName);
-
-            try {
-              const interfaceContent =
-                  fs.readFileSync(intefaceSchemaFile, 'utf8');
-              fs.writeFileSync(targetInterfaceSchema, interfaceContent);
-              const templateContent =
-                  fs.readFileSync(templateSchemaFile, 'utf8');
-              fs.writeFileSync(targetTemplateSchema, templateContent);
-            } catch (error) {
-              throw new Error(`Create schema file failed: ${error.message}`);
-            }
-
-            // step 2: Update the user settings for json schema
-            const settingsJSONFilePath =
-                path.join(vscodeFolderPath, PnPFileNames.settingsJsonFileName);
-            const settingsJSONObj = {
-              'json.schemas': [
-                {
-                  'fileMatch': ['/*.interface.json'],
-                  'url': './.vscode/schemas/interface.schema.json'
-                },
-                {
-                  'fileMatch': ['/*.template.json'],
-                  'url': './.vscode/schemas/template.schema.json'
-                }
-              ]
-            };
-
-            try {
-              fs.writeFileSync(
-                  settingsJSONFilePath,
-                  JSON.stringify(settingsJSONObj, null, 4));
-            } catch (error) {
-              throw new Error(
-                  `Device: create user setting file failed: ${error.message}`);
-            }
-          } catch (error) {
-            throw error;
-          }
-        });
   }
 
   async Load(
@@ -148,13 +53,6 @@ export class DeviceModelOperator {
       return false;
     }
 
-    const schemaFolderPath = path.join(
-        rootPath, PnPFileNames.vscodeSettingsFolderName,
-        PnPFileNames.schemaFolderName);
-
-    if (!fs.existsSync(schemaFolderPath)) {
-      this.InitializeDeviceModel(rootPath, context, channel);
-    }
     return true;
   }
 
@@ -164,14 +62,6 @@ export class DeviceModelOperator {
     rootPath = await this.InitializeFolder();
     if (!rootPath) {
       return;
-    }
-
-    const schemaFolderPath = path.join(
-        rootPath, PnPFileNames.vscodeSettingsFolderName,
-        PnPFileNames.schemaFolderName);
-
-    if (!fs.existsSync(schemaFolderPath)) {
-      this.InitializeDeviceModel(rootPath, context, channel);
     }
 
     const option: vscode.InputBoxOptions = {
@@ -239,14 +129,6 @@ export class DeviceModelOperator {
     rootPath = await this.InitializeFolder();
     if (!rootPath) {
       return;
-    }
-
-    const schemaFolderPath = path.join(
-        rootPath, PnPFileNames.vscodeSettingsFolderName,
-        PnPFileNames.schemaFolderName);
-
-    if (!fs.existsSync(schemaFolderPath)) {
-      this.InitializeDeviceModel(rootPath, context, channel);
     }
 
     const option: vscode.InputBoxOptions = {

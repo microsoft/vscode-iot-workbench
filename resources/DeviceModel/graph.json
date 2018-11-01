@@ -1,0 +1,1906 @@
+{
+  "Nodes": [
+    {
+      "Id": "http://azureiot.com/v0/classes/Entity"
+    },
+    {
+      "Id": "http://www.w3.org/2000/01/rdf-schema#Class"
+    },
+    {
+      "Value": "Entity",
+      "Language": "en",
+      "Id": "77c694e0-dd7b-49e8-a7af-b9b410f94020"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Entity/comment"
+    },
+    {
+      "Id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+    },
+    {
+      "Value": "Comment",
+      "Language": "en",
+      "Id": "0c59da07-1fae-44ac-a3f6-845405b3cc48"
+    },
+    {
+      "Id": "http://www.w3.org/2001/XMLSchema#string"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Entity/description"
+    },
+    {
+      "Value": "Description",
+      "Language": "en",
+      "Id": "5d12c44f-7383-4da9-8d5e-a3a0780063f7"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Entity/displayName"
+    },
+    {
+      "Value": "DisplayName",
+      "Language": "en",
+      "Id": "eab4508e-4a44-41ca-8c79-cb43abbe526a"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/EnumValue"
+    },
+    {
+      "Value": "EnumValue",
+      "Language": "en",
+      "Id": "4e33b0f4-117f-4a60-9e1f-c8d66d86e4d8"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/NamedEntity"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/EnumValue/value"
+    },
+    {
+      "Value": "Value",
+      "Language": "en",
+      "Id": "860a8af6-febe-4ba7-ae43-f2eb40bc5787"
+    },
+    {
+      "Id": "http://www.w3.org/2001/XMLSchema#int"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/ExecutionType"
+    },
+    {
+      "Value": "ExecutionType",
+      "Language": "en",
+      "Id": "4746c4d7-9b77-489e-839e-56d3f3a7e7c6"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Interface"
+    },
+    {
+      "Value": "Interface",
+      "Language": "en",
+      "Id": "7bf960b7-fa52-403b-9ddb-cc792c9334d9"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Interface/contents"
+    },
+    {
+      "Value": "Contents",
+      "Language": "en",
+      "Id": "5be99443-2b64-4894-b11e-1b2a5e308c33"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Property"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Command"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Telemetry"
+    },
+    {
+      "Value": "NamedEntity",
+      "Language": "en",
+      "Id": "dd9a466d-a4df-4a5f-8c7a-89abfca19c79"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/NamedEntity/name"
+    },
+    {
+      "Value": "Name",
+      "Language": "en",
+      "Id": "fb70f7f8-734e-40cb-8b67-97e5676008f1"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Schema"
+    },
+    {
+      "Value": "Schema",
+      "Language": "en",
+      "Id": "13f636fe-f558-4d5e-ac8b-01ab57a73ca0"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Template"
+    },
+    {
+      "Value": "Template",
+      "Language": "en",
+      "Id": "f565b671-08b9-43bf-83a1-bf9cd6fcd80a"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Template/implements"
+    },
+    {
+      "Value": "Implements",
+      "Language": "en",
+      "Id": "1cd54dbe-9fe0-4ed3-9d40-e9bb6e0b4118"
+    },
+    {
+      "Value": "Command",
+      "Language": "en",
+      "Id": "c3329437-8faa-41b7-bae7-c1f8b44b21e7"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Command/executionType"
+    },
+    {
+      "Value": "ExecutionType",
+      "Language": "en",
+      "Id": "c274a41e-89da-4dec-bc6a-b67213529e1b"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Command/requestSchema"
+    },
+    {
+      "Value": "RequestSchema",
+      "Language": "en",
+      "Id": "3f3821d8-f829-4db1-8c01-58f8d336e782"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Command/responseSchema"
+    },
+    {
+      "Value": "ResponseSchema",
+      "Language": "en",
+      "Id": "a628f2cf-3589-4218-8ff0-d6955d2c65c8"
+    },
+    {
+      "Value": "Property",
+      "Language": "en",
+      "Id": "c0cc946d-2a93-42c0-be93-934421dfe98a"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Property/writable"
+    },
+    {
+      "Value": "Writable",
+      "Language": "en",
+      "Id": "b4b0f58e-6e29-4655-94a4-706c391a8bee"
+    },
+    {
+      "Id": "http://www.w3.org/2001/XMLSchema#boolean"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/SchemaField"
+    },
+    {
+      "Value": "SchemaField",
+      "Language": "en",
+      "Id": "4955bb1e-2c76-4e9e-88ed-5b98950b84fc"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/SchemaField/schema"
+    },
+    {
+      "Value": "Schema",
+      "Language": "en",
+      "Id": "68225c1d-7936-4054-8909-6a21d1a42b18"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/SchemaField/unit"
+    },
+    {
+      "Value": "Unit",
+      "Language": "en",
+      "Id": "489dc8f9-1f79-406c-a019-80771b7e1fd8"
+    },
+    {
+      "Value": "Telemetry",
+      "Language": "en",
+      "Id": "101a5f3f-99ef-47b9-8c07-10f87dc7e3b5"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Schemas/Boolean"
+    },
+    {
+      "Value": "Boolean",
+      "Language": "en",
+      "Id": "5a73ed3e-b4a4-44b1-a883-16b38b716c95"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Schemas/Date"
+    },
+    {
+      "Value": "Date",
+      "Language": "en",
+      "Id": "8e9ce629-f987-4c46-b33c-6fb824ad9096"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Schemas/DateTime"
+    },
+    {
+      "Value": "DateTime",
+      "Language": "en",
+      "Id": "8edee621-5293-402d-8442-661d023c6168"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Schemas/Double"
+    },
+    {
+      "Value": "Double",
+      "Language": "en",
+      "Id": "f11f52ea-3441-4ff6-ad2c-6c961a154a8f"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Schemas/Duration"
+    },
+    {
+      "Value": "Duration",
+      "Language": "en",
+      "Id": "bc87b453-ce8e-4af0-9482-791cf6a53132"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Schemas/Enum"
+    },
+    {
+      "Value": "Enum",
+      "Language": "en",
+      "Id": "8affff9d-9edf-42d8-8bbe-5e56ca1f2a9b"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Schemas/Float"
+    },
+    {
+      "Value": "Float",
+      "Language": "en",
+      "Id": "23da739d-96b5-4b44-a88f-8f1836960a79"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Schemas/Integer"
+    },
+    {
+      "Value": "Integer",
+      "Language": "en",
+      "Id": "ba159368-cfce-41bf-8b60-a2177cedb049"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Schemas/Long"
+    },
+    {
+      "Value": "Long",
+      "Language": "en",
+      "Id": "51531554-8fa6-4355-a330-99694a10bd24"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Schemas/Object"
+    },
+    {
+      "Value": "Object",
+      "Language": "en",
+      "Id": "f625a5e6-efc5-44e8-8632-3f41ee7343b5"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Schemas/Object/fields"
+    },
+    {
+      "Value": "Fields",
+      "Language": "en",
+      "Id": "2169b4d2-33bd-4dae-9fdd-0843ebac3753"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Schemas/String"
+    },
+    {
+      "Value": "String",
+      "Language": "en",
+      "Id": "9f1981f1-af1e-4b33-83bf-300f04840ff8"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Schemas/Time"
+    },
+    {
+      "Value": "Time",
+      "Language": "en",
+      "Id": "916dbd5e-75be-4982-a6b6-977691e24620"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Schemas/Boolean/boolean"
+    },
+    {
+      "Value": "Boolean",
+      "Language": "en",
+      "Id": "ebba0823-06ff-4c1e-8d26-e685205fff71"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/ExecutionType/asynchronous"
+    },
+    {
+      "Value": "AsynchronousExecutionType",
+      "Language": "en",
+      "Id": "80edab1d-b837-4158-b89d-3cc65d484c75"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/ExecutionType/synchronous"
+    },
+    {
+      "Value": "SynchronousExecutionType",
+      "Language": "en",
+      "Id": "fb226918-4c1d-45db-a226-a8b9f9162d5a"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Schemas/Date/date"
+    },
+    {
+      "Value": "Date",
+      "Language": "en",
+      "Id": "eb498c0a-9b66-4ad4-b596-d30955a784af"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Schemas/DateTime/dateTime"
+    },
+    {
+      "Value": "DateTime",
+      "Language": "en",
+      "Id": "3893da8e-31dd-45a2-9441-85e2a6176ee6"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Schemas/Double/double"
+    },
+    {
+      "Value": "Double",
+      "Language": "en",
+      "Id": "4298af44-d22e-4929-8a6a-e9ac15de2835"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Schemas/Duration/duration"
+    },
+    {
+      "Value": "Duration",
+      "Language": "en",
+      "Id": "0328a2ab-a441-4a31-a1fa-62883ab5ae53"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Schemas/Float/float"
+    },
+    {
+      "Value": "Float",
+      "Language": "en",
+      "Id": "3daf7e2a-09e0-47f4-8020-51f5d776b95d"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Schemas/Integer/integer"
+    },
+    {
+      "Value": "Integer",
+      "Language": "en",
+      "Id": "60d4e4bc-f34d-4b56-bc2f-c888312ecbed"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Schemas/Long/long"
+    },
+    {
+      "Value": "Long",
+      "Language": "en",
+      "Id": "a9db9944-fb59-410f-8f57-87c3d11d7480"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Schemas/String/string"
+    },
+    {
+      "Value": "String",
+      "Language": "en",
+      "Id": "e463fc2e-cd72-4e55-bf98-15fc7597826c"
+    },
+    {
+      "Id": "http://azureiot.com/v0/classes/Schemas/Time/time"
+    },
+    {
+      "Value": "Time",
+      "Language": "en",
+      "Id": "e20b304d-a392-4d82-8164-6a4bf9edd4a1"
+    }
+  ],
+  "Edges": [
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Entity"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2000/01/rdf-schema#Class"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Entity"
+      },
+      "TargetNode": {
+        "Value": "Entity",
+        "Language": "en",
+        "Id": "77c694e0-dd7b-49e8-a7af-b9b410f94020"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Entity/comment"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Entity/comment"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Entity"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#domain"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Entity/comment"
+      },
+      "TargetNode": {
+        "Value": "Comment",
+        "Language": "en",
+        "Id": "0c59da07-1fae-44ac-a3f6-845405b3cc48"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Entity/comment"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2001/XMLSchema#string"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#range"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Entity/description"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Entity/description"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Entity"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#domain"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Entity/description"
+      },
+      "TargetNode": {
+        "Value": "Description",
+        "Language": "en",
+        "Id": "5d12c44f-7383-4da9-8d5e-a3a0780063f7"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Entity/description"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2001/XMLSchema#string"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#range"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Entity/displayName"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Entity/displayName"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Entity"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#domain"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Entity/displayName"
+      },
+      "TargetNode": {
+        "Value": "DisplayName",
+        "Language": "en",
+        "Id": "eab4508e-4a44-41ca-8c79-cb43abbe526a"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Entity/displayName"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2001/XMLSchema#string"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#range"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/EnumValue"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2000/01/rdf-schema#Class"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/EnumValue"
+      },
+      "TargetNode": {
+        "Value": "EnumValue",
+        "Language": "en",
+        "Id": "4e33b0f4-117f-4a60-9e1f-c8d66d86e4d8"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/EnumValue"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/NamedEntity"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#subClassOf"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/EnumValue/value"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/EnumValue/value"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/EnumValue"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#domain"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/EnumValue/value"
+      },
+      "TargetNode": {
+        "Value": "Value",
+        "Language": "en",
+        "Id": "860a8af6-febe-4ba7-ae43-f2eb40bc5787"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/EnumValue/value"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2001/XMLSchema#int"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#range"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/EnumValue/value"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2001/XMLSchema#string"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#range"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/ExecutionType"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2000/01/rdf-schema#Class"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/ExecutionType"
+      },
+      "TargetNode": {
+        "Value": "ExecutionType",
+        "Language": "en",
+        "Id": "4746c4d7-9b77-489e-839e-56d3f3a7e7c6"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/ExecutionType"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Entity"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#subClassOf"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Interface"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2000/01/rdf-schema#Class"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Interface"
+      },
+      "TargetNode": {
+        "Value": "Interface",
+        "Language": "en",
+        "Id": "7bf960b7-fa52-403b-9ddb-cc792c9334d9"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Interface"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Entity"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#subClassOf"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Interface/contents"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Interface/contents"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Interface"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#domain"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Interface/contents"
+      },
+      "TargetNode": {
+        "Value": "Contents",
+        "Language": "en",
+        "Id": "5be99443-2b64-4894-b11e-1b2a5e308c33"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Interface/contents"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Property"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#range"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Interface/contents"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Command"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#range"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Interface/contents"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Telemetry"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#range"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/NamedEntity"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2000/01/rdf-schema#Class"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/NamedEntity"
+      },
+      "TargetNode": {
+        "Value": "NamedEntity",
+        "Language": "en",
+        "Id": "dd9a466d-a4df-4a5f-8c7a-89abfca19c79"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/NamedEntity"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Entity"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#subClassOf"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/NamedEntity/name"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/NamedEntity/name"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/NamedEntity"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#domain"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/NamedEntity/name"
+      },
+      "TargetNode": {
+        "Value": "Name",
+        "Language": "en",
+        "Id": "fb70f7f8-734e-40cb-8b67-97e5676008f1"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/NamedEntity/name"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2001/XMLSchema#string"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#range"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schema"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2000/01/rdf-schema#Class"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schema"
+      },
+      "TargetNode": {
+        "Value": "Schema",
+        "Language": "en",
+        "Id": "13f636fe-f558-4d5e-ac8b-01ab57a73ca0"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schema"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Entity"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#subClassOf"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Template"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2000/01/rdf-schema#Class"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Template"
+      },
+      "TargetNode": {
+        "Value": "Template",
+        "Language": "en",
+        "Id": "f565b671-08b9-43bf-83a1-bf9cd6fcd80a"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Template"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Entity"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#subClassOf"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Template/implements"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Template/implements"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Template"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#domain"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Template/implements"
+      },
+      "TargetNode": {
+        "Value": "Implements",
+        "Language": "en",
+        "Id": "1cd54dbe-9fe0-4ed3-9d40-e9bb6e0b4118"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Template/implements"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Interface"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#range"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Command"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2000/01/rdf-schema#Class"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Command"
+      },
+      "TargetNode": {
+        "Value": "Command",
+        "Language": "en",
+        "Id": "c3329437-8faa-41b7-bae7-c1f8b44b21e7"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Command"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/NamedEntity"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#subClassOf"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Command/executionType"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Command/executionType"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Command"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#domain"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Command/executionType"
+      },
+      "TargetNode": {
+        "Value": "ExecutionType",
+        "Language": "en",
+        "Id": "c274a41e-89da-4dec-bc6a-b67213529e1b"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Command/executionType"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/ExecutionType"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#range"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Command/requestSchema"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Command/requestSchema"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Command"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#domain"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Command/requestSchema"
+      },
+      "TargetNode": {
+        "Value": "RequestSchema",
+        "Language": "en",
+        "Id": "3f3821d8-f829-4db1-8c01-58f8d336e782"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Command/requestSchema"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schema"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#range"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Command/responseSchema"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Command/responseSchema"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Command"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#domain"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Command/responseSchema"
+      },
+      "TargetNode": {
+        "Value": "ResponseSchema",
+        "Language": "en",
+        "Id": "a628f2cf-3589-4218-8ff0-d6955d2c65c8"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Command/responseSchema"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schema"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#range"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Property"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2000/01/rdf-schema#Class"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Property"
+      },
+      "TargetNode": {
+        "Value": "Property",
+        "Language": "en",
+        "Id": "c0cc946d-2a93-42c0-be93-934421dfe98a"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Property"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/NamedEntity"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#subClassOf"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Property/writable"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Property/writable"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Property"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#domain"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Property/writable"
+      },
+      "TargetNode": {
+        "Value": "Writable",
+        "Language": "en",
+        "Id": "b4b0f58e-6e29-4655-94a4-706c391a8bee"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Property/writable"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2001/XMLSchema#boolean"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#range"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/SchemaField"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2000/01/rdf-schema#Class"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/SchemaField"
+      },
+      "TargetNode": {
+        "Value": "SchemaField",
+        "Language": "en",
+        "Id": "4955bb1e-2c76-4e9e-88ed-5b98950b84fc"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/SchemaField"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/NamedEntity"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#subClassOf"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/SchemaField/schema"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/SchemaField/schema"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/SchemaField"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#domain"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/SchemaField/schema"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Property"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#domain"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/SchemaField/schema"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Telemetry"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#domain"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/SchemaField/schema"
+      },
+      "TargetNode": {
+        "Value": "Schema",
+        "Language": "en",
+        "Id": "68225c1d-7936-4054-8909-6a21d1a42b18"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/SchemaField/schema"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schema"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#range"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/SchemaField/unit"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/SchemaField/unit"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/SchemaField"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#domain"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/SchemaField/unit"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Property"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#domain"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/SchemaField/unit"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Telemetry"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#domain"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/SchemaField/unit"
+      },
+      "TargetNode": {
+        "Value": "Unit",
+        "Language": "en",
+        "Id": "489dc8f9-1f79-406c-a019-80771b7e1fd8"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/SchemaField/unit"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2001/XMLSchema#string"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#range"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Telemetry"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2000/01/rdf-schema#Class"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Telemetry"
+      },
+      "TargetNode": {
+        "Value": "Telemetry",
+        "Language": "en",
+        "Id": "101a5f3f-99ef-47b9-8c07-10f87dc7e3b5"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Telemetry"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/NamedEntity"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#subClassOf"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Boolean"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2000/01/rdf-schema#Class"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Boolean"
+      },
+      "TargetNode": {
+        "Value": "Boolean",
+        "Language": "en",
+        "Id": "5a73ed3e-b4a4-44b1-a883-16b38b716c95"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Boolean"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schema"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#subClassOf"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Date"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2000/01/rdf-schema#Class"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Date"
+      },
+      "TargetNode": {
+        "Value": "Date",
+        "Language": "en",
+        "Id": "8e9ce629-f987-4c46-b33c-6fb824ad9096"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Date"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schema"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#subClassOf"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/DateTime"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2000/01/rdf-schema#Class"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/DateTime"
+      },
+      "TargetNode": {
+        "Value": "DateTime",
+        "Language": "en",
+        "Id": "8edee621-5293-402d-8442-661d023c6168"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/DateTime"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schema"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#subClassOf"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Double"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2000/01/rdf-schema#Class"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Double"
+      },
+      "TargetNode": {
+        "Value": "Double",
+        "Language": "en",
+        "Id": "f11f52ea-3441-4ff6-ad2c-6c961a154a8f"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Double"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schema"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#subClassOf"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Duration"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2000/01/rdf-schema#Class"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Duration"
+      },
+      "TargetNode": {
+        "Value": "Duration",
+        "Language": "en",
+        "Id": "bc87b453-ce8e-4af0-9482-791cf6a53132"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Duration"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schema"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#subClassOf"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Enum"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2000/01/rdf-schema#Class"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Enum"
+      },
+      "TargetNode": {
+        "Value": "Enum",
+        "Language": "en",
+        "Id": "8affff9d-9edf-42d8-8bbe-5e56ca1f2a9b"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Enum"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schema"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#subClassOf"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Float"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2000/01/rdf-schema#Class"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Float"
+      },
+      "TargetNode": {
+        "Value": "Float",
+        "Language": "en",
+        "Id": "23da739d-96b5-4b44-a88f-8f1836960a79"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Float"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schema"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#subClassOf"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Integer"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2000/01/rdf-schema#Class"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Integer"
+      },
+      "TargetNode": {
+        "Value": "Integer",
+        "Language": "en",
+        "Id": "ba159368-cfce-41bf-8b60-a2177cedb049"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Integer"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schema"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#subClassOf"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Long"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2000/01/rdf-schema#Class"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Long"
+      },
+      "TargetNode": {
+        "Value": "Long",
+        "Language": "en",
+        "Id": "51531554-8fa6-4355-a330-99694a10bd24"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Long"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schema"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#subClassOf"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Object"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2000/01/rdf-schema#Class"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Object"
+      },
+      "TargetNode": {
+        "Value": "Object",
+        "Language": "en",
+        "Id": "f625a5e6-efc5-44e8-8632-3f41ee7343b5"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Object"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schema"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#subClassOf"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Object/fields"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Object/fields"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Object"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#domain"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Object/fields"
+      },
+      "TargetNode": {
+        "Value": "Fields",
+        "Language": "en",
+        "Id": "2169b4d2-33bd-4dae-9fdd-0843ebac3753"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Object/fields"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/SchemaField"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#range"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/String"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2000/01/rdf-schema#Class"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/String"
+      },
+      "TargetNode": {
+        "Value": "String",
+        "Language": "en",
+        "Id": "9f1981f1-af1e-4b33-83bf-300f04840ff8"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/String"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schema"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#subClassOf"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Time"
+      },
+      "TargetNode": {
+        "Id": "http://www.w3.org/2000/01/rdf-schema#Class"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Time"
+      },
+      "TargetNode": {
+        "Value": "Time",
+        "Language": "en",
+        "Id": "916dbd5e-75be-4982-a6b6-977691e24620"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#label"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Time"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schema"
+      },
+      "Label": "http://www.w3.org/2000/01/rdf-schema#subClassOf"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Boolean/boolean"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Boolean"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Boolean/boolean"
+      },
+      "TargetNode": {
+        "Value": "Boolean",
+        "Language": "en",
+        "Id": "ebba0823-06ff-4c1e-8d26-e685205fff71"
+      },
+      "Label": "http://azureiot.com/v0/classes/Entity/displayName"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/ExecutionType/asynchronous"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/ExecutionType"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/ExecutionType/asynchronous"
+      },
+      "TargetNode": {
+        "Value": "AsynchronousExecutionType",
+        "Language": "en",
+        "Id": "80edab1d-b837-4158-b89d-3cc65d484c75"
+      },
+      "Label": "http://azureiot.com/v0/classes/Entity/displayName"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/ExecutionType/synchronous"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/ExecutionType"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/ExecutionType/synchronous"
+      },
+      "TargetNode": {
+        "Value": "SynchronousExecutionType",
+        "Language": "en",
+        "Id": "fb226918-4c1d-45db-a226-a8b9f9162d5a"
+      },
+      "Label": "http://azureiot.com/v0/classes/Entity/displayName"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Date/date"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Date"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Date/date"
+      },
+      "TargetNode": {
+        "Value": "Date",
+        "Language": "en",
+        "Id": "eb498c0a-9b66-4ad4-b596-d30955a784af"
+      },
+      "Label": "http://azureiot.com/v0/classes/Entity/displayName"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/DateTime/dateTime"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/DateTime"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/DateTime/dateTime"
+      },
+      "TargetNode": {
+        "Value": "DateTime",
+        "Language": "en",
+        "Id": "3893da8e-31dd-45a2-9441-85e2a6176ee6"
+      },
+      "Label": "http://azureiot.com/v0/classes/Entity/displayName"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Double/double"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Double"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Double/double"
+      },
+      "TargetNode": {
+        "Value": "Double",
+        "Language": "en",
+        "Id": "4298af44-d22e-4929-8a6a-e9ac15de2835"
+      },
+      "Label": "http://azureiot.com/v0/classes/Entity/displayName"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Duration/duration"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Duration"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Duration/duration"
+      },
+      "TargetNode": {
+        "Value": "Duration",
+        "Language": "en",
+        "Id": "0328a2ab-a441-4a31-a1fa-62883ab5ae53"
+      },
+      "Label": "http://azureiot.com/v0/classes/Entity/displayName"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Float/float"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Float"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Float/float"
+      },
+      "TargetNode": {
+        "Value": "Float",
+        "Language": "en",
+        "Id": "3daf7e2a-09e0-47f4-8020-51f5d776b95d"
+      },
+      "Label": "http://azureiot.com/v0/classes/Entity/displayName"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Integer/integer"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Integer"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Integer/integer"
+      },
+      "TargetNode": {
+        "Value": "Integer",
+        "Language": "en",
+        "Id": "60d4e4bc-f34d-4b56-bc2f-c888312ecbed"
+      },
+      "Label": "http://azureiot.com/v0/classes/Entity/displayName"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Long/long"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Long"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Long/long"
+      },
+      "TargetNode": {
+        "Value": "Long",
+        "Language": "en",
+        "Id": "a9db9944-fb59-410f-8f57-87c3d11d7480"
+      },
+      "Label": "http://azureiot.com/v0/classes/Entity/displayName"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/String/string"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/String"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/String/string"
+      },
+      "TargetNode": {
+        "Value": "String",
+        "Language": "en",
+        "Id": "e463fc2e-cd72-4e55-bf98-15fc7597826c"
+      },
+      "Label": "http://azureiot.com/v0/classes/Entity/displayName"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Time/time"
+      },
+      "TargetNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Time"
+      },
+      "Label": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "SourceNode": {
+        "Id": "http://azureiot.com/v0/classes/Schemas/Time/time"
+      },
+      "TargetNode": {
+        "Value": "Time",
+        "Language": "en",
+        "Id": "e20b304d-a392-4d82-8164-6a4bf9edd4a1"
+      },
+      "Label": "http://azureiot.com/v0/classes/Entity/displayName"
+    }
+  ]
+}
