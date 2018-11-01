@@ -2,6 +2,8 @@
     "@id": "http://example.com/{TEMPLATENAME}/1.0.0",
     "@type": "Template",
     "displayName": "{TEMPLATENAME}",
-    "implements":[],
-    "@context": "http://aziot.cloudapp.net/v1/contexts/Template.json"
+    "implements": [
+        "http://examplerenhetest.com/test1/1.0.0"
+     ],
+    "@context": "http://azureiot.com/v0/contexts/template.json"
 }

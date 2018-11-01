@@ -8,15 +8,9 @@ import * as request from 'request-promise';
 import * as url from 'url';
 import {SearchResults} from './DataContracts/SearchResults';
 import {PnPUri} from './Validator/PnPUri';
-import {PnPContext} from './DataContracts/PnPContext';
+import {MetaModelType, PnPContext} from './DataContracts/PnPContext';
 import {PnPConnectionStringBuilder} from './PnPConnectionStringBuilder';
 import {PnPConnectionString} from './PnPConnectionString';
-
-
-export enum MetaModelType {
-  Interface,
-  Template
-}
 
 const constants = {
   interfaceRoute: '/api/interfaces',

@@ -29,6 +29,7 @@ import {PnPMetaModelUtility, PnPMetaModelContext} from './pnp/PnPMetaModelUtilit
 import {PnPMetaModelParser, PnPMetaModelGraph} from './pnp/PnPMetaModelGraph';
 import {DeviceModelOperator} from './pnp/DeviceModelOperator';
 import {PnPMetaModelJsonParser} from './pnp/PnPMetaModelJsonParser';
+import {MetaModelType} from './pnp/pnp-api/DataContracts/PnPContext';
 
 function filterMenu(commands: CommandItem[]) {
   for (let i = 0; i < commands.length; i++) {
@@ -353,6 +354,20 @@ export async function activate(context: vscode.ExtensionContext) {
     deviceModelOperator.CreateTemplate(context, outputChannel);
   };
 
+  const deviceModelConnectProvider = async () => {
+    deviceModelOperator.Connect(context, outputChannel);
+  };
+
+  const deviceModelSubmitInterfaceProvider = async () => {
+    deviceModelOperator.SubmitMetaModelFile(
+        context, outputChannel, MetaModelType.Interface);
+  };
+
+  const deviceModelSubmitTemplateProvider = async () => {
+    deviceModelOperator.SubmitMetaModelFile(
+        context, outputChannel, MetaModelType.Template);
+  };
+
   const scaffoldDeviceStubProvider = async () => {
     callWithTelemetry(
         EventNames.scaffoldDeviceStubEvent, outputChannel, true, context,
@@ -419,6 +434,12 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const menuForDeviceModel: CommandItem[] = [
     {
+      label: 'Connect to Plug & Play Model Repository',
+      description: '',
+      detail: 'connect to model repository',
+      click: deviceModelConnectProvider
+    },
+    {
       label: 'Create new Plug & Play interface',
       description: '',
       detail: 'Create an interface for device model',
@@ -429,6 +450,18 @@ export async function activate(context: vscode.ExtensionContext) {
       description: '',
       detail: 'Create a template for device model',
       click: deviceModelCreateTemplateProvider
+    },
+    {
+      label: 'Submit Plug & Play interface',
+      description: '',
+      detail: 'Submit an interface for device model.',
+      click: deviceModelSubmitInterfaceProvider
+    },
+    {
+      label: 'Submit Plug & Play template',
+      description: '',
+      detail: 'Submit a template for device model.',
+      click: deviceModelSubmitTemplateProvider
     },
     {
       label: 'Scaffold Code stub',

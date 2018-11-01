@@ -4,18 +4,19 @@
     "displayName": "{INTERFACENAME}", 
     "contents": [ 
       { 
-        "@type": "Event", 
+        "@type": "Telemetry", 
         "comment": "This shows an event that contains a single value (temperature).", 
         "name": "temperature", 
-        "schema": "double" 
+        "schema": "double"
       }, 
       { 
-        "@type": "Event", 
+        "@type": "Telemetry", 
         "comment": "This shows an event that contains a single value (humidity).", 
         "name": "humidity", 
-        "schema": "double" 
+        "schema": "double", 
+        "displayUnit": "%"
       }
     ],
-    "@context": "http://aziot.cloudapp.net/v1/contexts/Interface.json" 
+    "@context": "http://azureiot.com/v0/contexts/Interface.json" 
   } 
   

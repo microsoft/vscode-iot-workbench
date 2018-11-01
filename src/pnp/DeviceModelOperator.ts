@@ -8,7 +8,20 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 
 import {PnPFileNames} from './PnPConstants';
+import {PnPMetamodelRepositoryClient} from './pnp-api/PnPMetamodelRepositoryClient';
+import {PnPUri} from './pnp-api/Validator/PnPUri';
 import * as utils from '../utils';
+import {MetaModelType, PnPContext} from './pnp-api/DataContracts/PnPContext';
+
+const constants = {
+  modelRepositoryKeyName: 'ModelRepositoryKey',
+  storedFilesInfoKeyName: 'StoredFilesInfo',
+  RepoConnectionStringTemplate:
+      'HostName=<Host Name>;SharedAccessKeyName=<Shared AccessKey Name>;SharedAccessKey=<access Key>',
+  idName: '@id',
+  displayName: 'displayName'
+};
+
 
 export class DeviceModelOperator {
   // Initial the folder for authoring device model, return the root path of the
@@ -189,5 +202,301 @@ export class DeviceModelOperator {
 
     vscode.window.showInformationMessage('Template created successfully');
     return;
+  }
+
+  async Connect(
+      context: vscode.ExtensionContext,
+      channel: vscode.OutputChannel): Promise<boolean> {
+    let rootPath: string|null = null;
+    rootPath = await this.InitializeFolder();
+    if (!rootPath) {
+      return false;
+    }
+
+    const option: vscode.InputBoxOptions = {
+      value: constants.RepoConnectionStringTemplate,
+      prompt: `Please input connection string here.`,
+      ignoreFocusOut: true
+    };
+
+    const repoConnectionString = await vscode.window.showInputBox(option);
+
+    if (!repoConnectionString) {
+      return false;
+    }
+
+    const result =
+        await this.ConnectMetamodelRepository(context, repoConnectionString);
+
+    if (result) {
+      await vscode.commands.executeCommand(
+          'vscode.openFolder', vscode.Uri.file(rootPath), false);
+      return true;
+    }
+    return false;
+  }
+
+  async SubmitMetaModelFile(
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      metaModelType: MetaModelType): Promise<boolean> {
+    if (!vscode.workspace.workspaceFolders ||
+        !vscode.workspace.workspaceFolders[0].uri.fsPath) {
+      vscode.window.showWarningMessage(
+          'No folder opened in current window. Please select a folder first');
+      return false;
+    }
+    channel.show();
+    const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+
+    // Get the file to submit:
+    const templateFiles = fs.listSync(rootPath);
+    if (!templateFiles || templateFiles.length === 0) {
+      const message = 'Unable to find meta model files in the folder.';
+      vscode.window.showWarningMessage(message);
+      return false;
+    }
+
+    const suffix = metaModelType === MetaModelType.Interface ?
+        '.interface.json' :
+        '.template.json';
+
+    const templateItems: vscode.QuickPickItem[] = [];
+    templateFiles.forEach((filePath: string) => {
+      const fileName = path.basename(filePath);
+      if (fileName.endsWith(suffix)) {
+        templateItems.push({label: fileName, description: ''});
+      }
+    });
+
+    if (templateItems.length === 0) {
+      vscode.window.showWarningMessage(
+          'Unable to find the target metamodel files. Please make sure meta model files exists in the target folder.');
+      return false;
+    }
+
+    const fileSelection = await vscode.window.showQuickPick(templateItems, {
+      ignoreFocusOut: true,
+      matchOnDescription: true,
+      matchOnDetail: true,
+      placeHolder: 'Select a Plug & Play meta model file',
+    });
+
+    if (!fileSelection) {
+      return false;
+    }
+    channel.appendLine(`File selected: ${fileSelection.label}`);
+    const filePath = path.join(rootPath, fileSelection.label);
+
+    let connectionString =
+        context.workspaceState.get<string>(constants.modelRepositoryKeyName);
+    if (!connectionString) {
+      const option: vscode.InputBoxOptions = {
+        value: constants.RepoConnectionStringTemplate,
+        prompt: `Please input connection string here.`,
+        ignoreFocusOut: true
+      };
+
+      connectionString = await vscode.window.showInputBox(option);
+
+      if (!connectionString) {
+        return false;
+      } else {
+        const result =
+            await this.ConnectMetamodelRepository(context, connectionString);
+        if (!result) {
+          return false;
+        }
+      }
+    }
+
+    const pnpMetamodelRepositoryClient =
+        new PnPMetamodelRepositoryClient(connectionString);
+    // submit the file
+    if (metaModelType === MetaModelType.Interface) {
+      const result = await this.SubmitInterface(
+          pnpMetamodelRepositoryClient, filePath, fileSelection.label, channel);
+      return result;
+    } else {
+      const result = await this.SubmitTemplate(
+          pnpMetamodelRepositoryClient, filePath, fileSelection.label, channel);
+      return result;
+    }
+  }
+
+  private async SubmitInterface(
+      pnpMetamodelRepositoryClient: PnPMetamodelRepositoryClient,
+      filePath: string, fileName: string,
+      channel: vscode.OutputChannel): Promise<boolean> {
+    try {
+      const fileContent = fs.readFileSync(filePath, 'utf8');
+      const fileJson = JSON.parse(fileContent);
+      const fileId = fileJson[constants.idName];
+      const displayName = fileJson[constants.displayName];
+      if (!fileId || !displayName) {
+        vscode.window.showWarningMessage(
+            'Unable to find interface id or displayName from the interface file.');
+        return false;
+      }
+      channel.appendLine(`Load and parse file: ${fileName} successfully.`);
+      // check whether file exists in model repo, try to update the file.
+      try {
+        // First, get the file to retrieve the latest etag.
+        channel.appendLine(
+            `Connect to repository to check ${fileId} exists...`);
+        const interfaceContext =
+            await pnpMetamodelRepositoryClient.GetInterfaceByInterfaceIdAsync(
+                PnPUri.Parse(fileId));
+
+        if (interfaceContext.published) {
+          // already published, we should not update it.
+          vscode.window.showWarningMessage(`Interface with interface id: ${
+              fileId} is already published. You could not updated it.`);
+          return false;
+        }
+
+        channel.appendLine(`Interface file exists, updating ${fileId}... `);
+        // Update the interface
+        const pnpContext: PnPContext = {
+          resourceId: interfaceContext.resourceId,
+          content: fileContent,
+          etag: interfaceContext.etag
+        };
+        const updatedContext =
+            await pnpMetamodelRepositoryClient.UpdateInterface(pnpContext);
+        channel.appendLine(`Submitting interface file: fileName: ${
+            fileName} successfully, interface id: ${fileId}. `);
+        vscode.window.showInformationMessage(
+            `Interface with interface id: ${fileId} updated successfully`);
+      } catch (error) {
+        if (error.statusCode === 404)  // Not found
+        {
+          channel.appendLine(
+              `Interface file does not exist, creating ${fileId}... `);
+          // Create the interface.
+          const pnpContext:
+              PnPContext = {resourceId: '', content: fileContent, etag: ''};
+          const result: PnPContext =
+              await pnpMetamodelRepositoryClient.CreateInterfaceAsync(
+                  pnpContext);
+          channel.appendLine(`Submitting interface: fileName: ${
+              fileName} successfully, interface id: ${fileId}. `);
+          vscode.window.showInformationMessage(
+              `Interface with interface id: ${fileId} updated successfully`);
+        } else {
+          throw error;
+        }
+      }
+    } catch (error) {
+      channel.appendLine(`Submitting interface: fileName: ${
+          fileName} failed, error: ${error}.`);
+      vscode.window.showWarningMessage(
+          `Unable to submit the file, error: ${error}`);
+      return false;
+    }
+
+    return true;
+  }
+
+  private async SubmitTemplate(
+      pnpMetamodelRepositoryClient: PnPMetamodelRepositoryClient,
+      filePath: string, fileName: string,
+      channel: vscode.OutputChannel): Promise<boolean> {
+    try {
+      const fileContent = fs.readFileSync(filePath, 'utf8');
+      const fileJson = JSON.parse(fileContent);
+      const fileId = fileJson[constants.idName];
+      const displayName = fileJson[constants.displayName];
+      if (!fileId || !displayName) {
+        vscode.window.showWarningMessage(
+            'Unable to find template id or displayName from the template file.');
+        return false;
+      }
+      channel.appendLine(`Load and parse file: ${fileName} successfully.`);
+      // check whether file exists in model repo, try to update the file.
+      try {
+        // First, get the file to retrieve the latest etag.
+        channel.appendLine(
+            `Connect to repository to check ${fileId} exists...`);
+        const templateContext =
+            await pnpMetamodelRepositoryClient.GetTemplateByTemplateIdAsync(
+                PnPUri.Parse(fileId));
+
+        if (templateContext.published) {
+          // already published, we should not update it.
+          vscode.window.showWarningMessage(`Template with template id: ${
+              fileId} is already published. You could not updated it.`);
+          return false;
+        }
+
+        channel.appendLine(`Template file exists, updating ${fileId}... `);
+        // Update the interface
+        const pnpContext: PnPContext = {
+          resourceId: templateContext.resourceId,
+          content: fileContent,
+          etag: templateContext.etag
+        };
+        const updatedContext =
+            await pnpMetamodelRepositoryClient.UpdateTemplate(pnpContext);
+        channel.appendLine(`Submitting template file: fileName: ${
+            fileName} successfully, template id: ${fileId}. `);
+        vscode.window.showInformationMessage(
+            `Template with template id: ${fileId} updated successfully`);
+      } catch (error) {
+        if (error.statusCode === 404)  // Not found
+        {
+          channel.appendLine(
+              `Interface file does not exist, creating ${fileId}... `);
+          // Create the interface.
+          const pnpContext:
+              PnPContext = {resourceId: '', content: fileContent, etag: ''};
+          const result: PnPContext =
+              await pnpMetamodelRepositoryClient.CreateTemplateAsync(
+                  pnpContext);
+          channel.appendLine(`Submitting template: fileName: ${
+              fileName} successfully, template id: ${fileId}. `);
+          vscode.window.showInformationMessage(
+              `Template with template id: ${fileId} updated successfully`);
+        } else {
+          throw error;
+        }
+      }
+    } catch (error) {
+      channel.appendLine(`Submitting template: fileName: ${
+          fileName} failed, error: ${error}.`);
+      vscode.window.showWarningMessage(
+          `Unable to submit the file, error: ${error}`);
+      return false;
+    }
+
+    return true;
+  }
+
+
+
+  private async ConnectMetamodelRepository(
+      context: vscode.ExtensionContext,
+      connectionString: string): Promise<boolean> {
+    if (!connectionString) {
+      throw new Error(
+          'The connection string could not be empty. Please provide a valid connection string');
+    }
+
+    try {
+      const pnpMetamodelRepositoryClient =
+          new PnPMetamodelRepositoryClient(connectionString);
+      // try to get one interface.
+      const result =
+          await pnpMetamodelRepositoryClient.GetAllInterfacesAsync(null, 1);
+      context.workspaceState.update(
+          constants.modelRepositoryKeyName, connectionString);
+      vscode.window.showInformationMessage(
+          'Connect to Metamodel Repository successfully.');
+      // Save connection string into
+      return true;
+    } catch (error) {
+      vscode.window.showErrorMessage(
+          `Unable to connect to Metamodel Repository, error: ${error}`);
+      return false;
+    }
   }
 }
