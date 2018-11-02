@@ -1,3 +1,4 @@
+import {endianness} from 'os';
 import * as vscode from 'vscode';
 
 import * as Json from './JSON';
@@ -27,19 +28,76 @@ export class PnPMetaModelJsonParser {
   }
 
   static getTokenRange(tokens: Json.Token[], offset: number) {
+    // let startIndex = offset;
+    // let endIndex = offset + 1;
+    // for (const token of tokens) {
+    //   if (token.span.startIndex <= offset && token.span.endIndex >= offset) {
+    //     if ([
+    //           Json.TokenType.Boolean, Json.TokenType.Null,
+    //           Json.TokenType.Number, Json.TokenType.Literal
+    //         ].indexOf(token.type) > -1) {
+    //       startIndex = token.span.startIndex;
+    //       endIndex = token.span.endIndex + 1;
+    //     } else {
+    //       break;
+    //     }
+    //   }
+    // }
+
+    // Default insert text at current position
     let startIndex = offset;
-    let endIndex = offset + 1;
-    for (const token of tokens) {
-      if (token.span.startIndex <= offset && token.span.endIndex >= offset) {
-        if ([
-              Json.TokenType.Boolean, Json.TokenType.Null,
-              Json.TokenType.Number, Json.TokenType.Literal
-            ].indexOf(token.type) > -1) {
-          startIndex = token.span.startIndex;
-          endIndex = token.span.endIndex + 1;
-        } else {
-          break;
+    let endIndex = offset;
+
+    for (let i = 0; i < tokens.length; i++) {
+      const token = tokens[i];
+      // The position is inside a token, replace the whole token
+      if (token.span.startIndex < offset && token.span.afterEndIndex > offset) {
+        // Just replace it
+        startIndex = token.span.startIndex;
+        endIndex = token.span.afterEndIndex;
+
+        // This token is within quotes, replace the quotes as well
+        if (i > 0 && tokens[i - 1].type === Json.TokenType.QuotedString) {
+          startIndex = tokens[i - 1].span.startIndex;
+          endIndex = tokens[i + 1].span.afterEndIndex;
         }
+        break;
+      } else if (token.span.afterEndIndex === offset) {
+        if (token.type === Json.TokenType.QuotedString) {
+          // " " : " v a l u e "
+          //  ^
+          startIndex = token.span.startIndex;
+
+          // Do not use tokens[i + 1].span.endIndex here,
+          // Tokens have been upated for auto add right quote
+          endIndex = token.span.afterEndIndex + 1;
+        } else {
+          if (i > 0 && tokens[i - 1].type === Json.TokenType.QuotedString) {
+            // " k e y " : " v a l u e "
+            //        ^
+            startIndex = tokens[i - 1].span.startIndex;
+            endIndex = tokens[i + 1].span.afterEndIndex;
+          } else {
+            // k e y : " v a l u e "
+            //      ^
+            startIndex = token.span.startIndex;
+            endIndex = token.span.afterEndIndex;
+          }
+        }
+        break;
+      } else if (token.span.startIndex === offset) {
+        if (i > 0 && tokens[i - 1].type === Json.TokenType.QuotedString) {
+          // " k e y " : " v a l u e "
+          //  ^
+          startIndex = tokens[i - 1].span.startIndex;
+          endIndex = tokens[i + 1].span.afterEndIndex;
+        } else {
+          //  k e y : " v a l u e "
+          // ^
+          startIndex = token.span.startIndex;
+          endIndex = token.span.afterEndIndex;
+        }
+        break;
       }
     }
 
@@ -49,7 +107,7 @@ export class PnPMetaModelJsonParser {
   static isValueString(tokens: Json.Token[], offset: number) {
     for (let i = 0; i < tokens.length; i++) {
       if (tokens[i].span.startIndex <= offset &&
-          tokens[i].span.endIndex >= offset) {
+          tokens[i].span.afterEndIndex >= offset) {
         if (i >= 1 && tokens[i].type === Json.TokenType.QuotedString &&
             tokens[i - 1].type === Json.TokenType.Colon) {
           return true;
@@ -107,35 +165,45 @@ export class PnPMetaModelJsonParser {
 
   static getCompletionItemsFromArray(
       chars: Array<string|{label: string, type?: string}>,
-      startPosition: vscode.Position, endPosition: vscode.Position) {
+      currentPosition: vscode.Position, startPosition: vscode.Position,
+      endPosition: vscode.Position) {
     const items: vscode.CompletionItem[] = [];
     for (const char of chars) {
       const label = typeof char === 'string' ? char : char.label;
       const item = new vscode.CompletionItem(`$(plug) ${label}`);
       if (typeof char !== 'string') {
+        // insertText is vscode snippet string
+        // https://code.visualstudio.com/docs/editor/userdefinedsnippets#_snippet-syntax
+        let insertText: string;
+        
         switch (char.type) {
           case 'string':
-            item.insertText = `${label}": ""`;
+            insertText = `"${label}": "$1"$0`;
             break;
           case 'int':
-            item.insertText = `${label}": 0`;
+            insertText = `"${label}": $\{1:0\}$0`;
             break;
           case 'float':
-            item.insertText = `${label}": 0.0`;
+            insertText = `"${label}": $\{1:0.0\}$0`;
             break;
           case 'boolean':
-            item.insertText = `${label}": true`;
+            insertText = `"${label}": $\{1:true\}$0`;
             break;
           case 'array':
-            item.insertText = `${label}": []`;
+            insertText = `"${label}": [\n\t{\n\t\t$1\n\t}$2\n]$0`;
             break;
           default:
-            item.insertText = `${label}": `;
+            insertText = `"${label}": `;
         }
+        item.insertText = new vscode.SnippetString(insertText);
       } else {
-        item.insertText = `${label}"`;
+        item.insertText = `"${label}"`;
       }
-      item.range = new vscode.Range(startPosition, endPosition);
+      item.range = new vscode.Range(currentPosition, endPosition);
+      if (currentPosition.character !== startPosition.character) {
+        item.additionalTextEdits = [vscode.TextEdit.delete(
+            new vscode.Range(startPosition, currentPosition))];
+      }
       items.push(item);
     }
     return items;
@@ -153,7 +221,8 @@ export class PnPMetaModelJsonParser {
     let shortName = '';
     for (const token of json.tokens) {
       if (token.type === Json.TokenType.QuotedString &&
-          token.span.startIndex <= offset && token.span.endIndex >= offset) {
+          token.span.startIndex <= offset &&
+          token.span.afterEndIndex >= offset) {
         shortName =
             text.substr(token.span.startIndex + 1, token.span.length - 2);
         break;

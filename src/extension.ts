@@ -189,7 +189,7 @@ export async function activate(context: vscode.ExtensionContext) {
             const endPosition = document.positionAt(range.endIndex);
             const completionItems =
                 PnPMetaModelJsonParser.getCompletionItemsFromArray(
-                    values, startPosition, endPosition);
+                    values, position, startPosition, endPosition);
             return new vscode.CompletionList(completionItems, false);
           } else {
             let keyList: Array<{label: string, type?: string}> = [];
@@ -230,7 +230,7 @@ export async function activate(context: vscode.ExtensionContext) {
             const endPosition = document.positionAt(range.endIndex);
             const completionItems =
                 PnPMetaModelJsonParser.getCompletionItemsFromArray(
-                    completionKeyList, startPosition, endPosition);
+                    completionKeyList, position, startPosition, endPosition);
             console.log(completionItems);
             return new vscode.CompletionList(completionItems, false);
           }
