@@ -115,8 +115,8 @@ suite('IoT Workbench: PnPAPI', () => {
     const newinteface =
         data.replace('1.0.0', `1.0.${Math.floor(Math.random() * 1000000)}`);
 
-    const pnpContext:
-        PnPContext = {resourceId: '', content: newinteface, etag: ''};
+    const pnpContext: PnPContext =
+        {resourceId: '', content: newinteface, etag: '', tags: ['testtag']};
 
     const result: PnPContext =
         await pnpMetamodelRepositoryClient.CreateInterfaceAsync(pnpContext);

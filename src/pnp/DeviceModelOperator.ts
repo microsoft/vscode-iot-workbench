@@ -381,7 +381,7 @@ export class DeviceModelOperator {
           channel.appendLine(`Submitting interface: fileName: ${
               fileName} successfully, interface id: ${fileId}. `);
           vscode.window.showInformationMessage(
-              `Interface with interface id: ${fileId} updated successfully`);
+              `Interface with interface id: ${fileId} created successfully`);
         } else {
           throw error;
         }
@@ -445,7 +445,7 @@ export class DeviceModelOperator {
         if (error.statusCode === 404)  // Not found
         {
           channel.appendLine(
-              `Interface file does not exist, creating ${fileId}... `);
+              `Template file does not exist, creating ${fileId}... `);
           // Create the interface.
           const pnpContext:
               PnPContext = {resourceId: '', content: fileContent, etag: ''};
@@ -455,7 +455,7 @@ export class DeviceModelOperator {
           channel.appendLine(`Submitting template: fileName: ${
               fileName} successfully, template id: ${fileId}. `);
           vscode.window.showInformationMessage(
-              `Template with template id: ${fileId} updated successfully`);
+              `Template with template id: ${fileId} created successfully`);
         } else {
           throw error;
         }

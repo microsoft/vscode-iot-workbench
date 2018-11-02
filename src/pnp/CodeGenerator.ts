@@ -114,27 +114,35 @@ export class CodeGenerator {
         return false;
       }
 
+      const path = await this.GetFolderForCodeGen(channel);
+      if (!path) {
+        return false;
+      }
+
       if (targetSelection.label === 'MXChip IoT DevKit') {
-        const path = await this.GetFolderForCodeGen(channel);
-        if (path !== null) {
-          await this.GenerateCppCodeForDevKit(
-              context, path, templatePath, channel, telemetryContext);
+        const result = await this.GenerateCppCodeForDevKit(
+            context, path, templatePath, channel, telemetryContext);
+        if (result) {
+          vscode.window.showInformationMessage(
+              'Scaffold device code for MXChip IoT DevKit completed');
+          return true;
         }
       } else if (targetSelection.label === 'General') {
-        const path = await this.GetFolderForCodeGen(channel);
-        if (path !== null) {
-          await this.GenerateCppCode(path, templatePath, channel);
+        const result = await this.GenerateCppCode(path, templatePath, channel);
+        if (result) {
+          vscode.window.showInformationMessage(
+              'Scaffold general device code completed');
+          return true;
         }
       }
     }
-    vscode.window.showInformationMessage('Scaffold device code stub completed');
-    return true;
+    return false;
   }
 
   async GenerateCppCodeForDevKit(
       context: vscode.ExtensionContext, rootPath: string,
       templateFilePath: string, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext) {
+      telemetryContext: TelemetryContext): Promise<boolean> {
     const needReload = false;
 
     // Create the device path
@@ -166,25 +174,27 @@ export class CodeGenerator {
     }
 
     // Invoke PnP toolset to generate the code
-    await this.GenerateCppCode(libPath, templateFilePath, channel);
+    const codeGenerateResult =
+        await this.GenerateCppCode(libPath, templateFilePath, channel);
+    if (!codeGenerateResult) {
+      vscode.window.showErrorMessage(
+          'Unable to generate code, please check output window for detail.');
+      return false;
+    }
 
     // TODO: update the telemetry
     const project: IoTProject =
         new IoTProject(context, channel, telemetryContext);
 
-    // Template select
-    const template = context.asAbsolutePath(path.join(
-        FileNames.resourcesFolderName, AZ3166Device.boardId,
-        FileNames.templateFileName));
-    const templateJson = require(template);
-    const result = templateJson.templates.find((template: ProjectTemplate) => {
-      return template.label === 'Device only';  // For the generated project, we
-                                                // use the template of device
-                                                // only
-    });
-
-    await project.create(rootPath, result, AZ3166Device.boardId, true);
-    return;
+    const templateItem: ProjectTemplate = {
+      label: 'Device only',
+      detail: 'Create project from PnP Code generator',
+      description: '',
+      type: 'Basic',
+      sketch: 'pnp-device.ino'
+    };
+    await project.create(rootPath, templateItem, AZ3166Device.boardId, true);
+    return true;
   }
 
   async GetFolderForCodeGen(channel: vscode.OutputChannel):
@@ -218,7 +228,7 @@ export class CodeGenerator {
 
   async GenerateCppCode(
       targetPath: string, templateFilePath: string,
-      channel: vscode.OutputChannel) {
+      channel: vscode.OutputChannel): Promise<boolean> {
     // Invoke PnP toolset to generate the code
     const platform = os.platform();
     const homeDir = os.homedir();
@@ -226,7 +236,7 @@ export class CodeGenerator {
     if (platform === 'win32' || platform === 'darwin') {
       cmdPath = path.join(homeDir, constants.codeGeneratorPath);
     } else {
-      return;
+      return false;
     }
 
     const command = `IoTPnP.Cli.exe scaffold  --jsonldUri "${
@@ -236,7 +246,7 @@ export class CodeGenerator {
     channel.appendLine('IoT Workbench: scaffold code stub.');
     await utils.runCommand(command, cmdPath, channel);
     channel.appendLine('IoT Workbench: scaffold code stub completed.');
-    return;
+    return true;
   }
 
   async UpgradeCodeGenerator(
