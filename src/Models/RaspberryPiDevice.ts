@@ -38,7 +38,6 @@ export class RaspberryPiDevice implements Device {
   private deviceFolder: string;
   private extensionContext: vscode.ExtensionContext;
   private channel: vscode.OutputChannel;
-  private sketchName = '';
   private static _boardId = 'raspberrypi';
 
   static get boardId() {
@@ -47,16 +46,13 @@ export class RaspberryPiDevice implements Device {
 
   constructor(
       context: vscode.ExtensionContext, devicePath: string,
-      channel: vscode.OutputChannel, sketchName?: string) {
+      channel: vscode.OutputChannel, private sketchContent = '') {
     this.deviceType = DeviceType.Raspberry_Pi;
     this.componentType = ComponentType.Device;
     this.deviceFolder = devicePath;
     this.extensionContext = context;
     this.channel = channel;
     this.componentId = Guid.create().toString();
-    if (sketchName) {
-      this.sketchName = sketchName;
-    }
   }
 
   name = 'RaspberryPi';
@@ -131,15 +127,10 @@ export class RaspberryPiDevice implements Device {
       }
     }
 
-    const sketchTemplateFilePath =
-        this.extensionContext.asAbsolutePath(path.join(
-            FileNames.resourcesFolderName, RaspberryPiDevice.boardId,
-            this.sketchName));
     const newSketchFilePath = path.join(deviceFolderPath, sketchFileName);
 
     try {
-      const content = fs.readFileSync(sketchTemplateFilePath).toString();
-      fs.writeFileSync(newSketchFilePath, content);
+      fs.writeFileSync(newSketchFilePath, this.sketchContent);
     } catch (error) {
       throw new Error(`Create ${sketchFileName} failed: ${error.message}`);
     }

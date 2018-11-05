@@ -1,5 +1,4 @@
-#include "Arduino.h"
-#include "application.h"
+#include "src/{PATHNAME}/application.h"
 #include "EEPROMInterface.h"
 #include "AZ3166WiFi.h"
 

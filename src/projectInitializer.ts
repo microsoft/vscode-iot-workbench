@@ -149,7 +149,7 @@ export class ProjectInitializer {
               telemetryContext.properties.template = selection.label;
             }
 
-            const result =
+            const result: ProjectTemplate =
                 templateJson.templates.find((template: ProjectTemplate) => {
                   return template.label === selection.label;
                 });
@@ -159,8 +159,18 @@ export class ProjectInitializer {
             }
 
             const project = new IoTProject(context, channel, telemetryContext);
+
+            const sketchTemplateFilePath = context.asAbsolutePath(path.join(
+                FileNames.resourcesFolderName, boardSelection.id,
+                result.sketch));
+            const content = fs.readFileSync(sketchTemplateFilePath, 'utf8');
+
+            // Convert the string based template type to enum.
+            const type: ProjectTemplateType = ProjectTemplateType
+                [result.type as keyof typeof ProjectTemplateType];
+
             return await project.create(
-                rootPath, result, boardSelection.id, openInNewWindow);
+                rootPath, content, type, boardSelection.id, openInNewWindow);
           } catch (error) {
             throw error;
           }

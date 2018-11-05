@@ -367,8 +367,9 @@ export class IoTProject {
   }
 
   async create(
-      rootFolderPath: string, projectTemplateItem: ProjectTemplate,
-      boardId: string, openInNewWindow: boolean): Promise<boolean> {
+      rootFolderPath: string, sketchContent: string,
+      projectType: ProjectTemplateType, boardId: string,
+      openInNewWindow: boolean): Promise<boolean> {
     if (!fs.existsSync(rootFolderPath)) {
       throw new Error(
           'Unable to find the root path, please open the folder and initialize project again.');
@@ -394,18 +395,16 @@ export class IoTProject {
     workspace.folders.push({path: constants.deviceDefaultFolderName});
     let device: Component;
     if (boardId === AZ3166Device.boardId) {
-      device = new AZ3166Device(
-          this.extensionContext, deviceDir, projectTemplateItem.sketch);
+      device =
+          new AZ3166Device(this.extensionContext, deviceDir, sketchContent);
     } else if (boardId === IoTButtonDevice.boardId) {
-      device = new IoTButtonDevice(
-          this.extensionContext, deviceDir, projectTemplateItem.sketch);
+      device =
+          new IoTButtonDevice(this.extensionContext, deviceDir, sketchContent);
     } else if (boardId === Esp32Device.boardId) {
-      device = new Esp32Device(
-          this.extensionContext, deviceDir, projectTemplateItem.sketch);
+      device = new Esp32Device(this.extensionContext, deviceDir, sketchContent);
     } else if (boardId === RaspberryPiDevice.boardId) {
       device = new RaspberryPiDevice(
-          this.extensionContext, deviceDir, this.channel,
-          projectTemplateItem.sketch);
+          this.extensionContext, deviceDir, this.channel, sketchContent);
     } else {
       throw new Error('The specified board is not supported.');
     }
@@ -421,8 +420,7 @@ export class IoTProject {
     workspace.settings[`IoTWorkbench.${ConfigKey.devicePath}`] =
         constants.deviceDefaultFolderName;
 
-    const type: ProjectTemplateType = (ProjectTemplateType)
-        [projectTemplateItem.type as keyof typeof ProjectTemplateType];
+    const type: ProjectTemplateType = projectType;
 
     switch (type) {
       case ProjectTemplateType.Basic:

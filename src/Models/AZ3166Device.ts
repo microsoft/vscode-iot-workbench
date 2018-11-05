@@ -74,7 +74,6 @@ export class AZ3166Device extends ArduinoDeviceBase {
     return this.componentId;
   }
 
-  private sketchName = '';
   private static _boardId = 'devkit';
 
   static get boardId() {
@@ -83,12 +82,9 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
   constructor(
       context: vscode.ExtensionContext, devicePath: string,
-      sketchName?: string) {
+      private sketchContent = '') {
     super(context, devicePath, DeviceType.MXChip_AZ3166);
     this.componentId = Guid.create().toString();
-    if (sketchName) {
-      this.sketchName = sketchName;
-    }
   }
 
   name = 'AZ3166';
@@ -133,8 +129,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
   }
 
   async create(): Promise<boolean> {
-    if (!this.sketchName) {
-      throw new Error('No sketch file found.');
+    if (!this.sketchContent) {
+      throw new Error('The content of the sketch file is empty.');
     }
     const deviceFolderPath = this.deviceFolder;
 
@@ -148,7 +144,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
     this.generateCommonFiles();
     this.generateCppPropertiesFile(this.board);
     await this.generateSketchFile(
-        this.sketchName, this.board, constants.boardInfo,
+        this.sketchContent, this.board, constants.boardInfo,
         constants.uploadMethod);
     return true;
   }

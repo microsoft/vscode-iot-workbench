@@ -162,7 +162,7 @@ export abstract class ArduinoDeviceBase implements Device {
   }
 
   async generateSketchFile(
-      sketchTemplateFileName: string, board: Board, boardInfo: string,
+      sketchContent: string, board: Board, boardInfo: string,
       boardConfig: string): Promise<boolean> {
     // Get arduino sketch file name from user input or use defalt sketch name
     const option: vscode.InputBoxOptions = {
@@ -227,14 +227,10 @@ export abstract class ArduinoDeviceBase implements Device {
     }
 
     // Create an empty arduino sketch
-    const sketchTemplateFilePath =
-        this.extensionContext.asAbsolutePath(path.join(
-            FileNames.resourcesFolderName, board.id, sketchTemplateFileName));
     const newSketchFilePath = path.join(this.deviceFolder, sketchFileName);
 
     try {
-      const content = fs.readFileSync(sketchTemplateFilePath).toString();
-      fs.writeFileSync(newSketchFilePath, content);
+      fs.writeFileSync(newSketchFilePath, sketchContent);
     } catch (error) {
       throw new Error(`Create arduino sketch file failed: ${error.message}`);
     }

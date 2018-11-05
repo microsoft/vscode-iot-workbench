@@ -11,12 +11,12 @@ import * as crypto from 'crypto';
 
 import request = require('request-promise');
 import AdmZip = require('adm-zip');
-import {ConfigKey, FileNames} from '../constants';
+import {FileNames} from '../constants';
 import {AZ3166Device} from '../Models/AZ3166Device';
 import {IoTProject} from '../Models/IoTProject';
 import * as utils from '../utils';
 import {TelemetryContext} from '../telemetry';
-import {ProjectTemplate,} from '../Models/Interfaces/ProjectTemplate';
+import {ProjectTemplateType} from '../Models/Interfaces/ProjectTemplate';
 
 export interface CodeGeneratorConfig {
   version: string;
@@ -31,7 +31,7 @@ const constants = {
   deviceDefaultFolderName: 'Device',
   codeGeneratorPath: 'pnp-codegen',
   codeGeneratorVersionKey: 'pnp/codeGenVersion',
-  codeGenConfigUrl: 'https://aka.ms/iot-workbench/iot-pnp-config'
+  sketchFileName: 'pnp-device.ino'
 };
 
 export class CodeGenerator {
@@ -186,14 +186,17 @@ export class CodeGenerator {
     const project: IoTProject =
         new IoTProject(context, channel, telemetryContext);
 
-    const templateItem: ProjectTemplate = {
-      label: 'Device only',
-      detail: 'Create project from PnP Code generator',
-      description: '',
-      type: 'Basic',
-      sketch: 'pnp-device.ino'
-    };
-    await project.create(rootPath, templateItem, AZ3166Device.boardId, true);
+    const originPath = context.asAbsolutePath(path.join(
+        FileNames.resourcesFolderName, AZ3166Device.boardId,
+        constants.sketchFileName));
+    const originalContent = fs.readFileSync(originPath, 'utf8');
+
+    const pathPattern = /{PATHNAME}/g;
+    const replaceStr = originalContent.replace(pathPattern, matchItems[1]);
+
+    await project.create(
+        rootPath, replaceStr, ProjectTemplateType.Basic, AZ3166Device.boardId,
+        true);
     return true;
   }
 
@@ -255,10 +258,11 @@ export class CodeGenerator {
       telemetryContext: TelemetryContext): Promise<boolean> {
     channel.show();
 
+    const extensionPackage = require(context.asAbsolutePath('./package.json'));
     // download the config file for code generator
     const options: request.OptionsWithUri = {
       method: 'GET',
-      uri: constants.codeGenConfigUrl,
+      uri: extensionPackage.codeGenConfigUrl,
       encoding: 'utf8',
       json: true
     };

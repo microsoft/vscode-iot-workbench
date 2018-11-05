@@ -25,7 +25,6 @@ export class IoTButtonDevice implements Device {
   private componentType: ComponentType;
   private deviceFolder: string;
   private extensionContext: vscode.ExtensionContext;
-  private inputFileName = '';
 
   private componentId: string;
   get id() {
@@ -40,15 +39,12 @@ export class IoTButtonDevice implements Device {
 
   constructor(
       context: vscode.ExtensionContext, devicePath: string,
-      inputFileName?: string) {
+      private fileContent = '') {
     this.deviceType = DeviceType.IoT_Button;
     this.componentType = ComponentType.Device;
     this.deviceFolder = devicePath;
     this.extensionContext = context;
     this.componentId = Guid.create().toString();
-    if (inputFileName) {
-      this.inputFileName = inputFileName;
-    }
   }
 
   name = 'IoTButton';
@@ -72,7 +68,7 @@ export class IoTButtonDevice implements Device {
   }
 
   async create(): Promise<boolean> {
-    if (!this.inputFileName) {
+    if (!this.fileContent) {
       throw new Error('No user data file found.');
     }
     const deviceFolderPath = this.deviceFolder;
@@ -91,14 +87,11 @@ export class IoTButtonDevice implements Device {
     }
 
     // Create an empty userdata.json
-    const userdataJsonFilePath = this.extensionContext.asAbsolutePath(path.join(
-        FileNames.resourcesFolderName, IoTButtonDevice._boardId,
-        this.inputFileName));
-    const newUserdataPath = path.join(deviceFolderPath, this.inputFileName);
+    const newUserdataPath =
+        path.join(deviceFolderPath, constants.userjsonFilename);
 
     try {
-      const content = fs.readFileSync(userdataJsonFilePath).toString();
-      fs.writeFileSync(newUserdataPath, content);
+      fs.writeFileSync(newUserdataPath, this.fileContent);
     } catch (error) {
       throw new Error(`Create userdata json file failed: ${error.message}`);
     }

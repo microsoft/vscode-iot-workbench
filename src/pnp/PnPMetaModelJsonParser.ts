@@ -175,7 +175,7 @@ export class PnPMetaModelJsonParser {
         // insertText is vscode snippet string
         // https://code.visualstudio.com/docs/editor/userdefinedsnippets#_snippet-syntax
         let insertText: string;
-        
+
         switch (char.type) {
           case 'string':
             insertText = `"${label}": "$1"$0`;
