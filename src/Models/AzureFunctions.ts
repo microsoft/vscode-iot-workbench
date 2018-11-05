@@ -191,9 +191,15 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
         return false;
       }
 
+      const resourceGroup = AzureUtility.resourceGroup;
+      if (!resourceGroup) {
+        return false;
+      }
+
       const functionAppId: string|undefined =
           await vscode.commands.executeCommand<string>(
-              'azureFunctions.createFunctionApp', subscriptionId);
+              'azureFunctions.createFunctionApp', subscriptionId,
+              resourceGroup);
       if (functionAppId) {
         await ConfigHandler.update(ConfigKey.functionAppId, functionAppId);
         const eventHubConnectionString =
@@ -283,7 +289,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
             'azureFunctions.deploy', azureFunctionsPath, functionAppId);
       } else {
         const subPath =
-            path.join(azureFunctionsPath, 'bin/Release/netstandard2.0/publish');
+            path.join(azureFunctionsPath, 'bin/Release/netcoreapp2.1/publish');
         await vscode.commands.executeCommand(
             'azureFunctions.deploy', subPath, functionAppId);
       }
