@@ -353,13 +353,17 @@ export class DeviceModelOperator {
               fileId} is already published. You could not updated it.`);
           return false;
         }
-
         channel.appendLine(`Interface file exists, updating ${fileId}... `);
+
+        const interfaceTags =
+            await this.GetTagsforDocuments(fileName, interfaceContext.tags);
+
         // Update the interface
         const pnpContext: PnPContext = {
           resourceId: interfaceContext.resourceId,
           content: fileContent,
-          etag: interfaceContext.etag
+          etag: interfaceContext.etag,
+          tags: interfaceTags
         };
         const updatedContext =
             await pnpMetamodelRepositoryClient.UpdateInterface(pnpContext);
@@ -373,8 +377,13 @@ export class DeviceModelOperator {
           channel.appendLine(
               `Interface file does not exist, creating ${fileId}... `);
           // Create the interface.
-          const pnpContext:
-              PnPContext = {resourceId: '', content: fileContent, etag: ''};
+          const interfaceTags = await this.GetTagsforDocuments(fileName);
+          const pnpContext: PnPContext = {
+            resourceId: '',
+            content: fileContent,
+            etag: '',
+            tags: interfaceTags
+          };
           const result: PnPContext =
               await pnpMetamodelRepositoryClient.CreateInterfaceAsync(
                   pnpContext);
@@ -429,11 +438,16 @@ export class DeviceModelOperator {
         }
 
         channel.appendLine(`Template file exists, updating ${fileId}... `);
+
+        const templateTags =
+            await this.GetTagsforDocuments(fileName, templateContext.tags);
+
         // Update the interface
         const pnpContext: PnPContext = {
           resourceId: templateContext.resourceId,
           content: fileContent,
-          etag: templateContext.etag
+          etag: templateContext.etag,
+          tags: templateTags
         };
         const updatedContext =
             await pnpMetamodelRepositoryClient.UpdateTemplate(pnpContext);
@@ -447,8 +461,13 @@ export class DeviceModelOperator {
           channel.appendLine(
               `Template file does not exist, creating ${fileId}... `);
           // Create the interface.
-          const pnpContext:
-              PnPContext = {resourceId: '', content: fileContent, etag: ''};
+          const templateTags = await this.GetTagsforDocuments(fileName);
+          const pnpContext: PnPContext = {
+            resourceId: '',
+            content: fileContent,
+            etag: '',
+            tags: templateTags
+          };
           const result: PnPContext =
               await pnpMetamodelRepositoryClient.CreateTemplateAsync(
                   pnpContext);
@@ -497,6 +516,27 @@ export class DeviceModelOperator {
       vscode.window.showErrorMessage(
           `Unable to connect to Metamodel Repository, error: ${error}`);
       return false;
+    }
+  }
+
+  private async GetTagsforDocuments(fileName: string, inputTags?: string[]):
+      Promise<string[]|undefined> {
+    let tags = '';
+    if (inputTags && inputTags.length >= 0) {
+      tags = inputTags.join(';');
+    }
+
+    const option: vscode.InputBoxOptions = {
+      value: tags,
+      prompt: `Please input the tags of ${fileName}, separate by ';'`,
+      ignoreFocusOut: true
+    };
+    const result = await vscode.window.showInputBox(option);
+
+    if (result) {
+      return result.split(';');
+    } else {
+      return;
     }
   }
 }
