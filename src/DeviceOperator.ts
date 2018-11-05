@@ -146,8 +146,8 @@ export class DeviceOperator {
 
     const binFiles = fs.listSync(deviceBuildLocation, ['bin']);
     if (!binFiles || !binFiles.length) {
-      const message = 
-        'No bin file found. Please run the command of Device Compile first.';
+      const message =
+          'No bin file found. Please run the command of Device Compile first.';
       vscode.window.showWarningMessage(message);
       channel.show();
       channel.appendLine(message);
