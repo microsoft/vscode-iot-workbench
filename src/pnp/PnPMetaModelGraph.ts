@@ -53,7 +53,7 @@ export class PnPMetaModelParser {
     return undefined;
   }
 
-  getIdFromShortName(shortName: string): string {
+  getIdFromShortName(shortName: string): string|null {
     if (this.pnpInterface['@context'].hasOwnProperty(shortName)) {
       const shortNameValue = this.pnpInterface['@context'][shortName];
       if (typeof shortNameValue === 'string') {
@@ -62,7 +62,7 @@ export class PnPMetaModelParser {
         return this.pnpInterface['@context']['@vocab'] + shortNameValue['@id'];
       }
     } else {
-      return shortName;
+      return null;
     }
   }
 
@@ -126,6 +126,9 @@ export class PnPMetaModelParser {
     const results: Array<{label: string, type: string}> = [];
     for (const key of keys) {
       const id = this.getIdFromShortName(key);
+      if (!id) {
+        continue;
+      }
       const item = {
         label: key,
         type: this.isArrayFromShortName(key) ? 'array' :
@@ -344,15 +347,70 @@ export class PnPMetaModelParser {
       case 'XMLSchema#boolean':
         return 'boolean';
       case 'XMLSchema#int':
-      case 'XMLSchema#long':
         return 'int';
+      case 'XMLSchema#long':
+        return 'long';
       case 'XMLSchema#float':
-      case 'XMLSchema#double':
         return 'float';
+      case 'XMLSchema#double':
+        return 'double';
       case 'XMLSchema#string':
         return 'string';
       default:
         return '';
+    }
+  }
+
+  getStringValuePattern(key: string) {
+    switch (key) {
+      case 'name':
+        return /^[a-zA-Z0-9_]+$/;
+      default:
+        return null;
+    }
+  }
+
+  getRequiredPropertiesFromType(type: string) {
+    // I know, I know, hard code is ugly...
+    // It's just fine :)
+    switch (type) {
+      case 'Interface':
+        return ['@id', '@type', '@context'];
+      case 'Telemetry':
+        return ['@type', 'name', 'schema'];
+      case 'Property':
+        return ['@type', 'name', 'schema'];
+      case 'Command':
+        return ['@type', 'name'];
+      case 'Array':
+        return ['@type', 'elementSchema'];
+      case 'Enum':
+        return ['@type', 'enumValues'];
+      case 'EnumValue':
+        return ['name'];
+      case 'Map':
+        return ['@type', 'mapKey', 'mapValue'];
+      case 'MapKey':
+        return ['name', 'schema'];
+      case 'MapValue':
+        return ['name', 'schema'];
+      case 'Object':
+        return ['@type', 'fields'];
+      case 'SchemaField':
+        return ['name', 'schema'];
+      case 'Boolean':
+      case 'Bytes':
+      case 'Date':
+      case 'DateTime':
+      case 'Duration':
+      case 'Float':
+      case 'Integer':
+      case 'Long':
+      case 'String':
+      case 'Time':
+        return ['@type'];
+      default:
+        return [];
     }
   }
 }

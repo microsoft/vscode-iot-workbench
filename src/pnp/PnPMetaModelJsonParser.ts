@@ -181,9 +181,11 @@ export class PnPMetaModelJsonParser {
             insertText = `"${label}": "$1"$0`;
             break;
           case 'int':
+          case 'long':
             insertText = `"${label}": $\{1:0\}$0`;
             break;
           case 'float':
+          case 'double':
             insertText = `"${label}": $\{1:0.0\}$0`;
             break;
           case 'boolean':

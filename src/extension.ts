@@ -30,6 +30,7 @@ import {PnPMetaModelParser, PnPMetaModelGraph} from './pnp/PnPMetaModelGraph';
 import {DeviceModelOperator} from './pnp/DeviceModelOperator';
 import {PnPMetaModelJsonParser} from './pnp/PnPMetaModelJsonParser';
 import {MetaModelType} from './pnp/pnp-api/DataContracts/PnPContext';
+import {PnPDiagnostic} from './pnp/PnPDiagnostic';
 
 function filterMenu(commands: CommandItem[]) {
   for (let i = 0; i < commands.length; i++) {
@@ -136,6 +137,52 @@ export async function activate(context: vscode.ExtensionContext) {
   const pnpGraph: PnPMetaModelGraph = pnpContext.getGraph();
   const pnpParser = new PnPMetaModelParser(pnpGraph, pnpInterface);
 
+  const pnpDiagnostic = new PnPDiagnostic(pnpParser);
+
+  const activeEditor = vscode.window.activeTextEditor;
+
+  if (activeEditor) {
+    const document = activeEditor.document;
+    if (!/\.(interface|template)\.json$/.test(document.uri.fsPath)) {
+      return;
+    }
+
+    pnpDiagnostic.update(document);
+  }
+
+  vscode.workspace.onDidOpenTextDocument((document) => {
+    if (!/\.(interface|template)\.json$/.test(document.uri.fsPath)) {
+      return;
+    }
+
+    pnpDiagnostic.update(document);
+  });
+
+  vscode.workspace.onDidChangeTextDocument((event) => {
+    const document = event.document;
+    if (!/\.(interface|template)\.json$/.test(document.uri.fsPath)) {
+      return;
+    }
+
+    pnpDiagnostic.update(document);
+  });
+
+  vscode.window.onDidChangeActiveTextEditor((editor) => {
+    const document = editor.document;
+    if (!/\.(interface|template)\.json$/.test(document.uri.fsPath)) {
+      return;
+    }
+
+    pnpDiagnostic.update(document);
+  });
+
+  vscode.workspace.onDidCloseTextDocument((document) => {
+    if (!/\.(interface|template)\.json$/.test(document.uri.fsPath)) {
+      return;
+    }
+    pnpDiagnostic.delete(document);
+  });
+
   vscode.languages.registerHoverProvider(
       {language: 'json', scheme: 'file', pattern: '**/*.interface.json'}, {
         async provideHover(document, position, token):
@@ -170,10 +217,13 @@ export async function activate(context: vscode.ExtensionContext) {
           if (jsonInfo.isValue) {
             let values: string[] = [];
             if (jsonInfo.key === '@context') {
-              values = ['http://aziot.cloudapp.net/v1/contexts/Interface.json'];
+              values = ['http://azureiot.com/v0/contexts/Interface.json '];
             } else if (jsonInfo.key === '@type') {
               if (jsonInfo.lastKey) {
                 const id = pnpParser.getIdFromShortName(jsonInfo.lastKey);
+                if (!id) {
+                  return null;
+                }
                 values = pnpParser.getTypesFromId(id);
               } else {
                 values = ['Interface'];
@@ -196,9 +246,11 @@ export async function activate(context: vscode.ExtensionContext) {
             const completionKeyList: Array<{label: string, type?: string}> = [];
             if (!jsonInfo.type) {
               const id = pnpParser.getIdFromShortName(jsonInfo.lastKey);
-              const values = pnpParser.getTypesFromId(id);
-              if (values.length === 1) {
-                jsonInfo.type = values[0];
+              if (id) {
+                const values = pnpParser.getTypesFromId(id);
+                if (values.length === 1) {
+                  jsonInfo.type = values[0];
+                }
               }
             }
 
