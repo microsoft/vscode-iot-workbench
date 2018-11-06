@@ -4,7 +4,7 @@ import * as Json from './JSON';
 import {PnPMetaModelParser} from './PnPMetaModelGraph';
 
 import uniq = require('lodash.uniq');
-import {deflate} from 'zlib';
+import {PnPMetaModelContext} from './PnPMetaModelUtility';
 
 export interface Issue {
   startIndex: number;
@@ -17,50 +17,64 @@ export class PnPDiagnostic {
       vscode.languages.createDiagnosticCollection('pnpmetamodel');
   private _diagnostics: vscode.Diagnostic[] = [];
 
-  constructor(private _pnpParser: PnPMetaModelParser) {}
+  constructor(
+      private _pnpParser: PnPMetaModelParser,
+      private pnpInterface: PnPMetaModelContext,
+      private pnpTemplate: PnPMetaModelContext) {}
 
-  getIssues(document: vscode.TextDocument): Issue[] {
+  getIssues(pnpContext: PnPMetaModelContext, document: vscode.TextDocument):
+      Issue[] {
     const text = document.getText();
     const json = Json.parse(text);
-    let issues = this.getJsonValueIssues(json.value);
-    issues = issues.concat(this.getTypeIssues(json.value));
+    let issues = this.getJsonValueIssues(pnpContext, document, json.value);
+    issues =
+        issues.concat(this.getTypeIssues(pnpContext, document, json.value));
 
     return issues;
   }
 
-  getJsonValueIssues(jsonValue: Json.Value, jsonKey?: string) {
+  getJsonValueIssues(
+      pnpContext: PnPMetaModelContext, document: vscode.TextDocument,
+      jsonValue: Json.Value, jsonKey?: string) {
     switch (jsonValue.valueKind) {
       case Json.ValueKind.ObjectValue:
-        return this.getObjectIssues(jsonValue as Json.ObjectValue, jsonKey);
+        return this.getObjectIssues(
+            pnpContext, document, jsonValue as Json.ObjectValue, jsonKey);
       case Json.ValueKind.ArrayValue:
         let issues: Issue[] = [];
-        const arrayIssues =
-            this.getArrayIssues(jsonValue as Json.ArrayValue, jsonKey);
+        const arrayIssues = this.getArrayIssues(
+            pnpContext, document, jsonValue as Json.ArrayValue, jsonKey);
         const arrayElementNameIssues =
             this.getArrayElementNameIssues(jsonValue as Json.ArrayValue);
         issues = issues.concat(arrayIssues, arrayElementNameIssues);
         return issues;
       case Json.ValueKind.StringValue:
-        return this.getStringIssues(jsonValue as Json.StringValue, jsonKey);
+        return this.getStringIssues(
+            pnpContext, document, jsonValue as Json.StringValue, jsonKey);
       default:
         return [];
     }
   }
 
-  getType(jsonValue: Json.ObjectValue, jsonKey?: string) {
+  getType(
+      pnpContext: PnPMetaModelContext, document: vscode.TextDocument,
+      jsonValue: Json.ObjectValue, jsonKey?: string) {
     if (jsonValue.hasProperty('@type')) {
       return jsonValue.getPropertyValue('@type').toFriendlyString();
     }
 
     let types: string[];
     if (jsonKey) {
-      const id = this._pnpParser.getIdFromShortName(jsonKey);
+      const id = this._pnpParser.getIdFromShortName(pnpContext, jsonKey);
       if (!id) {
         return null;
       }
-      types = this._pnpParser.getTypesFromId(id);
+      types = this._pnpParser.getTypesFromId(pnpContext, id);
     } else {
-      types = ['Interface'];
+      const documentType = /\.interface\.json$/.test(document.uri.fsPath) ?
+          'Interface' :
+          'Template';
+      types = [documentType];
     }
 
     if (types.length === 1) {
@@ -70,15 +84,21 @@ export class PnPDiagnostic {
     return null;
   }
 
-  getStringIssues(jsonValue: Json.StringValue, jsonKey?: string) {
+  getStringIssues(
+      pnpContext: PnPMetaModelContext, document: vscode.TextDocument,
+      jsonValue: Json.StringValue, jsonKey?: string) {
     if (!jsonKey) {
       return [];
     }
     let values: string[] = [];
     if (jsonKey === '@context') {
-      values = ['http://azureiot.com/v0/contexts/Interface.json'];
+      const contextUri = this.pnpInterface === pnpContext ?
+          'http://azureiot.com/v0/contexts/Interface.json' :
+          'http://azureiot.com/v0/contexts/Template.json';
+      values = [contextUri];
     } else {
-      values = this._pnpParser.getStringValuesFromShortName(jsonKey);
+      values =
+          this._pnpParser.getStringValuesFromShortName(pnpContext, jsonKey);
     }
 
     if (!values.length) {
@@ -86,7 +106,7 @@ export class PnPDiagnostic {
     }
 
     if (values.indexOf('XMLSchema#string') !== -1) {
-      return this.getStringPatternIssues(jsonValue, jsonKey);
+      return this.getStringPatternIssues(document, jsonValue, jsonKey);
     } else if (values.indexOf(jsonValue.toFriendlyString()) === -1) {
       const startIndex = jsonValue.span.startIndex;
       const endIndex = jsonValue.span.endIndex;
@@ -99,7 +119,9 @@ export class PnPDiagnostic {
     return [];
   }
 
-  getStringPatternIssues(jsonValue: Json.StringValue, jsonKey: string) {
+  getStringPatternIssues(
+      document: vscode.TextDocument, jsonValue: Json.StringValue,
+      jsonKey: string) {
     const pattern = this._pnpParser.getStringValuePattern(jsonKey);
     if (pattern) {
       if (!pattern.test(jsonValue.toFriendlyString())) {
@@ -115,10 +137,13 @@ export class PnPDiagnostic {
     return [];
   }
 
-  getArrayIssues(jsonValue: Json.ArrayValue, jsonKey?: string) {
+  getArrayIssues(
+      pnpContext: PnPMetaModelContext, document: vscode.TextDocument,
+      jsonValue: Json.ArrayValue, jsonKey?: string) {
     let issues: Issue[] = [];
     for (const elementValue of jsonValue.elements) {
-      const elementIssues = this.getJsonValueIssues(elementValue, jsonKey);
+      const elementIssues =
+          this.getJsonValueIssues(pnpContext, document, elementValue, jsonKey);
       issues = issues.concat(elementIssues);
     }
     return issues;
@@ -151,15 +176,18 @@ export class PnPDiagnostic {
     return issues;
   }
 
-  getObjectIssues(jsonValue: Json.ObjectValue, jsonKey?: string) {
+  getObjectIssues(
+      pnpContext: PnPMetaModelContext, document: vscode.TextDocument,
+      jsonValue: Json.ObjectValue, jsonKey?: string) {
     let issues: Issue[] = [];
-    const typeIssue = this.getInvalidTypeIssue(jsonValue, jsonKey);
+    const typeIssue =
+        this.getInvalidTypeIssue(pnpContext, document, jsonValue, jsonKey);
     if (typeIssue) {
       issues.push(typeIssue);
       return issues;
     }
 
-    const type = this.getType(jsonValue, jsonKey);
+    const type = this.getType(pnpContext, document, jsonValue, jsonKey);
     if (!type) {
       const startIndex = jsonValue.span.startIndex;
       const endIndex = jsonValue.span.endIndex;
@@ -169,6 +197,13 @@ export class PnPDiagnostic {
       return issues;
     }
 
+    if (type === 'Interface') {
+      pnpContext = this.pnpInterface;
+    }
+    if (type === 'Template') {
+      pnpContext = this.pnpTemplate;
+    }
+
     const missingRequiredPropertiesIssue =
         this.getMissingRequiredPropertiesIssue(jsonValue, type);
     if (missingRequiredPropertiesIssue) {
@@ -176,14 +211,15 @@ export class PnPDiagnostic {
     }
 
     const unexpectedPropertiesIssues =
-        this.getUnexpectedPropertiesIssues(jsonValue, type);
+        this.getUnexpectedPropertiesIssues(pnpContext, jsonValue, type);
     if (unexpectedPropertiesIssues.length) {
       issues = issues.concat(unexpectedPropertiesIssues);
     }
 
     for (const propertyName of jsonValue.propertyNames) {
       const childIssues = this.getJsonValueIssues(
-          jsonValue.getPropertyValue(propertyName), propertyName);
+          pnpContext, document, jsonValue.getPropertyValue(propertyName),
+          propertyName);
       issues = issues.concat(childIssues);
     }
 
@@ -191,6 +227,7 @@ export class PnPDiagnostic {
   }
 
   getTypeIssues(
+      pnpContext: PnPMetaModelContext, document: vscode.TextDocument,
       jsonValue: Json.Value, jsonKey?: string, isArrayElement = false) {
     console.log(`checking ${jsonKey} kind, isArrayElement: ${isArrayElement}`);
     let validTypes: Json.ValueKind[];
@@ -202,7 +239,7 @@ export class PnPDiagnostic {
         !isArrayElement && this._pnpParser.isArrayFromShortName(jsonKey)) {
       validTypes = [Json.ValueKind.ArrayValue];
     } else {
-      const id = this._pnpParser.getIdFromShortName(jsonKey);
+      const id = this._pnpParser.getIdFromShortName(pnpContext, jsonKey);
       if (!id) {
         return [];
       }
@@ -260,12 +297,14 @@ export class PnPDiagnostic {
 
     if (jsonValue.valueKind === Json.ValueKind.ArrayValue) {
       for (const element of (jsonValue as Json.ArrayValue).elements) {
-        issues = issues.concat(this.getTypeIssues(element, jsonKey, true));
+        issues = issues.concat(
+            this.getTypeIssues(pnpContext, document, element, jsonKey, true));
       }
     } else if (jsonValue.valueKind === Json.ValueKind.ObjectValue) {
       for (const key of (jsonValue as Json.ObjectValue).propertyNames) {
         const value = (jsonValue as Json.ObjectValue).getPropertyValue(key);
-        issues = issues.concat(this.getTypeIssues(value, key));
+        issues =
+            issues.concat(this.getTypeIssues(pnpContext, document, value, key));
       }
     } else if (valueType === 'int' || valueType === 'long') {
       const value = Number((jsonValue as Json.NumberValue).toFriendlyString());
@@ -281,19 +320,24 @@ export class PnPDiagnostic {
     return issues;
   }
 
-  getInvalidTypeIssue(jsonValue: Json.ObjectValue, jsonKey?: string) {
+  getInvalidTypeIssue(
+      pnpContext: PnPMetaModelContext, document: vscode.TextDocument,
+      jsonValue: Json.ObjectValue, jsonKey?: string) {
     let types: string[];
     if (jsonKey) {
-      const id = this._pnpParser.getIdFromShortName(jsonKey);
+      const id = this._pnpParser.getIdFromShortName(pnpContext, jsonKey);
       if (!id) {
         return null;
       }
-      types = this._pnpParser.getTypesFromId(id);
+      types = this._pnpParser.getTypesFromId(pnpContext, id);
     } else {
-      types = ['Interface'];
+      const documentType = /\.interface\.json$/.test(document.uri.fsPath) ?
+          'Interface' :
+          'Template';
+      types = [documentType];
     }
 
-    const type = this.getType(jsonValue, jsonKey);
+    const type = this.getType(pnpContext, document, jsonValue, jsonKey);
     if (type && types.indexOf(type) === -1) {
       const typeValue = jsonValue.getPropertyValue('@type') as Json.StringValue;
       const startIndex = typeValue.span.startIndex;
@@ -326,9 +370,12 @@ export class PnPDiagnostic {
     return null;
   }
 
-  getUnexpectedPropertiesIssues(jsonValue: Json.ObjectValue, type: string) {
-    let properties = this._pnpParser.getTypedPropertiesFromType(type).map(
-        property => property.label);
+  getUnexpectedPropertiesIssues(
+      pnpContext: PnPMetaModelContext, jsonValue: Json.ObjectValue,
+      type: string) {
+    let properties =
+        this._pnpParser.getTypedPropertiesFromType(pnpContext, type)
+            .map(property => property.label);
     properties = uniq(
         properties.concat(this._pnpParser.getRequiredPropertiesFromType(type)));
     const issues: Issue[] = [];
@@ -347,8 +394,8 @@ export class PnPDiagnostic {
     return issues;
   }
 
-  update(document: vscode.TextDocument) {
-    const issues = this.getIssues(document);
+  update(pnpContext: PnPMetaModelContext, document: vscode.TextDocument) {
+    const issues = this.getIssues(pnpContext, document);
     for (const issue of issues) {
       const startPosition = document.positionAt(issue.startIndex);
       const endPosition = document.positionAt(issue.endIndex + 1);

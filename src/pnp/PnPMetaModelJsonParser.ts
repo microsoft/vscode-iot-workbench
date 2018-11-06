@@ -108,10 +108,23 @@ export class PnPMetaModelJsonParser {
     for (let i = 0; i < tokens.length; i++) {
       if (tokens[i].span.startIndex <= offset &&
           tokens[i].span.afterEndIndex >= offset) {
-        if (i >= 1 && tokens[i].type === Json.TokenType.QuotedString &&
-            tokens[i - 1].type === Json.TokenType.Colon) {
-          return true;
+        if (i >= 1) {
+          if (tokens[i].type === Json.TokenType.QuotedString &&
+              tokens[i - 1].type === Json.TokenType.Colon) {
+            return true;
+          }
+
+          for (let tokenIndex = i - 1; tokenIndex >= 0; tokenIndex--) {
+            if (tokens[tokenIndex].type === Json.TokenType.LeftCurlyBracket) {
+              break;
+            }
+
+            if (tokens[tokenIndex].type === Json.TokenType.LeftSquareBracket) {
+              return true;
+            }
+          }
         }
+
         break;
       }
     }
@@ -192,7 +205,11 @@ export class PnPMetaModelJsonParser {
             insertText = `"${label}": $\{1:true\}$0`;
             break;
           case 'array':
-            insertText = `"${label}": [\n\t{\n\t\t$1\n\t}$2\n]$0`;
+            if (label === 'implements') {
+              insertText = `"${label}": [\n\t$1\n]$0`;
+            } else {
+              insertText = `"${label}": [\n\t{\n\t\t$1\n\t}$2\n]$0`;
+            }
             break;
           default:
             insertText = `"${label}": `;
@@ -213,7 +230,7 @@ export class PnPMetaModelJsonParser {
 
   static getIdAtPosition(
       document: vscode.TextDocument, position: vscode.Position,
-      pnpInterface: PnPMetaModelContext) {
+      pnpContext: PnPMetaModelContext) {
     const text = document.getText();
     const json = Json.parse(text);
     if (!json) {
@@ -231,13 +248,13 @@ export class PnPMetaModelJsonParser {
       }
     }
     if (shortName) {
-      if (pnpInterface['@context'].hasOwnProperty(shortName)) {
+      if (pnpContext['@context'].hasOwnProperty(shortName)) {
         let id = '';
-        const item = pnpInterface['@context'][shortName];
+        const item = pnpContext['@context'][shortName];
         if (typeof item === 'string') {
-          id = pnpInterface['@context']['@vocab'] + item;
+          id = pnpContext['@context']['@vocab'] + item;
         } else {
-          id = pnpInterface['@context']['@vocab'] + item['@id'];
+          id = pnpContext['@context']['@vocab'] + item['@id'];
         }
         return id;
       }
@@ -245,6 +262,58 @@ export class PnPMetaModelJsonParser {
     }
 
     return null;
+  }
+
+  static getPnpContextTypeAtPosition(
+      document: vscode.TextDocument, position: vscode.Position,
+      contextType: string) {
+    const text = document.getText();
+    const json = Json.parse(text);
+    if (!json) {
+      return contextType;
+    }
+    const offset = document.offsetAt(position);
+    return PnPMetaModelJsonParser.getPnpContextTypeFromOffset(
+        json.value, offset, contextType);
+  }
+
+  static getPnpContextTypeFromOffset(
+      jsonValue: Json.Value, offset: number,
+      currentContextType: string): string {
+    switch (jsonValue.valueKind) {
+      case Json.ValueKind.ArrayValue: {
+        const json = jsonValue as Json.ArrayValue;
+        for (let i = 0; i < json.length; i++) {
+          const value = json.elements[i];
+          if (value.span.startIndex <= offset &&
+              value.span.startIndex + value.span.length >= offset) {
+            return PnPMetaModelJsonParser.getPnpContextTypeFromOffset(
+                value, offset, currentContextType);
+          }
+        }
+        return currentContextType;
+      }
+      case Json.ValueKind.ObjectValue: {
+        const json = jsonValue as Json.ObjectValue;
+        if (json.hasProperty('@type')) {
+          const type = json.getPropertyValue('@type').toFriendlyString();
+          if (type === 'Interface' || type === 'Template') {
+            currentContextType = type;
+          }
+        }
+        for (const key of json.propertyNames) {
+          const value = json.getPropertyValue(key);
+          if (value.span.startIndex <= offset &&
+              value.span.startIndex + value.span.length >= offset) {
+            return PnPMetaModelJsonParser.getPnpContextTypeFromOffset(
+                value, offset, currentContextType);
+          }
+        }
+        return currentContextType;
+      }
+      default:
+        return currentContextType;
+    }
   }
 
   static getJsonInfoAtPosition(

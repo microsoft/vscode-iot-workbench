@@ -20,9 +20,6 @@ export interface PnPMetaModelGraph {
 export interface Map<T> { [key: string]: T; }
 
 export class PnPMetaModelParser {
-  private graph: PnPMetaModelGraph;
-  private pnpInterface: PnPMetaModelContext;
-
   static LABEL = {
     DOMAIN: 'http://www.w3.org/2000/01/rdf-schema#domain',
     LABEL: 'http://www.w3.org/2000/01/rdf-schema#label',
@@ -32,10 +29,10 @@ export class PnPMetaModelParser {
     COMMENT: 'http://www.w3.org/2000/01/rdf-schema#comment'
   };
 
-  constructor(graph: PnPMetaModelGraph, pnpInterface: PnPMetaModelContext) {
-    this.graph = graph;
-    this.pnpInterface = pnpInterface;
-  }
+  constructor(
+      private graph: PnPMetaModelGraph,
+      private pnpInterface: PnPMetaModelContext,
+      private pnpTemplate: PnPMetaModelContext) {}
 
   cache = {
     IdFromLabel: {} as Map<string>,
@@ -53,21 +50,22 @@ export class PnPMetaModelParser {
     return undefined;
   }
 
-  getIdFromShortName(shortName: string): string|null {
-    if (this.pnpInterface['@context'].hasOwnProperty(shortName)) {
-      const shortNameValue = this.pnpInterface['@context'][shortName];
+  getIdFromShortName(pnpContext: PnPMetaModelContext, shortName: string): string
+      |null {
+    if (pnpContext['@context'].hasOwnProperty(shortName)) {
+      const shortNameValue = pnpContext['@context'][shortName];
       if (typeof shortNameValue === 'string') {
-        return this.pnpInterface['@context']['@vocab'] + shortNameValue;
+        return pnpContext['@context']['@vocab'] + shortNameValue;
       } else {
-        return this.pnpInterface['@context']['@vocab'] + shortNameValue['@id'];
+        return pnpContext['@context']['@vocab'] + shortNameValue['@id'];
       }
     } else {
       return null;
     }
   }
 
-  getIdFromLabel(label: string): string|null {
-    return this.pnpInterface['@context']['@vocab'] + label;
+  getIdFromLabel(pnpContext: PnPMetaModelContext, label: string): string|null {
+    return pnpContext['@context']['@vocab'] + label;
     // if (this.cache.IdFromLabel[type]) {
     //     return this.cache.IdFromLabel[type];
     // }
@@ -83,8 +81,8 @@ export class PnPMetaModelParser {
     // return null;
   }
 
-  getIdFromType(type: string): string|null {
-    const value = this.pnpInterface['@context'][type];
+  getIdFromType(pnpContext: PnPMetaModelContext, type: string): string|null {
+    const value = pnpContext['@context'][type];
     let label = '';
     if (value) {
       if (typeof value === 'string') {
@@ -99,15 +97,15 @@ export class PnPMetaModelParser {
       console.log(`Cannot find label from type ${type}`);
     }
 
-    return this.getIdFromLabel(label);
+    return this.getIdFromLabel(pnpContext, label);
   }
 
-  getPropertyNameFromId(id: string) {
+  getPropertyNameFromId(pnpContext: PnPMetaModelContext, id: string) {
     if (this.cache.PropertyNameFromId[id]) {
       return this.cache.PropertyNameFromId[id];
     }
-    const context = this.pnpInterface['@context'];
-    const base = this.pnpInterface['@context']['@vocab'];
+    const context = pnpContext['@context'];
+    const base = pnpContext['@context']['@vocab'];
     for (const key of Object.keys(context)) {
       const item = context[key];
       const path: string = typeof item === 'string' ? item : item['@id'];
@@ -121,11 +119,11 @@ export class PnPMetaModelParser {
     return id;
   }
 
-  getTypedPropertiesFromId(id: string) {
-    const keys = this.getPropertiesFromId(id);
+  getTypedPropertiesFromId(pnpContext: PnPMetaModelContext, id: string) {
+    const keys = this.getPropertiesFromId(pnpContext, id);
     const results: Array<{label: string, type: string}> = [];
     for (const key of keys) {
-      const id = this.getIdFromShortName(key);
+      const id = this.getIdFromShortName(pnpContext, key);
       if (!id) {
         continue;
       }
@@ -139,31 +137,38 @@ export class PnPMetaModelParser {
     return results;
   }
 
-  getTypedPropertiesFromType(type: string) {
-    const id = this.getIdFromType(type);
+  getTypedPropertiesFromType(pnpContext: PnPMetaModelContext, type: string) {
+    if (type === 'Interface') {
+      pnpContext = this.pnpInterface;
+    }
+    if (type === 'Template') {
+      pnpContext = this.pnpTemplate;
+    }
+    const id = this.getIdFromType(pnpContext, type);
     if (!id) {
       console.warn(`Cannot find ID for type ${type}.`);
       return [];
     }
-    const results = this.getTypedPropertiesFromId(id);
+    const results = this.getTypedPropertiesFromId(pnpContext, id);
     console.log(results);
     return results;
   }
 
-  getPropertiesFromId(id: string) {
+  getPropertiesFromId(pnpContext: PnPMetaModelContext, id: string) {
     console.log(`Checking properties for ${id}...`);
     let properties: string[] = [];
 
     for (const edge of this.graph.Edges) {
       if (edge.TargetNode.Id === id &&
           edge.Label === PnPMetaModelParser.LABEL.DOMAIN) {
-        properties.push(this.getPropertyNameFromId(edge.SourceNode.Id));
+        properties.push(
+            this.getPropertyNameFromId(pnpContext, edge.SourceNode.Id));
       } else if (
           edge.SourceNode.Id === id &&
           edge.Label === PnPMetaModelParser.LABEL.SUBCLASS) {
         console.log(`Found sub class of for ${id}: ${edge.TargetNode.Id}`);
-        properties =
-            properties.concat(this.getPropertiesFromId(edge.TargetNode.Id));
+        properties = properties.concat(
+            this.getPropertiesFromId(pnpContext, edge.TargetNode.Id));
       }
     }
 
@@ -171,38 +176,38 @@ export class PnPMetaModelParser {
     return keys;
   }
 
-  getPropertiesFromType(type: string) {
-    const id = this.getIdFromType(type);
+  getPropertiesFromType(pnpContext: PnPMetaModelContext, type: string) {
+    const id = this.getIdFromType(pnpContext, type);
     if (!id) {
       console.warn(`Cannot find ID for type ${type}.`);
       return [];
     }
-    const results = this.getPropertiesFromId(id);
+    const results = this.getPropertiesFromId(pnpContext, id);
     console.log(results);
     return results;
   }
 
-  getTypesFromLabel(label: string) {
-    const id = this.getIdFromLabel(label);
+  getTypesFromLabel(pnpContext: PnPMetaModelContext, label: string) {
+    const id = this.getIdFromLabel(pnpContext, label);
     if (!id) {
       console.warn(`Cannot find ID for type ${label}.`);
       return [];
     }
 
-    return this.getTypesFromId(id);
+    return this.getTypesFromId(pnpContext, id);
   }
 
-  getTypesFromShortName(shortName: string) {
-    const id = this.getIdFromShortName(shortName);
+  getTypesFromShortName(pnpContext: PnPMetaModelContext, shortName: string) {
+    const id = this.getIdFromShortName(pnpContext, shortName);
     if (!id) {
       console.warn(`Cannot find ID for short name ${shortName}.`);
       return [];
     }
 
-    return this.getTypesFromId(id);
+    return this.getTypesFromId(pnpContext, id);
   }
 
-  getTypesFromId(id: string): string[] {
+  getTypesFromId(pnpContext: PnPMetaModelContext, id: string): string[] {
     if (this.cache.TypesFromId[id]) {
       return this.cache.TypesFromId[id];
     }
@@ -211,18 +216,20 @@ export class PnPMetaModelParser {
     for (const edge of this.graph.Edges) {
       if (edge.SourceNode.Id === id &&
           edge.Label === PnPMetaModelParser.LABEL.RANGE) {
-        types = types.concat(this.getTypesFromId(edge.TargetNode.Id));
+        types =
+            types.concat(this.getTypesFromId(pnpContext, edge.TargetNode.Id));
       }
 
       if (edge.TargetNode.Id === id &&
           edge.Label === PnPMetaModelParser.LABEL.SUBCLASS) {
-        types = types.concat(this.getTypesFromId(edge.SourceNode.Id));
+        types =
+            types.concat(this.getTypesFromId(pnpContext, edge.SourceNode.Id));
       }
     }
 
     if (types.length === 0) {
-      const label = this.getLabelFromId(id);
-      const shortName = this.getShortNameFromLabel(label);
+      const label = this.getLabelFromId(pnpContext, id);
+      const shortName = this.getShortNameFromLabel(pnpContext, label);
       types.push(shortName);
     }
     types = uniq(types).sort();
@@ -231,9 +238,9 @@ export class PnPMetaModelParser {
     return types;
   }
 
-  getLabelFromId(id: string) {
-    if (id.indexOf(this.pnpInterface['@context']['@vocab']) === 0) {
-      return id.substr(this.pnpInterface['@context']['@vocab'].length);
+  getLabelFromId(pnpContext: PnPMetaModelContext, id: string) {
+    if (id.indexOf(pnpContext['@context']['@vocab']) === 0) {
+      return id.substr(pnpContext['@context']['@vocab'].length);
     }
     console.warn(`Cannot find label for ${id}.`);
     return id;
@@ -247,8 +254,8 @@ export class PnPMetaModelParser {
     // return id;
   }
 
-  getShortNameFromLabel(label: string) {
-    const context = this.pnpInterface['@context'];
+  getShortNameFromLabel(pnpContext: PnPMetaModelContext, label: string) {
+    const context = pnpContext['@context'];
     let labelInInterface = '';
     for (const key of Object.keys(context)) {
       const item = context[key];
@@ -268,12 +275,13 @@ export class PnPMetaModelParser {
   }
 
   isArrayFromShortName(shortName: string) {
-    return ['contents', 'schemas', 'fields', 'enumValues'].indexOf(shortName) >
-        -1;
+    return [
+      'contents', 'schemas', 'fields', 'enumValues', 'implements'
+    ].indexOf(shortName) > -1;
   }
 
-  getStringValuesFromLabel(label: string) {
-    const id = this.getIdFromLabel(label);
+  getStringValuesFromLabel(pnpContext: PnPMetaModelContext, label: string) {
+    const id = this.getIdFromLabel(pnpContext, label);
     if (!id) {
       console.warn(`Cannot find ID for type ${label}.`);
       return [];
@@ -282,8 +290,12 @@ export class PnPMetaModelParser {
     return this.getStringValuesFromId(id);
   }
 
-  getStringValuesFromShortName(shortName: string) {
-    const id = this.getIdFromShortName(shortName);
+  getStringValuesFromShortName(
+      pnpContext: PnPMetaModelContext, shortName: string) {
+    if (shortName === 'implements') {
+      return [];
+    }
+    const id = this.getIdFromShortName(pnpContext, shortName);
     if (!id) {
       console.warn(`Cannot find ID for short name ${shortName}.`);
       return [];
@@ -365,6 +377,8 @@ export class PnPMetaModelParser {
     switch (key) {
       case 'name':
         return /^[a-zA-Z0-9_]+$/;
+      case 'implements':
+        return /^(http|https):\/\/.+\.interface\/.json$/;
       default:
         return null;
     }
@@ -409,6 +423,8 @@ export class PnPMetaModelParser {
       case 'String':
       case 'Time':
         return ['@type'];
+      case 'Template':
+        return ['@id', '@type', '@context', 'implements'];
       default:
         return [];
     }

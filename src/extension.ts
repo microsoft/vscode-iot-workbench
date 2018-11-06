@@ -113,6 +113,13 @@ function executeCommand(command: ((...args: any[]) => any)|undefined) {
   command();
 }
 
+function getDocumentType(document: vscode.TextDocument) {
+  if (/\.interface\.json$/.test(document.uri.fsPath)) {
+    return 'Interface';
+  }
+
+  return 'Template';
+}
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -134,20 +141,23 @@ export async function activate(context: vscode.ExtensionContext) {
   // PnP Language Server
   const pnpContext = new PnPMetaModelUtility(context);
   const pnpInterface: PnPMetaModelContext = pnpContext.getInterface();
+  const pnpTemplate: PnPMetaModelContext = pnpContext.getTemplate();
   const pnpGraph: PnPMetaModelGraph = pnpContext.getGraph();
-  const pnpParser = new PnPMetaModelParser(pnpGraph, pnpInterface);
-
-  const pnpDiagnostic = new PnPDiagnostic(pnpParser);
+  const pnpParser = new PnPMetaModelParser(pnpGraph, pnpInterface, pnpTemplate);
+  const pnpDiagnostic = new PnPDiagnostic(pnpParser, pnpInterface, pnpTemplate);
 
   const activeEditor = vscode.window.activeTextEditor;
 
   if (activeEditor) {
     const document = activeEditor.document;
-    if (!/\.(interface|template)\.json$/.test(document.uri.fsPath)) {
-      return;
+    if (/\.(interface|template)\.json$/.test(document.uri.fsPath)) {
+      const documentType = getDocumentType(document);
+      if (documentType === 'Interface') {
+        pnpDiagnostic.update(pnpInterface, document);
+      } else {
+        pnpDiagnostic.update(pnpTemplate, document);
+      }
     }
-
-    pnpDiagnostic.update(document);
   }
 
   vscode.workspace.onDidOpenTextDocument((document) => {
@@ -155,7 +165,12 @@ export async function activate(context: vscode.ExtensionContext) {
       return;
     }
 
-    pnpDiagnostic.update(document);
+    const documentType = getDocumentType(document);
+    if (documentType === 'Interface') {
+      pnpDiagnostic.update(pnpInterface, document);
+    } else {
+      pnpDiagnostic.update(pnpTemplate, document);
+    }
   });
 
   vscode.workspace.onDidChangeTextDocument((event) => {
@@ -164,7 +179,12 @@ export async function activate(context: vscode.ExtensionContext) {
       return;
     }
 
-    pnpDiagnostic.update(document);
+    const documentType = getDocumentType(document);
+    if (documentType === 'Interface') {
+      pnpDiagnostic.update(pnpInterface, document);
+    } else {
+      pnpDiagnostic.update(pnpTemplate, document);
+    }
   });
 
   vscode.window.onDidChangeActiveTextEditor((editor) => {
@@ -173,18 +193,34 @@ export async function activate(context: vscode.ExtensionContext) {
       return;
     }
 
-    pnpDiagnostic.update(document);
+    const documentType = getDocumentType(document);
+    if (documentType === 'Interface') {
+      pnpDiagnostic.update(pnpInterface, document);
+    } else {
+      pnpDiagnostic.update(pnpTemplate, document);
+    }
   });
 
   vscode.workspace.onDidCloseTextDocument((document) => {
     if (!/\.(interface|template)\.json$/.test(document.uri.fsPath)) {
       return;
     }
-    pnpDiagnostic.delete(document);
+
+    const documentType = getDocumentType(document);
+    if (documentType === 'Interface') {
+      pnpDiagnostic.delete(document);
+    } else {
+      pnpDiagnostic.delete(document);
+    }
   });
 
   vscode.languages.registerHoverProvider(
-      {language: 'json', scheme: 'file', pattern: '**/*.interface.json'}, {
+      {
+        language: 'json',
+        scheme: 'file',
+        pattern: '**/*.{interface,template}.json'
+      },
+      {
         async provideHover(document, position, token):
             Promise<vscode.Hover|null> {
               const id = PnPMetaModelJsonParser.getIdAtPosition(
@@ -192,9 +228,9 @@ export async function activate(context: vscode.ExtensionContext) {
               let hoverText: string|undefined = undefined;
               if (id) {
                 if (id === '@id') {
-                  hoverText = 'An identifier for PnP template.';
+                  hoverText = 'An identifier for PnP template or interface.';
                 } else if (id === '@type') {
-                  hoverText = 'The type of template object.';
+                  hoverText = 'The type of PnP meta model object.';
                 } else if (id === '@context') {
                   hoverText = 'The context for PnP template or interface.';
                 } else {
@@ -206,31 +242,54 @@ export async function activate(context: vscode.ExtensionContext) {
       });
 
   vscode.languages.registerCompletionItemProvider(
-      {language: 'json', scheme: 'file', pattern: '**/*.interface.json'}, {
+      {
+        language: 'json',
+        scheme: 'file',
+        pattern: '**/*.{interface,template}.json'
+      },
+      {
         provideCompletionItems(document, position): vscode.CompletionList |
         null {
+          const documentType = getDocumentType(document);
+
           const jsonInfo =
               PnPMetaModelJsonParser.getJsonInfoAtPosition(document, position);
+          const contextType =
+              PnPMetaModelJsonParser.getPnpContextTypeAtPosition(
+                  document, position, documentType);
+
+          let pnpContext: PnPMetaModelContext;
+          if (contextType === 'Interface') {
+            pnpContext = pnpInterface;
+          } else {
+            pnpContext = pnpTemplate;
+          }
+
           if (!jsonInfo) {
             return null;
           }
           if (jsonInfo.isValue) {
             let values: string[] = [];
             if (jsonInfo.key === '@context') {
-              values = ['http://azureiot.com/v0/contexts/Interface.json '];
+              const contextUri = contextType === 'Interface' ?
+                  'http://azureiot.com/v0/contexts/Interface.json' :
+                  'http://azureiot.com/v0/contexts/Template.json';
+              values = [contextUri];
             } else if (jsonInfo.key === '@type') {
               if (jsonInfo.lastKey) {
-                const id = pnpParser.getIdFromShortName(jsonInfo.lastKey);
+                const id =
+                    pnpParser.getIdFromShortName(pnpContext, jsonInfo.lastKey);
                 if (!id) {
                   return null;
                 }
-                values = pnpParser.getTypesFromId(id);
+                values = pnpParser.getTypesFromId(pnpContext, id);
               } else {
-                values = ['Interface'];
+                values = [contextType];
               }
 
             } else {
-              values = pnpParser.getStringValuesFromShortName(jsonInfo.key);
+              values = pnpParser.getStringValuesFromShortName(
+                  pnpContext, jsonInfo.key);
             }
 
             const range = PnPMetaModelJsonParser.getTokenRange(
@@ -245,21 +304,25 @@ export async function activate(context: vscode.ExtensionContext) {
             let keyList: Array<{label: string, type?: string}> = [];
             const completionKeyList: Array<{label: string, type?: string}> = [];
             if (!jsonInfo.type) {
-              const id = pnpParser.getIdFromShortName(jsonInfo.lastKey);
+              const id =
+                  pnpParser.getIdFromShortName(pnpContext, jsonInfo.lastKey);
               if (id) {
-                const values = pnpParser.getTypesFromId(id);
-                if (values.length === 1) {
+                const values = pnpParser.getTypesFromId(pnpContext, id);
+                if (values.length === 1 && values[0] !== 'Interface' &&
+                    values[0] !== 'Template') {
                   jsonInfo.type = values[0];
                 }
               }
             }
 
             if (jsonInfo.type) {
-              if (jsonInfo.type === 'Interface' &&
+              if ((jsonInfo.type === 'Interface' ||
+                   jsonInfo.type === 'Template') &&
                   jsonInfo.properties.indexOf('@context') === -1) {
                 completionKeyList.push({label: '@context'});
               }
-              keyList = pnpParser.getTypedPropertiesFromType(jsonInfo.type);
+              keyList = pnpParser.getTypedPropertiesFromType(
+                  pnpContext, jsonInfo.type);
             } else {
               keyList = [{label: '@type'}];
             }
