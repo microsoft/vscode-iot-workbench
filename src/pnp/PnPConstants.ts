@@ -18,3 +18,9 @@ export class PnPFileNames {
   static readonly defaultInterfaceName = 'myInterface.interface.json';
   static readonly defaultTemplateName = 'myTemplate.template.json';
 }
+
+export class PnPConstants {
+  static readonly modelRepositoryKeyName = 'ModelRepositoryKey';
+  static readonly repoConnectionStringTemplate =
+      'HostName=<Host Name>;SharedAccessKeyName=<Shared AccessKey Name>;SharedAccessKey=<access Key>';
+}

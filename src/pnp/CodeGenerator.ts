@@ -17,6 +17,9 @@ import {IoTProject} from '../Models/IoTProject';
 import * as utils from '../utils';
 import {TelemetryContext} from '../telemetry';
 import {ProjectTemplateType} from '../Models/Interfaces/ProjectTemplate';
+import {PnPConnector} from './PnPConnector';
+import {PnPConstants} from './PnPConstants';
+import {MetaModelType} from './pnp-api/DataContracts/PnPContext';
 
 export interface CodeGeneratorConfig {
   version: string;
@@ -89,6 +92,35 @@ export class CodeGenerator {
     }
 
     const templatePath = path.join(rootPath, fileSelection.label);
+    let metaModelType: MetaModelType = MetaModelType.Interface;
+
+    if (fileSelection.label.endsWith('.template.json')) {
+      metaModelType = MetaModelType.Template;
+    }
+
+    // Get the connection string of the pnp repo
+    let connectionString =
+        context.workspaceState.get<string>(PnPConstants.modelRepositoryKeyName);
+
+    if (!connectionString) {
+      const option: vscode.InputBoxOptions = {
+        value: PnPConstants.repoConnectionStringTemplate,
+        prompt: `Please input connection string here.`,
+        ignoreFocusOut: true
+      };
+
+      connectionString = await vscode.window.showInputBox(option);
+
+      if (!connectionString) {
+        return false;
+      } else {
+        const result = await PnPConnector.ConnectMetamodelRepository(
+            context, connectionString);
+        if (!result) {
+          return false;
+        }
+      }
+    }
 
     // select the target of the code stub
     const languageItems: vscode.QuickPickItem[] =
@@ -121,14 +153,16 @@ export class CodeGenerator {
 
       if (targetSelection.label === 'MXChip IoT DevKit') {
         const result = await this.GenerateCppCodeForDevKit(
-            context, path, templatePath, channel, telemetryContext);
+            context, path, templatePath, channel, telemetryContext,
+            connectionString, metaModelType);
         if (result) {
           vscode.window.showInformationMessage(
               'Scaffold device code for MXChip IoT DevKit completed');
           return true;
         }
       } else if (targetSelection.label === 'General') {
-        const result = await this.GenerateCppCode(path, templatePath, channel);
+        const result = await this.GenerateCppCode(
+            path, templatePath, channel, connectionString, metaModelType);
         if (result) {
           vscode.window.showInformationMessage(
               'Scaffold general device code completed');
@@ -142,7 +176,8 @@ export class CodeGenerator {
   async GenerateCppCodeForDevKit(
       context: vscode.ExtensionContext, rootPath: string,
       templateFilePath: string, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext): Promise<boolean> {
+      telemetryContext: TelemetryContext, connectionString: string,
+      metaModelType: MetaModelType): Promise<boolean> {
     const needReload = false;
 
     // Create the device path
@@ -174,8 +209,8 @@ export class CodeGenerator {
     }
 
     // Invoke PnP toolset to generate the code
-    const codeGenerateResult =
-        await this.GenerateCppCode(libPath, templateFilePath, channel);
+    const codeGenerateResult = await this.GenerateCppCode(
+        libPath, templateFilePath, channel, connectionString, metaModelType);
     if (!codeGenerateResult) {
       vscode.window.showErrorMessage(
           'Unable to generate code, please check output window for detail.');
@@ -231,7 +266,8 @@ export class CodeGenerator {
 
   async GenerateCppCode(
       targetPath: string, templateFilePath: string,
-      channel: vscode.OutputChannel): Promise<boolean> {
+      channel: vscode.OutputChannel, connectionString: string,
+      metaModelType: MetaModelType): Promise<boolean> {
     // Invoke PnP toolset to generate the code
     const platform = os.platform();
     const homeDir = os.homedir();
@@ -242,8 +278,10 @@ export class CodeGenerator {
       return false;
     }
 
-    const command = `IoTPnP.Cli.exe scaffold  --jsonldUri "${
-        templateFilePath}" --language cpp  --output "${targetPath}"`;
+    const command = `PnPCodeGen.exe scaffold  --jsonldUri "${
+        templateFilePath}" --language cpp --modelType "${
+        MetaModelType[metaModelType]}" --output "${
+        targetPath}" --connectionString "${connectionString}"`;
 
     channel.show();
     channel.appendLine('IoT Workbench: scaffold code stub.');

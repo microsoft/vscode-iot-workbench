@@ -7,17 +7,15 @@ import * as vscode from 'vscode';
 import * as fs from 'fs-plus';
 import * as path from 'path';
 
-import {PnPFileNames} from './PnPConstants';
+import {PnPFileNames, PnPConstants} from './PnPConstants';
 import {PnPMetamodelRepositoryClient} from './pnp-api/PnPMetamodelRepositoryClient';
 import {PnPUri} from './pnp-api/Validator/PnPUri';
 import * as utils from '../utils';
 import {MetaModelType, PnPContext} from './pnp-api/DataContracts/PnPContext';
+import {PnPConnector} from './PnPConnector';
 
 const constants = {
-  modelRepositoryKeyName: 'ModelRepositoryKey',
   storedFilesInfoKeyName: 'StoredFilesInfo',
-  RepoConnectionStringTemplate:
-      'HostName=<Host Name>;SharedAccessKeyName=<Shared AccessKey Name>;SharedAccessKey=<access Key>',
   idName: '@id',
   displayName: 'displayName'
 };
@@ -214,7 +212,7 @@ export class DeviceModelOperator {
     }
 
     const option: vscode.InputBoxOptions = {
-      value: constants.RepoConnectionStringTemplate,
+      value: PnPConstants.repoConnectionStringTemplate,
       prompt: `Please input connection string here.`,
       ignoreFocusOut: true
     };
@@ -225,8 +223,8 @@ export class DeviceModelOperator {
       return false;
     }
 
-    const result =
-        await this.ConnectMetamodelRepository(context, repoConnectionString);
+    const result = await PnPConnector.ConnectMetamodelRepository(
+        context, repoConnectionString);
 
     if (result) {
       await vscode.commands.executeCommand(
@@ -288,10 +286,10 @@ export class DeviceModelOperator {
     const filePath = path.join(rootPath, fileSelection.label);
 
     let connectionString =
-        context.workspaceState.get<string>(constants.modelRepositoryKeyName);
+        context.workspaceState.get<string>(PnPConstants.modelRepositoryKeyName);
     if (!connectionString) {
       const option: vscode.InputBoxOptions = {
-        value: constants.RepoConnectionStringTemplate,
+        value: PnPConstants.repoConnectionStringTemplate,
         prompt: `Please input connection string here.`,
         ignoreFocusOut: true
       };
@@ -301,8 +299,8 @@ export class DeviceModelOperator {
       if (!connectionString) {
         return false;
       } else {
-        const result =
-            await this.ConnectMetamodelRepository(context, connectionString);
+        const result = await PnPConnector.ConnectMetamodelRepository(
+            context, connectionString);
         if (!result) {
           return false;
         }
@@ -488,35 +486,6 @@ export class DeviceModelOperator {
     }
 
     return true;
-  }
-
-
-
-  private async ConnectMetamodelRepository(
-      context: vscode.ExtensionContext,
-      connectionString: string): Promise<boolean> {
-    if (!connectionString) {
-      throw new Error(
-          'The connection string could not be empty. Please provide a valid connection string');
-    }
-
-    try {
-      const pnpMetamodelRepositoryClient =
-          new PnPMetamodelRepositoryClient(connectionString);
-      // try to get one interface.
-      const result =
-          await pnpMetamodelRepositoryClient.GetAllInterfacesAsync(null, 1);
-      context.workspaceState.update(
-          constants.modelRepositoryKeyName, connectionString);
-      vscode.window.showInformationMessage(
-          'Connect to Metamodel Repository successfully.');
-      // Save connection string into
-      return true;
-    } catch (error) {
-      vscode.window.showErrorMessage(
-          `Unable to connect to Metamodel Repository, error: ${error}`);
-      return false;
-    }
   }
 
   private async GetTagsforDocuments(fileName: string, inputTags?: string[]):
