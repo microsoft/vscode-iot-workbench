@@ -177,13 +177,16 @@ export class PnPMetaModelJsonParser {
   }
 
   static getCompletionItemsFromArray(
-      chars: Array<string|{label: string, type?: string}>,
+      chars: Array<string|{label: string, required: boolean, type?: string}>,
       currentPosition: vscode.Position, startPosition: vscode.Position,
       endPosition: vscode.Position) {
     const items: vscode.CompletionItem[] = [];
     for (const char of chars) {
       const label = typeof char === 'string' ? char : char.label;
-      const item = new vscode.CompletionItem(`$(plug) ${label}`);
+      const labelText = typeof char === 'string' ?
+          label :
+          (label + (!char.required ? ' (optional)' : ''));
+      const item = new vscode.CompletionItem(`$(plug) ${labelText}`);
       if (typeof char !== 'string') {
         // insertText is vscode snippet string
         // https://code.visualstudio.com/docs/editor/userdefinedsnippets#_snippet-syntax
@@ -215,6 +218,11 @@ export class PnPMetaModelJsonParser {
             insertText = `"${label}": `;
         }
         item.insertText = new vscode.SnippetString(insertText);
+        if (char.required) {
+          item.sortText = `!${label}`;
+        } else {
+          item.sortText = label;
+        }
       } else {
         item.insertText = `"${label}"`;
       }

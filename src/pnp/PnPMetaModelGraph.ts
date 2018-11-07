@@ -121,7 +121,9 @@ export class PnPMetaModelParser {
 
   getTypedPropertiesFromId(pnpContext: PnPMetaModelContext, id: string) {
     const keys = this.getPropertiesFromId(pnpContext, id);
-    const results: Array<{label: string, type: string}> = [];
+    const type = this.getLabelFromId(pnpContext, id);
+    const getRequiredProperties = this.getRequiredPropertiesFromType(type);
+    const results: Array<{label: string, required: boolean, type: string}> = [];
     for (const key of keys) {
       const id = this.getIdFromShortName(pnpContext, key);
       if (!id) {
@@ -129,6 +131,7 @@ export class PnPMetaModelParser {
       }
       const item = {
         label: key,
+        required: getRequiredProperties.indexOf(key) !== -1,
         type: this.isArrayFromShortName(key) ? 'array' :
                                                this.getValueTypeFromId(id)
       };

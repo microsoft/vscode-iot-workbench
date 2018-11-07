@@ -204,11 +204,9 @@ export class PnPDiagnostic {
       pnpContext = this.pnpTemplate;
     }
 
-    const missingRequiredPropertiesIssue =
-        this.getMissingRequiredPropertiesIssue(jsonValue, type);
-    if (missingRequiredPropertiesIssue) {
-      issues.push(missingRequiredPropertiesIssue);
-    }
+    const missingRequiredPropertiesIssues =
+        this.getMissingRequiredPropertiesIssues(jsonValue, type);
+    issues = issues.concat(missingRequiredPropertiesIssues);
 
     const unexpectedPropertiesIssues =
         this.getUnexpectedPropertiesIssues(pnpContext, jsonValue, type);
@@ -350,7 +348,9 @@ export class PnPDiagnostic {
     return null;
   }
 
-  getMissingRequiredPropertiesIssue(jsonValue: Json.ObjectValue, type: string) {
+  getMissingRequiredPropertiesIssues(
+      jsonValue: Json.ObjectValue, type: string) {
+    const issues: Issue[] = [];
     const missingRequiredProperties: string[] = [];
     const requiredProperties =
         this._pnpParser.getRequiredPropertiesFromType(type);
@@ -365,9 +365,29 @@ export class PnPDiagnostic {
       const message = `Missing required properties:\n${
           missingRequiredProperties.join('\n')}`;
       const issue = {startIndex, endIndex, message};
-      return issue;
+      issues.push(issue);
     }
-    return null;
+
+    // Required property cannot be an empty array
+    for (const propertyName of jsonValue.propertyNames) {
+      if (requiredProperties.indexOf(propertyName) === -1) {
+        continue;
+      }
+
+      const propertyValue = jsonValue.getPropertyValue(propertyName);
+      if (propertyValue.valueKind !== Json.ValueKind.ArrayValue) {
+        continue;
+      }
+
+      if ((propertyValue as Json.ArrayValue).elements.length === 0) {
+        const startIndex = propertyValue.span.startIndex;
+        const endIndex = propertyValue.span.startIndex;
+        const message = `${propertyName} cannot be empty.`;
+        const issue: Issue = {startIndex, endIndex, message};
+        issues.push(issue);
+      }
+    }
+    return issues;
   }
 
   getUnexpectedPropertiesIssues(

@@ -301,8 +301,10 @@ export async function activate(context: vscode.ExtensionContext) {
                     values, position, startPosition, endPosition);
             return new vscode.CompletionList(completionItems, false);
           } else {
-            let keyList: Array<{label: string, type?: string}> = [];
-            const completionKeyList: Array<{label: string, type?: string}> = [];
+            let keyList:
+                Array<{label: string, required: boolean, type?: string}> = [];
+            const completionKeyList:
+                Array<{label: string, required: boolean, type?: string}> = [];
             if (!jsonInfo.type) {
               const id =
                   pnpParser.getIdFromShortName(pnpContext, jsonInfo.lastKey);
@@ -319,12 +321,12 @@ export async function activate(context: vscode.ExtensionContext) {
               if ((jsonInfo.type === 'Interface' ||
                    jsonInfo.type === 'Template') &&
                   jsonInfo.properties.indexOf('@context') === -1) {
-                completionKeyList.push({label: '@context'});
+                completionKeyList.push({label: '@context', required: true});
               }
               keyList = pnpParser.getTypedPropertiesFromType(
                   pnpContext, jsonInfo.type);
             } else {
-              keyList = [{label: '@type'}];
+              keyList = [{label: '@type', required: true}];
             }
 
             for (const key of keyList) {
@@ -336,7 +338,8 @@ export async function activate(context: vscode.ExtensionContext) {
             if ((jsonInfo.type === 'Interface' ||
                  jsonInfo.type === 'Template') &&
                 jsonInfo.properties.indexOf('@id') === -1) {
-              completionKeyList.push({label: '@id', type: 'string'});
+              completionKeyList.push(
+                  {label: '@id', required: true, type: 'string'});
             }
 
             const range = PnPMetaModelJsonParser.getTokenRange(

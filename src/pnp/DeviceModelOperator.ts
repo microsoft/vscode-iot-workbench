@@ -213,7 +213,8 @@ export class DeviceModelOperator {
 
     const option: vscode.InputBoxOptions = {
       value: PnPConstants.repoConnectionStringTemplate,
-      prompt: `Please input connection string here.`,
+      prompt:
+          `Please input the connection string to access the model repository.`,
       ignoreFocusOut: true
     };
 
@@ -290,7 +291,8 @@ export class DeviceModelOperator {
     if (!connectionString) {
       const option: vscode.InputBoxOptions = {
         value: PnPConstants.repoConnectionStringTemplate,
-        prompt: `Please input connection string here.`,
+        prompt:
+            `Please input the connection string to access the model repository.`,
         ignoreFocusOut: true
       };
 
