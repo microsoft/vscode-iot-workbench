@@ -1,6 +1,12 @@
 # Change Log
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
 
+## Version 0.1.13
+- Release date: Nov. 9, 2018
+
+### Fixed
+- Fix Azure Functions integration problem.
+
 ## Version 0.1.12
 - Release date: October 16, 2018
 
