@@ -199,7 +199,7 @@ export class AzureUtility {
     const resourceGroupLocation = await vscode.window.showQuickPick(
         locationList,
         {placeHolder: 'Select Resource Group Location', ignoreFocusOut: true});
-    if (!resourceGroupLocation) {
+    if (!resourceGroupLocation || !resourceGroupLocation.description) {
       return undefined;
     }
 
