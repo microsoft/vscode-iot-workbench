@@ -331,10 +331,9 @@ export class DeviceModelOperator {
       const fileContent = fs.readFileSync(filePath, 'utf8');
       const fileJson = JSON.parse(fileContent);
       const fileId = fileJson[constants.idName];
-      const displayName = fileJson[constants.displayName];
-      if (!fileId || !displayName) {
+      if (!fileId) {
         vscode.window.showWarningMessage(
-            'Unable to find interface id or displayName from the interface file.');
+            'Unable to find interface id from the interface file.');
         return false;
       }
       channel.appendLine(`Load and parse file: ${fileName} successfully.`);
@@ -414,10 +413,9 @@ export class DeviceModelOperator {
       const fileContent = fs.readFileSync(filePath, 'utf8');
       const fileJson = JSON.parse(fileContent);
       const fileId = fileJson[constants.idName];
-      const displayName = fileJson[constants.displayName];
-      if (!fileId || !displayName) {
+      if (!fileId) {
         vscode.window.showWarningMessage(
-            'Unable to find template id or displayName from the template file.');
+            'Unable to find template id from the template file.');
         return false;
       }
       channel.appendLine(`Load and parse file: ${fileName} successfully.`);
