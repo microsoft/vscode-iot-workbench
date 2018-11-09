@@ -28,43 +28,11 @@ export class ProjectInitializer {
       telemetryContext: TelemetryContext) {
     let rootPath: string;
     let openInNewWindow = false;
-
-    try {
-      rootPath = await utils.selectWorkspaceItem(
-          'Please select an empty folder to contain your IoT Project:', {
-            canSelectFiles: false,
-            canSelectFolders: true,
-            canSelectMany: false,
-            defaultUri: vscode.workspace.workspaceFolders &&
-                    vscode.workspace.workspaceFolders.length > 0 ?
-                vscode.workspace.workspaceFolders[0].uri :
-                undefined,
-            openLabel: 'Select'
-          });
-
-      const files = fs.readdirSync(rootPath);
-      if (files && files[0]) {
-        const message =
-            'An empty folder is required to initialize the project. Initialize new project in workbench directory?';
-        const result: vscode.MessageItem|undefined =
-            await vscode.window.showWarningMessage(
-                message, DialogResponses.yes, DialogResponses.cancel);
-        if (result === DialogResponses.yes) {
-          const projectFolder = await this.GenerateProjectFolder();
-          if (!projectFolder) {
-            throw new Error('Generate Project Folder canceled');
-          }
-          rootPath = projectFolder;
-          openInNewWindow = true;
-        } else {
-          return;
-        }
-      }
-    } catch (error) {
-      telemetryContext.properties.errorMessage =
-          `Folder selection canceled. ${error}`;
-      telemetryContext.properties.result = 'Canceled';
-      return;
+    // If current window contains other project, open the created project in new
+    // window.
+    if (vscode.workspace.workspaceFolders &&
+        vscode.workspace.workspaceFolders.length > 0) {
+      openInNewWindow = true;
     }
 
     // Initial project
@@ -158,6 +126,35 @@ export class ProjectInitializer {
               throw new Error('Unable to load project template.');
             }
 
+            try {
+              rootPath = await utils.selectWorkspaceItem(
+                  'Please select a folder to contain your IoT Project:', {
+                    canSelectFiles: false,
+                    canSelectFolders: true,
+                    canSelectMany: false,
+                    defaultUri: vscode.workspace.workspaceFolders &&
+                            vscode.workspace.workspaceFolders.length > 0 ?
+                        vscode.workspace.workspaceFolders[0].uri :
+                        undefined,
+                    openLabel: 'Select'
+                  });
+
+              if (!rootPath) {
+                throw new Error('User cancelled folder selection.');
+              }
+
+              const projectFolder = await this.GenerateProjectFolder(rootPath);
+              if (!projectFolder) {
+                throw new Error('Generate Project Folder canceled');
+              }
+              rootPath = projectFolder;
+            } catch (error) {
+              telemetryContext.properties.errorMessage =
+                  `Folder selection canceled. ${error}`;
+              telemetryContext.properties.result = 'Canceled';
+              return;
+            }
+
             const project = new IoTProject(context, channel, telemetryContext);
             return await project.create(
                 rootPath, result, boardSelection.id, openInNewWindow);
@@ -168,22 +165,12 @@ export class ProjectInitializer {
   }
 
 
-  private async GenerateProjectFolder() {
-    const settings: IoTWorkbenchSettings = new IoTWorkbenchSettings();
-    const workbench = await settings.workbenchPath();
-    if (!workbench) {
-      return undefined;
-    }
-
-    if (!utils.directoryExistsSync(workbench)) {
-      utils.mkdirRecursivelySync(workbench);
-    }
-
+  private async GenerateProjectFolder(rootPath: string) {
     let counter = 0;
     const name = constants.defaultProjectName;
     let candidateName = name;
     while (true) {
-      const projectPath = path.join(workbench, candidateName);
+      const projectPath = path.join(rootPath, candidateName);
       if (!utils.fileExistsSync(projectPath) &&
           !utils.directoryExistsSync(projectPath)) {
         break;
@@ -201,7 +188,7 @@ export class ProjectInitializer {
                 projectName)) {
           return 'Project name can only contain letters, numbers, "-" and ".", and cannot start or end with "-" or ".".';
         }
-        const projectPath = path.join(workbench, projectName);
+        const projectPath = path.join(rootPath, projectName);
         if (!utils.fileExistsSync(projectPath) &&
             !utils.directoryExistsSync(projectPath)) {
           return;
@@ -212,7 +199,7 @@ export class ProjectInitializer {
     });
 
     const projectPath =
-        projectName ? path.join(workbench, projectName) : undefined;
+        projectName ? path.join(rootPath, projectName) : undefined;
     if (projectPath) {
       utils.mkdirRecursivelySync(projectPath);
     }
