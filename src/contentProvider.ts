@@ -7,18 +7,31 @@ import {ExampleExplorer} from './exampleExplorer';
 import {LocalWebServer} from './localWebServer';
 
 export class ContentProvider implements vscode.TextDocumentContentProvider {
-  private _webserver: LocalWebServer;
   private _onDidChange = new vscode.EventEmitter<vscode.Uri>();
 
-  constructor(
-      private _extensionPath: string,
-      private _exampleExplorer: ExampleExplorer) {
-    this._webserver = new LocalWebServer(this._extensionPath);
-    this.initialize();
+  private _webserver: LocalWebServer|null = null;
+  private _exampleExplorer: ExampleExplorer|null = null;
+
+  static getInstance(): ContentProvider {
+    if (!ContentProvider._instance) {
+      ContentProvider._instance = new ContentProvider();
+    }
+    return ContentProvider._instance;
+  }
+  private static _instance: ContentProvider;
+
+
+  Initialize(extensionPath: string, exampleExplorer: ExampleExplorer) {
+    this._webserver = new LocalWebServer(extensionPath);
+    this._exampleExplorer = exampleExplorer;
+    this.start();
     this._webserver.start();
   }
 
-  initialize() {
+  start() {
+    if (!this._webserver) {
+      throw new Error('internal web server is not initialized.');
+    }
     this._webserver.addHandler(
         '/api/example', async (req, res) => await this.loadExample(req, res));
     this._webserver.addHandler(
@@ -31,6 +44,10 @@ export class ContentProvider implements vscode.TextDocumentContentProvider {
   }
 
   async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
+    if (!this._webserver) {
+      throw new Error('internal web server is not initialized.');
+    }
+
     let type = '';
     const url = uri.toString();
     switch (url) {
@@ -60,6 +77,10 @@ export class ContentProvider implements vscode.TextDocumentContentProvider {
       await vscode.commands.executeCommand('iotworkbench.examples');
       return res.json({code: 0});
     }
+    if (!this._exampleExplorer) {
+      throw new Error('_exampleExplorer is not initialized.');
+    }
+
     const exampleExplorer = this._exampleExplorer;
     exampleExplorer.setSelectedExample(
         req.query.name, req.query.url, req.query.board);

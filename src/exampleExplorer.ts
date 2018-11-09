@@ -16,6 +16,7 @@ import {TelemetryContext} from './telemetry';
 import {ContentView, FileNames} from './constants';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
+import {ContentProvider} from './contentProvider';
 
 export class ExampleExplorer {
   private exampleList: Example[] = [];
@@ -209,13 +210,19 @@ export class ExampleExplorer {
 
       if (board) {
         await ArduinoPackageManager.installBoard(board);
-        vscode.commands.executeCommand(
-            'vscode.previewHtml',
-            ContentView.workbenchExampleURI + '?' +
-                encodeURIComponent(
-                    'board=' + board.id +
-                    '&url=' + encodeURIComponent(board.exampleUrl || '')),
-            vscode.ViewColumn.One, 'Examples - Azure IoT Workbench');
+        const exampleUrl = ContentView.workbenchExampleURI + '?' +
+            encodeURIComponent('board=' + board.id + '&url=' +
+                               encodeURIComponent(board.exampleUrl || ''));
+        const panel = vscode.window.createWebviewPanel(
+            'IoTWorkbenchExamples', 'Examples - Azure IoT Workbench',
+            vscode.ViewColumn.One, {
+              enableScripts: true,
+              retainContextWhenHidden: true,
+            });
+        panel.webview.html =
+            await ContentProvider.getInstance().provideTextDocumentContent(
+                vscode.Uri.parse(exampleUrl));
+
         return true;
       }
     }
