@@ -172,7 +172,7 @@ export class DeviceOperator {
         placeHolder: 'Select bin file',
       });
 
-      if (!choice) {
+      if (!choice || !choice.description) {
         return false;
       }
 
