@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import request = require('request-promise');
 import rq = require('request');
 
-import {AzureAccount, AzureResourceFilter} from '../azure-account.api';
+import {AzureAccount, AzureResourceFilter, AzureSession} from '../azure-account.api';
 import {ConfigHandler} from '../configHandler';
 
 import {getExtension} from './Apis';
@@ -75,8 +75,8 @@ export class AzureUtility {
     return subscriptionList;
   }
 
-  private static _getCredentialBySubscriptionId(subscriptionId: string):
-      ServiceClientCredentials|undefined {
+  private static _getSessionBySubscriptionId(subscriptionId: string):
+      AzureSession|undefined {
     if (!AzureUtility._azureAccountExtension) {
       throw new Error('Azure account extension is not found.');
     }
@@ -86,21 +86,20 @@ export class AzureUtility {
     const subscription = subscriptions.find(
         sub => sub.subscription.subscriptionId === subscriptionId);
     if (subscription) {
-      return subscription.session.credentials;
+      return subscription.session;
     }
 
     return undefined;
   }
 
-  private static async _getCredential():
-      Promise<ServiceClientCredentials|undefined> {
+  private static async _getSession(): Promise<AzureSession|undefined> {
     AzureUtility._subscriptionId = await AzureUtility._getSubscription();
 
     if (!AzureUtility._subscriptionId) {
       return undefined;
     }
 
-    return AzureUtility._getCredentialBySubscriptionId(
+    return AzureUtility._getSessionBySubscriptionId(
         AzureUtility._subscriptionId);
   }
 
@@ -111,10 +110,12 @@ export class AzureUtility {
       return undefined;
     }
 
-    const credential = await AzureUtility._getCredential();
-    if (credential) {
+    const session = await AzureUtility._getSession();
+    if (session) {
+      const credential = session.credentials;
       const client = new ResourceManagementClient(
-          credential, AzureUtility._subscriptionId);
+          credential, AzureUtility._subscriptionId,
+          session.environment.resourceManagerEndpointUrl);
       return client;
     }
     return undefined;
@@ -122,19 +123,23 @@ export class AzureUtility {
 
   private static _getSubscriptionClientBySubscriptionId(substriptionId:
                                                             string) {
-    const credential =
-        AzureUtility._getCredentialBySubscriptionId(substriptionId);
-    if (credential) {
-      const client = new ResourceManagementClient(credential, substriptionId);
+    const session = AzureUtility._getSessionBySubscriptionId(substriptionId);
+    if (session) {
+      const credential = session.credentials;
+      const client = new ResourceManagementClient(
+          credential, substriptionId,
+          session.environment.resourceManagerEndpointUrl);
       return client;
     }
     return undefined;
   }
 
   private static async _getSubscriptionClient() {
-    const credential = await AzureUtility._getCredential();
-    if (credential) {
-      const client = new SubscriptionClient(credential);
+    const session = await AzureUtility._getSession();
+    if (session) {
+      const credential = session.credentials;
+      const client = new SubscriptionClient(
+          credential, session.environment.resourceManagerEndpointUrl);
       return client;
     }
     return undefined;
@@ -550,11 +555,12 @@ export class AzureUtility {
   static async request(
       // tslint:disable-next-line: no-any
       method: HttpMethods, resource: string, body: any = null) {
-    const credential = await AzureUtility._getCredential();
-    if (!credential) {
+    const session = await AzureUtility._getSession();
+    if (!session) {
       return undefined;
     }
 
+    const credential = session.credentials;
     const httpRequest = new WebResource();
     httpRequest.method = method;
     httpRequest.url = 'https://management.azure.com' + resource;
