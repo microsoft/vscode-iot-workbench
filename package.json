@@ -16,7 +16,7 @@
   "aiKey": "5b869bc6-ca93-4f24-aa87-92871a3a616e",
   "codeGenConfigUrl": "https://aka.ms/iot-workbench/iot-pnp-config",
   "engines": {
-    "vscode": "^1.18.0"
+    "vscode": "^1.23.0"
   },
   "categories": [
     "Azure",
@@ -170,7 +170,7 @@
     "@types/winreg": "^1.2.30",
     "gts": "^0.5.1",
     "typescript": "^2.6.2",
-    "vscode": "^1.1.6"
+    "vscode": "^1.1.21"
   },
   "dependencies": {
     "adm-zip": "^0.4.11",
@@ -193,7 +193,7 @@
     "request-promise": "^4.2.2",
     "serialport-lite": "^0.1.2",
     "ssh2": "^0.6.1",
-    "vscode-extension-telemetry": "^0.0.22",
+    "vscode-extension-telemetry": "^0.1.0",
     "winreg": "^1.2.3"
   },
   "extensionDependencies": [

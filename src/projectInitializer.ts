@@ -31,7 +31,7 @@ export class ProjectInitializer {
 
     try {
       rootPath = await utils.selectWorkspaceItem(
-          'Select the folder that will contain your IoT Project:', {
+          'Please select an empty folder to contain your IoT Project:', {
             canSelectFiles: false,
             canSelectFolders: true,
             canSelectMany: false,

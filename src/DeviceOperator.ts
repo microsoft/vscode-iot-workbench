@@ -146,9 +146,11 @@ export class DeviceOperator {
 
     const binFiles = fs.listSync(deviceBuildLocation, ['bin']);
     if (!binFiles || !binFiles.length) {
-      vscode.window.showWarningMessage('No bin file found.');
+      const message =
+          'No bin file found. Please run the command of Device Compile first.';
+      vscode.window.showWarningMessage(message);
       channel.show();
-      channel.appendLine('No bin file found.');
+      channel.appendLine(message);
       return false;
     }
 
@@ -170,7 +172,7 @@ export class DeviceOperator {
         placeHolder: 'Select bin file',
       });
 
-      if (!choice) {
+      if (!choice || !choice.description) {
         return false;
       }
 

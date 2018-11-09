@@ -142,7 +142,7 @@ You need upload the firmware to cloud for the device to download and upgrade.
 
    Follow this [tutorial](https://docs.microsoft.com/en-us/azure/storage/common/storage-quickstart-create-account) to create a new Storage Account, or skip this step if you want to use a existing one.
 
-2. Create a public container for storing firmware files.
+2. Navigate to your new storage account in the Azure portal, scroll to the Blob Service section, then select **Blobs**. Create a public container for storing firmware files.
 
    ![Create Folder](media/firmware-ota/blob-folder.png)
 

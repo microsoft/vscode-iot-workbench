@@ -188,6 +188,10 @@ export async function activate(context: vscode.ExtensionContext) {
   });
 
   vscode.window.onDidChangeActiveTextEditor((editor) => {
+    if (!editor) {
+      return;
+    }
+
     const document = editor.document;
     if (!/\.(interface|template)\.json$/.test(document.uri.fsPath)) {
       return;
@@ -394,11 +398,11 @@ export async function activate(context: vscode.ExtensionContext) {
       codeGenerator.ScaffoldDeviceStub.bind(codeGenerator);
 
 
-  const contentProvider =
-      new ContentProvider(context.extensionPath, exampleExplorer);
+  ContentProvider.getInstance().Initialize(
+      context.extensionPath, exampleExplorer);
   context.subscriptions.push(
       vscode.workspace.registerTextDocumentContentProvider(
-          ContentView.workbenchContentProtocol, contentProvider));
+          ContentView.workbenchContentProtocol, ContentProvider.getInstance()));
 
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with  registerCommand
@@ -643,9 +647,17 @@ export async function activate(context: vscode.ExtensionContext) {
   if (!shownHelpPage) {
     // Do not execute help command here
     // Help command may open board help link
-    vscode.commands.executeCommand(
-        'vscode.previewHtml', ContentView.workbenchHelpURI,
-        vscode.ViewColumn.One, 'Welcome - Azure IoT Workbench');
+    const panel = vscode.window.createWebviewPanel(
+        'IoTWorkbenchHelp', 'Welcome - Azure IoT Workbench',
+        vscode.ViewColumn.One, {
+          enableScripts: true,
+          retainContextWhenHidden: true,
+        });
+
+    panel.webview.html =
+        await ContentProvider.getInstance().provideTextDocumentContent(
+            vscode.Uri.parse(ContentView.workbenchHelpURI));
+
     ConfigHandler.update(
         ConfigKey.shownHelpPage, true, vscode.ConfigurationTarget.Global);
   }

@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import {BoardProvider} from './boardProvider';
 import {ConfigHandler} from './configHandler';
 import {ConfigKey, ContentView} from './constants';
+import {ContentProvider} from './contentProvider';
 
 export class HelpProvider {
   static async open(context: vscode.ExtensionContext) {
@@ -19,9 +20,17 @@ export class HelpProvider {
       }
     }
 
-    await vscode.commands.executeCommand(
-        'vscode.previewHtml', ContentView.workbenchHelpURI,
-        vscode.ViewColumn.One, 'Welcome - Azure IoT Workbench');
+    const panel = vscode.window.createWebviewPanel(
+        'IoTWorkbenchHelp', 'Welcome - Azure IoT Workbench',
+        vscode.ViewColumn.One, {
+          enableScripts: true,
+          retainContextWhenHidden: true,
+        });
+
+    panel.webview.html =
+        await ContentProvider.getInstance().provideTextDocumentContent(
+            vscode.Uri.parse(ContentView.workbenchHelpURI));
+
     return;
   }
 }

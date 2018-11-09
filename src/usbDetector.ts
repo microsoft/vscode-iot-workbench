@@ -9,8 +9,9 @@ import * as vscode from 'vscode';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 import {ConfigHandler} from './configHandler';
-import {ConfigKey, ContentView, EventNames} from './constants';
-import {callWithTelemetry, TelemetryContext, TelemetryWorker} from './telemetry';
+import {ContentView, EventNames} from './constants';
+import {ContentProvider} from './contentProvider';
+import {callWithTelemetry} from './telemetry';
 
 export interface DeviceInfo {
   vendorId: number;
@@ -61,16 +62,26 @@ export class UsbDetector {
 
     if (board) {
       callWithTelemetry(
-          EventNames.detectBoard, this.channel, false, this.context, () => {
+          EventNames.detectBoard, this.channel, false,
+          this.context, async () => {
             if (board.exampleUrl) {
               ArduinoPackageManager.installBoard(board);
-              vscode.commands.executeCommand(
-                  'vscode.previewHtml',
+
+              const exampleUrl =
                   ContentView.workbenchExampleURI + '?' +
-                      encodeURIComponent(
-                          'board=' + board.id +
-                          '&url=' + encodeURIComponent(board.exampleUrl || '')),
-                  vscode.ViewColumn.One, 'IoT Workbench Examples');
+                  encodeURIComponent(
+                      'board=' + board.id +
+                      '&url=' + encodeURIComponent(board.exampleUrl || ''));
+
+              const panel = vscode.window.createWebviewPanel(
+                  'IoTWorkbenchExamples', 'Examples - Azure IoT Workbench',
+                  vscode.ViewColumn.One, {
+                    enableScripts: true,
+                    retainContextWhenHidden: true,
+                  });
+              panel.webview.html =
+                  await ContentProvider.getInstance()
+                      .provideTextDocumentContent(vscode.Uri.parse(exampleUrl));
             }
           }, {board: board.name});
     }
