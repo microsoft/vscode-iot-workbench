@@ -12,23 +12,17 @@ import * as opn from 'opn';
 import * as os from 'os';
 import * as path from 'path';
 import {SerialPortLite} from 'serialport-lite/dist';
-import {resolve} from 'url';
-import {error} from 'util';
 import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, FileNames} from '../constants';
+import {ConfigKey} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 import {delay, getRegistryValues} from '../utils';
 
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
-import {Board} from './Interfaces/Board';
-import {Component, ComponentType} from './Interfaces/Component';
-import {Device, DeviceType} from './Interfaces/Device';
-import {ProjectTemplate, ProjectTemplateType} from './Interfaces/ProjectTemplate';
-import {IoTProject} from './IoTProject';
+import {DeviceType} from './Interfaces/Device';
 
 interface SerialPortInfo {
   comName: string;
@@ -44,7 +38,8 @@ const constants = {
   platformLocalFileName: 'platform.local.txt',
   cExtraFlag: 'compiler.c.extra_flags=-DCORRELATIONID="',
   cppExtraFlag: 'compiler.cpp.extra_flags=-DCORRELATIONID="',
-  traceExtraFlag: ' -DENABLETRACE='
+  traceExtraFlag: ' -DENABLETRACE=',
+  informationPageUrl: 'https://aka.ms/AA35xln'
 };
 
 enum configDeviceOptions {
@@ -190,8 +185,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
         detail: 'Config Connection String'
       },
       {
-        label: 'Config Device UDS',
-        description: 'Config Device UDS',
+        label: 'Config Unique Device String (UDS)',
+        description: 'Config Unique Device String (UDS)',
         detail: 'Config UDS'
       }
     ];
@@ -243,44 +238,56 @@ export class AZ3166Device extends ArduinoDeviceBase {
             {
               label: 'Input IoT Hub Device Connection String',
               description: '',
-              detail: 'Input another...'
+              detail: ''
             }
           ];
         } else {
           deviceConnectionStringSelection = [{
             label: 'Input IoT Hub Device Connection String',
             description: '',
-            detail: 'Input another...'
+            detail: ''
           }];
         }
 
-        const selection =
-            await vscode.window.showQuickPick(deviceConnectionStringSelection, {
-              ignoreFocusOut: true,
-              placeHolder: 'Choose IoT Hub Device Connection String'
-            });
+        const selection = await vscode.window.showQuickPick(
+            deviceConnectionStringSelection,
+            {ignoreFocusOut: true, placeHolder: 'Choose an option:'});
 
         if (!selection) {
           return false;
         }
 
-        if (selection.detail === 'Input another...') {
+        if (selection.label === 'Input IoT Hub Device Connection String') {
           const option: vscode.InputBoxOptions = {
             value:
                 'HostName=<Host Name>;DeviceId=<Device Name>;SharedAccessKey=<Device Key>',
             prompt: `Please input device connection string here.`,
-            ignoreFocusOut: true
+            ignoreFocusOut: true,
+            validateInput: (deviceConnectionString: string) => {
+              if (!deviceConnectionString) {
+                return 'Please provide a valid device connection string.';
+              }
+
+              if ((deviceConnectionString.indexOf('HostName') === -1) ||
+                  (deviceConnectionString.indexOf('DeviceId') === -1) ||
+                  (deviceConnectionString.indexOf('SharedAccessKey') === -1)) {
+                return 'The format of the IoT Hub Device connection string is invalid.';
+              }
+              return;
+            }
           };
 
           deviceConnectionString = await vscode.window.showInputBox(option);
           if (!deviceConnectionString) {
+            const message =
+                'Need more information on how to get device connection string?';
+            const result: vscode.MessageItem|undefined =
+                await vscode.window.showWarningMessage(
+                    message, DialogResponses.yes, DialogResponses.no);
+            if (result === DialogResponses.yes) {
+              opn(constants.informationPageUrl);
+            }
             return false;
-          }
-          if ((deviceConnectionString.indexOf('HostName') === -1) ||
-              (deviceConnectionString.indexOf('DeviceId') === -1) ||
-              (deviceConnectionString.indexOf('SharedAccessKey') === -1)) {
-            throw new Error(
-                'The format of the IoT Hub Device connection string is invalid. Please provide a valid Device connection string.');
           }
         }
 
@@ -324,7 +331,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
         const option: vscode.InputBoxOptions = {
           value: generateRandomHex(),
-          prompt: `Please input UDS here.`,
+          prompt: `Please input Unique Device String (UDS) here.`,
           ignoreFocusOut: true,
           validateInput: (UDS: string) => {
             if (/^([0-9a-f]){64}$/i.test(UDS) === false) {
@@ -354,7 +361,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
         if (res === false) {
           return false;
         } else {
-          vscode.window.showInformationMessage('Configure UDS successfully.');
+          vscode.window.showInformationMessage(
+              'Configure Unique Device String (UDS) successfully.');
           return true;
         }
       } catch (error) {
