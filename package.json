@@ -37,7 +37,7 @@
     "commands": [
       {
         "command": "iotworkbench.initializeProject",
-        "title": "Create New Project",
+        "title": "New Project",
         "category": "IoT Workbench"
       },
       {

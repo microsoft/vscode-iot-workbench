@@ -39,8 +39,7 @@ const constants = {
   cExtraFlag: 'compiler.c.extra_flags=-DCORRELATIONID="',
   cppExtraFlag: 'compiler.cpp.extra_flags=-DCORRELATIONID="',
   traceExtraFlag: ' -DENABLETRACE=',
-  informationPageUrl:
-      'https://blogs.msdn.microsoft.com/iotdev/2017/05/09/understand-different-connection-strings-in-azure-iot-hub/'
+  informationPageUrl: 'https://aka.ms/AA35xln'
 };
 
 enum configDeviceOptions {
