@@ -7,7 +7,6 @@
 import * as vscode from 'vscode';
 import {IoTProject} from './Models/IoTProject';
 import {TelemetryContext} from './telemetry';
-import {askAndNewProject} from './utils';
 
 export class AzureOperator {
   async Provision(

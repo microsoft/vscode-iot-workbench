@@ -227,7 +227,7 @@ export class IoTProject {
   async handleLoadFailure() {
     if (!vscode.workspace.workspaceFolders ||
         !vscode.workspace.workspaceFolders[0]) {
-      await askAndNewProject();
+      await askAndNewProject(this.telemetryContext);
       return;
     }
 
@@ -240,9 +240,10 @@ export class IoTProject {
 
     if (fs.existsSync(workbenchFileName) && workspaceFiles &&
         workspaceFiles[0]) {
-      await askAndOpenProject(rootPath, workspaceFiles[0]);
+      await askAndOpenProject(
+          rootPath, workspaceFiles[0], this.telemetryContext);
     } else {
-      await askAndNewProject();
+      await askAndNewProject(this.telemetryContext);
     }
   }
 

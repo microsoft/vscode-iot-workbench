@@ -9,6 +9,7 @@ import * as WinReg from 'winreg';
 
 import {AzureFunctionsLanguage} from './constants';
 import {DialogResponses} from './DialogResponses';
+import {TelemetryContext} from './telemetry';
 
 export function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -163,7 +164,7 @@ export async function selectWorkspaceItem(
                                  (await showOpenDialog(options))[0].fsPath;
 }
 
-export async function askAndNewProject() {
+export async function askAndNewProject(telemetryContext: TelemetryContext) {
   const message =
       'An IoT project is needed to process the operation, do you want to create an IoT project?';
   const result: vscode.MessageItem|undefined =
@@ -171,12 +172,17 @@ export async function askAndNewProject() {
           message, DialogResponses.yes, DialogResponses.no);
 
   if (result === DialogResponses.yes) {
+    telemetryContext.properties.errorMessage =
+        'Operation failed and user create new project';
     await vscode.commands.executeCommand('iotworkbench.initializeProject');
+  } else {
+    telemetryContext.properties.errorMessage = 'Operation failed.';
   }
 }
 
 export async function askAndOpenProject(
-    rootPath: string, workspaceFile: string) {
+    rootPath: string, workspaceFile: string,
+    telemetryContext: TelemetryContext) {
   const message =
       `Operation failed because the IoT project is not opened. Current folder contains an IoT project \'${
           workspaceFile}\', do you want to open it?`;
@@ -185,8 +191,12 @@ export async function askAndOpenProject(
           message, DialogResponses.yes, DialogResponses.no);
 
   if (result === DialogResponses.yes) {
+    telemetryContext.properties.errorMessage =
+        'Operation failed and user open project from folder';
     const workspaceFilePath = path.join(rootPath, workspaceFile);
     await vscode.commands.executeCommand(
         'vscode.openFolder', vscode.Uri.file(workspaceFilePath), false);
+  } else {
+    telemetryContext.properties.errorMessage = 'Operation failed.';
   }
 }
