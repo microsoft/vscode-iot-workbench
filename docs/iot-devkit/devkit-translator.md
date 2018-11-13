@@ -108,7 +108,7 @@ Please take a note of the device name you created. It will be used in next secti
 
 * Check VS Code **Output** window to make sure the deployment is sucessful.
 
-  ![IoT Workbench: Cloud -> Deploy](media/devkit-translator/deploy-success.png)
+  ![IoT Workbench: Cloud -> Deploy](media/devkit-translator/deploy-success.PNG)
 
 * After the Function deploys successfully, go to the Function APP you've just created in Azure Portal. Click the **devkit-translator** function in the left panel, and click **</>Get function URL** link to get function URL.
 
