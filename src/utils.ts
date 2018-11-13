@@ -168,7 +168,7 @@ export async function askAndNewProject(telemetryContext: TelemetryContext) {
   const message =
       'An IoT project is needed to process the operation, do you want to create an IoT project?';
   const result: vscode.MessageItem|undefined =
-      await vscode.window.showErrorMessage(
+      await vscode.window.showInformationMessage(
           message, DialogResponses.yes, DialogResponses.no);
 
   if (result === DialogResponses.yes) {
@@ -184,15 +184,15 @@ export async function askAndOpenProject(
     rootPath: string, workspaceFile: string,
     telemetryContext: TelemetryContext) {
   const message =
-      `Operation failed because the IoT project is not opened. Current folder contains an IoT project \'${
-          workspaceFile}\', do you want to open it?`;
+      `Operation failed because the IoT project is not opened. Current folder contains an IoT project '${
+          workspaceFile}', do you want to open it?`;
   const result: vscode.MessageItem|undefined =
-      await vscode.window.showErrorMessage(
+      await vscode.window.showInformationMessage(
           message, DialogResponses.yes, DialogResponses.no);
 
   if (result === DialogResponses.yes) {
     telemetryContext.properties.errorMessage =
-        'Operation failed and user open project from folder';
+        'Operation failed and user open project from folder.';
     const workspaceFilePath = path.join(rootPath, workspaceFile);
     await vscode.commands.executeCommand(
         'vscode.openFolder', vscode.Uri.file(workspaceFilePath), false);
