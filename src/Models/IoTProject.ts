@@ -9,6 +9,7 @@ import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames} from '../constants';
 import {AzureComponentsStorage, EventNames} from '../constants';
 import {TelemetryContext, TelemetryWorker} from '../telemetry';
+import {askAndNewProject, askAndOpenProject} from '../utils';
 
 import {checkAzureLogin} from './Apis';
 import {AZ3166Device} from './AZ3166Device';
@@ -221,6 +222,29 @@ export class IoTProject {
     }
 
     return true;
+  }
+
+  async handleLoadFailure() {
+    if (!vscode.workspace.workspaceFolders ||
+        !vscode.workspace.workspaceFolders[0]) {
+      await askAndNewProject(this.telemetryContext);
+      return;
+    }
+
+    const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+    const workbenchFileName =
+        path.join(rootPath, 'Device', FileNames.iotworkbenchprojectFileName);
+
+    const workspaceFiles = fs.readdirSync(rootPath).filter(
+        file => path.extname(file).endsWith(FileNames.workspaceExtensionName));
+
+    if (fs.existsSync(workbenchFileName) && workspaceFiles &&
+        workspaceFiles[0]) {
+      await askAndOpenProject(
+          rootPath, workspaceFiles[0], this.telemetryContext);
+    } else {
+      await askAndNewProject(this.telemetryContext);
+    }
   }
 
   async compile(): Promise<boolean> {

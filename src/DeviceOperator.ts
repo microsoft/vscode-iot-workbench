@@ -13,23 +13,19 @@ import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 import {ConfigHandler} from './configHandler';
-import {ConfigKey, FileNames} from './constants';
+import {ConfigKey} from './constants';
 import {OTA} from './Models/OTA';
+import {askAndNewProject} from './utils';
 
 export class DeviceOperator {
   async compile(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    if (!vscode.workspace.rootPath) {
-      throw new Error(
-          'Unable to find the root path, please open an IoT Workbench project.');
-    }
-
     const project = new IoTProject(context, channel, telemetryContext);
     const result = await project.load();
     if (!result) {
-      throw new Error(
-          'Unable to compile device code, please open an IoT Workbench project and retry.');
+      await project.handleLoadFailure();
+      return;
     }
     await project.compile();
   }
@@ -37,16 +33,11 @@ export class DeviceOperator {
   async upload(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    if (!vscode.workspace.rootPath) {
-      throw new Error(
-          'Unable to find the root path, please open an IoT Workbench project.');
-    }
-
     const project = new IoTProject(context, channel, telemetryContext);
     const result = await project.load();
     if (!result) {
-      throw new Error(
-          'Unable to upload device code, please open an IoT Workbench project and retry.');
+      await project.handleLoadFailure();
+      return;
     }
     await project.upload();
   }
@@ -54,16 +45,11 @@ export class DeviceOperator {
   async configDeviceSettings(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    if (!vscode.workspace.rootPath) {
-      throw new Error(
-          'Unable to find the root path, please open an IoT Workbench project.');
-    }
-
     const project = new IoTProject(context, channel, telemetryContext);
     const result = await project.load();
     if (!result) {
-      throw new Error(
-          'Unable to config device settings, please open an IoT Workbench project and retry.');
+      await project.handleLoadFailure();
+      return;
     }
     await project.configDeviceSettings();
   }
