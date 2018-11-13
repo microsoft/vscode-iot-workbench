@@ -45,16 +45,21 @@ Find **DevKit Translator** and click **Open Sample** button. A new VS Code windo
 ![IoT Workbench, select DevKit Translator example](media/devkit-translator/iot-workbench-example.png)
 
 ## Provision Cognitive Service
-  1. Login to http://portal.azure.com
-  1. Select the **+ New** option.
-  1. Select **AI + Machine Learning** from the list of services.
-  1. Select **Translator Speech**. You may need to click "See all" or search to see it.
-	![create speech service](media/devkit-translator/create-speech-api.jpg)
-  1. Fill out the rest of the form, and click the **Create** button.
-  1. You are now subscribed to Microsoft Translator Speech API.
-  1. Go to **All Resources** and select the Microsoft Translator you created.
-  1. Go to the **Keys** option and copy your subscription key to access the service. We will use that value in later sections.
-	![get speech key](media/devkit-translator/speech-key.jpg)
+* Sign in to [Azure Portal](http://portal.azure.com) using your Microsoft account.
+* Select **Create a resource** at the top left of the portal.
+* In the **New** window, search for **speech**.
+* In the search results, select **Speech**.
+* Under Speech, select the **Create** button.
+
+  ![create speech service](media/devkit-translator/create-speech-api.png)
+
+* Fill out the rest of the form, and click the **Create** button.
+
+  ![create speech service](media/devkit-translator/create-speech-api2.png)
+
+* Go to **All Resources** and select the Microsoft Translator you created.
+* Go to the **Keys** option and copy your subscription key to access the service. We will use that value in later sections.
+  ![get speech key](media/devkit-translator/speech-key.jpg)
 
 ## Provision Azure services
 
@@ -78,25 +83,40 @@ The whole process includes:
 Please take a note of the device name you created. It will be used in next section.
 
 ## Modify code for Azure Functions
-Open **devkit-traslater\run.csx** and modify the following line with the device name and subscription key you provisioned in previous step:
-```cpp
-    string subscriptionKey = "";
-    string deviceName = "";
-```
+* Open **Functions\DevKitTranslatorFunction.cs** and modify the following lines with the device name and subscription key you provisioned in previous step:
+
+  ```csharp
+  // Subscription Key of Speech Service
+  const string speechSubscriptionKey = "";
+
+  // Region of the speech service, see https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/regions for more details.
+  const string speechServiceRegion = "";
+
+  // Device ID
+  const string deviceName = "";
+  ```
 
 ## Deploy Azure Functions
 
-Open the command palette and select **IoT Workbench: Cloud**, then select **Azure Deploy**.
+* Open the command palette and select **IoT Workbench: Cloud**, then select **Azure Deploy**.
 
-![IoT Workbench: Cloud -> Deploy](media/iot-workbench-cloud-deploy.png)
+  ![IoT Workbench: Cloud -> Deploy](media/iot-workbench-cloud-deploy.png)
 
-After the Function deploys successfully, fill in the azure_config.h file with Function App name. 
+* If VS Code prompt you that the Azure Function remote runtime is not compatible with the local runtime, please click the **Update remote runtime** button.
 
-![Update the function app name](media/devkit-translator/update-app-name.png)
+   ![IoT Workbench: Cloud -> Deploy](media/devkit-translator/update-remote-runtime.png)
 
-You can get back the Function App name from the VS Code **OUTPUT** window if you forgot it.
+* If VS Code ask your confirmation to deploy the Azure Function, please click the **Deploy** button to confirm.
 
-![Get back the function app name](media/devkit-translator/azure-function.png)
+  ![IoT Workbench: Cloud -> Deploy](media/devkit-translator/confirm-deploy.png)
+
+* After the Function deploys successfully, go to the Function APP you've just created in Azure Portal. Click the **devkit-translator** function in the left panel, and click **</>Get function URL** link to get function URL.
+
+  ![Get function URL](media/devkit-translator/get-function-url.png)
+
+* Copy the function URL and fill in the azure_config.h file. 
+
+  ![Update the function URL](media/devkit-translator/update-function-url.png)
 
 > Note: If the Function App does not work properly, check this [FAQs](https://microsoft.github.io/azure-iot-developer-kit/docs/faq#compilation-error-for-azure-function) section to resolve it.
 
