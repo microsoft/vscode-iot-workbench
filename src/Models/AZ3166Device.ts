@@ -376,81 +376,91 @@ export class AZ3166Device extends ArduinoDeviceBase {
     return new Promise(
         async (
             resolve: (value: boolean) => void,
-            reject: (reason: Error) => void) => {
+            reject: (value: Error) => void) => {
+          let comPort = '';
           let command = '';
           try {
-            const list = await SerialPortLite.list();
-            let devkitConnected = false;
-            const az3166 = this.board;
-            if (option === configDeviceOptions.ConnectionString) {
-              command = 'set_az_iothub';
-            } else {
-              command = 'set_dps_uds';
-            }
-            if (!az3166) {
-              return reject(
-                  new Error('AZ3166 is not found in the board list.'));
-            }
+            // Chooes COM port that AZ3166 is connected
+            comPort = await this.chooseCOM();
+            console.log(`Opening ${comPort}.`);
+          } catch (error) {
+            reject(error);
+          }
+          if (option === configDeviceOptions.ConnectionString) {
+            command = 'set_az_iothub';
+          } else {
+            command = 'set_dps_uds';
+          }
+          let errorRejected = false;
 
-            for (let i = 0; i < list.length; i++) {
-              const device = list[i];
-              if (device.vendorId === Number(`0x${az3166.vendorId}`) &&
-                  device.productId === Number(`0x${az3166.productId}`)) {
-                devkitConnected = true;
-                const screenLogFile = path.join(
-                    this.extensionContext.extensionPath, 'screenlog.0');
+          const az3166 = this.board;
 
-                const timeoutMessage = setTimeout(async () => {
-                  await vscode.window.showInformationMessage(
-                      'Please hold down button A and then push and release the reset button to enter configuration mode.');
-                  await cmd(
-                      `screen -S devkit -p 0 -X stuff \$'\\r\\nhelp\\r\\n'`);
-                }, 20000);
+          if (!az3166) {
+            return reject(
+                new Error('IoT DevKit is not found in the board list.'));
+          }
 
-                await cmd(`cd ${
-                    this.extensionContext
-                        .extensionPath} && rm -f screenlog.* && screen -dmSL devkit ${
-                    device.port} 115200 && sleep 1`);
-                if (!fs.existsSync(screenLogFile)) {
-                  await cmd('screen -X -S devkit quit');
-                  clearTimeout(timeoutMessage);
-                  throw new Error(`Cannot open serial port ${device.port}`);
-                }
+          const port = new AZ3166Device.serialport(comPort, {
+            baudRate: az3166.defaultBaudRate,
+            dataBits: 8,
+            stopBits: 1,
+            xon: false,
+            xoff: false,
+            parity: 'none'
+          });
 
-                await cmd(
-                    `screen -S devkit -p 0 -X stuff \$'\\r\\nhelp\\r\\n'`);
-
-                let logs = fs.readFileSync(screenLogFile, 'utf-8');
-                if (logs.includes('set_')) {
-                  clearTimeout(timeoutMessage);
-                  await cmd(
-                      'screen -X -S devkit quit && sleep 1 && rm -f screenlog.*');
-                  const res = await SerialPortLite.write(
-                      device.port, `${command} "${configValue}"\r`, 115200);
-                  return resolve(res);
-                } else {
-                  fs.watchFile(screenLogFile, async () => {
-                    logs = fs.readFileSync(screenLogFile, 'utf-8');
-
-                    if (logs.includes('set_')) {
-                      fs.unwatchFile(screenLogFile);
-                      clearTimeout(timeoutMessage);
-                      await cmd(
-                          'screen -X -S devkit quit && sleep 1 && rm -f screenlog.*');
-                      const res = await SerialPortLite.write(
-                          device.port, `${command} "${configValue}"\r`, 115200);
-                      return resolve(res);
-                    }
-                  });
-                }
+          const rejectIfError = (err: Error) => {
+            if (errorRejected) return true;
+            if (err) {
+              errorRejected = true;
+              reject(err);
+              try {
+                port.close();
+              } catch (ignore) {
               }
             }
-            if (!devkitConnected) {
-              return resolve(false);
+
+            return true;
+          };
+
+          const executeSetAzIoTHub = async () => {
+            try {
+              const data = `${command} "${configValue}"\r\n`;
+              await this.sendDataViaSerialPort(port, data.slice(0, 120));
+              if (data.length > 120) {
+                await delay(1000);
+                await this.sendDataViaSerialPort(port, data.slice(120));
+              }
+
+              await delay(1000);
+              port.close();
+            } catch (ignore) {
             }
-          } catch (error) {
-            return resolve(false);
-          }
+
+            if (errorRejected) {
+              return;
+            } else {
+              resolve(true);
+            }
+          };
+
+          // Configure serial port callbacks
+          port.on('open', async () => {
+            // tslint:disable-next-line: no-any
+            await vscode.window.showInformationMessage(
+                'Please hold down button A and then push and release the reset button to enter configuration mode. When DevKit switches into configuration mode, click OK.',
+                'OK');
+            executeSetAzIoTHub()
+                .then(() => resolve(true))
+                .catch((error) => reject(error));
+          });
+
+          // tslint:disable-next-line: no-any
+          port.on('error', (error: any) => {
+            if (errorRejected) return;
+            console.log(error);
+            rejectIfError(error);
+          });
         });
   }
 
