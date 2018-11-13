@@ -7,8 +7,8 @@ import {setTimeout} from 'timers';
 import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
 
-import {ConfigHandler} from './configHandler';
-import {AzureFunctionsLanguage, ConfigKey} from './constants';
+import {AzureFunctionsLanguage} from './constants';
+import {DialogResponses} from './DialogResponses';
 
 export function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -161,4 +161,32 @@ export async function selectWorkspaceItem(
 
   return folder && folder.data ? folder.data :
                                  (await showOpenDialog(options))[0].fsPath;
+}
+
+export async function askAndNewProject() {
+  const message =
+      'An IoT project is needed to process the operation, do you want to create an IoT project?';
+  const result: vscode.MessageItem|undefined =
+      await vscode.window.showErrorMessage(
+          message, DialogResponses.yes, DialogResponses.no);
+
+  if (result === DialogResponses.yes) {
+    await vscode.commands.executeCommand('iotworkbench.initializeProject');
+  }
+}
+
+export async function askAndOpenProject(
+    rootPath: string, workspaceFile: string) {
+  const message =
+      `Operation failed because the IoT project is not opened. Current folder contains an IoT project \'${
+          workspaceFile}\', do you want to open it?`;
+  const result: vscode.MessageItem|undefined =
+      await vscode.window.showErrorMessage(
+          message, DialogResponses.yes, DialogResponses.no);
+
+  if (result === DialogResponses.yes) {
+    const workspaceFilePath = path.join(rootPath, workspaceFile);
+    await vscode.commands.executeCommand(
+        'vscode.openFolder', vscode.Uri.file(workspaceFilePath), false);
+  }
 }

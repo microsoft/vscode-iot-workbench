@@ -7,21 +7,17 @@
 import * as vscode from 'vscode';
 import {IoTProject} from './Models/IoTProject';
 import {TelemetryContext} from './telemetry';
+import {askAndNewProject} from './utils';
 
 export class AzureOperator {
   async Provision(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    if (!vscode.workspace.workspaceFolders) {
-      throw new Error(
-          'Unable to find the root path, please open an IoT Workbench project');
-    }
-
     const project = new IoTProject(context, channel, telemetryContext);
     const result = await project.load();
     if (!result) {
-      throw new Error(
-          'Unable to provision Azure objects, please open an IoT Workbench project and retry.');
+      await project.handleLoadFailure();
+      return;
     }
     const status = await project.provision();
 
@@ -38,8 +34,8 @@ export class AzureOperator {
     const project = new IoTProject(context, channel, telemetryContext);
     const result = await project.load();
     if (!result) {
-      throw new Error(
-          'Unable to deploy Azure objects, please open an IoT Workbench project and retry.');
+      await project.handleLoadFailure();
+      return;
     }
     await project.deploy();
   }
