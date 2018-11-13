@@ -102,10 +102,6 @@ Please take a note of the device name you created. It will be used in next secti
 
   ![IoT Workbench: Cloud -> Deploy](media/iot-workbench-cloud-deploy.png)
 
-* If VS Code prompt you that the Azure Function remote runtime is not compatible with the local runtime, please click the **Update remote runtime** button.
-
-   ![IoT Workbench: Cloud -> Deploy](media/devkit-translator/update-remote-runtime.png)
-
 * If VS Code ask your confirmation to deploy the Azure Function, please click the **Deploy** button to confirm.
 
   ![IoT Workbench: Cloud -> Deploy](media/devkit-translator/confirm-deploy.png)
