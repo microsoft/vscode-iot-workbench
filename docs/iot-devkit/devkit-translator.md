@@ -78,7 +78,7 @@ Then VS Code guides you through provisioning the required Azure services.
 The whole process includes:
 * Select an existing IoT Hub or create a new IoT Hub.
 * Select an existing IoT Hub device or create a new IoT Hub device. 
-* Create a new Function App.
+* Create a new Azure Functions App.
 
 Please take a note of the device name you created. It will be used in next section.
 
