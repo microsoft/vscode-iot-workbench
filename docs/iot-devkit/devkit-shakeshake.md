@@ -61,8 +61,8 @@ Then VS Code guides you through provisioning the required Azure services.
 The whole process includes:
 
 - Select an existing IoT Hub or create a new IoT Hub.
-- Select an existing IoT Hub device or create a new IoT Hub device. 
-- Create a new Function App.
+- Select an existing IoT Hub device or create a new IoT Hub device. Please take a note of the **device id**. It will be used in next section.  
+- Create a new Azure Functions App.
 
 ## Modify the #hashtag
 
@@ -75,13 +75,13 @@ static const char* iot_event = "{\"topic\":\"iot\"}";
 Replace the string `iot` within the curly braces with your preferred hashtag. DevKit later retrieves a random tweet that includes the hashtag you specify in this step.
 
 ## Modify code for Azure Functions
-Open **Function\shakeshake.cs** and find the following line of code:
+Open **Function\shakeshake.cs** and find the following code:
 ```csharp
     // TODO： Input the device name.
     string deviceId = "";
 ```
 
-Set deviceId with the device name you provisioned in previous step.
+Set `deviceId` with the device id you provisioned in previous step.
 
 ## Deploy Azure Functions
 
