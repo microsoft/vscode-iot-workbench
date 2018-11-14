@@ -77,7 +77,7 @@ Replace the string `iot` within the curly braces with your preferred hashtag. De
 ## Modify code for Azure Functions
 Open **shakeshake\run.csx** and look for this line of code::
 ```cpp
-    string deviceName = "AZ3166";
+    string deviceId = "AZ3166";
 ```
 
 Replace **AZ3166** with the device name you provisioned in previous step.
