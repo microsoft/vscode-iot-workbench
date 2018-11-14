@@ -312,7 +312,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
           return false;
         } else {
           vscode.window.showInformationMessage(
-              'Configure Device connection string successfully.');
+              'Configure Device connection string completely.');
           return true;
         }
       } catch (error) {
@@ -362,7 +362,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
           return false;
         } else {
           vscode.window.showInformationMessage(
-              'Configure Unique Device String (UDS) successfully.');
+              'Configure Unique Device String (UDS) completely.');
           return true;
         }
       } catch (error) {
@@ -380,7 +380,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
           let comPort = '';
           let command = '';
           try {
-            // Chooes COM port that AZ3166 is connected
+            // Choose COM port that AZ3166 is connected
             comPort = await this.chooseCOM();
             console.log(`Opening ${comPort}.`);
           } catch (error) {
@@ -475,7 +475,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
           let comPort = '';
           let command = '';
           try {
-            // Chooes COM port that AZ3166 is connected
+            // Choose COM port that AZ3166 is connected
             comPort = await this.chooseCOM();
             console.log(`Opening ${comPort}.`);
           } catch (error) {
