@@ -426,10 +426,12 @@ export class AZ3166Device extends ArduinoDeviceBase {
           const executeSetAzIoTHub = async () => {
             try {
               const data = `${command} "${configValue}"\r\n`;
-              await this.sendDataViaSerialPort(port, data.slice(0, 120));
-              if (data.length > 120) {
+              if (data.length <= 120) {
+                await this.sendDataViaSerialPort(port, data);
+              } else {
+                await this.sendDataViaSerialPort(port, data.slice(0, 100));
                 await delay(1000);
-                await this.sendDataViaSerialPort(port, data.slice(120));
+                await this.sendDataViaSerialPort(port, data.slice(100));
               }
 
               await delay(1000);
@@ -448,7 +450,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
           port.on('open', async () => {
             // tslint:disable-next-line: no-any
             await vscode.window.showInformationMessage(
-                'Please hold down button A and then push and release the reset button to enter configuration mode. When DevKit switches into configuration mode, click OK.',
+                'Please hold down button A and then push and release the reset button to enter configuration mode. After enter configuration mode, click OK.',
                 'OK');
             executeSetAzIoTHub()
                 .then(() => resolve(true))
