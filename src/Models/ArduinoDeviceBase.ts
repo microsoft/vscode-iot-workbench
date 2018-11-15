@@ -198,9 +198,6 @@ export abstract class ArduinoDeviceBase implements Device {
     }
 
     // Create an empty arduino sketch
-    const sketchTemplateFilePath =
-        this.extensionContext.asAbsolutePath(path.join(
-            FileNames.resourcesFolderName, board.id, sketchTemplateFileName));
     const newSketchFilePath =
         path.join(this.deviceFolder, constants.defaultSketchFileName);
 

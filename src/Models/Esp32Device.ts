@@ -23,7 +23,7 @@ const constants = {
 };
 
 export class Esp32Device extends ArduinoDeviceBase {
-  private sketchFileTemplateName = '';
+  private sketchFileContent = '';
   private static _boardId = 'esp32';
 
   private componentId: string;
@@ -69,11 +69,11 @@ export class Esp32Device extends ArduinoDeviceBase {
 
   constructor(
       context: vscode.ExtensionContext, devicePath: string,
-      sketchFileTemplateName?: string) {
+      sketchFileContent?: string) {
     super(context, devicePath, DeviceType.IoT_Button);
     this.componentId = Guid.create().toString();
-    if (sketchFileTemplateName) {
-      this.sketchFileTemplateName = sketchFileTemplateName;
+    if (sketchFileContent) {
+      this.sketchFileContent = sketchFileContent;
     }
   }
 
@@ -93,7 +93,7 @@ export class Esp32Device extends ArduinoDeviceBase {
   }
 
   async create(): Promise<boolean> {
-    if (!this.sketchFileTemplateName) {
+    if (!this.sketchFileContent) {
       throw new Error('No sketch file found.');
     }
     const deviceFolderPath = this.deviceFolder;
@@ -108,7 +108,7 @@ export class Esp32Device extends ArduinoDeviceBase {
     this.generateCommonFiles();
     this.generateCppPropertiesFile(this.board);
     await this.generateSketchFile(
-        this.sketchFileTemplateName, this.board, constants.defaultBoardInfo,
+        this.sketchFileContent, this.board, constants.defaultBoardInfo,
         constants.defaultBoardConfig);
     return true;
   }
