@@ -66,7 +66,7 @@ export class UsbDetector {
           this.context, async () => {
             if (board.exampleUrl) {
               ArduinoPackageManager.installBoard(board);
-              
+
               const exampleUrl =
                   ContentView.workbenchExampleURI + '?' +
                   encodeURIComponent(
