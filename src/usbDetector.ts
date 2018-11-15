@@ -66,7 +66,7 @@ export class UsbDetector {
           this.context, async () => {
             if (board.exampleUrl) {
               ArduinoPackageManager.installBoard(board);
-
+              
               const exampleUrl =
                   ContentView.workbenchExampleURI + '?' +
                   encodeURIComponent(
@@ -100,8 +100,19 @@ export class UsbDetector {
 
     const devices: DeviceInfo[]|undefined =
         await UsbDetector._usbDetector.find();
+
     if (devices) {
-      devices.forEach(this.showLandingPage.bind(this));
+      const uniqueDevices: DeviceInfo[] = [];
+
+      devices.forEach(device => {
+        if (uniqueDevices.findIndex(
+                item => item.vendorId === device.vendorId &&
+                    item.productId === device.productId) < 0) {
+          uniqueDevices.push(device);
+        }
+      });
+
+      uniqueDevices.forEach(this.showLandingPage.bind(this));
     }
 
     UsbDetector._usbDetector.on('add', this.showLandingPage.bind(this));
