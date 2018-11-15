@@ -30,7 +30,7 @@ You need to make sure the following steps are finished before beginning the proc
 # Step 2: Create IoT Project
 
 1. Open Visual Studio Code and open an empty folder.
-1. Press **F1** or **Ctrl + Shift + P** in Visual Studio Code and select **IoT Workbench:New**.
+1. Press **F1** or **Ctrl + Shift + P** in Visual Studio Code and select **IoT Workbench: Create Project...** .
 1. Select the device of **IoT button teXXmo - Microsoft Azure Developer Kit**.
 ![CreateProject](media/iot-button-get-started/iot_button_create.jpg)
 1. From the project template, please select **With Azure Functions**. With this template, when teXXmo IoT button is clicked, a telemetry will be sent to IoT Hub and Azure Functions will be triggered to execute the code.
