@@ -16,7 +16,7 @@ An active Azure subscription. If you do not have one, you can register via one o
 
 ## Create a New Project
 
-Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select **IoT Workbench: New**.
+Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select **IoT Workbench: Create Project...**.
 
 ![IoT Workbench: New](media/iot-workbench-new-cmd.png)
 
