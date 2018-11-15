@@ -27,6 +27,8 @@ export class UsbDetector {
   private static _usbDetector: any =
       require('../../vendor/node-usb-native').detector;
 
+  private examplePanel: vscode.WebviewPanel|undefined;
+
   constructor(
       private context: vscode.ExtensionContext,
       private channel: vscode.OutputChannel) {}
@@ -62,8 +64,7 @@ export class UsbDetector {
 
     if (board) {
       callWithTelemetry(
-          EventNames.detectBoard, this.channel, false,
-          this.context, async () => {
+          EventNames.detectBoard, this.channel, false, this.context, () => {
             if (board.exampleUrl) {
               ArduinoPackageManager.installBoard(board);
 
@@ -73,15 +74,23 @@ export class UsbDetector {
                       'board=' + board.id +
                       '&url=' + encodeURIComponent(board.exampleUrl || ''));
 
-              const panel = vscode.window.createWebviewPanel(
-                  'IoTWorkbenchExamples', 'Examples - Azure IoT Workbench',
-                  vscode.ViewColumn.One, {
-                    enableScripts: true,
-                    retainContextWhenHidden: true,
-                  });
-              panel.webview.html =
-                  await ContentProvider.getInstance()
-                      .provideTextDocumentContent(vscode.Uri.parse(exampleUrl));
+              if (!this.examplePanel) {
+                const panel: vscode.WebviewPanel|
+                    undefined = vscode.window.createWebviewPanel(
+                    'IoTWorkbenchExamples', 'Examples - Azure IoT Workbench',
+                    vscode.ViewColumn.One, {
+                      enableScripts: true,
+                      retainContextWhenHidden: true,
+                    });
+                panel.webview.html =
+                    ContentProvider.getInstance().provideTextDocumentContent(
+                        vscode.Uri.parse(exampleUrl));
+                panel.onDidDispose(() => {
+                  this.examplePanel = undefined;
+                });
+
+                this.examplePanel = panel;
+              }
             }
           }, {board: board.name});
     }

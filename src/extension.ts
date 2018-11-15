@@ -332,7 +332,7 @@ export async function activate(context: vscode.ExtensionContext) {
         });
 
     panel.webview.html =
-        await ContentProvider.getInstance().provideTextDocumentContent(
+        ContentProvider.getInstance().provideTextDocumentContent(
             vscode.Uri.parse(ContentView.workbenchHelpURI));
 
     ConfigHandler.update(

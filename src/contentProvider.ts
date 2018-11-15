@@ -43,7 +43,7 @@ export class ContentProvider implements vscode.TextDocumentContentProvider {
     });
   }
 
-  async provideTextDocumentContent(uri: vscode.Uri): Promise<string> {
+  provideTextDocumentContent(uri: vscode.Uri) {
     if (!this._webserver) {
       throw new Error('internal web server is not initialized.');
     }

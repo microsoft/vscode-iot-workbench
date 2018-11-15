@@ -220,7 +220,7 @@ export class ExampleExplorer {
               retainContextWhenHidden: true,
             });
         panel.webview.html =
-            await ContentProvider.getInstance().provideTextDocumentContent(
+            ContentProvider.getInstance().provideTextDocumentContent(
                 vscode.Uri.parse(exampleUrl));
 
         return true;

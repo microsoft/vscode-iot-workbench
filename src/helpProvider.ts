@@ -28,7 +28,7 @@ export class HelpProvider {
         });
 
     panel.webview.html =
-        await ContentProvider.getInstance().provideTextDocumentContent(
+        ContentProvider.getInstance().provideTextDocumentContent(
             vscode.Uri.parse(ContentView.workbenchHelpURI));
 
     return;
