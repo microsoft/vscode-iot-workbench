@@ -10,7 +10,7 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 - Fix the device connection string setting problem in macOS.
 - Upgrade to VS Code's webview API
 
-## Version 0.1.13
+## Version 0.1.14
 - Release date: Nov. 9, 2018
 
 ### Fixed
