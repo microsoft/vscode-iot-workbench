@@ -80,7 +80,7 @@ Here are a set of tutorials that will help you get started:
 
 | Command | Description |
 | --- | --- |
-| `IoT Workbench: New`  | Create new IoT Workbench projects. |
+| `IoT Workbench: Create Project...`  | Create new IoT Workbench projects. |
 | `IoT Workbench: Examples` | Load existing examples of IoT Workbench project. |
 | `IoT Workbench: Cloud` | Provison and deploy Azure services. |
 | `IoT Workbench: Device`  | Compile, upload device code and config device settings. |
@@ -100,10 +100,16 @@ Here are a set of tutorials that will help you get started:
 <img width="760" src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/example.gif">
 
 #### Note: 
-When invoking the **Azure Provision** command with Azure IoT Hub and Azure Functions, by default, Azure Functions would use the IoT Hub consumer group of `$Default`. To switch to another consumer group, please follow the [guide](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-create-through-portal) to create a new consumer group in Azure Poral. Then in IoT project, modify the following setting in **function.json**:
-```
-"consumerGroup": "[consumer_group_name]"
-```
+-  When invoking the **Azure Provision** command with Azure IoT Hub and Azure Functions, by default, Azure Functions would use the IoT Hub consumer group of `$Default`. To switch to another consumer group, please follow the [guide](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-create-through-portal) to create a new consumer group in Azure Poral. Then in IoT project, modify the following setting in **function.json**:
+    ```
+    "consumerGroup": "[consumer_group_name]"
+    ```
+-  You may open an existing IoT project after you close it. To do so:
+    -  In the menu of **Visual Studio Code**, choose *File -> Open Workspace...* .
+    -  In file selection panel, navigate to the folder that contains your project and select *{PROJECT_NAME}.code-project*.
+
+        ![IoT Workbench: OpenExisting](docs/pic/openexisting.png)
+    -  Click **Open**.
 
 ## Privacy Statement
 The [Microsft Enterprise and Developer Privacy Statement](https://www.microsoft.com/en-us/privacystatement/EnterpriseDev/default.aspx) describes the privacy statement of this software.
@@ -126,15 +132,15 @@ There are a couple of ways you can contribute to this repo:
   - Write a tutorial to describe how to run the example.
   - Submit a [new issue](https://github.com/Microsoft/vscode-iot-workbench/issues/new) and provide the following information:
   
-  | Item | Description |
-  | --- | --- |
-  | `Name` | Name of the example to be displayed in example gallery. |
-  | `Folder name` | Name of the folder to host the example. |
-  | `Description` | A short statement to describe the example. |
-  | `Location` | URL of the GitHub repo. |
-  | `Image` | URL of the image shown in example gallery for your example, if not provided, the default image will be used. |
-  | `Tutorial` | URL of tutorial that describes how to run the example. |
-  | `Difficulty` | Difficulty of the example, easy, medium or difficult. |
+      | Item | Description |
+      | --- | --- |
+      | `Name` | Name of the example to be displayed in example gallery. |
+      | `Folder name` | Name of the folder to host the example. |
+      | `Description` | A short statement to describe the example. |
+      | `Location` | URL of the GitHub repo. |
+      | `Image` | URL of the image shown in example gallery for your example, if not provided, the default image will be used. |
+      | `Tutorial` | URL of tutorial that describes how to run the example. |
+      | `Difficulty` | Difficulty of the example, easy, medium or difficult. |
 
 ## Code of Conduct
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct). For more information please see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/#howadopt) or contact opencode@microsoft.com with any additional questions or comments.

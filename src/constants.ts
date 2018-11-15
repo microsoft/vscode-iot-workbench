@@ -47,6 +47,7 @@ export class FileNames {
   static readonly vscodeSettingsFolderName = '.vscode';
   static readonly workspaceConfigFilePath = 'project.code-workspace';
   static readonly iotworkbenchTempFolder = '.iotworkbenchtemp';
+  static readonly workspaceExtensionName = '.code-workspace';
 }
 
 export enum AzureFunctionsLanguage {

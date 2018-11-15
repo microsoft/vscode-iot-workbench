@@ -397,7 +397,6 @@ export async function activate(context: vscode.ExtensionContext) {
   const codeGeneratorBinder =
       codeGenerator.ScaffoldDeviceStub.bind(codeGenerator);
 
-
   ContentProvider.getInstance().Initialize(
       context.extensionPath, exampleExplorer);
   context.subscriptions.push(

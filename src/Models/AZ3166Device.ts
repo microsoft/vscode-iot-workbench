@@ -12,23 +12,17 @@ import * as opn from 'opn';
 import * as os from 'os';
 import * as path from 'path';
 import {SerialPortLite} from 'serialport-lite/dist';
-import {resolve} from 'url';
-import {error} from 'util';
 import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, FileNames} from '../constants';
+import {ConfigKey} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 import {delay, getRegistryValues} from '../utils';
 
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
-import {Board} from './Interfaces/Board';
-import {Component, ComponentType} from './Interfaces/Component';
-import {Device, DeviceType} from './Interfaces/Device';
-import {ProjectTemplate, ProjectTemplateType} from './Interfaces/ProjectTemplate';
-import {IoTProject} from './IoTProject';
+import {DeviceType} from './Interfaces/Device';
 
 interface SerialPortInfo {
   comName: string;
@@ -44,7 +38,8 @@ const constants = {
   platformLocalFileName: 'platform.local.txt',
   cExtraFlag: 'compiler.c.extra_flags=-DCORRELATIONID="',
   cppExtraFlag: 'compiler.cpp.extra_flags=-DCORRELATIONID="',
-  traceExtraFlag: ' -DENABLETRACE='
+  traceExtraFlag: ' -DENABLETRACE=',
+  informationPageUrl: 'https://aka.ms/AA35xln'
 };
 
 enum configDeviceOptions {
@@ -186,8 +181,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
         detail: 'Config Connection String'
       },
       {
-        label: 'Config Device UDS',
-        description: 'Config Device UDS',
+        label: 'Config Unique Device String (UDS)',
+        description: 'Config Unique Device String (UDS)',
         detail: 'Config UDS'
       }
     ];
@@ -239,44 +234,56 @@ export class AZ3166Device extends ArduinoDeviceBase {
             {
               label: 'Input IoT Hub Device Connection String',
               description: '',
-              detail: 'Input another...'
+              detail: ''
             }
           ];
         } else {
           deviceConnectionStringSelection = [{
             label: 'Input IoT Hub Device Connection String',
             description: '',
-            detail: 'Input another...'
+            detail: ''
           }];
         }
 
-        const selection =
-            await vscode.window.showQuickPick(deviceConnectionStringSelection, {
-              ignoreFocusOut: true,
-              placeHolder: 'Choose IoT Hub Device Connection String'
-            });
+        const selection = await vscode.window.showQuickPick(
+            deviceConnectionStringSelection,
+            {ignoreFocusOut: true, placeHolder: 'Choose an option:'});
 
         if (!selection) {
           return false;
         }
 
-        if (selection.detail === 'Input another...') {
+        if (selection.label === 'Input IoT Hub Device Connection String') {
           const option: vscode.InputBoxOptions = {
             value:
                 'HostName=<Host Name>;DeviceId=<Device Name>;SharedAccessKey=<Device Key>',
             prompt: `Please input device connection string here.`,
-            ignoreFocusOut: true
+            ignoreFocusOut: true,
+            validateInput: (deviceConnectionString: string) => {
+              if (!deviceConnectionString) {
+                return 'Please provide a valid device connection string.';
+              }
+
+              if ((deviceConnectionString.indexOf('HostName') === -1) ||
+                  (deviceConnectionString.indexOf('DeviceId') === -1) ||
+                  (deviceConnectionString.indexOf('SharedAccessKey') === -1)) {
+                return 'The format of the IoT Hub Device connection string is invalid.';
+              }
+              return;
+            }
           };
 
           deviceConnectionString = await vscode.window.showInputBox(option);
           if (!deviceConnectionString) {
+            const message =
+                'Need more information on how to get device connection string?';
+            const result: vscode.MessageItem|undefined =
+                await vscode.window.showWarningMessage(
+                    message, DialogResponses.yes, DialogResponses.no);
+            if (result === DialogResponses.yes) {
+              opn(constants.informationPageUrl);
+            }
             return false;
-          }
-          if ((deviceConnectionString.indexOf('HostName') === -1) ||
-              (deviceConnectionString.indexOf('DeviceId') === -1) ||
-              (deviceConnectionString.indexOf('SharedAccessKey') === -1)) {
-            throw new Error(
-                'The format of the IoT Hub Device connection string is invalid. Please provide a valid Device connection string.');
           }
         }
 
@@ -301,7 +308,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
           return false;
         } else {
           vscode.window.showInformationMessage(
-              'Configure Device connection string successfully.');
+              'Configure Device connection string completely.');
           return true;
         }
       } catch (error) {
@@ -320,7 +327,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
         const option: vscode.InputBoxOptions = {
           value: generateRandomHex(),
-          prompt: `Please input UDS here.`,
+          prompt: `Please input Unique Device String (UDS) here.`,
           ignoreFocusOut: true,
           validateInput: (UDS: string) => {
             if (/^([0-9a-f]){64}$/i.test(UDS) === false) {
@@ -350,7 +357,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
         if (res === false) {
           return false;
         } else {
-          vscode.window.showInformationMessage('Configure UDS successfully.');
+          vscode.window.showInformationMessage(
+              'Configure Unique Device String (UDS) completely.');
           return true;
         }
       } catch (error) {
@@ -364,81 +372,93 @@ export class AZ3166Device extends ArduinoDeviceBase {
     return new Promise(
         async (
             resolve: (value: boolean) => void,
-            reject: (reason: Error) => void) => {
+            reject: (value: Error) => void) => {
+          let comPort = '';
           let command = '';
           try {
-            const list = await SerialPortLite.list();
-            let devkitConnected = false;
-            const az3166 = this.board;
-            if (option === configDeviceOptions.ConnectionString) {
-              command = 'set_az_iothub';
-            } else {
-              command = 'set_dps_uds';
-            }
-            if (!az3166) {
-              return reject(
-                  new Error('AZ3166 is not found in the board list.'));
-            }
+            // Choose COM port that AZ3166 is connected
+            comPort = await this.chooseCOM();
+            console.log(`Opening ${comPort}.`);
+          } catch (error) {
+            reject(error);
+          }
+          if (option === configDeviceOptions.ConnectionString) {
+            command = 'set_az_iothub';
+          } else {
+            command = 'set_dps_uds';
+          }
+          let errorRejected = false;
 
-            for (let i = 0; i < list.length; i++) {
-              const device = list[i];
-              if (device.vendorId === Number(`0x${az3166.vendorId}`) &&
-                  device.productId === Number(`0x${az3166.productId}`)) {
-                devkitConnected = true;
-                const screenLogFile = path.join(
-                    this.extensionContext.extensionPath, 'screenlog.0');
+          const az3166 = this.board;
 
-                const timeoutMessage = setTimeout(async () => {
-                  await vscode.window.showInformationMessage(
-                      'Please hold down button A and then push and release the reset button to enter configuration mode.');
-                  await cmd(
-                      `screen -S devkit -p 0 -X stuff \$'\\r\\nhelp\\r\\n'`);
-                }, 20000);
+          if (!az3166) {
+            return reject(
+                new Error('IoT DevKit is not found in the board list.'));
+          }
 
-                await cmd(`cd ${
-                    this.extensionContext
-                        .extensionPath} && rm -f screenlog.* && screen -dmSL devkit ${
-                    device.port} 115200 && sleep 1`);
-                if (!fs.existsSync(screenLogFile)) {
-                  await cmd('screen -X -S devkit quit');
-                  clearTimeout(timeoutMessage);
-                  throw new Error(`Cannot open serial port ${device.port}`);
-                }
+          const port = new AZ3166Device.serialport(comPort, {
+            baudRate: az3166.defaultBaudRate,
+            dataBits: 8,
+            stopBits: 1,
+            xon: false,
+            xoff: false,
+            parity: 'none'
+          });
 
-                await cmd(
-                    `screen -S devkit -p 0 -X stuff \$'\\r\\nhelp\\r\\n'`);
-
-                let logs = fs.readFileSync(screenLogFile, 'utf-8');
-                if (logs.includes('set_')) {
-                  clearTimeout(timeoutMessage);
-                  await cmd(
-                      'screen -X -S devkit quit && sleep 1 && rm -f screenlog.*');
-                  const res = await SerialPortLite.write(
-                      device.port, `${command} "${configValue}"\r`, 115200);
-                  return resolve(res);
-                } else {
-                  fs.watchFile(screenLogFile, async () => {
-                    logs = fs.readFileSync(screenLogFile, 'utf-8');
-
-                    if (logs.includes('set_')) {
-                      fs.unwatchFile(screenLogFile);
-                      clearTimeout(timeoutMessage);
-                      await cmd(
-                          'screen -X -S devkit quit && sleep 1 && rm -f screenlog.*');
-                      const res = await SerialPortLite.write(
-                          device.port, `${command} "${configValue}"\r`, 115200);
-                      return resolve(res);
-                    }
-                  });
-                }
+          const rejectIfError = (err: Error) => {
+            if (errorRejected) return true;
+            if (err) {
+              errorRejected = true;
+              reject(err);
+              try {
+                port.close();
+              } catch (ignore) {
               }
             }
-            if (!devkitConnected) {
-              return resolve(false);
+
+            return true;
+          };
+
+          const executeSetAzIoTHub = async () => {
+            try {
+              const data = `${command} "${configValue}"\r\n`;
+              if (data.length <= 120) {
+                await this.sendDataViaSerialPort(port, data);
+              } else {
+                await this.sendDataViaSerialPort(port, data.slice(0, 100));
+                await delay(1000);
+                await this.sendDataViaSerialPort(port, data.slice(100));
+              }
+
+              await delay(1000);
+              port.close();
+            } catch (ignore) {
             }
-          } catch (error) {
-            return resolve(false);
-          }
+
+            if (errorRejected) {
+              return;
+            } else {
+              resolve(true);
+            }
+          };
+
+          // Configure serial port callbacks
+          port.on('open', async () => {
+            // tslint:disable-next-line: no-any
+            await vscode.window.showInformationMessage(
+                'Please hold down button A and then push and release the reset button to enter configuration mode. After enter configuration mode, click OK.',
+                'OK');
+            executeSetAzIoTHub()
+                .then(() => resolve(true))
+                .catch((error) => reject(error));
+          });
+
+          // tslint:disable-next-line: no-any
+          port.on('error', (error: any) => {
+            if (errorRejected) return;
+            console.log(error);
+            rejectIfError(error);
+          });
         });
   }
 
@@ -451,7 +471,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
           let comPort = '';
           let command = '';
           try {
-            // Chooes COM port that AZ3166 is connected
+            // Choose COM port that AZ3166 is connected
             comPort = await this.chooseCOM();
             console.log(`Opening ${comPort}.`);
           } catch (error) {

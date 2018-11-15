@@ -23,7 +23,7 @@ const constants = {
   cppPropertiesFileName: 'c_cpp_properties.json',
   cppPropertiesFileNameMac: 'c_cpp_properties_macos.json',
   cppPropertiesFileNameWin: 'c_cpp_properties_win32.json',
-  outputPath: './.build',
+  outputPath: './.build'
 };
 
 
@@ -164,41 +164,12 @@ export abstract class ArduinoDeviceBase implements Device {
   async generateSketchFile(
       sketchContent: string, board: Board, boardInfo: string,
       boardConfig: string): Promise<boolean> {
-    // Get arduino sketch file name from user input or use defalt sketch name
-    const option: vscode.InputBoxOptions = {
-      value: constants.defaultSketchFileName,
-      prompt: `Please input device sketch file name here.`,
-      ignoreFocusOut: true,
-      validateInput: (sketchFileName: string) => {
-        if (!sketchFileName ||
-            /^([a-z_]|[a-z_][-a-z0-9_.]*[a-z0-9_])(\.ino)?$/i.test(
-                sketchFileName)) {
-          return '';
-        }
-        return 'Sketch file name can only contain alphanumeric and cannot start with number.';
-      }
-    };
-
-    let sketchFileName = await vscode.window.showInputBox(option);
-
-
-    if (sketchFileName === undefined) {
-      return false;
-    } else if (!sketchFileName) {
-      sketchFileName = constants.defaultSketchFileName;
-    } else {
-      sketchFileName = sketchFileName.trim();
-      if (!/\.ino$/i.test(sketchFileName)) {
-        sketchFileName += '.ino';
-      }
-    }
-
     // Create arduino.json config file
     const arduinoJSONFilePath =
         path.join(this.vscodeFolderPath, constants.arduinoJsonFileName);
     const arduinoJSONObj = {
       'board': boardInfo,
-      'sketch': sketchFileName,
+      'sketch': constants.defaultSketchFileName,
       'configuration': boardConfig,
       'output': constants.outputPath
     };
@@ -227,7 +198,11 @@ export abstract class ArduinoDeviceBase implements Device {
     }
 
     // Create an empty arduino sketch
-    const newSketchFilePath = path.join(this.deviceFolder, sketchFileName);
+    const sketchTemplateFilePath =
+        this.extensionContext.asAbsolutePath(path.join(
+            FileNames.resourcesFolderName, board.id, sketchTemplateFileName));
+    const newSketchFilePath =
+        path.join(this.deviceFolder, constants.defaultSketchFileName);
 
     try {
       fs.writeFileSync(newSketchFilePath, sketchContent);
