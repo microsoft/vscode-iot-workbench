@@ -80,7 +80,7 @@ Here are a set of tutorials that will help you get started:
 
 | Command | Description |
 | --- | --- |
-| `IoT Workbench: New`  | Create new IoT Workbench projects. |
+| `IoT Workbench: Create Project...`  | Create new IoT Workbench projects. |
 | `IoT Workbench: Examples` | Load existing examples of IoT Workbench project. |
 | `IoT Workbench: Cloud` | Provison and deploy Azure services. |
 | `IoT Workbench: Device`  | Compile, upload device code and config device settings. |
