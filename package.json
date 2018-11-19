@@ -10,7 +10,7 @@
     "url": "https://github.com/Microsoft/vscode-iot-workbench/issues"
   },
   "homepage": "https://github.com/Microsoft/vscode-iot-workbench/blob/master/README.md",
-  "version": "0.1.14-rc",
+  "version": "0.1.14",
   "publisher": "vsciot-vscode",
   "icon": "logo.png",
   "aiKey": "5b869bc6-ca93-4f24-aa87-92871a3a616e",
