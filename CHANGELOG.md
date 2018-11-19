@@ -1,8 +1,8 @@
 # Change Log
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
 
-## Version 0.1.13
-- Release date: Nov. 16, 2018
+## Version 0.1.14
+- Release date: Nov. 19, 2018
 
 ### Fixed
 - Use C# library in Azure Functions for IoT DevKit examples.
@@ -10,7 +10,7 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 - Fix the device connection string setting problem in macOS.
 - Upgrade to VS Code's webview API
 
-## Version 0.1.14
+## Version 0.1.13
 - Release date: Nov. 9, 2018
 
 ### Fixed
