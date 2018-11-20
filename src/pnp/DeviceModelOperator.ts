@@ -57,7 +57,7 @@ export class DeviceModelOperator {
     const files = fs.listSync(rootPath);
 
     const deviceModelFile = files.find(
-        fileName => fileName.endsWith('.template.json') ||
+        fileName => fileName.endsWith('.capabilitymodel.json') ||
             fileName.endsWith('.interface.json'));
 
     if (!deviceModelFile) {
@@ -134,7 +134,7 @@ export class DeviceModelOperator {
     return;
   }
 
-  async CreateTemplate(
+  async CreateCapabilityModel(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
     let rootPath: string|null = null;
     rootPath = await this.InitializeFolder();
@@ -143,62 +143,67 @@ export class DeviceModelOperator {
     }
 
     const option: vscode.InputBoxOptions = {
-      value: PnPFileNames.defaultTemplateName,
-      prompt: `Please input template name here.`,
+      value: PnPFileNames.defaultCapabilityModelName,
+      prompt: `Please input capability model name here.`,
       ignoreFocusOut: true,
-      validateInput: (templateName: string) => {
-        if (!templateName) {
-          return 'Please provide a valid template name.';
+      validateInput: (capabilityModelName: string) => {
+        if (!capabilityModelName) {
+          return 'Please provide a valid capability model name.';
         }
-        if (/^([a-z_]|[a-z_][-a-z0-9_.]*[a-z0-9_])(\.template\.json)?$/i.test(
-                templateName)) {
-          if (!/\.template\.json$/i.test(templateName)) {
-            templateName += '.template.json';
+        if (/^([a-z_]|[a-z_][-a-z0-9_.]*[a-z0-9_])(\.capabilitymodel\.json)?$/i
+                .test(capabilityModelName)) {
+          if (!/\.capabilitymodel\.json$/i.test(capabilityModelName)) {
+            capabilityModelName += '.capabilitymodel.json';
           }
-          const targetTemplate = path.join(rootPath as string, templateName);
-          if (fs.existsSync(targetTemplate)) {
+          const targetCapabilityModel =
+              path.join(rootPath as string, capabilityModelName);
+          if (fs.existsSync(targetCapabilityModel)) {
             return 'The file name specified already exists in the device model.';
           }
           return '';
         }
-        return 'Template name can only contain alphanumeric and cannot start with number.';
+        return 'Capability model name can only contain alphanumeric and cannot start with number.';
       }
     };
 
-    let templateFileName = await vscode.window.showInputBox(option);
+    let capabilityModelFileName = await vscode.window.showInputBox(option);
 
-    if (templateFileName === undefined) {
+    if (capabilityModelFileName === undefined) {
       return false;
     } else {
-      templateFileName = templateFileName.trim();
-      if (!/\.template\.json$/i.test(templateFileName)) {
-        templateFileName += '.template.json';
+      capabilityModelFileName = capabilityModelFileName.trim();
+      if (!/\.capabilitymodel\.json$/i.test(capabilityModelFileName)) {
+        capabilityModelFileName += '.capabilitymodel.json';
       }
     }
 
-    const targetTemplate = path.join(rootPath, templateFileName);
+    const targetCapabilityModel = path.join(rootPath, capabilityModelFileName);
 
-    const template = context.asAbsolutePath(path.join(
+    const capabilityModel = context.asAbsolutePath(path.join(
         PnPFileNames.resourcesFolderName, PnPFileNames.deviceModelFolderName,
-        PnPFileNames.sampleTemplateName));
+        PnPFileNames.sampleCapabilityModelName));
 
     try {
-      const content = fs.readFileSync(template, 'utf8');
-      const templateNamePattern = /{TEMPLATENAME}/g;
-      const matchItems = templateFileName.match(/^(.*?)\.(template)\.json$/);
+      const content = fs.readFileSync(capabilityModel, 'utf8');
+      const capabilityModelNamePattern = /{CAPABILITYMODELNAME}/g;
+      const matchItems =
+          capabilityModelFileName.match(/^(.*?)\.(capabilitymodel)\.json$/);
       if (!matchItems || !matchItems[1]) {
         return false;
       }
-      const replaceStr = content.replace(templateNamePattern, matchItems[1]);
-      fs.writeFileSync(targetTemplate, replaceStr);
+      const replaceStr =
+          content.replace(capabilityModelNamePattern, matchItems[1]);
+      fs.writeFileSync(targetCapabilityModel, replaceStr);
     } catch (error) {
-      throw new Error(`Create sample template file failed: ${error.message}`);
+      throw new Error(
+          `Create sample capability model file failed: ${error.message}`);
     }
 
     await vscode.commands.executeCommand(
         'vscode.openFolder', vscode.Uri.file(rootPath), false);
 
-    vscode.window.showInformationMessage('Template created successfully');
+    vscode.window.showInformationMessage(
+        'capability model created successfully');
     return;
   }
 
@@ -248,8 +253,8 @@ export class DeviceModelOperator {
     const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
 
     // Get the file to submit:
-    const templateFiles = fs.listSync(rootPath);
-    if (!templateFiles || templateFiles.length === 0) {
+    const pnpFiles = fs.listSync(rootPath);
+    if (!pnpFiles || pnpFiles.length === 0) {
       const message = 'Unable to find meta model files in the folder.';
       vscode.window.showWarningMessage(message);
       return false;
@@ -257,23 +262,23 @@ export class DeviceModelOperator {
 
     const suffix = metaModelType === MetaModelType.Interface ?
         '.interface.json' :
-        '.template.json';
+        '.capabilitymodel.json';
 
-    const templateItems: vscode.QuickPickItem[] = [];
-    templateFiles.forEach((filePath: string) => {
+    const fileItems: vscode.QuickPickItem[] = [];
+    pnpFiles.forEach((filePath: string) => {
       const fileName = path.basename(filePath);
       if (fileName.endsWith(suffix)) {
-        templateItems.push({label: fileName, description: ''});
+        fileItems.push({label: fileName, description: ''});
       }
     });
 
-    if (templateItems.length === 0) {
+    if (fileItems.length === 0) {
       vscode.window.showWarningMessage(
           'Unable to find the target metamodel files. Please make sure meta model files exists in the target folder.');
       return false;
     }
 
-    const fileSelection = await vscode.window.showQuickPick(templateItems, {
+    const fileSelection = await vscode.window.showQuickPick(fileItems, {
       ignoreFocusOut: true,
       matchOnDescription: true,
       matchOnDetail: true,
@@ -317,7 +322,7 @@ export class DeviceModelOperator {
           pnpMetamodelRepositoryClient, filePath, fileSelection.label, channel);
       return result;
     } else {
-      const result = await this.SubmitTemplate(
+      const result = await this.SubmitCapabilityModel(
           pnpMetamodelRepositoryClient, filePath, fileSelection.label, channel);
       return result;
     }
@@ -405,7 +410,7 @@ export class DeviceModelOperator {
     return true;
   }
 
-  private async SubmitTemplate(
+  private async SubmitCapabilityModel(
       pnpMetamodelRepositoryClient: PnPMetamodelRepositoryClient,
       filePath: string, fileName: string,
       channel: vscode.OutputChannel): Promise<boolean> {
@@ -415,7 +420,7 @@ export class DeviceModelOperator {
       const fileId = fileJson[constants.idName];
       if (!fileId) {
         vscode.window.showWarningMessage(
-            'Unable to find template id from the template file.');
+            'Unable to find id from the capability model file.');
         return false;
       }
       channel.appendLine(`Load and parse file: ${fileName} successfully.`);
@@ -424,61 +429,64 @@ export class DeviceModelOperator {
         // First, get the file to retrieve the latest etag.
         channel.appendLine(
             `Connect to repository to check ${fileId} exists...`);
-        const templateContext =
-            await pnpMetamodelRepositoryClient.GetTemplateByTemplateIdAsync(
-                PnPUri.Parse(fileId));
+        const capabilityModelContext =
+            await pnpMetamodelRepositoryClient
+                .GetCapabilityModelByCapabilityModelIdAsync(
+                    PnPUri.Parse(fileId));
 
-        if (templateContext.published) {
+        if (capabilityModelContext.published) {
           // already published, we should not update it.
-          vscode.window.showWarningMessage(`Template with template id: ${
+          vscode.window.showWarningMessage(`Capability model file with id: ${
               fileId} is already published. You could not updated it.`);
           return false;
         }
 
-        channel.appendLine(`Template file exists, updating ${fileId}... `);
+        channel.appendLine(
+            `Capability model file exists, updating ${fileId}... `);
 
-        const templateTags =
-            await this.GetTagsforDocuments(fileName, templateContext.tags);
+        const capabilityModelTags = await this.GetTagsforDocuments(
+            fileName, capabilityModelContext.tags);
 
         // Update the interface
         const pnpContext: PnPContext = {
-          resourceId: templateContext.resourceId,
+          resourceId: capabilityModelContext.resourceId,
           content: fileContent,
-          etag: templateContext.etag,
-          tags: templateTags
+          etag: capabilityModelContext.etag,
+          tags: capabilityModelTags
         };
         const updatedContext =
-            await pnpMetamodelRepositoryClient.UpdateTemplate(pnpContext);
-        channel.appendLine(`Submitting template file: fileName: ${
-            fileName} successfully, template id: ${fileId}. `);
+            await pnpMetamodelRepositoryClient.UpdateCapabilityModelAsync(
+                pnpContext);
+        channel.appendLine(`Submitting capability model file: fileName: ${
+            fileName} successfully, capability model id: ${fileId}. `);
         vscode.window.showInformationMessage(
-            `Template with template id: ${fileId} updated successfully`);
+            `Capability model with id: ${fileId} updated successfully`);
       } catch (error) {
         if (error.statusCode === 404)  // Not found
         {
           channel.appendLine(
-              `Template file does not exist, creating ${fileId}... `);
+              `Capability model file does not exist, creating ${fileId}... `);
           // Create the interface.
-          const templateTags = await this.GetTagsforDocuments(fileName);
+          const capabilityModelTags = await this.GetTagsforDocuments(fileName);
           const pnpContext: PnPContext = {
             resourceId: '',
             content: fileContent,
             etag: '',
-            tags: templateTags
+            tags: capabilityModelTags
           };
           const result: PnPContext =
-              await pnpMetamodelRepositoryClient.CreateTemplateAsync(
+              await pnpMetamodelRepositoryClient.CreateCapabilityModelAsync(
                   pnpContext);
-          channel.appendLine(`Submitting template: fileName: ${
-              fileName} successfully, template id: ${fileId}. `);
+          channel.appendLine(`Submitting capability model: fileName: ${
+              fileName} successfully, capability model id: ${fileId}. `);
           vscode.window.showInformationMessage(
-              `Template with template id: ${fileId} created successfully`);
+              `Capability model with id: ${fileId} created successfully`);
         } else {
           throw error;
         }
       }
     } catch (error) {
-      channel.appendLine(`Submitting template: fileName: ${
+      channel.appendLine(`Submitting capability model: fileName: ${
           fileName} failed, error: ${error}.`);
       vscode.window.showWarningMessage(
           `Unable to submit the file, error: ${error}`);

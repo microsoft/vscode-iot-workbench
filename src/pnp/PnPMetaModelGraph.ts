@@ -32,7 +32,7 @@ export class PnPMetaModelParser {
   constructor(
       private graph: PnPMetaModelGraph,
       private pnpInterface: PnPMetaModelContext,
-      private pnpTemplate: PnPMetaModelContext) {}
+      private pnpCapabilityModel: PnPMetaModelContext) {}
 
   cache = {
     IdFromLabel: {} as Map<string>,
@@ -144,8 +144,8 @@ export class PnPMetaModelParser {
     if (type === 'Interface') {
       pnpContext = this.pnpInterface;
     }
-    if (type === 'Template') {
-      pnpContext = this.pnpTemplate;
+    if (type === 'CapabilityModel') {
+      pnpContext = this.pnpCapabilityModel;
     }
     const id = this.getIdFromType(pnpContext, type);
     if (!id) {
@@ -426,7 +426,7 @@ export class PnPMetaModelParser {
       case 'String':
       case 'Time':
         return ['@type'];
-      case 'Template':
+      case 'CapabilityModel':
         return ['@id', '@type', '@context', 'implements'];
       default:
         return [];

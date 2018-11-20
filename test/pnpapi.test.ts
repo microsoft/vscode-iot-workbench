@@ -6,8 +6,6 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {SearchResults} from '../src/pnp/pnp-api/DataContracts/SearchResults';
-import {PnPConnectionString} from '../src/pnp/pnp-api/PnPConnectionString';
-import {PnPConnectionStringBuilder} from '../src/pnp/pnp-api/PnPConnectionStringBuilder';
 import {PnPMetamodelRepositoryClient} from '../src/pnp/pnp-api/PnPMetamodelRepositoryClient';
 import {PnPUri} from '../src/pnp/pnp-api/Validator/PnPUri';
 
@@ -16,11 +14,11 @@ import {PnPContext} from '../src/pnp/pnp-api/DataContracts/PnPContext';
 
 const constants = {
   connectionString:
-      'HostName=iotpnptest.azurewebsites.net;SharedAccessKeyName=pnptest;SharedAccessKey={access key}}',
+      'HostName=vscpnptest.azurewebsites.net;SharedAccessKeyName=vsc;SharedAccessKey={}',
   sampleFolderPath:
       path.join(__dirname, '../../test/resources/PnPTestInputFiles'),
   sampleIntefaceName: 'MxChipInterface.json',
-  sampleTemplateName: 'MxChipTemplate.json'
+  sampleCapabilityModelName: 'MxChipCapabilityModel.json'
 };
 
 
@@ -84,19 +82,20 @@ suite('IoT Workbench: PnPAPI', () => {
     }
   });
 
-  test('should be able to get the template content', async function() {
+  test('should be able to get the capability model content', async function() {
     this.timeout(10 * 60 * 1000);
     const pnpMetamodelRepositoryClient =
         new PnPMetamodelRepositoryClient(constants.connectionString);
     const searchResults: SearchResults =
-        await pnpMetamodelRepositoryClient.GetAllTemplatesAsync(null, 50);
+        await pnpMetamodelRepositoryClient.GetAllCapabilityModelsAsync(
+            null, 50);
 
     if (searchResults.results.length > 0) {
       const sampleUri = searchResults.results[0].id;
       // get the interface.
-      const templateContext =
-          await pnpMetamodelRepositoryClient.GetTemplateByTemplateIdAsync(
-              PnPUri.Parse(sampleUri));
+      const templateContext = await pnpMetamodelRepositoryClient
+                                  .GetCapabilityModelByCapabilityModelIdAsync(
+                                      PnPUri.Parse(sampleUri));
       assert.equal(templateContext.content.length > 0, true);
     }
   });
@@ -145,15 +144,16 @@ suite('IoT Workbench: PnPAPI', () => {
       assert.equal(updatedContext.etag !== newContext.etag, true);
       assert.equal(updatedContext.resourceId, newContext.resourceId);
 
-      /*await
-      pnpMetamodelRepositoryClient.DeleteInterfaceByResourceIdAsync(result.resourceId);
-
-      assert.throws(async ()=>{
-        if(result.resourceId){
-          await
-      pnpMetamodelRepositoryClient.GetInterfaceByResourceIdAsync(result.resourceId);
+      await pnpMetamodelRepositoryClient.DeleteInterfaceByResourceIdAsync(
+          result.resourceId);
+      if (result.resourceId) {
+        try {
+          await pnpMetamodelRepositoryClient.GetInterfaceByResourceIdAsync(
+              result.resourceId);
+        } catch (error) {
+          assert.equal(error.statusCode, 404);
         }
-      });*/
+      }
     }
   });
 });

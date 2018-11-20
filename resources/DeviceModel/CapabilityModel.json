@@ -12,7 +12,7 @@
             "@container": "@language"
         },
         "implements": {
-            "@id": "Template/implements",
+            "@id": "CapabilityModel/implements",
             "@type": "@id"
         }
     }

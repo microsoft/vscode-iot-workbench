@@ -1,9 +1,0 @@
-{
-  "@id": "http://example.com/MXChip/2.0.0",
-  "@type": "Template",
-  "displayName": "MX Chip Template",
-  "implements": [
-      "http://example.com/MXChip/1.0.0"
-   ],
-  "@context": "http://azureiot.com/v0/contexts/template.json"
-}

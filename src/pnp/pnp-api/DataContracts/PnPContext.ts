@@ -3,7 +3,7 @@
 
 export enum MetaModelType {
   Interface,
-  Template
+  CapabilityModel
 }
 
 export interface PnPContext {

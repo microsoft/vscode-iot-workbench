@@ -14,7 +14,7 @@ import {PnPConnectionString} from './PnPConnectionString';
 
 const constants = {
   interfaceRoute: '/api/interfaces',
-  templateRoute: '/api/templates',
+  capabilityModelRoute: '/api/capabilitymodels',
   mediaType: 'application/json'
 };
 
@@ -41,13 +41,14 @@ export class PnPMetamodelRepositoryClient {
         pnpUri.Id, MetaModelType.Interface, false);
   }
 
-  async GetTemplateByTemplateIdAsync(pnpUri: PnPUri): Promise<PnPContext> {
+  async GetCapabilityModelByCapabilityModelIdAsync(pnpUri: PnPUri):
+      Promise<PnPContext> {
     if (!pnpUri) {
-      throw new Error('pnpUri is required to get the template.');
+      throw new Error('pnpUri is required to get the capability model.');
     }
 
     return await this.MakeGetRequestAsync(
-        pnpUri.Id, MetaModelType.Template, false);
+        pnpUri.Id, MetaModelType.CapabilityModel, false);
   }
 
   async GetInterfaceByResourceIdAsync(interfaceResourceId: string):
@@ -61,14 +62,15 @@ export class PnPMetamodelRepositoryClient {
         interfaceResourceId, MetaModelType.Interface, true);
   }
 
-  async GetTemplateByResourceIdAsync(templateResourceId: string):
+  async GetCapabilityModelByResourceIdAsync(capabilityModelResourceId: string):
       Promise<PnPContext> {
-    if (!templateResourceId) {
-      throw new Error('The name of the template ResourceId should not be null');
+    if (!capabilityModelResourceId) {
+      throw new Error(
+          'The name of the capability model ResourceId should not be null');
     }
 
     return await this.MakeGetRequestAsync(
-        templateResourceId, MetaModelType.Template, true);
+        capabilityModelResourceId, MetaModelType.CapabilityModel, true);
   }
 
 
@@ -83,14 +85,14 @@ export class PnPMetamodelRepositoryClient {
   }
 
 
-  async GetAllTemplatesAsync(continuationToken: string|null, pageSize = 20):
-      Promise<SearchResults> {
+  async GetAllCapabilityModelsAsync(
+      continuationToken: string|null, pageSize = 20): Promise<SearchResults> {
     if (pageSize <= 0) {
       throw new Error('pageSize should be greater than 0');
     }
 
     return await this.MakeGetAllRequestAsync(
-        MetaModelType.Template, continuationToken, pageSize);
+        MetaModelType.CapabilityModel, continuationToken, pageSize);
   }
 
 
@@ -106,11 +108,12 @@ export class PnPMetamodelRepositoryClient {
   }
 
   /// <summary>
-  /// Updates the interface with the new context content.
+  /// Updates the capability model with the new context content.
   /// </summary>
   /// <param name="pnpContext"><see cref="PnPContext"/> object.</param>
   /// <returns><see cref="PnPContext"/> object.</returns>
-  async UpdateTemplate(pnpContext: PnPContext): Promise<PnPContext> {
+  async UpdateCapabilityModelAsync(pnpContext: PnPContext):
+      Promise<PnPContext> {
     if (!pnpContext.resourceId) {
       throw new Error('pnpContext does not contain the resource id to update.');
     }
@@ -119,7 +122,7 @@ export class PnPMetamodelRepositoryClient {
     // ParseTemplateResult parsedResult =
     // PnPParser.ParsePnpTemplate(pnpContext.Content);
     return await this.MakeCreateOrUpdateRequestAsync(
-        pnpContext, 'PUT', MetaModelType.Template);
+        pnpContext, 'PUT', MetaModelType.CapabilityModel);
   }
 
   /// <summary>
@@ -144,16 +147,18 @@ export class PnPMetamodelRepositoryClient {
   /// </summary>
   /// <param name="pnpContext"><see cref="PnPContext"/> object.</param>
   /// <returns>Created <see cref="PnPContext"/> object.</returns>
-  async CreateTemplateAsync(pnpContext: PnPContext): Promise<PnPContext> {
+  async CreateCapabilityModelAsync(pnpContext: PnPContext):
+      Promise<PnPContext> {
     if (!pnpContext.content) {
-      throw new Error('pnpContext content is required to create template.');
+      throw new Error(
+          'pnpContext content is required to create capability model.');
     }
 
     // TODO:
     // ParseTemplateResult parsedResult =
     // PnPParser.ParsePnpTemplate(pnpContext.Content)
     return await this.MakeCreateOrUpdateRequestAsync(
-        pnpContext, 'POST', MetaModelType.Template);
+        pnpContext, 'POST', MetaModelType.CapabilityModel);
   }
 
 
@@ -184,30 +189,31 @@ export class PnPMetamodelRepositoryClient {
   }
 
   /// <summary>
-  /// Deletes a template for given resource id.
+  /// Deletes a capability model for given resource id.
   /// </summary>
   /// <param name="resourceId"><see cref="resourceId"/> object.</param>
-  async DeleteTemplateByResourceIdAsync(resourceId: string) {
+  async DeleteCapabilityModelByResourceIdAsync(resourceId: string) {
     if (!resourceId) {
-      throw new Error('resourceId is required to delete the interface.');
+      throw new Error('resourceId is required to delete the capability model.');
     }
 
-    await this.MakeDeleteRequestAsync(resourceId, MetaModelType.Template, true);
+    await this.MakeDeleteRequestAsync(
+        resourceId, MetaModelType.CapabilityModel, true);
   }
 
   /// <summary>
-  /// Deletes a template for given PnPUri.
+  /// Deletes a capability model for given PnPUri.
   /// </summary>
-  /// <param name="pnpTemplateUri"><see cref="PnPUri"/> object.</param>
-  async DeleteTemplateByTemplateIdAsync(pnpTemplateUri: PnPUri) {
-    if (!pnpTemplateUri) {
-      throw new Error('pnpTemplateUri is required to delete the template.');
+  /// <param name="pnpCapabilityModelUri"><see cref="PnPUri"/> object.</param>
+  async DeleteCapabilityModelByCapabilityModelIdAsync(pnpCapabilityModelUri:
+                                                          PnPUri) {
+    if (!pnpCapabilityModelUri) {
+      throw new Error(
+          'pnpCapabilityModelUri is required to delete the capability model.');
     }
 
     await this.MakeDeleteRequestAsync(
-        pnpTemplateUri.toString(), MetaModelType.Template);
-    await this.MakeDeleteRequestAsync(
-        pnpTemplateUri.toString(), MetaModelType.Interface);
+        pnpCapabilityModelUri.toString(), MetaModelType.CapabilityModel);
   }
 
 
@@ -224,15 +230,15 @@ export class PnPMetamodelRepositoryClient {
   }
 
   /// <summary>
-  /// Publishes template.
+  /// Publishes capability model.
   /// </summary>
-  /// <param name="pnpUri">PnPUri of template.</param>
-  async PublishTemplateAsync(pnpUri: PnPUri) {
+  /// <param name="pnpUri">PnPUri of capability model.</param>
+  async PublishCapabilityModelAsync(pnpUri: PnPUri) {
     if (!pnpUri) {
-      throw new Error('PnPUri is required to publish the template.');
+      throw new Error('PnPUri is required to publish the capability model.');
     }
 
-    await this.MakePatchRequestAsync(pnpUri, MetaModelType.Template);
+    await this.MakePatchRequestAsync(pnpUri, MetaModelType.CapabilityModel);
   }
 
 
@@ -309,7 +315,7 @@ export class PnPMetamodelRepositoryClient {
       pageSize: number): Promise<SearchResults> {
     const relativeUri = metaModelType === MetaModelType.Interface ?
         constants.interfaceRoute :
-        constants.templateRoute;
+        constants.capabilityModelRoute;
     let uriString = `${relativeUri}?pageSize=${pageSize}`;
     if (continuationToken) {
       uriString +=
@@ -361,7 +367,7 @@ export class PnPMetamodelRepositoryClient {
   /// service.
   /// </summary>
   /// <param name="metaModelId">Metamodel id.</param>
-  /// <param name="metaModelType"><see cref="MetaModelType"/> Interface or Template.</param>
+  /// <param name="metaModelType"><see cref="MetaModelType"/> Interface or capability model.</param>
   private async MakeDeleteRequestAsync(
       metaModelId: string, metaModelType: MetaModelType, isResourceId = false) {
     const targetUri = this.GetRepositoryEndPoint(
@@ -403,12 +409,12 @@ export class PnPMetamodelRepositoryClient {
       }
     } else {
       relativeRoute = relativeRoute === null ?
-          constants.templateRoute :
-          constants.templateRoute + `/${relativeRoute}`;
+          constants.capabilityModelRoute :
+          constants.capabilityModelRoute + `/${relativeRoute}`;
       if (isResourceId) {
         relativeRoute += `/${metaModelId}`;
       } else {
-        relativeRoute += `?templateId=${metaModelId}`;
+        relativeRoute += `?capabilityModelId=${metaModelId}`;
       }
     }
     return url.resolve(

@@ -7,4 +7,7 @@ export interface MetaModelMetaData {
   version: string;
   descritption: string;
   comments: string;
+  eTag: string;
+  resourceId: string;
+  published: boolean;
 }

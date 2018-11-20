@@ -61,26 +61,24 @@ export class CodeGenerator {
           'Unable to upgrade the Code Generator to the latest version.\r\n Trying to use the existing version.');
     }
 
-    // Step 1: list all template from device model folder for selection.
-    const templateFiles = fs.listSync(rootPath);
-    if (!templateFiles || templateFiles.length === 0) {
+    // Step 1: list all files from device model folder for selection.
+    const pnpFiles = fs.listSync(rootPath);
+    if (!pnpFiles || pnpFiles.length === 0) {
       const message = 'Unable to find device model files in the folder.';
       vscode.window.showWarningMessage(message);
       return false;
     }
 
-    const templateItems: vscode.QuickPickItem[] = [];
-    templateFiles.forEach((filePath: string) => {
+    const pnpItems: vscode.QuickPickItem[] = [];
+    pnpFiles.forEach((filePath: string) => {
       const fileName = path.basename(filePath);
-      // Currently, PnP CLI only supports generating code for interface.json
-      // TODO: Update this part when Pnp CLI supports template.json
-      if (fileName.endsWith('.template.json') ||
+      if (fileName.endsWith('.capabilitymodel.json') ||
           fileName.endsWith('.interface.json')) {
-        templateItems.push({label: fileName, description: ''});
+        pnpItems.push({label: fileName, description: ''});
       }
     });
 
-    const fileSelection = await vscode.window.showQuickPick(templateItems, {
+    const fileSelection = await vscode.window.showQuickPick(pnpItems, {
       ignoreFocusOut: true,
       matchOnDescription: true,
       matchOnDetail: true,
@@ -91,11 +89,11 @@ export class CodeGenerator {
       return;
     }
 
-    const templatePath = path.join(rootPath, fileSelection.label);
+    const selectedFilePath = path.join(rootPath, fileSelection.label);
     let metaModelType: MetaModelType = MetaModelType.Interface;
 
-    if (fileSelection.label.endsWith('.template.json')) {
-      metaModelType = MetaModelType.Template;
+    if (fileSelection.label.endsWith('.capabilitymodel.json')) {
+      metaModelType = MetaModelType.CapabilityModel;
     }
 
     // Get the connection string of the pnp repo
@@ -154,7 +152,7 @@ export class CodeGenerator {
 
       if (targetSelection.label === 'MXChip IoT DevKit') {
         const result = await this.GenerateCppCodeForDevKit(
-            context, path, templatePath, channel, telemetryContext,
+            context, path, selectedFilePath, channel, telemetryContext,
             connectionString, metaModelType);
         if (result) {
           vscode.window.showInformationMessage(
@@ -163,7 +161,7 @@ export class CodeGenerator {
         }
       } else if (targetSelection.label === 'General') {
         const result = await this.GenerateCppCode(
-            path, templatePath, channel, connectionString, metaModelType);
+            path, selectedFilePath, channel, connectionString, metaModelType);
         if (result) {
           vscode.window.showInformationMessage(
               'Scaffold general device code completed');
@@ -175,9 +173,9 @@ export class CodeGenerator {
   }
 
   async GenerateCppCodeForDevKit(
-      context: vscode.ExtensionContext, rootPath: string,
-      templateFilePath: string, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext, connectionString: string,
+      context: vscode.ExtensionContext, rootPath: string, filePath: string,
+      channel: vscode.OutputChannel, telemetryContext: TelemetryContext,
+      connectionString: string,
       metaModelType: MetaModelType): Promise<boolean> {
     const needReload = false;
 
@@ -196,22 +194,23 @@ export class CodeGenerator {
     }
 
     // Generate the folder for the code stub
-    const fileName = path.basename(templateFilePath);
-    // myinterface.template.json => myinterface
+    const fileName = path.basename(filePath);
+    // myinterface.interface.json => myinterface
 
-    const matchItems = fileName.match(/^(.*?)\.(interface|template)\.json$/);
+    const matchItems =
+        fileName.match(/^(.*?)\.(interface|capabilitymodel)\.json$/);
     if (!matchItems || !matchItems[1]) {
       return false;
     }
-    const libPath =
-        path.join(sourcePath, matchItems[1]);  // Template or interface name
+    const libPath = path.join(
+        sourcePath, matchItems[1]);  // Capability model or interface name
     if (!fs.existsSync(libPath)) {
       fs.mkdirSync(libPath);
     }
 
     // Invoke PnP toolset to generate the code
     const codeGenerateResult = await this.GenerateCppCode(
-        libPath, templateFilePath, channel, connectionString, metaModelType);
+        libPath, filePath, channel, connectionString, metaModelType);
     if (!codeGenerateResult) {
       vscode.window.showErrorMessage(
           'Unable to generate code, please check output window for detail.');
@@ -266,8 +265,8 @@ export class CodeGenerator {
   }
 
   async GenerateCppCode(
-      targetPath: string, templateFilePath: string,
-      channel: vscode.OutputChannel, connectionString: string,
+      targetPath: string, filePath: string, channel: vscode.OutputChannel,
+      connectionString: string,
       metaModelType: MetaModelType): Promise<boolean> {
     // Invoke PnP toolset to generate the code
     const platform = os.platform();
@@ -280,7 +279,7 @@ export class CodeGenerator {
     }
 
     const command = `PnPCodeGen.exe scaffold  --jsonldUri "${
-        templateFilePath}" --language cpp --modelType "${
+        filePath}" --language cpp --modelType "${
         MetaModelType[metaModelType]}" --output "${
         targetPath}" --connectionString "${connectionString}"`;
 

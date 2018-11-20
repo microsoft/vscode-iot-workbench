@@ -20,7 +20,7 @@ export class PnPDiagnostic {
   constructor(
       private _pnpParser: PnPMetaModelParser,
       private pnpInterface: PnPMetaModelContext,
-      private pnpTemplate: PnPMetaModelContext) {}
+      private pnpCapabilityModel: PnPMetaModelContext) {}
 
   getIssues(pnpContext: PnPMetaModelContext, document: vscode.TextDocument):
       Issue[] {
@@ -73,7 +73,7 @@ export class PnPDiagnostic {
     } else {
       const documentType = /\.interface\.json$/.test(document.uri.fsPath) ?
           'Interface' :
-          'Template';
+          'CapabilityModel';
       types = [documentType];
     }
 
@@ -94,7 +94,7 @@ export class PnPDiagnostic {
     if (jsonKey === '@context') {
       const contextUri = this.pnpInterface === pnpContext ?
           'http://azureiot.com/v0/contexts/Interface.json' :
-          'http://azureiot.com/v0/contexts/Template.json';
+          'http://azureiot.com/v0/contexts/capabilitymodel.json';
       values = [contextUri];
     } else {
       values =
@@ -200,8 +200,8 @@ export class PnPDiagnostic {
     if (type === 'Interface') {
       pnpContext = this.pnpInterface;
     }
-    if (type === 'Template') {
-      pnpContext = this.pnpTemplate;
+    if (type === 'CapabilityModel') {
+      pnpContext = this.pnpCapabilityModel;
     }
 
     const missingRequiredPropertiesIssues =
@@ -331,7 +331,7 @@ export class PnPDiagnostic {
     } else {
       const documentType = /\.interface\.json$/.test(document.uri.fsPath) ?
           'Interface' :
-          'Template';
+          'CapabilityModel';
       types = [documentType];
     }
 

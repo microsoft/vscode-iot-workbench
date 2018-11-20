@@ -6,17 +6,16 @@ export class PnPFileNames {
   static readonly deviceModelFolderName = 'DeviceModel';
   static readonly graphFileName = 'graph.json';
   static readonly interfaceFileName = 'Interface.json';
-  static readonly templateFileName = 'Template.json';
+  static readonly capabilityModelFileName = 'CapabilityModel.json';
   static readonly iotworkbenchprojectFileName = '.vscode-pnp';
   static readonly settingsJsonFileName = 'settings.json';
   static readonly vscodeSettingsFolderName = '.vscode';
   static readonly sampleInterfaceName = 'sample.interface.json';
-  static readonly sampleTemplateName = 'sample.template.json';
+  static readonly sampleCapabilityModelName = 'sample.capabilitymodel.json';
   static readonly schemaFolderName = 'schemas';
-  static readonly interfaceSchemaFileName = 'interface.schema.json';
-  static readonly templateSchemaFileName = 'template.schema.json';
   static readonly defaultInterfaceName = 'myInterface.interface.json';
-  static readonly defaultTemplateName = 'myTemplate.template.json';
+  static readonly defaultCapabilityModelName =
+      'myCapabilityModel.capabilitymodel.json';
 }
 
 export class PnPConstants {

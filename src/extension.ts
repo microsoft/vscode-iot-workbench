@@ -118,7 +118,7 @@ function getDocumentType(document: vscode.TextDocument) {
     return 'Interface';
   }
 
-  return 'Template';
+  return 'CapabilityModel';
 }
 
 // this method is called when your extension is activated
@@ -141,27 +141,30 @@ export async function activate(context: vscode.ExtensionContext) {
   // PnP Language Server
   const pnpContext = new PnPMetaModelUtility(context);
   const pnpInterface: PnPMetaModelContext = pnpContext.getInterface();
-  const pnpTemplate: PnPMetaModelContext = pnpContext.getTemplate();
+  const pnpCapabilityModel: PnPMetaModelContext =
+      pnpContext.getCapabilityModel();
   const pnpGraph: PnPMetaModelGraph = pnpContext.getGraph();
-  const pnpParser = new PnPMetaModelParser(pnpGraph, pnpInterface, pnpTemplate);
-  const pnpDiagnostic = new PnPDiagnostic(pnpParser, pnpInterface, pnpTemplate);
+  const pnpParser =
+      new PnPMetaModelParser(pnpGraph, pnpInterface, pnpCapabilityModel);
+  const pnpDiagnostic =
+      new PnPDiagnostic(pnpParser, pnpInterface, pnpCapabilityModel);
 
   const activeEditor = vscode.window.activeTextEditor;
 
   if (activeEditor) {
     const document = activeEditor.document;
-    if (/\.(interface|template)\.json$/.test(document.uri.fsPath)) {
+    if (/\.(interface|capabilitymodel)\.json$/.test(document.uri.fsPath)) {
       const documentType = getDocumentType(document);
       if (documentType === 'Interface') {
         pnpDiagnostic.update(pnpInterface, document);
       } else {
-        pnpDiagnostic.update(pnpTemplate, document);
+        pnpDiagnostic.update(pnpCapabilityModel, document);
       }
     }
   }
 
   vscode.workspace.onDidOpenTextDocument((document) => {
-    if (!/\.(interface|template)\.json$/.test(document.uri.fsPath)) {
+    if (!/\.(interface|capabilitymodel)\.json$/.test(document.uri.fsPath)) {
       return;
     }
 
@@ -169,13 +172,13 @@ export async function activate(context: vscode.ExtensionContext) {
     if (documentType === 'Interface') {
       pnpDiagnostic.update(pnpInterface, document);
     } else {
-      pnpDiagnostic.update(pnpTemplate, document);
+      pnpDiagnostic.update(pnpCapabilityModel, document);
     }
   });
 
   vscode.workspace.onDidChangeTextDocument((event) => {
     const document = event.document;
-    if (!/\.(interface|template)\.json$/.test(document.uri.fsPath)) {
+    if (!/\.(interface|capabilitymodel)\.json$/.test(document.uri.fsPath)) {
       return;
     }
 
@@ -183,7 +186,7 @@ export async function activate(context: vscode.ExtensionContext) {
     if (documentType === 'Interface') {
       pnpDiagnostic.update(pnpInterface, document);
     } else {
-      pnpDiagnostic.update(pnpTemplate, document);
+      pnpDiagnostic.update(pnpCapabilityModel, document);
     }
   });
 
@@ -193,7 +196,7 @@ export async function activate(context: vscode.ExtensionContext) {
     }
 
     const document = editor.document;
-    if (!/\.(interface|template)\.json$/.test(document.uri.fsPath)) {
+    if (!/\.(interface|capabilitymodel)\.json$/.test(document.uri.fsPath)) {
       return;
     }
 
@@ -201,12 +204,12 @@ export async function activate(context: vscode.ExtensionContext) {
     if (documentType === 'Interface') {
       pnpDiagnostic.update(pnpInterface, document);
     } else {
-      pnpDiagnostic.update(pnpTemplate, document);
+      pnpDiagnostic.update(pnpCapabilityModel, document);
     }
   });
 
   vscode.workspace.onDidCloseTextDocument((document) => {
-    if (!/\.(interface|template)\.json$/.test(document.uri.fsPath)) {
+    if (!/\.(interface|capabilitymodel)\.json$/.test(document.uri.fsPath)) {
       return;
     }
 
@@ -222,34 +225,35 @@ export async function activate(context: vscode.ExtensionContext) {
       {
         language: 'json',
         scheme: 'file',
-        pattern: '**/*.{interface,template}.json'
+        pattern: '**/*.{interface,capabilitymodel}.json'
       },
       {
-        async provideHover(document, position, token):
-            Promise<vscode.Hover|null> {
-              const id = PnPMetaModelJsonParser.getIdAtPosition(
-                  document, position, pnpInterface);
-              let hoverText: string|undefined = undefined;
-              if (id) {
-                if (id === '@id') {
-                  hoverText = 'An identifier for PnP template or interface.';
-                } else if (id === '@type') {
-                  hoverText = 'The type of PnP meta model object.';
-                } else if (id === '@context') {
-                  hoverText = 'The context for PnP template or interface.';
-                } else {
-                  hoverText = pnpParser.getCommentFromId(id);
-                }
-              }
-              return hoverText ? new vscode.Hover(hoverText) : null;
+        async provideHover(
+            document, position, token): Promise<vscode.Hover|null> {
+          const id = PnPMetaModelJsonParser.getIdAtPosition(
+              document, position, pnpInterface);
+          let hoverText: string|undefined = undefined;
+          if (id) {
+            if (id === '@id') {
+              hoverText =
+                  'An identifier for PnP capability model or interface.';
+            } else if (id === '@type') {
+              hoverText = 'The type of PnP meta model object.';
+            } else if (id === '@context') {
+              hoverText = 'The context for PnP capability model or interface.';
+            } else {
+              hoverText = pnpParser.getCommentFromId(id);
             }
+          }
+          return hoverText ? new vscode.Hover(hoverText) : null;
+        }
       });
 
   vscode.languages.registerCompletionItemProvider(
       {
         language: 'json',
         scheme: 'file',
-        pattern: '**/*.{interface,template}.json'
+        pattern: '**/*.{interface,capabilitymodel}.json'
       },
       {
         provideCompletionItems(document, position): vscode.CompletionList |
@@ -266,7 +270,7 @@ export async function activate(context: vscode.ExtensionContext) {
           if (contextType === 'Interface') {
             pnpContext = pnpInterface;
           } else {
-            pnpContext = pnpTemplate;
+            pnpContext = pnpCapabilityModel;
           }
 
           if (!jsonInfo) {
@@ -277,7 +281,7 @@ export async function activate(context: vscode.ExtensionContext) {
             if (jsonInfo.key === '@context') {
               const contextUri = contextType === 'Interface' ?
                   'http://azureiot.com/v0/contexts/Interface.json' :
-                  'http://azureiot.com/v0/contexts/Template.json';
+                  'http://azureiot.com/v0/contexts/capabilitymodel.json';
               values = [contextUri];
             } else if (jsonInfo.key === '@type') {
               if (jsonInfo.lastKey) {
@@ -315,7 +319,7 @@ export async function activate(context: vscode.ExtensionContext) {
               if (id) {
                 const values = pnpParser.getTypesFromId(pnpContext, id);
                 if (values.length === 1 && values[0] !== 'Interface' &&
-                    values[0] !== 'Template') {
+                    values[0] !== 'CapabilityModel') {
                   jsonInfo.type = values[0];
                 }
               }
@@ -323,7 +327,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
             if (jsonInfo.type) {
               if ((jsonInfo.type === 'Interface' ||
-                   jsonInfo.type === 'Template') &&
+                   jsonInfo.type === 'CapabilityModel') &&
                   jsonInfo.properties.indexOf('@context') === -1) {
                 completionKeyList.push({label: '@context', required: true});
               }
@@ -340,7 +344,7 @@ export async function activate(context: vscode.ExtensionContext) {
             }
 
             if ((jsonInfo.type === 'Interface' ||
-                 jsonInfo.type === 'Template') &&
+                 jsonInfo.type === 'CapabilityModel') &&
                 jsonInfo.properties.indexOf('@id') === -1) {
               completionKeyList.push(
                   {label: '@id', required: true, type: 'string'});
@@ -471,8 +475,8 @@ export async function activate(context: vscode.ExtensionContext) {
     deviceModelOperator.CreateInterface(context, outputChannel);
   };
 
-  const deviceModelCreateTemplateProvider = async () => {
-    deviceModelOperator.CreateTemplate(context, outputChannel);
+  const deviceModelCreateCapabilityModelProvider = async () => {
+    deviceModelOperator.CreateCapabilityModel(context, outputChannel);
   };
 
   const deviceModelConnectProvider = async () => {
@@ -484,9 +488,9 @@ export async function activate(context: vscode.ExtensionContext) {
         context, outputChannel, MetaModelType.Interface);
   };
 
-  const deviceModelSubmitTemplateProvider = async () => {
+  const deviceModelSubmitCapabilityModelProvider = async () => {
     deviceModelOperator.SubmitMetaModelFile(
-        context, outputChannel, MetaModelType.Template);
+        context, outputChannel, MetaModelType.CapabilityModel);
   };
 
   const scaffoldDeviceStubProvider = async () => {
@@ -567,10 +571,10 @@ export async function activate(context: vscode.ExtensionContext) {
       click: deviceModelCreateInterfaceProvider
     },
     {
-      label: 'Create new Plug & Play template',
+      label: 'Create new Plug & Play capability model',
       description: '',
-      detail: 'Create a template for device model',
-      click: deviceModelCreateTemplateProvider
+      detail: 'Create a capability model for device model',
+      click: deviceModelCreateCapabilityModelProvider
     },
     {
       label: 'Submit Plug & Play interface',
@@ -579,10 +583,10 @@ export async function activate(context: vscode.ExtensionContext) {
       click: deviceModelSubmitInterfaceProvider
     },
     {
-      label: 'Submit Plug & Play template',
+      label: 'Submit Plug & Play capability model',
       description: '',
-      detail: 'Submit a template for device model.',
-      click: deviceModelSubmitTemplateProvider
+      detail: 'Submit a capability model for device model.',
+      click: deviceModelSubmitCapabilityModelProvider
     },
     {
       label: 'Scaffold Code stub',

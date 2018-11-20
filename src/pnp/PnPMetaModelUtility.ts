@@ -33,12 +33,14 @@ export class PnPMetaModelUtility {
     const pnpInterface: PnPMetaModelContext = JSON.parse(pnpInterfaceString);
     return pnpInterface;
   }
-  getTemplate() {
-    const templateFilePath = this.context.asAbsolutePath(path.join(
+  getCapabilityModel() {
+    const capabilityModelFilePath = this.context.asAbsolutePath(path.join(
         PnPFileNames.resourcesFolderName, PnPFileNames.deviceModelFolderName,
-        PnPFileNames.templateFileName));
-    const pnpTemplateString = fs.readFileSync(templateFilePath, 'utf8');
-    const pnpTemplate: PnPMetaModelContext = JSON.parse(pnpTemplateString);
-    return pnpTemplate;
+        PnPFileNames.capabilityModelFileName));
+    const pnpCapabilityModelString =
+        fs.readFileSync(capabilityModelFilePath, 'utf8');
+    const pnpCapabilityModel: PnPMetaModelContext =
+        JSON.parse(pnpCapabilityModelString);
+    return pnpCapabilityModel;
   }
 }

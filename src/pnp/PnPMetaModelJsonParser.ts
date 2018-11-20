@@ -305,7 +305,7 @@ export class PnPMetaModelJsonParser {
         const json = jsonValue as Json.ObjectValue;
         if (json.hasProperty('@type')) {
           const type = json.getPropertyValue('@type').toFriendlyString();
-          if (type === 'Interface' || type === 'Template') {
+          if (type === 'Interface' || type === 'CapabilityModel') {
             currentContextType = type;
           }
         }

@@ -1,0 +1,9 @@
+﻿{
+  "@id": "http://example.com/MXChip/2.0.0",
+  "@type": "CapabilityModel",
+  "displayName": "MX Chip CapabilityModel",
+  "implements": [
+      "http://example.com/MXChip/1.0.0"
+   ],
+  "@context": "http://azureiot.com/v0/contexts/capabilityModel.json"
+}

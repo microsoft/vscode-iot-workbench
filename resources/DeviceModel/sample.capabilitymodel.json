@@ -1,0 +1,9 @@
+{
+  "@id": "http://example.com/{CAPABILITYMODELNAME}/1.0.0",
+  "@type": "CapabilityModel",
+  "displayName": "{CAPABILITYMODELNAME}",
+  "implements": [
+    "http://examplerenhetest.com/test1/1.0.0"
+  ],
+  "@context": "http://azureiot.com/v0/contexts/capabilitymodel.json"
+}
