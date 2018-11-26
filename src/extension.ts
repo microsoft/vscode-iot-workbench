@@ -31,6 +31,7 @@ import {DeviceModelOperator} from './pnp/DeviceModelOperator';
 import {PnPMetaModelJsonParser} from './pnp/PnPMetaModelJsonParser';
 import {MetaModelType} from './pnp/pnp-api/DataContracts/PnPContext';
 import {PnPDiagnostic} from './pnp/PnPDiagnostic';
+import {VSCExpress} from 'vscode-express';
 
 function filterMenu(commands: CommandItem[]) {
   for (let i = 0; i < commands.length; i++) {
@@ -664,6 +665,52 @@ export async function activate(context: vscode.ExtensionContext) {
     ConfigHandler.update(
         ConfigKey.shownHelpPage, true, vscode.ConfigurationTarget.Global);
   }
+
+  const vscexpress = new VSCExpress(context, 'pnpRepositoryViews');
+
+  vscode.commands.registerCommand('iotworkbench.getAllInterfaces', async () => {
+    return await deviceModelOperator.GetAllInterfaces(context);
+  });
+
+  vscode.commands.registerCommand(
+      'iotworkbench.getAllCapabilities', async () => {
+        return await deviceModelOperator.GetAllCapabilities(context);
+      });
+
+  vscode.commands.registerCommand(
+      'iotworkbench.deletePnPFiles',
+      async (interfaceIds: string[], metaModelValue: string) => {
+        await deviceModelOperator.DeletePnPFiles(
+            interfaceIds, metaModelValue, context, outputChannel);
+      });
+
+  vscode.commands.registerCommand(
+      'iotworkbench.editPnPFiles',
+      async (fileIds: string[], metaModelValue: string) => {
+        await deviceModelOperator.DownloadAndEditPnPFiles(
+            fileIds, metaModelValue, context, outputChannel);
+      });
+
+  vscode.commands.registerCommand(
+      'iotworkbench.publishPnPFiles',
+      async (fileIds: string[], metaModelValue: string) => {
+        await deviceModelOperator.PublishPnPFiles(
+            fileIds, metaModelValue, context, outputChannel);
+      });
+
+  vscode.commands.registerCommand(
+      'iotworkbench.createPnPInterface', deviceModelCreateInterfaceProvider);
+
+  vscode.commands.registerCommand(
+      'iotworkbench.createPnPCapabilityModel',
+      deviceModelCreateCapabilityModelProvider);
+
+  context.subscriptions.push(
+      vscode.commands.registerCommand('iotworkbench.pnpRepositry', () => {
+        vscexpress.open(
+            'index.html', 'Plug & Play Repositry', vscode.ViewColumn.Two,
+            {retainContextWhenHidden: true, enableScripts: true});
+      }));
 }
 
 // this method is called when your extension is deactivated

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="vue.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="main">
+<header>
+  <h1>{{ companyName }}</h1>
+  <div class="type_switch">
+    <a href="#" v-bind:class="{active: type.value === 'Interface'}" v-on:click="type.value = 'Interface'">Interface</a>
+    <a href="#" v-bind:class="{active: type.value === 'CapabilityModel'}" v-on:click="type.value = 'CapabilityModel'">Capability Model</a>
+  </div>
+  <div class="actions">
+    <button v-on:click="createPnPFile">New...</button>
+    <button v-on:click="editPnPFiles">Edit</button>
+    <button v-on:click="publishPnPFiles">Publish</button>
+    <button v-on:click="deletePnPFiles">Delete</button>
+  </div>
+</header>
+<table class="item-list" v-show="type.value === 'Interface'">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Name</th>
+      <th>Resource ID</th>
+      <th>Type</th>
+      <th>ID</th>
+      <th>Version</th>
+      <th>Custom tags</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr v-for="interface in interfaceList.value">
+      <td>
+        <input type="checkbox" v-bind:id="interface.resourceId" v-bind:value="interface.id" v-model="selectedInterfaces.value">
+      </td>
+      <td>{{ interface.displayName }}</td>
+      <td>{{ interface.resourceId }}</td>
+      <td>{{ type.value }}</td>
+      <td>{{ interface.id }}</td>
+      <td>{{ interface.version }}</td>
+      <td>
+        <span class="tag" v-if="interface.tags" v-for="tag in interface.tags">#{{ tag }}</span>
+      </td>
+      <td>{{ interface.published ? 'Published' : 'Saved' }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="item-list" v-show="type.value === 'CapabilityModel'">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Name</th>
+      <th>Resource ID</th>
+      <th>Type</th>
+      <th>ID</th>
+      <th>Version</th>
+      <th>Custom tags</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr v-for="capability in capabilityList.value">
+      <td>
+        <input type="checkbox" v-bind:id="capability.resourceId" v-bind:value="capability.id" v-model="selectedCapabilities.value">
+      </td>
+      <td>{{ capability.displayName }}</td>
+      <td>{{ capability.resourceId }}</td>
+      <td>{{ type.value }}</td>
+      <td>{{ capability.id }}</td>
+      <td>{{ capability.version }}</td>
+      <td>
+        <span class="tag" v-if="capability.tags" v-for="tag in capability.tags">#{{ tag }}</span>
+      </td>
+      <td>{{ capability.published ? 'Published' : 'Saved' }}</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<script src="command.js"></script>
+<script src="main.js"></script>
+</body>
+</html>

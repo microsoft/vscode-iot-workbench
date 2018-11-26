@@ -1,0 +1,90 @@
+::-webkit-scrollbar {
+  width: 10px;
+  background: white;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #AAA;
+  border: 2px solid white;
+  border-radius: 5px;
+}
+
+[v-cloak] { display: none }
+
+* {
+  box-sizing: border-box;
+  font-family: "Segoe UI",-apple-system,".SFNSText-Regular","San Francisco","Helvetica Neue","Lucida Grande",Arial,sans-serif;
+}
+
+body {
+  margin: 0;
+  background: white;
+}
+
+header {
+  padding-bottom: 10px;
+  border-bottom: 2px solid #ccc;
+}
+
+h1 {
+  background: #031b42;
+  color: white;
+  margin: 0;
+  padding: 20px 30px;
+}
+
+.actions {
+  margin: 50px 30px 0;
+}
+
+.actions button {
+  background: #ccc;
+  border: none;
+  border-radius: 3px;
+  padding: 10px 15px;
+  font-size: 18px;
+}
+
+.item-list {
+  width: calc(100% - 60px);
+  margin: 10px 30px;
+  border-collapse: collapse;
+}
+
+.item-list tr {
+  border-bottom: 1px solid #ccc;
+}
+
+.item-list th,
+.item-list td {
+  line-height: 2em;
+  text-align: left;
+}
+
+.item-list td {
+  padding: 10px 0px;
+}
+
+.item-list .tag {
+  padding: 3px 5px;
+  background: #ccc;
+  border-radius: 3px;
+  margin-right: 3px;
+}
+
+.type_switch {
+  margin: 20px;
+}
+
+.type_switch a {
+  text-decoration: none;
+  color: #555;
+  line-height: 2;
+  margin: 0 10px;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.type_switch a.active {
+  border-bottom: 5px solid lightskyblue;
+}

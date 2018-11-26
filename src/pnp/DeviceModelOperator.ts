@@ -6,6 +6,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-plus';
 import * as path from 'path';
+import {VSCExpress} from 'vscode-express';
 
 import {PnPFileNames, PnPConstants} from './PnPConstants';
 import {PnPMetamodelRepositoryClient} from './pnp-api/PnPMetamodelRepositoryClient';
@@ -46,6 +47,8 @@ export class DeviceModelOperator {
 
     return rootPath;
   }
+
+  private static vscexpress: VSCExpress|undefined;
 
   async Load(
       rootPath: string, context: vscode.ExtensionContext,
@@ -235,9 +238,231 @@ export class DeviceModelOperator {
     if (result) {
       await vscode.commands.executeCommand(
           'vscode.openFolder', vscode.Uri.file(rootPath), false);
+      DeviceModelOperator.vscexpress = DeviceModelOperator.vscexpress ||
+          new VSCExpress(context, 'pnpRepositoryViews');
+      await DeviceModelOperator.vscexpress.open(
+          'index.html', 'Plug & Play Repositry', vscode.ViewColumn.Two,
+          {retainContextWhenHidden: true, enableScripts: true});
       return true;
     }
     return false;
+  }
+
+  async GetAllInterfaces(context: vscode.ExtensionContext) {
+    let connectionString =
+        context.workspaceState.get<string>(PnPConstants.modelRepositoryKeyName);
+    if (!connectionString) {
+      const option: vscode.InputBoxOptions = {
+        value: PnPConstants.repoConnectionStringTemplate,
+        prompt:
+            `Please input the connection string to access the model repository.`,
+        ignoreFocusOut: true
+      };
+
+      const repoConnectionString = await vscode.window.showInputBox(option);
+
+      if (!repoConnectionString) {
+        return [];
+      } else {
+        context.workspaceState.update(
+            PnPConstants.modelRepositoryKeyName, repoConnectionString);
+        connectionString = repoConnectionString;
+      }
+    }
+    const pnpMetamodelRepositoryClient =
+        new PnPMetamodelRepositoryClient(connectionString);
+    const result =
+        await pnpMetamodelRepositoryClient.GetAllInterfacesAsync(null, 50);
+    return result.results;
+  }
+
+  async GetAllCapabilities(context: vscode.ExtensionContext) {
+    let connectionString =
+        context.workspaceState.get<string>(PnPConstants.modelRepositoryKeyName);
+    if (!connectionString) {
+      const option: vscode.InputBoxOptions = {
+        value: PnPConstants.repoConnectionStringTemplate,
+        prompt:
+            `Please input the connection string to access the model repository.`,
+        ignoreFocusOut: true
+      };
+
+      const repoConnectionString = await vscode.window.showInputBox(option);
+
+      if (!repoConnectionString) {
+        return [];
+      } else {
+        context.workspaceState.update(
+            PnPConstants.modelRepositoryKeyName, repoConnectionString);
+        connectionString = repoConnectionString;
+      }
+    }
+    const pnpMetamodelRepositoryClient =
+        new PnPMetamodelRepositoryClient(connectionString);
+    const result =
+        await pnpMetamodelRepositoryClient.GetAllCapabilityModelsAsync(
+            null, 50);
+    return result.results;
+  }
+
+  async DeletePnPFiles(
+      fileIds: string[], metaModelValue: string,
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
+    channel.show();
+    if (!fileIds || fileIds.length === 0) {
+      channel.appendLine(`Please select the ${metaModelValue} to delete.`);
+      return;
+    }
+
+    const metaModelType: MetaModelType =
+        MetaModelType[metaModelValue as keyof typeof MetaModelType];
+
+    const connectionString =
+        context.workspaceState.get<string>(PnPConstants.modelRepositoryKeyName);
+    if (!connectionString) {
+      return;
+    }
+
+    const pnpMetamodelRepositoryClient =
+        new PnPMetamodelRepositoryClient(connectionString);
+
+    fileIds.forEach(async (id) => {
+      channel.appendLine(`Start deleting ${metaModelValue} with id ${id}.`);
+      try {
+        if (metaModelType === MetaModelType.Interface) {
+          await pnpMetamodelRepositoryClient.DeleteInterfaceByInterfaceIdAsync(
+              PnPUri.Parse(id));
+          channel.appendLine(`Deleting interface with id ${id} completed.`);
+        } else {
+          await pnpMetamodelRepositoryClient
+              .DeleteCapabilityModelByCapabilityModelIdAsync(PnPUri.Parse(id));
+          channel.appendLine(
+              `Deleting capabilty model with id ${id} completed.`);
+        }
+      } catch (error) {
+        channel.appendLine(
+            `Deleting ${metaModelValue} with id ${id} failed. Error: ${error}`);
+      }
+    });
+  }
+
+  async PublishPnPFiles(
+      fileIds: string[], metaModelValue: string,
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
+    channel.show();
+    if (!fileIds || fileIds.length === 0) {
+      channel.appendLine('Please select the ${metaModelValue} to publish.');
+      return;
+    }
+
+    const metaModelType: MetaModelType =
+        MetaModelType[metaModelValue as keyof typeof MetaModelType];
+
+    const connectionString =
+        context.workspaceState.get<string>(PnPConstants.modelRepositoryKeyName);
+    if (!connectionString) {
+      return;
+    }
+
+    const pnpMetamodelRepositoryClient =
+        new PnPMetamodelRepositoryClient(connectionString);
+
+    fileIds.forEach(async (id) => {
+      channel.appendLine(`Start publishing ${metaModelValue} with id ${id}.`);
+      try {
+        if (metaModelType === MetaModelType.Interface) {
+          await pnpMetamodelRepositoryClient.PublishInterfaceAsync(
+              PnPUri.Parse(id));
+          channel.appendLine(`Publishing interface with id ${id} completed.`);
+        } else {
+          await pnpMetamodelRepositoryClient.PublishCapabilityModelAsync(
+              PnPUri.Parse(id));
+          channel.appendLine(
+              `Publishing capabilty model with id ${id} completed.`);
+        }
+      } catch (error) {
+        channel.appendLine(`Publishing ${metaModelValue} with id ${
+            id} failed. Error: ${error}`);
+      }
+    });
+  }
+
+
+  async DownloadAndEditPnPFiles(
+      fileIds: string[], metaModelValue: string,
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
+    channel.show();
+    if (!fileIds || fileIds.length === 0) {
+      channel.appendLine('Please select the PnP files to edit.');
+      return;
+    }
+
+    const metaModelType: MetaModelType =
+        MetaModelType[metaModelValue as keyof typeof MetaModelType];
+
+    let suffix = '.interface.json';
+    if (metaModelType === MetaModelType.CapabilityModel) {
+      suffix = '.capabiltyModel.json';
+    }
+
+    const rootPath = await this.InitializeFolder();
+    if (!rootPath) {
+      return;
+    }
+
+    const connectionString =
+        context.workspaceState.get<string>(PnPConstants.modelRepositoryKeyName);
+    if (!connectionString) {
+      return;
+    }
+
+    const pnpMetamodelRepositoryClient =
+        new PnPMetamodelRepositoryClient(connectionString);
+
+    fileIds.forEach(async (id) => {
+      channel.appendLine(`Start getting ${metaModelValue} with id ${id}.`);
+      let fileContext: PnPContext;
+      try {
+        if (metaModelType === MetaModelType.Interface) {
+          fileContext =
+              await pnpMetamodelRepositoryClient.GetInterfaceByInterfaceIdAsync(
+                  PnPUri.Parse(id));
+        } else {
+          fileContext =
+              await pnpMetamodelRepositoryClient
+                  .GetCapabilityModelByCapabilityModelIdAsync(PnPUri.Parse(id));
+        }
+        if (fileContext) {
+          const fileJson = JSON.parse(fileContext.content);
+          const displayName = fileJson[constants.displayName] ?
+              fileJson[constants.displayName] :
+              metaModelValue;
+          let counter = 0;
+          let candidateName = displayName + suffix;
+          while (true) {
+            const filePath = path.join(rootPath, candidateName);
+            if (!utils.fileExistsSync(filePath)) {
+              break;
+            }
+            counter++;
+            candidateName = `${displayName}_${counter}${suffix}`;
+          }
+
+          fs.writeFileSync(
+              path.join(rootPath, candidateName), fileContext.content);
+          await vscode.window.showTextDocument(
+              vscode.Uri.file(path.join(rootPath, candidateName)));
+          channel.appendLine(`Downloading ${metaModelValue} with id ${
+              id} into ${candidateName} completed.`);
+        }
+
+      } catch (error) {
+        channel.appendLine(`Downloading ${metaModelValue} with id ${
+            id} failed. Error: ${error}`);
+      }
+    });
+    await vscode.commands.executeCommand(
+        'vscode.openFolder', vscode.Uri.file(rootPath), false);
   }
 
   async SubmitMetaModelFile(

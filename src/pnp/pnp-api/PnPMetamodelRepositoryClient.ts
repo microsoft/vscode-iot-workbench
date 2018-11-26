@@ -185,7 +185,7 @@ export class PnPMetamodelRepositoryClient {
     }
 
     await this.MakeDeleteRequestAsync(
-        pnpInterfaceUri.toString(), MetaModelType.Interface);
+        pnpInterfaceUri.Id, MetaModelType.Interface);
   }
 
   /// <summary>
@@ -213,7 +213,7 @@ export class PnPMetamodelRepositoryClient {
     }
 
     await this.MakeDeleteRequestAsync(
-        pnpCapabilityModelUri.toString(), MetaModelType.CapabilityModel);
+        pnpCapabilityModelUri.Id, MetaModelType.CapabilityModel);
   }
 
 
