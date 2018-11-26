@@ -143,7 +143,7 @@ The whole process includes:
 
 ## Deploy Azure Functions
 
-In Visual Studio Code, open the `run.csx` file (default named `Functions\doormonitor\run.csx`) to edit the code for your function.
+In Visual Studio Code, open the `door_monitor.cs` file (default named `Functions\door_monitor.cs`) to edit the code for your function.
 
 Edit the code with the following lines
 
