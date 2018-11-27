@@ -484,15 +484,10 @@ export async function activate(context: vscode.ExtensionContext) {
     deviceModelOperator.Connect(context, outputChannel);
   };
 
-  const deviceModelSubmitInterfaceProvider = async () => {
-    deviceModelOperator.SubmitMetaModelFile(
-        context, outputChannel, MetaModelType.Interface);
+  const deviceModelSubmitPnPFileProvider = async () => {
+    deviceModelOperator.SubmitMetaModelFile(context, outputChannel);
   };
 
-  const deviceModelSubmitCapabilityModelProvider = async () => {
-    deviceModelOperator.SubmitMetaModelFile(
-        context, outputChannel, MetaModelType.CapabilityModel);
-  };
 
   const scaffoldDeviceStubProvider = async () => {
     callWithTelemetry(
@@ -558,46 +553,6 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   ];
 
-  const menuForDeviceModel: CommandItem[] = [
-    {
-      label: 'Connect to Plug & Play Model Repository',
-      description: '',
-      detail: 'connect to model repository',
-      click: deviceModelConnectProvider
-    },
-    {
-      label: 'Create new Plug & Play interface',
-      description: '',
-      detail: 'Create an interface for device model',
-      click: deviceModelCreateInterfaceProvider
-    },
-    {
-      label: 'Create new Plug & Play capability model',
-      description: '',
-      detail: 'Create a capability model for device model',
-      click: deviceModelCreateCapabilityModelProvider
-    },
-    {
-      label: 'Submit Plug & Play interface',
-      description: '',
-      detail: 'Submit an interface for device model.',
-      click: deviceModelSubmitInterfaceProvider
-    },
-    {
-      label: 'Submit Plug & Play capability model',
-      description: '',
-      detail: 'Submit a capability model for device model.',
-      click: deviceModelSubmitCapabilityModelProvider
-    },
-    {
-      label: 'Scaffold Code stub',
-      description: '',
-      detail: 'Scaffold Code stub on device.',
-      click: scaffoldDeviceStubProvider
-    }
-  ];
-
-
   const iotdeviceMenu =
       vscode.commands.registerCommand('iotworkbench.device', async () => {
         renderMenu('IoT Workbench: Device', menuForDevice);
@@ -630,11 +585,6 @@ export async function activate(context: vscode.ExtensionContext) {
         return;
       });
 
-  const iotdeviceModelMenu =
-      vscode.commands.registerCommand('iotworkbench.pnp', async () => {
-        renderMenu('IoT Workbench: Plug & Play', menuForDeviceModel);
-      });
-
   context.subscriptions.push(iotdeviceMenu);
   context.subscriptions.push(iotcloudMenu);
   context.subscriptions.push(projectInit);
@@ -642,7 +592,6 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(exampleInitialize);
   context.subscriptions.push(helpInit);
   context.subscriptions.push(workbenchPath);
-  context.subscriptions.push(iotdeviceModelMenu);
 
   const usbDetector = new UsbDetector(context, outputChannel);
   usbDetector.startListening();
@@ -705,11 +654,31 @@ export async function activate(context: vscode.ExtensionContext) {
       'iotworkbench.createPnPCapabilityModel',
       deviceModelCreateCapabilityModelProvider);
 
-  context.subscriptions.push(
-      vscode.commands.registerCommand('iotworkbench.pnpRepositry', () => {
-        vscexpress.open(
-            'index.html', 'Plug & Play Repositry', vscode.ViewColumn.Two,
-            {retainContextWhenHidden: true, enableScripts: true});
+  context.subscriptions.push(vscode.commands.registerCommand(
+      'iotworkbench.pnpOpenRepositry', async () => {
+        deviceModelOperator.Connect(context, outputChannel);
+      }));
+  context.subscriptions.push(vscode.commands.registerCommand(
+      'iotworkbench.pnpSignOutRepositry', async () => {
+        deviceModelOperator.Disconnect(context);
+      }));
+  context.subscriptions.push(vscode.commands.registerCommand(
+      'iotworkbench.pnpCreateInterface', async () => {
+        deviceModelOperator.CreateInterface(context, outputChannel);
+      }));
+  context.subscriptions.push(vscode.commands.registerCommand(
+      'iotworkbench.pnpCreateCapabilityModel', async () => {
+        deviceModelOperator.CreateCapabilityModel(context, outputChannel);
+      }));
+  context.subscriptions.push(vscode.commands.registerCommand(
+      'iotworkbench.pnpSubmitFile', async () => {
+        deviceModelOperator.SubmitMetaModelFile(context, outputChannel);
+      }));
+  context.subscriptions.push(vscode.commands.registerCommand(
+      'iotworkbench.pnpGenerateCode', async () => {
+        callWithTelemetry(
+            EventNames.scaffoldDeviceStubEvent, outputChannel, true, context,
+            codeGeneratorBinder);
       }));
 }
 

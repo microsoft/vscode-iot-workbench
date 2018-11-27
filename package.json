@@ -72,9 +72,34 @@
         "category": "IoT Workbench"
       },
       {
-        "command": "iotworkbench.pnpRepositry",
-        "title": "Plug & Play Repositry",
-        "category": "IoT Workbench"
+        "command": "iotworkbench.pnpOpenRepositry",
+        "title": "Open Model Repository...",
+        "category": "Azure IoT Plug & Play"
+      },
+      {
+        "command": "iotworkbench.pnpSignOutRepositry",
+        "title": "Sign out Model Repository",
+        "category": "Azure IoT Plug & Play"
+      },
+      {
+        "command": "iotworkbench.pnpCreateInterface",
+        "title": "Create Interface...",
+        "category": "Azure IoT Plug & Play"
+      },
+      {
+        "command": "iotworkbench.pnpCreateCapabilityModel",
+        "title": "Create Capability Model...",
+        "category": "Azure IoT Plug & Play"
+      },
+      {
+        "command": "iotworkbench.pnpSubmitFile",
+        "title": "Submit file to Model Repository...",
+        "category": "Azure IoT Plug & Play"
+      },
+      {
+        "command": "iotworkbench.pnpGenerateCode",
+        "title": "Generate Device Code Stub...",
+        "category": "Azure IoT Plug & Play"
       }
     ],
     "configuration": [

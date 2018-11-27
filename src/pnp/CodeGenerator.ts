@@ -72,8 +72,8 @@ export class CodeGenerator {
     const pnpItems: vscode.QuickPickItem[] = [];
     pnpFiles.forEach((filePath: string) => {
       const fileName = path.basename(filePath);
-      if (fileName.endsWith('.capabilitymodel.json') ||
-          fileName.endsWith('.interface.json')) {
+      if (fileName.endsWith(PnPConstants.interfaceSuffix) ||
+          fileName.endsWith(PnPConstants.capabilityModelSuffix)) {
         pnpItems.push({label: fileName, description: ''});
       }
     });
@@ -92,7 +92,7 @@ export class CodeGenerator {
     const selectedFilePath = path.join(rootPath, fileSelection.label);
     let metaModelType: MetaModelType = MetaModelType.Interface;
 
-    if (fileSelection.label.endsWith('.capabilitymodel.json')) {
+    if (fileSelection.label.endsWith(PnPConstants.capabilityModelSuffix)) {
       metaModelType = MetaModelType.CapabilityModel;
     }
 

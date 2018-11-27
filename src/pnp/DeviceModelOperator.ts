@@ -60,8 +60,8 @@ export class DeviceModelOperator {
     const files = fs.listSync(rootPath);
 
     const deviceModelFile = files.find(
-        fileName => fileName.endsWith('.capabilitymodel.json') ||
-            fileName.endsWith('.interface.json'));
+        fileName => fileName.endsWith(PnPConstants.interfaceSuffix) ||
+            fileName.endsWith(PnPConstants.capabilityModelSuffix));
 
     if (!deviceModelFile) {
       return false;
@@ -89,7 +89,7 @@ export class DeviceModelOperator {
         if (/^([a-z_]|[a-z_][-a-z0-9_.]*[a-z0-9_])(\.interface\.json)?$/i.test(
                 interfaceName)) {
           if (!/\.interface\.json$/i.test(interfaceName)) {
-            interfaceName += '.interface.json';
+            interfaceName += PnPConstants.interfaceSuffix;
           }
           const targetInterface = path.join(rootPath as string, interfaceName);
           if (fs.existsSync(targetInterface)) {
@@ -108,7 +108,7 @@ export class DeviceModelOperator {
     } else {
       interfaceFileName = interfaceFileName.trim();
       if (!/\.interface\.json$/i.test(interfaceFileName)) {
-        interfaceFileName += '.interface.json';
+        interfaceFileName += PnPConstants.interfaceSuffix;
       }
     }
 
@@ -156,7 +156,7 @@ export class DeviceModelOperator {
         if (/^([a-z_]|[a-z_][-a-z0-9_.]*[a-z0-9_])(\.capabilitymodel\.json)?$/i
                 .test(capabilityModelName)) {
           if (!/\.capabilitymodel\.json$/i.test(capabilityModelName)) {
-            capabilityModelName += '.capabilitymodel.json';
+            capabilityModelName += PnPConstants.capabilityModelSuffix;
           }
           const targetCapabilityModel =
               path.join(rootPath as string, capabilityModelName);
@@ -176,7 +176,7 @@ export class DeviceModelOperator {
     } else {
       capabilityModelFileName = capabilityModelFileName.trim();
       if (!/\.capabilitymodel\.json$/i.test(capabilityModelFileName)) {
-        capabilityModelFileName += '.capabilitymodel.json';
+        capabilityModelFileName += PnPConstants.capabilityModelSuffix;
       }
     }
 
@@ -219,21 +219,30 @@ export class DeviceModelOperator {
       return false;
     }
 
-    const option: vscode.InputBoxOptions = {
-      value: PnPConstants.repoConnectionStringTemplate,
-      prompt:
-          `Please input the connection string to access the model repository.`,
-      ignoreFocusOut: true
-    };
+    let connectionString =
+        context.workspaceState.get<string>(PnPConstants.modelRepositoryKeyName);
 
-    const repoConnectionString = await vscode.window.showInputBox(option);
+    if (!connectionString) {
+      const option: vscode.InputBoxOptions = {
+        value: PnPConstants.repoConnectionStringTemplate,
+        prompt:
+            `Please input the connection string to access the model repository.`,
+        ignoreFocusOut: true
+      };
 
-    if (!repoConnectionString) {
-      return false;
+      const repoConnectionString = await vscode.window.showInputBox(option);
+
+      if (!repoConnectionString) {
+        return false;
+      } else {
+        context.workspaceState.update(
+            PnPConstants.modelRepositoryKeyName, repoConnectionString);
+        connectionString = repoConnectionString;
+      }
     }
 
     const result = await PnPConnector.ConnectMetamodelRepository(
-        context, repoConnectionString);
+        context, connectionString);
 
     if (result) {
       await vscode.commands.executeCommand(
@@ -247,6 +256,13 @@ export class DeviceModelOperator {
     }
     return false;
   }
+
+  async Disconnect(context: vscode.ExtensionContext) {
+    context.workspaceState.update(PnPConstants.modelRepositoryKeyName, '');
+
+    // TODO: Close the window of open model repo UI
+  }
+
 
   async GetAllInterfaces(context: vscode.ExtensionContext) {
     let connectionString =
@@ -351,7 +367,7 @@ export class DeviceModelOperator {
       context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
     channel.show();
     if (!fileIds || fileIds.length === 0) {
-      channel.appendLine('Please select the ${metaModelValue} to publish.');
+      channel.appendLine(`Please select the ${metaModelValue} to publish.`);
       return;
     }
 
@@ -400,9 +416,9 @@ export class DeviceModelOperator {
     const metaModelType: MetaModelType =
         MetaModelType[metaModelValue as keyof typeof MetaModelType];
 
-    let suffix = '.interface.json';
+    let suffix = PnPConstants.interfaceSuffix;
     if (metaModelType === MetaModelType.CapabilityModel) {
-      suffix = '.capabiltyModel.json';
+      suffix = PnPConstants.capabilityModelSuffix;
     }
 
     const rootPath = await this.InitializeFolder();
@@ -466,8 +482,8 @@ export class DeviceModelOperator {
   }
 
   async SubmitMetaModelFile(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      metaModelType: MetaModelType): Promise<boolean> {
+      context: vscode.ExtensionContext,
+      channel: vscode.OutputChannel): Promise<boolean> {
     if (!vscode.workspace.workspaceFolders ||
         !vscode.workspace.workspaceFolders[0].uri.fsPath) {
       vscode.window.showWarningMessage(
@@ -485,14 +501,11 @@ export class DeviceModelOperator {
       return false;
     }
 
-    const suffix = metaModelType === MetaModelType.Interface ?
-        '.interface.json' :
-        '.capabilitymodel.json';
-
     const fileItems: vscode.QuickPickItem[] = [];
     pnpFiles.forEach((filePath: string) => {
       const fileName = path.basename(filePath);
-      if (fileName.endsWith(suffix)) {
+      if (fileName.endsWith(PnPConstants.interfaceSuffix) ||
+          fileName.endsWith(PnPConstants.capabilityModelSuffix)) {
         fileItems.push({label: fileName, description: ''});
       }
     });
@@ -513,6 +526,13 @@ export class DeviceModelOperator {
     if (!fileSelection) {
       return false;
     }
+
+
+    const metaModelType =
+        fileSelection.label.endsWith(PnPConstants.interfaceSuffix) ?
+        MetaModelType.Interface :
+        MetaModelType.CapabilityModel;
+
     channel.appendLine(`File selected: ${fileSelection.label}`);
     const filePath = path.join(rootPath, fileSelection.label);
 

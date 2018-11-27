@@ -22,4 +22,6 @@ export class PnPConstants {
   static readonly modelRepositoryKeyName = 'ModelRepositoryKey';
   static readonly repoConnectionStringTemplate =
       'HostName=<Host Name>;SharedAccessKeyName=<Shared AccessKey Name>;SharedAccessKey=<access Key>';
+  static readonly interfaceSuffix = '.interface.json';
+  static readonly capabilityModelSuffix = '.capabilitymodel.json';
 }
