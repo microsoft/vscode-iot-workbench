@@ -117,7 +117,7 @@ export async function activate(context: vscode.ExtensionContext) {
       'Congratulations, your extension "vscode-iot-workbench" is now active!');
 
   const outputChannel: vscode.OutputChannel =
-      vscode.window.createOutputChannel('Azure IoT Workbench');
+      vscode.window.createOutputChannel('Azure IoT Device Workbench');
 
   // Initialize Telemetry
   TelemetryWorker.Initialize(context);
@@ -279,12 +279,12 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const iotdeviceMenu =
       vscode.commands.registerCommand('iotworkbench.device', async () => {
-        renderMenu('IoT Workbench: Device', menuForDevice);
+        renderMenu('IoT Device Workbench: Device', menuForDevice);
       });
 
   const iotcloudMenu =
       vscode.commands.registerCommand('iotworkbench.cloud', async () => {
-        renderMenu('IoT Workbench: Cloud', menuForCloud);
+        renderMenu('IoT Device Workbench: Cloud', menuForCloud);
       });
 
   const projectInit = vscode.commands.registerCommand(
@@ -325,7 +325,7 @@ export async function activate(context: vscode.ExtensionContext) {
     // Do not execute help command here
     // Help command may open board help link
     const panel = vscode.window.createWebviewPanel(
-        'IoTWorkbenchHelp', 'Welcome - Azure IoT Workbench',
+        'IoTWorkbenchHelp', 'Welcome - Azure IoT Device Workbench',
         vscode.ViewColumn.One, {
           enableScripts: true,
           retainContextWhenHidden: true,

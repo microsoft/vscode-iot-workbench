@@ -1,4 +1,4 @@
-# Get Started with teXXmo IoT button in IoT Workbench
+# Get Started with teXXmo IoT button in IoT Device Workbench
 ---
 
 # Table of Contents
@@ -14,7 +14,7 @@
 
 **About this document**
 
-This document describes the steps for developing an IoT project for [teXXmo IoT button](https://aka.ms/button) in Azure IoT Workbench. This multi-step process includes:
+This document describes the steps for developing an IoT project for [teXXmo IoT button](https://aka.ms/button) in Azure IoT Device Workbench. This multi-step process includes:
 -   Create an IoT project.
 -   Provision and deploy Azure resources.
 -   Configure device settings and run the sample.
@@ -24,13 +24,13 @@ This document describes the steps for developing an IoT project for [teXXmo IoT 
 You need to make sure the following steps are finished before beginning the process:
 
 * Required hardware: [teXXmo IoT button](https://aka.ms/button).
-* [Visual Studio Code](https://code.visualstudio.com/download/) with [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) installed.
+* [Visual Studio Code](https://code.visualstudio.com/download/) with [Azure IoT Device Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) installed.
 * [An Azure Subscription](https://azure.microsoft.com/en-us/free/) (free trial works great)
 
 # Step 2: Create IoT Project
 
 1. Open Visual Studio Code and open an empty folder.
-1. Press **F1** or **Ctrl + Shift + P** in Visual Studio Code and select **IoT Workbench: Create Project...** .
+1. Press **F1** or **Ctrl + Shift + P** in Visual Studio Code and select **IoT Device Workbench: Create Project...** .
 1. Select the device of **IoT button teXXmo - Microsoft Azure Developer Kit**.
 ![CreateProject](media/iot-button-get-started/iot_button_create.jpg)
 1. From the project template, please select **With Azure Functions**. With this template, when teXXmo IoT button is clicked, a telemetry will be sent to IoT Hub and Azure Functions will be triggered to execute the code.
@@ -39,7 +39,7 @@ You need to make sure the following steps are finished before beginning the proc
 
 # Step 3: Provision Azure Services
 
-1. Press **F1** or **Ctrl + Shift + P** in Visual Studio Code - **IoT Workbench:Cloud** and click **Azure Provision**
+1. Press **F1** or **Ctrl + Shift + P** in Visual Studio Code - **IoT Device Workbench:Cloud** and click **Azure Provision**
 1. You need to login with your Azure subscrption if you didn't do that before.
 1. A popup window will open and guide you to provision the required Azure services. The whole process includes:
 ![provision](media/iot-button-get-started/iot_button_azure_provision.JPG)
@@ -53,7 +53,7 @@ You need to make sure the following steps are finished before beginning the proc
 
 1. From any desktop machine, connect to the device via WiFi using the SSID : ESP_<Last 3 digits of MAC Address>.
 
-1. In Visual Studio Code, press **F1** or **Ctrl + Shift + P** in Visual Studio Code - **IoT Workbench:Device** and click **Configure Device Settings**
+1. In Visual Studio Code, press **F1** or **Ctrl + Shift + P** in Visual Studio Code - **IoT Device Workbench:Device** and click **Configure Device Settings**
 ![ConfigDevice](media/iot-button-get-started/iot_button_config_device.JPG)
     For teXXmo IoT button, the following commands are provided:
 
@@ -104,7 +104,7 @@ You need to make sure the following steps are finished before beginning the proc
       
     ```
     > NOTE: replace the URL with the unique URL of your workflow
-1. Press **F1** or **Ctrl + Shift + P** in Visual Studio Code - **IoT Workbench:Cloud** and click **Azure Deploy**. This command will deploy the function code to Azure Functions App.
+1. Press **F1** or **Ctrl + Shift + P** in Visual Studio Code - **IoT Device Workbench:Cloud** and click **Azure Deploy**. This command will deploy the function code to Azure Functions App.
 
 ## Testing the deployment
 

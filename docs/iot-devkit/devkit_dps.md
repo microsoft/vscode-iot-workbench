@@ -28,22 +28,22 @@ Create and link IoT Hub with Device Provisioning Service instance with [Set up a
 ### Start VS Code
 
 * Start Visual Studio Code.
-* Make sure [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
+* Make sure [Azure IoT Device Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
 * Connect IoT DevKit to your PC.
 
-### Open IoT Workbench Examples
+### Open IoT Device Workbench Examples
 
-Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select **IoT Workbench: Examples**.
+Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Device Workbench**, and then select **IoT Device Workbench: Examples**.
 
-![IoT Workbench: Examples](media/iot-workbench-examples-cmd.png)
+![IoT Device Workbench: Examples](media/iot-workbench-examples-cmd.png)
 
 Select **IoT DevKit**.
 
-![IoT Workbench: Examples -> Select board](media/iot-workbench-examples-board.png)
+![IoT Device Workbench: Examples -> Select board](media/iot-workbench-examples-board.png)
 
-Then the **IoT Workbench Example** window is shown up.
+Then the **IoT Device Workbench Example** window is shown up.
 
-![IoT Workbench, Examples window](media/iot-workbench-examples.png)
+![IoT Device Workbench, Examples window](media/iot-workbench-examples.png)
 
 Find **DevKit DPS** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
 
@@ -63,7 +63,7 @@ Device Provisioning Service can be configured on device based on its [Hardware S
 
 A typical **Unique Device Secret (UDS)** is a 64 characters long hexadecimal digit.
 
-1. Open the command palette and select **IoT Workbench: Device**.
+1. Open the command palette and select **IoT Device Workbench: Device**.
 
 2. Select **Config Device Settings**.
 
@@ -83,11 +83,11 @@ Here you may need to close [serial monitor](./devkit-get-started.md/#Serial_moni
 
    > You can leave the **registrationId** as blank, the application will generate one for you based on the MAC address and firmware version. If you want to customized it, 
 
-2. Open the command palette and select **IoT Workbench: Device**, then select **Device Upload**. 
-   ![IoT Workbench: Device - > Upload](media/iot-workbench-device-upload.png)
+2. Open the command palette and select **IoT Device Workbench: Device**, then select **Device Upload**. 
+   ![IoT Device Workbench: Device - > Upload](media/iot-workbench-device-upload.png)
 
 3. VS Code then starts verifying and uploading the code to your DevKit.
-   ![IoT Workbench: Device - > Uploaded](media/devkit-dps/device-uploaded.png)
+   ![IoT Device Workbench: Device - > Uploaded](media/devkit-dps/device-uploaded.png)
 
 4. The DevKit reboots and starts running the code.
 

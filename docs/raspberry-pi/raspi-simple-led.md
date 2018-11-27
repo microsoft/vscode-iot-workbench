@@ -31,39 +31,39 @@ Connect LED VCC to GPIO 4, and GND to Ground.
 ### Start VS Code
 
 - Start VS Code.
-- Make sure [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
+- Make sure [Azure IoT Device Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
 
-### Open IoT Workbench Examples
+### Open IoT Device Workbench Examples
 
-Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select **IoT Workbench: Examples**.
+Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Device Workbench**, and then select **IoT Device Workbench: Examples**.
 
-![IoT Workbench: Examples](media/iot-workbench-examples-cmd.png)
+![IoT Device Workbench: Examples](media/iot-workbench-examples-cmd.png)
 
 Select **Raspberry Pi**.
 
-![IoT Workbench: Examples -> Select board](media/iot-workbench-examples-board.png)
+![IoT Device Workbench: Examples -> Select board](media/iot-workbench-examples-board.png)
 
-Then the **IoT Workbench Example** window is shown up.
+Then the **IoT Device Workbench Example** window is shown up.
 
-![IoT Workbench, Examples window](media/iot-workbench-examples.png)
+![IoT Device Workbench, Examples window](media/iot-workbench-examples.png)
 
 Find **Simple LED** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
 
-![IoT Workbench, select Simple LED example](media/raspi-simple-led/open-example-simple-led.png)
+![IoT Device Workbench, select Simple LED example](media/raspi-simple-led/open-example-simple-led.png)
 
 ## Provision Azure Services
 
-In the solution window, open the command palette and select **IoT Workbench: Cloud**.
+In the solution window, open the command palette and select **IoT Device Workbench: Cloud**.
 
-![IoT Workbench: Cloud](media/iot-workbench-cloud.png)
+![IoT Device Workbench: Cloud](media/iot-workbench-cloud.png)
 
 Select **Azure Provision**.
 
-![IoT Workbench: Cloud -> Provision](media/iot-workbench-cloud-provision.png)
+![IoT Device Workbench: Cloud -> Provision](media/iot-workbench-cloud-provision.png)
 
 Then VS Code guides you through provisioning the required Azure services.
 
-![IoT Workbench: Cloud -> Provision steps](media/iot-workbench-cloud-provision-steps3.png)
+![IoT Device Workbench: Cloud -> Provision steps](media/iot-workbench-cloud-provision-steps3.png)
 
 The whole process includes:
 
@@ -82,27 +82,27 @@ static string deviceName = "";
 
 ## Deploy Azure Functions
 
-Open the command palette and select **IoT Workbench: Cloud**, then select **Azure Deploy**.
+Open the command palette and select **IoT Device Workbench: Cloud**, then select **Azure Deploy**.
 
-![IoT Workbench: Cloud -> Deploy](media/iot-workbench-cloud-deploy.png)
+![IoT Device Workbench: Cloud -> Deploy](media/iot-workbench-cloud-deploy.png)
 
 ## Config IoT Hub Connection String
 
-1. Open the command palette and select **IoT Workbench: Device**.
+1. Open the command palette and select **IoT Device Workbench: Device**.
 
-   ![IoT Workbench: Device](media/iot-workbench-device.png)
+   ![IoT Device Workbench: Device](media/iot-workbench-device.png)
 
 2. Select **Config Device Settings**.
 
-   ![IoT Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
+   ![IoT Device Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
 
 3. Select **Config connection of IoT Hub Device**.
 
-  ![IoT Workbench: Device -> Connection string](media/iot-workbench-device-string.png)
+  ![IoT Device Workbench: Device -> Connection string](media/iot-workbench-device-string.png)
 
 4. Select **Select IoT Hub Device Connection String**.
 
-  ![IoT Workbench: Device -> Connection string](media/iot-workbench-device-string1.png)
+  ![IoT Device Workbench: Device -> Connection string](media/iot-workbench-device-string1.png)
 
   This sets the connection string that is retrieved from the `Provision Azure services` step.
 
@@ -112,27 +112,27 @@ Open the command palette and select **IoT Workbench: Cloud**, then select **Azur
 
 ## Upload the device code
 
-1. Open the command palette and select **IoT Workbench: Device**.
+1. Open the command palette and select **IoT Device Workbench: Device**.
 
-  ![IoT Workbench: Device](media/iot-workbench-device.png)
+  ![IoT Device Workbench: Device](media/iot-workbench-device.png)
 
 2. Select **Config Device Settings**.
 
-  ![IoT Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
+  ![IoT Device Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
 
 3. Select **Select Config Raspberry Pi SSH**.
 
-  ![IoT Workbench: Device -> SSH](media/iot-workbench-device-ssh.png)
+  ![IoT Device Workbench: Device -> SSH](media/iot-workbench-device-ssh.png)
 
 4. Input Raspberry Pi host name or IP, ssh port, user name, password and project name.
 
-5. Open the command palette and select **IoT Workbench: Device**, then select **Device Upload**.
+5. Open the command palette and select **IoT Device Workbench: Device**, then select **Device Upload**.
 
-  ![IoT Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
+  ![IoT Device Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
 
 6. VS Code then starts uploading the code to Raspberry Pi and install node modules.
 
-  ![IoT Workbench: Device -> Upload](media/iot-workbench-device-upload2.png)
+  ![IoT Device Workbench: Device -> Upload](media/iot-workbench-device-upload2.png)
 
 7. Login Raspberry Pi and run node code.
 
@@ -168,4 +168,4 @@ var functionName = '';
 1. Open `web\index.html` in browser.
 2. Click the switch to control the LED.
 
-![IoT Workbench: Cloud -> Deploy](media/raspi-simple-led/web.png)
+![IoT Device Workbench: Cloud -> Deploy](media/raspi-simple-led/web.png)
