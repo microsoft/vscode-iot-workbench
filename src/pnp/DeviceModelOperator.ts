@@ -261,8 +261,12 @@ export class DeviceModelOperator {
 
   async Disconnect(context: vscode.ExtensionContext) {
     context.workspaceState.update(PnPConstants.modelRepositoryKeyName, '');
+    const message =
+        'Sign out Plug & Play repository successfully, please close the Plug & Play Repositry window.';
+    vscode.window.showInformationMessage(message);
 
     // TODO: Close the window of open model repo UI
+    // DeviceModelOperator.vscexpress.close('index.html');
   }
 
 
