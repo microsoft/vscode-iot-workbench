@@ -33,7 +33,7 @@ export class DeviceModelOperator {
       rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
     } else {
       rootPath = await utils.selectWorkspaceItem(
-          'Select the folder that will contain your PnP files:', {
+          'Select the folder that will contain your Plug & Play files:', {
             canSelectFiles: false,
             canSelectFolders: true,
             canSelectMany: false,
@@ -93,7 +93,7 @@ export class DeviceModelOperator {
           }
           const targetInterface = path.join(rootPath as string, interfaceName);
           if (fs.existsSync(targetInterface)) {
-            return 'The file name specified already exists in the device model.';
+            return 'The file name specified already exists in the folder.';
           }
           return '';
         }
@@ -128,12 +128,14 @@ export class DeviceModelOperator {
       const replaceStr = content.replace(interfaceNamePattern, matchItems[1]);
       fs.writeFileSync(targetInterface, replaceStr);
     } catch (error) {
-      throw new Error(`Create sample interface file failed: ${error.message}`);
+      throw new Error(
+          `Creating Plug & Play interface failed: ${error.message}`);
     }
     await vscode.commands.executeCommand(
         'vscode.openFolder', vscode.Uri.file(rootPath), false);
 
-    vscode.window.showInformationMessage('Interface created successfully');
+    vscode.window.showInformationMessage(
+        'Plug & Play interface was created successfully');
     return;
   }
 
@@ -161,7 +163,7 @@ export class DeviceModelOperator {
           const targetCapabilityModel =
               path.join(rootPath as string, capabilityModelName);
           if (fs.existsSync(targetCapabilityModel)) {
-            return 'The file name specified already exists in the device model.';
+            return 'The file name specified already exists in the folder.';
           }
           return '';
         }
@@ -199,7 +201,7 @@ export class DeviceModelOperator {
       fs.writeFileSync(targetCapabilityModel, replaceStr);
     } catch (error) {
       throw new Error(
-          `Create sample capability model file failed: ${error.message}`);
+          `Creating Plug & Play capability model failed: ${error.message}`);
     }
 
     await vscode.commands.executeCommand(
@@ -226,7 +228,7 @@ export class DeviceModelOperator {
       const option: vscode.InputBoxOptions = {
         value: PnPConstants.repoConnectionStringTemplate,
         prompt:
-            `Please input the connection string to access the model repository.`,
+            'Please input the connection string to the Plug & Play repository.',
         ignoreFocusOut: true
       };
 
@@ -271,7 +273,7 @@ export class DeviceModelOperator {
       const option: vscode.InputBoxOptions = {
         value: PnPConstants.repoConnectionStringTemplate,
         prompt:
-            `Please input the connection string to access the model repository.`,
+            'Please input the connection string to the Plug & Play repository.',
         ignoreFocusOut: true
       };
 
@@ -299,7 +301,7 @@ export class DeviceModelOperator {
       const option: vscode.InputBoxOptions = {
         value: PnPConstants.repoConnectionStringTemplate,
         prompt:
-            `Please input the connection string to access the model repository.`,
+            'Please input the connection string to the Plug & Play repository.',
         ignoreFocusOut: true
       };
 
@@ -356,8 +358,8 @@ export class DeviceModelOperator {
               `Deleting capabilty model with id ${id} completed.`);
         }
       } catch (error) {
-        channel.appendLine(
-            `Deleting ${metaModelValue} with id ${id} failed. Error: ${error}`);
+        channel.appendLine(`Deleting ${metaModelValue} with id ${
+            id} failed. Error: ${error.message}`);
       }
     });
   }
@@ -398,7 +400,7 @@ export class DeviceModelOperator {
         }
       } catch (error) {
         channel.appendLine(`Publishing ${metaModelValue} with id ${
-            id} failed. Error: ${error}`);
+            id} failed. Error: ${error.message}`);
       }
     });
   }
@@ -409,7 +411,7 @@ export class DeviceModelOperator {
       context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
     channel.show();
     if (!fileIds || fileIds.length === 0) {
-      channel.appendLine('Please select the PnP files to edit.');
+      channel.appendLine('Please select the Plug & Play files to download.');
       return;
     }
 
@@ -474,7 +476,7 @@ export class DeviceModelOperator {
 
       } catch (error) {
         channel.appendLine(`Downloading ${metaModelValue} with id ${
-            id} failed. Error: ${error}`);
+            id} failed. Error: ${error.message}`);
       }
     });
     await vscode.commands.executeCommand(
@@ -496,7 +498,8 @@ export class DeviceModelOperator {
     // Get the file to submit:
     const pnpFiles = fs.listSync(rootPath);
     if (!pnpFiles || pnpFiles.length === 0) {
-      const message = 'Unable to find meta model files in the folder.';
+      const message =
+          'Unable to find Plug & Play files in current folder. Please open the folder that contains Plug & Play files and try again.';
       vscode.window.showWarningMessage(message);
       return false;
     }
@@ -512,7 +515,7 @@ export class DeviceModelOperator {
 
     if (fileItems.length === 0) {
       vscode.window.showWarningMessage(
-          'Unable to find the target metamodel files. Please make sure meta model files exists in the target folder.');
+          'Unable to find Plug & Play files in current folder. Please open the folder that contains Plug & Play files and try again.');
       return false;
     }
 
@@ -520,13 +523,12 @@ export class DeviceModelOperator {
       ignoreFocusOut: true,
       matchOnDescription: true,
       matchOnDetail: true,
-      placeHolder: 'Select a Plug & Play meta model file',
+      placeHolder: 'Select a Plug & Play file',
     });
 
     if (!fileSelection) {
       return false;
     }
-
 
     const metaModelType =
         fileSelection.label.endsWith(PnPConstants.interfaceSuffix) ?
@@ -542,7 +544,7 @@ export class DeviceModelOperator {
       const option: vscode.InputBoxOptions = {
         value: PnPConstants.repoConnectionStringTemplate,
         prompt:
-            `Please input the connection string to access the model repository.`,
+            'Please input the connection string to access the Plug & Play repository.',
         ignoreFocusOut: true
       };
 
@@ -579,11 +581,20 @@ export class DeviceModelOperator {
       channel: vscode.OutputChannel): Promise<boolean> {
     try {
       const fileContent = fs.readFileSync(filePath, 'utf8');
-      const fileJson = JSON.parse(fileContent);
-      const fileId = fileJson[constants.idName];
+
+      let fileId = '';
+      try {
+        const fileJson = JSON.parse(fileContent);
+        fileId = fileJson[constants.idName];
+      } catch (error) {
+        vscode.window.showWarningMessage(`${
+            fileName} is not a valid json file. Please modify the content and submit it again.`);
+        return false;
+      }
+
       if (!fileId) {
         vscode.window.showWarningMessage(
-            'Unable to find interface id from the interface file.');
+            'Unable to find interface id from the interface file. Please provide a valid file.');
         return false;
       }
       channel.appendLine(`Load and parse file: ${fileName} successfully.`);
@@ -591,7 +602,7 @@ export class DeviceModelOperator {
       try {
         // First, get the file to retrieve the latest etag.
         channel.appendLine(
-            `Connect to repository to check ${fileId} exists...`);
+            `Connect to Plug & Play repository to check ${fileId} exists...`);
         const interfaceContext =
             await pnpMetamodelRepositoryClient.GetInterfaceByInterfaceIdAsync(
                 PnPUri.Parse(fileId));
@@ -646,9 +657,9 @@ export class DeviceModelOperator {
       }
     } catch (error) {
       channel.appendLine(`Submitting interface: fileName: ${
-          fileName} failed, error: ${error}.`);
+          fileName} failed, error: ${error.message}.`);
       vscode.window.showWarningMessage(
-          `Unable to submit the file, error: ${error}`);
+          `Unable to submit the file, error: ${error.message}`);
       return false;
     }
 
@@ -661,8 +672,17 @@ export class DeviceModelOperator {
       channel: vscode.OutputChannel): Promise<boolean> {
     try {
       const fileContent = fs.readFileSync(filePath, 'utf8');
-      const fileJson = JSON.parse(fileContent);
-      const fileId = fileJson[constants.idName];
+
+      let fileId = '';
+      try {
+        const fileJson = JSON.parse(fileContent);
+        fileId = fileJson[constants.idName];
+      } catch (error) {
+        vscode.window.showWarningMessage(`${
+            fileName} is not a valid json file. Please modify the content and submit it again.`);
+        return false;
+      }
+
       if (!fileId) {
         vscode.window.showWarningMessage(
             'Unable to find id from the capability model file.');
@@ -732,9 +752,9 @@ export class DeviceModelOperator {
       }
     } catch (error) {
       channel.appendLine(`Submitting capability model: fileName: ${
-          fileName} failed, error: ${error}.`);
+          fileName} failed, error: ${error.message}.`);
       vscode.window.showWarningMessage(
-          `Unable to submit the file, error: ${error}`);
+          `Unable to submit the file, error: ${error.message}`);
       return false;
     }
 
@@ -750,7 +770,7 @@ export class DeviceModelOperator {
 
     const option: vscode.InputBoxOptions = {
       value: tags,
-      prompt: `Please input the tags of ${fileName}, separate by ';'`,
+      prompt: `Please input the tags for ${fileName}, separate by ';'`,
       ignoreFocusOut: true
     };
     const result = await vscode.window.showInputBox(option);
