@@ -6,6 +6,7 @@
 </head>
 <body>
 <div id="main">
+
 <header>
   <h1>{{ companyName }}</h1>
   <div class="type_switch">
@@ -14,9 +15,10 @@
   </div>
   <div class="actions">
     <button v-on:click="createPnPFile">New...</button>
-    <button v-on:click="editPnPFiles">Edit</button>
+    <button v-on:click="editPnPFiles">Download</button>
     <button v-on:click="publishPnPFiles">Publish</button>
     <button v-on:click="deletePnPFiles">Delete</button>
+    <button v-on:click="refreshPnPFileList">Refresh</button>
   </div>
 </header>
 <table class="item-list" v-show="type.value === 'Interface'">
@@ -80,6 +82,10 @@
     </tr>
   </tbody>
 </table>
+<div class="load" v-on:click="getNextPagePnPFiles"
+    v-if="type.value === 'Interface' && interfaceNextToken.value || type.value === 'CapabilityModel' && capabilityNextToken.value">Load more...
+</div>
+
 </div>
 <script src="command.js"></script>
 <script src="main.js"></script>

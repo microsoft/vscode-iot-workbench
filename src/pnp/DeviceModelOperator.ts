@@ -270,7 +270,9 @@ export class DeviceModelOperator {
   }
 
 
-  async GetAllInterfaces(context: vscode.ExtensionContext) {
+  async GetAllInterfaces(
+      context: vscode.ExtensionContext, pageSize = 50,
+      continueToken: string|null = null) {
     let connectionString =
         context.workspaceState.get<string>(PnPConstants.modelRepositoryKeyName);
     if (!connectionString) {
@@ -293,12 +295,14 @@ export class DeviceModelOperator {
     }
     const pnpMetamodelRepositoryClient =
         new PnPMetamodelRepositoryClient(connectionString);
-    const result =
-        await pnpMetamodelRepositoryClient.GetAllInterfacesAsync(null, 50);
-    return result.results;
+    const result = await pnpMetamodelRepositoryClient.GetAllInterfacesAsync(
+        continueToken, pageSize);
+    return result;
   }
 
-  async GetAllCapabilities(context: vscode.ExtensionContext) {
+  async GetAllCapabilities(
+      context: vscode.ExtensionContext, pageSize = 50,
+      continueToken: string|null = null) {
     let connectionString =
         context.workspaceState.get<string>(PnPConstants.modelRepositoryKeyName);
     if (!connectionString) {
@@ -323,8 +327,8 @@ export class DeviceModelOperator {
         new PnPMetamodelRepositoryClient(connectionString);
     const result =
         await pnpMetamodelRepositoryClient.GetAllCapabilityModelsAsync(
-            null, 50);
-    return result.results;
+            continueToken, pageSize);
+    return result;
   }
 
   async DeletePnPFiles(

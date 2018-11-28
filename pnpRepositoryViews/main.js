@@ -16,6 +16,12 @@ var repository = new Vue({
     },
     type: {
       value: 'Interface'
+    },
+    interfaceNextToken: {
+      value: ''
+    },
+    capabilityNextToken: {
+      value: ''
     }
   },
   methods: {
@@ -27,12 +33,13 @@ var repository = new Vue({
     deletePnPFiles,
     editPnPFiles,
     publishPnPFiles,
-    getAllPnPFiles
+    getNextPagePnPFiles,
+    refreshPnPFileList
   },
   created: function() {
     this.companyName = this.getCompanyName();
-    getAllPnPFiles.call(this, 'Interface');
-    getAllPnPFiles.call(this, 'CapabilityModel');
+    getNextPagePnPFiles.call(this, 'Interface');
+    getNextPagePnPFiles.call(this, 'CapabilityModel');
   }
 });
 
@@ -57,26 +64,40 @@ function createPnPFile() {
   command(commandName);
 }
 
-function getAllPnPFiles(fileType) {
+function getNextPagePnPFiles(fileType) {
   fileType = typeof fileType === 'string' ? fileType : this.type.value;
-  let commandName, fileList, selectedList;
+  let commandName, fileList, nextToken;
   
   if(fileType === 'Interface') {
     commandName = 'iotworkbench.getAllInterfaces';
     fileList = this.interfaceList;
-    selectedList = this.selectedInterfaces;
+    nextToken = this.interfaceNextToken;
   } else {
     commandName = 'iotworkbench.getAllCapabilities';
     fileList = this.capabilityList;
-    selectedList = this.selectedCapabilities;
+    nextToken = this.capabilityNextToken;
   }
 
-  command(commandName, res => {
-    Vue.set(fileList, 'value', res.result);
-    Vue.set(selectedList, 'value', []);
+  command(commandName, 50, nextToken.value, res => {
+    Vue.set(fileList, 'value', fileList.value.concat(res.result.results));
+    Vue.set(nextToken, 'value', res.result.continuationToken);
   });
 }
 
 function refreshPnPFileList() {
-  setTimeout(getAllPnPFiles.bind(this), 1000); // wait for server refresh
+  let nextToken, selectedList;
+  if(this.type.value === 'Interface') {
+    fileList = this.interfaceList;
+    nextToken = this.interfaceNextToken;
+    selectedList = this.selectedInterfaces;
+  } else {
+    fileList = this.capabilityList;
+    nextToken = this.capabilityNextToken;
+    selectedList = this.selectedCapabilities;
+  }
+
+  Vue.set(fileList, 'value', []);
+  Vue.set(nextToken, 'value', '');
+  Vue.set(selectedList, 'value', []);
+  setTimeout(getNextPagePnPFiles.bind(this), 1000); // wait for server refresh
 }

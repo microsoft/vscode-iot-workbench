@@ -88,3 +88,15 @@ h1 {
 .type_switch a.active {
   border-bottom: 5px solid lightskyblue;
 }
+
+.load {
+  margin: 10px 30px;
+  padding: 5px;
+  background: #ddd;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.load:hover {
+  background: #eee;
+}

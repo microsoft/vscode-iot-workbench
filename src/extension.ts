@@ -617,13 +617,18 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const vscexpress = new VSCExpress(context, 'pnpRepositoryViews');
 
-  vscode.commands.registerCommand('iotworkbench.getAllInterfaces', async () => {
-    return await deviceModelOperator.GetAllInterfaces(context);
-  });
+  vscode.commands.registerCommand(
+      'iotworkbench.getAllInterfaces',
+      async (pageSize?: number, continueToken?: string) => {
+        return await deviceModelOperator.GetAllInterfaces(
+            context, pageSize, continueToken);
+      });
 
   vscode.commands.registerCommand(
-      'iotworkbench.getAllCapabilities', async () => {
-        return await deviceModelOperator.GetAllCapabilities(context);
+      'iotworkbench.getAllCapabilities',
+      async (pageSize?: number, continueToken?: string) => {
+        return await deviceModelOperator.GetAllCapabilities(
+            context, pageSize, continueToken);
       });
 
   vscode.commands.registerCommand(

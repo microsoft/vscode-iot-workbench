@@ -67,11 +67,6 @@
         "category": "IoT Workbench"
       },
       {
-        "command": "iotworkbench.pnp",
-        "title": "Plug & Play",
-        "category": "IoT Workbench"
-      },
-      {
         "command": "iotworkbench.pnpOpenRepositry",
         "title": "Open Model Repository...",
         "category": "Azure IoT Plug & Play"
