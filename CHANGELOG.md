@@ -78,7 +78,7 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 - Release date: May 10, 2018
 
 ### Added
-- Create new IoT Workbench projects.
-- Load existing examples of IoT Workbench project.
+- Create new IoT Device Workbench projects.
+- Load existing examples of IoT Device Workbench project.
 - Compile and upload device code.
 - Config device settings.

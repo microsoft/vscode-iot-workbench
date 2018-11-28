@@ -4,7 +4,7 @@ In this tutorial, you can monitor the MXChip IoT DevKit WiFi information and sen
 
 ## About IoT DevKit
 
-The [MXChip IoT DevKit](https://aka.ms/iot-devkit) (a.k.a. IoT DevKit) is an all-in-one Arduino compatible board with rich peripherals and sensors. You can develop for it using [Azure IoT Workbench ](https://aka.ms/azure-iot-workbench). And it comes with a growing [projects catalog](https://aka.ms/devkit/project-catalog) to guide you prototype Internet of Things (IoT) solutions that take advantage of Microsoft Azure services.
+The [MXChip IoT DevKit](https://aka.ms/iot-devkit) (a.k.a. IoT DevKit) is an all-in-one Arduino compatible board with rich peripherals and sensors. You can develop for it using [Azure IoT Device Workbench ](https://aka.ms/azure-iot-workbench). And it comes with a growing [projects catalog](https://aka.ms/devkit/project-catalog) to guide you prototype Internet of Things (IoT) solutions that take advantage of Microsoft Azure services.
 
 ## What you need
 
@@ -24,40 +24,40 @@ An active Azure subscription. If you do not have one, you can register via one o
 ### Start VS Code
 
 - Start Visual Studio Code.
-- Make sure [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
+- Make sure [Azure IoT Device Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
 - Connect IoT DevKit to your PC.
 
-### Open IoT Workbench Examples
+### Open IoT Device Workbench Examples
 
-Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select **IoT Workbench: Examples**.
+Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Device Workbench**, and then select **IoT Device Workbench: Examples**.
 
-![IoT Workbench: Examples](media/iot-workbench-examples-cmd.png)
+![IoT Device Workbench: Examples](media/iot-workbench-examples-cmd.png)
 
 Select **IoT DevKit**.
 
-![IoT Workbench: Examples -> Select board](media/iot-workbench-examples-board.png)
+![IoT Device Workbench: Examples -> Select board](media/iot-workbench-examples-board.png)
 
-Then the **IoT Workbench Example** window is shown up.
+Then the **IoT Device Workbench Example** window is shown up.
 
-![IoT Workbench, Examples window](media/iot-workbench-examples.png)
+![IoT Device Workbench, Examples window](media/iot-workbench-examples.png)
 
 Find **DevKit State** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
 
-![IoT Workbench, select DevKit State example](media/devkit-state/open-example-devkitstate.jpg)
+![IoT Device Workbench, select DevKit State example](media/devkit-state/open-example-devkitstate.jpg)
 
 ## Provision Azure Services
 
-In the solution window, open the command palette and select **IoT Workbench: Cloud**.
+In the solution window, open the command palette and select **IoT Device Workbench: Cloud**.
 
-![IoT Workbench: Cloud](media/iot-workbench-cloud.png)
+![IoT Device Workbench: Cloud](media/iot-workbench-cloud.png)
 
 Select **Azure Provision**.
 
-![IoT Workbench: Cloud -> Provision](media/iot-workbench-cloud-provision.png)
+![IoT Device Workbench: Cloud -> Provision](media/iot-workbench-cloud-provision.png)
 
 Then VS Code guides you through provisioning the required Azure services.
 
-![IoT Workbench: Cloud -> Provision steps](media/iot-workbench-cloud-provision-steps3.png)
+![IoT Device Workbench: Cloud -> Provision steps](media/iot-workbench-cloud-provision-steps3.png)
 
 The whole process includes:
 
@@ -75,9 +75,9 @@ static string deviceName = "";
 
 ## Deploy Azure Functions
 
-Open the command palette and select **IoT Workbench: Cloud**, then select **Azure Deploy**.
+Open the command palette and select **IoT Device Workbench: Cloud**, then select **Azure Deploy**.
 
-![IoT Workbench: Cloud -> Deploy](media/iot-workbench-cloud-deploy.png)
+![IoT Device Workbench: Cloud -> Deploy](media/iot-workbench-cloud-deploy.png)
 
 ## Config IoT Hub Connection String
 
@@ -90,17 +90,17 @@ Open the command palette and select **IoT Workbench: Cloud**, then select **Azur
 
    ![IoT DevKit Configuration Mode](media/devkit-configuration-mode.png) 
 
-3. Open the command palette and select **IoT Workbench: Device**.
+3. Open the command palette and select **IoT Device Workbench: Device**.
 
-   ![IoT Workbench: Device](media/iot-workbench-device.png)
+   ![IoT Device Workbench: Device](media/iot-workbench-device.png)
 
 4. Select **Config Device Settings**.
 
-   ![IoT Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
+   ![IoT Device Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
 
 5. Select **Select IoT Hub Device Connection String**.
 
-   ![IoT Workbench: Device -> Connection string](media/iot-workbench-device-string1.png)
+   ![IoT Device Workbench: Device -> Connection string](media/iot-workbench-device-string1.png)
 
    This sets the connection string that is retrieved from the `Provision Azure services` step.
 
@@ -110,13 +110,13 @@ Open the command palette and select **IoT Workbench: Cloud**, then select **Azur
 
 ## Build and upload the device code
 
-1. Open the command palette and select **IoT Workbench: Device**, then select **Device Upload**.
+1. Open the command palette and select **IoT Device Workbench: Device**, then select **Device Upload**.
 
-   ![IoT Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
+   ![IoT Device Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
 
 2. VS Code then starts verifying and uploading the code to your DevKit.
 
-   ![IoT Workbench: Device -> Uploaded](media/devkit-state/devkitstate-device-upload.jpg)
+   ![IoT Device Workbench: Device -> Uploaded](media/devkit-state/devkitstate-device-upload.jpg)
 
 3. The IoT DevKit reboots and starts running the code.
 

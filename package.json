@@ -1,6 +1,6 @@
 {
   "name": "vscode-iot-workbench",
-  "displayName": "Azure IoT Workbench",
+  "displayName": "Azure IoT Device Workbench",
   "description": "Integrated environment to enable easy development on IoT prototype devices (e.g. MXChip IoT DevKit, teXXmo IoT Button, ESP32 and Raspberry Pi) with multiple Azure services.",
   "repository": {
     "type": "git",
@@ -38,32 +38,32 @@
       {
         "command": "iotworkbench.initializeProject",
         "title": "Create Project...",
-        "category": "IoT Workbench"
+        "category": "IoT Device Workbench"
       },
       {
         "command": "iotworkbench.examples",
         "title": "Examples",
-        "category": "IoT Workbench"
+        "category": "IoT Device Workbench"
       },
       {
         "command": "iotworkbench.device",
         "title": "Device",
-        "category": "IoT Workbench"
+        "category": "IoT Device Workbench"
       },
       {
         "command": "iotworkbench.cloud",
         "title": "Cloud",
-        "category": "IoT Workbench"
+        "category": "IoT Device Workbench"
       },
       {
         "command": "iotworkbench.help",
         "title": "Help",
-        "category": "IoT Workbench"
+        "category": "IoT Device Workbench"
       },
       {
         "command": "iotworkbench.workbench",
         "title": "Set Workbench Path",
-        "category": "IoT Workbench"
+        "category": "IoT Device Workbench"
       }
     ],
     "configuration": [
@@ -91,7 +91,7 @@
         }
       },
       {
-        "title": "IoT Workbench Configuration",
+        "title": "IoT Device Workbench Configuration",
         "properties": {
           "IoTWorkbench.workbench": {
             "type": "string"
