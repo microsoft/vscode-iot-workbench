@@ -14,6 +14,7 @@ import {PnPUri} from './pnp-api/Validator/PnPUri';
 import * as utils from '../utils';
 import {MetaModelType, PnPContext} from './pnp-api/DataContracts/PnPContext';
 import {PnPConnector} from './PnPConnector';
+import {DialogResponses} from '../DialogResponses';
 
 const constants = {
   storedFilesInfoKeyName: 'StoredFilesInfo',
@@ -621,7 +622,19 @@ export class DeviceModelOperator {
               fileId} is already published. You could not updated it.`);
           return false;
         }
-        channel.appendLine(`Interface file exists, updating ${fileId}... `);
+        channel.appendLine(`Interface file with id:${fileId} exists... `);
+
+        const msg = `The interface with id ${
+            fileId} already exists in the Plug & Play Repository, do you want to overwrite it?`;
+        const result: vscode.MessageItem|undefined =
+            await vscode.window.showInformationMessage(
+                msg, DialogResponses.yes, DialogResponses.no);
+
+        if (result === DialogResponses.no) {
+          channel.appendLine('Submit interface file cancelled.');
+          return false;
+        }
+        channel.appendLine(`Updating interface with id:${fileId}... `);
 
         const interfaceTags =
             await this.GetTagsforDocuments(fileName, interfaceContext.tags);
@@ -714,8 +727,18 @@ export class DeviceModelOperator {
           return false;
         }
 
-        channel.appendLine(
-            `Capability model file exists, updating ${fileId}... `);
+        const msg = `The capability model with id ${
+            fileId} already exists in the Plug & Play Repository, do you want to overwrite it?`;
+        const result: vscode.MessageItem|undefined =
+            await vscode.window.showInformationMessage(
+                msg, DialogResponses.yes, DialogResponses.no);
+
+        if (result === DialogResponses.no) {
+          channel.appendLine('Submit capability model cancelled.');
+          return false;
+        }
+
+        channel.appendLine(`Updating capability model with id:${fileId}...`);
 
         const capabilityModelTags = await this.GetTagsforDocuments(
             fileName, capabilityModelContext.tags);
