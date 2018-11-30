@@ -13,9 +13,8 @@ export class PnPFileNames {
   static readonly sampleInterfaceName = 'sample.interface.json';
   static readonly sampleCapabilityModelName = 'sample.capabilitymodel.json';
   static readonly schemaFolderName = 'schemas';
-  static readonly defaultInterfaceName = 'myInterface.interface.json';
-  static readonly defaultCapabilityModelName =
-      'myCapabilityModel.capabilitymodel.json';
+  static readonly defaultInterfaceName = 'myInterface';
+  static readonly defaultCapabilityModelName = 'myCapabilityModel';
 }
 
 export class PnPConstants {

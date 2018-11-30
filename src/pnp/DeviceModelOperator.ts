@@ -87,14 +87,16 @@ export class DeviceModelOperator {
         if (!interfaceName) {
           return 'Please provide a valid interface name.';
         }
+        if (!/\.interface\.json$/i.test(interfaceName)) {
+          interfaceName += PnPConstants.interfaceSuffix;
+        }
+
         if (/^([a-z_]|[a-z_][-a-z0-9_.]*[a-z0-9_])(\.interface\.json)?$/i.test(
                 interfaceName)) {
-          if (!/\.interface\.json$/i.test(interfaceName)) {
-            interfaceName += PnPConstants.interfaceSuffix;
-          }
           const targetInterface = path.join(rootPath as string, interfaceName);
           if (fs.existsSync(targetInterface)) {
-            return 'The file name specified already exists in the folder.';
+            return `The file with name ${
+                interfaceName} already exists in current folder.`;
           }
           return '';
         }
@@ -135,8 +137,10 @@ export class DeviceModelOperator {
     await vscode.commands.executeCommand(
         'vscode.openFolder', vscode.Uri.file(rootPath), false);
 
-    vscode.window.showInformationMessage(
-        'Plug & Play interface was created successfully');
+    await vscode.window.showTextDocument(vscode.Uri.file(targetInterface));
+
+    vscode.window.showInformationMessage(`New Plug & Play interface ${
+        interfaceFileName} was created successfully`);
     return;
   }
 
@@ -156,15 +160,16 @@ export class DeviceModelOperator {
         if (!capabilityModelName) {
           return 'Please provide a valid capability model name.';
         }
+        if (!/\.capabilitymodel\.json$/i.test(capabilityModelName)) {
+          capabilityModelName += PnPConstants.capabilityModelSuffix;
+        }
         if (/^([a-z_]|[a-z_][-a-z0-9_.]*[a-z0-9_])(\.capabilitymodel\.json)?$/i
                 .test(capabilityModelName)) {
-          if (!/\.capabilitymodel\.json$/i.test(capabilityModelName)) {
-            capabilityModelName += PnPConstants.capabilityModelSuffix;
-          }
           const targetCapabilityModel =
               path.join(rootPath as string, capabilityModelName);
           if (fs.existsSync(targetCapabilityModel)) {
-            return 'The file name specified already exists in the folder.';
+            return `The file with name ${
+                capabilityModelName} already exists in current folder.`;
           }
           return '';
         }
@@ -208,8 +213,11 @@ export class DeviceModelOperator {
     await vscode.commands.executeCommand(
         'vscode.openFolder', vscode.Uri.file(rootPath), false);
 
-    vscode.window.showInformationMessage(
-        'capability model created successfully');
+    await vscode.window.showTextDocument(
+        vscode.Uri.file(targetCapabilityModel));
+
+    vscode.window.showInformationMessage(`New Plug & Play capability model ${
+        capabilityModelFileName} created successfully`);
     return;
   }
 
