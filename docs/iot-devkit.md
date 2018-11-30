@@ -13,6 +13,9 @@ Azure IoT Workbench provides an integrated experience to develop IoT solutions. 
 Follow these steps to prepare the development environment for the IoT DevKit:
 
 1. Download and install [Arduino IDE](https://www.arduino.cc/en/Main/Software). It provides the necessary toolchain for compiling and uploading Arduino code.
+
+    **Note:** Arduino IDE `1.8.7` has breaking changes, causing board package and library installation failures. It is recommended to that you install version `1.8.6`
+
    * Windows: Use Windows Installer version
    * macOS: Drag and drop the Arduino into `/Applications`
    * Ubuntu: Unzip it into `$HOME/Downloads/arduino-1.8.5`
