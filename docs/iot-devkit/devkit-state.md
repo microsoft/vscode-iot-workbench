@@ -45,6 +45,10 @@ Find **DevKit State** and click **Open Sample** button. A new VS Code window wit
 
 ![IoT Device Workbench, select DevKit State example](media/devkit-state/open-example-devkitstate.jpg)
 
+A popup will show asking to restore packages. Click **Restore** to restore the NuGet packages for the Azure Functions app.
+
+![Azure Functions app restore packages](media/functions-restore-packages.png)
+
 ## Provision Azure Services
 
 In the solution window, open the command palette and select **IoT Device Workbench: Cloud**.
@@ -62,15 +66,17 @@ Then VS Code guides you through provisioning the required Azure services.
 The whole process includes:
 
 - Select an existing IoT Hub or create a new IoT Hub.
-- Select an existing IoT Hub device or create a new IoT Hub device. 
+- Select an existing IoT Hub device or create a new IoT Hub device.
 - Create a new Function App.
 
 Please take a note of the Function App name and IoT Hub device name you created. It will be used in the next section.
 
 ## Modify code for Azure Functions
-Open **devkit-state\run.csx** and modify the following line with the device name you provisioned in previous step:
+
+Open **Functions\State.cs** and modify the following line with the device name you provisioned in previous step:
+
 ```cpp
-static string deviceName = "";
+static readonly string deviceName = "";
 ```
 
 ## Deploy Azure Functions
@@ -88,7 +94,7 @@ Open the command palette and select **IoT Device Workbench: Cloud**, then select
 
 2. The screen displays the DevKit ID and 'Configuration'.
 
-   ![IoT DevKit Configuration Mode](media/devkit-configuration-mode.png) 
+   ![IoT DevKit Configuration Mode](media/devkit-configuration-mode.png)
 
 3. Open the command palette and select **IoT Device Workbench: Device**.
 
@@ -98,15 +104,23 @@ Open the command palette and select **IoT Device Workbench: Cloud**, then select
 
    ![IoT Device Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
 
-5. Select **Select IoT Hub Device Connection String**.
+5. Select **Config Device Connection String**.
 
-   ![IoT Device Workbench: Device -> Connection string](media/iot-workbench-device-string1.png)
+   ![IoT Workbench: Device -> Settings -> Connection string](media/iot-workbench-device-connectionstring.png)
+
+6. Select **Select IoT Hub Device Connection String**.
+
+   ![IoT Workbench: Device -> Connection string -> Select](media/iot-workbench-device-string1.png)
 
    This sets the connection string that is retrieved from the `Provision Azure services` step.
 
-6. The configuration success notification popup bottom right corner once it's done.
+7. Click **OK** on the popup to confirm the device is in Configuration mode.
 
-   ![IoT DevKit Connection String OK](media/iot-workbench-connection-done.png) 
+   ![IoT DevKit Confirm configuration mode](media/devkit-configuration-mode-popup.png)
+
+8. The configuration success notification popup bottom right corner once it's done.
+
+   ![IoT DevKit Connection String OK](media/iot-workbench-connection-done.png)
 
 ## Build and upload the device code
 
@@ -126,6 +140,7 @@ Open the command palette and select **IoT Device Workbench: Cloud**, then select
 2. Input the Function App name you write down.
 3. Click connect button.
 4. You should see DevKit state in a few seconds.
+
 ![web page](media/devkit-state/devkit-state-function-app-name.png)
 
 ## Control DevKit User LED
