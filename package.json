@@ -50,16 +50,6 @@
         "category": "Azure IoT Device Workbench"
       },
       {
-        "command": "iotworkbench.device",
-        "title": "Device",
-        "category": "Azure IoT Device Workbench"
-      },
-      {
-        "command": "iotworkbench.cloud",
-        "title": "Cloud",
-        "category": "Azure IoT Device Workbench"
-      },
-      {
         "command": "iotworkbench.help",
         "title": "Help",
         "category": "Azure IoT Device Workbench"
