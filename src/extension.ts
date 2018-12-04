@@ -5,106 +5,18 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import * as fs from 'fs-plus';
-import * as path from 'path';
 import {ProjectInitializer} from './projectInitializer';
 import {DeviceOperator} from './DeviceOperator';
 import {AzureOperator} from './AzureOperator';
 import {IoTProject} from './Models/IoTProject';
 import {ExampleExplorer} from './exampleExplorer';
 import {IoTWorkbenchSettings} from './IoTSettings';
-import {CommandItem} from './Models/Interfaces/CommandItem';
 import {ConfigHandler} from './configHandler';
 import {ConfigKey, EventNames, ContentView} from './constants';
 import {ContentProvider} from './contentProvider';
 import {TelemetryContext, callWithTelemetry, TelemetryWorker} from './telemetry';
 import {UsbDetector} from './usbDetector';
 import {HelpProvider} from './helpProvider';
-import {AZ3166Device} from './Models/AZ3166Device';
-import {IoTButtonDevice} from './Models/IoTButtonDevice';
-import {RaspberryPiDevice} from './Models/RaspberryPiDevice';
-import {Esp32Device} from './Models/Esp32Device';
-
-function filterMenu(commands: CommandItem[]) {
-  for (let i = 0; i < commands.length; i++) {
-    const command = commands[i];
-    let filtered = true;
-    let containDeviceId = false;
-    if (command.only) {
-      let commandList: string[] = [];
-      if (typeof command.only === 'string') {
-        commandList = [command.only];
-      } else {
-        commandList = command.only;
-      }
-
-      for (const key of commandList) {
-        const hasRequiredConfig = ConfigHandler.get(key);
-        if (hasRequiredConfig) {
-          filtered = false;
-          break;
-        }
-      }
-
-      if (filtered) {
-        commands.splice(i, 1);
-        i--;
-      }
-    }
-    if (command.deviceIds) {
-      const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
-      for (const requiredDivice of command.deviceIds) {
-        if (requiredDivice === boardId) {
-          containDeviceId = true;
-        }
-      }
-      if (!containDeviceId) {
-        commands.splice(i, 1);
-        i--;
-        filtered = true;
-      }
-    }
-    if (!filtered && command.children) {
-      command.children = filterMenu(command.children);
-    }
-  }
-  return commands;
-}
-
-async function renderMenu(
-    parentLabel: string, commands: CommandItem[]|undefined) {
-  if (commands === undefined) {
-    return;
-  }
-
-  commands = filterMenu(commands);
-
-  const selection = await vscode.window.showQuickPick(
-      commands, {ignoreFocusOut: true, placeHolder: parentLabel});
-  if (!selection) {
-    return;
-  }
-
-  for (let i = 0; i < commands.length; i++) {
-    if (commands[i].label === selection.label &&
-        commands[i].description === selection.description) {
-      if (commands[i].click !== undefined) {
-        executeCommand(commands[i].click);
-      } else if (commands[i].children !== undefined) {
-        renderMenu(commands[i].label, commands[i].children);
-      }
-      return;
-    }
-  }
-}
-
-// tslint:disable-next-line: no-any
-function executeCommand(command: ((...args: any[]) => any)|undefined) {
-  if (command === undefined) {
-    return;
-  }
-  command();
-}
 
 
 // this method is called when your extension is activated
@@ -165,12 +77,6 @@ export async function activate(context: vscode.ExtensionContext) {
         projectInitializerBinder);
   };
 
-  const crcGenerateProvider = async () => {
-    callWithTelemetry(
-        EventNames.generateOtaCrc, outputChannel, false, context,
-        deviceOperator.generateCrc);
-  };
-
   const azureProvisionProvider = async () => {
     callWithTelemetry(
         EventNames.azureProvisionEvent, outputChannel, true, context,
@@ -219,74 +125,6 @@ export async function activate(context: vscode.ExtensionContext) {
         initializeExampleBinder);
   };
 
-  const menuForDevice: CommandItem[] = [
-    {
-      label: 'Config Device Settings',
-      description: '',
-      detail: 'Config the settings on device to connect to Azure',
-      click: deviceSettingsConfigProvider
-    },
-    {
-      label: 'Device Compile',
-      description: '',
-      detail: 'Compile device side code',
-      click: deviceCompileProvider,
-      deviceIds: [AZ3166Device.boardId, Esp32Device.boardId]
-    },
-    {
-      label: 'Device Upload',
-      description: '',
-      detail: 'Upload code to device',
-      click: deviceUploadProvider,
-      deviceIds: [
-        AZ3166Device.boardId, RaspberryPiDevice.boardId, Esp32Device.boardId
-      ]
-    },
-    {
-      label: 'Install Device SDK',
-      description: '',
-      detail: 'Download device board package',
-      click: devicePackageManager,
-      deviceIds: [
-        AZ3166Device.boardId, IoTButtonDevice.boardId,
-        RaspberryPiDevice.boardId, Esp32Device.boardId
-      ]
-    },
-    {
-      label: 'Generate CRC',
-      description: '',
-      detail: 'Generate CRC for OTA',
-      click: crcGenerateProvider,
-      deviceIds: [AZ3166Device.boardId, Esp32Device.boardId]
-    }
-  ];
-
-  const menuForCloud: CommandItem[] = [
-    {
-      label: 'Azure Provision',
-      description: '',
-      detail: 'Provision Azure services',
-      click: azureProvisionProvider
-    },
-    {
-      label: 'Azure Deploy',
-      description: '',
-      detail: 'Deploy Azure Services',
-      only: [ConfigKey.functionPath, ConfigKey.asaPath],
-      click: azureDeployProvider
-    }
-  ];
-
-  const iotdeviceMenu =
-      vscode.commands.registerCommand('iotworkbench.device', async () => {
-        renderMenu('IoT Device Workbench: Device', menuForDevice);
-      });
-
-  const iotcloudMenu =
-      vscode.commands.registerCommand('iotworkbench.cloud', async () => {
-        renderMenu('IoT Device Workbench: Cloud', menuForCloud);
-      });
-
   const projectInit = vscode.commands.registerCommand(
       'iotworkbench.initializeProject', projectInitProvider);
 
@@ -295,6 +133,24 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const exampleInitialize = vscode.commands.registerCommand(
       'iotworkbench.exampleInitialize', examplesInitializeProvider);
+
+  const deviceCompile = vscode.commands.registerCommand(
+      'iotworkbench.deviceCompile', deviceCompileProvider);
+
+  const deviceUpload = vscode.commands.registerCommand(
+      'iotworkbench.deviceUpload', deviceUploadProvider);
+
+  const azureProvision = vscode.commands.registerCommand(
+      'iotworkbench.azureProvision', azureProvisionProvider);
+
+  const azureDeploy = vscode.commands.registerCommand(
+      'iotworkbench.azureDeploy', azureDeployProvider);
+
+  const deviceToolchain = vscode.commands.registerCommand(
+      'iotworkbench.installToolchain', devicePackageManager);
+
+  const configureDevice = vscode.commands.registerCommand(
+      'iotworkbench.configureDevice', deviceSettingsConfigProvider);
 
   const helpInit =
       vscode.commands.registerCommand('iotworkbench.help', async () => {
@@ -309,13 +165,17 @@ export async function activate(context: vscode.ExtensionContext) {
         return;
       });
 
-  context.subscriptions.push(iotdeviceMenu);
-  context.subscriptions.push(iotcloudMenu);
   context.subscriptions.push(projectInit);
   context.subscriptions.push(examples);
   context.subscriptions.push(exampleInitialize);
   context.subscriptions.push(helpInit);
   context.subscriptions.push(workbenchPath);
+  context.subscriptions.push(deviceCompile);
+  context.subscriptions.push(deviceUpload);
+  context.subscriptions.push(azureProvision);
+  context.subscriptions.push(azureDeploy);
+  context.subscriptions.push(deviceToolchain);
+  context.subscriptions.push(configureDevice);
 
   const usbDetector = new UsbDetector(context, outputChannel);
   usbDetector.startListening();
