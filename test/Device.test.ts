@@ -14,7 +14,8 @@ suite('IoT Device Workbench: Device', () => {
   // tslint:disable-next-line: only-arrow-functions
   test('property of device should be set correctly', function(done) {
     const context = new TestExtensionContext();
-    const device = new AZ3166Device(context, '', 'emptySketch.ino');
+    const channel = vscode.window.createOutputChannel('IoT workbench test');
+    const device = new AZ3166Device(context, channel, '', 'emptySketch.ino');
     assert.equal(device.getDeviceType(), DeviceType.MXChip_AZ3166);
     assert.equal(device.getComponentType(), ComponentType.Device);
     done();
