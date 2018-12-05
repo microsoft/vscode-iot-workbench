@@ -1,89 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="vue.js"></script>
+<meta charset="UTF-8">
 <link rel="stylesheet" href="style.css">
+<script src="vue.js"></script>
 </head>
 <body>
-<div id="main">
+<div id="main" v-bind:class="{'show-search-bar': showSearchBar}" v-cloak>
 
-<header>
-  <h1>{{ companyName }}</h1>
-  <div class="type_switch">
-    <a href="#" v-bind:class="{active: type.value === 'Interface'}" v-on:click="type.value = 'Interface'">Interface</a>
-    <a href="#" v-bind:class="{active: type.value === 'CapabilityModel'}" v-on:click="type.value = 'CapabilityModel'">Capability Model</a>
+<header v-bind:class="{'show-status-selector': showStatusSelector, 'show-tag-selector': showTagSelector}">
+<h1 class="company-name">{{ companyName }}</h1>
+<div class="pnp-file-type-tab">
+  <span v-bind:class="{active: type.value === 'Interface'}" v-on:click="type.value = 'Interface'">Device Capability Models</span>
+  <span v-bind:class="{active: type.value === 'CapabilityModel'}" v-on:click="type.value = 'CapabilityModel'">Interfaces</span>
+</div>
+<div class="action-bar">
+  <button class="with-icon new" v-on:click="createPnPFile">New</button>
+  <button class="with-icon download" v-on:click="editPnPFiles" v-bind:disabled="type.value === 'Interface' && !this.selectedInterfaces.value.length || type.value === 'CapabilityModel' && !this.selectedCapabilities.value.length">Download</button>
+  <button class="with-icon publish" v-on:click="publishPnPFiles" v-bind:disabled="type.value === 'Interface' && !this.selectedInterfaces.value.length || type.value === 'CapabilityModel' && !this.selectedCapabilities.value.length">Publish</button>
+  <button class="with-icon delete" v-on:click="deletePnPFiles" v-bind:disabled="type.value === 'Interface' && !this.selectedInterfaces.value.length || type.value === 'CapabilityModel' && !this.selectedCapabilities.value.length">Delete</button>
+  <button class="with-icon refresh right" v-on:click="refreshPnPFileList"></button>
+  <button class="with-icon filter right" v-on:click="showHideSearchBar"></button>
+</div>
+<div class="with-icon search-bar">
+  <input type="text" placeholder="Filter by keyword" v-model="filterKeywords">
+  <button class="with-icon clear right" v-on:click="clearFilter"></button>
+  <button class="dropdown tags right" v-on:click="showHideTagSelector">{{ filterTags.length ? (filterTags.length > 1 ? (filterTags.length + ' Tags') : '1 Tag') : 'Tags' }}</button>
+  <button class="dropdown status right" v-on:click="showHideStatusSelector">{{ filterStatus === 'All' ? 'Status' : filterStatus }}</button>
+</div>
+<div class="tag-selector">
+  <div class="tag-list">
+    <div class="tag-list-item" v-for="tag in searchTags(allTags.value)">
+      <label><input type="checkbox" v-bind:value="tag" v-model="filterTags">{{ tag }}</label>
+    </div>
   </div>
-  <div class="actions">
-    <button v-on:click="createPnPFile">New...</button>
-    <button v-on:click="editPnPFiles">Download</button>
-    <button v-on:click="publishPnPFiles">Publish</button>
-    <button v-on:click="deletePnPFiles">Delete</button>
-    <button v-on:click="refreshPnPFileList">Refresh</button>
+</div>
+<div class="tag-selector-search-bar">
+  <div class="with-icon tag-search-bar">
+    <input type="text" placeholder="Search" v-model="filterTagsKeywords">
   </div>
+  <div class="tag-search-action">
+    <div class="tag-and-or">
+      <input type="radio" name="tag-and-or" value="or" id="tag-or" v-model="filterTagsOrAnd"><label for="tag-or">or</label>
+      <input type="radio" name="tag-and-or" value="and" id="tag-and" v-model="filterTagsOrAnd"><label for="tag-and">and</label>
+    </div>
+    <div class="tag-clear" v-on:click="filterTags = []" v-bind:class="{disabled: !filterTags.length}">Clear</div>
+  </div>
+</div>
+<div class="status-selector">
+  <div class="status-item" v-on:click="selectFilterStatus('All')">All</div>
+  <div class="status-item" v-on:click="selectFilterStatus('Saved')">Saved</div>
+  <div class="status-item" v-on:click="selectFilterStatus('Published')">Published</div>
+</div>
 </header>
-<table class="item-list" v-show="type.value === 'Interface'">
-  <thead>
-    <tr>
-      <th></th>
-      <th>Name</th>
-      <th>Resource ID</th>
-      <th>Type</th>
-      <th>ID</th>
-      <th>Version</th>
-      <th>Custom tags</th>
-      <th>Status</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr v-for="interface in interfaceList.value">
-      <td>
-        <input type="checkbox" v-bind:id="interface.resourceId" v-bind:value="interface.id" v-model="selectedInterfaces.value">
-      </td>
-      <td>{{ interface.displayName }}</td>
-      <td>{{ interface.resourceId }}</td>
-      <td>{{ type.value }}</td>
-      <td>{{ interface.id }}</td>
-      <td>{{ interface.version }}</td>
-      <td>
-        <span class="tag" v-if="interface.tags" v-for="tag in interface.tags">#{{ tag }}</span>
-      </td>
-      <td>{{ interface.published ? 'Published' : 'Saved' }}</td>
-    </tr>
-  </tbody>
+<div class="content">
+
+<table v-show="type.value === 'Interface'">
+<thead>
+<tr>
+  <th></th>
+  <th>Name</th>
+  <th>ID</th>
+  <th>Version</th>
+  <th>Custom Tags</th>
+  <th>Status</th>
+</tr>
+</thead>
+<tbody v-on:scroll="onScrollTable">
+<tr v-for="interface in filterItems(interfaceList.value)" v-on:click="addRemoveInterface(interface.id)">
+  <td><input type="checkbox" v-bind:value="interface.id" v-model="selectedInterfaces.value"></td>
+  <td v-bind:title="interface.displayName">{{ interface.displayName }}</td>
+  <td v-bind:title="interface.id">{{ interface.id }}</td>
+  <td v-bind:title="interface.version">{{ interface.version }}</td>
+  <td>tags here</td>
+  <td>{{ interface.published ? 'Published' : 'Saved' }}</td>
+</tr>
+<tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
+  <td colspan="6">Loading...</td>
+</tr>
+<tr v-show="!loadingPnPInterfaces.value && interfaceNextToken.value">
+  <td colspan="6"></td>
+</tr>
+</tbody>
 </table>
 
-<table class="item-list" v-show="type.value === 'CapabilityModel'">
-  <thead>
-    <tr>
-      <th></th>
-      <th>Name</th>
-      <th>Resource ID</th>
-      <th>Type</th>
-      <th>ID</th>
-      <th>Version</th>
-      <th>Custom tags</th>
-      <th>Status</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr v-for="capability in capabilityList.value">
-      <td>
-        <input type="checkbox" v-bind:id="capability.resourceId" v-bind:value="capability.id" v-model="selectedCapabilities.value">
-      </td>
-      <td>{{ capability.displayName }}</td>
-      <td>{{ capability.resourceId }}</td>
-      <td>{{ type.value }}</td>
-      <td>{{ capability.id }}</td>
-      <td>{{ capability.version }}</td>
-      <td>
-        <span class="tag" v-if="capability.tags" v-for="tag in capability.tags">#{{ tag }}</span>
-      </td>
-      <td>{{ capability.published ? 'Published' : 'Saved' }}</td>
-    </tr>
-  </tbody>
+<table v-show="type.value === 'CapabilityModel'">
+<thead>
+<tr>
+  <th></th>
+  <th>Name</th>
+  <th>ID</th>
+  <th>Version</th>
+  <th>Custom Tags</th>
+  <th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr v-for="capability in filterItems(capabilityList.value)" v-on:click="addRemoveCapability(capability.id)">
+  <td><input type="checkbox" v-bind:value="capability.id" v-model="selectedCapabilities.value"></td>
+  <td v-bind:title="capability.displayName">{{ capability.displayName }}</td>
+  <td v-bind:title="capability.id">{{ capability.id }}</td>
+  <td v-bind:title="capability.version">{{ capability.version }}</td>
+  <td>tags here</td>
+  <td>{{ capability.published ? 'Published' : 'Saved' }}</td>
+</tr>
+<tr class="loading-pnp-files" v-show="loadingPnPCapabilities.value">
+  <td colspan="6">Loading...</td>
+</tr>
+<tr v-show="!loadingPnPCapabilities.value && capabilityNextToken.value">
+  <td colspan="6"></td>
+</tr>
+</tbody>
 </table>
-<div class="load" v-on:click="getNextPagePnPFiles"
-    v-if="type.value === 'Interface' && interfaceNextToken.value || type.value === 'CapabilityModel' && capabilityNextToken.value">Load more...
+
 </div>
 
 </div>
