@@ -24,3 +24,8 @@ export class PnPConstants {
   static readonly interfaceSuffix = '.interface.json';
   static readonly capabilityModelSuffix = '.capabilitymodel.json';
 }
+
+export class CodeGenConstants {
+  static readonly codeGeneratorToolPath = 'pnp-codegen';
+  static readonly codeGeneratorVersionKey = 'pnp/codeGenVersion';
+}

@@ -24,7 +24,7 @@ import {AZ3166Device} from './Models/AZ3166Device';
 import {IoTButtonDevice} from './Models/IoTButtonDevice';
 import {RaspberryPiDevice} from './Models/RaspberryPiDevice';
 import {Esp32Device} from './Models/Esp32Device';
-import {CodeGenerator} from './pnp/CodeGenerator';
+import {CodeGenerateCore} from './pnp/CodeGenerateCore';
 import {PnPMetaModelUtility, PnPMetaModelContext} from './pnp/PnPMetaModelUtility';
 import {PnPMetaModelParser, PnPMetaModelGraph} from './pnp/PnPMetaModelGraph';
 import {DeviceModelOperator} from './pnp/DeviceModelOperator';
@@ -365,7 +365,7 @@ export async function activate(context: vscode.ExtensionContext) {
       },
       '"');
 
-  const codeGenerator = new CodeGenerator();
+  const codeGenerator = new CodeGenerateCore();
 
   const telemetryContext: TelemetryContext = {
     properties: {result: 'Succeeded', error: '', errorMessage: ''},
