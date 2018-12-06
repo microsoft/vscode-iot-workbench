@@ -6,8 +6,9 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-plus';
 import * as path from 'path';
-import {VSCExpress} from 'vscode-express';
+import * as url from 'url';
 
+import {VSCExpress} from 'vscode-express';
 import {PnPFileNames, PnPConstants} from './PnPConstants';
 import {PnPMetamodelRepositoryClient} from './pnp-api/PnPMetamodelRepositoryClient';
 import {PnPUri} from './pnp-api/Validator/PnPUri';
@@ -16,10 +17,10 @@ import {MetaModelType, PnPContext} from './pnp-api/DataContracts/PnPContext';
 import {PnPConnector} from './PnPConnector';
 import {DialogResponses} from '../DialogResponses';
 
+
 const constants = {
   storedFilesInfoKeyName: 'StoredFilesInfo',
-  idName: '@id',
-  displayName: 'displayName'
+  idName: '@id'
 };
 
 
@@ -469,9 +470,20 @@ export class DeviceModelOperator {
         }
         if (fileContext) {
           const fileJson = JSON.parse(fileContext.content);
-          const displayName = fileJson[constants.displayName] ?
-              fileJson[constants.displayName] :
-              metaModelValue;
+          const pathName = url.parse(fileJson[constants.idName]).pathname;
+          if (!pathName) {
+            throw new Error(`Unable to parse the id of the file. id: ${
+                fileJson[constants.idName]}`);
+          }
+
+          const names: string[] = pathName.replace(/^\//, '').split('/');
+          // at least the path should contain name & version
+          if (names.length < 2) {
+            throw new Error(`The id of the file is not valid. id: ${
+                fileJson[constants.idName]}`);
+          }
+
+          const displayName = names[names.length - 2];
           let counter = 0;
           let candidateName = displayName + suffix;
           while (true) {
