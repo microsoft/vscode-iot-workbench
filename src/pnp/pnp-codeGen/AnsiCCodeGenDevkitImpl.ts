@@ -13,7 +13,7 @@ import {AnsiCCodeGeneratorBase} from './Interfaces/AnsiCCodeGeneratorBase';
 
 const constants = {
   deviceDefaultFolderName: 'Device',
-  sketchFileName: 'pnp-device.ino'
+  sketchFileName: 'device-ansic.ino'
 };
 
 export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
