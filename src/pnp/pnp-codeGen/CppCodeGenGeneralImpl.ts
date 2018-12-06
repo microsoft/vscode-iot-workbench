@@ -12,7 +12,11 @@ export class CppCodeGenGeneralImpl extends CppCodeGeneratorBase {
       connectionString: string): Promise<boolean> {
     // Invoke PnP toolset to generate the code
     const retvalue =
-        this.GenerateCppCodeCore(targetPath, filePath, connectionString);
+        await this.GenerateCppCodeCore(targetPath, filePath, connectionString);
+    if (retvalue) {
+      await vscode.commands.executeCommand(
+          'vscode.openFolder', vscode.Uri.file(targetPath), true);
+    }
     return retvalue;
   }
 }

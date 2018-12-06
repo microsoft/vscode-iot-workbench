@@ -10,8 +10,12 @@ export class AnsiCCodeGenGeneralImpl extends AnsiCCodeGeneratorBase {
       targetPath: string, filePath: string, fileCoreName: string,
       connectionString: string): Promise<boolean> {
     // Invoke PnP toolset to generate the code
-    const retvalue =
-        this.GenerateAnsiCCodeCore(targetPath, filePath, connectionString);
+    const retvalue = await this.GenerateAnsiCCodeCore(
+        targetPath, filePath, connectionString);
+    if (retvalue) {
+      await vscode.commands.executeCommand(
+          'vscode.openFolder', vscode.Uri.file(targetPath), true);
+    }
     return retvalue;
   }
 }

@@ -56,11 +56,6 @@ export class CodeGenerateCore {
 
     // Step 1: list all files from device model folder for selection.
     const pnpFiles = fs.listSync(rootPath);
-    if (!pnpFiles || pnpFiles.length === 0) {
-      const message = 'Unable to find device model files in the folder.';
-      vscode.window.showWarningMessage(message);
-      return false;
-    }
 
     const pnpItems: vscode.QuickPickItem[] = [];
     pnpFiles.forEach((filePath: string) => {
@@ -69,6 +64,13 @@ export class CodeGenerateCore {
         pnpItems.push({label: fileName, description: ''});
       }
     });
+
+    if (pnpItems.length === 0) {
+      const message =
+          'Unable to find capability model files in the folder. Please open a folder that contains capability model files.';
+      vscode.window.showWarningMessage(message);
+      return false;
+    }
 
     const fileSelection = await vscode.window.showQuickPick(pnpItems, {
       ignoreFocusOut: true,
@@ -89,11 +91,6 @@ export class CodeGenerateCore {
     const fileCoreName = matchItems[1];
 
     const selectedFilePath = path.join(rootPath, fileSelection.label);
-    let metaModelType: MetaModelType = MetaModelType.Interface;
-
-    if (fileSelection.label.endsWith(PnPConstants.capabilityModelSuffix)) {
-      metaModelType = MetaModelType.CapabilityModel;
-    }
 
     // Get the connection string of the pnp repo
     let connectionString =
@@ -175,15 +172,24 @@ export class CodeGenerateCore {
     if (!codeGenerator) {
       return false;
     }
-    const result = await codeGenerator.GenerateCode(
-        folderPath, selectedFilePath, fileCoreName, connectionString);
-    if (result) {
-      vscode.window.showInformationMessage(
-          `Scaffold device code for ${targetSelection.label} completed`);
-      return true;
-    }
 
-    return false;
+    await vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: `Generate code stub for ${fileSelection.label} ...`
+        },
+        async () => {
+          if (!connectionString) {
+            return;
+          }
+          const result = await codeGenerator.GenerateCode(
+              folderPath, selectedFilePath, fileCoreName, connectionString);
+          if (result) {
+            vscode.window.showInformationMessage(
+                `Generate code stub for ${fileSelection.label} completed`);
+          }
+        });
+    return true;
   }
 
   async GetFolderForCodeGen(): Promise<string|null> {
@@ -257,64 +263,77 @@ export class CodeGenerateCore {
     }
 
     if (needUpgrade) {
-      channel.appendLine('Start upgrading PnP Code Generator...');
+      await vscode.window.withProgress(
+          {
+            location: vscode.ProgressLocation.Notification,
+            title: 'Upgrade Azure IoT Plug & Play Code Generator...'
+          },
+          async () => {
+            channel.appendLine(
+                'Start upgrading Azure IoT Plug & Play Code Generator...');
 
-      let downloadOption: request.OptionsWithUri;
-      let md5value: string;
-      if (platform === 'win32') {
-        downloadOption = {
-          method: 'GET',
-          uri: pnpCodeGenConfig.win32PackageUrl,
-          encoding: null  // Binary data
-        };
-        md5value = pnpCodeGenConfig.win32Md5;
-      } else {
-        downloadOption = {
-          method: 'GET',
-          uri: pnpCodeGenConfig.macOSPackageUrl,
-          encoding: null  // Binary data
-        };
-        md5value = pnpCodeGenConfig.macOSMd5;
-      }
+            let downloadOption: request.OptionsWithUri;
+            let md5value: string;
+            if (platform === 'win32') {
+              downloadOption = {
+                method: 'GET',
+                uri: pnpCodeGenConfig.win32PackageUrl,
+                encoding: null  // Binary data
+              };
+              md5value = pnpCodeGenConfig.win32Md5;
+            } else {
+              downloadOption = {
+                method: 'GET',
+                uri: pnpCodeGenConfig.macOSPackageUrl,
+                encoding: null  // Binary data
+              };
+              md5value = pnpCodeGenConfig.macOSMd5;
+            }
 
-      const loading = setInterval(() => {
-        channel.append('.');
-      }, 1000);
+            const loading = setInterval(() => {
+              channel.append('.');
+            }, 1000);
 
-      try {
-        channel.appendLine('Step 1: Downloading updated PnP Code Generator...');
-        const zipData = await request(downloadOption).promise();
-        const tempPath =
-            path.join(os.tmpdir(), FileNames.iotworkbenchTempFolder);
-        const filePath = path.join(tempPath, `${md5value}.zip`);
-        fs.writeFileSync(filePath, zipData);
-        clearInterval(loading);
-        channel.appendLine('Download complete');
+            try {
+              channel.appendLine(
+                  'Step 1: Downloading package for Azure IoT Plug & Play Code Generator...');
+              const zipData = await request(downloadOption).promise();
+              const tempPath =
+                  path.join(os.tmpdir(), FileNames.iotworkbenchTempFolder);
+              const filePath = path.join(tempPath, `${md5value}.zip`);
+              fs.writeFileSync(filePath, zipData);
+              clearInterval(loading);
+              channel.appendLine('Download complete');
 
-        // Validate hash code
-        channel.appendLine('Step 2: Validating hash code');
+              // Validate hash code
+              channel.appendLine(
+                  'Step 2: Validating hash code for the package...');
 
-        const hashvalue = await fileHash(filePath);
-        if (hashvalue !== md5value) {
-          channel.appendLine('Validating hash code failed.');
-          return false;
-        } else {
-          channel.appendLine('Validating hash code successfully.');
-        }
+              const hashvalue = await fileHash(filePath);
+              if (hashvalue !== md5value) {
+                throw new Error('Validating hash code failed.');
+              } else {
+                channel.appendLine('Validating hash code successfully.');
+              }
 
-        channel.appendLine('Step 3: Extracting PnP Code Generator.');
-        const zip = new AdmZip(filePath);
+              channel.appendLine(
+                  'Step 3: Extracting Azure IoT Plug & Play Code Generator.');
+              const zip = new AdmZip(filePath);
 
-        zip.extractAllTo(codeGenCommandPath, true);
-        channel.appendLine('PnP Code Generator updated successfully.');
-        context.globalState.update(
-            CodeGenConstants.codeGeneratorVersionKey, pnpCodeGenConfig.version);
-        return true;
-      } catch (error) {
-        clearInterval(loading);
-        channel.appendLine('');
-        throw error;
-      }
+              zip.extractAllTo(codeGenCommandPath, true);
+              channel.appendLine(
+                  'Azure IoT Plug & Play Code Generator updated successfully.');
+              context.globalState.update(
+                  CodeGenConstants.codeGeneratorVersionKey,
+                  pnpCodeGenConfig.version);
+            } catch (error) {
+              clearInterval(loading);
+              channel.appendLine('');
+              throw error;
+            }
+          });
+      vscode.window.showInformationMessage(
+          'Azure IoT Plug & Play Code Generator updated successfully');
     }
     // No need to upgrade
     return true;

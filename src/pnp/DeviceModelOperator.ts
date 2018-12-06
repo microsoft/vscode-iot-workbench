@@ -611,38 +611,42 @@ export class DeviceModelOperator {
 
       if (!fileId) {
         vscode.window.showWarningMessage(
-            'Unable to find interface id from the interface file. Please provide a valid file.');
+            'Unable to find interface id from the Plug & Play interface file. Please provide a valid file.');
         return false;
       }
-      channel.appendLine(`Load and parse file: ${fileName} successfully.`);
+      channel.appendLine(`Load and parse file: "${fileName}" successfully.`);
       // check whether file exists in model repo, try to update the file.
       try {
         // First, get the file to retrieve the latest etag.
         channel.appendLine(
-            `Connect to Plug & Play repository to check ${fileId} exists...`);
+            `Connect to Plug & Play repository to check whether ${
+                fileId} exists in server...`);
         const interfaceContext =
             await pnpMetamodelRepositoryClient.GetInterfaceByInterfaceIdAsync(
                 PnPUri.Parse(fileId));
 
         if (interfaceContext.published) {
           // already published, we should not update it.
-          vscode.window.showWarningMessage(`Interface with interface id: ${
-              fileId} is already published. You could not updated it.`);
+          vscode.window.showWarningMessage(
+              `Azure IoT Plug & Play interface with id: "${
+                  fileId}" is already published. You could not updated it.`);
           return false;
         }
-        channel.appendLine(`Interface file with id:${fileId} exists... `);
+        channel.appendLine(`Azure IoT Plug & Play interface file with id:"${
+            fileId}" exists in server. `);
 
-        const msg = `The interface with id ${
-            fileId} already exists in the Plug & Play Repository, do you want to overwrite it?`;
+        const msg = `The interface with id "${
+            fileId}" already exists in the Plug & Play Repository, do you want to overwrite it?`;
         const result: vscode.MessageItem|undefined =
             await vscode.window.showInformationMessage(
                 msg, DialogResponses.yes, DialogResponses.no);
 
         if (result === DialogResponses.no) {
-          channel.appendLine('Submit interface file cancelled.');
+          channel.appendLine('Submitting Plug & Play interface cancelled.');
           return false;
         }
-        channel.appendLine(`Updating interface with id:${fileId}... `);
+        channel.appendLine(
+            `Start updating Plug & Play interface with id:"${fileId}"... `);
 
         const interfaceTags =
             await this.GetTagsforDocuments(fileName, interfaceContext.tags);
@@ -656,15 +660,18 @@ export class DeviceModelOperator {
         };
         const updatedContext =
             await pnpMetamodelRepositoryClient.UpdateInterface(pnpContext);
-        channel.appendLine(`Submitting interface file: fileName: ${
-            fileName} successfully, interface id: ${fileId}. `);
+        channel.appendLine(
+            `Submitting Azure IoT Plug & Play interface file: fileName: "${
+                fileName}" successfully, interface id: "${fileId}". `);
         vscode.window.showInformationMessage(
-            `Interface with interface id: ${fileId} updated successfully`);
+            `Azure IoT Plug & Play interface with interface id: "${
+                fileId}" updated successfully`);
       } catch (error) {
         if (error.statusCode === 404)  // Not found
         {
           channel.appendLine(
-              `Interface file does not exist, creating ${fileId}... `);
+              `Plug & Play interface file does not exist in server, creating ${
+                  fileId}... `);
           // Create the interface.
           const interfaceTags = await this.GetTagsforDocuments(fileName);
           const pnpContext: PnPContext = {
@@ -676,19 +683,20 @@ export class DeviceModelOperator {
           const result: PnPContext =
               await pnpMetamodelRepositoryClient.CreateInterfaceAsync(
                   pnpContext);
-          channel.appendLine(`Submitting interface: fileName: ${
-              fileName} successfully, interface id: ${fileId}. `);
+          channel.appendLine(`Submitting Plug & Play interface: fileName: "${
+              fileName}" successfully, interface id: "${fileId}". `);
           vscode.window.showInformationMessage(
-              `Interface with interface id: ${fileId} created successfully`);
+              `Plug & Play interface with interface id: "${
+                  fileId}" created successfully`);
         } else {
           throw error;
         }
       }
     } catch (error) {
-      channel.appendLine(`Submitting interface: fileName: ${
-          fileName} failed, error: ${error.message}.`);
+      channel.appendLine(`Submitting Plug & Play interface: fileName: "${
+          fileName}" failed, error: ${error.message}.`);
       vscode.window.showWarningMessage(
-          `Unable to submit the file, error: ${error.message}`);
+          `Unable to submit Plug & Play interface, error: ${error.message}`);
       return false;
     }
 
@@ -714,7 +722,7 @@ export class DeviceModelOperator {
 
       if (!fileId) {
         vscode.window.showWarningMessage(
-            'Unable to find id from the capability model file.');
+            'Unable to find id from the Plug & Play capability model file. Please provide a valid file');
         return false;
       }
       channel.appendLine(`Load and parse file: ${fileName} successfully.`);
@@ -722,7 +730,8 @@ export class DeviceModelOperator {
       try {
         // First, get the file to retrieve the latest etag.
         channel.appendLine(
-            `Connect to repository to check ${fileId} exists...`);
+            `Connect to Azure IoT Plug & Play repository to check whether "${
+                fileId}" exists in server...`);
         const capabilityModelContext =
             await pnpMetamodelRepositoryClient
                 .GetCapabilityModelByCapabilityModelIdAsync(
@@ -730,8 +739,9 @@ export class DeviceModelOperator {
 
         if (capabilityModelContext.published) {
           // already published, we should not update it.
-          vscode.window.showWarningMessage(`Capability model file with id: ${
-              fileId} is already published. You could not updated it.`);
+          vscode.window.showWarningMessage(
+              `Azure IoT Plug & Play capability model file with id: ${
+                  fileId} is already published. You could not updated it.`);
           return false;
         }
 
@@ -742,11 +752,13 @@ export class DeviceModelOperator {
                 msg, DialogResponses.yes, DialogResponses.no);
 
         if (result === DialogResponses.no) {
-          channel.appendLine('Submit capability model cancelled.');
+          channel.appendLine('Submit Plug & Play capability model cancelled.');
           return false;
         }
 
-        channel.appendLine(`Updating capability model with id:${fileId}...`);
+        channel.appendLine(
+            `Start updating Plug & Play capability model with id:"${
+                fileId}"...`);
 
         const capabilityModelTags = await this.GetTagsforDocuments(
             fileName, capabilityModelContext.tags);
@@ -761,15 +773,18 @@ export class DeviceModelOperator {
         const updatedContext =
             await pnpMetamodelRepositoryClient.UpdateCapabilityModelAsync(
                 pnpContext);
-        channel.appendLine(`Submitting capability model file: fileName: ${
-            fileName} successfully, capability model id: ${fileId}. `);
+        channel.appendLine(
+            `Submitting Plug & Play capability model: fileName: "${
+                fileName}" successfully, capability model id: "${fileId}". `);
         vscode.window.showInformationMessage(
-            `Capability model with id: ${fileId} updated successfully`);
+            `Plug & Play capability model with id: "${
+                fileId}" updated successfully`);
       } catch (error) {
         if (error.statusCode === 404)  // Not found
         {
           channel.appendLine(
-              `Capability model file does not exist, creating ${fileId}... `);
+              `Plug & Play capability model file does not exist in server, creating "${
+                  fileId}"... `);
           // Create the interface.
           const capabilityModelTags = await this.GetTagsforDocuments(fileName);
           const pnpContext: PnPContext = {
@@ -781,19 +796,22 @@ export class DeviceModelOperator {
           const result: PnPContext =
               await pnpMetamodelRepositoryClient.CreateCapabilityModelAsync(
                   pnpContext);
-          channel.appendLine(`Submitting capability model: fileName: ${
-              fileName} successfully, capability model id: ${fileId}. `);
+          channel.appendLine(
+              `Submitting Plug & Play capability model: fileName: "${
+                  fileName}" successfully, capability model id: "${fileId}". `);
           vscode.window.showInformationMessage(
-              `Capability model with id: ${fileId} created successfully`);
+              `Plug & Play capability model with id: "${
+                  fileId}" created successfully`);
         } else {
           throw error;
         }
       }
     } catch (error) {
-      channel.appendLine(`Submitting capability model: fileName: ${
-          fileName} failed, error: ${error.message}.`);
+      channel.appendLine(`Submitting Plug & Play capability model: fileName: "${
+          fileName}" failed, error: ${error.message}.`);
       vscode.window.showWarningMessage(
-          `Unable to submit the file, error: ${error.message}`);
+          `Unable to submit Plug & Play capability model, error: ${
+              error.message}`);
       return false;
     }
 
