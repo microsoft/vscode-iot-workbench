@@ -11,8 +11,8 @@
 <header v-bind:class="{'show-status-selector': showStatusSelector, 'show-tag-selector': showTagSelector}">
 <h1 class="company-name">{{ companyName }}</h1>
 <div class="pnp-file-type-tab">
-  <span v-bind:class="{active: type.value === 'Interface'}" v-on:click="type.value = 'Interface'">Device Capability Models</span>
-  <span v-bind:class="{active: type.value === 'CapabilityModel'}" v-on:click="type.value = 'CapabilityModel'">Interfaces</span>
+  <span v-bind:class="{active: type.value === 'CapabilityModel'}" v-on:click="type.value = 'CapabilityModel'">Device Capability Models</span>
+  <span v-bind:class="{active: type.value === 'Interface'}" v-on:click="type.value = 'Interface'">Interfaces</span>
 </div>
 <div class="action-bar">
   <button class="with-icon new" v-on:click="createPnPFile">New</button>
