@@ -15,8 +15,6 @@ import {FileNames} from '../constants';
 import {TelemetryContext} from '../telemetry';
 import {PnPConnector} from './PnPConnector';
 import {PnPConstants, CodeGenConstants} from './PnPConstants';
-import {MetaModelType} from './pnp-api/DataContracts/PnPContext';
-import {CppCodeGeneratorFactory} from './pnp-codeGen/CppCodeGeneratorFactory';
 import {CodeGenDeviceType} from './pnp-codeGen/Interfaces/CodeGenerator';
 import {AnsiCCodeGeneratorFactory} from './pnp-codeGen/AnsiCCodeGeneratorFactory';
 import {CodeGeneratorFactory} from './pnp-codeGen/Interfaces/CodeGeneratorFactory';
@@ -119,7 +117,7 @@ export class CodeGenerateCore {
 
     // select the target of the code stub
     const languageItems: vscode.QuickPickItem[] =
-        [{label: 'C++', description: ''}, {label: 'ANSI C', description: ''}];
+        [{label: 'ANSI C', description: ''}];
     const languageSelection = await vscode.window.showQuickPick(
         languageItems,
         {ignoreFocusOut: true, placeHolder: 'Please select a language:'});
@@ -131,14 +129,7 @@ export class CodeGenerateCore {
     let codeGenFactory: CodeGeneratorFactory|null = null;
     let targetItems: vscode.QuickPickItem[]|null = null;
 
-    if (languageSelection.label === 'C++') {
-      codeGenFactory =
-          new CppCodeGeneratorFactory(context, channel, telemetryContext);
-      targetItems = [
-        {label: 'MXChip IoT DevKit', description: ''},
-        {label: 'General Platform', description: ''}
-      ];
-    } else if (languageSelection.label === 'ANSI C') {
+    if (languageSelection.label === 'ANSI C') {
       codeGenFactory =
           new AnsiCCodeGeneratorFactory(context, channel, telemetryContext);
       targetItems = [
