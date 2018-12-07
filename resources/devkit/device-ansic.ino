@@ -1,5 +1,5 @@
 #include "src/{PATHNAME}/application.h"
-#include "EEPROMInterface.h"
+#include "IoT_DevKit_HW.h"
 #include "AZ3166WiFi.h"
 #include "azureiotcerts.h"
 
@@ -24,27 +24,37 @@ void init_network()
 }
 
 void setup() {
-    // Initialize Wi-Fi
-    init_network();
+    char buff[128];
 
-    // Read connection string
-    char connString[AZ_IOT_HUB_MAX_LEN + 1] = {'\0'};
-    EEPROMInterface eeprom;
-    eeprom.read((uint8_t *)connString, AZ_IOT_HUB_MAX_LEN, 0, AZ_IOT_HUB_ZONE_IDX);
+    // Initialize the board
+    networkConnected = initIoTDevKit();
+    
+    if (!networkConnected)
+    {
+        Screen.print(1, "No WiFi");
+        return;
+    }
+    else
+    {
+        IPAddress ip = WiFi.localIP();
+        snprintf(buff, sizeof(buff), "%s\r\nWiFi Connected\r\n%s", WiFi.SSID(), ip.get_address());
+        Screen.print(1, buff);
+    }
 
     // Initialize device model application
-    application_initialize(connString, certificates);
+    application_initialize(getIoTHubConnectionString(), certificates);
+    digitalWrite(LED_AZURE, 1);
+    snprintf(buff, sizeof(buff), "%s\r\nPnP enabled\r\nRunning...\r\n", getDevKitName());
+    Screen.print(1, buff);
 }
 
 void loop() {
     // put your main code here, to run repeatedly:
-    Screen.print("loop");
-
     if (networkConnected)
     {
         application_run();
     }
 
-    delay(3000);
+    invokeDevKitSensors();
+    delay(500);
 }
-
