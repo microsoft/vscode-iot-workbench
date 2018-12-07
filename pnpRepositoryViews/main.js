@@ -15,7 +15,7 @@ var repository = new Vue({
       value: []
     },
     type: {
-      value: 'Interface'
+      value: 'CapabilityModel'
     },
     interfaceNextToken: {
       value: ''

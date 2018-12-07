@@ -550,26 +550,30 @@ header .search-bar button.dropdown.status {
 
 .content table th:nth-child(2),
 .content table td:nth-child(2) {
-  width: calc(23% - 52px);
-  max-width: 74px;
+  /* width: calc(23% - 52px);
+  max-width: 74px; */
+  width: calc(20% - 20px);
 }
 
 .content table th:nth-child(3),
 .content table td:nth-child(3) {
-  width: calc(46% - 104px);
-  max-width: 150px;
+  /* width: calc(46% - 104px);
+  max-width: 150px; */
+  width: calc(50% - 50px);
 }
 
 .content table th:nth-child(4),
 .content table td:nth-child(4) {
-  width: 120px;
+  /* width: 120px; */
+  width: calc(15% - 15px);
   text-align: right;
 }
 
 .content table th:nth-child(5),
 .content table td:nth-child(5) {
-  min-width: calc(30% - 70px);
-  width: calc(100% - 464px);
+  /* min-width: calc(30% - 70px);
+  width: calc(100% - 464px); */
+  width: calc(15% - 15px);
 }
 
 .content table th:nth-child(6),
