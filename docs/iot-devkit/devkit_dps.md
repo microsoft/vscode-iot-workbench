@@ -65,7 +65,7 @@ A typical **Unique Device Secret (UDS)** is a 64 characters long hexadecimal dig
 
 1. Open the command palette and select **Azure IoT Device Workbench: Configure Device Settings...**.
 
-	![IoT Device Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
+    ![IoT Device Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
 
 2. Select **Config Unique Device String (UDS)**.
 

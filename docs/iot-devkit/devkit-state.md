@@ -94,7 +94,7 @@ Open the command palette and select **IoT Device Workbench: Deploy to Azure...**
 
 3. Open the command palette and select **Azure IoT Device Workbench: Configure Device Settings...**.
 
-	![IoT Device Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
+  ![IoT Device Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
 
 4. Select **Config Device Connection string**.
 
