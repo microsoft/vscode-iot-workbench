@@ -28,7 +28,7 @@ An active Azure subscription. If you do not have one, you can register via one o
 
 ### Open IoT Device Workbench Examples
 
-Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Device Workbench**, and then select **IoT Device Workbench: Examples**.
+Use `F1` or`Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **Azure IoT Device Workbench**, and then select **Open Examples...**.
 
 ![IoT Device Workbench: Examples](media/iot-workbench-examples-cmd.png)
 
@@ -63,11 +63,7 @@ Find **DevKit Translator** and click **Open Sample** button. A new VS Code windo
 
 ## Provision Azure services
 
-In the solution window, open the command palette and select **IoT Device Workbench: Cloud**.
-
-![IoT Device Workbench: Cloud](media/iot-workbench-cloud.png)
-
-Select **Azure Provision**.
+In the solution window, open the command palette and select **Azure IoT Device Workbench: Provision Azure Services...**.
 
 ![IoT Device Workbench: Cloud -> Provision](media/iot-workbench-cloud-provision.png)
 
@@ -98,7 +94,7 @@ Please take a note of the device name you created. It will be used in next secti
 
 ## Deploy Azure Functions
 
-* Open the command palette and select **IoT Device Workbench: Cloud**, then select **Azure Deploy**.
+* Open the command palette and select **Azure IoT Device Workbench: Deploy to Azure...**.
 
   ![IoT Device Workbench: Cloud -> Deploy](media/iot-workbench-cloud-deploy.png)
 
@@ -120,7 +116,7 @@ Please take a note of the device name you created. It will be used in next secti
 
 > Note: If the Function App does not work properly, check this [FAQs](https://microsoft.github.io/azure-iot-developer-kit/docs/faq#compilation-error-for-azure-function) section to resolve it.
 
-## Config IoT Hub Connection String
+## Config IoT Hub Device Connection String
 
 1. Switch the IoT DevKit into **Configuration mode**. To do so:
 
@@ -131,15 +127,13 @@ Please take a note of the device name you created. It will be used in next secti
 
 	![IoT DevKit Configuration Mode](media/devkit-configuration-mode.png) 
 
-3. Open the command palette and select **IoT Device Workbench: Device**.
-
-	![IoT Device Workbench: Device](media/iot-workbench-device.png)
-
-4. Select **Config Device Settings**.
+3. Open the command palette and select **Azure IoT Device Workbench: Configure Device Settings...**.
 
 	![IoT Device Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
 
-5. Select **Select IoT Hub Device Connection String**.
+4. Select **Config Device Connection string**.
+
+5. Then select **Select IoT Hub Device Connection String**.
 
 	![IoT Device Workbench: Device -> Connection string](media/iot-workbench-device-string1.png)
 
@@ -151,7 +145,7 @@ Please take a note of the device name you created. It will be used in next secti
 
 ## Build and upload the device code
 
-1. Open the command palette and select **IoT Device Workbench: Device**, then select **Device Upload**.
+1. Open the command palette and select **IoT Device Workbench:Upload Device Code**.
 
 	![IoT Device Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
 

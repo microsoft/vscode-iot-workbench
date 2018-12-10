@@ -86,7 +86,7 @@ Open the command palette and select **IoT Device Workbench: Cloud**, then select
 
 ![IoT Device Workbench: Cloud -> Deploy](media/iot-workbench-cloud-deploy.png)
 
-## Config IoT Hub Connection String
+## Config IoT Hub Device Connection String
 
 1. Open the command palette and select **IoT Device Workbench: Device**.
 

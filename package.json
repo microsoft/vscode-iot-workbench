@@ -10,7 +10,7 @@
     "url": "https://github.com/Microsoft/vscode-iot-workbench/issues"
   },
   "homepage": "https://github.com/Microsoft/vscode-iot-workbench/blob/master/README.md",
-  "version": "0.1.14",
+  "version": "0.2.0-rc",
   "publisher": "vsciot-vscode",
   "icon": "logo.png",
   "aiKey": "5b869bc6-ca93-4f24-aa87-92871a3a616e",
@@ -71,7 +71,7 @@
       },
       {
         "command": "iotworkbench.azureProvision",
-        "title": "Provision Azure service...",
+        "title": "Provision Azure Services...",
         "category": "Azure IoT Device Workbench"
       },
       {
@@ -89,7 +89,6 @@
         "title": "Install Device Compiler Toolchain...",
         "category": "Azure IoT Device Workbench"
       }
-
     ],
     "configuration": [
       {

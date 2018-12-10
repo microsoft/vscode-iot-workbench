@@ -65,7 +65,7 @@ This connection string will be used in the next section.
 
 ### B. Open IoT Device Workbench Examples
 
-Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Device Workbench**, and then select **IoT Device Workbench: Examples**.
+Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **Azure IoT Device Workbench**, and then select **Open Examples...**.
 
 ![IoT Device Workbench: Examples](media/iot-workbench-examples-cmd.png)
 
@@ -81,7 +81,7 @@ Find **Remote Monitoring** and click **Open Sample** button. A new VS Code windo
 
 ![IoT Device Workbench, select Remote Monitoring example](media/iot-devkit-remote-monitoring/iot-workbench-example.png)
 
-## Config IoT Hub Connection String
+## Config IoT Hub Device Connection String
 
 1. Switch the IoT DevKit into **Configuration mode**. To do so: 
 
@@ -93,13 +93,11 @@ Find **Remote Monitoring** and click **Open Sample** button. A new VS Code windo
 
 	![IoT DevKit Configuration Mode](media/devkit-configuration-mode.png) 
 
-3. Open the command palette and select **IoT Device Workbench: Device**.
-
-	![IoT Device Workbench:Device](media/iot-workbench-device.png)         
-
-4. Select **Config Device Settings**.       
+3. Open the command palette and select **Azure IoT Device Workbench: Config Device Settings**.    
 
 	![IoT Device Workbench:Device -> Settings](media/iot-workbench-device-settings.png) 
+
+4. Select **Config Device Connection String**.       
 
 5. Select **Select IoT Hub Device Connection String**. 
 
@@ -114,7 +112,7 @@ Find **Remote Monitoring** and click **Open Sample** button. A new VS Code windo
 
 Go back to the Visual Studio Code: 
 
-1. Open the command palette and select **IoT Device Workbench: Device**, then select **Device Upload**. 
+1. Open the command palette and select **Azure IoT Device Workbench: Upload Device Code**. 
 
 	![IoT Device Workbench: Device - > Upload](media/iot-workbench-device-upload.png)
 

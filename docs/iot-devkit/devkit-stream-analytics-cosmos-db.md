@@ -16,7 +16,7 @@ An active Azure subscription. If you do not have one, you can register via one o
 
 ## Create a New Project
 
-Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Device Workbench**, and then select **IoT Device Workbench: Create Project...**.
+Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **Azure IoT Device Workbench**, and then select **Create Project...**.
 
 ![IoT Device Workbench: New](media/iot-workbench-new-cmd.png)
 
@@ -158,11 +158,11 @@ void loop() {
 }
 ```
 
-## Provision Azure Service
+## Provision Azure Services
 
-Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Device Workbench**, and then select **IoT Device Workbench: Cloud** -> **Azure Provision**.
+In the solution window, open the command palette and select **Azure IoT Device Workbench: Provision Azure Services...**.
 
-![Azure Provision](media/iot-workbench-cloud-provision2.png)
+![Azure Provision](media/iot-workbench-cloud-provision.png)
 
 Select subscription and resource group you want to create Azure services in. A guide line shows what service will be created.
 
@@ -214,7 +214,7 @@ GROUP BY
 
 You can learn more about ASAQL windowing functions from [here](https://docs.microsoft.com/en-us/azure/stream-analytics/stream-analytics-window-functions).
 
-Deploy the query by executing **IoT Device Workbench: Cloud** command and select **Azure Deploy**.
+Deploy the query by executing **Azure IoT Device Workbench: Deploy to Azure...**.
 
 ![Azure Deply](media/iot-workbench-cloud-deploy.png)
 
@@ -224,7 +224,7 @@ IoT Device Workbench will stop Stream Analytics Job, update query and restart St
 
 ## Build and Upload the Device Code
 
-1. Open the command palette and select **IoT Device Workbench: Device**, then select **Device Upload**.
+1. Open the command palette and select **Azure IoT Device Workbench: Upload Device Code**.
 
 ![IoT Device Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
 

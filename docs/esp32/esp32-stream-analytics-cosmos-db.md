@@ -45,7 +45,7 @@ Find **ESP32 ASA CosmodDB** and click **Open Sample** button. A new VS Code wind
 
 Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Device Workbench**, and then select **IoT Device Workbench: Cloud** -> **Azure Provision**.
 
-![Azure Provision](media/iot-workbench-cloud-provision2.png)
+![Azure Provision](media/iot-workbench-cloud-provision.png)
 
 Select subscription and resource group you want to create Azure services in. A guide line shows what service will be created.
 
