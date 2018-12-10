@@ -67,12 +67,12 @@
         "category": "IoT Workbench"
       },
       {
-        "command": "iotworkbench.pnpOpenRepositry",
+        "command": "iotworkbench.pnpOpenRepository",
         "title": "Open Model Repository...",
         "category": "Azure IoT Plug & Play"
       },
       {
-        "command": "iotworkbench.pnpSignOutRepositry",
+        "command": "iotworkbench.pnpSignOutRepository",
         "title": "Sign out Model Repository",
         "category": "Azure IoT Plug & Play"
       },

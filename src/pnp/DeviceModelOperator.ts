@@ -17,7 +17,6 @@ import {MetaModelType, PnPContext} from './pnp-api/DataContracts/PnPContext';
 import {PnPConnector} from './PnPConnector';
 import {DialogResponses} from '../DialogResponses';
 
-
 const constants = {
   storedFilesInfoKeyName: 'StoredFilesInfo',
   idName: '@id'
@@ -225,12 +224,6 @@ export class DeviceModelOperator {
   async Connect(
       context: vscode.ExtensionContext,
       channel: vscode.OutputChannel): Promise<boolean> {
-    let rootPath: string|null = null;
-    rootPath = await this.InitializeFolder();
-    if (!rootPath) {
-      return false;
-    }
-
     let connectionString =
         context.workspaceState.get<string>(PnPConstants.modelRepositoryKeyName);
 
@@ -257,12 +250,10 @@ export class DeviceModelOperator {
         context, connectionString);
 
     if (result) {
-      await vscode.commands.executeCommand(
-          'vscode.openFolder', vscode.Uri.file(rootPath), false);
       DeviceModelOperator.vscexpress = DeviceModelOperator.vscexpress ||
           new VSCExpress(context, 'pnpRepositoryViews');
       await DeviceModelOperator.vscexpress.open(
-          'index.html', 'Plug & Play Repositry', vscode.ViewColumn.Two,
+          'index.html', 'Plug & Play Repository', vscode.ViewColumn.Two,
           {retainContextWhenHidden: true, enableScripts: true});
       return true;
     }
@@ -272,7 +263,7 @@ export class DeviceModelOperator {
   async Disconnect(context: vscode.ExtensionContext) {
     context.workspaceState.update(PnPConstants.modelRepositoryKeyName, '');
     const message =
-        'Sign out Plug & Play repository successfully, please close the Plug & Play Repositry window.';
+        'Sign out Plug & Play repository successfully, please close the Plug & Play Repository window.';
     vscode.window.showInformationMessage(message);
 
     // TODO: Close the window of open model repo UI
@@ -455,7 +446,7 @@ export class DeviceModelOperator {
     const pnpMetamodelRepositoryClient =
         new PnPMetamodelRepositoryClient(connectionString);
 
-    fileIds.forEach(async (id) => {
+    for (const id of fileIds) {
       channel.appendLine(`Start getting ${metaModelValue} with id ${id}.`);
       let fileContext: PnPContext;
       try {
@@ -507,7 +498,8 @@ export class DeviceModelOperator {
         channel.appendLine(`Downloading ${metaModelValue} with id ${
             id} failed. Error: ${error.message}`);
       }
-    });
+    }
+
     await vscode.commands.executeCommand(
         'vscode.openFolder', vscode.Uri.file(rootPath), false);
   }

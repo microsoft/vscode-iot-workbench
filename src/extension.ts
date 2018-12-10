@@ -480,21 +480,6 @@ export async function activate(context: vscode.ExtensionContext) {
     deviceModelOperator.CreateCapabilityModel(context, outputChannel);
   };
 
-  const deviceModelConnectProvider = async () => {
-    deviceModelOperator.Connect(context, outputChannel);
-  };
-
-  const deviceModelSubmitPnPFileProvider = async () => {
-    deviceModelOperator.SubmitMetaModelFile(context, outputChannel);
-  };
-
-
-  const scaffoldDeviceStubProvider = async () => {
-    callWithTelemetry(
-        EventNames.scaffoldDeviceStubEvent, outputChannel, true, context,
-        codeGeneratorBinder);
-  };
-
   const menuForDevice: CommandItem[] = [
     {
       label: 'Config Device Settings',
@@ -660,11 +645,11 @@ export async function activate(context: vscode.ExtensionContext) {
       deviceModelCreateCapabilityModelProvider);
 
   context.subscriptions.push(vscode.commands.registerCommand(
-      'iotworkbench.pnpOpenRepositry', async () => {
+      'iotworkbench.pnpOpenRepository', async () => {
         deviceModelOperator.Connect(context, outputChannel);
       }));
   context.subscriptions.push(vscode.commands.registerCommand(
-      'iotworkbench.pnpSignOutRepositry', async () => {
+      'iotworkbench.pnpSignOutRepository', async () => {
         deviceModelOperator.Disconnect(context);
       }));
   context.subscriptions.push(vscode.commands.registerCommand(
