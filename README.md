@@ -3,11 +3,11 @@
 [![Gitter](https://img.shields.io/badge/chat-on%20gitter-blue.svg)](https://gitter.im/Microsoft/vscode-iot-workbench)
 [![Travis CI](https://travis-ci.org/Microsoft/vscode-iot-workbench.svg?branch=master)](https://travis-ci.org/Microsoft/vscode-iot-workbench)
 
-Welcome to **Azure IoT Device Workbench** <sup>preview</sup> for Visual Studio Code! The IoT Device Workbench extension makes it easy to code, build, deploy and debug your IoT project with multiple Azure services and popular IoT development boards .
+Welcome to **Azure IoT Device Workbench** <sup>preview</sup> for Visual Studio Code! The Azure IoT Device Workbench extension makes it easy to code, build, deploy and debug your IoT project with multiple Azure services and popular IoT development boards .
 
 ## Prerequisites
 
-IoT Device Workbench aims to support multiple popular IoT development boards and kits. It currently supports following IoT hardware:
+Azure IoT Device Workbench aims to support multiple popular IoT development boards and kits. It currently supports following IoT hardware:
 
 - [MXChip IoT DevKit](https://aka.ms/iot-devkit)
 - [teXXmo IoT button](https://aka.ms/button)
@@ -80,14 +80,18 @@ Here are a set of tutorials that will help you get started:
 
 | Command | Description |
 | --- | --- |
-| `IoT Device Workbench: Create Project...`  | Create new IoT Device Workbench projects. |
-| `IoT Device Workbench: Examples` | Load existing examples of IoT Device Workbench project. |
-| `IoT Device Workbench: Cloud` | Provison and deploy Azure services. |
-| `IoT Device Workbench: Device`  | Compile, upload device code and config device settings. |
-| `IoT Device Workbench: Set Workbench Path` | Set the default path for IoT Device Workbench. |
-| `IoT Device Workbench: Help` | Open helper for the device. |
+| `Azure IoT Device Workbench: Create Project...`  | Create new IoT Device Workbench projects. |
+| `Azure IoT Device Workbench: Open Examples... ` | Load existing examples of IoT Device Workbench project. |
+| `Azure IoT Device Workbench: Provision Azure Services...` | Provison Azure services for current project. |
+| `Azure IoT Device Workbench: Deploy to Azure...`  | Deploy the code of the Azure services. |
+| `Azure IoT Device Workbench: Compile Device Code`  | Compile device code. |
+| `Azure IoT Device Workbench: Upload Device Code`  | Compile and upload device code. |
+| `Azure IoT Device Workbench: Configure Device Settings...`  | Manage the settings on the device. |
+| `Azure IoT Device Workbench: Install Device Compiler Toolchain...`  | Install device compiler toolchain. |
+| `Azure IoT Device Workbench: Set Workbench Path` | Set the default path for Azure IoT Device Workbench. |
+| `Azure IoT Device Workbench: Help` | Get help for Azure IoT Device Workbench. |
 
-### Create New Project
+### Create Project
 
 <img width="760" src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/new.gif">
 
@@ -95,12 +99,12 @@ Here are a set of tutorials that will help you get started:
 
 <img width="760" src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/provision.gif">
 
-### Example Gallery
+### Open Examples
 
 <img width="760" src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/example.gif">
 
 #### Note: 
--  When invoking the **Azure Provision** command with Azure IoT Hub and Azure Functions, by default, Azure Functions would use the IoT Hub consumer group of `$Default`. To switch to another consumer group, please follow the [guide](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-create-through-portal) to create a new consumer group in Azure Poral. Then in IoT project, modify the following setting in **function.json**:
+-  When invoking the **Azure IoT Device Workbench: Provision Azure service** command with Azure IoT Hub and Azure Functions, by default, Azure Functions would use the IoT Hub consumer group of `$Default`. To switch to another consumer group, please follow the [guide](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-create-through-portal) to create a new consumer group in Azure Poral. Then in IoT project, modify the following setting in **function.json**:
     ```
     "consumerGroup": "[consumer_group_name]"
     ```
@@ -146,7 +150,7 @@ There are a couple of ways you can contribute to this repo:
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct). For more information please see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/#howadopt) or contact opencode@microsoft.com with any additional questions or comments.
 
 ## Contact Us
-If you would like to help to build the best IoT experience with IoT Device Workbench, you can reach us directly at [gitter chat room](https://gitter.im/Microsoft/vscode-iot-workbench).
+If you would like to help to build the best IoT experience with Azure IoT Device Workbench, you can reach us directly at [gitter chat room](https://gitter.im/Microsoft/vscode-iot-workbench).
 
 ## Telemetry
 VS Code collects usage data and sends it to Microsoft to help improve our products and services. Read our [privacy statement](https://go.microsoft.com/fwlink/?LinkID=528096&clcid=0x409) to learn more. If you don’t wish to send usage data to Microsoft, you can set the `telemetry.enableTelemetry` setting to `false`. Learn more in our [FAQ](https://code.visualstudio.com/docs/supporting/faq#_how-to-disable-telemetry-reporting).

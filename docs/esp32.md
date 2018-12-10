@@ -22,7 +22,7 @@ Follow these steps to prepare the development environment for ESP32 devices:
 
 3. Look for **Azure IoT Device Workbench** in the extension marketplace and install it.
     ![Install IoT Device Workbench](esp32/media/esp32-get-started/install-workbench.png)
-    Together with the IoT Device Workbench, other dependent extensions will be installed.
+    Together with **Azure IoT Device Workbench**, other dependent extensions will be installed.
 
 4. Open **File > Preference > Settings** and add following lines to configure Arduino.
 

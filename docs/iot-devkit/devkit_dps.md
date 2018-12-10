@@ -33,7 +33,7 @@ Create and link IoT Hub with Device Provisioning Service instance with [Set up a
 
 ### Open IoT Device Workbench Examples
 
-Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Device Workbench**, and then select **IoT Device Workbench: Examples**.
+Use `F1` or`Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **Azure IoT Device Workbench**, and then select **Open Examples...**.
 
 ![IoT Device Workbench: Examples](media/iot-workbench-examples-cmd.png)
 
@@ -63,14 +63,17 @@ Device Provisioning Service can be configured on device based on its [Hardware S
 
 A typical **Unique Device Secret (UDS)** is a 64 characters long hexadecimal digit.
 
-1. Open the command palette and select **IoT Device Workbench: Device**.
+1. Open the command palette and select **Azure IoT Device Workbench: Configure Device Settings...**.
 
-2. Select **Config Device Settings**.
+	![IoT Device Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
 
-3. Select **Config Dvice UDS**.
+2. Select **Config Unique Device String (UDS)**.
 
-4. Note down the generated uds string and then press enter.
-![Config UDS string](media/devkit-dps/config-uds-string.png)
+    ![Select Config UDS](media/devkit-dps/configure-uds.png)
+
+3. Note down the generated uds string and then press enter.
+
+    ![Config UDS string](media/devkit-dps/config-uds-string.png)
 
 Here you may need to close [serial monitor](./devkit-get-started.md/#Serial_monitor_usage) and let devkit enter configuration mode. After UDS string configed successfully, you will see a Visual Studio Code notification.
 ![Config UDS string successfully](media/devkit-dps/config-uds-string-notification.png)
@@ -83,7 +86,7 @@ Here you may need to close [serial monitor](./devkit-get-started.md/#Serial_moni
 
    > You can leave the **registrationId** as blank, the application will generate one for you based on the MAC address and firmware version. If you want to customized it, 
 
-2. Open the command palette and select **IoT Device Workbench: Device**, then select **Device Upload**. 
+2. Open the command palette and select **Azure IoT Device Workbench: Upload Device Code**. 
    ![IoT Device Workbench: Device - > Upload](media/iot-workbench-device-upload.png)
 
 3. VS Code then starts verifying and uploading the code to your DevKit.

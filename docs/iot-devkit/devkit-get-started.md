@@ -136,9 +136,9 @@ In the bottom right status bar, check the **MXCHIP AZ3166** is shown as selected
 
 ![Select board and serial port](media/iot-devkit-get-started/select-board.png)
 
-### Open IoT Device Workbench Examples
+### Open Azure IoT Device Workbench Examples
 
-Use `F1` or`Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Device Workbench**, and then select **IoT Device Workbench: Examples**.
+Use `F1` or`Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **Azure IoT Device Workbench**, and then select **Open Examples...**.
 
 ![IoT Device Workbench: Examples](media/iot-workbench-examples-cmd.png)
 
@@ -156,11 +156,7 @@ Find **Get Started** and click **Open Sample** button. A new VS Code window with
 
 ### Provision Azure service
 
-In the solution window, open the command palette and select **IoT Device Workbench: Cloud**.
-
-![IoT Device Workbench: Cloud](media/iot-workbench-cloud.png)
-
-Select **Azure Provision**.
+In the solution window, open the command palette and select **Azure IoT Device Workbench: Provision Azure Services...**.
 
 ![IoT Device Workbench: Cloud -> Provision](media/iot-workbench-cloud-provision.png)
 
@@ -172,7 +168,7 @@ The whole process includes:
 * Select an existing IoT Hub or create a new IoT Hub.
 * Select an existing IoT Hub device or create a new IoT Hub device. 
 
-### Config IoT Hub Connection String
+### Config IoT Hub Device Connection String
 
 1. Switch the IoT DevKit into **Configuration mode**. To do so:
 
@@ -183,15 +179,13 @@ The whole process includes:
 
 	![IoT DevKit Configuration Mode](media/devkit-configuration-mode.png) 
 
-3. Open the command palette and select **IoT Device Workbench: Device**.
-
-	![IoT Device Workbench: Device](media/iot-workbench-device.png)
-
-4. Select **Config Device Settings**.
+3. Open the command palette and select **Azure IoT Device Workbench: Configure Device Settings...**.
 
 	![IoT Device Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
 
-5. Select **Select IoT Hub Device Connection String**.
+4. Select **Config Device Connection string**.
+
+5. Then select **Select IoT Hub Device Connection String**.
 
 	![IoT Device Workbench: Device -> Connection string](media/iot-workbench-device-string1.png)
 
@@ -203,7 +197,7 @@ The whole process includes:
 
 ### Build and upload the device code
 
-1. Open the command palette and select **IoT Device Workbench: Device**, then select **Device Upload**.
+1. Open the command palette and select **IoT Device Workbench:Upload Device Code**.
 
 	![IoT Device Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
 

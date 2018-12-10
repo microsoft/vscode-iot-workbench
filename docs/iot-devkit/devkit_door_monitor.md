@@ -38,7 +38,7 @@ An active Azure subscription. If you do not have one, you can register via one o
 
 ### Open IoT Device Workbench Examples
 
-Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Device Workbench**, and then select **IoT Device Workbench: Examples**.
+Use `F1` or`Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **Azure IoT Device Workbench**, and then select **Open Examples...**.
 
 ![IoT Device Workbench: Examples](media/iot-workbench-examples-cmd.png)
 
@@ -124,11 +124,7 @@ Your API key is displayed only one time. Be sure to copy and store it safely, as
 
 ## Provision Azure services
 
-In the solution window, open the command palette and select **IoT Device Workbench: Cloud**.
-
-![IoT Device Workbench: Cloud](media/iot-workbench-cloud.png)
-
-Select **Azure Provision**.
+In the solution window, open the command palette and select **Azure IoT Device Workbench: Provision Azure Services...**.
 
 ![IoT Device Workbench: Cloud -> Provision](media/iot-workbench-cloud-provision.png)
 
@@ -153,12 +149,12 @@ client.PostAsync("https://prod-07..yourLogicAppURL..", httpContent);
 
 > NOTE: replace the URL with the unique URL of your workflow
 
-Open the command palette and select **IoT Device Workbench: Cloud**, then select **Azure Deploy**.
+Open the command palette and select **IoT Device Workbench: Deploy to Azure...**.
 
 ![IoT Device Workbench: Cloud -> Deploy](media/iot-workbench-cloud-deploy.png)
 
 
-## Config IoT Hub Connection String
+## Config IoT Hub Device Connection String
 
 1. Switch the IoT DevKit into **Configuration mode**. To do so:
 
@@ -169,15 +165,13 @@ Open the command palette and select **IoT Device Workbench: Cloud**, then select
 
 	![IoT DevKit Configuration Mode](media/devkit-configuration-mode.png) 
 
-3. Open the command palette and select **IoT Device Workbench: Device**.
-
-	![IoT Device Workbench: Device](media/iot-workbench-device.png)
-
-4. Select **Config Device Settings**.
+3. Open the command palette and select **Azure IoT Device Workbench: Configure Device Settings...**.
 
 	![IoT Device Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
 
-5. Select **Select IoT Hub Device Connection String**.
+4. Select **Config Device Connection string**.
+
+5. Then select **Select IoT Hub Device Connection String**.
 
 	![IoT Device Workbench: Device -> Connection string](media/iot-workbench-device-string1.png)
 
@@ -189,7 +183,7 @@ Open the command palette and select **IoT Device Workbench: Cloud**, then select
 
 ## Build and upload the device code
 
-1. Open the command palette and select **IoT Device Workbench: Device**, then select **Device Upload**.
+1. Open the command palette and select **IoT Device Workbench: Upload Device Code**.
 
 	![door monitor device upload](media/iot-workbench-device-upload.png)
 

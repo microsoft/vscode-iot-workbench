@@ -93,7 +93,7 @@ The whole process includes:
 * Select an existing IoT Hub or create a new IoT Hub.
 * Select an existing IoT Hub device or create a new IoT Hub device. 
 
-### Config IoT Hub Connection String
+### Config IoT Hub Device Connection String
 
 1. Open the command palette and select **IoT Device Workbench: Device**.
 

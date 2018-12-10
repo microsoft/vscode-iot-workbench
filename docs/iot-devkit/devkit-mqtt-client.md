@@ -25,9 +25,9 @@ Finish the [Getting Started Guide](./devkit-get-started.md) to:
 * Make sure [Azure IoT Device Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
 * Connect IoT DevKit to your PC.
 
-### Open IoT Device Workbench Examples
+### Open Azure IoT Device Workbench Examples
 
-Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Device Workbench**, and then select **IoT Device Workbench: Examples**.
+Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **Azure IoT Device Workbench**, and then select **Open Examples...**.
 
 ![IoT Device Workbench: Examples](media/iot-workbench-examples-cmd.png)
 
@@ -45,7 +45,7 @@ Find **MQTT Client** and click **Open Sample** button. A new VS Code window with
 
 ## Build and upload the device code
 
-1. Open the command palette and select **IoT Device Workbench: Device**, then select **Device Upload**.
+1. Open the command palette and select **Azure IoT Device Workbench: Upload Device Code**.
 
 	![IoT Device Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
 

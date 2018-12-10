@@ -34,9 +34,9 @@ An active Azure subscription. If you do not have one, you can register via one o
 * Make sure the [bootloader](https://microsoft.github.io/azure-iot-developer-kit/docs/firmware-upgrading/) on your IoT DevKit and the [SDK](https://microsoft.github.io/azure-iot-developer-kit/versions/) are both updated to [v1.4.0](https://github.com/Microsoft/devkit-sdk/releases/tag/1.4.0) or higher.
 
 
-### Open IoT Device Workbench Examples
+### Open Azure IoT Device Workbench Examples
 
-Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Device Workbench**, and then select **IoT Device Workbench: Examples**.
+Use `F1` or`Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **Azure IoT Device Workbench**, and then select **Open Examples...**.
 
 ![IoT Device Workbench: Examples](media/iot-workbench-examples-cmd.png)
 
@@ -54,11 +54,7 @@ Find **Firmware OTA** and click **Open Sample** button. A new VS Code window wit
 
 ## Provision Azure service
 
-In the solution window, open the command palette and select **IoT Device Workbench: Cloud**.
-
-![IoT Device Workbench: Cloud](media/iot-workbench-cloud.png)
-
-Select **Azure Provision**.
+In the solution window, open the command palette and select **Azure IoT Device Workbench: Provision Azure Services...**.
 
 ![IoT Device Workbench: Cloud -> Provision](media/iot-workbench-cloud-provision.png)
 
@@ -70,7 +66,7 @@ The whole process includes:
 * Select an existing IoT Hub or create a new IoT Hub, remember your IoT Hub name as we will use it later.
 * Select an existing IoT Hub device or create a new IoT Hub device. 
 
-## Config IoT Hub Connection String
+## Config IoT Hub Device Connection String
 
 > **Notice:** for real product we highly recommend you to use the [Azure IoT Hub Device  Provisioning Service](https://docs.microsoft.com/en-us/azure/iot-dps/) which can allowing you to provision millions of devices in a secure and scalable manner. And here is the [tutorial](https://github.com/Microsoft/vscode-iot-workbench/blob/master/docs/iot-devkit/devkit_dps.md) which can help you to learn how to use  Azure IoT Hub Device Provisioning Service [auto-provisioning](https://docs.microsoft.com/en-us/azure/iot-dps/concepts-auto-provisioning) a real device.
 
@@ -83,15 +79,13 @@ The whole process includes:
 
    ![IoT DevKit Configuration Mode](media/devkit-configuration-mode.png) 
 
-3. Open the command palette and select **IoT Device Workbench: Device**.
+3. Open the command palette and select **Azure IoT Device Workbench: Configure Device Settings...**.
 
-   ![IoT Device Workbench: Device](media/iot-workbench-device.png)
+	![IoT Device Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
 
-4. Select **Config Device Settings**.
+4. Select **Config Device Connection string**.
 
-   ![IoT Device Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
-
-5. Select **Select IoT Hub Device Connection String**.
+5. Then select **Select IoT Hub Device Connection String**.
 
    ![IoT Device Workbench: Device -> Connection string](media/iot-workbench-device-string1.png)
 
@@ -115,7 +109,7 @@ The initial version of the device firmware is 1.0.0, to complete this tutorial y
 
    ![Firmware version](media/firmware-ota/version-1-0-1.png)
 
-2. Open the command palette and select **IoT Device Workbench: Device**, then select **Device Compile** to compile the code.
+2. Open the command palette and select **Azure IoT Device Workbench: Compile Device Code**.
 
    ![IoT Device Workbench Compile](media/iot-workbench-device-compile.png)
 
@@ -125,7 +119,11 @@ The initial version of the device firmware is 1.0.0, to complete this tutorial y
 
 ### CRC value and file size of the firmware
 
-1. Open the command palette and select **IoT Device Workbench: Device**, then select **Generate CRC**.
+1. Open the command palette and select **Azure IoT Device Workbench: Configure Device Settings...**.
+
+	![IoT Device Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
+
+    Then select **Generate CRC for OTA**
 
    ![Command CRC](media/firmware-ota/iot-workbench-device-crc.png)
 
@@ -246,7 +244,7 @@ Now everything on Azure cloud is ready, let's upload the device code and begin t
 
    ![Version 1.0.0](media/firmware-ota/version-1-0-0.png)
 
-2. Open the command palette and select **IoT Device Workbench: Device**, then select **Device Upload**.
+2. Open the command palette and select **Azure IoT Device Workbench: Upload Device Code**.
 
    ![IoT Device Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
 
