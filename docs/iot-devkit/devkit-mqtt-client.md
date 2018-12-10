@@ -45,7 +45,7 @@ Find **MQTT Client** and click **Open Sample** button. A new VS Code window with
 
 ## Build and upload the device code
 
-1. Open the command palette and select **IoT Workbench: Device**, then select **Device Upload**.
+1. Open the command palette (Ctrl+Shift+P) and select **IoT Workbench: Device**, then select **Device Upload**.
 
 	![IoT Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
 
