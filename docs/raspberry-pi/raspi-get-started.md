@@ -51,19 +51,19 @@ Follow these steps to prepare the development environment for Raspberry Pi:
 
   ![Install IoT Device Workbench](media/raspi-get-started/install-workbench.png)
 
-Together with the IoT Device Workbench, other dependent extensions will be installed.
+Together with the Azure IoT Device Workbench, other dependent extensions will be installed.
 
 ## Build your first project
 
 Now you are all set with preparing and configuring your development environment. Let us build a "Hello World" sample for IoT: sending temperature telemetry data to Azure IoT Hub.
 
-### Open IoT Device Workbench Examples
+### Open Azure IoT Device Workbench Examples
 
-Use `F1` or`Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Device Workbench**, and then select **IoT Device Workbench: Examples**.
+Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **Azure IoT Device Workbench**, and then select **Open Examples...**.
 
 ![IoT Device Workbench: Examples](media/iot-workbench-examples-cmd.png)
 
-Select **Raspberry**.
+Select **Raspberry Pi**.
     
 ![IoT Device Workbench: Examples -> Select board](media/iot-workbench-examples-board.png)
 
@@ -77,11 +77,7 @@ Find **Get Started** and click **Open Sample** button. A new VS Code window with
 
 ### Provision Azure service
 
-In the solution window, open the command palette and select **IoT Device Workbench: Cloud**.
-
-![IoT Device Workbench: Cloud](media/iot-workbench-cloud.png)
-
-Select **Azure Provision**.
+In the solution window, open the command palette and select **Azure IoT Device Workbench: Provision Azure Services...**.
 
 ![IoT Device Workbench: Cloud -> Provision](media/iot-workbench-cloud-provision.png)
 
@@ -95,53 +91,45 @@ The whole process includes:
 
 ### Config IoT Hub Device Connection String
 
-1. Open the command palette and select **IoT Device Workbench: Device**.
-
-  ![IoT Device Workbench: Device](media/iot-workbench-device.png)
-
-2. Select **Config Device Settings**.
+1. Open the command palette and select **Azure IoT Device Workbench: Configure Device Settings...**.
 
   ![IoT Device Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
 
-3. Select **Config connection of IoT Hub Device**.
+2. Select **Config connection of IoT Hub Device**.
 
   ![IoT Device Workbench: Device -> Connection string](media/iot-workbench-device-string.png)
 
-4. Select **Select IoT Hub Device Connection String**.
+3. Select **Select IoT Hub Device Connection String**.
 
   ![IoT Device Workbench: Device -> Connection string](media/iot-workbench-device-string1.png)
 
    This sets the connection string that is retrieved from the `Provision Azure services` step.
 
-5. The configuration success notification popup bottom right corner once it's done.
+4. The configuration success notification popup bottom right corner once it's done.
 
   ![Raspberry Pi Connection String OK](media/iot-workbench-connection-done.png) 
 
 ### Upload the device code
 
-1. Open the command palette and select **IoT Device Workbench: Device**.
-
-  ![IoT Device Workbench: Device](media/iot-workbench-device.png)
-
-2. Select **Config Device Settings**.
+1. Open the command palette and select **Azure IoT Device Workbench: Configure Device Settings...**.
 
   ![IoT Device Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
 
-3. Select **Select Config Raspberry Pi SSH**.
+2. Select **Select Config Raspberry Pi SSH**.
 
   ![IoT Device Workbench: Device -> SSH](media/iot-workbench-device-ssh.png)
 
-4. Input Raspberry Pi host name or IP, ssh port, user name, password and project name.
+3. Input Raspberry Pi host name or IP, ssh port, user name, password and project name.
 
-5. Open the command palette and select **IoT Device Workbench: Device**, then select **Device Upload**.
+4. Open the command palette and select **Azure IoT Device Workbench: Upload Device Code**.
 
   ![IoT Device Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
 
-6. VS Code then starts uploading the code to Raspberry Pi and install node modules.
+5. VS Code then starts uploading the code to Raspberry Pi and install node modules.
 
   ![IoT Device Workbench: Device -> Upload](media/iot-workbench-device-upload2.png)
 
-7. Login Raspberry Pi and run node code.
+6. Login Raspberry Pi and run node code.
 
 Use command below to connect your Raspberry Pi with SSH. Change `pi` to your own user name, and `raspberrypi` to real Raspberry Pi host or IP.
 

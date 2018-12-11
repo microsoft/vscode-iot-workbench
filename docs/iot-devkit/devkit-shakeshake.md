@@ -26,7 +26,7 @@ An active Azure subscription. If you do not have one, you can register via one o
 - Make sure [Azure IoT Device Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
 - Connect IoT DevKit to your PC.
 
-### Open IoT Device Workbench Examples
+### Open Azure IoT Device Workbench Examples
 
 Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **Azure IoT Device Workbench**, and then select **Open Examples...**.
 
@@ -96,7 +96,7 @@ Open the command palette and select **Azure IoT Device Workbench: Deploy to Azur
 
    ![IoT DevKit Configuration Mode](media/devkit-configuration-mode.png) 
 
-3. Open the command palette and select **Azure IoT Device Workbench: *Config Device Settings**.
+3. Open the command palette and select **Azure IoT Device Workbench: Config Device Settings...**.
 
    ![IoT Device Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
 
