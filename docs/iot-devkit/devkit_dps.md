@@ -31,7 +31,7 @@ Create and link IoT Hub with Device Provisioning Service instance with [Set up a
 * Make sure [Azure IoT Device Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
 * Connect IoT DevKit to your PC.
 
-### Open IoT Device Workbench Examples
+### Open Azure IoT Device Workbench Examples
 
 Use `F1` or`Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **Azure IoT Device Workbench**, and then select **Open Examples...**.
 

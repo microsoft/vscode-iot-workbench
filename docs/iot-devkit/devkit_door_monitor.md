@@ -36,7 +36,7 @@ An active Azure subscription. If you do not have one, you can register via one o
 * Make sure [Azure IoT Device Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
 * Connect IoT DevKit to your PC.
 
-### Open IoT Device Workbench Examples
+### Open Azure IoT Device Workbench Examples
 
 Use `F1` or`Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **Azure IoT Device Workbench**, and then select **Open Examples...**.
 
@@ -183,7 +183,7 @@ Open the command palette and select **IoT Device Workbench: Deploy to Azure...**
 
 ## Build and upload the device code
 
-1. Open the command palette and select **IoT Device Workbench: Upload Device Code**.
+1. Open the command palette and select **Azure IoT Device Workbench: Upload Device Code**.
 
 	![door monitor device upload](media/iot-workbench-device-upload.png)
 

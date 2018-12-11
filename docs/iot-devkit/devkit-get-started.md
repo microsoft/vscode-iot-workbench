@@ -197,7 +197,7 @@ The whole process includes:
 
 ### Build and upload the device code
 
-1. Open the command palette and select **IoT Device Workbench: Upload Device Code**.
+1. Open the command palette and select **Azure IoT Device Workbench: Upload Device Code**.
 
 	![IoT Device Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
 

@@ -63,7 +63,7 @@ This connection string will be used in the next section.
 * Make sure [Azure IoT Device Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
 * Connect IoT DevKit to your PC.
 
-### B. Open IoT Device Workbench Examples
+### B. Open Azure IoT Device Workbench Examples
 
 Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **Azure IoT Device Workbench**, and then select **Open Examples...**.
 
