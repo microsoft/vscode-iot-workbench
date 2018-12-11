@@ -97,14 +97,37 @@
 
 @keyframes iot_data {
   0% {
-    bottom: 220px;
+    bottom: 325px;
   }
   50% {
-    bottom: 270px;
+    bottom: 375px;
   }
   100% {
-    bottom: 220px;
+    bottom: 325px;
   }
+}
+
+.main_menu {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  font-size: 54px;
+  font-weight: bold;
+  margin-top: -200px;
+}
+
+.main_menu div {
+  cursor: pointer;
+  letter-spacing: -0.05em;
+}
+
+.main_menu div:hover {
+  text-decoration: underline;
+}
+
+.main_menu .light {
+  font-weight: normal;
+  font-family: arial;
 }
 
 .pumpjack {
@@ -112,16 +135,9 @@
   height: 430px;
   position: absolute;
   overflow: hidden;
-  bottom: 0;
-  left: 10px;
-  filter: drop-shadow(2px 0 0 orange)
-          drop-shadow(3px 0 0 orange)
-          drop-shadow(0 -2px 0 orange)
-          drop-shadow(0 -3px 0 orange)
-          drop-shadow(-2px 0 0 orange)
-          drop-shadow(-3px 0 0 orange)
-          drop-shadow(0 2px 0 orange)
-          drop-shadow(0 3px 0 orange);
+  bottom: 90px;
+  right: 10px;
+  transform: scaleX(-1);
 }
 
 .pumpjack .hourse_head_walking_beam {
@@ -348,16 +364,44 @@ html, body {
 body {
   margin: 0;
   background: black;
-  font-family: sans-serif;
+  font-family: "Segoe UI", sans-serif;
   min-width: 900px;
   cursor: default;
+  overflow: hidden;
+}
+
+.header::after {
+  content: "";
+  display: block;
+  width: 120%;
+  height: 200px;
+  position: absolute;
+  left: -10%;
+  bottom: -100px;
+  background: black;
+  transform: rotate(-5deg);
+  z-index: 10;
+}
+
+.header::before {
+  content: "";
+  display: block;
+  width: 120%;
+  height: 500px;
+  position: absolute;
+  left: -10%;
+  bottom: -200px;
+  background: rgba(0, 0, 0, 0.2);
+  transform: rotate(-10deg);
 }
 
 .header {
-  height: 80%;
+  height: 98%;
+  width: 100%;
   min-height: 500px;
   border-bottom: 10px solid black;
-  background-color: orange;
+  background-color: #0078d4;
+  overflow: hidden;
 }
 
 .header .inner {
@@ -378,7 +422,6 @@ body {
   bottom: 325px;
   font-size: 10px;
   padding: 10px;
-  background: orange;
   animation: iot_data 5s ease-in-out infinite;
 }
 
@@ -389,7 +432,7 @@ body {
 .logo {
   height: 30px;
   line-height: 30px;
-  background: url(images/logo-black.png) no-repeat;
+  background: url(images/logo.svg) no-repeat;
   background-size: 30px;
   position: absolute;
   left: 20px;
@@ -398,24 +441,6 @@ body {
   vertical-align: middle;
   padding-left: 42px;
   color: black;
-}
-
-.tower {
-  width: 88px;
-  height: 300px;
-  background: url(images/tower.png) no-repeat;
-  background-size: 88px 300px;
-  position: absolute;
-  bottom: 0;
-  right: 60px;
-  filter: drop-shadow(2px 0 0 orange)
-          drop-shadow(3px 0 0 orange)
-          drop-shadow(0 -2px 0 orange)
-          drop-shadow(0 -3px 0 orange)
-          drop-shadow(-2px 0 0 orange)
-          drop-shadow(-3px 0 0 orange)
-          drop-shadow(0 2px 0 orange)
-          drop-shadow(0 3px 0 orange);
 }
 
 .resource {
@@ -427,7 +452,7 @@ body {
   top: 20px;
   right: 10px;
   cursor: pointer;
-  background: orange;
+  background: #0078d4;
 }
 
 .resource_links {
@@ -460,111 +485,14 @@ body {
   padding: 10px 0;
   text-align: center;
   background: black;
-  color: orange;
-  border: 5px solid orange;
+  color: #0078d4;
+  border: 5px solid #0078d4;
   transition: all 0.3s;
   cursor: pointer;
 }
 
 .resource_links .link:hover {
   left: -10px;
-}
-
-.main_button {
-  height: 80px;
-  line-height: 80px;
-  font-size: 42px;
-  padding: 0 10px;
-  font-weight: bold;
-  color: orange;
-  cursor: pointer;
-  position: relative;
-  left: 0;
-  transition: 0.15s all ease-out;
-}
-
-.main_button:hover {
-  left: 10px;
-}
-
-.road_sign {
-  width: 400px;
-  height: 400px;
-  position: absolute;
-  bottom: 0;
-  right: 30px;
-}
-
-.road_sign::before {
-  content: "";
-  height: 400px;
-  width: 40px;
-  display: block;
-  border-top-left-radius: 20px 5px;
-  border-top-right-radius: 20px 5px;
-  background: black;
-  position: absolute;
-  top: 0;
-  left: 180px;
-  filter: drop-shadow(2px 0 0 orange)
-          drop-shadow(3px 0 0 orange)
-          drop-shadow(0 -2px 0 orange)
-          drop-shadow(0 -3px 0 orange)
-          drop-shadow(-2px 0 0 orange)
-          drop-shadow(-3px 0 0 orange)
-          drop-shadow(0 2px 0 orange)
-          drop-shadow(0 3px 0 orange);
-}
-
-.road_sign_board {
-  height: 80px;
-  position: absolute;
-  background: black;
-  border: 5px solid orange;
-  border-right: none;
-}
-
-.road_sign_board::before {
-  content: "";
-  display: block;
-  border-left: 50px solid black;
-  border-top: 40px solid transparent;
-  border-bottom: 40px solid transparent;
-  position: absolute;
-  top: 0px;
-  right: -50px;
-  z-index: 10;
-}
-
-.road_sign_board::after {
-  content: "";
-  display: block;
-  border-left: 56px solid orange;
-  border-top: 46px solid transparent;
-  border-bottom: 46px solid transparent;
-  position: absolute;
-  top: -6px;
-  right: -56px;
-}
-
-.road_sign_start {
-  width: 350px;
-  top: 10px;
-  transform: rotate3d(-1, 1, -0.2, 45deg);
-}
-
-.road_sign_new {
-  width: 315px;
-  top: 120px;
-  left: 50px;
-  transform: rotate3d(1, 0.2, -0.2, -45deg);
-}
-
-.road_sign_example {
-  width: 270px;
-  top: 220px;
-  left: 60px;
-  transform: rotateX(30deg);
 }
 
 .how_to_start {
@@ -703,16 +631,10 @@ body[data-show-how-to-start="true"] .how_to_start {
         <div class="link" onclick="openLink('https://github.com/espressif/arduino-esp32')">ESP32</div>
         <div class="link" onclick="openLink('https://www.raspberrypi.org/')">Raspberry Pi</div>
       </div>
-      <div class="road_sign">
-        <div class="road_sign_board road_sign_start">
-          <div class="main_button start_button" onclick="showHowToStart()">How To Start &#x2771;&#x2771;</div>
-        </div>
-        <div class="road_sign_board road_sign_new">
-          <div class="main_button new_button" onclick="httpRequest('/api/new')">New Project &#x2771;&#x2771;</div>
-        </div>
-        <div class="road_sign_board road_sign_example">
-          <div class="main_button examples_button" onclick="httpRequest('/api/example')">Examples &#x2771;&#x2771;</div>
-        </div>
+      <div class="main_menu">
+        <div onclick="showHowToStart()">How To Start <span class="light">&#x2771;</span></div>
+        <div onclick="httpRequest('/api/new')">New Project <span class="light">&#x2771;</span></div>
+        <div onclick="httpRequest('/api/example')">Examples <span class="light">&#x2771;</span></div>
       </div>
   </div>
 </div>
