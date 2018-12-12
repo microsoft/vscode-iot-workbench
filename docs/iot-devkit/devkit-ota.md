@@ -296,7 +296,7 @@ You can see the status update in the portal in the **Automatic device management
 
 ### View status in device twins
 
-You can check them by using the Azure IoT Toolkit extension:
+You can check them by using the Azure IoT Hub Toolkit extension:
 
 1. In Explorer of VS Code, click "Azure IoT Hub Devices" in the bottom left corner.
 
