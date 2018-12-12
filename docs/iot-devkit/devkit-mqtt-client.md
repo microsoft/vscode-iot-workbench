@@ -45,7 +45,7 @@ Find **MQTT Client** and click **Open Sample** button. A new VS Code window with
 
 ## Build and upload the device code
 
-1. Open the command palette and select **Azure IoT Device Workbench: Upload Device Code**.
+1. Open the command palette (Ctrl+Shift+P) and select **Azure IoT Device Workbench: Upload Device Code**.
 
 	![IoT Device Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
 
