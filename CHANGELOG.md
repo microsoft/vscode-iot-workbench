@@ -1,6 +1,18 @@
 # Change Log
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
 
+
+## Version 0.2.0
+- Release date: Dec. 14, 2018
+
+### Fixed
+- Rename **Azure IoT Workbench** to **Azure IoT Device Workbench**.
+- Use C# library in Azure Functions for all MXChip IoT DevKit examples.
+- Redesign commands for Azure IoT Device Workbench and update related documents.
+- Add the option of 'My Device is not in the list...' in device selection.
+- Redesign the Welcome page of the extension.
+
+
 ## Version 0.1.14
 - Release date: Nov. 19, 2018
 
