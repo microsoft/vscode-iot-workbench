@@ -40,6 +40,7 @@ export class ContentProvider implements vscode.TextDocumentContentProvider {
         '/api/feed', async (req, res) => await this.getFeed(req, res));
     this._webserver.addHandler('/api/new', async (req, res) => {
       await vscode.commands.executeCommand('iotworkbench.initializeProject');
+      res.send({code: 0});
     });
   }
 
