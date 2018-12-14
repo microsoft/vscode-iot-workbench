@@ -43,7 +43,7 @@ export class UsbDetector {
   }
 
   showLandingPage(device: DeviceInfo) {
-    // if current workspace is iot workbench workspace
+    // if current workspace is iot device workbench workspace
     // we shouldn't popup landing page
     // if (vscode.workspace.workspaceFolders &&
     //     vscode.workspace.workspaceFolders.length) {
@@ -74,7 +74,8 @@ export class UsbDetector {
                       '&url=' + encodeURIComponent(board.exampleUrl || ''));
 
               const panel = vscode.window.createWebviewPanel(
-                  'IoTWorkbenchExamples', 'Examples - Azure IoT Workbench',
+                  'IoTWorkbenchExamples',
+                  'Examples - Azure IoT Device Workbench',
                   vscode.ViewColumn.One, {
                     enableScripts: true,
                     retainContextWhenHidden: true,

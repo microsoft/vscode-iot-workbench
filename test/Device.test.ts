@@ -10,11 +10,12 @@ import {TelemetryContext} from '../src/telemetry';
 
 import {TestExtensionContext} from './stub';
 
-suite('IoT Workbench: Device', () => {
+suite('IoT Device Workbench: Device', () => {
   // tslint:disable-next-line: only-arrow-functions
   test('property of device should be set correctly', function(done) {
     const context = new TestExtensionContext();
-    const device = new AZ3166Device(context, '', 'emptySketch.ino');
+    const channel = vscode.window.createOutputChannel('IoT workbench test');
+    const device = new AZ3166Device(context, channel, '', 'emptySketch.ino');
     assert.equal(device.getDeviceType(), DeviceType.MXChip_AZ3166);
     assert.equal(device.getComponentType(), ComponentType.Device);
     done();
@@ -31,7 +32,7 @@ suite('IoT Workbench: Device', () => {
         measurements: {duration: 0}
       };
       const outputChannel: vscode.OutputChannel =
-          vscode.window.createOutputChannel('Azure IoT Workbench Test');
+          vscode.window.createOutputChannel('Azure IoT Device Workbench Test');
       deviceOperator.compile(contextMock, outputChannel, telemetryContext)
           .then(() => {
             done();

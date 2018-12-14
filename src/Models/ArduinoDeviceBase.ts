@@ -4,18 +4,16 @@
 import * as fs from 'fs-plus';
 import * as os from 'os';
 import * as path from 'path';
-import {error} from 'util';
 import * as vscode from 'vscode';
 
-import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames} from '../constants';
-
 import {Board} from './Interfaces/Board';
-import {Component, ComponentType} from './Interfaces/Component';
+import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
 import {ProjectTemplate, ProjectTemplateType} from './Interfaces/ProjectTemplate';
 import {IoTProject} from './IoTProject';
+import {OTA} from './OTA';
 
 const constants = {
   defaultSketchFileName: 'device.ino',
@@ -206,6 +204,90 @@ export abstract class ArduinoDeviceBase implements Device {
     } catch (error) {
       throw new Error(`Create arduino sketch file failed: ${error.message}`);
     }
+    return true;
+  }
+
+  async generateCrc(
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
+    if (!vscode.workspace.workspaceFolders) {
+      vscode.window.showWarningMessage('No workspace opened.');
+      channel.show();
+      channel.appendLine('No workspace opened.');
+      return false;
+    }
+
+    const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
+    if (!devicePath) {
+      vscode.window.showWarningMessage(
+          'No device path found in workspace configuration.');
+      channel.show();
+      channel.appendLine('No device path found in workspace configuration.');
+      return false;
+    }
+    const deviceBuildLocation = path.join(
+        vscode.workspace.workspaceFolders[0].uri.fsPath, '..', devicePath,
+        '.build');
+
+    if (!deviceBuildLocation) {
+      vscode.window.showWarningMessage(
+          'No device compile output folder found.');
+      channel.show();
+      channel.appendLine('No device compile output folder found.');
+      return false;
+    }
+
+    const binFiles = fs.listSync(deviceBuildLocation, ['bin']);
+    if (!binFiles || !binFiles.length) {
+      const message =
+          'No bin file found. Please run the command of Device Compile first.';
+      vscode.window.showWarningMessage(message);
+      channel.show();
+      channel.appendLine(message);
+      return false;
+    }
+
+    let binFilePath = '';
+
+    if (binFiles.length === 1) {
+      binFilePath = binFiles[0];
+    } else {
+      const binFilePickItems: vscode.QuickPickItem[] = [];
+      for (const file of binFiles) {
+        const fileName = path.basename(file);
+        binFilePickItems.push({label: fileName, description: file});
+      }
+
+      const choice = await vscode.window.showQuickPick(binFilePickItems, {
+        ignoreFocusOut: true,
+        matchOnDescription: true,
+        matchOnDetail: true,
+        placeHolder: 'Select bin file',
+      });
+
+      if (!choice || !choice.description) {
+        return false;
+      }
+
+      binFilePath = choice.description;
+    }
+
+    if (!binFilePath || !fs.existsSync(binFilePath)) {
+      return false;
+    }
+
+    const res = OTA.generateCrc(binFilePath);
+
+    vscode.window.showInformationMessage('Generate CRC succeeded.');
+
+    channel.show();
+    channel.appendLine('========== CRC Information ==========');
+    channel.appendLine('');
+    channel.appendLine('fwPath: ' + binFilePath);
+    channel.appendLine('fwPackageCheckValue: ' + res.crc);
+    channel.appendLine('fwSize: ' + res.size);
+    channel.appendLine('');
+    channel.appendLine('======================================');
+
     return true;
   }
 }

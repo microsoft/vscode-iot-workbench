@@ -25,6 +25,7 @@ const constants = {
 export class Esp32Device extends ArduinoDeviceBase {
   private sketchFileContent = '';
   private static _boardId = 'esp32';
+  private channel: vscode.OutputChannel;
 
   private componentId: string;
   get id() {
@@ -68,9 +69,10 @@ export class Esp32Device extends ArduinoDeviceBase {
   name = 'Esp32Arduino';
 
   constructor(
-      context: vscode.ExtensionContext, devicePath: string,
-      sketchFileContent?: string) {
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      devicePath: string, sketchFileContent?: string) {
     super(context, devicePath, DeviceType.IoT_Button);
+    this.channel = channel;
     this.componentId = Guid.create().toString();
     if (sketchFileContent) {
       this.sketchFileContent = sketchFileContent;
@@ -115,11 +117,19 @@ export class Esp32Device extends ArduinoDeviceBase {
 
 
   async configDeviceSettings(): Promise<boolean> {
-    const configSelectionItems: vscode.QuickPickItem[] = [{
-      label: 'Copy device connection string',
-      description: 'Copy device connection string',
-      detail: 'Copy'
-    }];
+    const configSelectionItems: vscode.QuickPickItem[] = [
+      {
+        label: 'Copy device connection string',
+        description: 'Copy device connection string',
+        detail: 'Copy'
+      },
+      {
+        label: 'Generate CRC for OTA',
+        description:
+            'Generate Cyclic Redundancy Check(CRC) code for OTA Update',
+        detail: 'Config CRC'
+      }
+    ];
 
     const configSelection =
         await vscode.window.showQuickPick(configSelectionItems, {
@@ -133,7 +143,11 @@ export class Esp32Device extends ArduinoDeviceBase {
       return false;
     }
 
-    if (configSelection.detail === 'Copy') {
+    if (configSelection.detail === 'Config CRC') {
+      const retValue: boolean =
+          await this.generateCrc(this.extensionContext, this.channel);
+      return retValue;
+    } else if (configSelection.detail === 'Copy') {
       const deviceConnectionString =
           ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
 

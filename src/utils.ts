@@ -8,7 +8,7 @@ import {setTimeout} from 'timers';
 import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
 
-import {AzureFunctionsLanguage} from './constants';
+import {AzureFunctionsLanguage, GlobalConstants} from './constants';
 import {DialogResponses} from './DialogResponses';
 import {TelemetryContext} from './telemetry';
 
@@ -226,4 +226,33 @@ export async function askAndOpenProject(
   } else {
     telemetryContext.properties.errorMessage = 'Operation failed.';
   }
+}
+
+const noDeviceSurveyUrl = 'https://www.surveymonkey.com/r/C7NY7KJ';
+
+export async function TakeNoDeviceSurvey(telemetryContext: TelemetryContext) {
+  const message =
+      'Could you help to take a quick survey about what IoT development kit(s) you want Azure IoT Device Workbench to support?';
+  const result: vscode.MessageItem|undefined =
+      await vscode.window.showWarningMessage(
+          message, DialogResponses.yes, DialogResponses.cancel);
+  if (result === DialogResponses.yes) {
+    // Open the survey page
+    telemetryContext.properties.message = 'User takes no-device survey.';
+    telemetryContext.properties.result = 'Succeeded';
+
+
+    const extension =
+        vscode.extensions.getExtension(GlobalConstants.extensionId);
+    if (!extension) {
+      return;
+    }
+    const extensionVersion = extension.packageJSON.version || 'unknown';
+    await vscode.commands.executeCommand(
+        'vscode.open',
+        vscode.Uri.parse(
+            `${noDeviceSurveyUrl}?o=${encodeURIComponent(process.platform)}&v=${
+                encodeURIComponent(extensionVersion)}`));
+  }
+  return;
 }
