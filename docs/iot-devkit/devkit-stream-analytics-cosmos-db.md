@@ -16,17 +16,17 @@ An active Azure subscription. If you do not have one, you can register via one o
 
 ## Create a New Project
 
-Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select **IoT Workbench: Create Project...**.
+Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **Azure IoT Device Workbench**, and then select **Create Project...**.
 
-![IoT Workbench: New](media/iot-workbench-new-cmd.png)
+![IoT Device Workbench: New](media/iot-workbench-new-cmd.png)
 
 Select **IoT DevKit**.
 
-![IoT Workbench: New -> IoT DevKit](media/iot-workbench-new-devkit.png)
+![IoT Device Workbench: New -> IoT DevKit](media/iot-workbench-new-devkit.png)
 
 Select **With Stream Analytics and Cosmos DB**.
 
-![IoT Workbench: New -> With Stream Analytics and Cosmos DB](media/iot-workbench-stream-analytics-and-cosmos-db.png)
+![IoT Device Workbench: New -> With Stream Analytics and Cosmos DB](media/iot-workbench-stream-analytics-and-cosmos-db.png)
 
 A new project will be opened in a new window with two folders named Device and StreamAnalytics.
 
@@ -158,11 +158,11 @@ void loop() {
 }
 ```
 
-## Provision Azure Service
+## Provision Azure Services
 
-Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select **IoT Workbench: Cloud** -> **Azure Provision**.
+In the solution window, open the command palette and select **Azure IoT Device Workbench: Provision Azure Services...**.
 
-![Azure Provision](media/iot-workbench-cloud-provision2.png)
+![Azure Provision](media/iot-workbench-cloud-provision.png)
 
 Select subscription and resource group you want to create Azure services in. A guide line shows what service will be created.
 
@@ -214,23 +214,23 @@ GROUP BY
 
 You can learn more about ASAQL windowing functions from [here](https://docs.microsoft.com/en-us/azure/stream-analytics/stream-analytics-window-functions).
 
-Deploy the query by executing **IoT Workbench: Cloud** command and select **Azure Deploy**.
+Deploy the query by executing **Azure IoT Device Workbench: Deploy to Azure...**.
 
 ![Azure Deply](media/iot-workbench-cloud-deploy.png)
 
-IoT Workbench will stop Stream Analytics Job, update query and restart Stream Analytics Job automatically.
+IoT Device Workbench will stop Stream Analytics Job, update query and restart Stream Analytics Job automatically.
 
 ![Azure Deply Query](media/iot-workbench-stream-analytics-and-cosmos-db-deploy-query.png)
 
 ## Build and Upload the Device Code
 
-1. Open the command palette and select **IoT Workbench: Device**, then select **Device Upload**.
+1. Open the command palette and select **Azure IoT Device Workbench: Upload Device Code**.
 
-![IoT Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
+![IoT Device Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
 
 2. VS Code then starts verifying and uploading the code to your DevKit.
 
-![IoT Workbench: Device -> Uploaded](media/iot-workbench-stream-analytics-and-cosmos-db-upload.png)
+![IoT Device Workbench: Device -> Uploaded](media/iot-workbench-stream-analytics-and-cosmos-db-upload.png)
 
 3. The IoT DevKit reboots and starts running the code.
 

@@ -103,11 +103,13 @@ export class IoTProject {
       }
       let device = null;
       if (boardId === AZ3166Device.boardId) {
-        device = new AZ3166Device(this.extensionContext, deviceLocation);
+        device = new AZ3166Device(
+            this.extensionContext, this.channel, deviceLocation);
       } else if (boardId === IoTButtonDevice.boardId) {
         device = new IoTButtonDevice(this.extensionContext, deviceLocation);
       } else if (boardId === Esp32Device.boardId) {
-        device = new Esp32Device(this.extensionContext, deviceLocation);
+        device = new Esp32Device(
+            this.extensionContext, this.channel, deviceLocation);
       } else if (boardId === RaspberryPiDevice.boardId) {
         device = new RaspberryPiDevice(
             this.extensionContext, deviceLocation, this.channel);
@@ -253,7 +255,7 @@ export class IoTProject {
         const res = await item.compile();
         if (res === false) {
           const error = new Error(
-              'Unable to compile the sketch, please check output window for detail.');
+              'Unable to compile the device code, please check output window for detail.');
           throw error;
         }
       }
@@ -279,7 +281,7 @@ export class IoTProject {
     const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
     if (!devicePath) {
       throw new Error(
-          'Cannot run IoT Workbench command in a non-IoTWorkbench project. Please initialize an IoT Workbench project first.');
+          'Cannot run IoT Device Workbench command in a non-IoTWorkbench project. Please initialize an IoT Device Workbench project first.');
     }
 
     const provisionItemList: string[] = [];
@@ -287,6 +289,13 @@ export class IoTProject {
       if (this.canProvision(item)) {
         provisionItemList.push(item.name);
       }
+    }
+
+    if (provisionItemList.length === 0) {
+      // nothing to provision:
+      vscode.window.showInformationMessage(
+          'Congratulations! There is no Azure service to provision in this project.');
+      return false;
     }
 
     // Ensure azure login before component provision
@@ -347,8 +356,8 @@ export class IoTProject {
     }
 
     if (deployItemList && deployItemList.length <= 0) {
-      await vscode.window.showWarningMessage(
-          'The project does not contain any Azure components to be deployed, Azure Deploy skipped.');
+      await vscode.window.showInformationMessage(
+          'Congratulations! The project does not contain any Azure components to be deployed.');
       return false;
     }
 
@@ -420,13 +429,15 @@ export class IoTProject {
     let device: Component;
     if (boardId === AZ3166Device.boardId) {
       device = new AZ3166Device(
-          this.extensionContext, deviceDir, projectTemplateItem.sketch);
+          this.extensionContext, this.channel, deviceDir,
+          projectTemplateItem.sketch);
     } else if (boardId === IoTButtonDevice.boardId) {
       device = new IoTButtonDevice(
           this.extensionContext, deviceDir, projectTemplateItem.sketch);
     } else if (boardId === Esp32Device.boardId) {
       device = new Esp32Device(
-          this.extensionContext, deviceDir, projectTemplateItem.sketch);
+          this.extensionContext, this.channel, deviceDir,
+          projectTemplateItem.sketch);
     } else if (boardId === RaspberryPiDevice.boardId) {
       device = new RaspberryPiDevice(
           this.extensionContext, deviceDir, this.channel,

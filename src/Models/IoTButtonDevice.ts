@@ -127,14 +127,14 @@ export class IoTButtonDevice implements Device {
   }
 
   async compile(): Promise<boolean> {
-    await vscode.window.showInformationMessage(
-        'Compiling device code for IoT button is not supported');
+    vscode.window.showInformationMessage(
+        'Congratulations! There is no device code to compile in this project.');
     return true;
   }
 
   async upload(): Promise<boolean> {
-    await vscode.window.showInformationMessage(
-        'Uploading device code for IoT button is not supported');
+    vscode.window.showInformationMessage(
+        'Congratulations! There is no device code to upload in this project.');
     return true;
   }
 

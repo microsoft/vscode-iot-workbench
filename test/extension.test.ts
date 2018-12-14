@@ -12,7 +12,7 @@ import * as vscode from 'vscode';
 import * as myExtension from '../src/extension';
 
 // Defines a Mocha test suite to group tests of similar kind together
-suite('IoT Workbench Tests', () => {
+suite('IoT Device Workbench Tests', () => {
   test('should be present', () => {
     assert.ok(
         vscode.extensions.getExtension('vsciot-vscode.vscode-iot-workbench'));
@@ -38,7 +38,7 @@ suite('IoT Workbench Tests', () => {
     }
   });
 
-  test('should be able to register iot workbench commands', () => {
+  test('should be able to register iot device workbench commands', () => {
     return vscode.commands.getCommands(true).then((commands) => {
       const COMMANDS = [
         'iotworkbench.device', 'iotworkbench.cloud',

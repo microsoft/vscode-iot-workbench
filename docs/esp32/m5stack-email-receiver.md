@@ -24,40 +24,36 @@ A Gmail account. If you do not have one, you can register from [this website](ht
 ### Start VS Code
 
 - Start Visual Studio Code.
-- Make sure [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
+- Make sure [Azure IoT Device Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
 - Connect M5Stack to your PC.
 
-### Open IoT Workbench Examples
+### Open Azure IoT Device Workbench Examples
 
-Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select **IoT Workbench: Examples**.
+Use `F1` or`Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **Azure IoT Device Workbench**, and then select **Open Examples...**.
 
-![IoT Workbench: Examples](media/iot-workbench-examples-cmd.png)
+![IoT Device Workbench: Examples](media/iot-workbench-examples-cmd.png)
 
 Select **ESP32 Arduino**.
 
-![IoT Workbench: Examples -> Select board](media/iot-workbench-examples-board.png)
+![IoT Device Workbench: Examples -> Select board](media/iot-workbench-examples-board.png)
 
-Then the **IoT Workbench Example** window is shown up.
+Then the **IoT Device Workbench Example** window is shown up.
 
-![IoT Workbench, Examples window](media/iot-workbench-examples.png)
+![IoT Device Workbench, Examples window](media/iot-workbench-examples.png)
 
 Find **M5Stack Email Receiver** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
 
-![IoT Workbench, select M5Stack Email Receiver example](media/m5stack-email-receiver/open-example-m5stack-email-receiver.jpg)
+![IoT Device Workbench, select M5Stack Email Receiver example](media/m5stack-email-receiver/open-example-m5stack-email-receiver.jpg)
 
 ## Provision Azure Services
 
-In the solution window, open the command palette and select **IoT Workbench: Cloud**.
+In the solution window, open the command palette and select **Azure IoT Device Workbench: Provision Azure Services...**.
 
-![IoT Workbench: Cloud](media/iot-workbench-cloud.png)
-
-Select **Azure Provision**.
-
-![IoT Workbench: Cloud -> Provision](media/iot-workbench-cloud-provision.png)
+![IoT Device Workbench: Cloud -> Provision](media/iot-workbench-cloud-provision.png)
 
 Then VS Code guides you through provisioning the required Azure services.
 
-![IoT Workbench: Cloud -> Provision steps](media/iot-workbench-cloud-provision-steps3.png)
+![IoT Device Workbench: Cloud -> Provision steps](media/iot-workbench-cloud-provision-steps3.png)
 
 The whole process includes:
 
@@ -75,10 +71,9 @@ static string deviceName = "";
 
 ## Deploy Azure Functions
 
-Open the command palette and select **IoT Workbench: Cloud**, then select **Azure Deploy**.
+Open the command palette and select **IoT Device Workbench: Deploy to Azure...**.
 
-![IoT Workbench: Cloud -> Deploy](media/iot-workbench-cloud-deploy.png)
-
+![IoT Device Workbench: Cloud -> Deploy](media/iot-workbench-cloud-deploy.png)
 
 ## Creating Azure Logic App
 
@@ -127,21 +122,17 @@ You can refer to the following graph to config this action.
 		const char* password = "";
     ```
 
-2. Open the command palette and select **IoT Workbench: Device**.
+2. Open the command palette and select **Azure IoT Device Workbench: Config Device Settings...**.
 
-	![IoT Workbench: Device](media/iot-workbench-device.png)
+   ![IoT Device Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
 
-3. Select **Config Device Settings**.
+3. Select **Copy device connection string**.
 
-	![IoT Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
-
-4. Select **Copy device connection string**.
-
-	![IoT Workbench: Device copy connection string](media/esp32-get-started/copy-connection-string.png)
+	![IoT Device Workbench: Device copy connection string](media/esp32-get-started/copy-connection-string.png)
 
    This copies the connection string that is retrieved from the `Provision Azure services` step.
 
-5. Paste the device connection string into the following line in device code
+4. Paste the device connection string into the following line in device code
     ```csharp
 	/*String containing Hostname, Device Id & Device Key in the format:                         */
 	/*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
@@ -151,13 +142,13 @@ You can refer to the following graph to config this action.
 
 ## Build and upload the device code
 
-1. Open the command palette and select **IoT Workbench: Device**, then select **Device Upload**.
+1. Open the command palette and select **Azure IoT Device Workbench: Upload Device Code**.
 
-	![IoT Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
+	![IoT Device Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
 
 2. VS Code then starts verifying and uploading the code to your DevKit.
 
-	![IoT Workbench: Device -> Uploaded](media/esp32-get-started/esp32-device-uploaded.png)
+	![IoT Device Workbench: Device -> Uploaded](media/esp32-get-started/esp32-device-uploaded.png)
 
 3. The M5Stack device reboots and starts running the code.
 

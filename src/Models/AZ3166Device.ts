@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import {port} from '_debugger';
 import {exec} from 'child_process';
 import * as crypto from 'crypto';
 import * as fs from 'fs-plus';
@@ -11,7 +10,6 @@ import * as _ from 'lodash';
 import * as opn from 'opn';
 import * as os from 'os';
 import * as path from 'path';
-import {SerialPortLite} from 'serialport-lite/dist';
 import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
 
@@ -63,6 +61,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
   // tslint:disable-next-line: no-any
   private static _serialport: any;
+  private channel: vscode.OutputChannel;
 
   private componentId: string;
   get id() {
@@ -77,9 +76,10 @@ export class AZ3166Device extends ArduinoDeviceBase {
   }
 
   constructor(
-      context: vscode.ExtensionContext, devicePath: string,
-      sketchName?: string) {
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      devicePath: string, sketchName?: string) {
     super(context, devicePath, DeviceType.MXChip_AZ3166);
+    this.channel = channel;
     this.componentId = Guid.create().toString();
     if (sketchName) {
       this.sketchName = sketchName;
@@ -188,6 +188,12 @@ export class AZ3166Device extends ArduinoDeviceBase {
         label: 'Config Unique Device String (UDS)',
         description: 'Config Unique Device String (UDS)',
         detail: 'Config UDS'
+      },
+      {
+        label: 'Generate CRC for OTA',
+        description:
+            'Generate Cyclic Redundancy Check(CRC) code for OTA Update',
+        detail: 'Config CRC'
       }
     ];
 
@@ -203,9 +209,11 @@ export class AZ3166Device extends ArduinoDeviceBase {
       return false;
     }
 
-
-
-    if (configSelection.detail === 'Config Connection String') {
+    if (configSelection.detail === 'Config CRC') {
+      const retValue: boolean =
+          await this.generateCrc(this.extensionContext, this.channel);
+      return retValue;
+    } else if (configSelection.detail === 'Config Connection String') {
       try {
         // Get IoT Hub device connection string from config
         let deviceConnectionString =

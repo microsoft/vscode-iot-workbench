@@ -5,7 +5,7 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 
-suite('IoT Workbench: Commands Tests', () => {
+suite('IoT Device Workbench: Commands Tests', () => {
   // tslint:disable-next-line: only-arrow-functions
   setup(function(done) {
     // Ensure that extension is activate while testing

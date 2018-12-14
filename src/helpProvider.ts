@@ -21,7 +21,7 @@ export class HelpProvider {
     }
 
     const panel = vscode.window.createWebviewPanel(
-        'IoTWorkbenchHelp', 'Welcome - Azure IoT Workbench',
+        'IoTWorkbenchHelp', 'Welcome - Azure IoT Device Workbench',
         vscode.ViewColumn.One, {
           enableScripts: true,
           retainContextWhenHidden: true,

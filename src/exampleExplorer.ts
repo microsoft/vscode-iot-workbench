@@ -226,7 +226,7 @@ export class ExampleExplorer {
             encodeURIComponent('board=' + board.id + '&url=' +
                                encodeURIComponent(board.exampleUrl || ''));
         const panel = vscode.window.createWebviewPanel(
-            'IoTWorkbenchExamples', 'Examples - Azure IoT Workbench',
+            'IoTWorkbenchExamples', 'Examples - Azure IoT Device Workbench',
             vscode.ViewColumn.One, {
               enableScripts: true,
               retainContextWhenHidden: true,

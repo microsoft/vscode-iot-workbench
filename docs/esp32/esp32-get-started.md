@@ -26,9 +26,9 @@ For M5Stack, please follow the [guide](http://www.m5stack.com/assets/docs/index.
 
 ## Install development environment
 
-We recommend [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) extension for Visual Studio Code to develop on the ESP32 devices.
+We recommend [Azure IoT Device Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) extension for Visual Studio Code to develop on the ESP32 devices.
 
-Azure IoT Workbench provides an integrated experience to develop IoT solutions. It helps both on device and cloud development using Azure IoT and other services. You can watch this [Channel9 video](https://channel9.msdn.com/Shows/Internet-of-Things-Show/IoT-Workbench-extension-for-VS-Code) to have an overview of what it does.
+Azure IoT Device Workbench provides an integrated experience to develop IoT solutions. It helps both on device and cloud development using Azure IoT and other services. You can watch this [Channel9 video](https://channel9.msdn.com/Shows/Internet-of-Things-Show/IoT-Workbench-extension-for-VS-Code) to have an overview of what it does.
 
 Follow these steps to prepare the development environment for ESP32 devices:
 
@@ -39,9 +39,9 @@ Follow these steps to prepare the development environment for ESP32 devices:
 
 2. Install [Visual Studio Code](https://code.visualstudio.com/), a cross platform source code editor with powerful developer tooling, like IntelliSense code completion and debugging.
 
-3. Look for **Azure IoT Workbench** in the extension marketplace and install it.
-    ![Install IoT Workbench](media/esp32-get-started/install-workbench.png)
-    Together with the IoT Workbench, other dependent extensions will be installed.
+3. Look for **Azure IoT Device Workbench** in the extension marketplace and install it.
+    ![Install IoT Device Workbench](media/esp32-get-started/install-workbench.png)
+    Together with the IoT Device Workbench, other dependent extensions will be installed.
 
 4. Open **File > Preference > Settings** and add following lines to configure Arduino.
 
@@ -77,37 +77,33 @@ Make sure your device is **not connected** to your computer. Start VS Code first
 
 ## Open the project folder
 
-### Open IoT Workbench Examples
+### Open Azure IoT Device Workbench Examples
 
-Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **IoT Workbench**, and then select **IoT Workbench: Examples**.
+Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **Azure IoT Device Workbench**, and then select **Open Examples...**.
 
-![IoT Workbench: Examples](media/iot-workbench-examples-cmd.png)
+![IoT Device Workbench: Examples](media/iot-workbench-examples-cmd.png)
 
 Select **ESP32 Arduino**.
 
-![IoT Workbench: Examples -> Select board](media/iot-workbench-examples-board.png)
+![IoT Device Workbench: Examples -> Select board](media/iot-workbench-examples-board.png)
 
-Then the **IoT Workbench Example** window is shown up.
+Then the **IoT Device Workbench Example** window is shown up.
 
-![IoT Workbench, Examples window](media/iot-workbench-examples.png)
+![IoT Device Workbench, Examples window](media/iot-workbench-examples.png)
 
 Find **ESP32 Get Started** and click **Open Sample** button. A new VS Code window with a project folder in it opens.
 
-![IoT Workbench, select ESP32 Get Started example](media/esp32-get-started/open-example-esp32getstarted.jpg)
+![IoT Device Workbench, select ESP32 Get Started example](media/esp32-get-started/open-example-esp32getstarted.jpg)
 
 ### Provision Azure service
 
-In the solution window, open the command palette and select **IoT Workbench: Cloud**.
+In the solution window, open the command palette and select **Azure IoT Device Workbench: Cloud: Provision Azure Services...**.
 
-![IoT Workbench: Cloud](media/iot-workbench-cloud.png)
-
-Select **Azure Provision**.
-
-![IoT Workbench: Cloud -> Provision](media/iot-workbench-cloud-provision.png)
+![IoT Device Workbench: Cloud -> Provision](media/iot-workbench-cloud-provision.png)
 
 Then VS Code guides you through provisioning the required Azure services.
 
-![IoT Workbench: Cloud -> Provision steps](media/iot-workbench-cloud-provision-steps2.png)
+![IoT Device Workbench: Cloud -> Provision steps](media/iot-workbench-cloud-provision-steps2.png)
 
 The whole process includes:
 * Select an existing IoT Hub or create a new IoT Hub.
@@ -122,21 +118,17 @@ The whole process includes:
 		const char* password = "";
     ```
 
-2. Open the command palette and select **IoT Workbench: Device**.
+2. Open the command palette and select **Azure IoT Device Workbench: Config Device Settings...**.
 
-	![IoT Workbench: Device](media/iot-workbench-device.png)
+   ![IoT Device Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
 
-3. Select **Config Device Settings**.
+3. Select **Copy device connection string**.
 
-	![IoT Workbench: Device -> Settings](media/iot-workbench-device-settings.png)
-
-4. Select **Copy device connection string**.
-
-	![IoT Workbench: Device copy connection string](media/esp32-get-started/copy-connection-string.png)
+	![IoT Device Workbench: Device copy connection string](media/esp32-get-started/copy-connection-string.png)
 
    This copies the connection string that is retrieved from the `Provision Azure services` step.
 
-5. Paste the device connection string into the following line in device code
+4. Paste the device connection string into the following line in device code
     ```csharp
 	/*String containing Hostname, Device Id & Device Key in the format:                         */
 	/*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
@@ -146,13 +138,13 @@ The whole process includes:
 
 ### Build and upload the device code
 
-1. Open the command palette and select **IoT Workbench: Device**, then select **Device Upload**.
+1. Open the command palette and select **Azure IoT Device Workbench: Upload Device Code**.
 
-	![IoT Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
+	![IoT Device Workbench: Device -> Upload](media/iot-workbench-device-upload.png)
 
 2. VS Code then starts verifying and uploading the code to your DevKit.
 
-	![IoT Workbench: Device -> Uploaded](media/esp32-get-started/esp32-device-uploaded.png)
+	![IoT Device Workbench: Device -> Uploaded](media/esp32-get-started/esp32-device-uploaded.png)
 
 3. The ESP32 device reboots and starts running the code.
 
