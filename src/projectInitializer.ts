@@ -62,6 +62,15 @@ export class ProjectInitializer {
               });
             });
 
+            // add the selection of 'device not in the list'
+            boardItemList.push({
+              name: '',
+              id: 'no_device',
+              detailInfo: '',
+              label: '$(issue-opened) My device is not in the list...',
+              description: '',
+            });
+
             const boardSelection =
                 await vscode.window.showQuickPick(boardItemList, {
                   ignoreFocusOut: true,
@@ -74,6 +83,9 @@ export class ProjectInitializer {
               telemetryContext.properties.errorMessage =
                   'Board selection canceled.';
               telemetryContext.properties.result = 'Canceled';
+              return;
+            } else if (boardSelection.id === 'no_device') {
+              await utils.TakeNoDeviceSurvey(telemetryContext);
               return;
             } else {
               telemetryContext.properties.board = boardSelection.label;

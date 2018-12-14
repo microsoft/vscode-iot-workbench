@@ -193,6 +193,15 @@ export class ExampleExplorer {
       });
     });
 
+    // add the selection of 'device not in the list'
+    boardItemList.push({
+      name: '',
+      id: 'no_device',
+      detailInfo: '',
+      label: '$(issue-opened) My device is not in the list...',
+      description: '',
+    });
+
     const boardSelection = await vscode.window.showQuickPick(boardItemList, {
       ignoreFocusOut: true,
       matchOnDescription: true,
@@ -204,6 +213,9 @@ export class ExampleExplorer {
       telemetryContext.properties.errorMessage = 'Board selection canceled.';
       telemetryContext.properties.result = 'Canceled';
       return false;
+    } else if (boardSelection.id === 'no_device') {
+      await utils.TakeNoDeviceSurvey(telemetryContext);
+      return;
     } else {
       telemetryContext.properties.board = boardSelection.label;
       const board = boardProvider.find({id: boardSelection.id});
@@ -214,7 +226,7 @@ export class ExampleExplorer {
             encodeURIComponent('board=' + board.id + '&url=' +
                                encodeURIComponent(board.exampleUrl || ''));
         const panel = vscode.window.createWebviewPanel(
-            'IoTWorkbenchExamples', 'Examples - Azure IoT Workbench',
+            'IoTWorkbenchExamples', 'Examples - Azure IoT Device Workbench',
             vscode.ViewColumn.One, {
               enableScripts: true,
               retainContextWhenHidden: true,

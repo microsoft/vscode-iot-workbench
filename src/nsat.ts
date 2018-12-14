@@ -99,7 +99,7 @@ export class NSAT {
     telemetryContext.properties.message = 'nsat.survey/userAsked';
     TelemetryWorker.sendEvent(EventNames.nsatsurvery, telemetryContext);
     const button = await window.showInformationMessage(
-        'Do you mind taking a quick feedback survey about the Azure IoT Workbench Extension for VS Code?',
+        'Do you mind taking a quick feedback survey about the Azure IoT Device Workbench Extension for VS Code?',
         take, remind, never);
     await (button || remind).run();
   }

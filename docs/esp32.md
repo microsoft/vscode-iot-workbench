@@ -1,25 +1,28 @@
 # ESP32
 
-[ESP32](https://www.espressif.com/en/products/hardware/esp32/overview) is a series of low-cost, low-power system on a chip microcontrollers with integrated Wi-Fi and dual-mode Bluetooth. You can develop for it using [Azure IoT Workbench](https://aka.ms/azure-iot-workbench) to take advantage of Microsoft Azure services.
+[ESP32](https://www.espressif.com/en/products/hardware/esp32/overview) is a series of low-cost, low-power system on a chip microcontrollers with integrated Wi-Fi and dual-mode Bluetooth. You can develop for it using [Azure IoT Device Workbench](https://aka.ms/azure-iot-workbench) to take advantage of Microsoft Azure services.
 
 ## Install development environment
 
-We recommend [Azure IoT Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) extension for Visual Studio Code to develop on the ESP32 devices.
+We recommend [Azure IoT Device Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) extension for Visual Studio Code to develop on the ESP32 devices.
 
-Azure IoT Workbench provides an integrated experience to develop IoT solutions. It helps both on device and cloud development using Azure IoT and other services. You can watch this [Channel9 video](https://channel9.msdn.com/Shows/Internet-of-Things-Show/IoT-Workbench-extension-for-VS-Code) to have an overview of what it does.
+Azure IoT Device Workbench provides an integrated experience to develop IoT solutions. It helps both on device and cloud development using Azure IoT and other services. You can watch this [Channel9 video](https://channel9.msdn.com/Shows/Internet-of-Things-Show/IoT-Workbench-extension-for-VS-Code) to have an overview of what it does.
 
 Follow these steps to prepare the development environment for ESP32 devices:
 
 1. Download and install [Arduino IDE](https://www.arduino.cc/en/Main/Software). It provides the necessary toolchain for compiling and uploading Arduino code.
+
+  **Note:** Arduino IDE `1.8.7` has breaking changes, causing board package and library installation failures. It is recommended to that you install version `1.8.6`
+
    * Windows: Use Windows Installer version
    * macOS: Drag and drop the Arduino into `/Applications`
    * Ubuntu: Unzip it into `$HOME/Downloads/arduino-1.8.5`
 
 2. Install [Visual Studio Code](https://code.visualstudio.com/), a cross platform source code editor with powerful developer tooling, like IntelliSense code completion and debugging.
 
-3. Look for **Azure IoT Workbench** in the extension marketplace and install it.
-    ![Install IoT Workbench](esp32/media/esp32-get-started/install-workbench.png)
-    Together with the IoT Workbench, other dependent extensions will be installed.
+3. Look for **Azure IoT Device Workbench** in the extension marketplace and install it.
+    ![Install IoT Device Workbench](esp32/media/esp32-get-started/install-workbench.png)
+    Together with **Azure IoT Device Workbench**, other dependent extensions will be installed.
 
 4. Open **File > Preference > Settings** and add following lines to configure Arduino.
 
