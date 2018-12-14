@@ -11,6 +11,7 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 - Redesign commands for Azure IoT Device Workbench and update related documents.
 - Add the option of 'My Device is not in the list...' in device selection.
 - Redesign the Welcome page of the extension.
+- New sample of 'Connect to Microsoft IoT Central'.
 
 
 ## Version 0.1.14
