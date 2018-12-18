@@ -4,6 +4,21 @@
   "displayName": "{INTERFACENAME}",
   "contents": [
     {
+      "@type": "Property",
+      "displayName": "Device Name",
+      "description": "The name of the device.",
+      "name": "name",
+      "schema": "string",
+      "writable": false
+    },
+    {
+      "@type": "Property",
+      "name": "fanSpeed",
+      "displayName": "Fan Speed",
+      "writable": true,
+      "schema": "double"
+    },
+    {
       "@type": "Telemetry",
       "comment": "This shows an event that contains a single value (temperature).",
       "name": "temperature",
@@ -11,10 +26,49 @@
     },
     {
       "@type": "Telemetry",
-      "comment": "This shows an event that contains a single value (humidity).",
-      "name": "humidity",
-      "schema": "double",
-      "displayUnit": "%"
+      "name": "magnetometer",
+      "displayName": "Magnetometer",
+      "comment": "This shows a complex telemetry that contains a magnetometer reading.",
+      "schema": {
+        "@type": "Object",
+        "fields": [
+          {
+            "name": "x",
+            "schema": "integer"
+          },
+          {
+            "name": "y",
+            "schema": "integer"
+          },
+          {
+            "name": "z",
+            "schema": "integer"
+          }
+        ]
+      }
+    },
+    {
+      "@type": "Command",
+      "description": "This command will begin blinking the LED for given time interval.",
+      "name": "blink",
+      "requestSchema": {
+        "@type": "Object",
+        "fields": [
+          {
+            "name": "interval",
+            "schema": "long"
+          }
+        ]
+      },
+      "responseSchema": {
+        "@type": "Object",
+        "fields": [
+          {
+            "name": "description",
+            "schema": "string"
+          }
+        ]
+      }
     }
   ],
   "@context": "http://azureiot.com/v0/contexts/Interface.json"
