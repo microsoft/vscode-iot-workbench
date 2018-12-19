@@ -267,12 +267,11 @@ export class DeviceModelOperator {
     await ConfigHandler.update(
         ConfigKey.pnpModelRepositoryKeyName, '',
         vscode.ConfigurationTarget.Global);
-    const message =
-        'Sign out Plug & Play repository successfully, please close the Plug & Play Repository window.';
+    if (DeviceModelOperator.vscexpress) {
+      DeviceModelOperator.vscexpress.close('index.html');
+    }
+    const message = 'Sign out Plug & Play repository successfully';
     vscode.window.showInformationMessage(message);
-
-    // TODO: Close the window of open model repo UI
-    // DeviceModelOperator.vscexpress.close('index.html');
   }
 
 

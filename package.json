@@ -248,7 +248,7 @@
     "request-promise": "^4.2.2",
     "serialport-lite": "^0.1.2",
     "ssh2": "^0.6.1",
-    "vscode-express": "^0.1.11",
+    "vscode-express": "^0.1.13",
     "vscode-extension-telemetry": "^0.1.0",
     "winreg": "^1.2.3"
   },
