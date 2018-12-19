@@ -16,6 +16,8 @@ import * as utils from '../utils';
 import {MetaModelType, PnPContext} from './pnp-api/DataContracts/PnPContext';
 import {PnPConnector} from './PnPConnector';
 import {DialogResponses} from '../DialogResponses';
+import {ConfigHandler} from '../configHandler';
+import {ConfigKey} from '../constants';
 
 const constants = {
   storedFilesInfoKeyName: 'StoredFilesInfo',
@@ -225,7 +227,7 @@ export class DeviceModelOperator {
       context: vscode.ExtensionContext,
       channel: vscode.OutputChannel): Promise<boolean> {
     let connectionString =
-        context.workspaceState.get<string>(PnPConstants.modelRepositoryKeyName);
+        ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
 
     if (!connectionString) {
       const option: vscode.InputBoxOptions = {
@@ -240,14 +242,15 @@ export class DeviceModelOperator {
       if (!repoConnectionString) {
         return false;
       } else {
-        context.workspaceState.update(
-            PnPConstants.modelRepositoryKeyName, repoConnectionString);
+        await ConfigHandler.update(
+            ConfigKey.pnpModelRepositoryKeyName, repoConnectionString,
+            vscode.ConfigurationTarget.Global);
         connectionString = repoConnectionString;
       }
     }
 
-    const result = await PnPConnector.ConnectMetamodelRepository(
-        context, connectionString);
+    const result =
+        await PnPConnector.ConnectMetamodelRepository(connectionString);
 
     if (result) {
       DeviceModelOperator.vscexpress = DeviceModelOperator.vscexpress ||
@@ -260,8 +263,10 @@ export class DeviceModelOperator {
     return false;
   }
 
-  async Disconnect(context: vscode.ExtensionContext) {
-    context.workspaceState.update(PnPConstants.modelRepositoryKeyName, '');
+  async Disconnect() {
+    await ConfigHandler.update(
+        ConfigKey.pnpModelRepositoryKeyName, '',
+        vscode.ConfigurationTarget.Global);
     const message =
         'Sign out Plug & Play repository successfully, please close the Plug & Play Repository window.';
     vscode.window.showInformationMessage(message);
@@ -275,7 +280,7 @@ export class DeviceModelOperator {
       context: vscode.ExtensionContext, pageSize = 50,
       continueToken: string|null = null) {
     let connectionString =
-        context.workspaceState.get<string>(PnPConstants.modelRepositoryKeyName);
+        ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
     if (!connectionString) {
       const option: vscode.InputBoxOptions = {
         value: PnPConstants.repoConnectionStringTemplate,
@@ -289,8 +294,9 @@ export class DeviceModelOperator {
       if (!repoConnectionString) {
         return [];
       } else {
-        context.workspaceState.update(
-            PnPConstants.modelRepositoryKeyName, repoConnectionString);
+        await ConfigHandler.update(
+            ConfigKey.pnpModelRepositoryKeyName, repoConnectionString,
+            vscode.ConfigurationTarget.Global);
         connectionString = repoConnectionString;
       }
     }
@@ -305,7 +311,7 @@ export class DeviceModelOperator {
       context: vscode.ExtensionContext, pageSize = 50,
       continueToken: string|null = null) {
     let connectionString =
-        context.workspaceState.get<string>(PnPConstants.modelRepositoryKeyName);
+        ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
     if (!connectionString) {
       const option: vscode.InputBoxOptions = {
         value: PnPConstants.repoConnectionStringTemplate,
@@ -319,8 +325,9 @@ export class DeviceModelOperator {
       if (!repoConnectionString) {
         return [];
       } else {
-        context.workspaceState.update(
-            PnPConstants.modelRepositoryKeyName, repoConnectionString);
+        await ConfigHandler.update(
+            ConfigKey.pnpModelRepositoryKeyName, repoConnectionString,
+            vscode.ConfigurationTarget.Global);
         connectionString = repoConnectionString;
       }
     }
@@ -345,7 +352,7 @@ export class DeviceModelOperator {
         MetaModelType[metaModelValue as keyof typeof MetaModelType];
 
     const connectionString =
-        context.workspaceState.get<string>(PnPConstants.modelRepositoryKeyName);
+        ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
     if (!connectionString) {
       return;
     }
@@ -386,7 +393,7 @@ export class DeviceModelOperator {
         MetaModelType[metaModelValue as keyof typeof MetaModelType];
 
     const connectionString =
-        context.workspaceState.get<string>(PnPConstants.modelRepositoryKeyName);
+        ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
     if (!connectionString) {
       return;
     }
@@ -438,7 +445,7 @@ export class DeviceModelOperator {
     }
 
     const connectionString =
-        context.workspaceState.get<string>(PnPConstants.modelRepositoryKeyName);
+        ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
     if (!connectionString) {
       return;
     }
@@ -560,7 +567,7 @@ export class DeviceModelOperator {
     const filePath = path.join(rootPath, fileSelection.label);
 
     let connectionString =
-        context.workspaceState.get<string>(PnPConstants.modelRepositoryKeyName);
+        ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
     if (!connectionString) {
       const option: vscode.InputBoxOptions = {
         value: PnPConstants.repoConnectionStringTemplate,
@@ -574,8 +581,8 @@ export class DeviceModelOperator {
       if (!connectionString) {
         return false;
       } else {
-        const result = await PnPConnector.ConnectMetamodelRepository(
-            context, connectionString);
+        const result =
+            await PnPConnector.ConnectMetamodelRepository(connectionString);
         if (!result) {
           return false;
         }

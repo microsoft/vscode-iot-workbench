@@ -18,7 +18,6 @@ export class PnPFileNames {
 }
 
 export class PnPConstants {
-  static readonly modelRepositoryKeyName = 'ModelRepositoryKey';
   static readonly repoConnectionStringTemplate =
       'HostName=<Host Name>;SharedAccessKeyName=<Shared AccessKey Name>;SharedAccessKey=<access Key>';
   static readonly interfaceSuffix = '.interface.json';
@@ -27,5 +26,4 @@ export class PnPConstants {
 
 export class CodeGenConstants {
   static readonly codeGeneratorToolPath = 'pnp-codegen';
-  static readonly codeGeneratorVersionKey = 'pnp/codeGenVersion';
 }

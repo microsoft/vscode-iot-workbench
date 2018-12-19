@@ -515,7 +515,7 @@ export async function activate(context: vscode.ExtensionContext) {
       }));
   context.subscriptions.push(vscode.commands.registerCommand(
       'iotworkbench.pnpSignOutRepository', async () => {
-        deviceModelOperator.Disconnect(context);
+        deviceModelOperator.Disconnect();
       }));
   context.subscriptions.push(vscode.commands.registerCommand(
       'iotworkbench.pnpCreateInterface', async () => {

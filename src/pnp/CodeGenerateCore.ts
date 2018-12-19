@@ -11,13 +11,14 @@ import * as crypto from 'crypto';
 
 import request = require('request-promise');
 import AdmZip = require('adm-zip');
-import {FileNames} from '../constants';
+import {FileNames, ConfigKey} from '../constants';
 import {TelemetryContext} from '../telemetry';
 import {PnPConnector} from './PnPConnector';
 import {PnPConstants, CodeGenConstants} from './PnPConstants';
 import {CodeGenDeviceType} from './pnp-codeGen/Interfaces/CodeGenerator';
 import {AnsiCCodeGeneratorFactory} from './pnp-codeGen/AnsiCCodeGeneratorFactory';
 import {CodeGeneratorFactory} from './pnp-codeGen/Interfaces/CodeGeneratorFactory';
+import {ConfigHandler} from '../configHandler';
 
 
 export interface CodeGeneratorConfig {
@@ -92,7 +93,7 @@ export class CodeGenerateCore {
 
     // Get the connection string of the pnp repo
     let connectionString =
-        context.workspaceState.get<string>(PnPConstants.modelRepositoryKeyName);
+        ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
 
     if (!connectionString) {
       const option: vscode.InputBoxOptions = {
@@ -107,8 +108,8 @@ export class CodeGenerateCore {
       if (!connectionString) {
         return false;
       } else {
-        const result = await PnPConnector.ConnectMetamodelRepository(
-            context, connectionString);
+        const result =
+            await PnPConnector.ConnectMetamodelRepository(connectionString);
         if (!result) {
           return false;
         }
@@ -246,7 +247,7 @@ export class CodeGenerateCore {
     } else {
       // Then check the version
       const currentVersion =
-          context.globalState.get(CodeGenConstants.codeGeneratorVersionKey, '');
+          ConfigHandler.get<string>(ConfigKey.pnpCodeGeneratorVersion);
       if (!currentVersion ||
           compareVersion(pnpCodeGenConfig.version, currentVersion)) {
         needUpgrade = true;
@@ -314,9 +315,9 @@ export class CodeGenerateCore {
               zip.extractAllTo(codeGenCommandPath, true);
               channel.appendLine(
                   'Azure IoT Plug & Play Code Generator updated successfully.');
-              context.globalState.update(
-                  CodeGenConstants.codeGeneratorVersionKey,
-                  pnpCodeGenConfig.version);
+              await ConfigHandler.update(
+                  ConfigKey.pnpCodeGeneratorVersion, pnpCodeGenConfig.version,
+                  vscode.ConfigurationTarget.Global);
             } catch (error) {
               clearInterval(loading);
               channel.appendLine('');

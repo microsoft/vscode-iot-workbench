@@ -12,6 +12,8 @@ export class ConfigKey {
   static readonly boardId = 'BoardId';
   static readonly asaPath = 'StreamAnalyticsPath';
   static readonly shownHelpPage = 'ShownHelpPage';
+  static readonly pnpCodeGeneratorVersion = 'PnPCodeGenVersion';
+  static readonly pnpModelRepositoryKeyName = 'PnPModelRepositoryKey';
 }
 
 export class EventNames {

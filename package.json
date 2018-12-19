@@ -182,6 +182,12 @@
           "IoTWorkbench.ShownHelpPage": {
             "type": "boolean",
             "default": false
+          },
+          "IoTWorkbench.PnPModelRepositoryKey": {
+            "type": "string"
+          },
+          "IoTWorkbench.PnPCodeGenVersion": {
+            "type": "string"
           }
         }
       }
