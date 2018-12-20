@@ -94,7 +94,7 @@ export class PnPDiagnostic {
     if (jsonKey === '@context') {
       const contextUri = this.pnpInterface === pnpContext ?
           'http://azureiot.com/v0/contexts/Interface.json' :
-          'http://azureiot.com/v0/contexts/capabilitymodel.json';
+          'http://azureiot.com/v0/contexts/CapabilityModel.json';
       values = [contextUri];
     } else {
       values =

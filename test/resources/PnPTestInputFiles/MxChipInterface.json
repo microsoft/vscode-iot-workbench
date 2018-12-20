@@ -171,5 +171,5 @@
       }
     }
   ],
-  "@context": "http://azureiot.com/v0/contexts/interface.json"
+  "@context": "http://azureiot.com/v0/contexts/Interface.json"
 }

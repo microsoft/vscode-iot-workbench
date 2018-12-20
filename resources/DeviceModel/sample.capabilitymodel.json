@@ -5,5 +5,5 @@
   "implements": [
     "http://examplerenhetest.com/test1/1.0.0"
   ],
-  "@context": "http://azureiot.com/v0/contexts/capabilitymodel.json"
+  "@context": "http://azureiot.com/v0/contexts/CapabilityModel.json"
 }
