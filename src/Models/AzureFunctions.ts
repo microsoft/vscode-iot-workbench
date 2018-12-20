@@ -85,6 +85,24 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     return this.componentType;
   }
 
+  static async isAvailable(): Promise<boolean> {
+    if (!vscode.extensions.getExtension(
+            'ms-azuretools.vscode-azurefunctions')) {
+      const choice = await vscode.window.showInformationMessage(
+          'Azure Functions extension has been disabled or not installed. Please enable Azure Functions extension or install it from marketplace, and try again.',
+          'Install Azure Functions Extension', 'Close');
+      if (choice === 'Install Azure Functions Extension') {
+        vscode.commands.executeCommand(
+            'vscode.open',
+            vscode.Uri.parse(
+                'vscode:extension/ms-azuretools.vscode-azurefunctions'));
+      }
+      return false;
+    }
+
+    return true;
+  }
+
   async load(): Promise<boolean> {
     const azureConfigFilePath = path.join(
         this.azureFunctionsPath, '..', AzureComponentsStorage.folderName,
@@ -118,6 +136,11 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
   }
 
   async create(): Promise<boolean> {
+    const isFunctionsExtensionAvailable = await AzureFunctions.isAvailable();
+    if (!isFunctionsExtensionAvailable) {
+      return false;
+    }
+
     const azureFunctionsPath = this.azureFunctionsPath;
     console.log(azureFunctionsPath);
 
@@ -185,6 +208,11 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
   }
 
   async provision(): Promise<boolean> {
+    const isFunctionsExtensionAvailable = await AzureFunctions.isAvailable();
+    if (!isFunctionsExtensionAvailable) {
+      return false;
+    }
+
     try {
       const subscriptionId = AzureUtility.subscriptionId;
       if (!subscriptionId) {
@@ -271,6 +299,11 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
   }
 
   async deploy(): Promise<boolean> {
+    const isFunctionsExtensionAvailable = await AzureFunctions.isAvailable();
+    if (!isFunctionsExtensionAvailable) {
+      return false;
+    }
+
     let deployPending: NodeJS.Timer|null = null;
     if (this.channel) {
       this.channel.show();
