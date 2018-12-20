@@ -29,6 +29,7 @@ export class EventNames {
   static readonly detectBoard = 'IoTWorkbench.DetectBoard';
   static readonly generateOtaCrc = 'IoTWorkbench.GenerateOtaCrc';
   static readonly nsatsurvery = 'IoTWorkbench.NSATSurvey';
+  static readonly selectSubscription = 'IoTWorkbench.SelectSubscription';
 }
 
 export class ContentView {
