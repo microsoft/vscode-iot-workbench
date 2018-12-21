@@ -143,6 +143,10 @@ export class IoTProject {
         this.componentList.push(functionApp);
       }
 
+      this.componentList.forEach(item => {
+        item.checkPrerequisites();
+      });
+
       return true;
     }
 
@@ -223,6 +227,10 @@ export class IoTProject {
       }
     }
 
+    this.componentList.forEach(item => {
+      item.checkPrerequisites();
+    });
+
     return true;
   }
 
@@ -252,6 +260,11 @@ export class IoTProject {
   async compile(): Promise<boolean> {
     for (const item of this.componentList) {
       if (this.canCompile(item)) {
+        const isPrerequisitesAchieved = await item.checkPrerequisites();
+        if (!isPrerequisitesAchieved) {
+          return false;
+        }
+
         const res = await item.compile();
         if (res === false) {
           const error = new Error(
@@ -266,6 +279,11 @@ export class IoTProject {
   async upload(): Promise<boolean> {
     for (const item of this.componentList) {
       if (this.canUpload(item)) {
+        const isPrerequisitesAchieved = await item.checkPrerequisites();
+        if (!isPrerequisitesAchieved) {
+          return false;
+        }
+
         const res = await item.upload();
         if (res === false) {
           const error = new Error(
@@ -287,6 +305,11 @@ export class IoTProject {
     const provisionItemList: string[] = [];
     for (const item of this.componentList) {
       if (this.canProvision(item)) {
+        const isPrerequisitesAchieved = await item.checkPrerequisites();
+        if (!isPrerequisitesAchieved) {
+          return false;
+        }
+
         provisionItemList.push(item.name);
       }
     }
@@ -351,6 +374,11 @@ export class IoTProject {
     const deployItemList: string[] = [];
     for (const item of this.componentList) {
       if (this.canDeploy(item)) {
+        const isPrerequisitesAchieved = await item.checkPrerequisites();
+        if (!isPrerequisitesAchieved) {
+          return false;
+        }
+
         deployItemList.push(item.name);
       }
     }
@@ -446,6 +474,11 @@ export class IoTProject {
       throw new Error('The specified board is not supported.');
     }
 
+    const isPrerequisitesAchieved = await device.checkPrerequisites();
+    if (!isPrerequisitesAchieved) {
+      return false;
+    }
+
     workspace.settings[`IoTWorkbench.${ConfigKey.boardId}`] = boardId;
     this.componentList.push(device);
 
@@ -466,11 +499,19 @@ export class IoTProject {
         break;
       case ProjectTemplateType.IotHub: {
         const iothub = new IoTHub(this.projectRootPath, this.channel);
+        const isPrerequisitesAchieved = await iothub.checkPrerequisites();
+        if (!isPrerequisitesAchieved) {
+          return false;
+        }
         this.componentList.push(iothub);
         break;
       }
       case ProjectTemplateType.AzureFunctions: {
         const iothub = new IoTHub(this.projectRootPath, this.channel);
+        const isIotHubPrerequisitesAchieved = await iothub.checkPrerequisites();
+        if (!isIotHubPrerequisitesAchieved) {
+          return false;
+        }
 
         const functionDir = path.join(
             this.projectRootPath, constants.functionDefaultFolderName);
@@ -485,6 +526,11 @@ export class IoTProject {
             functionDir, constants.functionDefaultFolderName, this.channel,
             null,
             [{component: iothub, type: DependencyType.Input}] /*Dependencies*/);
+        const isFunctionsPrerequisitesAchieved =
+            await azureFunctions.checkPrerequisites();
+        if (!isFunctionsPrerequisitesAchieved) {
+          return false;
+        }
         settings.projectsettings.push({
           name: ConfigKey.functionPath,
           value: constants.functionDefaultFolderName
@@ -499,8 +545,19 @@ export class IoTProject {
       }
       case ProjectTemplateType.StreamAnalytics: {
         const iothub = new IoTHub(this.projectRootPath, this.channel);
+        const isIotHubPrerequisitesAchieved = await iothub.checkPrerequisites();
+        if (!isIotHubPrerequisitesAchieved) {
+          return false;
+        }
+
         const cosmosDB = new CosmosDB(
             this.extensionContext, this.projectRootPath, this.channel);
+        const isCosmosDBPrerequisitesAchieved =
+            await cosmosDB.checkPrerequisites();
+        if (!isCosmosDBPrerequisitesAchieved) {
+          return false;
+        }
+
         const asaDir = path.join(this.projectRootPath, constants.asaFolderName);
 
         if (!fs.existsSync(asaDir)) {
@@ -522,6 +579,10 @@ export class IoTProject {
               {component: iothub, type: DependencyType.Input},
               {component: cosmosDB, type: DependencyType.Other}
             ]);
+        const isAsaPrerequisitesAchieved = await asa.checkPrerequisites();
+        if (!isAsaPrerequisitesAchieved) {
+          return false;
+        }
 
         workspace.folders.push({path: constants.asaFolderName});
         workspace.settings[`IoTWorkbench.${ConfigKey.asaPath}`] =

@@ -103,12 +103,16 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     return true;
   }
 
-  async load(): Promise<boolean> {
+  async checkPrerequisites(): Promise<boolean> {
     const isFunctionsExtensionAvailable = await AzureFunctions.isAvailable();
     if (!isFunctionsExtensionAvailable) {
       return false;
     }
 
+    return true;
+  }
+
+  async load(): Promise<boolean> {
     const azureConfigFilePath = path.join(
         this.azureFunctionsPath, '..', AzureComponentsStorage.folderName,
         AzureComponentsStorage.fileName);
@@ -141,11 +145,6 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
   }
 
   async create(): Promise<boolean> {
-    const isFunctionsExtensionAvailable = await AzureFunctions.isAvailable();
-    if (!isFunctionsExtensionAvailable) {
-      return false;
-    }
-
     const azureFunctionsPath = this.azureFunctionsPath;
     console.log(azureFunctionsPath);
 
@@ -213,11 +212,6 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
   }
 
   async provision(): Promise<boolean> {
-    const isFunctionsExtensionAvailable = await AzureFunctions.isAvailable();
-    if (!isFunctionsExtensionAvailable) {
-      return false;
-    }
-
     try {
       const subscriptionId = AzureUtility.subscriptionId;
       if (!subscriptionId) {
@@ -304,11 +298,6 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
   }
 
   async deploy(): Promise<boolean> {
-    const isFunctionsExtensionAvailable = await AzureFunctions.isAvailable();
-    if (!isFunctionsExtensionAvailable) {
-      return false;
-    }
-
     let deployPending: NodeJS.Timer|null = null;
     if (this.channel) {
       this.channel.show();

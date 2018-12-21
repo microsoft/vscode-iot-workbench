@@ -16,5 +16,6 @@ export interface Component {
   id: string;
   load(): Promise<boolean>;
   create(): Promise<boolean>;
+  checkPrerequisites(): Promise<boolean>;
   getComponentType(): ComponentType;
 }
