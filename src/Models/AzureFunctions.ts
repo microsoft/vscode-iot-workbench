@@ -104,6 +104,11 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
   }
 
   async load(): Promise<boolean> {
+    const isFunctionsExtensionAvailable = await AzureFunctions.isAvailable();
+    if (!isFunctionsExtensionAvailable) {
+      return false;
+    }
+
     const azureConfigFilePath = path.join(
         this.azureFunctionsPath, '..', AzureComponentsStorage.folderName,
         AzureComponentsStorage.fileName);
