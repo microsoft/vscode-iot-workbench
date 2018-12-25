@@ -62,6 +62,10 @@ export class IoTButtonDevice implements Device {
     return this.componentType;
   }
 
+  async checkPrerequisites(): Promise<boolean> {
+    return true;
+  }
+
   async load(): Promise<boolean> {
     const deviceFolderPath = this.deviceFolder;
 

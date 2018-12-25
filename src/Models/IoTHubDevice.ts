@@ -37,6 +37,10 @@ export class IoTHubDevice implements Component, Provisionable {
     return this.componentType;
   }
 
+  async checkPrerequisites(): Promise<boolean> {
+    return true;
+  }
+
   async load(): Promise<boolean> {
     return true;
   }

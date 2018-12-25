@@ -17,6 +17,7 @@ import {TelemetryContext} from './telemetry';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {FileNames} from './constants';
 import {BoardProvider} from './boardProvider';
+import {AzureFunctions} from './Models/AzureFunctions';
 
 const constants = {
   defaultProjectName: 'IoTproject'
@@ -136,6 +137,14 @@ export class ProjectInitializer {
 
             if (!result) {
               throw new Error('Unable to load project template.');
+            }
+
+            if (result.type === 'AzureFunctions') {
+              const isFunctionsExtensionAvailable =
+                  await AzureFunctions.isAvailable();
+              if (!isFunctionsExtensionAvailable) {
+                return false;
+              }
             }
 
             try {

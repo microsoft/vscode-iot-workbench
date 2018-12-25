@@ -143,6 +143,10 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     return this.componentType;
   }
 
+  async checkPrerequisites(): Promise<boolean> {
+    return true;
+  }
+
   async load(): Promise<boolean> {
     const azureConfigFilePath = path.join(
         this.projectRootPath, AzureComponentsStorage.folderName,
