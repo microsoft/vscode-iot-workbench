@@ -19,6 +19,7 @@ import {CodeGenDeviceType} from './pnp-codeGen/Interfaces/CodeGenerator';
 import {AnsiCCodeGeneratorFactory} from './pnp-codeGen/AnsiCCodeGeneratorFactory';
 import {CodeGeneratorFactory} from './pnp-codeGen/Interfaces/CodeGeneratorFactory';
 import {ConfigHandler} from '../configHandler';
+import {DialogResponses} from '../DialogResponses';
 
 
 export interface CodeGeneratorConfig {
@@ -203,9 +204,13 @@ export class CodeGenerateCore {
       const files = fs.readdirSync(rootPath);
       if (files && files[0]) {
         const message =
-            'An empty folder is required for the operation. Please use an empty folder.';
-        vscode.window.showWarningMessage(message);
-        return null;
+            'Plug & Play Code Generator would overwrite existing files in the folder. Do you want to continue?';
+
+        const choice = await vscode.window.showInformationMessage(
+            message, DialogResponses.yes, DialogResponses.cancel);
+        if (choice !== DialogResponses.yes) {
+          return null;
+        }
       }
       return rootPath;
     }
