@@ -225,7 +225,7 @@
     "@types/winreg": "^1.2.30",
     "gts": "^0.5.1",
     "typescript": "^2.6.2",
-    "vscode": "^1.1.21"
+    "vscode": "^1.1.26"
   },
   "dependencies": {
     "adm-zip": "^0.4.11",
