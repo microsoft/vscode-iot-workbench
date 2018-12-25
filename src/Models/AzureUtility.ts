@@ -1,6 +1,6 @@
 import {ResourceManagementClient, ResourceModels, SubscriptionClient} from 'azure-arm-resource';
 import * as fs from 'fs-plus';
-import {HttpMethods, ServiceClientCredentials, WebResource} from 'ms-rest';
+import {HttpMethods, WebResource} from 'ms-rest';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
@@ -12,6 +12,8 @@ import {ConfigHandler} from '../configHandler';
 
 import {getExtension} from './Apis';
 import {extensionName} from './Interfaces/Api';
+import {TelemetryWorker, TelemetryContext} from '../telemetry';
+import {EventNames} from '../constants';
 
 export interface ARMParameters {
   [key: string]: {value: string|number|boolean|null};
@@ -425,6 +427,18 @@ export class AzureUtility {
     if (!subscription || !subscription.description) {
       return undefined;
     }
+
+    const telemetryContext: TelemetryContext = {
+      properties: {
+        result: 'Succeeded',
+        error: '',
+        errorMessage: '',
+        subscription: subscription.description
+      },
+      measurements: {duration: 0}
+    };
+
+    TelemetryWorker.sendEvent(EventNames.selectSubscription, telemetryContext);
     return subscription.description;
   }
 
