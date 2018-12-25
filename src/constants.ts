@@ -25,6 +25,7 @@ export class EventNames {
   static readonly devicePackageEvent = 'IoTWorkbench.DevicePackage';
   static readonly configDeviceSettingsEvent =
       'IoTWorkbench.ConfigDeviceSettingsEvent';
+  static readonly openExamplePageEvent = 'IoTWorkbench.OpenExamplePage';
   static readonly loadExampleEvent = 'IoTWorkbench.loadExample';
   static readonly detectBoard = 'IoTWorkbench.DetectBoard';
   static readonly generateOtaCrc = 'IoTWorkbench.GenerateOtaCrc';

@@ -115,7 +115,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const examplesProvider = async () => {
     callWithTelemetry(
-        EventNames.loadExampleEvent, outputChannel, true, context,
+        EventNames.openExamplePageEvent, outputChannel, true, context,
         exampleSelectBoardBinder);
   };
 
