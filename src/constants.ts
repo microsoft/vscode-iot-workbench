@@ -61,3 +61,7 @@ export class AzureComponentsStorage {
 export class GlobalConstants {
   static readonly extensionId = 'vsciot-vscode.vscode-iot-workbench';
 }
+
+export class DependentExtensions {
+  static readonly azureFunctions = 'ms-azuretools.vscode-azurefunctions';
+}
