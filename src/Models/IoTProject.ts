@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames} from '../constants';
-import {AzureComponentsStorage, EventNames} from '../constants';
+import {EventNames} from '../constants';
 import {TelemetryContext, TelemetryWorker} from '../telemetry';
 import {askAndNewProject, askAndOpenProject} from '../utils';
 
