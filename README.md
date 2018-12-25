@@ -141,10 +141,9 @@ There are a couple of ways you can contribute to this repo:
     | Item | Description |
     | --- | --- |
     | `Name` | Name of the example to be displayed in example gallery. |
-    | `Folder name` | Name of the folder to host the example. |
     | `Description` | A short statement to describe the example. |
     | `Location` | URL of the GitHub repo. |
-    | `Image` | URL of the image shown in example gallery for your example, if not provided, the default image will be used. |
+    | `Image` | URL of the example image (size: 640*370) shown in the gallery, if not provided, the default image will be used. |
     | `Tutorial` | URL of tutorial that describes how to run the example. |
     | `Difficulty` | Difficulty of the example, easy, medium or difficult. |
 
