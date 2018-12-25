@@ -16,6 +16,8 @@ Azure IoT Device Workbench aims to support multiple popular IoT development boar
 
 Please find the [Setup Guide](#setup-guide) section below to configure your hardware.
 
+We will support more devices in Azure IoT Device Workbench. Please help to take the [survey](https://www.surveymonkey.com/r/C7NY7KJ) to let us know your opinion of the device.
+
 ## Installation
 Open VS Code and press `F1` or `Ctrl + Shift + P` to open command palette, select **Install Extension** and type `iot-workbench`.
 
@@ -136,15 +138,15 @@ There are a couple of ways you can contribute to this repo:
   - Write a tutorial to describe how to run the example.
   - Submit a [new issue](https://github.com/Microsoft/vscode-iot-workbench/issues/new) and provide the following information:
   
-      | Item | Description |
-      | --- | --- |
-      | `Name` | Name of the example to be displayed in example gallery. |
-      | `Folder name` | Name of the folder to host the example. |
-      | `Description` | A short statement to describe the example. |
-      | `Location` | URL of the GitHub repo. |
-      | `Image` | URL of the image shown in example gallery for your example, if not provided, the default image will be used. |
-      | `Tutorial` | URL of tutorial that describes how to run the example. |
-      | `Difficulty` | Difficulty of the example, easy, medium or difficult. |
+    | Item | Description |
+    | --- | --- |
+    | `Name` | Name of the example to be displayed in example gallery. |
+    | `Folder name` | Name of the folder to host the example. |
+    | `Description` | A short statement to describe the example. |
+    | `Location` | URL of the GitHub repo. |
+    | `Image` | URL of the image shown in example gallery for your example, if not provided, the default image will be used. |
+    | `Tutorial` | URL of tutorial that describes how to run the example. |
+    | `Difficulty` | Difficulty of the example, easy, medium or difficult. |
 
 ## Code of Conduct
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct). For more information please see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/#howadopt) or contact opencode@microsoft.com with any additional questions or comments.
