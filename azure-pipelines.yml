@@ -1,0 +1,63 @@
+jobs:
+- job: Windows
+  pool:
+    name: Hosted VS2017
+    demands: npm
+  steps:
+  - task: Npm@1
+    displayName: 'Install dependencies'
+    inputs:
+      verbose: false
+  - task: Npm@1
+    displayName: 'Compile sources'
+    inputs:
+      command: custom
+      verbose: false
+      customCommand: 'run compile'
+  - script: npm install -g vsce
+    displayName: 'install vsce'
+  - script: gts check
+    displayName: 'check gts error'
+    failOnStderr: True
+  - script: vsce package
+    displayName: 'Build VSIX package'
+  - task: CopyFiles@2
+    inputs:
+      SourceFolder: '$(System.DefaultWorkingDirectory)'
+      Contents: |
+        **\*.vsix
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)'  
+      artifactName: drop1
+- job: macOS
+  pool:
+    name: Hosted macOS
+    demands: npm
+  steps:
+  - task: Npm@1
+    displayName: 'Install dependencies'
+    inputs:
+      verbose: false
+  - task: Npm@1
+    displayName: 'Compile sources'
+    inputs:
+      command: custom
+      verbose: false
+      customCommand: 'run compile'
+- job: Linux
+  pool:
+    name: Hosted Ubuntu 1604
+    demands: npm
+  steps:
+  - task: Npm@1
+    displayName: 'Install dependencies'
+    inputs:
+      verbose: false
+  - task: Npm@1
+    displayName: 'Compile sources'
+    inputs:
+      command: custom
+      verbose: false
+      customCommand: 'run compile'
