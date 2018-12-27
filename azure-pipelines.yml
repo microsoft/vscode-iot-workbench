@@ -19,6 +19,8 @@ jobs:
   - script: gts check
     displayName: 'check gts error'
     failOnStderr: True
+  - script: node updateCodeGenLink.js %prodCodeGenUrl%
+    displayName: 'Update link for code generator'
   - script: vsce package
     displayName: 'Build VSIX package'
   - task: CopyFiles@2
