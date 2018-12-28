@@ -389,6 +389,30 @@ ul.example-list > li:hover > .header > img,
   cursor: pointer;
 }
 
+.community-headline {
+  clear: both;
+  margin-top: 50px;
+}
+
+ul.example-list > li > .body > .author {
+  font-size: 14px;
+  height: 24px;
+  line-height: 24px;
+  margin-bottom: 5px;
+}
+
+ul.example-list > li > .body > .author > a {
+  color: #069;
+}
+
+ul.example-list > li > .body > .author > .avatar {
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+  vertical-align: top;
+  margin-right: 5px;
+}
+
 @media (min-width: 4096px) {
   body:after {
     content: "There's more to the picture than meets the eye.";
@@ -470,14 +494,37 @@ ul.example-list > li:hover > .header > img,
       </div>
     </div>
   </div>
-  <ul class="example-list">
-    <li v-for="example in examples" v-on:click="openLink(example.tutorial)">
+  <ul class="example-list" v-if="officialExamples.length > 0">
+    <li v-for="example in officialExamples" v-on:click="openLink(example.tutorial)">
       <div class="header">
         <span v-if="example.difficulty" v-bind:class="'difficulty ' + example.difficulty"></span>
         <img v-bind:src="example.image || '/images/no-image.jpg'">
       </div>
       <div class="body">
         <h2 v-bind:class="{'example-link': example.tutorial}">{{ example.name }}</h2>
+        <div class="description" v-if="example.description">{{ example.description }}</div>
+        <div class="buttons">
+          <!-- Fake button. The entire block is clickable. -->
+          <div v-if="example.tutorial" class="example-link tutorial">View Tutorial</div>
+          <button v-on:click.stop="callAPI(getProjectName(example), example.url, boardId)" v-if="example.url">Open Sample</button>
+        </div>
+      </div>
+    </li>
+  </ul>
+  <h2 class="community-headline" v-if="communityExamples.length > 0">Community contributed tutorials. Kudos to our developers!</h2>
+  <ul class="example-list" v-if="communityExamples.length > 0">
+    <li v-for="example in communityExamples" v-on:click="openLink(example.tutorial)">
+      <div class="header">
+        <span v-if="example.difficulty" v-bind:class="'difficulty ' + example.difficulty"></span>
+        <img v-bind:src="example.image || '/images/no-image.jpg'">
+      </div>
+      <div class="body">
+        <h2 v-bind:class="{'example-link': example.tutorial}">{{ example.name }}</h2>
+        <div class="author">
+          <img v-bind:src="example.author.avatar || 'images/no-avatar.svg'" class="avatar">
+          <a href="#open-user-homepage" v-on:click.stop="openLink(example.author.homepage)" v-if="example.author.homepage">{{ example.author.name }}</a>
+          <span v-if="!example.author.homepage">{{ example.author.name }}</span>
+        </div>
         <div class="description" v-if="example.description">{{ example.description }}</div>
         <div class="buttons">
           <!-- Fake button. The entire block is clickable. -->
