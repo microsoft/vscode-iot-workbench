@@ -487,7 +487,7 @@ ul.example-list > li > .body > .author > .avatar {
     <img v-bind:src="featuredExample.image || '/images/no-image.jpg'">
     <div class="body">
       <h2>{{ featuredExample.name }}</h2>
-      <div class="description" v-if="featuredExample.description">{{ featuredExample.description }}</div>
+      <div class="description" v-if="featuredExample.description" v-bind:title="featuredExample.fullDescription">{{ featuredExample.description }}</div>
       <div class="buttons">
         <button v-on:click="openLink(featuredExample.tutorial)" v-if="featuredExample.tutorial">View Tutorial</button>
         <button v-on:click="callAPI(getProjectName(featuredExample), featuredExample.url, boardId)" v-if="featuredExample.url">Open Sample</button>
@@ -502,7 +502,7 @@ ul.example-list > li > .body > .author > .avatar {
       </div>
       <div class="body">
         <h2 v-bind:class="{'example-link': example.tutorial}">{{ example.name }}</h2>
-        <div class="description" v-if="example.description">{{ example.description }}</div>
+        <div class="description" v-if="example.description" v-bind:title="example.fullDescription">{{ example.description }}</div>
         <div class="buttons">
           <!-- Fake button. The entire block is clickable. -->
           <div v-if="example.tutorial" class="example-link tutorial">View Tutorial</div>
@@ -525,7 +525,7 @@ ul.example-list > li > .body > .author > .avatar {
           <a href="#open-user-homepage" v-on:click.stop="openLink(example.author.homepage)" v-if="example.author.homepage">{{ example.author.name }}</a>
           <span v-if="!example.author.homepage">{{ example.author.name }}</span>
         </div>
-        <div class="description" v-if="example.description">{{ example.description }}</div>
+        <div class="description" v-if="example.description" v-bind:title="example.fullDescription">{{ example.description }}</div>
         <div class="buttons">
           <!-- Fake button. The entire block is clickable. -->
           <div v-if="example.tutorial" class="example-link tutorial">View Tutorial</div>
