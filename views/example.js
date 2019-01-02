@@ -4,7 +4,8 @@ var example = new Vue({
     version: '',
     publishDate: '',
     featuredExample: null,
-    examples: [],
+    officialExamples: [],
+    communityExamples: [],
     blogs: [],
     boardId: ''
   },
@@ -40,7 +41,8 @@ var example = new Vue({
           examples[i].description = examples[i].description.substr(0, 77) + '...';
         }
       }
-      this.examples = examples;
+      this.officialExamples = examples.filter(example => !example.author);
+      this.communityExamples = examples.filter(example => example.author);
     }.bind(this));
   },
   methods: {
