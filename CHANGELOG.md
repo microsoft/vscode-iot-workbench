@@ -1,6 +1,16 @@
 # Change Log
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
 
+## Version 0.2.2
+- Release date: Jan. 4th, 2019
+
+### Added
+- IoT DevKit: Add community contributed examples into gallery.
+
+### Changed
+- Remove the dependency of 'Azure Functions Extension'.
+- IoT DevKit: Update the main page of example gallery.
+
 ## Version 0.2.1
 - Release date: Dec. 24, 2018
 
