@@ -34,6 +34,7 @@ var example = new Vue({
       }
       
       for (var i = 0; i < examples.length; i++) {
+        examples[i].fullDescription = examples[i].description;
         if (examples[i].featured && !this.featuredExample) {
           this.featuredExample = examples.splice(i, 1)[0];
           i--;
