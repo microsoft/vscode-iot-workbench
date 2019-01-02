@@ -8,7 +8,7 @@ var repository = new Vue({
     interfaceList: {
       value: []
     },
-    selectedCapabilities: {
+    selectedCapabilityModels: {
       value: []
     },
     capabilityList: {
@@ -33,7 +33,7 @@ var repository = new Vue({
     loadingPnPInterfaces: {
       value: true
     },
-    loadingPnPCapabilities: {
+    loadingPnPCapabilityModels: {
       value: true
     },
     allTags: {
@@ -52,7 +52,8 @@ var repository = new Vue({
         'tag33'
       ]
     },
-    filterTagsKeywords: ''
+    filterTagsKeywords: '',
+    nextPageLoadingCounter: null
   },
   methods: {
     command,
@@ -85,17 +86,17 @@ var repository = new Vue({
 
 
 function deletePnPFiles() {
-  const fileIds = this.type.value === 'Interface' ? this.selectedInterfaces.value : this.selectedCapabilities.value;
+  const fileIds = this.type.value === 'Interface' ? this.selectedInterfaces.value : this.selectedCapabilityModels.value;
   command('iotworkbench.deletePnPFiles', fileIds, this.type.value, refreshPnPFileList.bind(this));
 }
 
 function editPnPFiles() {
-  const fileIds = this.type.value === 'Interface' ? this.selectedInterfaces.value : this.selectedCapabilities.value;
+  const fileIds = this.type.value === 'Interface' ? this.selectedInterfaces.value : this.selectedCapabilityModels.value;
   command('iotworkbench.editPnPFiles', fileIds, this.type.value, refreshPnPFileList.bind(this));
 }
 
 function publishPnPFiles() {
-  const fileIds = this.type.value === 'Interface' ? this.selectedInterfaces.value : this.selectedCapabilities.value;
+  const fileIds = this.type.value === 'Interface' ? this.selectedInterfaces.value : this.selectedCapabilityModels.value;
   command('iotworkbench.publishPnPFiles', fileIds, this.type.value, refreshPnPFileList.bind(this));
 }
 
@@ -106,21 +107,28 @@ function createPnPFile() {
 
 function getNextPagePnPFiles(fileType) {
   fileType = typeof fileType === 'string' ? fileType : this.type.value;
-  let commandName, fileList, nextToken, loadingPnPFiles;
+  let commandName, fileList, nextToken, loadingPnPFiles, tableId;
   
   if(fileType === 'Interface') {
     commandName = 'iotworkbench.getAllInterfaces';
     fileList = this.interfaceList;
     nextToken = this.interfaceNextToken;
     loadingPnPFiles = this.loadingPnPInterfaces;
+    tableId = 'interfaceListTable';
   } else {
-    commandName = 'iotworkbench.getAllCapabilities';
+    commandName = 'iotworkbench.getAllCapabilityModels';
     fileList = this.capabilityList;
     nextToken = this.capabilityNextToken;
-    loadingPnPFiles = this.loadingPnPCapabilities;
+    loadingPnPFiles = this.loadingPnPCapabilityModels;
+    tableId = 'capabilityListTable';
   }
 
   loadingPnPFiles.value = true;
+
+  // make sure loading bar has been rendered by Vue
+  setTimeout(() => {
+    document.getElementById(tableId).scrollTop = document.getElementById(tableId).scrollHeight;
+  }, 0);
 
   command(commandName, 50, nextToken.value, res => {
     Vue.set(fileList, 'value', fileList.value.concat(res.result.results));
@@ -139,8 +147,8 @@ function refreshPnPFileList() {
   } else {
     fileList = this.capabilityList;
     nextToken = this.capabilityNextToken;
-    selectedList = this.selectedCapabilities;
-    loadingPnPFiles = this.loadingPnPCapabilities;
+    selectedList = this.selectedCapabilityModels;
+    loadingPnPFiles = this.loadingPnPCapabilityModels;
   }
 
   Vue.set(fileList, 'value', []);
@@ -189,11 +197,11 @@ function addRemoveInterface(id) {
 }
 
 function addRemoveCapability(id) {
-  const index = this.selectedCapabilities.value.indexOf(id);
+  const index = this.selectedCapabilityModels.value.indexOf(id);
   if (index !== -1) {
-    this.selectedCapabilities.value.splice(index, 1);
+    this.selectedCapabilityModels.value.splice(index, 1);
   } else {
-    this.selectedCapabilities.value.push(id);
+    this.selectedCapabilityModels.value.push(id);
   }
 }
 
@@ -273,5 +281,17 @@ function isMatchTags(tags, selectedTags, orAnd) {
 }
 
 function onScrollTable(event) {
-  //console.log(event);
+  const nextToken = this.type.value === 'Interface' ? this.interfaceNextToken.value : this.capabilityNextToken.value;
+  if (!nextToken || this.nextPageLoadingCounter) {
+    return;
+  }
+  this.nextPageLoadingCounter = setTimeout(() => {
+    const totalHeight = event.target.scrollHeight;
+    const heightOffset = event.target.scrollTop;
+    const viewHeight = event.target.offsetHeight;
+    if (viewHeight + heightOffset >= totalHeight) {
+      this.getNextPagePnPFiles(this.type);
+    }
+    this.nextPageLoadingCounter = null;
+  }, 1000);
 }

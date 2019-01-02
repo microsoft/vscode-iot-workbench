@@ -306,7 +306,7 @@ export class DeviceModelOperator {
     return result;
   }
 
-  async GetAllCapabilities(
+  async GetAllCapabilityModels(
       context: vscode.ExtensionContext, pageSize = 50,
       continueToken: string|null = null) {
     let connectionString =

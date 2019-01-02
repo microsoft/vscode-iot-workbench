@@ -475,9 +475,9 @@ export async function activate(context: vscode.ExtensionContext) {
       });
 
   vscode.commands.registerCommand(
-      'iotworkbench.getAllCapabilities',
+      'iotworkbench.getAllCapabilityModels',
       async (pageSize?: number, continueToken?: string) => {
-        return await deviceModelOperator.GetAllCapabilities(
+        return await deviceModelOperator.GetAllCapabilityModels(
             context, pageSize, continueToken);
       });
 
