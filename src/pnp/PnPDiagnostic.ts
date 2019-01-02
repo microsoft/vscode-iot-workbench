@@ -228,63 +228,51 @@ export class PnPDiagnostic {
       pnpContext: PnPMetaModelContext, document: vscode.TextDocument,
       jsonValue: Json.Value, jsonKey?: string, isArrayElement = false) {
     console.log(`checking ${jsonKey} kind, isArrayElement: ${isArrayElement}`);
-    let validTypes: Json.ValueKind[];
+    const validTypes: Json.ValueKind[] = [];
     let issues: Issue[] = [];
-    let valueType = '';
+    let rawValueTypes: string[] = [];
     if (!jsonKey) {
-      validTypes = [Json.ValueKind.ObjectValue];
+      rawValueTypes = ['object'];
+      validTypes.push(Json.ValueKind.ObjectValue);
     } else if (
         !isArrayElement && this._pnpParser.isArrayFromShortName(jsonKey)) {
-      validTypes = [Json.ValueKind.ArrayValue];
+      rawValueTypes = ['array'];
+      validTypes.push(Json.ValueKind.ArrayValue);
     } else {
       const id = this._pnpParser.getIdFromShortName(pnpContext, jsonKey);
       if (!id) {
         return [];
       }
-      valueType = this._pnpParser.getValueTypeFromId(id);
-      switch (valueType) {
-        case 'string':
-          validTypes = [Json.ValueKind.StringValue];
-          break;
-        case 'int':
-        case 'long':
-        case 'float':
-        case 'double':
-          validTypes = [Json.ValueKind.NumberValue];
-          break;
-        case 'boolean':
-          validTypes = [Json.ValueKind.BooleanValue];
-          break;
-        default:
-          validTypes = [Json.ValueKind.ObjectValue, Json.ValueKind.StringValue];
+      rawValueTypes = this._pnpParser.getValueTypesFromId(id);
+      rawValueTypes.forEach(valueType => {
+        switch (valueType) {
+          case 'string':
+            validTypes.push(Json.ValueKind.StringValue);
+            break;
+          case 'int':
+          case 'long':
+          case 'float':
+          case 'double':
+            validTypes.push(Json.ValueKind.NumberValue);
+            break;
+          case 'boolean':
+            validTypes.push(Json.ValueKind.BooleanValue);
+            break;
+          default:
+            break;
+        }
+      });
+      if (!validTypes.length) {
+        validTypes.push(Json.ValueKind.ObjectValue, Json.ValueKind.StringValue);
       }
     }
 
-    const validTypesFriendlyString = validTypes.map(kind => {
-      switch (kind) {
-        case Json.ValueKind.StringValue:
-          return 'String';
-        case Json.ValueKind.NumberValue:
-          return 'Number';
-        case Json.ValueKind.BooleanValue:
-          return 'Boolean';
-        case Json.ValueKind.ObjectValue:
-          return 'Object';
-        case Json.ValueKind.ArrayValue:
-          return 'Array';
-        default:
-          return '';
-      }
-    });
-
-    console.log(
-        `${jsonKey} has types of ${validTypesFriendlyString.join(',')}`);
+    console.log(`${jsonKey} has types of ${rawValueTypes.join(',')}`);
 
     if (validTypes.indexOf(jsonValue.valueKind) === -1) {
       const startIndex = jsonValue.span.startIndex;
       const endIndex = jsonValue.span.endIndex;
-      const message =
-          `Unexpected value. Expect ${validTypesFriendlyString.join(', ')}.`;
+      const message = `Unexpected value. Expect ${rawValueTypes.join(', ')}.`;
       const issue: Issue = {startIndex, endIndex, message};
       issues.push(issue);
     }
@@ -304,12 +292,16 @@ export class PnPDiagnostic {
         issues =
             issues.concat(this.getTypeIssues(pnpContext, document, value, key));
       }
-    } else if (valueType === 'int' || valueType === 'long') {
+    } else if (
+        jsonValue.valueKind === Json.ValueKind.NumberValue &&
+        rawValueTypes.indexOf('float') === -1 &&
+        rawValueTypes.indexOf('double') === -1) {
       const value = Number((jsonValue as Json.NumberValue).toFriendlyString());
       if (Math.floor(value) !== value) {
         const startIndex = jsonValue.span.startIndex;
         const endIndex = jsonValue.span.endIndex;
-        const message = `Invalid value. Valid value is ${valueType} number.`;
+        const message =
+            `Invalid value. Valid value is ${rawValueTypes.join(', ')}.`;
         const issue: Issue = {startIndex, endIndex, message};
         issues.push(issue);
       }

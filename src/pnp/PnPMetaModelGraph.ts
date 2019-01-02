@@ -132,8 +132,9 @@ export class PnPMetaModelParser {
       const item = {
         label: key,
         required: getRequiredProperties.indexOf(key) !== -1,
-        type: this.isArrayFromShortName(key) ? 'array' :
-                                               this.getValueTypeFromId(id)
+        type: this.isArrayFromShortName(key) ?
+            'array' :
+            (this.getValueTypesFromId(id)[0] || '')
       };
       results.push(item);
     }
@@ -350,30 +351,39 @@ export class PnPMetaModelParser {
     return id.split('/').pop();
   }
 
-  getValueTypeFromId(id: string) {
+  getValueTypesFromId(id: string) {
     if (!id) {
-      return '';
+      return [];
     }
     const values = this.getStringValuesFromId(id);
-    if (values.length !== 1) {
-      return '';
-    }
-    switch (values[0]) {
-      case 'XMLSchema#boolean':
-        return 'boolean';
-      case 'XMLSchema#int':
-        return 'int';
-      case 'XMLSchema#long':
-        return 'long';
-      case 'XMLSchema#float':
-        return 'float';
-      case 'XMLSchema#double':
-        return 'double';
-      case 'XMLSchema#string':
-        return 'string';
-      default:
-        return '';
-    }
+    const valueTypes: string[] = [];
+    values.forEach(value => {
+      switch (value) {
+        case 'XMLSchema#boolean':
+          valueTypes.push('boolean');
+          break;
+        case 'XMLSchema#int':
+          valueTypes.push('int');
+          break;
+        case 'XMLSchema#long':
+          valueTypes.push('long');
+          break;
+        case 'XMLSchema#float':
+          valueTypes.push('float');
+          break;
+        case 'XMLSchema#double':
+          valueTypes.push('double');
+          break;
+        case 'XMLSchema#string':
+          valueTypes.push('string');
+          break;
+        default:
+          console.log(`High level type: ${value}`);
+          break;
+      }
+    });
+
+    return valueTypes;
   }
 
   getStringValuePattern(key: string) {
