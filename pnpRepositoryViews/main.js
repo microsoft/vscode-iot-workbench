@@ -75,7 +75,8 @@ var repository = new Vue({
     addRemoveCapability,
     filterItems,
     onScrollTable,
-    searchTags
+    searchTags,
+    copy
   },
   created: function() {
     this.companyName = this.getCompanyName();
@@ -294,4 +295,14 @@ function onScrollTable(event) {
     }
     this.nextPageLoadingCounter = null;
   }, 1000);
+}
+
+function copy(content) {
+  const copyTextBox = document.createElement('input');
+  copyTextBox.className = 'copy-text-box';
+  copyTextBox.value = content;
+  document.body.appendChild(copyTextBox);
+  copyTextBox.select();
+  document.execCommand('copy');
+  document.body.removeChild(copyTextBox);
 }

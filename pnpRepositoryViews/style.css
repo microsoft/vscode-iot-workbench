@@ -540,6 +540,7 @@ header .search-bar button.dropdown.status {
   overflow: hidden;
   white-space: nowrap;
   display: inline-block;
+  position: relative;
 }
 
 .content table th:nth-child(1),
@@ -624,4 +625,29 @@ header .search-bar button.dropdown.status {
 .content table tr.loading-pnp-files td {
   text-align: center;
   width: 100%;
+}
+
+.copy_icon {
+  width: 32px;
+  height: 32px;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: url(image/Copy.svg) no-repeat center;
+  background-size: 16px 16px;
+  display: none;
+  z-index: 10;
+}
+
+:hover > .copy_icon {
+  display: block;
+}
+.copy_icon:hover {
+  background-color: rgba(0, 120, 215, 0.2);
+}
+
+.copy-text-box {
+  position: absolute;
+  top: -1000px;
+  left: 0;
 }

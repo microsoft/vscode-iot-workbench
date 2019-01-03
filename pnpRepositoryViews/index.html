@@ -70,7 +70,7 @@
 <tr v-for="interface in filterItems(interfaceList.value)" v-on:click="addRemoveInterface(interface.id)">
   <td><input type="checkbox" v-bind:value="interface.id" v-model="selectedInterfaces.value"></td>
   <td v-bind:title="interface.displayName">{{ interface.displayName }}</td>
-  <td v-bind:title="interface.id">{{ interface.id }}</td>
+  <td v-bind:title="interface.id">{{ interface.id }}<span class="copy_icon" title="Copy" v-on:click.stop="copy(interface.id)"></span></td>
   <td v-bind:title="interface.version">{{ interface.version }}</td>
   <td> </td>
   <td>{{ interface.published ? 'Published' : 'Saved' }}</td>
@@ -99,7 +99,7 @@
 <tr v-for="capability in filterItems(capabilityList.value)" v-on:click="addRemoveCapability(capability.id)">
   <td><input type="checkbox" v-bind:value="capability.id" v-model="selectedCapabilityModels.value"></td>
   <td v-bind:title="capability.displayName">{{ capability.displayName }}</td>
-  <td v-bind:title="capability.id">{{ capability.id }}</td>
+  <td v-bind:title="capability.id">{{ capability.id }}<span class="copy_icon" title="Copy" v-on:click.stop="copy(capability.id)"></span></td>
   <td v-bind:title="capability.version">{{ capability.version }}</td>
   <td>tags here</td>
   <td>{{ capability.published ? 'Published' : 'Saved' }}</td>
