@@ -126,11 +126,6 @@ function getNextPagePnPFiles(fileType) {
 
   loadingPnPFiles.value = true;
 
-  // make sure loading bar has been rendered by Vue
-  setTimeout(() => {
-    document.getElementById(tableId).scrollTop = document.getElementById(tableId).scrollHeight;
-  }, 0);
-
   command(commandName, 50, nextToken.value, res => {
     Vue.set(fileList, 'value', fileList.value.concat(res.result.results));
     Vue.set(nextToken, 'value', res.result.continuationToken);
