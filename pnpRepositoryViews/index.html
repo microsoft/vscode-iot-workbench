@@ -76,7 +76,19 @@
   <td>{{ interface.published ? 'Published' : 'Saved' }}</td>
 </tr>
 <tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
-  <td colspan="6">Loading...</td>
+  <td></td><td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
+  <td></td><td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
+  <td></td><td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
+  <td></td><td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
+  <td></td><td></td><td></td><td></td><td></td><td></td>
 </tr>
 <tr v-show="!loadingPnPInterfaces.value && interfaceNextToken.value">
   <td colspan="6"></td>
@@ -101,11 +113,23 @@
   <td v-bind:title="capability.displayName">{{ capability.displayName }}</td>
   <td v-bind:title="capability.id">{{ capability.id }}<span class="copy_icon" title="Copy" v-on:click.stop="copy(capability.id)"></span></td>
   <td v-bind:title="capability.version">{{ capability.version }}</td>
-  <td>tags here</td>
+  <td></td>
   <td>{{ capability.published ? 'Published' : 'Saved' }}</td>
 </tr>
 <tr class="loading-pnp-files" v-show="loadingPnPCapabilityModels.value">
-  <td colspan="6">Loading...</td>
+  <td></td><td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-pnp-files" v-show="loadingPnPCapabilityModels.value">
+  <td></td><td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-pnp-files" v-show="loadingPnPCapabilityModels.value">
+  <td></td><td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-pnp-files" v-show="loadingPnPCapabilityModels.value">
+  <td></td><td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-pnp-files" v-show="loadingPnPCapabilityModels.value">
+  <td></td><td></td><td></td><td></td><td></td><td></td>
 </tr>
 <tr v-show="!loadingPnPCapabilityModels.value && capabilityNextToken.value">
   <td colspan="6"></td>

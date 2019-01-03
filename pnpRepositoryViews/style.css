@@ -622,9 +622,42 @@ header .search-bar button.dropdown.status {
   cursor: default;
 }
 
-.content table tr.loading-pnp-files td {
-  text-align: center;
-  width: 100%;
+.content table tr.loading-pnp-files td::before {
+  content: "";
+  display: block;
+  height: 16px;
+  background: rgba(102, 102, 102, 0.2);
+  bottom: 7px;
+  position: absolute;
+}
+
+.content table tr.loading-pnp-files td:nth-child(1)::before {
+  width: 16px;
+  border: 1px solid #c8c8c8;
+  background: none;
+  bottom: 6px;
+  left: 1px;
+}
+
+.content table tr.loading-pnp-files td:nth-child(2)::before {
+  width: 80px;
+}
+
+.content table tr.loading-pnp-files td:nth-child(3)::before {
+  width: 120px;
+}
+
+.content table tr.loading-pnp-files td:nth-child(4)::before {
+  width: 70px;
+  right: 10px;
+}
+
+.content table tr.loading-pnp-files td:nth-child(5)::before {
+  width: 40px;
+}
+
+.content table tr.loading-pnp-files td:nth-child(6)::before {
+  width: 40px;
 }
 
 .copy_icon {
