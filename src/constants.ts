@@ -31,6 +31,7 @@ export class EventNames {
   static readonly generateOtaCrc = 'IoTWorkbench.GenerateOtaCrc';
   static readonly nsatsurvery = 'IoTWorkbench.NSATSurvey';
   static readonly selectSubscription = 'IoTWorkbench.SelectSubscription';
+  static readonly openTutorial = 'IoTWorkbench.OpenTutorial';
 }
 
 export class ContentView {

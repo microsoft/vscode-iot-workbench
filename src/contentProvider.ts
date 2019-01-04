@@ -2,13 +2,12 @@ import * as express from 'express';
 import * as vscode from 'vscode';
 import request = require('request-promise');
 
-import {ContentView} from './constants';
+import {ContentView, EventNames} from './constants';
 import {ExampleExplorer} from './exampleExplorer';
 import {LocalWebServer} from './localWebServer';
+import {TelemetryContext, TelemetryWorker} from './telemetry';
 
 export class ContentProvider implements vscode.TextDocumentContentProvider {
-  private _onDidChange = new vscode.EventEmitter<vscode.Uri>();
-
   private _webserver: LocalWebServer|null = null;
   private _exampleExplorer: ExampleExplorer|null = null;
 
@@ -19,7 +18,6 @@ export class ContentProvider implements vscode.TextDocumentContentProvider {
     return ContentProvider._instance;
   }
   private static _instance: ContentProvider;
-
 
   Initialize(extensionPath: string, exampleExplorer: ExampleExplorer) {
     this._webserver = new LocalWebServer(extensionPath);
@@ -95,6 +93,21 @@ export class ContentProvider implements vscode.TextDocumentContentProvider {
     }
     await vscode.commands.executeCommand(
         'vscode.open', vscode.Uri.parse(req.query.url));
+
+    if (req.query.example) {
+      const telemetryContext: TelemetryContext = {
+        properties: {
+          result: 'Succeeded',
+          message: req.query.example,
+          error: '',
+          errorMessage: ''
+        },
+        measurements: {duration: 0}
+      };
+
+      TelemetryWorker.sendEvent(EventNames.openTutorial, telemetryContext);
+    }
+
     return res.json({code: 0});
   }
 

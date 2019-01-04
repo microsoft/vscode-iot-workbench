@@ -489,13 +489,13 @@ ul.example-list > li > .body > .author > .avatar {
       <h2>{{ featuredExample.name }}</h2>
       <div class="description" v-if="featuredExample.description" v-bind:title="featuredExample.fullDescription">{{ featuredExample.description }}</div>
       <div class="buttons">
-        <button v-on:click="openLink(featuredExample.tutorial)" v-if="featuredExample.tutorial">View Tutorial</button>
+        <button v-on:click="openLink(featuredExample.tutorial, featuredExample.name)" v-if="featuredExample.tutorial">View Tutorial</button>
         <button v-on:click="callAPI(getProjectName(featuredExample), featuredExample.url, boardId)" v-if="featuredExample.url">Open Sample</button>
       </div>
     </div>
   </div>
   <ul class="example-list" v-if="officialExamples.length > 0">
-    <li v-for="example in officialExamples" v-on:click="openLink(example.tutorial)">
+    <li v-for="example in officialExamples" v-on:click="openLink(example.tutorial, example.name)">
       <div class="header">
         <span v-if="example.difficulty" v-bind:class="'difficulty ' + example.difficulty"></span>
         <img v-bind:src="example.image || '/images/no-image.jpg'">
@@ -513,7 +513,7 @@ ul.example-list > li > .body > .author > .avatar {
   </ul>
   <h2 class="community-headline" v-if="communityExamples.length > 0">Community contributed tutorials. Kudos to our developers!</h2>
   <ul class="example-list" v-if="communityExamples.length > 0">
-    <li v-for="example in communityExamples" v-on:click="openLink(example.tutorial)">
+    <li v-for="example in communityExamples" v-on:click="openLink(example.tutorial, example.name)">
       <div class="header">
         <span v-if="example.difficulty" v-bind:class="'difficulty ' + example.difficulty"></span>
         <img v-bind:src="example.image || '/images/no-image.jpg'">
