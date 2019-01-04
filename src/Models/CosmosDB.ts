@@ -267,11 +267,11 @@ export class CosmosDB implements Component, Provisionable {
   private _getCosmosDBAuthorizationToken(
       key: string, verb: string, date: string, resourceType: string,
       resourceId: string) {
-    const _key = new Buffer(key, 'base64');
+    const _key = Buffer.from(key, 'base64');
     const stringToSign =
         (`${verb}\n${resourceType}\n${resourceId}\n${date}\n\n`).toLowerCase();
 
-    const body = new Buffer(stringToSign, 'utf8');
+    const body = Buffer.from(stringToSign, 'utf8');
     const signature =
         crypto.createHmac('sha256', _key).update(body).digest('base64');
 
