@@ -83,6 +83,7 @@ export abstract class ArduinoDeviceBase implements Device {
 
   abstract async configDeviceSettings(): Promise<boolean>;
 
+  abstract async checkPrerequisites(): Promise<boolean>;
   abstract async load(): Promise<boolean>;
   abstract async create(): Promise<boolean>;
 

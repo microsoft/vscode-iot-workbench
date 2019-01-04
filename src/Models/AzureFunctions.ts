@@ -14,7 +14,7 @@ import {Provisionable} from './Interfaces/Provisionable';
 import {Deployable} from './Interfaces/Deployable';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, AzureFunctionsLanguage, AzureComponentsStorage} from '../constants';
+import {ConfigKey, AzureFunctionsLanguage, AzureComponentsStorage, DependentExtensions} from '../constants';
 
 import {ServiceClientCredentials} from 'ms-rest';
 import {AzureAccount, AzureResourceFilter} from '../azure-account.api';
@@ -83,6 +83,32 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
 
   getComponentType(): ComponentType {
     return this.componentType;
+  }
+
+  static async isAvailable(): Promise<boolean> {
+    if (!vscode.extensions.getExtension(DependentExtensions.azureFunctions)) {
+      const choice = await vscode.window.showInformationMessage(
+          'Azure Functions extension is required for the current project. Do you want to install it from marketplace?',
+          'Install Azure Functions Extension', 'Cancel');
+      if (choice === 'Install Azure Functions Extension') {
+        vscode.commands.executeCommand(
+            'vscode.open',
+            vscode.Uri.parse(
+                'vscode:extension/' + DependentExtensions.azureFunctions));
+      }
+      return false;
+    }
+
+    return true;
+  }
+
+  async checkPrerequisites(): Promise<boolean> {
+    const isFunctionsExtensionAvailable = await AzureFunctions.isAvailable();
+    if (!isFunctionsExtensionAvailable) {
+      return false;
+    }
+
+    return true;
   }
 
   async load(): Promise<boolean> {

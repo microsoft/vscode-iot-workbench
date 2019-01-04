@@ -79,6 +79,10 @@ export class Esp32Device extends ArduinoDeviceBase {
     }
   }
 
+  async checkPrerequisites(): Promise<boolean> {
+    return true;
+  }
+
   async load(): Promise<boolean> {
     const deviceFolderPath = this.deviceFolder;
 
