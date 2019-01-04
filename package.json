@@ -254,7 +254,6 @@
   },
   "extensionDependencies": [
     "vsciot-vscode.azure-iot-toolkit",
-    "ms-azuretools.vscode-azurefunctions",
     "vsciot-vscode.vscode-arduino"
   ]
 }

@@ -27,10 +27,13 @@ export class EventNames {
   static readonly devicePackageEvent = 'IoTWorkbench.DevicePackage';
   static readonly configDeviceSettingsEvent =
       'IoTWorkbench.ConfigDeviceSettingsEvent';
+  static readonly openExamplePageEvent = 'IoTWorkbench.OpenExamplePage';
   static readonly loadExampleEvent = 'IoTWorkbench.loadExample';
   static readonly detectBoard = 'IoTWorkbench.DetectBoard';
   static readonly generateOtaCrc = 'IoTWorkbench.GenerateOtaCrc';
   static readonly nsatsurvery = 'IoTWorkbench.NSATSurvey';
+  static readonly selectSubscription = 'IoTWorkbench.SelectSubscription';
+  static readonly openTutorial = 'IoTWorkbench.OpenTutorial';
   static readonly scaffoldDeviceStubEvent = 'IoTWorkbench.ScaffoldDeviceStub';
 }
 
@@ -65,4 +68,8 @@ export class AzureComponentsStorage {
 
 export class GlobalConstants {
   static readonly extensionId = 'vsciot-vscode.vscode-iot-workbench';
+}
+
+export class DependentExtensions {
+  static readonly azureFunctions = 'ms-azuretools.vscode-azurefunctions';
 }

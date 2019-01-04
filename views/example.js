@@ -4,7 +4,8 @@ var example = new Vue({
     version: '',
     publishDate: '',
     featuredExample: null,
-    examples: [],
+    officialExamples: [],
+    communityExamples: [],
     blogs: [],
     boardId: ''
   },
@@ -33,6 +34,7 @@ var example = new Vue({
       }
       
       for (var i = 0; i < examples.length; i++) {
+        examples[i].fullDescription = examples[i].description;
         if (examples[i].featured && !this.featuredExample) {
           this.featuredExample = examples.splice(i, 1)[0];
           i--;
@@ -40,7 +42,8 @@ var example = new Vue({
           examples[i].description = examples[i].description.substr(0, 77) + '...';
         }
       }
-      this.examples = examples;
+      this.officialExamples = examples.filter(example => !example.author);
+      this.communityExamples = examples.filter(example => example.author);
     }.bind(this));
   },
   methods: {
@@ -64,11 +67,14 @@ var example = new Vue({
   }
 });
 
-function openLink(url) {
+function openLink(url, example) {
   if (!url) {
     return;
   }
   var apiUrl = `/api/link?url=${url}`;
+  if (example) {
+    apiUrl += '&example=' + encodeURIComponent(example);
+  }
   httpRequest(apiUrl);
 }
 
