@@ -37,7 +37,10 @@ export class PnPMetaModelParser {
   cache = {
     IdFromLabel: {} as Map<string>,
     PropertyNameFromId: {} as Map<string>,
-    TypesFromId: {} as Map<string[]>
+    TypesFromId: {} as Map<string[]>,
+    ValueTypesFromId: {} as Map<string[]>,
+    StringValuesFromId: {} as Map<string[]>,
+    PropertiesFromId: {} as Map<string[]>
   };
 
   getCommentFromId(id: string): string|undefined {
@@ -154,11 +157,14 @@ export class PnPMetaModelParser {
       return [];
     }
     const results = this.getTypedPropertiesFromId(pnpContext, id);
-    console.log(results);
+    console.log(id, results);
     return results;
   }
 
   getPropertiesFromId(pnpContext: PnPMetaModelContext, id: string) {
+    if (this.cache.PropertiesFromId[id]) {
+      return this.cache.PropertiesFromId[id];
+    }
     console.log(`Checking properties for ${id}...`);
     let properties: string[] = [];
 
@@ -177,6 +183,7 @@ export class PnPMetaModelParser {
     }
 
     const keys = uniq(properties).sort();
+    this.cache.PropertiesFromId[id] = keys;
     return keys;
   }
 
@@ -243,8 +250,13 @@ export class PnPMetaModelParser {
   }
 
   getLabelFromId(pnpContext: PnPMetaModelContext, id: string) {
+    let label = '';
     if (id.indexOf(pnpContext['@context']['@vocab']) === 0) {
-      return id.substr(pnpContext['@context']['@vocab'].length);
+      label = id.substr(pnpContext['@context']['@vocab'].length);
+    }
+    if (label) {
+      const shortName = this.getShortNameFromLabel(pnpContext, label);
+      return shortName;
     }
     console.warn(`Cannot find label for ${id}.`);
     return id;
@@ -309,6 +321,9 @@ export class PnPMetaModelParser {
   }
 
   getStringValuesFromId(id: string) {
+    if (this.cache.StringValuesFromId[id]) {
+      return this.cache.StringValuesFromId[id];
+    }
     let values: string[] = [];
     let hasProperty = false;
     for (const edge of this.graph.Edges) {
@@ -344,6 +359,7 @@ export class PnPMetaModelParser {
         values.push(shortName);
       }
     }
+    this.cache.StringValuesFromId[id] = values;
     return values;
   }
 
@@ -354,6 +370,9 @@ export class PnPMetaModelParser {
   getValueTypesFromId(id: string) {
     if (!id) {
       return [];
+    }
+    if (this.cache.ValueTypesFromId[id]) {
+      return this.cache.ValueTypesFromId[id];
     }
     const values = this.getStringValuesFromId(id);
     const valueTypes: string[] = [];
@@ -383,6 +402,7 @@ export class PnPMetaModelParser {
       }
     });
 
+    this.cache.ValueTypesFromId[id] = valueTypes;
     return valueTypes;
   }
 

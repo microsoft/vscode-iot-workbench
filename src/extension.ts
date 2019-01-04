@@ -17,16 +17,11 @@ import {ContentProvider} from './contentProvider';
 import {TelemetryContext, callWithTelemetry, TelemetryWorker} from './telemetry';
 import {UsbDetector} from './usbDetector';
 import {HelpProvider} from './helpProvider';
-import {AZ3166Device} from './Models/AZ3166Device';
-import {IoTButtonDevice} from './Models/IoTButtonDevice';
-import {RaspberryPiDevice} from './Models/RaspberryPiDevice';
-import {Esp32Device} from './Models/Esp32Device';
 import {CodeGenerateCore} from './pnp/CodeGenerateCore';
 import {PnPMetaModelUtility, PnPMetaModelContext} from './pnp/PnPMetaModelUtility';
 import {PnPMetaModelParser, PnPMetaModelGraph} from './pnp/PnPMetaModelGraph';
 import {DeviceModelOperator} from './pnp/DeviceModelOperator';
 import {PnPMetaModelJsonParser} from './pnp/PnPMetaModelJsonParser';
-import {MetaModelType} from './pnp/pnp-api/DataContracts/PnPContext';
 import {PnPDiagnostic} from './pnp/PnPDiagnostic';
 import {VSCExpress} from 'vscode-express';
 
@@ -81,17 +76,21 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   }
 
+  let waitingForUpdatingDiagnostic: NodeJS.Timer|null = null;
+
   vscode.workspace.onDidOpenTextDocument((document) => {
     if (!/\.(interface|capabilitymodel)\.json$/.test(document.uri.fsPath)) {
       return;
     }
 
-    const documentType = getDocumentType(document);
-    if (documentType === 'Interface') {
-      pnpDiagnostic.update(pnpInterface, document);
-    } else {
-      pnpDiagnostic.update(pnpCapabilityModel, document);
-    }
+    waitingForUpdatingDiagnostic = setTimeout(() => {
+      const documentType = getDocumentType(document);
+      if (documentType === 'Interface') {
+        pnpDiagnostic.update(pnpInterface, document);
+      } else {
+        pnpDiagnostic.update(pnpCapabilityModel, document);
+      }
+    }, 0);
   });
 
   vscode.workspace.onDidChangeTextDocument((event) => {
@@ -100,12 +99,19 @@ export async function activate(context: vscode.ExtensionContext) {
       return;
     }
 
-    const documentType = getDocumentType(document);
-    if (documentType === 'Interface') {
-      pnpDiagnostic.update(pnpInterface, document);
-    } else {
-      pnpDiagnostic.update(pnpCapabilityModel, document);
+    if (waitingForUpdatingDiagnostic) {
+      clearTimeout(waitingForUpdatingDiagnostic);
     }
+
+    waitingForUpdatingDiagnostic = setTimeout(() => {
+      const documentType = getDocumentType(document);
+      if (documentType === 'Interface') {
+        pnpDiagnostic.update(pnpInterface, document);
+      } else {
+        pnpDiagnostic.update(pnpCapabilityModel, document);
+      }
+      waitingForUpdatingDiagnostic = null;
+    }, 500);
   });
 
   vscode.window.onDidChangeActiveTextEditor((editor) => {

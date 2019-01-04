@@ -1,4 +1,3 @@
-import {endianness} from 'os';
 import * as vscode from 'vscode';
 
 import * as Json from './JSON';
