@@ -67,11 +67,14 @@ var example = new Vue({
   }
 });
 
-function openLink(url) {
+function openLink(url, example) {
   if (!url) {
     return;
   }
   var apiUrl = `/api/link?url=${url}`;
+  if (example) {
+    apiUrl += '&example=' + encodeURIComponent(example);
+  }
   httpRequest(apiUrl);
 }
 
