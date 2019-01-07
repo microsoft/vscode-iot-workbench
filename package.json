@@ -16,7 +16,7 @@
   "aiKey": "5b869bc6-ca93-4f24-aa87-92871a3a616e",
   "codeGenConfigUrl": "https://aka.ms/iot-pnp-config-staging.json",
   "engines": {
-    "vscode": "^1.23.0"
+    "vscode": "^1.30.0"
   },
   "categories": [
     "Azure",
