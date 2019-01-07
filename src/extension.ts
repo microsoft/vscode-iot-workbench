@@ -471,8 +471,6 @@ export async function activate(context: vscode.ExtensionContext) {
         ConfigKey.shownHelpPage, true, vscode.ConfigurationTarget.Global);
   }
 
-  const vscexpress = new VSCExpress(context, 'pnpRepositoryViews');
-
   vscode.commands.registerCommand(
       'iotworkbench.getAllInterfaces',
       async (pageSize?: number, continueToken?: string) => {

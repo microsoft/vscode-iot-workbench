@@ -182,10 +182,13 @@ export class PnPMetaModelJsonParser {
     const items: vscode.CompletionItem[] = [];
     for (const char of chars) {
       const label = typeof char === 'string' ? char : char.label;
+      if (label.indexOf('XMLSchema#') !== -1) {
+        continue;
+      }
       const labelText = typeof char === 'string' ?
           label :
           (label + (!char.required ? ' (optional)' : ''));
-      const item = new vscode.CompletionItem(`$(plug) ${labelText}`);
+      const item = new vscode.CompletionItem(labelText);
       if (typeof char !== 'string') {
         // insertText is vscode snippet string
         // https://code.visualstudio.com/docs/editor/userdefinedsnippets#_snippet-syntax

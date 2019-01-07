@@ -40,16 +40,25 @@ export class PnPMetaModelParser {
     TypesFromId: {} as Map<string[]>,
     ValueTypesFromId: {} as Map<string[]>,
     StringValuesFromId: {} as Map<string[]>,
-    PropertiesFromId: {} as Map<string[]>
+    PropertiesFromId: {} as Map<string[]>,
+    CommnetFromId: {} as Map<string>,
+    TypedPropertiesFromId: {} as
+        Map<Array<{label: string, required: boolean, type: string}>>,
+    ShortNameFromLabel: {} as Map<string>
   };
 
   getCommentFromId(id: string): string|undefined {
+    if (this.cache.CommnetFromId[id] !== undefined) {
+      return this.cache.CommnetFromId[id];
+    }
     for (const edge of this.graph.Edges) {
       if (edge.SourceNode.Id === id &&
           edge.Label === PnPMetaModelParser.LABEL.COMMENT) {
+        this.cache.CommnetFromId[id] = edge.TargetNode.Value || '';
         return edge.TargetNode.Value;
       }
     }
+    this.cache.CommnetFromId[id] = '';
     return undefined;
   }
 
@@ -123,6 +132,9 @@ export class PnPMetaModelParser {
   }
 
   getTypedPropertiesFromId(pnpContext: PnPMetaModelContext, id: string) {
+    if (this.cache.TypedPropertiesFromId[id]) {
+      return this.cache.TypedPropertiesFromId[id];
+    }
     const keys = this.getPropertiesFromId(pnpContext, id);
     const type = this.getLabelFromId(pnpContext, id);
     const getRequiredProperties = this.getRequiredPropertiesFromType(type);
@@ -141,6 +153,7 @@ export class PnPMetaModelParser {
       };
       results.push(item);
     }
+    this.cache.TypedPropertiesFromId[id] = results;
     return results;
   }
 
@@ -271,6 +284,9 @@ export class PnPMetaModelParser {
   }
 
   getShortNameFromLabel(pnpContext: PnPMetaModelContext, label: string) {
+    if (this.cache.ShortNameFromLabel[label]) {
+      return this.cache.ShortNameFromLabel[label];
+    }
     const context = pnpContext['@context'];
     let labelInInterface = '';
     for (const key of Object.keys(context)) {
@@ -282,11 +298,13 @@ export class PnPMetaModelParser {
       }
 
       if (labelInInterface === label) {
+        this.cache.ShortNameFromLabel[label] = key;
         return key;
       }
     }
 
     console.log(`Cannot find short name for label ${label}.`);
+    this.cache.ShortNameFromLabel[label] = label;
     return label;
   }
 
@@ -351,6 +369,7 @@ export class PnPMetaModelParser {
       if (hasProperty) {
         // this is object, ignore it
         console.log(`${id} is an object, ignored`);
+        this.cache.StringValuesFromId[id] = [];
         return [];
       }
       const shortName = this.getShortNameFromId(id);
