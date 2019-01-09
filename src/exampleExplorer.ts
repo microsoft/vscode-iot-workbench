@@ -109,34 +109,38 @@ export class ExampleExplorer {
       return name;
     }
 
-    const workspaceFile = path.join(name, 'project.code-workspace');
-    if (fs.existsSync(workspaceFile)) {
-      const selection = await vscode.window.showQuickPick(
-          [
+    const workspaceFiles =
+        fs.listSync(name, [FileNames.workspaceExtensionName]);
+    if (workspaceFiles && workspaceFiles.length > 0) {
+      const workspaceFile = workspaceFiles[0];  // just pick the first one
+      if (fs.existsSync(workspaceFile)) {
+        const selection = await vscode.window.showQuickPick(
+            [
+              {
+                label: `Open an existing example`,
+                description: '',
+                detail: `Example exists: ${name}`
+              },
+              {
+                label: 'Generate a new example',
+                description: '',
+                detail: 'Create a new folder to generate the example'
+              }
+            ],
             {
-              label: `Open an existing example`,
-              description: '',
-              detail: `Example exists: ${name}`
-            },
-            {
-              label: 'Generate a new example',
-              description: '',
-              detail: 'Create a new folder to generate the example'
-            }
-          ],
-          {
-            ignoreFocusOut: true,
-            matchOnDescription: true,
-            matchOnDetail: true,
-            placeHolder: 'Select an option',
-          });
+              ignoreFocusOut: true,
+              matchOnDescription: true,
+              matchOnDetail: true,
+              placeHolder: 'Select an option',
+            });
 
-      if (!selection) {
-        return '';
-      }
+        if (!selection) {
+          return '';
+        }
 
-      if (selection.label === 'Open an existing example') {
-        return name;
+        if (selection.label === 'Open an existing example') {
+          return name;
+        }
       }
     }
 
@@ -294,11 +298,10 @@ export class ExampleExplorer {
       return false;
     }
 
-    const items = fs.listSync(fsPath);
+    const items = fs.listSync(fsPath, [FileNames.workspaceExtensionName]);
     if (items.length !== 0) {
       await vscode.commands.executeCommand(
-          'vscode.openFolder',
-          vscode.Uri.file(path.join(fsPath, 'project.code-workspace')), true);
+          'vscode.openFolder', vscode.Uri.file(items[0]), true);
       return true;
     }
 
@@ -308,10 +311,17 @@ export class ExampleExplorer {
     if (res) {
       // Follow the same pattern in Arduino extension to open examples in new
       // VSCode instance
-      await vscode.commands.executeCommand(
-          'vscode.openFolder',
-          vscode.Uri.file(path.join(fsPath, 'project.code-workspace')), true);
-      return true;
+      const workspaceFiles =
+          fs.listSync(fsPath, [FileNames.workspaceExtensionName]);
+      if (workspaceFiles && workspaceFiles.length > 0) {
+        await vscode.commands.executeCommand(
+            'vscode.openFolder', vscode.Uri.file(workspaceFiles[0]), true);
+        return true;
+      } else {
+        // TODO: Add buttom to submit issue to iot-workbench repo.
+        throw new Error(
+            'The example does not contain a project for Azure IoT Device Workbench.');
+      }
     } else {
       throw new Error(
           'Downloading example package failed. Please check your network settings.');
