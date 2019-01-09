@@ -69,9 +69,9 @@
 <tbody v-on:wheel="onScrollTable" id="interfaceListTable">
 <tr v-for="interface in filterItems(interfaceList.value)" v-on:click="addRemoveInterface(interface.id)">
   <td><input type="checkbox" v-bind:value="interface.id" v-model="selectedInterfaces.value"></td>
-  <td v-bind:title="interface.displayName">{{ interface.displayName }}</td>
-  <td v-bind:title="interface.id">{{ interface.id }}<span class="copy_icon" title="Copy" v-on:click.stop="copy(interface.id)"></span></td>
-  <td v-bind:title="interface.version">{{ interface.version }}</td>
+  <td v-bind:title="interface.displayName"><div class="td_inner">{{ interface.displayName }}</div></td>
+  <td v-bind:title="interface.id"><div class="td_inner">{{ interface.id }}</div><span class="copy_icon" title="Copy" v-on:click.stop="copy($event, interface.id)"></span></td>
+  <td v-bind:title="interface.version"><div class="td_inner">{{ interface.version }}</div></td>
   <td> </td>
   <td>{{ interface.published ? 'Published' : 'Saved' }}</td>
 </tr>
@@ -125,9 +125,9 @@
 <tbody v-on:wheel="onScrollTable" id="capabilityListTable">
 <tr v-for="capability in filterItems(capabilityList.value)" v-on:click="addRemoveCapability(capability.id)">
   <td><input type="checkbox" v-bind:value="capability.id" v-model="selectedCapabilityModels.value"></td>
-  <td v-bind:title="capability.displayName">{{ capability.displayName }}</td>
-  <td v-bind:title="capability.id">{{ capability.id }}<span class="copy_icon" title="Copy" v-on:click.stop="copy(capability.id)"></span></td>
-  <td v-bind:title="capability.version">{{ capability.version }}</td>
+  <td v-bind:title="capability.displayName"><div class="td_inner">{{ capability.displayName }}</div></td>
+  <td v-bind:title="capability.id"><div class="td_inner">{{ capability.id }}</div><span class="copy_icon" title="Copy" v-on:click.stop="copy($event, capability.id)"></span></td>
+  <td v-bind:title="capability.version"><div class="td_inner">{{ capability.version }}</div></td>
   <td></td>
   <td>{{ capability.published ? 'Published' : 'Saved' }}</td>
 </tr>

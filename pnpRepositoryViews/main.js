@@ -292,7 +292,7 @@ function onScrollTable(event) {
   }, 1000);
 }
 
-function copy(content) {
+function copy(event, content) {
   const copyTextBox = document.createElement('input');
   copyTextBox.className = 'copy-text-box';
   copyTextBox.value = content;
@@ -300,4 +300,8 @@ function copy(content) {
   copyTextBox.select();
   document.execCommand('copy');
   document.body.removeChild(copyTextBox);
+  event.target.className = 'copy_icon copied';
+  setTimeout(() => {
+    event.target.className = 'copy_icon';
+  }, 500);
 }
