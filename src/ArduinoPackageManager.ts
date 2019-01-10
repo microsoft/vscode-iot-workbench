@@ -46,11 +46,20 @@ export class ArduinoPackageManager {
       return;
     }
 
-    await ArduinoPackageManager.setAdditionalUrl(
-        board.installation.additionalUrl);
-    await vscode.commands.executeCommand(
-        'arduino.installBoard', board.installation.packageName,
-        board.installation.architecture);
+    try {
+      await ArduinoPackageManager.setAdditionalUrl(
+          board.installation.additionalUrl);
+      await vscode.commands.executeCommand(
+          'arduino.installBoard', board.installation.packageName,
+          board.installation.architecture);
+    } catch (ignore) {
+      // If we fail to install board package,
+      // it may because the user hasn't installed
+      // Arduino extension. Let's just ignore
+      // that. We should have asked the the user
+      // to install Arduino extension somewhere
+      // else already
+    }
     return;
   }
 }
