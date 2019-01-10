@@ -89,8 +89,8 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     if (!vscode.extensions.getExtension(DependentExtensions.azureFunctions)) {
       const choice = await vscode.window.showInformationMessage(
           'Azure Functions extension is required for the current project. Do you want to install it from marketplace?',
-          'Install Azure Functions Extension', 'Cancel');
-      if (choice === 'Install Azure Functions Extension') {
+          'Yes', 'No');
+      if (choice === 'Yes') {
         vscode.commands.executeCommand(
             'vscode.open',
             vscode.Uri.parse(

@@ -213,7 +213,6 @@
     "winreg": "^1.2.3"
   },
   "extensionDependencies": [
-    "vsciot-vscode.azure-iot-toolkit",
-    "vsciot-vscode.vscode-arduino"
+    "vsciot-vscode.azure-iot-toolkit"
   ]
 }
