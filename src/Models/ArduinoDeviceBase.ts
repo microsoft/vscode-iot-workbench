@@ -71,8 +71,8 @@ export abstract class ArduinoDeviceBase implements Device {
   }
 
   async checkPrerequisites(): Promise<boolean> {
-    const isFunctionsExtensionAvailable = await ArduinoDeviceBase.isAvailable();
-    if (!isFunctionsExtensionAvailable) {
+    const isArduinoExtensionAvailable = await ArduinoDeviceBase.isAvailable();
+    if (!isArduinoExtensionAvailable) {
       return false;
     }
 
