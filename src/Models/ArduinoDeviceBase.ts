@@ -7,7 +7,8 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, FileNames} from '../constants';
+import {ConfigKey, DependentExtensions, FileNames} from '../constants';
+
 import {Board} from './Interfaces/Board';
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
@@ -52,6 +53,32 @@ export abstract class ArduinoDeviceBase implements Device {
     return this.componentType;
   }
 
+  static async isAvailable(): Promise<boolean> {
+    if (!vscode.extensions.getExtension(DependentExtensions.arduino)) {
+      const choice = await vscode.window.showInformationMessage(
+          'Arduino extension is required for the current project. Do you want to install it from marketplace?',
+          'Yes', 'No');
+      if (choice === 'Yes') {
+        vscode.commands.executeCommand(
+            'vscode.open',
+            vscode.Uri.parse(
+                'vscode:extension/' + DependentExtensions.arduino));
+      }
+      return false;
+    }
+
+    return true;
+  }
+
+  async checkPrerequisites(): Promise<boolean> {
+    const isArduinoExtensionAvailable = await ArduinoDeviceBase.isAvailable();
+    if (!isArduinoExtensionAvailable) {
+      return false;
+    }
+
+    return true;
+  }
+
   async compile(): Promise<boolean> {
     try {
       const result = await this.preCompileAction();
@@ -81,7 +108,6 @@ export abstract class ArduinoDeviceBase implements Device {
 
   abstract async configDeviceSettings(): Promise<boolean>;
 
-  abstract async checkPrerequisites(): Promise<boolean>;
   abstract async load(): Promise<boolean>;
   abstract async create(): Promise<boolean>;
 
