@@ -8,7 +8,7 @@ import {EventNames, GlobalConstants} from './constants';
 import {TelemetryProperties, TelemetryContext, TelemetryWorker} from './telemetry';
 
 const NSAT_SURVEY_URL = 'https://www.surveymonkey.com/r/C2928RZ';
-const PROBABILITY = 0.5;
+const PROBABILITY = 1;
 const SESSION_COUNT_THRESHOLD = 2;
 const SESSION_COUNT_KEY = 'nsat/sessionCount';
 const LAST_SESSION_DATE_KEY = 'nsat/lastSessionDate';
@@ -40,8 +40,8 @@ export class NSAT {
       return;
     }
 
-    const isCandidate =
-        globalState.get(IS_CANDIDATE_KEY, false) || Math.random() < PROBABILITY;
+    const isCandidate = globalState.get(IS_CANDIDATE_KEY, false) ||
+        Math.random() <= PROBABILITY;
 
     await globalState.update(IS_CANDIDATE_KEY, isCandidate);
 
