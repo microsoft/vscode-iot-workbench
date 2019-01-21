@@ -40,8 +40,8 @@ export class NSAT {
       return;
     }
 
-    const isCandidate =
-        globalState.get(IS_CANDIDATE_KEY, false) || Math.random() <= PROBABILITY;
+    const isCandidate = globalState.get(IS_CANDIDATE_KEY, false) ||
+        Math.random() <= PROBABILITY;
 
     await globalState.update(IS_CANDIDATE_KEY, isCandidate);
 
