@@ -28,6 +28,8 @@ export interface CodeGeneratorConfig {
   win32PackageUrl: string;
   macOSMd5: string;
   macOSPackageUrl: string;
+  ubuntuMd5: string;
+  ubuntuPackageUrl: string;
 }
 
 export class CodeGenerateCore {
@@ -278,13 +280,20 @@ export class CodeGenerateCore {
                 encoding: null  // Binary data
               };
               md5value = pnpCodeGenConfig.win32Md5;
-            } else {
+            } else if (platform === 'darwin') {
               downloadOption = {
                 method: 'GET',
                 uri: pnpCodeGenConfig.macOSPackageUrl,
                 encoding: null  // Binary data
               };
               md5value = pnpCodeGenConfig.macOSMd5;
+            } else {
+              downloadOption = {
+                method: 'GET',
+                uri: pnpCodeGenConfig.ubuntuPackageUrl,
+                encoding: null  // Binary data
+              };
+              md5value = pnpCodeGenConfig.ubuntuMd5;
             }
 
             const loading = setInterval(() => {

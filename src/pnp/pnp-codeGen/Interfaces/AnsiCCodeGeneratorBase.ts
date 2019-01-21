@@ -22,16 +22,15 @@ export abstract class AnsiCCodeGeneratorBase implements CodeGenerator {
     // Invoke PnP toolset to generate the code
     const platform = os.platform();
     const homeDir = os.homedir();
-    let cmdPath = '';
+    const cmdPath = path.join(homeDir, CodeGenConstants.codeGeneratorToolPath);
+    let codeGenCommand = '';
     if (platform === 'win32') {
-      cmdPath = path.join(homeDir, CodeGenConstants.codeGeneratorToolPath);
+      codeGenCommand = 'PnPCodeGen.exe';
     } else {
-      vscode.window.showWarningMessage(
-          `Currently, Plug & Play code generator does not support ${platform}`);
-      return false;
+      codeGenCommand = 'PnPCodeGen';
     }
 
-    const command = `PnPCodeGen.exe scaffold  --jsonldUri "${
+    const command = `${codeGenCommand} scaffold  --jsonldUri "${
         filePath}" --language ansic --output "${
         targetPath}" --connectionString "${connectionString}"`;
 
