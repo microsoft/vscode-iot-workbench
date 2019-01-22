@@ -76,7 +76,8 @@ var repository = new Vue({
     filterItems,
     onScrollTable,
     searchTags,
-    copy
+    copy,
+    hasNoItemToPublish
   },
   created: function() {
     this.companyName = this.getCompanyName();
@@ -97,8 +98,19 @@ function editPnPFiles() {
 }
 
 function publishPnPFiles() {
+  const fullItemList = this.type.value === 'Interface' ? this.interfaceList.value : this.capabilityList.value;
   const fileIds = this.type.value === 'Interface' ? this.selectedInterfaces.value : this.selectedCapabilityModels.value;
-  command('iotworkbench.publishPnPFiles', fileIds, this.type.value, refreshPnPFileList.bind(this));
+  const publishFileIds = [];
+  for (let i = 0; i < fileIds.length; i++) {
+    const item = fullItemList.find(item => item.id === fileIds[i]);
+    if (item && !item.published) {
+      publishFileIds.push(item.id);
+    }
+  }
+
+  if (publishFileIds.length) {
+    command('iotworkbench.publishPnPFiles', publishFileIds, this.type.value, refreshPnPFileList.bind(this));
+  }
 }
 
 function createPnPFile() {
@@ -304,4 +316,23 @@ function copy(event, content) {
   setTimeout(() => {
     event.target.className = 'copy_icon';
   }, 500);
+}
+
+function hasNoItemToPublish() {
+  let selectedItemList, fullItemList;
+  if(this.type.value === 'Interface') {
+    fullItemList = this.interfaceList.value;
+    selectedItemList = this.selectedInterfaces.value;
+  } else {
+    fullItemList = this.capabilityList.value;
+    selectedItemList = this.selectedCapabilityModels.value;
+  }
+
+  for (let i = 0; i < selectedItemList.length; i++) {
+    const item = fullItemList.find(item => item.id === selectedItemList[i]);
+    if (item && !item.published) {
+      return false;
+    }
+  }
+  return true;
 }
