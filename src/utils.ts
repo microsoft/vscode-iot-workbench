@@ -156,7 +156,8 @@ export async function selectWorkspaceItem(
         });
   }
   folderPicks.push({label: 'Browse...', description: '', data: undefined});
-  folder = await vscode.window.showQuickPick(folderPicks, {placeHolder});
+  folder = await vscode.window.showQuickPick(
+      folderPicks, {placeHolder, ignoreFocusOut: true});
   if (folder === undefined) {
     throw new Error('User cancelled the operation.');
   }
