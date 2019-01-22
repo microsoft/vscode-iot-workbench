@@ -20,34 +20,36 @@ Follow these steps to prepare the development environment for ESP32 devices:
 
 2. Install [Visual Studio Code](https://code.visualstudio.com/), a cross platform source code editor with powerful developer tooling, like IntelliSense code completion and debugging.
 
-3. Look for **Azure IoT Device Workbench** in the extension marketplace and install it.
+3. Install [Arduino](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-arduino) for Visual Studio Code.
+
+4. Look for **Azure IoT Device Workbench** in the extension marketplace and install it.
     ![Install IoT Device Workbench](esp32/media/esp32-get-started/install-workbench.png)
     Together with **Azure IoT Device Workbench**, other dependent extensions will be installed.
 
-4. Open **File > Preference > Settings** and add following lines to configure Arduino.
+5. Open **File > Preference > Settings** and add following lines to configure Arduino.
 
-	* Windows
+  * Windows
 
-		```JSON
-		"arduino.path": "C:\\Program Files (x86)\\Arduino",
-		"arduino.additionalUrls": "https://dl.espressif.com/dl/package_esp32_index.json"
-		```
+    ```JSON
+    "arduino.path": "C:\\Program Files (x86)\\Arduino",
+    "arduino.additionalUrls": "https://dl.espressif.com/dl/package_esp32_index.json"
+    ```
 
-	* macOS
+  * macOS
 
-		```JSON
-		"arduino.path": "/Application",
-		"arduino.additionalUrls": "https://dl.espressif.com/dl/package_esp32_index.json"
-		```
+    ```JSON
+    "arduino.path": "/Application",
+    "arduino.additionalUrls": "https://dl.espressif.com/dl/package_esp32_index.json"
+    ```
 
-	* Ubuntu
+  * Ubuntu
 
-		```JSON
-		"arduino.path": "/home/{username}/Downloads/arduino-1.8.5",
-		"arduino.additionalUrls": "https://dl.espressif.com/dl/package_esp32_index.json"
-		```
+    ```JSON
+    "arduino.path": "/home/{username}/Downloads/arduino-1.8.5",
+    "arduino.additionalUrls": "https://dl.espressif.com/dl/package_esp32_index.json"
+    ```
 
-5. Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type and select **Arduino: Board Manager**. Search for **esp32** and install the latest version.
+6. Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type and select **Arduino: Board Manager**. Search for **esp32** and install the latest version.
 
     ![Install DevKit SDK](esp32/media/esp32-get-started/esp32-install-sdk.jpg)
 
