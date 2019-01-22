@@ -1,0 +1,11 @@
+{
+  "templates": [
+      {
+          "description": "",
+          "detail": "Create Yocto project that connects to Azure IoT Hub.",
+          "label": "Raspberry Pi With Azure IoT Hub",
+          "type": "IotHub",
+          "sketch": "respberrypi_iothub"
+      }
+  ]
+}

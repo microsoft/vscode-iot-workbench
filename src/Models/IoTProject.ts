@@ -31,6 +31,7 @@ import {IoTHub} from './IoTHub';
 import {IoTHubDevice} from './IoTHubDevice';
 import {RaspberryPiDevice} from './RaspberryPiDevice';
 import {StreamAnalyticsJob} from './StreamAnalyticsJob';
+import {YoctoDevice} from './YoctoDevice';
 
 const constants = {
   deviceDefaultFolderName: 'Device',
@@ -112,6 +113,9 @@ export class IoTProject {
             this.extensionContext, this.channel, deviceLocation);
       } else if (boardId === RaspberryPiDevice.boardId) {
         device = new RaspberryPiDevice(
+            this.extensionContext, deviceLocation, this.channel);
+      } else if (boardId === YoctoDevice.boardId) {
+        device = new YoctoDevice(
             this.extensionContext, deviceLocation, this.channel);
       }
       if (device) {
@@ -468,6 +472,10 @@ export class IoTProject {
           projectTemplateItem.sketch);
     } else if (boardId === RaspberryPiDevice.boardId) {
       device = new RaspberryPiDevice(
+          this.extensionContext, deviceDir, this.channel,
+          projectTemplateItem.sketch);
+    } else if (boardId === YoctoDevice.boardId) {
+      device = new YoctoDevice(
           this.extensionContext, deviceDir, this.channel,
           projectTemplateItem.sketch);
     } else {
