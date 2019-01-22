@@ -203,6 +203,7 @@
     "getmac": "^1.2.1",
     "guid-typescript": "^1.0.7",
     "lodash": "^4.17.10",
+    "molehole": "^0.1.3",
     "ms-rest": "^2.3.0",
     "opn": "5.1.0",
     "request": "^2.83.0",

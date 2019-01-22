@@ -4,6 +4,7 @@
 import * as cp from 'child_process';
 import * as fs from 'fs-plus';
 import {Guid} from 'guid-typescript';
+import {MoleHole} from 'molehole';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
@@ -218,16 +219,88 @@ export class YoctoDevice implements Device {
     }
   }
 
+  async getSSHEnabledDevicePickItems() {
+    const deviceList: vscode.QuickPickItem[] = [];
+    const devices = await MoleHole.getDevicesFromLAN();
+    const raspberryPiDevices =
+        devices.filter(info => info.id === 'raspberrypi');
+    for (const device of raspberryPiDevices) {
+      if (device.ip) {
+        deviceList.push({label: device.ip, detail: device.host || '<Unknown>'});
+      }
+    }
+
+    deviceList.push(
+        {
+          label: '$(sync) Discover again',
+          detail: 'Auto discover SSH enabled device in LAN'
+        },
+        {
+          label: '$(gear) Manual setup',
+          detail: 'Setup device SSH configuration manually'
+        });
+
+    return deviceList;
+  }
+
   async configSSH(): Promise<boolean> {
     // Raspberry Pi host
-    const raspiHostOption: vscode.InputBoxOptions = {
-      value: RaspberryPiUploadConfig.host,
-      prompt: `Please input Raspberry Pi ip or hostname here.`,
-      ignoreFocusOut: true
-    };
-    let raspiHost = await vscode.window.showInputBox(raspiHostOption);
-    if (raspiHost === undefined) {
+    const sshDiscoverOrInputItems: vscode.QuickPickItem[] = [
+      {
+        label: '$(search) Auto discover',
+        detail: 'Auto discover SSH enabled device in LAN'
+      },
+      {
+        label: '$(gear) Manual setup',
+        detail: 'Setup device SSH configuration manually'
+      }
+    ];
+    const sshDiscoverOrInputChoice =
+        await vscode.window.showQuickPick(sshDiscoverOrInputItems, {
+          ignoreFocusOut: true,
+          matchOnDescription: true,
+          matchOnDetail: true,
+          placeHolder: 'Select an option',
+        });
+    if (!sshDiscoverOrInputChoice) {
       return false;
+    }
+
+    let raspiHost: string|undefined;
+
+    if (sshDiscoverOrInputChoice.label === '$(search) Auto discover') {
+      let selectDeviceChoice: vscode.QuickPickItem|undefined;
+      do {
+        const selectDeviceItems = this.getSSHEnabledDevicePickItems();
+        selectDeviceChoice =
+            await vscode.window.showQuickPick(selectDeviceItems, {
+              ignoreFocusOut: true,
+              matchOnDescription: true,
+              matchOnDetail: true,
+              placeHolder: 'Select a device',
+            });
+      } while (selectDeviceChoice &&
+               selectDeviceChoice.label === '$(sync) Discover again');
+
+      if (!selectDeviceChoice) {
+        return false;
+      }
+
+      if (selectDeviceChoice.label !== '$(gear) Manual setup') {
+        raspiHost = selectDeviceChoice.label;
+      }
+    }
+
+    if (!raspiHost) {
+      const raspiHostOption: vscode.InputBoxOptions = {
+        value: RaspberryPiUploadConfig.host,
+        prompt: `Please input Raspberry Pi ip or hostname here.`,
+        ignoreFocusOut: true
+      };
+      raspiHost = await vscode.window.showInputBox(raspiHostOption);
+      if (raspiHost === undefined) {
+        return false;
+      }
     }
     raspiHost = raspiHost || RaspberryPiUploadConfig.host;
 
