@@ -27,7 +27,7 @@ export abstract class AnsiCCodeGeneratorBase implements CodeGenerator {
     if (platform === 'win32') {
       codeGenCommand = 'PnPCodeGen.exe';
     } else {
-      codeGenCommand = 'PnPCodeGen';
+      codeGenCommand = './PnPCodeGen';
     }
 
     const command = `${codeGenCommand} scaffold  --jsonldUri "${

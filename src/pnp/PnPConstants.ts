@@ -3,7 +3,7 @@
 
 export class PnPFileNames {
   static readonly resourcesFolderName = 'resources';
-  static readonly deviceModelFolderName = 'DeviceModel';
+  static readonly deviceModelFolderName = 'devicemodel';
   static readonly graphFileName = 'graph.json';
   static readonly interfaceFileName = 'Interface.json';
   static readonly capabilityModelFileName = 'CapabilityModel.json';
