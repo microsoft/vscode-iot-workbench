@@ -328,7 +328,7 @@ export class RaspberryPiDevice implements Device {
       prompt: `Please input Raspberry Pi password here.`,
       ignoreFocusOut: true
     };
-    let raspiPassword = await vscode.window.showInputBox(raspiPasswordOption);
+    const raspiPassword = await vscode.window.showInputBox(raspiPasswordOption);
     if (raspiPassword === undefined) {
       return false;
     }
