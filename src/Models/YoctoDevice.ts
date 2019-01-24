@@ -177,14 +177,25 @@ export class YoctoDevice implements Device {
   }
 
   async upload(): Promise<boolean> {
-    if (!fs.existsSync(path.join(this.deviceFolder, 'config.json'))) {
-      const option = await vscode.window.showInformationMessage(
-          'No config file found. Have you configured device connection string?',
-          'Upload anyway', 'Cancel');
-      if (option === 'Cancel') {
-        return true;
-      }
+    if (!fs.existsSync(path.join(this.deviceFolder, 'build.json'))) {
+      await vscode.window.showWarningMessage('No build config file found.');
+      return false;
     }
+
+    const buildConfigRaw =
+        fs.readFileSync(path.join(this.deviceFolder, 'build.json'), 'utf8');
+    const buildConfig = JSON.parse(buildConfigRaw) as {
+      source: string,
+      output: string,
+    };
+    const buildTargetPath = path.join(
+        this.deviceFolder, buildConfig.output, 'cmake', buildConfig.source);
+    if (!fs.existsSync(buildTargetPath)) {
+      await vscode.window.showErrorMessage(
+          `Cannot find build target file under ${buildTargetPath}`);
+      return false;
+    }
+
     if (!RaspberryPiUploadConfig.updated) {
       const res = await this.configSSH();
       if (!res) {
@@ -201,29 +212,32 @@ export class YoctoDevice implements Device {
     let sshUploaded: boolean;
     if (sshConnected) {
       sshUploaded = await ssh.upload(
-          this.deviceFolder, RaspberryPiUploadConfig.projectPath as string);
+          buildTargetPath, RaspberryPiUploadConfig.projectPath as string);
     } else {
       await ssh.close();
       this.channel.appendLine('SSH connection failed.');
+      vscode.window.showInformationMessage('SSH connection failed.');
       return false;
     }
 
-    let sshNpmInstalled: boolean;
-    if (sshUploaded) {
-      sshNpmInstalled = await ssh.shell(
-          `cd ${RaspberryPiUploadConfig.projectPath} && npm install`);
-    } else {
+    if (!sshUploaded) {
       await ssh.close();
       this.channel.appendLine('SFTP upload failed.');
+      vscode.window.showInformationMessage(
+          'Yocto project upload failed via SFTP.');
       return false;
     }
+
+    // make uploaded build executable
+    await ssh.shell(
+        `cd ${RaspberryPiUploadConfig.projectPath} && chmod -R 755 .\/`);
 
     await ssh.close();
     if (this.channel) {
-      this.channel.appendLine('Uploaded project to Raspberry Pi.');
+      this.channel.appendLine('Yocto project uploaded.');
     }
 
-    vscode.window.showInformationMessage('Uploaded project to Raspberry Pi.');
+    vscode.window.showInformationMessage('Yocto project uploaded.');
     return true;
   }
 

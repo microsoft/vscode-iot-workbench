@@ -174,11 +174,9 @@ export function runCommand(
     const stderr = '';
     const process = cp.spawn(command, [], {cwd: workingDir, shell: true});
     process.stdout.on('data', (data: string) => {
-      console.log(data);
       outputChannel.appendLine(data);
     });
     process.stderr.on('data', (data: string) => {
-      console.log(data);
       outputChannel.appendLine(data);
     });
     process.on('error', (error) => reject({error, stderr, stdout}));

@@ -60,7 +60,9 @@ export class SSH {
           const rootPath =
               (fs.isDirectorySync(filePath) ? filePath : path.dirname(filePath))
                   .replace(/\/$/, '');
-          const files = fs.listTreeSync(filePath);
+          const files = fs.isDirectorySync(filePath) ?
+              fs.listTreeSync(filePath) :
+              [filePath];
 
           if (this._channel) {
             this._channel.show();
