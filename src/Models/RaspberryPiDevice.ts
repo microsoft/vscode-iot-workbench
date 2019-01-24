@@ -332,7 +332,7 @@ export class RaspberryPiDevice implements Device {
     if (raspiPassword === undefined) {
       return false;
     }
-    raspiPassword = raspiPassword || RaspberryPiUploadConfig.password;
+    // raspiPassword = raspiPassword || RaspberryPiUploadConfig.password;
 
     // Raspberry Pi path
     const raspiPathOption: vscode.InputBoxOptions = {
