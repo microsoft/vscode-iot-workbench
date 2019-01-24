@@ -1,6 +1,15 @@
 # Change Log
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
 
+## Version 0.2.3
+- Release date: Jan. 25th, 2019
+
+### Added
+- IoT DevKit: Add new example of 'Play GIFs on the MXCHIP' into gallery.
+
+### Changed
+- Remove 'Arduino Extension' from hard dependency list.
+
 ## Version 0.2.2
 - Release date: Jan. 4th, 2019
 
