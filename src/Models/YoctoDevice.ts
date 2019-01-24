@@ -1,15 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import {devicePath} from 'azure-iot-common/lib/endpoint';
 import * as cp from 'child_process';
 import * as fs from 'fs-plus';
 import {Guid} from 'guid-typescript';
 import {MoleHole} from 'molehole';
 import * as path from 'path';
+import {utils} from 'ssh2';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames} from '../constants';
+import {DialogResponses} from '../DialogResponses';
+import {DockerBuildConfig, DockerManager} from '../DockerManager';
+import {TerminalManager} from '../TerminalManager';
+import {runCommand} from '../utils';
 
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
@@ -117,6 +123,56 @@ export class YoctoDevice implements Device {
   }
 
   async compile(): Promise<boolean> {
+    const dockerManager = new DockerManager();
+
+    // check whether docker is installed
+    this.channel.show();
+    this.channel.appendLine('Check whether Docker is installed...');
+    try {
+      await runCommand(
+          dockerManager.constructGetVersionCmd(), '', this.channel);
+      this.channel.appendLine('Docker is installed.');
+    } catch {
+      // Docker is not installed.
+      const option = await vscode.window.showInformationMessage(
+          'Docker is required to compile the code. Do you want to install Docker now?',
+          DialogResponses.yes, DialogResponses.cancel);
+      if (option === DialogResponses.yes) {
+        vscode.commands.executeCommand(
+            'vscode.open', vscode.Uri.parse('https://www.docker.com/'));
+      }
+      return false;
+    }
+
+    // Generate commands for build application from docker.
+    // read config file
+    const configFilePath =
+        path.join(this.deviceFolder, FileNames.dockerBuildConfigFileName);
+    if (!fs.existsSync(configFilePath)) {
+      // TODO: Replace this with copy default.
+      throw new Error(
+          'Build config file does not exist. Please check the project settings.');
+    }
+
+    const buildConfig: DockerBuildConfig =
+        JSON.parse(fs.readFileSync(configFilePath, 'utf8'));
+    if (!buildConfig) {
+      // create the output folder
+      throw new Error(
+          'Build config file is not valid. Please check the project settings.');
+    }
+
+    // Create output folder
+    const targetFolderPath = path.join(this.deviceFolder, buildConfig.output);
+    if (!fs.existsSync(targetFolderPath)) {
+      fs.mkdirSync(targetFolderPath);
+    }
+
+    const dockerCommand = dockerManager.constructCommandForBuildConfig(
+        buildConfig, this.deviceFolder);
+    this.channel.appendLine(dockerCommand);
+
+    TerminalManager.runInTerminal(dockerCommand);
     return true;
   }
 

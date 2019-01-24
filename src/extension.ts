@@ -17,6 +17,7 @@ import {ContentProvider} from './contentProvider';
 import {TelemetryContext, callWithTelemetry, TelemetryWorker} from './telemetry';
 import {UsbDetector} from './usbDetector';
 import {HelpProvider} from './helpProvider';
+import {TerminalManager} from './TerminalManager';
 
 
 // this method is called when your extension is activated
@@ -176,6 +177,11 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(azureDeploy);
   context.subscriptions.push(deviceToolchain);
   context.subscriptions.push(configureDevice);
+
+  context.subscriptions.push(
+      vscode.window.onDidCloseTerminal((closedTerminal: vscode.Terminal) => {
+        TerminalManager.onDidCloseTerminal(closedTerminal);
+      }));
 
   const usbDetector = new UsbDetector(context, outputChannel);
   usbDetector.startListening();

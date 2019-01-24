@@ -48,6 +48,7 @@ export class FileNames {
   static readonly settingsJsonFileName = 'settings.json';
   static readonly vscodeSettingsFolderName = '.vscode';
   static readonly workspaceExtensionName = '.code-workspace';
+  static readonly dockerBuildConfigFileName = 'build.json';
 }
 
 export enum AzureFunctionsLanguage {
@@ -63,6 +64,7 @@ export class AzureComponentsStorage {
 
 export class GlobalConstants {
   static readonly extensionId = 'vsciot-vscode.vscode-iot-workbench';
+  static readonly iotWorkbenchDisplayName = 'Azure IoT Device Workbench';
 }
 
 export class DependentExtensions {
