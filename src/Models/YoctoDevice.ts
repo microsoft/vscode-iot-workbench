@@ -7,7 +7,7 @@ import * as fs from 'fs-plus';
 import {Guid} from 'guid-typescript';
 import {MoleHole} from 'molehole';
 import * as path from 'path';
-import {utils} from 'ssh2';
+import * as copypaste from 'copy-paste';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
@@ -21,9 +21,6 @@ import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
 import {SSH} from './SSH';
 
-const constants = {
-  defaultSketchFileName: 'app.js'
-};
 
 class RaspberryPiUploadConfig {
   static host = 'raspberrypi';
@@ -249,9 +246,9 @@ export class YoctoDevice implements Device {
         detail: 'Config SSH'
       },
       {
-        label: 'Config connection of IoT Hub Device',
-        description: 'Config connection of IoT Hub Device',
-        detail: 'Config IoT Hub Device'
+        label: 'Copy device connection string',
+        description: 'Copy device connection string',
+        detail: 'Copy'
       }
     ];
 
@@ -279,13 +276,15 @@ export class YoctoDevice implements Device {
         return false;
       }
     } else {
-      try {
-        const res = await this.configHub();
-        return res;
-      } catch (error) {
-        vscode.window.showWarningMessage('Config IoT Hub failed.');
-        return false;
+      const deviceConnectionString =
+          ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
+
+      if (!deviceConnectionString) {
+        throw new Error(
+            'Unable to get the device connection string, please invoke the command of Azure Provision first.');
       }
+      copypaste.copy(deviceConnectionString);
+      return true;
     }
   }
 
@@ -431,108 +430,5 @@ export class YoctoDevice implements Device {
     RaspberryPiUploadConfig.projectPath = raspiPath;
     RaspberryPiUploadConfig.updated = true;
     return true;
-  }
-
-  async configHub(): Promise<boolean> {
-    try {
-      const deviceFolderPath = this.deviceFolder;
-
-      if (!fs.existsSync(deviceFolderPath)) {
-        throw new Error('Unable to find the device folder inside the project.');
-      }
-
-      // Get IoT Hub device connection string from config
-      let deviceConnectionString =
-          ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
-
-      let hostName = '';
-      let deviceId = '';
-      if (deviceConnectionString) {
-        const hostnameMatches =
-            deviceConnectionString.match(/HostName=(.*?)(;|$)/);
-        if (hostnameMatches) {
-          hostName = hostnameMatches[0];
-        }
-
-        const deviceIDMatches =
-            deviceConnectionString.match(/DeviceId=(.*?)(;|$)/);
-        if (deviceIDMatches) {
-          deviceId = deviceIDMatches[0];
-        }
-      }
-
-      let deviceConnectionStringSelection: vscode.QuickPickItem[] = [];
-      if (deviceId && hostName) {
-        deviceConnectionStringSelection = [
-          {
-            label: 'Select IoT Hub Device Connection String',
-            description: '',
-            detail: `Device Information: ${hostName} ${deviceId}`
-          },
-          {
-            label: 'Input IoT Hub Device Connection String',
-            description: '',
-            detail: 'Input another...'
-          }
-        ];
-      } else {
-        deviceConnectionStringSelection = [{
-          label: 'Input IoT Hub Device Connection String',
-          description: '',
-          detail: 'Input another...'
-        }];
-      }
-
-      const selection =
-          await vscode.window.showQuickPick(deviceConnectionStringSelection, {
-            ignoreFocusOut: true,
-            placeHolder: 'Choose IoT Hub Device Connection String'
-          });
-
-      if (!selection) {
-        return false;
-      }
-
-      if (selection.detail === 'Input another...') {
-        const option: vscode.InputBoxOptions = {
-          value:
-              'HostName=<Host Name>;DeviceId=<Device Name>;SharedAccessKey=<Device Key>',
-          prompt: `Please input device connection string here.`,
-          ignoreFocusOut: true
-        };
-
-        deviceConnectionString = await vscode.window.showInputBox(option);
-        if (!deviceConnectionString) {
-          return false;
-        }
-        if ((deviceConnectionString.indexOf('HostName') === -1) ||
-            (deviceConnectionString.indexOf('DeviceId') === -1) ||
-            (deviceConnectionString.indexOf('SharedAccessKey') === -1)) {
-          throw new Error(
-              'The format of the IoT Hub Device connection string is invalid. Please provide a valid Device connection string.');
-        }
-      }
-
-      if (!deviceConnectionString) {
-        return false;
-      }
-
-      console.log(deviceConnectionString);
-
-      // Set selected connection string to device
-      try {
-        const configFilePath = path.join(deviceFolderPath, 'config.json');
-        const config = {connectionString: deviceConnectionString};
-        fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2));
-      } catch (error) {
-        throw new Error(`Device: create config file failed: ${error.message}`);
-      }
-
-      vscode.window.showInformationMessage(
-          'Configure Device connection string successfully.');
-      return true;
-    } catch (error) {
-      throw error;
-    }
   }
 }
