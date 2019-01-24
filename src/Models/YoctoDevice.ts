@@ -3,11 +3,11 @@
 
 import {devicePath} from 'azure-iot-common/lib/endpoint';
 import * as cp from 'child_process';
+import * as copypaste from 'copy-paste';
 import * as fs from 'fs-plus';
 import {Guid} from 'guid-typescript';
 import {MoleHole} from 'molehole';
 import * as path from 'path';
-import * as copypaste from 'copy-paste';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
@@ -405,7 +405,7 @@ export class YoctoDevice implements Device {
       prompt: `Please input Raspberry Pi password here.`,
       ignoreFocusOut: true
     };
-    let raspiPassword = await vscode.window.showInputBox(raspiPasswordOption);
+    const raspiPassword = await vscode.window.showInputBox(raspiPasswordOption);
     if (raspiPassword === undefined) {
       return false;
     }
