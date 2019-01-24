@@ -5,11 +5,22 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as ssh2 from 'ssh2';
 import * as vscode from 'vscode';
+import * as scpClient from 'scp2';
+import { resolve } from 'bluebird';
+
+export enum SSH_UPLOAD_METHOD {
+  SFTP,
+  SCP
+}
 
 export class SSH {
   private _client: ssh2.Client;
   private _connected = false;
   private _channel: vscode.OutputChannel|null = null;
+  private _host: string|undefined;
+  private _port: number|undefined;
+  private _username: string|undefined;
+  private _password: string|undefined;
 
   constructor(channel?: vscode.OutputChannel) {
     this._client = new ssh2.Client();
@@ -27,6 +38,10 @@ export class SSH {
           conn.on('ready',
                   () => {
                     this._connected = true;
+                    this._host = host;
+                    this._password = password;
+                    this._port = port;
+                    this._username = username;
                     return resolve(true);
                   })
               .on('end',
@@ -43,9 +58,9 @@ export class SSH {
         });
   }
 
-  async upload(filePath: string, remoteRootPath: string) {
+  async upload(filePath: string, remoteRootPath: string, method = SSH_UPLOAD_METHOD.SFTP) {
     return new Promise(
-        (resolve: (value: boolean) => void,
+        async (resolve: (value: boolean) => void,
          reject: (reason: boolean) => void) => {
           if (!this._connected) {
             return resolve(false);
@@ -69,7 +84,47 @@ export class SSH {
             this._channel.appendLine('');
           }
 
-          const conn = this._client;
+          if (method === SSH_UPLOAD_METHOD.SFTP) {
+            return await this.uploadViaSFTP(filePath, remoteRootPath, rootPath, files);
+          } else {
+            return await this.uploadViaSCP(remoteRootPath, files);
+          }
+        });
+  }
+
+  private async uploadViaSCP(remoteRootPath: string, files: string[]) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        for (const file of files) {
+          await this.uploadSingleFileViaSCP(file, remoteRootPath);
+        }
+  
+        return resolve(true);
+      } catch(err) {
+        return reject(err);
+      }
+    });
+  }
+
+  private async uploadSingleFileViaSCP(filePath: string, remoteRootPath: string) {
+    return new Promise(async (resolve, reject) => {
+      scpClient.scp(filePath, {
+        host: this._host,
+        username: this._username,
+        password: this._password,
+        path: './' + remoteRootPath
+      }, function(err) {
+        if (err) {
+          return reject(err);
+        }
+        return resolve(true);
+      })
+    });
+  }
+
+  private async uploadViaSFTP(filePath: string, remoteRootPath: string, rootPath: string, files: string[]) {
+    return new Promise((resolve, reject) => {
+      const conn = this._client;
           conn.sftp(async (err, sftp) => {
             if (err) {
               if (this._channel) {
@@ -140,7 +195,7 @@ export class SSH {
 
             return resolve(true);
           });
-        });
+    });
   }
 
   private async isExist(sftp: ssh2.SFTPWrapper, remotePath: string) {

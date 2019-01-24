@@ -1,13 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import {devicePath} from 'azure-iot-common/lib/endpoint';
 import * as cp from 'child_process';
 import * as fs from 'fs-plus';
 import {Guid} from 'guid-typescript';
 import {MoleHole} from 'molehole';
 import * as path from 'path';
-import {utils} from 'ssh2';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
@@ -19,7 +17,7 @@ import {runCommand} from '../utils';
 
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
-import {SSH} from './SSH';
+import {SSH, SSH_UPLOAD_METHOD} from './SSH';
 
 const constants = {
   defaultSketchFileName: 'app.js'
@@ -204,6 +202,28 @@ export class YoctoDevice implements Device {
       }
     }
 
+    const methodChoice = await vscode.window.showQuickPick([
+      {
+        label: 'SFTP',
+        detail: 'Upload via SFTP'
+      },
+      {
+        label: 'SCP',
+        detail: 'Upload via SCP'
+      }
+    ], {
+      ignoreFocusOut: true,
+      matchOnDescription: true,
+      matchOnDetail: true,
+      placeHolder: 'Select upload method',
+    });
+
+    if (!methodChoice) {
+      return false;
+    }
+
+    const sshUploadMethod = methodChoice.label === 'SFTP' ? SSH_UPLOAD_METHOD.SFTP : SSH_UPLOAD_METHOD.SCP;
+
     const ssh = new SSH(this.channel);
 
     const sshConnected = await ssh.connect(
@@ -211,8 +231,11 @@ export class YoctoDevice implements Device {
         RaspberryPiUploadConfig.user, RaspberryPiUploadConfig.password);
     let sshUploaded: boolean;
     if (sshConnected) {
+      if (sshUploadMethod === SSH_UPLOAD_METHOD.SCP) {
+        ssh.shell(`mkdir -p ${RaspberryPiUploadConfig.projectPath}`);
+      }
       sshUploaded = await ssh.upload(
-          buildTargetPath, RaspberryPiUploadConfig.projectPath as string);
+          buildTargetPath, RaspberryPiUploadConfig.projectPath as string, sshUploadMethod);
     } else {
       await ssh.close();
       this.channel.appendLine('SSH connection failed.');
@@ -222,9 +245,9 @@ export class YoctoDevice implements Device {
 
     if (!sshUploaded) {
       await ssh.close();
-      this.channel.appendLine('SFTP upload failed.');
+      this.channel.appendLine(`${methodChoice.label} upload failed.`);
       vscode.window.showInformationMessage(
-          'Yocto project upload failed via SFTP.');
+          `Yocto project upload failed via ${methodChoice.label}.`);
       return false;
     }
 
