@@ -1,17 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import {resolve} from 'bluebird';
-import * as cp from 'child_process';
 import * as fs from 'fs-plus';
 import * as os from 'os';
 import * as path from 'path';
-import * as scpClient from 'scp2';
+import * as scp from 'scp';
 import * as ssh2 from 'ssh2';
 import * as vscode from 'vscode';
 
 import {TerminalManager} from '../TerminalManager';
-import * as utils from '../utils';
 
 export enum SSH_UPLOAD_METHOD {
   SFTP,
@@ -116,16 +113,20 @@ export class SSH {
       filePath: string, remoteRootPath: string) {
     return new Promise(async (resolve, reject) => {
       try {
-        if (os.platform() === 'win32') {
-          const command = `scp.exe ${filePath}  ${this._username}@${
-              this._host}:~/${remoteRootPath}/`;
-          TerminalManager.runInTerminal(command);
-          // await utils.runCommand(command, 'C:\\Windows\\System32\\OpenSSH\\',
-          // this._channel);
-          resolve(true);
-        } else {
-          throw new Error('The platform is not supported.');
-        }
+        scp.send(
+            {
+              host: this._host as string,
+              user: this._username as string,
+              port: this._port,
+              file: filePath,
+              path: `~/${remoteRootPath}/`
+            },
+            err => {
+              if (err) {
+                return reject(err);
+              }
+              return resolve(true);
+            });
       } catch (err) {
         return reject(err);
       }
