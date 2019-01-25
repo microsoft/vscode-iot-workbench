@@ -20,12 +20,11 @@ import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
 import {SSH, SSH_UPLOAD_METHOD} from './SSH';
 
-
-class RaspberryPiUploadConfig {
-  static host = 'raspberrypi';
+class YoctoUploadConfig {
+  static host = 'yocto';
   static port = 22;
-  static user = 'pi';
-  static password = 'raspberry';
+  static user = 'root';
+  static password = '';
   static projectPath = 'IoTProject';
   static updated = false;
 }
@@ -192,7 +191,7 @@ export class YoctoDevice implements Device {
       return false;
     }
 
-    if (!RaspberryPiUploadConfig.updated) {
+    if (!YoctoUploadConfig.updated) {
       const res = await this.configSSH();
       if (!res) {
         vscode.window.showWarningMessage('Configure SSH cancelled.');
@@ -200,40 +199,39 @@ export class YoctoDevice implements Device {
       }
     }
 
-    const methodChoice = await vscode.window.showQuickPick([
-      {
-        label: 'SFTP',
-        detail: 'Upload via SFTP'
-      },
-      {
-        label: 'SCP',
-        detail: 'Upload via SCP'
-      }
-    ], {
-      ignoreFocusOut: true,
-      matchOnDescription: true,
-      matchOnDetail: true,
-      placeHolder: 'Select upload method',
-    });
+    const methodChoice = await vscode.window.showQuickPick(
+        [
+          {label: 'SFTP', detail: 'Upload via SFTP'},
+          {label: 'SCP', detail: 'Upload via SCP'}
+        ],
+        {
+          ignoreFocusOut: true,
+          matchOnDescription: true,
+          matchOnDetail: true,
+          placeHolder: 'Select upload method',
+        });
 
     if (!methodChoice) {
       return false;
     }
 
-    const sshUploadMethod = methodChoice.label === 'SFTP' ? SSH_UPLOAD_METHOD.SFTP : SSH_UPLOAD_METHOD.SCP;
+    const sshUploadMethod = methodChoice.label === 'SFTP' ?
+        SSH_UPLOAD_METHOD.SFTP :
+        SSH_UPLOAD_METHOD.SCP;
 
     const ssh = new SSH(this.channel);
 
     const sshConnected = await ssh.connect(
-        RaspberryPiUploadConfig.host, RaspberryPiUploadConfig.port,
-        RaspberryPiUploadConfig.user, RaspberryPiUploadConfig.password);
+        YoctoUploadConfig.host, YoctoUploadConfig.port, YoctoUploadConfig.user,
+        YoctoUploadConfig.password);
     let sshUploaded: boolean;
     if (sshConnected) {
       if (sshUploadMethod === SSH_UPLOAD_METHOD.SCP) {
-        ssh.shell(`mkdir -p ${RaspberryPiUploadConfig.projectPath}`);
+        ssh.shell(`mkdir -p ${YoctoUploadConfig.projectPath}`);
       }
       sshUploaded = await ssh.upload(
-          buildTargetPath, RaspberryPiUploadConfig.projectPath as string, sshUploadMethod);
+          buildTargetPath, YoctoUploadConfig.projectPath as string,
+          sshUploadMethod);
     } else {
       await ssh.close();
       this.channel.appendLine('SSH connection failed.');
@@ -250,8 +248,7 @@ export class YoctoDevice implements Device {
     }
 
     // make uploaded build executable
-    await ssh.shell(
-        `cd ${RaspberryPiUploadConfig.projectPath} && chmod -R 755 .\/`);
+    await ssh.shell(`cd ${YoctoUploadConfig.projectPath} && chmod -R 755 .\/`);
 
     await ssh.close();
     if (this.channel) {
@@ -265,8 +262,8 @@ export class YoctoDevice implements Device {
   async configDeviceSettings(): Promise<boolean> {
     const configSelectionItems: vscode.QuickPickItem[] = [
       {
-        label: 'Config Raspberry Pi SSH',
-        description: 'Config Raspberry Pi SSH',
+        label: 'Config Yocto Device SSH',
+        description: 'Config Yocto Device SSH',
         detail: 'Config SSH'
       },
       {
@@ -337,7 +334,7 @@ export class YoctoDevice implements Device {
   }
 
   async configSSH(): Promise<boolean> {
-    // Raspberry Pi host
+    // Yocto Device host
     const sshDiscoverOrInputItems: vscode.QuickPickItem[] = [
       {
         label: '$(search) Auto discover',
@@ -386,8 +383,8 @@ export class YoctoDevice implements Device {
 
     if (!raspiHost) {
       const raspiHostOption: vscode.InputBoxOptions = {
-        value: RaspberryPiUploadConfig.host,
-        prompt: `Please input Raspberry Pi ip or hostname here.`,
+        value: YoctoUploadConfig.host,
+        prompt: `Please input Yocto device ip or hostname here.`,
         ignoreFocusOut: true
       };
       raspiHost = await vscode.window.showInputBox(raspiHostOption);
@@ -395,12 +392,12 @@ export class YoctoDevice implements Device {
         return false;
       }
     }
-    raspiHost = raspiHost || RaspberryPiUploadConfig.host;
+    raspiHost = raspiHost || YoctoUploadConfig.host;
 
-    // Raspberry Pi SSH port
+    // Yocto Device SSH port
     const raspiPortOption: vscode.InputBoxOptions = {
-      value: RaspberryPiUploadConfig.port.toString(),
-      prompt: `Please input Raspberry Pi SSH port here.`,
+      value: YoctoUploadConfig.port.toString(),
+      prompt: `Please input Yocto device SSH port here.`,
       ignoreFocusOut: true
     };
     const raspiPortString = await vscode.window.showInputBox(raspiPortOption);
@@ -409,24 +406,24 @@ export class YoctoDevice implements Device {
     }
     const raspiPort = raspiPortString && !isNaN(Number(raspiPortString)) ?
         Number(raspiPortString) :
-        RaspberryPiUploadConfig.port;
+        YoctoUploadConfig.port;
 
-    // Raspberry Pi user name
+    // Yocto device user name
     const raspiUserOption: vscode.InputBoxOptions = {
-      value: RaspberryPiUploadConfig.user,
-      prompt: `Please input Raspberry Pi user name here.`,
+      value: YoctoUploadConfig.user,
+      prompt: `Please input Yocto device user name here.`,
       ignoreFocusOut: true
     };
     let raspiUser = await vscode.window.showInputBox(raspiUserOption);
     if (raspiUser === undefined) {
       return false;
     }
-    raspiUser = raspiUser || RaspberryPiUploadConfig.user;
+    raspiUser = raspiUser || YoctoUploadConfig.user;
 
-    // Raspberry Pi user password
+    // Yocto device user password
     const raspiPasswordOption: vscode.InputBoxOptions = {
-      value: RaspberryPiUploadConfig.password,
-      prompt: `Please input Raspberry Pi password here.`,
+      value: YoctoUploadConfig.password,
+      prompt: `Please input Yocto device password here.`,
       ignoreFocusOut: true
     };
     const raspiPassword = await vscode.window.showInputBox(raspiPasswordOption);
@@ -435,24 +432,24 @@ export class YoctoDevice implements Device {
     }
     // raspiPassword = raspiPassword || RaspberryPiUploadConfig.password;
 
-    // Raspberry Pi path
+    // Yocto device path
     const raspiPathOption: vscode.InputBoxOptions = {
-      value: RaspberryPiUploadConfig.projectPath,
-      prompt: `Please input Raspberry Pi path here.`,
+      value: YoctoUploadConfig.projectPath,
+      prompt: `Please input Yocto device path here.`,
       ignoreFocusOut: true
     };
     let raspiPath = await vscode.window.showInputBox(raspiPathOption);
     if (raspiPath === undefined) {
       return false;
     }
-    raspiPath = raspiPath || RaspberryPiUploadConfig.projectPath;
+    raspiPath = raspiPath || YoctoUploadConfig.projectPath;
 
-    RaspberryPiUploadConfig.host = raspiHost;
-    RaspberryPiUploadConfig.port = raspiPort;
-    RaspberryPiUploadConfig.user = raspiUser;
-    RaspberryPiUploadConfig.password = raspiPassword;
-    RaspberryPiUploadConfig.projectPath = raspiPath;
-    RaspberryPiUploadConfig.updated = true;
+    YoctoUploadConfig.host = raspiHost;
+    YoctoUploadConfig.port = raspiPort;
+    YoctoUploadConfig.user = raspiUser;
+    YoctoUploadConfig.password = raspiPassword;
+    YoctoUploadConfig.projectPath = raspiPath;
+    YoctoUploadConfig.updated = true;
     return true;
   }
 }
