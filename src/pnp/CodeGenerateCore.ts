@@ -10,7 +10,6 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 
 import request = require('request-promise');
-import AdmZip = require('adm-zip');
 import {FileNames, ConfigKey} from '../constants';
 import {TelemetryContext} from '../telemetry';
 import {PnPConnector} from './PnPConnector';
@@ -20,7 +19,7 @@ import {AnsiCCodeGeneratorFactory} from './pnp-codeGen/AnsiCCodeGeneratorFactory
 import {CodeGeneratorFactory} from './pnp-codeGen/Interfaces/CodeGeneratorFactory';
 import {ConfigHandler} from '../configHandler';
 import {DialogResponses} from '../DialogResponses';
-
+import extractzip = require('extract-zip');
 
 export interface CodeGeneratorConfig {
   version: string;
@@ -324,9 +323,8 @@ export class CodeGenerateCore {
 
               channel.appendLine(
                   'Step 3: Extracting Azure IoT Plug & Play Code Generator.');
-              const zip = new AdmZip(filePath);
 
-              zip.extractAllTo(codeGenCommandPath, true);
+              await extract(filePath, codeGenCommandPath);
               channel.appendLine(
                   'Azure IoT Plug & Play Code Generator updated successfully.');
               await ConfigHandler.update(
@@ -378,6 +376,18 @@ async function fileHash(filename: string, algorithm = 'md5') {
     input.on('end', () => {
       hashvalue = hash.digest('hex');
       return resolve(hashvalue);
+    });
+  });
+}
+
+async function extract(sourceZip: string, targetFoder: string) {
+  return new Promise((resolve, reject) => {
+    extractzip(sourceZip, {dir: targetFoder}, (err) => {
+      if (err) {
+        return reject(err);
+      } else {
+        return resolve(true);
+      }
     });
   });
 }

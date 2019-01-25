@@ -10,7 +10,7 @@
     "url": "https://github.com/Microsoft/vscode-iot-workbench/issues"
   },
   "homepage": "https://github.com/Microsoft/vscode-iot-workbench/blob/master/README.md",
-  "version": "0.9.8-rc2",
+  "version": "0.9.8-rc3",
   "publisher": "vsciot-vscode",
   "icon": "logo.png",
   "aiKey": "5b869bc6-ca93-4f24-aa87-92871a3a616e",
@@ -233,6 +233,7 @@
     "@types/ssh2": "^0.5.35",
     "@types/unzip": "^0.1.0",
     "@types/winreg": "^1.2.30",
+    "@types/extract-zip": "^1.6.2",
     "gts": "^0.5.1",
     "typescript": "^2.6.2",
     "vscode": "^1.1.26"
@@ -260,7 +261,8 @@
     "ssh2": "^0.6.1",
     "vscode-express": "^0.1.13",
     "vscode-extension-telemetry": "^0.1.0",
-    "winreg": "^1.2.3"
+    "winreg": "^1.2.3",
+    "extract-zip": "^1.6.7"
   },
   "extensionDependencies": [
     "vsciot-vscode.azure-iot-toolkit",
