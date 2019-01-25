@@ -199,21 +199,25 @@ export class YoctoDevice implements Device {
       }
     }
 
-    const methodChoice = await vscode.window.showQuickPick(
-        [
-          {label: 'SFTP', detail: 'Upload via SFTP'},
-          {label: 'SCP', detail: 'Upload via SCP'}
-        ],
-        {
-          ignoreFocusOut: true,
-          matchOnDescription: true,
-          matchOnDetail: true,
-          placeHolder: 'Select upload method',
-        });
+    // const methodChoice = await vscode.window.showQuickPick(
+    //     [
+    //       {label: 'SFTP', detail: 'Upload via SFTP'},
+    //       {label: 'SCP', detail: 'Upload via SCP'}
+    //     ],
+    //     {
+    //       ignoreFocusOut: true,
+    //       matchOnDescription: true,
+    //       matchOnDetail: true,
+    //       placeHolder: 'Select upload method',
+    //     });
 
-    if (!methodChoice) {
-      return false;
-    }
+    // if (!methodChoice) {
+    //   return false;
+    // }
+
+    // Disable SCP
+    const methodChoice:
+        vscode.QuickPickItem = {label: 'SFTP', detail: 'Upload via SFTP'};
 
     const sshUploadMethod = methodChoice.label === 'SFTP' ?
         SSH_UPLOAD_METHOD.SFTP :
