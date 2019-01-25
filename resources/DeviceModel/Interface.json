@@ -2,19 +2,15 @@
     "@context": {
         "@vocab": "http://azureiot.com/v0/classes/",
         "@language": "en",
-        "Array": "Schemas/Array",
-        "Boolean": "Schemas/Boolean",
+        "asynchronous": "ExecutionType/asynchronous",
         "boolean": "Schemas/Boolean/boolean",
-        "Bytes": "Schemas/Bytes",
         "bytes": "Schemas/Bytes/bytes",
         "comment": {
             "@id": "Entity/comment",
             "@language": null
         },
         "contents": "Interface/contents",
-        "Date": "Schemas/Date",
         "date": "Schemas/Date/date",
-        "DateTime": "Schemas/DateTime",
         "dateTime": "Schemas/DateTime/dateTime",
         "description": {
             "@id": "Entity/description",
@@ -28,14 +24,8 @@
             "@id": "SchemaField/unit",
             "@container": "@language"
         },
-        "Double": "Schemas/Double",
         "double": "Schemas/Double/double",
-        "Duration": "Schemas/Duration",
         "duration": "Schemas/Duration/duration",
-        "elementSchema": {
-            "@id": "Schemas/Array/elementSchema",
-            "@type": "@vocab"
-        },
         "Enum": "Schemas/Enum",
         "enumValue": "EnumValue/value",
         "enumValues": "Schemas/Enum/values",
@@ -44,12 +34,12 @@
             "@type": "@vocab"
         },
         "fields": "Schemas/Object/fields",
-        "Float": "Schemas/Float",
         "float": "Schemas/Float/float",
-        "Integer": "Schemas/Integer",
         "integer": "Schemas/Integer/integer",
-        "Long": "Schemas/Long",
         "long": "Schemas/Long/long",
+        "Map": "Schemas/Map",
+        "mapKey": "Schemas/Map/mapKey",
+        "mapValue" :  "Schemas/Map/mapValue", 
         "name": {
             "@id": "NamedEntity/name",
             "@language": null
@@ -67,10 +57,8 @@
             "@id": "SchemaField/schema",
             "@type": "@vocab"
         },
-        "String": "Schemas/String",
         "string": "Schemas/String/string",
-        "synchronous": "CommandExecutionType/synchronous",
-        "Time": "Schemas/Time",
+        "synchronous": "ExecutionType/synchronous",
         "time": "Schemas/Time/time",
         "writable": "Property/writable"
     }
