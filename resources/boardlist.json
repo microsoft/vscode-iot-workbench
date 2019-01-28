@@ -37,16 +37,9 @@
             }
         },
         {
-            "name": "Raspberry Pi",
-            "id": "raspberrypi",
-            "detailInfo": "Raspberry Pi",
-            "helpUrl": "https://www.raspberrypi.org/",
-            "exampleUrl": "https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/gallery/workbench-example-raspi.json"
-        },
-        {
-            "name": "Yocto Device",
+            "name": "Raspberry Pi – Yocto Linux",
             "id": "yocto",
-            "detailInfo": "Yocto Device",
+            "detailInfo": "Raspberry Pi – Yocto Linux",
             "helpUrl": "https://www.yoctoproject.org/"
         }
     ]

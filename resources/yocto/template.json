@@ -1,11 +1,25 @@
 {
   "templates": [
       {
+        "description": "",
+        "detail": "Blank project",
+        "label": "Raspberry Pi With Azure IoT Hub",
+        "type": "Basic",
+        "sketch": "raspberrypi_blank"
+      },
+      {
           "description": "",
-          "detail": "Create Yocto project that connects to Azure IoT Hub.",
-          "label": "Raspberry Pi With Azure IoT Hub",
+          "detail": "Create project that connects to Azure IoT Hub",
+          "label": "Azure IoT project",
           "type": "IotHub",
           "sketch": "raspberrypi_iothub"
-      }
+      },
+      {
+        "description": "",
+        "detail": "Azure IoT with Azure Plug & Play project",
+        "label": "With Plug & Play",
+        "type": "IotHub",
+        "sketch": "raspberrypi_iothub"
+    }
   ]
 }
