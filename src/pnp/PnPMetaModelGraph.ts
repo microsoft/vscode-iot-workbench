@@ -44,7 +44,7 @@ export class PnPMetaModelParser {
     CommnetFromId: {} as Map<string>,
     TypedPropertiesFromId: {} as
         Map<Array<{label: string, required: boolean, type: string}>>,
-    ShortNameFromLabel: {} as Map<string>
+    ShortNameFromLabel: {} as Map<string|null>
   };
 
   getCommentFromId(id: string): string|undefined {
@@ -254,7 +254,9 @@ export class PnPMetaModelParser {
     if (types.length === 0) {
       const label = this.getLabelFromId(pnpContext, id);
       const shortName = this.getShortNameFromLabel(pnpContext, label);
-      types.push(shortName);
+      if (shortName) {
+        types.push(shortName);
+      }
     }
     types = uniq(types).sort();
 
@@ -268,8 +270,7 @@ export class PnPMetaModelParser {
       label = id.substr(pnpContext['@context']['@vocab'].length);
     }
     if (label) {
-      const shortName = this.getShortNameFromLabel(pnpContext, label);
-      return shortName;
+      return label;
     }
     console.warn(`Cannot find label for ${id}.`);
     return id;
@@ -284,7 +285,7 @@ export class PnPMetaModelParser {
   }
 
   getShortNameFromLabel(pnpContext: PnPMetaModelContext, label: string) {
-    if (this.cache.ShortNameFromLabel[label]) {
+    if (this.cache.ShortNameFromLabel[label] !== undefined) {
       return this.cache.ShortNameFromLabel[label];
     }
     const context = pnpContext['@context'];
@@ -304,8 +305,13 @@ export class PnPMetaModelParser {
     }
 
     console.log(`Cannot find short name for label ${label}.`);
-    this.cache.ShortNameFromLabel[label] = label;
-    return label;
+    if (label.indexOf('\/') === -1) {
+      this.cache.ShortNameFromLabel[label] = label;
+      return label;
+    } else {
+      this.cache.ShortNameFromLabel[label] = null;
+      return null;
+    }
   }
 
   isArrayFromShortName(shortName: string) {
