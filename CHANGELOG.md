@@ -2,7 +2,7 @@
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
 
 ## Version 0.2.3
-- Release date: Jan. 25th, 2019
+- Release date: Jan. 28th, 2019
 
 ### Added
 - IoT DevKit: Add new example of 'Play GIFs on the MXCHIP' into gallery.
