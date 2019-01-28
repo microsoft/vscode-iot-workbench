@@ -19,13 +19,17 @@ export class DockerManager {
     const commands: string[] = [];
     commands.push(this.constructDockerBuildCmd(
         buildConfig.imageName, buildConfig.imageVersion, rootPath));
+    commands.push(`echo "Information: build image completed"`);
     commands.push(this.constructCreateVolumeCmd(buildConfig.volumeName));
     commands.push(this.constructRunAppCommand(buildConfig.volumeName));
+    commands.push(`echo "Information: build application completed"`);
     commands.push(this.constructDockerCreateCommand(
         buildConfig.imageName, buildConfig.imageVersion));
     const targetPath = path.join(rootPath, buildConfig.output);
     commands.push(
         this.constructDockerCopyAppCommand(buildConfig.source, targetPath));
+    commands.push(
+        `echo "Information: the application is copied into local folder."`);
     return this.combineCommands(commands);
   }
 
