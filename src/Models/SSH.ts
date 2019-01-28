@@ -88,25 +88,30 @@ export class SSH {
           }
 
           if (method === SSH_UPLOAD_METHOD.SFTP) {
-            return await this.uploadViaSFTP(
+            const res = await this.uploadViaSFTP(
                 filePath, remoteRootPath, rootPath, files);
+            return resolve(res);
           } else {
-            return await this.uploadViaSCP(remoteRootPath, files);
+            const res = await this.uploadViaSCP(remoteRootPath, files);
+            return resolve(res);
           }
         });
   }
 
   private async uploadViaSCP(remoteRootPath: string, files: string[]) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        for (const file of files) {
-          await this.uploadSingleFileViaSCP(file, remoteRootPath);
-        }
-        return resolve(true);
-      } catch (err) {
-        return reject(err);
-      }
-    });
+    return new Promise(
+        async (
+            resolve: (value: boolean) => void,
+            reject: (reason: Error) => void) => {
+          try {
+            for (const file of files) {
+              await this.uploadSingleFileViaSCP(file, remoteRootPath);
+            }
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        });
   }
 
   private async uploadSingleFileViaSCP(
@@ -136,76 +141,81 @@ export class SSH {
   private async uploadViaSFTP(
       filePath: string, remoteRootPath: string, rootPath: string,
       files: string[]) {
-    return new Promise((resolve, reject) => {
-      const conn = this._client;
-      conn.sftp(async (err, sftp) => {
-        if (err) {
-          if (this._channel) {
-            this._channel.appendLine(`SFTP Error:`);
-            this._channel.appendLine(err.message);
-          }
-          return resolve(false);
-        }
-
-        const rootPathExist = await this.isExist(sftp, remoteRootPath);
-
-        if (rootPathExist) {
-          const overwriteOption = await vscode.window.showInformationMessage(
-              `${remoteRootPath} exists, overwrite?`, 'Yes', 'No', 'Cancel');
-          if (overwriteOption === 'Cancel') {
-            if (this._channel) {
-              this._channel.appendLine('Device upload cancelled.');
+    return new Promise(
+        (resolve: (value: boolean) => void,
+         reject: (reason: Error) => void) => {
+          const conn = this._client;
+          conn.sftp(async (err, sftp) => {
+            if (err) {
+              if (this._channel) {
+                this._channel.appendLine(`SFTP Error:`);
+                this._channel.appendLine(err.message);
+              }
+              return resolve(false);
             }
-            vscode.window.showWarningMessage('Device upload cancelled.');
+
+            const rootPathExist = await this.isExist(sftp, remoteRootPath);
+
+            if (rootPathExist) {
+              const overwriteOption =
+                  await vscode.window.showInformationMessage(
+                      `${remoteRootPath} exists, overwrite?`, 'Yes', 'No',
+                      'Cancel');
+              if (overwriteOption === 'Cancel') {
+                if (this._channel) {
+                  this._channel.appendLine('Device upload cancelled.');
+                }
+                vscode.window.showWarningMessage('Device upload cancelled.');
+                return resolve(true);
+              }
+
+              if (overwriteOption === 'No') {
+                const raspiPathOption: vscode.InputBoxOptions = {
+                  value: 'IoTProject',
+                  prompt: `Please input Raspberry Pi path here.`,
+                  ignoreFocusOut: true
+                };
+                let raspiPath =
+                    await vscode.window.showInputBox(raspiPathOption);
+                if (raspiPath === undefined) {
+                  return resolve(false);
+                }
+                raspiPath = raspiPath || 'IoTProject';
+                const res = await this.upload(filePath, raspiPath);
+                return resolve(res);
+              }
+
+              const rmDirRes = await this.shell(`rm -rf ${remoteRootPath}`);
+              if (!rmDirRes) {
+                if (this._channel) {
+                  this._channel.appendLine(
+                      `Directory Error: remove ${remoteRootPath} failed.`);
+                }
+                return resolve(false);
+              }
+            }
+
+            const rootPathCreated = await this.ensureDir(sftp, remoteRootPath);
+
+            if (!rootPathCreated) {
+              if (this._channel) {
+                this._channel.appendLine(`Directory Error: ${remoteRootPath}`);
+                this._channel.appendLine(err);
+              }
+              return resolve(false);
+            }
+
+            for (const file of files) {
+              const res = await this.uploadSingleFile(
+                  sftp, file, rootPath, remoteRootPath);
+              if (!res) {
+                return resolve(false);
+              }
+            }
+
             return resolve(true);
-          }
-
-          if (overwriteOption === 'No') {
-            const raspiPathOption: vscode.InputBoxOptions = {
-              value: 'IoTProject',
-              prompt: `Please input Raspberry Pi path here.`,
-              ignoreFocusOut: true
-            };
-            let raspiPath = await vscode.window.showInputBox(raspiPathOption);
-            if (raspiPath === undefined) {
-              return false;
-            }
-            raspiPath = raspiPath || 'IoTProject';
-            const res = await this.upload(filePath, raspiPath);
-            return resolve(res);
-          }
-
-          const rmDirRes = await this.shell(`rm -rf ${remoteRootPath}`);
-          if (!rmDirRes) {
-            if (this._channel) {
-              this._channel.appendLine(
-                  `Directory Error: remove ${remoteRootPath} failed.`);
-            }
-            return resolve(false);
-          }
-        }
-
-        const rootPathCreated = await this.ensureDir(sftp, remoteRootPath);
-
-        if (!rootPathCreated) {
-          if (this._channel) {
-            this._channel.appendLine(`Directory Error: ${remoteRootPath}`);
-            this._channel.appendLine(err);
-          }
-          return resolve(false);
-        }
-
-        for (const file of files) {
-          const res =
-              await this.uploadSingleFile(sftp, file, rootPath, remoteRootPath);
-          if (!res) {
-            return resolve(false);
-          }
-        }
-
-        return resolve(true);
-      });
-    });
+          });
+        });
   }
 
   private async isExist(sftp: ssh2.SFTPWrapper, remotePath: string) {
