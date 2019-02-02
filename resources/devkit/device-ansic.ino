@@ -5,37 +5,20 @@
 
 static bool networkConnected;
 
-void init_network()
-{
-     Screen.print(2, "Connecting...");
-
-    if (WiFi.begin() == WL_CONNECTED)
-    {
-        IPAddress ip = WiFi.localIP();
-        Screen.print(1, ip.get_address());
-        networkConnected = true;
-        Screen.print(2, "Wi-Fi connected\r\n");
-    }
-    else
-    {
-        networkConnected = false;
-        Screen.print(1, "No Wi-Fi\r\n ");
-    }
-}
-
 void setup() {
     char buff[128];
 
     // Initialize the board
-    networkConnected = initIoTDevKit();
-    
-    if (!networkConnected)
+    int ret = initIoTDevKit(1);
+    if (ret != 0)
     {
-        Screen.print(1, "No WiFi");
+        networkConnected = false;
+        Screen.print(1, "Failed: %d", ret);
         return;
     }
     else
     {
+        networkConnected = true;
         IPAddress ip = WiFi.localIP();
         snprintf(buff, sizeof(buff), "%s\r\nWiFi Connected\r\n%s", WiFi.SSID(), ip.get_address());
         Screen.print(1, buff);
@@ -55,6 +38,6 @@ void loop() {
         application_run();
     }
 
-    invokeDevKitSensors();
+    invokeDevKitPeripheral();
     delay(500);
 }
