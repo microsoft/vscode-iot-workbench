@@ -95,9 +95,6 @@ export class ExampleExplorer {
   private async GenerateExampleFolder(exampleName: string) {
     const settings: IoTWorkbenchSettings = new IoTWorkbenchSettings();
     const workbench = await settings.workbenchPath();
-    if (!workbench) {
-      return undefined;
-    }
 
     if (!utils.directoryExistsSync(workbench)) {
       utils.mkdirRecursivelySync(workbench);
@@ -288,11 +285,6 @@ export class ExampleExplorer {
 
     const url = this._exampleUrl;
     const fsPath = await this.GenerateExampleFolder(this._exampleName);
-
-    if (fsPath === undefined) {
-      throw new Error(
-          'Unable to create folder for examples, please check the workbench settings.');
-    }
 
     if (!fsPath) {
       return false;
