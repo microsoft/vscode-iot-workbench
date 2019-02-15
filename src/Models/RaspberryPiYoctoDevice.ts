@@ -14,7 +14,7 @@ import {ConfigKey, FileNames} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 import {DockerManager} from '../DockerManager';
 import {TerminalManager} from '../TerminalManager';
-import {fileExistsSync, runCommand} from '../utils';
+import {runCommand} from '../utils';
 
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
@@ -28,6 +28,7 @@ class LocalConstants {
   static dockerFileName = 'Dockerfile';
   static configFileName = 'yoctoconfig.json';
   static imageVersion = 'latest';
+  static defaultOutputPath = '.build';
 }
 
 class YoctoUploadConfig {
@@ -148,6 +149,8 @@ export class RaspberryPiYoctoDevice implements Device {
       fs.writeFileSync(dockerFilePath, replaceStr);
     }
 
+    // Generate yoctoconfig.json
+    this.generateYoctoConfig(deviceFolderPath);
     return true;
   }
 
@@ -176,19 +179,17 @@ export class RaspberryPiYoctoDevice implements Device {
     // Generate commands for build application from docker.
     // read config file
     const configFilePath =
-        path.join(this.deviceFolder, FileNames.dockerBuildConfigFileName);
+        path.join(this.deviceFolder, LocalConstants.configFileName);
     if (!fs.existsSync(configFilePath)) {
-      // TODO: Replace this with copy default.
-      throw new Error(
-          'Build config file does not exist. Please check the project settings.');
+      this.generateYoctoConfig(this.deviceFolder);
     }
 
     const config: RaspberryPiYoctoConfig =
         JSON.parse(fs.readFileSync(configFilePath, 'utf8'));
     if (!config) {
       // create the output folder
-      throw new Error(
-          'Build config file is not valid. Please check the project settings.');
+      await vscode.window.showWarningMessage('Yocto config file is not valid.');
+      return false;
     }
 
     // Create output folder
@@ -210,8 +211,7 @@ export class RaspberryPiYoctoDevice implements Device {
   async upload(): Promise<boolean> {
     if (!fs.existsSync(
             path.join(this.deviceFolder, LocalConstants.configFileName))) {
-      await vscode.window.showWarningMessage('No build config file found.');
-      return false;
+      this.generateYoctoConfig(this.deviceFolder);
     }
 
     const configRaw = fs.readFileSync(
@@ -491,5 +491,14 @@ export class RaspberryPiYoctoDevice implements Device {
     YoctoUploadConfig.projectPath = raspiPath;
     YoctoUploadConfig.updated = true;
     return true;
+  }
+
+  generateYoctoConfig(folder: string) {
+    const filePath = path.join(folder, LocalConstants.configFileName);
+    if (!fs.existsSync(filePath)) {
+      const config:
+          RaspberryPiYoctoConfig = {output: LocalConstants.defaultOutputPath};
+      fs.writeFileSync(filePath, JSON.stringify(config, null, 4));
+    }
   }
 }

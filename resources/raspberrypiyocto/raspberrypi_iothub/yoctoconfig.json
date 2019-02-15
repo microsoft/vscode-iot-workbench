@@ -1,6 +1,0 @@
-{
-  "imageName":"azurebuild",
-  "imageVersion":"latest",
-  "volumeName":"AzureVolume",
-  "output":".build"  
-}
