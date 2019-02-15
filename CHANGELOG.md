@@ -1,6 +1,24 @@
 # Change Log
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
 
+## Version 0.2.4
+- Release date: Feb. 15th, 2019
+
+### Added
+- IoT DevKit: Add new example of 'Air Traffic Control Simulator' into gallery.
+
+### Changed
+- Workbench path will be set automatically.
+
+## Version 0.2.3
+- Release date: Jan. 28th, 2019
+
+### Added
+- IoT DevKit: Add new example of 'Play GIFs on the MXCHIP' into gallery.
+
+### Changed
+- Remove 'Arduino Extension' from hard dependency list.
+
 ## Version 0.2.2
 - Release date: Jan. 4th, 2019
 
