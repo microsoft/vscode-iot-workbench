@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
+import {OperatingResultType, OperatingResult} from '../OperatingResult';
 
 import {getExtension} from './Apis';
 import {ComponentInfo, DependencyConfig} from './AzureComponentConfig';

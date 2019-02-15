@@ -10,6 +10,7 @@ import {ConfigKey, FileNames} from '../constants';
 import {EventNames} from '../constants';
 import {TelemetryContext, TelemetryWorker} from '../telemetry';
 import {askAndNewProject, askAndOpenProject} from '../utils';
+import {OperatingResultType, OperatingResult} from '../OperatingResult';
 
 import {checkAzureLogin} from './Apis';
 import {AZ3166Device} from './AZ3166Device';
@@ -430,10 +431,12 @@ export class IoTProject {
 
   async create(
       rootFolderPath: string, projectTemplateItem: ProjectTemplate,
-      boardId: string, openInNewWindow: boolean): Promise<boolean> {
+      boardId: string, openInNewWindow: boolean): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('IoTProjectCreate');
+
     if (!fs.existsSync(rootFolderPath)) {
-      throw new Error(
-          'Unable to find the root path, please open the folder and initialize project again.');
+      operatingResult.update(OperatingResultType.Failed, 'Unable to find the root path, please open the folder and initialize project again.');
+      return operatingResult;
     }
 
     this.projectRootPath = rootFolderPath;
@@ -474,7 +477,7 @@ export class IoTProject {
       throw new Error('The specified board is not supported.');
     }
 
-    const isPrerequisitesAchieved = await device.checkPrerequisites();
+    const checkPrerequisitesResult = await device.checkPrerequisites();
     if (!isPrerequisitesAchieved) {
       return false;
     }

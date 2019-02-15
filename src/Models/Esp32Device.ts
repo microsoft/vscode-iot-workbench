@@ -11,6 +11,7 @@ import * as vscode from 'vscode';
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
+import {OperatingResultType, OperatingResult} from '../OperatingResult';
 
 
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';

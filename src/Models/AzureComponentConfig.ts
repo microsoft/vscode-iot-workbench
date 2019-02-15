@@ -2,6 +2,7 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 
 import {AzureComponentsStorage} from '../constants';
+import {OperatingResultType, OperatingResult} from '../OperatingResult';
 
 import {Component} from './Interfaces/Component';
 import {ComponentType} from './Interfaces/Component';

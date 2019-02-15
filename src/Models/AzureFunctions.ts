@@ -15,6 +15,7 @@ import {Deployable} from './Interfaces/Deployable';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, AzureFunctionsLanguage, AzureComponentsStorage, DependentExtensions} from '../constants';
+import {OperatingResultType, OperatingResult} from '../OperatingResult';
 
 import {ServiceClientCredentials} from 'ms-rest';
 import {AzureAccount, AzureResourceFilter} from '../azure-account.api';
@@ -102,22 +103,27 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     return true;
   }
 
-  async checkPrerequisites(): Promise<boolean> {
+  async checkPrerequisites(): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('AzureFunctionsCheckPrerequisites');
     const isFunctionsExtensionAvailable = await AzureFunctions.isAvailable();
     if (!isFunctionsExtensionAvailable) {
-      return false;
+      operatingResult.update(OperatingResultType.Failed, 'Azure Fucntions extension is unavailable.');
+      return operatingResult;
     }
 
-    return true;
+    operatingResult.update(OperatingResultType.Succeeded);
+    return operatingResult;
   }
 
-  async load(): Promise<boolean> {
+  async load(): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('AzureFunctionsLoad');
     const azureConfigFilePath = path.join(
         this.azureFunctionsPath, '..', AzureComponentsStorage.folderName,
         AzureComponentsStorage.fileName);
 
     if (!fs.existsSync(azureConfigFilePath)) {
-      return false;
+      operatingResult.update(OperatingResultType.Failed, 'Azure Fucntions path in config file is not existing.');
+      return operatingResult;
     }
 
     let azureConfigs: AzureConfigs;
@@ -125,7 +131,8 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     try {
       azureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, 'utf8'));
     } catch (error) {
-      return false;
+      operatingResult.update(OperatingResultType.Failed, '[ERROR] ' + error.message);;
+      return operatingResult;
     }
 
     const azureFunctionsConfig = azureConfigs.componentConfigs.find(
@@ -140,16 +147,19 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
 
       // Load other information from config file.
     }
-    return true;
+
+    operatingResult.update(OperatingResultType.Succeeded);
+    return operatingResult;
   }
 
-  async create(): Promise<boolean> {
+  async create(): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('AzureFunctionsCreate');
     const azureFunctionsPath = this.azureFunctionsPath;
     console.log(azureFunctionsPath);
 
     if (!fs.existsSync(azureFunctionsPath)) {
-      throw new Error(
-          'Unable to find the Azure Functions folder inside the project.');
+      operatingResult.update(OperatingResultType.Failed, 'Unable to find the Azure Functions folder inside the project.');
+      return operatingResult;
     }
 
     if (!this.functionLanguage) {

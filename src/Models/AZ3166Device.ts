@@ -18,6 +18,7 @@ import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 import {delay, getRegistryValues} from '../utils';
+import {OperatingResultType, OperatingResult} from '../OperatingResult';
 
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 import {DeviceType} from './Interfaces/Device';
@@ -108,19 +109,22 @@ export class AZ3166Device extends ArduinoDeviceBase {
     return version;
   }
 
-  async checkPrerequisites(): Promise<boolean> {
+  async checkPrerequisites(): Promise<OperatingResult> {
     return super.checkPrerequisites();
   }
 
-  async load(): Promise<boolean> {
+  async load(): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('AZ3166DeviceLoad');
     const deviceFolderPath = this.deviceFolder;
 
     if (!fs.existsSync(deviceFolderPath)) {
-      throw new Error('Unable to find the device folder inside the project.');
+      operatingResult.update(OperatingResultType.Failed, 'Unable to find the device folder inside the project.');
+      return operatingResult;
     }
 
     if (!this.board) {
-      throw new Error('Unable to find the board in the config file.');
+      operatingResult.update(OperatingResultType.Failed, 'Unable to find the board in the config file.');
+      return operatingResult;
     }
 
     this.generateCppPropertiesFile(this.board);
@@ -128,37 +132,45 @@ export class AZ3166Device extends ArduinoDeviceBase {
     // Enable logging on IoT Devkit
     await this.generatePlatformLocal();
 
-    return true;
+    operatingResult.update(OperatingResultType.Succeeded);
+    return operatingResult;
   }
 
-  async create(): Promise<boolean> {
+  async create(): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('AZ3166DeviceCreate');
     if (!this.sketchName) {
-      throw new Error('No sketch file found.');
+      operatingResult.update(OperatingResultType.Failed, 'No sketch file found.');
+      return operatingResult;
     }
     const deviceFolderPath = this.deviceFolder;
 
     if (!fs.existsSync(deviceFolderPath)) {
-      throw new Error('Unable to find the device folder inside the project.');
+      operatingResult.update(OperatingResultType.Failed, 'Unable to find the device folder inside the project.');
+      return operatingResult;
     }
     if (!this.board) {
-      throw new Error('Unable to find the board in the config file.');
+      operatingResult.update(OperatingResultType.Failed, 'Unable to find the board in the config file.');
+      return operatingResult;
     }
 
     this.generateCommonFiles();
     this.generateCppPropertiesFile(this.board);
-    await this.generateSketchFile(
+    const generateSketchFileResult = await this.generateSketchFile(
         this.sketchName, this.board, constants.boardInfo,
         constants.uploadMethod);
-    return true;
+    operatingResult.append(generateSketchFileResult);
+    return operatingResult;
   }
 
-  async preCompileAction(): Promise<boolean> {
+  async preCompileAction(): Promise<OperatingResult> {
     await this.generatePlatformLocal();
-    return true;
+    const operatingResult = new OperatingResult('AZ3166DevicePreCompileAction', OperatingResultType.Succeeded);
+    return operatingResult;
   }
 
-  async preUploadAction(): Promise<boolean> {
+  async preUploadAction(): Promise<OperatingResult> {
     const isStlinkInstalled = await this.stlinkDriverInstalled();
+    const operatingResult = new OperatingResult('AZ3166DevicePreUploadAction');
     if (!isStlinkInstalled) {
       const message =
           'The ST-LINK driver for DevKit is not installed. Install now?';
@@ -171,17 +183,21 @@ export class AZ3166Device extends ArduinoDeviceBase {
         const installUri =
             'http://www.st.com/en/development-tools/stsw-link009.html';
         opn(installUri);
-        return true;
+        operatingResult.update(OperatingResultType.Succeeded);
+        return operatingResult;
       } else if (result !== DialogResponses.cancel) {
-        return false;
+        operatingResult.update(OperatingResultType.Canceled);
+        return operatingResult;
       }
     }
     // Enable logging on IoT Devkit
     await this.generatePlatformLocal();
-    return true;
+    operatingResult.update(OperatingResultType.Succeeded);
+    return operatingResult;
   }
 
-  async configDeviceSettings(): Promise<boolean> {
+  async configDeviceSettings(): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('AZ3166DeviceConfigDeviceSettings');
     const configSelectionItems: vscode.QuickPickItem[] = [
       {
         label: 'Config Device Connection String',
@@ -210,13 +226,19 @@ export class AZ3166Device extends ArduinoDeviceBase {
         });
 
     if (!configSelection) {
-      return false;
+      operatingResult.update(OperatingResultType.Canceled)
+      return operatingResult;
     }
 
     if (configSelection.detail === 'Config CRC') {
-      const retValue: boolean =
-          await this.generateCrc(this.extensionContext, this.channel);
-      return retValue;
+      const retValue = await this.generateCrc(this.extensionContext, this.channel);
+      if (retValue) {
+        operatingResult.update(OperatingResultType.Failed);
+        operatingResult.append('AZ3166DeviceGenerateCRC', OperatingResultType.Failed, 'Generate CRC failed.');
+      } else {
+        operatingResult.update(OperatingResultType.Succeeded);
+        operatingResult.append('AZ3166DeviceGenerateCRC', OperatingResultType.Succeeded);
+      }
     } else if (configSelection.detail === 'Config Connection String') {
       try {
         // Get IoT Hub device connection string from config
@@ -266,7 +288,9 @@ export class AZ3166Device extends ArduinoDeviceBase {
             {ignoreFocusOut: true, placeHolder: 'Choose an option:'});
 
         if (!selection) {
-          return false;
+          operatingResult.update(OperatingResultType.Canceled);
+          operatingResult.append('AZ3166DeviceConfigConnectionString', OperatingResultType.Canceled);
+          return operatingResult;
         }
 
         if (selection.label === 'Input IoT Hub Device Connection String') {
@@ -299,12 +323,17 @@ export class AZ3166Device extends ArduinoDeviceBase {
             if (result === DialogResponses.yes) {
               opn(constants.informationPageUrl);
             }
-            return false;
+
+            operatingResult.update(OperatingResultType.Canceled);
+            operatingResult.append('AZ3166DeviceConfigConnectionString', OperatingResultType.Canceled, 'User canceled to provide connection string.');
+            return operatingResult;
           }
         }
 
         if (!deviceConnectionString) {
-          return false;
+          operatingResult.update(OperatingResultType.Failed);
+          operatingResult.append('AZ3166DeviceConfigConnectionString', OperatingResultType.Failed, 'Cannot find connection string.');
+          return operatingResult;
         }
 
         console.log(deviceConnectionString);
@@ -321,14 +350,18 @@ export class AZ3166Device extends ArduinoDeviceBase {
         }
 
         if (res === false) {
-          return false;
+          operatingResult.update(OperatingResultType.Failed);
+          operatingResult.append('AZ3166DeviceConfigConnectionString', OperatingResultType.Failed, 'Flush device connection string failed.');
+          return operatingResult;
         } else {
-          vscode.window.showInformationMessage(
-              'Configure Device connection string completely.');
-          return true;
+          operatingResult.update(OperatingResultType.Succeeded);
+          operatingResult.append('AZ3166DeviceConfigConnectionString', OperatingResultType.Succeeded, 'Configure Device connection string completely.');
+          return operatingResult;
         }
       } catch (error) {
-        throw error;
+        operatingResult.update(OperatingResultType.Failed);
+        operatingResult.append('AZ3166DeviceConfigConnectionString', OperatingResultType.Failed, '[ERROR] ' + error.message);
+        return operatingResult;
       }
     } else {
       try {
@@ -356,7 +389,9 @@ export class AZ3166Device extends ArduinoDeviceBase {
         const UDS = await vscode.window.showInputBox(option);
 
         if (UDS === undefined) {
-          return false;
+          operatingResult.update(OperatingResultType.Canceled);
+          operatingResult.append('AZ3166DeviceConfigUDS', OperatingResultType.Canceled, 'User canceled to provide UDS.');
+          return operatingResult;
         }
 
         console.log(UDS);
@@ -371,16 +406,22 @@ export class AZ3166Device extends ArduinoDeviceBase {
         }
 
         if (res === false) {
-          return false;
+          operatingResult.update(OperatingResultType.Failed);
+          operatingResult.append('AZ3166DeviceConfigUDS', OperatingResultType.Failed, 'Flush Device UDS failed.');
+          return operatingResult;
         } else {
-          vscode.window.showInformationMessage(
-              'Configure Unique Device String (UDS) completely.');
-          return true;
+          operatingResult.update(OperatingResultType.Succeeded);
+          operatingResult.append('AZ3166DeviceConfigConnectionString', OperatingResultType.Succeeded, 'Configure Unique Device String (UDS) completely.');
+          return operatingResult;
         }
       } catch (error) {
-        throw error;
+        operatingResult.update(OperatingResultType.Failed);
+        operatingResult.append('AZ3166DeviceConfigConnectionString', OperatingResultType.Failed, '[ERROR] ' + error.message);
+        return operatingResult;
       }
     }
+
+    return operatingResult;
   }
 
   async flushDeviceConfigUnix(configValue: string, option: number):

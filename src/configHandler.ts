@@ -4,6 +4,7 @@
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import {OperatingResultType, OperatingResult} from './OperatingResult';
 
 export class ConfigHandler {
   static async update(

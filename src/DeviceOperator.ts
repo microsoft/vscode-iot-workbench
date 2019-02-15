@@ -10,6 +10,7 @@ import {TelemetryContext} from './telemetry';
 import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
+import {OperatingResultType, OperatingResult} from './OperatingResult';
 
 export class DeviceOperator {
   async compile(

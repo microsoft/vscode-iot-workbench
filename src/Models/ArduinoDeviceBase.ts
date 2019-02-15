@@ -8,6 +8,7 @@ import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, DependentExtensions, FileNames} from '../constants';
+import {OperatingResultType, OperatingResult} from '../OperatingResult';
 
 import {Board} from './Interfaces/Board';
 import {ComponentType} from './Interfaces/Component';
@@ -70,50 +71,54 @@ export abstract class ArduinoDeviceBase implements Device {
     return true;
   }
 
-  async checkPrerequisites(): Promise<boolean> {
+  async checkPrerequisites(): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('ArduinoDeviceBaseCheckPrerequisites');
     const isArduinoExtensionAvailable = await ArduinoDeviceBase.isAvailable();
     if (!isArduinoExtensionAvailable) {
-      return false;
+      operatingResult.update(OperatingResultType.Failed, 'Arduino extension is unavailable.');
+      return operatingResult;
     }
 
-    return true;
+    operatingResult.update(OperatingResultType.Succeeded);
+    return operatingResult;
   }
 
-  async compile(): Promise<boolean> {
+  async compile(): Promise<OperatingResult> {
     try {
-      const result = await this.preCompileAction();
-      if (!result) {
-        return false;
+      const operatingResult = await this.preCompileAction();
+      if (operatingResult.isSucceded) {
+        await vscode.commands.executeCommand('arduino.verify');
+        operatingResult.push('ArduinoDeviceBaseCompile', OperatingResultType.Succeeded);
       }
-      await vscode.commands.executeCommand('arduino.verify');
-      return true;
+      return operatingResult;
     } catch (error) {
-      throw error;
+      const operatingResult = new OperatingResult('ArduinoDeviceBaseCompile', OperatingResultType.Failed, '[ERROR] ' + error.message);
+      return operatingResult;
     }
   }
 
-  async upload(): Promise<boolean> {
+  async upload(): Promise<OperatingResult> {
     try {
-      const result = await this.preUploadAction();
-      if (!result) {
-        return false;
+      const operatingResult = await this.preUploadAction();
+      if (operatingResult.isSucceded) {
+        await vscode.commands.executeCommand('arduino.upload');
       }
-      await vscode.commands.executeCommand('arduino.upload');
-      return true;
+      return operatingResult;
     } catch (error) {
-      throw error;
+      const operatingResult = new OperatingResult('ArduinoDeviceBaseUpload', OperatingResultType.Failed, '[ERROR] ' + error.message);
+      return operatingResult;
     }
   }
 
 
-  abstract async configDeviceSettings(): Promise<boolean>;
+  abstract async configDeviceSettings(): Promise<OperatingResult>;
 
-  abstract async load(): Promise<boolean>;
-  abstract async create(): Promise<boolean>;
+  abstract async load(): Promise<OperatingResult>;
+  abstract async create(): Promise<OperatingResult>;
 
-  abstract async preCompileAction(): Promise<boolean>;
+  abstract async preCompileAction(): Promise<OperatingResult>;
 
-  abstract async preUploadAction(): Promise<boolean>;
+  abstract async preUploadAction(): Promise<OperatingResult>;
 
   abstract get version(): string;
 
@@ -186,7 +191,8 @@ export abstract class ArduinoDeviceBase implements Device {
 
   async generateSketchFile(
       sketchTemplateFileName: string, board: Board, boardInfo: string,
-      boardConfig: string): Promise<boolean> {
+      boardConfig: string): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('ArduinoDeviceBaseGenerateSketchFile');
     // Create arduino.json config file
     const arduinoJSONFilePath =
         path.join(this.vscodeFolderPath, constants.arduinoJsonFileName);
@@ -201,8 +207,8 @@ export abstract class ArduinoDeviceBase implements Device {
       fs.writeFileSync(
           arduinoJSONFilePath, JSON.stringify(arduinoJSONObj, null, 4));
     } catch (error) {
-      throw new Error(
-          `Device: create arduino config file failed: ${error.message}`);
+      operatingResult.update(OperatingResultType.Failed, '[ERROR] Device: create arduino config file failed: ' + error.message);
+      return operatingResult;
     }
 
     // Create settings.json config file
@@ -216,8 +222,8 @@ export abstract class ArduinoDeviceBase implements Device {
       fs.writeFileSync(
           settingsJSONFilePath, JSON.stringify(settingsJSONObj, null, 4));
     } catch (error) {
-      throw new Error(
-          `Device: create arduino config file failed: ${error.message}`);
+      operatingResult.update(OperatingResultType.Failed, '[ERROR] Device: create arduino config file failed: ' + error.message);
+      return operatingResult;
     }
 
     // Create an empty arduino sketch
@@ -231,9 +237,12 @@ export abstract class ArduinoDeviceBase implements Device {
       const content = fs.readFileSync(sketchTemplateFilePath).toString();
       fs.writeFileSync(newSketchFilePath, content);
     } catch (error) {
-      throw new Error(`Create arduino sketch file failed: ${error.message}`);
+      operatingResult.update(OperatingResultType.Failed, '[ERROR] Create arduino sketch file failed: ' + error.message);
+      return operatingResult;
     }
-    return true;
+
+    operatingResult.update(OperatingResultType.Succeeded);
+    return operatingResult;
   }
 
   async generateCrc(

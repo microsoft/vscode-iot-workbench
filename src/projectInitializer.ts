@@ -18,6 +18,7 @@ import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {FileNames} from './constants';
 import {BoardProvider} from './boardProvider';
 import {AzureFunctions} from './Models/AzureFunctions';
+import { OperatingResult, OperatingResultType } from './OperatingResult';
 
 const constants = {
   defaultProjectName: 'IoTproject'
@@ -35,6 +36,8 @@ export class ProjectInitializer {
         vscode.workspace.workspaceFolders.length > 0) {
       openInNewWindow = true;
     }
+
+    const operatingResult = new OperatingResult('InitializeProject');
 
     // Initial project
     await vscode.window.withProgress(
@@ -81,13 +84,12 @@ export class ProjectInitializer {
                 });
 
             if (!boardSelection) {
-              telemetryContext.properties.errorMessage =
-                  'Board selection canceled.';
-              telemetryContext.properties.result = 'Canceled';
-              return;
+              operatingResult.update(OperatingResultType.Canceled, 'Board selection canceled.');
+              return operatingResult;
             } else if (boardSelection.id === 'no_device') {
+              operatingResult.update(OperatingResultType.Canceled, 'User\'s device is not in the list.');
               await utils.TakeNoDeviceSurvey(telemetryContext);
-              return;
+              return operatingResult;
             } else {
               telemetryContext.properties.board = boardSelection.label;
               const board = boardProvider.find({id: boardSelection.id});
@@ -122,10 +124,8 @@ export class ProjectInitializer {
                 });
 
             if (!selection) {
-              telemetryContext.properties.errorMessage =
-                  'Project template selection canceled.';
-              telemetryContext.properties.result = 'Canceled';
-              return;
+              operatingResult.update(OperatingResultType.Canceled, 'Project template selection canceled.');
+              return operatingResult;
             } else {
               telemetryContext.properties.template = selection.label;
             }
@@ -136,14 +136,16 @@ export class ProjectInitializer {
                 });
 
             if (!result) {
-              throw new Error('Unable to load project template.');
+              operatingResult.update(OperatingResultType.Failed, 'Unable to load project template.');
+              return operatingResult;
             }
 
             if (result.type === 'AzureFunctions') {
               const isFunctionsExtensionAvailable =
                   await AzureFunctions.isAvailable();
               if (!isFunctionsExtensionAvailable) {
-                return false;
+                operatingResult.update(OperatingResultType.Failed, 'Azure Functions extension is unavailable.');
+                return operatingResult;
               }
             }
 
@@ -161,28 +163,32 @@ export class ProjectInitializer {
                   });
 
               if (!rootPath) {
-                throw new Error('User cancelled folder selection.');
+                operatingResult.update(OperatingResultType.Canceled, 'User cancelled folder selection.');
+                return operatingResult;
               }
 
               const projectFolder = await this.GenerateProjectFolder(rootPath);
               if (!projectFolder) {
-                throw new Error('Generate Project Folder canceled');
+                operatingResult.update(OperatingResultType.Canceled, 'Generate Project Folder canceled.');
+                return operatingResult;
               }
               rootPath = projectFolder;
             } catch (error) {
-              telemetryContext.properties.errorMessage =
-                  `Folder selection canceled. ${error}`;
-              telemetryContext.properties.result = 'Canceled';
-              return;
+              operatingResult.update(OperatingResultType.Failed, '[ERROR] Folder selection canceled. ' + error.message);
+              return operatingResult;
             }
 
             const project = new IoTProject(context, channel, telemetryContext);
-            return await project.create(
-                rootPath, result, boardSelection.id, openInNewWindow);
+            const projectCreateResult = await project.create(
+              rootPath, result, boardSelection.id, openInNewWindow);
+            operatingResult.push(projectCreateResult);
+            return operatingResult;
           } catch (error) {
-            throw error;
+            operatingResult.update(OperatingResultType.Failed, '[ERROR] ' + error.message);
+            return operatingResult;
           }
         });
+    return operatingResult;
   }
 
 

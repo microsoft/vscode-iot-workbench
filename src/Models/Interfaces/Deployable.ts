@@ -1,4 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-export interface Deployable { deploy(): Promise<boolean>; }
+import { OperatingResult } from '../../OperatingResult';
+
+export interface Deployable { deploy(): Promise<OperatingResult>; }

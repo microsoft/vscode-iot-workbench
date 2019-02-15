@@ -4,6 +4,7 @@
 import * as vscode from 'vscode';
 
 import {AzureAccount} from '../azure-account.api';
+import {OperatingResultType, OperatingResult} from '../OperatingResult';
 
 import {extensionName} from './Interfaces/Api';
 

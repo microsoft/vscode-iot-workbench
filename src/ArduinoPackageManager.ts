@@ -6,6 +6,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {FileNames} from './constants';
+import {OperatingResultType, OperatingResult} from './OperatingResult';
 import {Board} from './Models/Interfaces/Board';
 
 export class ArduinoPackageManager {

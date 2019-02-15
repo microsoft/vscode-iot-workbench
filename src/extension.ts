@@ -17,6 +17,7 @@ import {ContentProvider} from './contentProvider';
 import {TelemetryContext, callWithTelemetry, TelemetryWorker} from './telemetry';
 import {UsbDetector} from './usbDetector';
 import {HelpProvider} from './helpProvider';
+import {OperatingResultType, OperatingResult} from './OperatingResult';
 
 
 // this method is called when your extension is activated

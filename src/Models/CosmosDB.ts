@@ -8,6 +8,7 @@ import request = require('request-promise');
 import rq = require('request');
 
 import {AzureComponentsStorage, FileNames} from '../constants';
+import {OperatingResultType, OperatingResult} from '../OperatingResult';
 
 import {AzureComponentConfig, AzureConfigFileHandler, AzureConfigs, ComponentInfo, Dependency, DependencyConfig, DependencyType} from './AzureComponentConfig';
 import {ARMTemplate, AzureUtility} from './AzureUtility';

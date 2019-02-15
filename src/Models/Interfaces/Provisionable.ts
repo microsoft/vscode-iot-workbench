@@ -2,8 +2,10 @@
 // Licensed under the MIT License.
 import {ComponentInfo, DependencyConfig} from '../AzureComponentConfig';
 
+import { OperatingResult } from '../../OperatingResult';
+
 export interface Provisionable {
   dependencies: DependencyConfig[];
-  provision(): Promise<boolean>;
+  provision(): Promise<OperatingResult>;
   updateConfigSettings(componentInfo?: ComponentInfo): void;
 }

@@ -6,6 +6,8 @@ import * as path from 'path';
 import * as ssh2 from 'ssh2';
 import * as vscode from 'vscode';
 
+import {OperatingResultType, OperatingResult} from '../OperatingResult';
+
 export class SSH {
   private _client: ssh2.Client;
   private _connected = false;

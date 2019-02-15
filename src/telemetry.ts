@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import TelemetryReporter from 'vscode-extension-telemetry';
 import {ExceptionHelper} from './exceptionHelper';
 import {NSAT} from './nsat';
+import {OperatingResultType, OperatingResult} from './OperatingResult';
 
 interface PackageInfo {
   name: string;
@@ -85,7 +86,7 @@ export async function callWithTelemetry(
     callback: (
         context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
         // tslint:disable-next-line:no-any
-        telemetrycontext: TelemetryContext) => any,
+        telemetrycontext: TelemetryContext) => Promise<OperatingResult>,
     // tslint:disable-next-line:no-any
     additionalProperties?: {[key: string]: string}): Promise<any> {
   const start: number = Date.now();

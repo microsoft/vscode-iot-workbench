@@ -9,6 +9,7 @@ import rq = require('request');
 
 import {AzureAccount, AzureResourceFilter, AzureSession} from '../azure-account.api';
 import {ConfigHandler} from '../configHandler';
+import {OperatingResultType, OperatingResult} from '../OperatingResult';
 
 import {getExtension} from './Apis';
 import {extensionName} from './Interfaces/Api';

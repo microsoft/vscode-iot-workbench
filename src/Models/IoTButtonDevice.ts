@@ -9,6 +9,7 @@ import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames} from '../constants';
+import {OperatingResultType, OperatingResult} from '../OperatingResult';
 
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
