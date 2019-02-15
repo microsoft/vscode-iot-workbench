@@ -239,7 +239,8 @@ function generateFeed(obj) {
       liEl.appendChild(divEl);
 
       let pEl = document.createElement('p');
-      pEl.innerText = description;
+      pEl.innerHTML = description;
+      pEl.innerText = pEl.innerText;
       liEl.appendChild(pEl);
 
       ulEl.appendChild(liEl);
