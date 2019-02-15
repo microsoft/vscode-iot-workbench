@@ -265,7 +265,6 @@
     "extract-zip": "^1.6.7"
   },
   "extensionDependencies": [
-    "vsciot-vscode.azure-iot-toolkit",
-    "vsciot-vscode.vscode-arduino"
+    "vsciot-vscode.azure-iot-toolkit"
   ]
 }

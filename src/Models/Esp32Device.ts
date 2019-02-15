@@ -80,7 +80,7 @@ export class Esp32Device extends ArduinoDeviceBase {
   }
 
   async checkPrerequisites(): Promise<boolean> {
-    return true;
+    return super.checkPrerequisites();
   }
 
   async load(): Promise<boolean> {

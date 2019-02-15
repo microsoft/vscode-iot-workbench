@@ -72,4 +72,5 @@ export class GlobalConstants {
 
 export class DependentExtensions {
   static readonly azureFunctions = 'ms-azuretools.vscode-azurefunctions';
+  static readonly arduino = 'vsciot-vscode.vscode-arduino';
 }
