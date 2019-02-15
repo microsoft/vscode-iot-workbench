@@ -5,29 +5,16 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-export interface DockerBuildConfig {
-  imageName: string;
-  imageVersion: string;
-  volumeName: string;
-  source: string;
-  output: string;
-}
-
 export class DockerManager {
   constructCommandForBuildConfig(
-      buildConfig: DockerBuildConfig, rootPath: string): string {
+      projectName: string, outputFolder: string, imagePath: string,
+      rootPath: string): string {
     const commands: string[] = [];
-    commands.push(this.constructDockerBuildCmd(
-        buildConfig.imageName, buildConfig.imageVersion, rootPath));
-    commands.push(`echo "Information: build image completed"`);
-    commands.push(this.constructCreateVolumeCmd(buildConfig.volumeName));
-    commands.push(this.constructRunAppCommand(buildConfig.volumeName));
-    commands.push(`echo "Information: build application completed"`);
-    commands.push(this.constructDockerCreateCommand(
-        buildConfig.imageName, buildConfig.imageVersion));
-    const targetPath = path.join(rootPath, buildConfig.output);
-    commands.push(
-        this.constructDockerCopyAppCommand(buildConfig.source, targetPath));
+    commands.push(this.constructDockerBuildCmd(imagePath, rootPath));
+    commands.push(`echo "Information: build image with application completed"`);
+    commands.push(this.constructDockerCreateCommand(imagePath));
+    const targetPath = path.join(rootPath, outputFolder);
+    commands.push(this.constructDockerCopyAppCommand(projectName, targetPath));
     commands.push(
         `echo "Information: the application is copied into local folder."`);
     return this.combineCommands(commands);
@@ -37,36 +24,24 @@ export class DockerManager {
     return 'docker --version';
   }
 
-  private constructDockerBuildCmd(
-      imageName: string, imageVersion: string, path: string): string {
-    return `docker build -t ${imageName}:${imageVersion} ${
-        path} --network=host`;
+  private constructDockerBuildCmd(imagePath: string, path: string): string {
+    return `docker build -t ${imagePath} ${path} --network=host`;
   }
 
-  private constructCreateVolumeCmd(volumeName: string): string {
-    return `docker volume create --name ${volumeName}`;
-  }
-
-  private constructRunAppCommand(volumeName: string): string {
-    return `docker run -it --rm -v ${
-        volumeName}:/workdir busybox chown -R 1000:1000 /workdir`;
-  }
-
-  private constructDockerCreateCommand(imageName: string, imageVersion: string):
-      string {
+  private constructDockerCreateCommand(imagePath: string): string {
     if (os.platform() === 'win32') {
-      return `$cid = (docker create ${imageName}:${imageVersion})`;
+      return `$cid = (docker create ${imagePath})`;
     } else {
-      return `cid=$(docker create ${imageName}:${imageVersion})`;
+      return `cid=$(docker create ${imagePath})`;
     }
   }
 
   private constructDockerCopyAppCommand(source: string, target: string):
       string {
     if (os.platform() === 'win32') {
-      return `docker cp \${cid}:/workdir/AzureBuild/${source}/cmake/ ${target}`;
+      return `docker cp \${cid}:/work/AzureBuild/${source}/cmake/ ${target}`;
     } else {
-      return `docker cp $CID:/workdir/AzureBuild/${source}/cmake/ ${target}`;
+      return `docker cp $CID:/work/AzureBuild/${source}/cmake/ ${target}`;
     }
   }
 

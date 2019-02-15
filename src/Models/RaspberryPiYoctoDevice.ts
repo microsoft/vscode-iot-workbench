@@ -12,13 +12,23 @@ import * as vscode from 'vscode';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames} from '../constants';
 import {DialogResponses} from '../DialogResponses';
-import {DockerBuildConfig, DockerManager} from '../DockerManager';
+import {DockerManager} from '../DockerManager';
 import {TerminalManager} from '../TerminalManager';
-import {runCommand} from '../utils';
+import {fileExistsSync, runCommand} from '../utils';
 
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
 import {SSH, SSH_UPLOAD_METHOD} from './SSH';
+
+export interface RaspberryPiYoctoConfig { output: string; }
+
+class LocalConstants {
+  static sourceFolder = 'source';
+  static makeFileName = 'CMakeLists.txt';
+  static dockerFileName = 'Dockerfile';
+  static configFileName = 'yoctoconfig.json';
+  static imageVersion = 'latest';
+}
 
 class YoctoUploadConfig {
   static host = 'yocto';
@@ -29,7 +39,7 @@ class YoctoUploadConfig {
   static updated = false;
 }
 
-export class YoctoDevice implements Device {
+export class RaspberryPiYoctoDevice implements Device {
   private componentId: string;
   get id() {
     return this.componentId;
@@ -40,20 +50,22 @@ export class YoctoDevice implements Device {
   private extensionContext: vscode.ExtensionContext;
   private channel: vscode.OutputChannel;
   private sketchFolder = '';
-  private static _boardId = 'yocto';
+  private projectName: string;
+  private static _boardId = 'raspberrypiyocto';
 
   static get boardId() {
-    return YoctoDevice._boardId;
+    return RaspberryPiYoctoDevice._boardId;
   }
 
   constructor(
-      context: vscode.ExtensionContext, devicePath: string,
+      context: vscode.ExtensionContext, projectName: string, devicePath: string,
       channel: vscode.OutputChannel, sketchFolder?: string) {
     this.deviceType = DeviceType.Raspberry_Pi;
     this.componentType = ComponentType.Device;
     this.deviceFolder = devicePath;
     this.extensionContext = context;
     this.channel = channel;
+    this.projectName = projectName;
     this.componentId = Guid.create().toString();
     if (sketchFolder) {
       this.sketchFolder = sketchFolder;
@@ -110,10 +122,32 @@ export class YoctoDevice implements Device {
     }
 
     const sketchFolderPath = this.extensionContext.asAbsolutePath(path.join(
-        FileNames.resourcesFolderName, YoctoDevice.boardId, this.sketchFolder));
+        FileNames.resourcesFolderName, RaspberryPiYoctoDevice.boardId,
+        this.sketchFolder));
 
     // Copy all file under resource folder into target project.
     fs.copySync(sketchFolderPath, deviceFolderPath);
+
+    // Update the name under for source files:
+    const makeFilePath = path.join(
+        deviceFolderPath, LocalConstants.sourceFolder,
+        LocalConstants.makeFileName);
+    const projectNamePattern = /{PROJECT_NAME}/g;
+
+    if (fs.existsSync(makeFilePath) && fs.isFileSync(makeFilePath)) {
+      const content = fs.readFileSync(makeFilePath, 'utf8');
+      const replaceStr = content.replace(projectNamePattern, this.projectName);
+      fs.writeFileSync(makeFilePath, replaceStr);
+    }
+
+    const dockerFilePath =
+        path.join(deviceFolderPath, LocalConstants.dockerFileName);
+    if (fs.existsSync(dockerFilePath) && fs.isFileSync(dockerFilePath)) {
+      const content = fs.readFileSync(dockerFilePath, 'utf8');
+      const replaceStr = content.replace(projectNamePattern, this.projectName);
+      fs.writeFileSync(dockerFilePath, replaceStr);
+    }
+
     return true;
   }
 
@@ -149,22 +183,24 @@ export class YoctoDevice implements Device {
           'Build config file does not exist. Please check the project settings.');
     }
 
-    const buildConfig: DockerBuildConfig =
+    const config: RaspberryPiYoctoConfig =
         JSON.parse(fs.readFileSync(configFilePath, 'utf8'));
-    if (!buildConfig) {
+    if (!config) {
       // create the output folder
       throw new Error(
           'Build config file is not valid. Please check the project settings.');
     }
 
     // Create output folder
-    const targetFolderPath = path.join(this.deviceFolder, buildConfig.output);
+    const targetFolderPath = path.join(this.deviceFolder, config.output);
     if (!fs.existsSync(targetFolderPath)) {
       fs.mkdirSync(targetFolderPath);
     }
 
+    const imagePath =
+        `${this.projectName}_build:${LocalConstants.imageVersion}`;
     const dockerCommand = dockerManager.constructCommandForBuildConfig(
-        buildConfig, this.deviceFolder);
+        this.projectName, config.output, imagePath, this.deviceFolder);
     this.channel.appendLine(dockerCommand);
 
     TerminalManager.runInTerminal(dockerCommand);
@@ -172,19 +208,19 @@ export class YoctoDevice implements Device {
   }
 
   async upload(): Promise<boolean> {
-    if (!fs.existsSync(path.join(this.deviceFolder, 'build.json'))) {
+    if (!fs.existsSync(
+            path.join(this.deviceFolder, LocalConstants.configFileName))) {
       await vscode.window.showWarningMessage('No build config file found.');
       return false;
     }
 
-    const buildConfigRaw =
-        fs.readFileSync(path.join(this.deviceFolder, 'build.json'), 'utf8');
-    const buildConfig = JSON.parse(buildConfigRaw) as {
-      source: string,
+    const configRaw = fs.readFileSync(
+        path.join(this.deviceFolder, LocalConstants.configFileName), 'utf8');
+    const buildConfig = JSON.parse(configRaw) as {
       output: string,
     };
     const buildTargetPath = path.join(
-        this.deviceFolder, buildConfig.output, 'cmake', buildConfig.source);
+        this.deviceFolder, buildConfig.output, 'cmake', this.projectName);
     if (!fs.existsSync(buildTargetPath)) {
       await vscode.window.showErrorMessage(
           `Cannot find build target file under ${buildTargetPath}`);

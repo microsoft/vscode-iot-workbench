@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.11)
-project(azureIoT_project)
+project({PROJECT_NAME}_project)
 
 # The demonstration uses C99 but it could just as easily be a C++ application
 set (CMAKE_C_FLAGS "--std=c99 ${CMAKE_C_FLAGS}")
@@ -22,14 +22,14 @@ if(${use_sample_trusted_cert})
 endif()
 
 # Set up the include and library paths
-include_directories($ENV{TOOLCHAIN_PREFIX}/include/)
-include_directories($ENV{TOOLCHAIN_PREFIX}/include/azureiot)
-link_directories($ENV{TOOLCHAIN_PREFIX}/lib)
+include_directories($ENV{QEMU_LD_PREFIX}/usr/include/)
+include_directories($ENV{QEMU_LD_PREFIX}/usr/include/azureiot)
+link_directories($ENV{QEMU_LD_PREFIX}/usr/lib)
 
-add_executable(azureIoT ${iothub_c_files})
+add_executable({PROJECT_NAME} ${iothub_c_files})
 
 # Redundant in this case but shows how to rename your output executable
-set_target_properties(azureIoT PROPERTIES OUTPUT_NAME "azureIoT")
+set_target_properties({PROJECT_NAME} PROPERTIES OUTPUT_NAME "{PROJECT_NAME}")
 
 # List the libraries required by the link step
-target_link_libraries(azureIoT iothub_client_mqtt_transport iothub_client umqtt aziotsharedutil parson pthread curl ssl crypto m )
+target_link_libraries({PROJECT_NAME} iothub_client_mqtt_transport iothub_client umqtt aziotsharedutil parson pthread curl ssl crypto m )

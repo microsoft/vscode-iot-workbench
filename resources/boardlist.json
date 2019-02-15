@@ -38,7 +38,7 @@
         },
         {
             "name": "Raspberry Pi – Yocto Linux",
-            "id": "yocto",
+            "id": "raspberrypiyocto",
             "detailInfo": "Raspberry Pi – Yocto Linux",
             "helpUrl": "https://www.yoctoproject.org/"
         }

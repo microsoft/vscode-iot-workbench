@@ -30,8 +30,8 @@ import {IoTButtonDevice} from './IoTButtonDevice';
 import {IoTHub} from './IoTHub';
 import {IoTHubDevice} from './IoTHubDevice';
 import {RaspberryPiDevice} from './RaspberryPiDevice';
+import {RaspberryPiYoctoDevice} from './RaspberryPiYoctoDevice';
 import {StreamAnalyticsJob} from './StreamAnalyticsJob';
-import {YoctoDevice} from './YoctoDevice';
 
 const constants = {
   deviceDefaultFolderName: 'Device',
@@ -114,9 +114,10 @@ export class IoTProject {
       } else if (boardId === RaspberryPiDevice.boardId) {
         device = new RaspberryPiDevice(
             this.extensionContext, deviceLocation, this.channel);
-      } else if (boardId === YoctoDevice.boardId) {
-        device = new YoctoDevice(
-            this.extensionContext, deviceLocation, this.channel);
+      } else if (boardId === RaspberryPiYoctoDevice.boardId) {
+        device = new RaspberryPiYoctoDevice(
+            this.extensionContext, path.basename(this.projectRootPath),
+            deviceLocation, this.channel);
       }
       if (device) {
         this.componentList.push(device);
@@ -474,10 +475,10 @@ export class IoTProject {
       device = new RaspberryPiDevice(
           this.extensionContext, deviceDir, this.channel,
           projectTemplateItem.sketch);
-    } else if (boardId === YoctoDevice.boardId) {
-      device = new YoctoDevice(
-          this.extensionContext, deviceDir, this.channel,
-          projectTemplateItem.sketch);
+    } else if (boardId === RaspberryPiYoctoDevice.boardId) {
+      const projectName = device = new RaspberryPiYoctoDevice(
+          this.extensionContext, path.basename(this.projectRootPath), deviceDir,
+          this.channel, projectTemplateItem.sketch);
     } else {
       throw new Error('The specified board is not supported.');
     }
