@@ -22,11 +22,13 @@ Follow these steps to prepare the development environment for the IoT DevKit:
 
 2. Install [Visual Studio Code](https://code.visualstudio.com/), a cross platform source code editor with powerful developer tooling, like IntelliSense code completion and debugging.
 
-3. Look for **Azure IoT Device Workbench** in the extension marketplace and install it.
+3. Install [Arduino](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-arduino) for Visual Studio Code.
+
+4. Look for **Azure IoT Device Workbench** in the extension marketplace and install it.
     ![Install IoT Device Workbench](iot-devkit/media/iot-devkit-get-started/install-workbench.png)
     Together with **Azure IoT Device Workbench**, other dependent extensions will be installed.
 
-4. Open **File > Preference > Settings** and add following lines to configure Arduino.
+5. Open **File > Preference > Settings** and add following lines to configure Arduino.
 
   * Windows
 
@@ -49,11 +51,11 @@ Follow these steps to prepare the development environment for the IoT DevKit:
     "arduino.additionalUrls": "https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/master/package_azureboard_index.json"
     ```
 
-5. Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type and select **Arduino: Board Manager**. Search for **AZ3166** and install the latest version.
+6. Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type and select **Arduino: Board Manager**. Search for **AZ3166** and install the latest version.
 
     ![Install DevKit SDK](iot-devkit/media/iot-devkit-get-started/install-sdk.png)
 
-6. ST-Link configuration.
+7. ST-Link configuration.
   The [ST-Link/V2](http://www.st.com/en/development-tools/st-link-v2.html) is the USB interface that IoT DevKit uses to communicate with your development machine. Follow the platform specific steps to allow the machine access to your device.
 
   * Windows

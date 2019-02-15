@@ -30,9 +30,12 @@ export class IoTWorkbenchSettings {
     const userWorkbenchPath = ConfigHandler.get<string>('workbench');
     if (userWorkbenchPath) {
       return userWorkbenchPath;
+    } else {
+      // Use the default value for workbenchPath.
+      await ConfigHandler.update(
+          'workbench', this._workbenchPath, vscode.ConfigurationTarget.Global);
+      return this._workbenchPath;
     }
-
-    return await this.setWorkbenchPath(false);
   }
 
   async setWorkbenchPath(showMessage = true) {
