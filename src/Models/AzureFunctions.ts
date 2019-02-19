@@ -177,8 +177,8 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
       });
 
       if (!languageSelection) {
-        throw new Error(
-            'Unable to get the language for Azure Functions. Creating project for Azure Functions canceled.');
+        operatingResult.update(OperatingResultType.Canceled, 'Unable to get the language for Azure Functions. Creating project for Azure Functions canceled.');
+        return operatingResult;
       }
       this.functionLanguage = languageSelection.label;
     }
@@ -186,8 +186,8 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     const templateName =
         utils.getScriptTemplateNameFromLanguage(this.functionLanguage);
     if (!templateName) {
-      throw new Error(
-          'Unable to get the template for Azure Functions.Creating project for Azure Functions canceled.');
+      operatingResult.update(OperatingResultType.Canceled, 'Unable to get the template for Azure Functions.Creating project for Azure Functions canceled.');
+      return operatingResult;
     }
 
     try {
@@ -214,22 +214,27 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
 
       this.updateConfigSettings(
           {values: {functionLanguage: this.functionLanguage}});
-      return true;
+      operatingResult.update(OperatingResultType.Succeeded);
+      return operatingResult;
     } catch (error) {
-      throw error;
+      operatingResult.update(OperatingResultType.Failed, '[ERROR] Create Azure Functions failed: ' + error.message);
+      return operatingResult;
     }
   }
 
-  async provision(): Promise<boolean> {
+  async provision(): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('AzureFucntionsProvision');
     try {
       const subscriptionId = AzureUtility.subscriptionId;
       if (!subscriptionId) {
-        return false;
+        operatingResult.update(OperatingResultType.Failed, 'Cannot get subscription ID.');
+        return operatingResult;
       }
 
       const resourceGroup = AzureUtility.resourceGroup;
       if (!resourceGroup) {
-        return false;
+        operatingResult.update(OperatingResultType.Failed, 'Cannot get resource group name.');
+        return operatingResult;
       }
 
       const functionAppId: string|undefined =
@@ -246,25 +251,28 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
             ConfigHandler.get<string>(ConfigKey.iotHubConnectionString);
 
         if (!eventHubConnectionString || !eventHubConnectionPath) {
-          throw new Error('No event hub path or connection string found.');
+          operatingResult.update(OperatingResultType.Failed, 'No event hub path or connection string found.');
+          return operatingResult;
         }
         const credential =
             await this.getCredentialFromSubscriptionId(subscriptionId);
         if (credential === undefined) {
-          throw new Error('Unable to get credential for the subscription.');
+          operatingResult.update(OperatingResultType.Failed, 'Unable to get credential for the subscription.');
+          return operatingResult;
         }
 
         const resourceGroupMatches =
             functionAppId.match(/\/resourceGroups\/([^\/]*)/);
         if (!resourceGroupMatches || resourceGroupMatches.length < 2) {
-          throw new Error('Cannot parse resource group from function app ID.');
+          operatingResult.update(OperatingResultType.Failed, 'Cannot parse resource group from function app ID.');
+          return operatingResult;
         }
         const resourceGroup = resourceGroupMatches[1];
 
         const siteNameMatches = functionAppId.match(/\/sites\/([^\/]*)/);
         if (!siteNameMatches || siteNameMatches.length < 2) {
-          throw new Error(
-              'Cannot parse function app name from function app ID.');
+          operatingResult.update(OperatingResultType.Failed, 'Cannot parse function app name from function app ID.');
+          return operatingResult;
         }
         const siteName = siteNameMatches[1];
 
@@ -296,17 +304,20 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
         await client.webApps.updateApplicationSettings(
             resourceGroup, siteName, appSettings);
 
-        return true;
+        operatingResult.update(OperatingResultType.Succeeded);
+        return operatingResult;
       } else {
-        throw new Error(
-            'Unable to create Azure Functions application. Please check the error and retry.');
+        operatingResult.update(OperatingResultType.Failed, 'Cannot get function app ID.');
+        return operatingResult;
       }
     } catch (error) {
-      throw error;
+      operatingResult.update(OperatingResultType.Failed, '[ERROR] Cannot provision Azure Functions: ' + error.message);
+      return operatingResult;
     }
   }
 
-  async deploy(): Promise<boolean> {
+  async deploy(): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('AzureFunctionsDeploy');
     let deployPending: NodeJS.Timer|null = null;
     if (this.channel) {
       this.channel.show();
@@ -335,13 +346,17 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
         clearInterval(deployPending);
         this.channel.appendLine('.');
       }
-      return true;
+
+      operatingResult.update(OperatingResultType.Succeeded);
+      return operatingResult;
     } catch (error) {
       if (this.channel && deployPending) {
         clearInterval(deployPending);
         this.channel.appendLine('.');
       }
-      throw error;
+
+      operatingResult.update(OperatingResultType.Failed, '[ERROR] Cannot deploy Azure Functions: ' + error.message);
+      return operatingResult;
     }
   }
 

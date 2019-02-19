@@ -231,15 +231,16 @@ export class AZ3166Device extends ArduinoDeviceBase {
     }
 
     if (configSelection.detail === 'Config CRC') {
+      const configCrcResult = new OperatingResult('AZ3166DeviceGenerateCRC');
       const retValue = await this.generateCrc(this.extensionContext, this.channel);
       if (retValue) {
-        operatingResult.update(OperatingResultType.Failed);
-        operatingResult.append('AZ3166DeviceGenerateCRC', OperatingResultType.Failed, 'Generate CRC failed.');
+        configCrcResult.update(OperatingResultType.Failed);
       } else {
-        operatingResult.update(OperatingResultType.Succeeded);
-        operatingResult.append('AZ3166DeviceGenerateCRC', OperatingResultType.Succeeded);
+        configCrcResult.update(OperatingResultType.Succeeded);
       }
+      return configCrcResult;
     } else if (configSelection.detail === 'Config Connection String') {
+      const configConnectionStringResult = new OperatingResult('AZ3166ConfigConnectionString');
       try {
         // Get IoT Hub device connection string from config
         let deviceConnectionString =
@@ -288,9 +289,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
             {ignoreFocusOut: true, placeHolder: 'Choose an option:'});
 
         if (!selection) {
-          operatingResult.update(OperatingResultType.Canceled);
-          operatingResult.append('AZ3166DeviceConfigConnectionString', OperatingResultType.Canceled);
-          return operatingResult;
+          configConnectionStringResult.update(OperatingResultType.Canceled, 'Canceled to select or input IoT Hub Device connection string.');
+          return configConnectionStringResult;
         }
 
         if (selection.label === 'Input IoT Hub Device Connection String') {
@@ -324,16 +324,14 @@ export class AZ3166Device extends ArduinoDeviceBase {
               opn(constants.informationPageUrl);
             }
 
-            operatingResult.update(OperatingResultType.Canceled);
-            operatingResult.append('AZ3166DeviceConfigConnectionString', OperatingResultType.Canceled, 'User canceled to provide connection string.');
-            return operatingResult;
+            configConnectionStringResult.update(OperatingResultType.Canceled, 'Canceled to provide connection string.');
+            return configConnectionStringResult;
           }
         }
 
         if (!deviceConnectionString) {
-          operatingResult.update(OperatingResultType.Failed);
-          operatingResult.append('AZ3166DeviceConfigConnectionString', OperatingResultType.Failed, 'Cannot find connection string.');
-          return operatingResult;
+          configConnectionStringResult.update(OperatingResultType.Failed, 'Cannot find connection string.');
+          return configConnectionStringResult;
         }
 
         console.log(deviceConnectionString);
@@ -350,20 +348,18 @@ export class AZ3166Device extends ArduinoDeviceBase {
         }
 
         if (res === false) {
-          operatingResult.update(OperatingResultType.Failed);
-          operatingResult.append('AZ3166DeviceConfigConnectionString', OperatingResultType.Failed, 'Flush device connection string failed.');
-          return operatingResult;
+          configConnectionStringResult.update(OperatingResultType.Failed, 'Flush device connection string failed.');
+          return configConnectionStringResult;
         } else {
-          operatingResult.update(OperatingResultType.Succeeded);
-          operatingResult.append('AZ3166DeviceConfigConnectionString', OperatingResultType.Succeeded, 'Configure Device connection string completely.');
-          return operatingResult;
+          configConnectionStringResult.update(OperatingResultType.Succeeded);
+          return configConnectionStringResult;
         }
       } catch (error) {
-        operatingResult.update(OperatingResultType.Failed);
-        operatingResult.append('AZ3166DeviceConfigConnectionString', OperatingResultType.Failed, '[ERROR] ' + error.message);
-        return operatingResult;
+        configConnectionStringResult.update(OperatingResultType.Failed, '[ERROR] ' + error.message);
+        return configConnectionStringResult;
       }
     } else {
+      const configUdsResult = new OperatingResult('AZ3166DeviceConfigUDS');
       try {
         function generateRandomHex(): string {
           const chars = '0123456789abcdef'.split('');
@@ -389,9 +385,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
         const UDS = await vscode.window.showInputBox(option);
 
         if (UDS === undefined) {
-          operatingResult.update(OperatingResultType.Canceled);
-          operatingResult.append('AZ3166DeviceConfigUDS', OperatingResultType.Canceled, 'User canceled to provide UDS.');
-          return operatingResult;
+          configUdsResult.update(OperatingResultType.Canceled);
+          return configUdsResult;
         }
 
         console.log(UDS);
@@ -406,22 +401,17 @@ export class AZ3166Device extends ArduinoDeviceBase {
         }
 
         if (res === false) {
-          operatingResult.update(OperatingResultType.Failed);
-          operatingResult.append('AZ3166DeviceConfigUDS', OperatingResultType.Failed, 'Flush Device UDS failed.');
-          return operatingResult;
+          configUdsResult.update(OperatingResultType.Failed, 'Flush Device UDP failed.');
+          return configUdsResult;
         } else {
-          operatingResult.update(OperatingResultType.Succeeded);
-          operatingResult.append('AZ3166DeviceConfigConnectionString', OperatingResultType.Succeeded, 'Configure Unique Device String (UDS) completely.');
-          return operatingResult;
+          configUdsResult.update(OperatingResultType.Succeeded);
+          return configUdsResult;
         }
       } catch (error) {
-        operatingResult.update(OperatingResultType.Failed);
-        operatingResult.append('AZ3166DeviceConfigConnectionString', OperatingResultType.Failed, '[ERROR] ' + error.message);
-        return operatingResult;
+        configUdsResult.update(OperatingResultType.Failed, '[ERROR] ' + error.message);
+        return configUdsResult;
       }
     }
-
-    return operatingResult;
   }
 
   async flushDeviceConfigUnix(configValue: string, option: number):

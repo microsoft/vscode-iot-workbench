@@ -68,6 +68,8 @@ export class OperatingResult {
   append(operator: string, result: OperatingResultType, details?: string): OperatingResult;
   append(operatorOrOperatingResult: string|OperatingResult, result?: OperatingResultType, details?: string) {
     if (operatorOrOperatingResult instanceof OperatingResult) {
+      this.result = operatorOrOperatingResult.result;
+      this.details = undefined;
       this._stack.push({
         operator: operatorOrOperatingResult.operator,
         result: operatorOrOperatingResult.result,
@@ -79,6 +81,8 @@ export class OperatingResult {
       if (!result) {
         throw new Error('Result is missing. Availbale results are Success, Failed and Canceled.');
       }
+      this.result = result;
+      this.details = undefined;
       this._stack.push({
         operator: operatorOrOperatingResult,
         result: result,
@@ -104,20 +108,36 @@ export class OperatingResult {
     };
 
     let lastDetails: string|undefined;
+    const stack: Array<{
+      operator: string;
+      result: string;
+      details?: string;
+    }> = [];
 
-    this._stack.map((item, index) => {
-      data[`stack\/${index}\/operator`] = item.operator;
-      data[`stack\/${index}\/result`] = OperatingResultType[item.result];
+    this._stack.map(item => {
+      const stackItem: {
+        operator: string;
+        result: string;
+        details?: string;
+      } = {
+        operator: item.operator,
+        result: OperatingResultType[item.result]
+      };
+      
       if (item.details) {
-        data[`stack\/${index}\/details`] = item.details;
+        stackItem.details = item.details;
         lastDetails = item.details;
       }
+
+      stack.push(stackItem);
     });
 
+    data.operatingStack = JSON.stringify(stack);
+
     if (this.details) {
-      data.details = this.details;
+      data.errorMessage = this.details;
     } else if (lastDetails) {
-      data.details = lastDetails;
+      data.errorMessage = lastDetails;
     }
 
     return data;

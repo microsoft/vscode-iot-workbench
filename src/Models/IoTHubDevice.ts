@@ -38,19 +38,23 @@ export class IoTHubDevice implements Component, Provisionable {
     return this.componentType;
   }
 
-  async checkPrerequisites(): Promise<boolean> {
-    return true;
+  async checkPrerequisites(): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('IoTHubDeviceCheckPrerequisites', OperatingResultType.Succeeded);
+    return operatingResult;
   }
 
-  async load(): Promise<boolean> {
-    return true;
+  async load(): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('IoTHubDeviceLoad', OperatingResultType.Succeeded);
+    return operatingResult;
   }
 
-  async create(): Promise<boolean> {
-    return true;
+  async create(): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('IoTHubDeviceCreate', OperatingResultType.Succeeded);
+    return operatingResult;
   }
 
-  async provision(): Promise<boolean> {
+  async provision(): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('IoTHubDeviceProvision');
     const iotHubConnectionString =
         ConfigHandler.get<string>(ConfigKey.iotHubConnectionString);
     if (!iotHubConnectionString) {
@@ -63,14 +67,14 @@ export class IoTHubDevice implements Component, Provisionable {
         {ignoreFocusOut: true, placeHolder: 'Provision IoTHub Device'});
 
     if (!selection) {
-      return false;
+      operatingResult.update(OperatingResultType.Canceled);
+      return operatingResult;
     }
 
     const toolkit = getExtension(extensionName.Toolkit);
     if (toolkit === undefined) {
-      const error = new Error(
-          'Azure IoT Hub Toolkit is not installed. Please install it from Marketplace.');
-      throw error;
+      operatingResult.update(OperatingResultType.Failed, 'Azure IoT Hub Toolkit is not installed. Please install it from Marketplace.');
+      return operatingResult;
     }
 
     let device = null;
@@ -80,7 +84,8 @@ export class IoTHubDevice implements Component, Provisionable {
           device = await toolkit.azureIoTExplorer.getDevice(
               null, iotHubConnectionString, this.channel);
           if (device === undefined) {
-            return false;
+            operatingResult.update(OperatingResultType.Failed, 'Cannot fetch device information.');
+            return operatingResult;
           } else {
             await ConfigHandler.update(
                 ConfigKey.iotHubDeviceConnectionString,
@@ -92,7 +97,8 @@ export class IoTHubDevice implements Component, Provisionable {
           device = await toolkit.azureIoTExplorer.createDevice(
               false, iotHubConnectionString, this.channel);
           if (device === undefined) {
-            return false;
+            operatingResult.update(OperatingResultType.Failed, 'Cannot create device.');
+            return operatingResult;
           } else {
             await ConfigHandler.update(
                 ConfigKey.iotHubDeviceConnectionString,
@@ -102,10 +108,12 @@ export class IoTHubDevice implements Component, Provisionable {
         default:
           break;
       }
-      return true;
+
+      operatingResult.update(OperatingResultType.Succeeded);
     } catch (error) {
-      throw error;
+      operatingResult.update(OperatingResultType.Failed, '[ERROR] ' + error.message);
     }
+    return operatingResult;
   }
 
   updateConfigSettings(componentInfo?: ComponentInfo): void {}

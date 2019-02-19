@@ -42,17 +42,20 @@ export class IoTHub implements Component, Provisionable {
     return this.componentType;
   }
 
-  async checkPrerequisites(): Promise<boolean> {
-    return true;
+  async checkPrerequisites(): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('IoTHubCheckPrerequisites', OperatingResultType.Succeeded);
+    return operatingResult;
   }
 
-  async load(): Promise<boolean> {
+  async load(): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('IoTHubLoad');
     const azureConfigFilePath = path.join(
         this.projectRootPath, AzureComponentsStorage.folderName,
         AzureComponentsStorage.fileName);
 
     if (!fs.existsSync(azureConfigFilePath)) {
-      return false;
+      operatingResult.update(OperatingResultType.Failed, 'Azure config file is not existing.');
+      return operatingResult;
     }
 
     let azureConfigs: AzureConfigs;
@@ -67,18 +70,23 @@ export class IoTHub implements Component, Provisionable {
         // Load other information from config file.
       }
     } catch (error) {
-      return false;
+      operatingResult.update(OperatingResultType.Failed, '[ERROR] ' + error.message);
     }
-    return true;
+
+    operatingResult.update(OperatingResultType.Succeeded);
+    return operatingResult;
   }
 
 
-  async create(): Promise<boolean> {
-    this.updateConfigSettings();
-    return true;
+  async create(): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('IoTHubCreate');
+    const res = this.updateConfigSettings();
+    operatingResult.append(res);
+    return operatingResult;
   }
 
-  async provision(): Promise<boolean> {
+  async provision(): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('IoTHubProvision');
     const provisionIothubSelection: vscode.QuickPickItem[] = [
       {
         label: 'Select an existing IoT Hub',
@@ -96,14 +104,14 @@ export class IoTHub implements Component, Provisionable {
         {ignoreFocusOut: true, placeHolder: 'Provision IoT Hub'});
 
     if (!selection) {
-      return false;
+      operatingResult.update(OperatingResultType.Canceled);
+      return operatingResult;
     }
 
     const toolkit = getExtension(extensionName.Toolkit);
     if (toolkit === undefined) {
-      const error = new Error(
-          'Azure IoT Hub Toolkit is not installed. Please install it from Marketplace.');
-      throw error;
+      operatingResult.update(OperatingResultType.Failed, 'Azure IoT Hub Toolkit is not installed. Please install it from Marketplace.');
+      return operatingResult;
     }
 
     let iothub = null;
@@ -137,8 +145,8 @@ export class IoTHub implements Component, Provisionable {
       const sharedAccessKeyMatches =
           iothub.iotHubConnectionString.match(/SharedAccessKey=([^;]*)/);
       if (!sharedAccessKeyMatches || sharedAccessKeyMatches.length < 2) {
-        throw new Error(
-            'Cannot parse shared access key from IoT Hub connection string. Please retry Azure Provision.');
+        operatingResult.update(OperatingResultType.Failed, 'Cannot parse shared access key from IoT Hub connection string. Please retry Azure Provision.');
+        return operatingResult;
       }
 
       const sharedAccessKey = sharedAccessKeyMatches[1];
@@ -157,7 +165,7 @@ export class IoTHub implements Component, Provisionable {
       await ConfigHandler.update(
           ConfigKey.eventHubConnectionPath, eventHubConnectionPath);
 
-      this.updateConfigSettings({
+      const res = this.updateConfigSettings({
         values: {
           iotHubConnectionString: iothub.iotHubConnectionString,
           eventHubConnectionString,
@@ -165,29 +173,40 @@ export class IoTHub implements Component, Provisionable {
         }
       });
 
-      if (this.channel) {
+      operatingResult.append(res);
+
+      if (this.channel && operatingResult.isSucceded) {
         this.channel.show();
         this.channel.appendLine('IoT Hub provision succeeded.');
       }
-      return true;
     } else if (!iothub) {
-      return false;
+      operatingResult.update(OperatingResultType.Failed, 'Cannot fetch IoT Hub information.');
     } else {
-      throw new Error(
-          'IoT Hub provision failed. Please check output window for detail.');
+      operatingResult.update(OperatingResultType.Failed, 'IoT Hub provision failed. Please check output window for detail.');
     }
+    return operatingResult;
   }
 
-  updateConfigSettings(componentInfo?: ComponentInfo): void {
+  updateConfigSettings(componentInfo?: ComponentInfo): OperatingResult {
+    const operatingResult = new OperatingResult('IoTHubUpdateConfigSettings');
     const iotHubComponentIndex =
         this.azureConfigFileHandler.getComponentIndexById(this.id);
 
     if (iotHubComponentIndex > -1) {
       if (!componentInfo) {
-        return;
+        operatingResult.update(OperatingResultType.Failed, 'No component info provided.');
+        return operatingResult;
       }
-      this.azureConfigFileHandler.updateComponent(
+
+      try {
+        this.azureConfigFileHandler.updateComponent(
           iotHubComponentIndex, componentInfo);
+        operatingResult.update(OperatingResultType.Succeeded);
+      } catch(error) {
+        operatingResult.update(OperatingResultType.Failed, '[ERROR] ' + error.message);
+      }
+
+      return operatingResult;
     } else {
       const newIoTHubConfig: AzureComponentConfig = {
         id: this.id,
@@ -197,7 +216,14 @@ export class IoTHub implements Component, Provisionable {
         type: ComponentType[this.componentType],
         componentInfo
       };
-      this.azureConfigFileHandler.appendComponent(newIoTHubConfig);
+
+      try {
+        this.azureConfigFileHandler.appendComponent(newIoTHubConfig);
+        operatingResult.update(OperatingResultType.Succeeded);
+      } catch(error) {
+        operatingResult.update(OperatingResultType.Failed, '[ERROR] ' + error.message);
+      }
+      return operatingResult;
     }
   }
 }

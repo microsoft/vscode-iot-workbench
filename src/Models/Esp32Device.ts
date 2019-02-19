@@ -80,36 +80,46 @@ export class Esp32Device extends ArduinoDeviceBase {
     }
   }
 
-  async checkPrerequisites(): Promise<boolean> {
+  async checkPrerequisites(): Promise<OperatingResult> {
     return super.checkPrerequisites();
   }
 
-  async load(): Promise<boolean> {
+  async load(): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('Esp32DeviceLoad');
     const deviceFolderPath = this.deviceFolder;
 
     if (!fs.existsSync(deviceFolderPath)) {
-      throw new Error('Unable to find the device folder inside the project.');
+      operatingResult.update(OperatingResultType.Failed, 'Unable to find the device folder inside the project.');
+      return operatingResult;
     }
 
     if (!this.board) {
-      throw new Error('Unable to find the board in the config file.');
+      operatingResult.update(OperatingResultType.Failed, 'Unable to find the board in the config file.');
+      return operatingResult;
     }
 
     this.generateCppPropertiesFile(this.board);
-    return true;
+
+    operatingResult.update(OperatingResultType.Succeeded);
+    return operatingResult;
   }
 
-  async create(): Promise<boolean> {
+  async create(): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('Esp32DeviceCreate');
+
     if (!this.sketchFileTemplateName) {
-      throw new Error('No sketch file found.');
+      operatingResult.update(OperatingResultType.Failed, 'No sketch file found.');
+      return operatingResult;
     }
     const deviceFolderPath = this.deviceFolder;
 
     if (!fs.existsSync(deviceFolderPath)) {
-      throw new Error('Unable to find the device folder inside the project.');
+      operatingResult.update(OperatingResultType.Failed, 'Unable to find the device folder inside the project.');
+      return operatingResult;
     }
     if (!this.board) {
-      throw new Error('Unable to find the board in the config file.');
+      operatingResult.update(OperatingResultType.Failed, 'Unable to find the board in the config file.');
+      return operatingResult;
     }
 
     this.generateCommonFiles();
@@ -117,11 +127,15 @@ export class Esp32Device extends ArduinoDeviceBase {
     await this.generateSketchFile(
         this.sketchFileTemplateName, this.board, constants.defaultBoardInfo,
         constants.defaultBoardConfig);
-    return true;
+
+    operatingResult.update(OperatingResultType.Succeeded);
+    return operatingResult;
   }
 
 
-  async configDeviceSettings(): Promise<boolean> {
+  async configDeviceSettings(): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('Esp32DeviceConfigDeviceSettings');
+
     const configSelectionItems: vscode.QuickPickItem[] = [
       {
         label: 'Copy device connection string',
@@ -145,33 +159,44 @@ export class Esp32Device extends ArduinoDeviceBase {
         });
 
     if (!configSelection) {
-      return false;
+      operatingResult.update(OperatingResultType.Canceled);
+      return operatingResult;
     }
 
     if (configSelection.detail === 'Config CRC') {
+      const configCrcResult = new OperatingResult('Esp32DeviceConfigCRC');
       const retValue: boolean =
           await this.generateCrc(this.extensionContext, this.channel);
-      return retValue;
-    } else if (configSelection.detail === 'Copy') {
+      if (retValue) {
+        configCrcResult.update(OperatingResultType.Succeeded);
+      } else {
+        configCrcResult.update(OperatingResultType.Failed);
+      }
+
+      return configCrcResult;
+    } else {
+      const copyConnectionStringResult = new OperatingResult('Esp32CopyConnectionString');
       const deviceConnectionString =
           ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
 
       if (!deviceConnectionString) {
-        throw new Error(
-            'Unable to get the device connection string, please invoke the command of Azure Provision first.');
+        copyConnectionStringResult.update(OperatingResultType.Failed, 'Unable to get the device connection string, please invoke the command of Azure Provision first.');
+        return copyConnectionStringResult;
       }
       copypaste.copy(deviceConnectionString);
-      return true;
+
+      copyConnectionStringResult.update(OperatingResultType.Succeeded);
+      return copyConnectionStringResult;
     }
-
-    return false;
   }
 
-  async preCompileAction(): Promise<boolean> {
-    return true;
+  async preCompileAction(): Promise<OperatingResult> {
+    const preCompileActionResult = new OperatingResult('Esp32DevicePreCompileAction', OperatingResultType.Succeeded);
+    return preCompileActionResult;
   }
 
-  async preUploadAction(): Promise<boolean> {
-    return true;
+  async preUploadAction(): Promise<OperatingResult> {
+    const preUploadActionResult = new OperatingResult('Esp32DevicePreUploadAction', OperatingResultType.Succeeded);
+    return preUploadActionResult;
   }
 }

@@ -51,17 +51,20 @@ export class CosmosDB implements Component, Provisionable {
     return this.componentType;
   }
 
-  async checkPrerequisites(): Promise<boolean> {
-    return true;
+  async checkPrerequisites(): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('CosmosDBCheckPrerequisites', OperatingResultType.Succeeded);
+    return operatingResult;
   }
 
-  async load(): Promise<boolean> {
+  async load(): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('CosmosDBLoad');
     const azureConfigFilePath = path.join(
         this.projectRootPath, AzureComponentsStorage.folderName,
         AzureComponentsStorage.fileName);
 
     if (!fs.existsSync(azureConfigFilePath)) {
-      return false;
+      operatingResult.update(OperatingResultType.Failed, 'Azure config file is not existing.');
+      return operatingResult;
     }
 
     let azureConfigs: AzureConfigs;
@@ -76,14 +79,18 @@ export class CosmosDB implements Component, Provisionable {
         // Load other information from config file.
       }
     } catch (error) {
-      return false;
+      operatingResult.update(OperatingResultType.Failed, '[ERROR] Cannot parse Azure config: ' + error.message);
+      return operatingResult;
     }
-    return true;
+
+    operatingResult.update(OperatingResultType.Succeeded);
+    return operatingResult;
   }
 
-  async create(): Promise<boolean> {
+  async create(): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('CosmosDBCreate', OperatingResultType.Succeeded);
     this.updateConfigSettings();
-    return true;
+    return operatingResult;
   }
 
   updateConfigSettings(componentInfo?: ComponentInfo): void {
@@ -107,12 +114,14 @@ export class CosmosDB implements Component, Provisionable {
     }
   }
 
-  async provision(): Promise<boolean> {
+  async provision(): Promise<OperatingResult> {
+    const operatingResult = new OperatingResult('CosmosDBProvision');
     const cosmosDbList = this.getCosmosDbInResourceGroup();
     const cosmosDbNameChoose = await vscode.window.showQuickPick(
         cosmosDbList, {placeHolder: 'Select Cosmos DB', ignoreFocusOut: true});
     if (!cosmosDbNameChoose) {
-      return false;
+      operatingResult.update(OperatingResultType.Canceled, 'Canceled when select Cosmos DB.');
+      return operatingResult;
     }
 
     let cosmosDbName = '';
@@ -173,7 +182,8 @@ export class CosmosDB implements Component, Provisionable {
     const databaseChoose = await vscode.window.showQuickPick(
         databaseList, {placeHolder: 'Select Database', ignoreFocusOut: true});
     if (!databaseChoose) {
-      return false;
+      operatingResult.update(OperatingResultType.Canceled, 'Canceled to select database.');
+      return operatingResult;
     }
 
     let database: string|undefined = '';
@@ -195,13 +205,15 @@ export class CosmosDB implements Component, Provisionable {
       });
 
       if (!database || !database.trim()) {
-        return false;
+        operatingResult.update(OperatingResultType.Canceled, 'Canceled to create database.');
+        return operatingResult;
       }
       database = database.trim();
       const cosmosDBApiRes =
           await this.ensureDatabase(cosmosDbName, cosmosDbKey, database);
       if (!cosmosDBApiRes) {
-        throw new Error('Error occurred when create database.');
+        operatingResult.update(OperatingResultType.Failed, 'Failed to create database.');
+        return operatingResult;
       }
     } else {
       database = databaseChoose.label;
@@ -213,7 +225,8 @@ export class CosmosDB implements Component, Provisionable {
         collectionList,
         {placeHolder: 'Select Collection', ignoreFocusOut: true});
     if (!collectionChoose) {
-      return false;
+      operatingResult.update(OperatingResultType.Canceled, 'Canceled to select collection.');
+      return operatingResult;
     }
 
     let collection: string|undefined = '';
@@ -235,13 +248,15 @@ export class CosmosDB implements Component, Provisionable {
       });
 
       if (!collection || !collection.trim()) {
-        return false;
+        operatingResult.update(OperatingResultType.Canceled, 'Canceled to create collection.');
+        return operatingResult;
       }
       collection = collection.trim();
       const cosmosDBApiRes = await this.ensureCollection(
           cosmosDbName, cosmosDbKey, database, collection);
       if (!cosmosDBApiRes) {
-        throw new Error('Error occurred when create collection.');
+        operatingResult.update(OperatingResultType.Failed, 'Failed to create collection.');
+        return operatingResult;
       }
     } else {
       collection = collectionChoose.label;
@@ -262,7 +277,9 @@ export class CosmosDB implements Component, Provisionable {
       this.channel.show();
       this.channel.appendLine('Cosmos DB provision succeeded.');
     }
-    return true;
+
+    operatingResult.update(OperatingResultType.Succeeded);
+    return operatingResult;
   }
 
   private _getCosmosDBAuthorizationToken(
