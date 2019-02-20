@@ -20,6 +20,7 @@ import {CodeGeneratorFactory} from './pnp-codeGen/Interfaces/CodeGeneratorFactor
 import {ConfigHandler} from '../configHandler';
 import {DialogResponses} from '../DialogResponses';
 import extractzip = require('extract-zip');
+import * as utils from '../utils';
 
 export interface CodeGeneratorConfig {
   version: string;
@@ -157,6 +158,7 @@ export class CodeGenerateCore {
     if (!folderPath) {
       return false;
     }
+
     let codeGenDeviceType = CodeGenDeviceType.General;
     if (targetSelection.label === 'MXChip IoT DevKit') {
       codeGenDeviceType = CodeGenDeviceType.IoTDevKit;
@@ -187,7 +189,6 @@ export class CodeGenerateCore {
   }
 
   async GetFolderForCodeGen(): Promise<string|null> {
-    let rootPath: string;
     // Ask user to select a folder to export
     const options: vscode.OpenDialogOptions = {
       canSelectMany: false,
@@ -199,21 +200,41 @@ export class CodeGenerateCore {
     const folderUri = await vscode.window.showOpenDialog(options);
     if (folderUri && folderUri[0]) {
       console.log(`Selected folder: ${folderUri[0].fsPath}`);
-      rootPath = folderUri[0].fsPath;
+      const rootPath = folderUri[0].fsPath;
 
-      // if the selected folder is not empty, ask user to select another one.
-      const files = fs.readdirSync(rootPath);
-      if (files && files[0]) {
-        const message =
-            'Plug & Play Code Generator would overwrite existing files in the folder. Do you want to continue?';
-
-        const choice = await vscode.window.showInformationMessage(
-            message, DialogResponses.yes, DialogResponses.cancel);
-        if (choice !== DialogResponses.yes) {
-          return null;
+      const name = 'pnp_app';
+      const projectName = await vscode.window.showInputBox({
+        value: name,
+        prompt: 'Please input project name.',
+        ignoreFocusOut: true,
+        validateInput: (projectName: string) => {
+          if (!/^([a-z0-9_]|[a-z0-9_][-a-z0-9_.]*[a-z0-9_])(\.ino)?$/i.test(
+                  projectName)) {
+            return 'Project name can only contain letters, numbers, "-" and ".", and cannot start or end with "-" or ".".';
+          }
+          return;
         }
+      });
+
+      const projectPath =
+          projectName ? path.join(rootPath, projectName) : undefined;
+      if (projectPath) {
+        utils.mkdirRecursivelySync(projectPath);
+        // if the selected folder is not empty, ask user to select another one.
+        const files = fs.readdirSync(projectPath);
+        if (files && files[0]) {
+          const message =
+              `Plug & Play Code Generator would overwrite existing files in the folder ${
+                  projectName}. Do you want to continue?`;
+
+          const choice = await vscode.window.showInformationMessage(
+              message, DialogResponses.yes, DialogResponses.cancel);
+          if (choice !== DialogResponses.yes) {
+            return null;
+          }
+        }
+        return projectPath;
       }
-      return rootPath;
     }
     return null;
   }
