@@ -25,7 +25,7 @@ const constants = {
 export class UsbDetector {
   // tslint:disable-next-line: no-any
   private static _usbDetector: any =
-      require('../../vendor/node-usb-native').detector;
+      require('../vendor/node-usb-native').detector;
 
   constructor(
       private context: vscode.ExtensionContext,

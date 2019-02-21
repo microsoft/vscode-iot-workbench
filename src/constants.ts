@@ -42,7 +42,7 @@ export class ContentView {
 
 export class FileNames {
   static readonly templateFileName = 'template.json';
-  static readonly boardListFileName = 'boardlist.json';
+  // static readonly boardListFileName = 'boardlist.json';
   static readonly resourcesFolderName = 'resources';
   static readonly iotworkbenchprojectFileName = '.iotworkbenchproject';
   static readonly settingsJsonFileName = 'settings.json';

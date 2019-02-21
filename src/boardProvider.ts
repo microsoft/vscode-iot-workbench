@@ -24,9 +24,9 @@ export class BoardProvider {
   constructor(private context: vscode.ExtensionContext) {}
 
   get list() {
-    const boardList = this.context.asAbsolutePath(
-        path.join(FileNames.resourcesFolderName, FileNames.boardListFileName));
-    const boardsJson: BoardList = require(boardList);
+    // const boardList = this.context.asAbsolutePath(
+    //     path.join(FileNames.resourcesFolderName, FileNames.boardListFileName));
+    const boardsJson: BoardList = require('../resources/boardlist.json');
     return boardsJson.boards;
   }
 

@@ -275,9 +275,10 @@ export class ExampleExplorer {
       return false;
     }
 
-    const boardList = context.asAbsolutePath(
-        path.join(FileNames.resourcesFolderName, FileNames.boardListFileName));
-    const boardsJson: {boards: Board[]} = require(boardList);
+    // const boardList = context.asAbsolutePath(
+    //     path.join(FileNames.resourcesFolderName, FileNames.boardListFileName));
+    // const boardsJson: {boards: Board[]} = require(boardList);
+    const boardsJson: {boards: Board[]} = require('../resources/boardlist.json');
 
     telemetryContext.properties.Example = this._exampleName;
     const board = boardsJson.boards.find(board => board.id === this._boardId);

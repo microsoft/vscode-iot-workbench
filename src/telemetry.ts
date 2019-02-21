@@ -30,7 +30,7 @@ export interface TelemetryMeasurements {
 
 function getPackageInfo(context: vscode.ExtensionContext): PackageInfo|
     undefined {
-  const extensionPackage = require(context.asAbsolutePath('./package.json'));
+  const extensionPackage = require('../package.json');
   if (extensionPackage) {
     const packageInfo: PackageInfo = {
       name: extensionPackage.name,
