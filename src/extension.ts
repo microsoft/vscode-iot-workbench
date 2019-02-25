@@ -23,7 +23,6 @@ import {PnPMetaModelParser, PnPMetaModelGraph} from './pnp/PnPMetaModelGraph';
 import {DeviceModelOperator} from './pnp/DeviceModelOperator';
 import {PnPMetaModelJsonParser} from './pnp/PnPMetaModelJsonParser';
 import {PnPDiagnostic} from './pnp/PnPDiagnostic';
-import {VSCExpress} from 'vscode-express';
 
 
 function getDocumentType(document: vscode.TextDocument) {

@@ -139,8 +139,8 @@ function getNextPagePnPFiles(fileType) {
   loadingPnPFiles.value = true;
 
   command(commandName, 50, nextToken.value, res => {
-    Vue.set(fileList, 'value', fileList.value.concat(res.result.results));
-    Vue.set(nextToken, 'value', res.result.continuationToken);
+    Vue.set(fileList, 'value', fileList.value.concat(res.results));
+    Vue.set(nextToken, 'value', res.continuationToken);
     Vue.set(loadingPnPFiles, 'value', false);
   });
 }

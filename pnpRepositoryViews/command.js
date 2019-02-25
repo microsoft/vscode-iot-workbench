@@ -1,3 +1,6 @@
+const callbackStack = [];
+const vscode = acquireVsCodeApi();
+
 function command(cmd, callback) {
   if (!cmd) {
     return;
@@ -9,23 +12,30 @@ function command(cmd, callback) {
   } else {
     callback = undefined;
   }
-  const data = encodeURIComponent(JSON.stringify(args));
-  const url = `/command?data=${data}`;
- 
-  var xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState === 4) {
-      if (xhr.status === 200) {
-        if (callback) {
-          callback(JSON.parse(xhr.responseText));
-        }
-      } else {
-        if (callback) {
-          callback(null);
-        }
-      }
+  args.shift();
+  const messageId = new Date().getTime() + Math.random();
+  
+  callbackStack.push({
+    messageId,
+    callback
+  });
+
+  vscode.postMessage({
+    messageId,
+    command: cmd,
+    parameter: args
+  });
+}
+
+window.addEventListener('message', event => {
+  const message = event.data;
+
+  for (let index = 0; index < callbackStack.length; index++) {
+    const callbackItem = callbackStack[index];
+    if (callbackItem.messageId === message.messageId) {
+      callbackItem.callback(message.payload);
+      callbackStack.splice(index, 1);
+      break;
     }
   }
-  xhr.open('GET', url, true);
-  xhr.send();
-}
+});

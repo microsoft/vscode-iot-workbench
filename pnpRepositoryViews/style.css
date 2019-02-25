@@ -678,10 +678,23 @@ header .search-bar button.dropdown.status {
   position: absolute;
   bottom: 0;
   right: 0;
-  background: url(image/Copy.svg) no-repeat center;
-  background-size: 16px 16px;
   display: none;
   z-index: 10;
+}
+
+.copy_icon::after {
+  content: "";
+  width: 16px;
+  height: 16px;
+  display: block;
+  -webkit-mask-image: url(image/Copy.svg);
+  mask-image: url(image/Copy.svg);
+  -webkit-mask-size: 16px 16px;
+  mask-size: 16px 16px;
+  background-color: #333;
+  left: 8px;
+  top: 8px;
+  position: absolute;
 }
 
 :hover > .copy_icon {
@@ -706,7 +719,7 @@ header .search-bar button.dropdown.status {
   top: 6px;
 }
 
-.copy_icon.copied::after {
+/* .copy_icon.copied::after {
   content: "";
   display: block;
   border-right: 5px solid rgba(0, 0, 0, 0.5);
@@ -715,10 +728,124 @@ header .search-bar button.dropdown.status {
   position: absolute;
   right: -5px;
   top: 11px;
-}
+} */
 
 .copy-text-box {
   position: absolute;
   top: -1000px;
   left: 0;
+}
+
+body.vscode-dark {
+  color: #ccc;
+  background: #1e1e1e;
+}
+
+body.vscode-dark .with-icon::before {
+  background-color: #ccc;
+}
+
+body.vscode-dark button:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+body.vscode-dark button:not(:disabled):active {
+  background: rgba(255, 255, 255, 0.2)!important;
+}
+body.vscode-dark button:disabled {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+body.vscode-dark button:disabled::before {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+body.vscode-dark button {
+  color: #eee;
+}
+
+body.vscode-dark .content table th {
+  color: #888;
+}
+
+body.vscode-dark #main.show-search-bar header .action-bar button.filter {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+body.vscode-dark #main.show-search-bar header.show-status-selector .search-bar .status {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+body.vscode-dark #main.show-search-bar header.show-tag-selector .search-bar .tags {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+body.vscode-dark header .search-bar input[type=text] {
+  color: #ccc;
+}
+
+body.vscode-dark header .search-bar button.dropdown::after {
+  background-color: #eee;
+}
+
+body.vscode-dark header .status-selector {
+  background: #333;
+}
+
+body.vscode-dark header .tag-selector {
+  border-top-color: #333;
+  background: #333;
+}
+
+body.vscode-dark header .tag-selector .tag-list-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+body.vscode-dark header .tag-selector .tag-list-item:active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+body.vscode-dark header .status-selector .status-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+body.vscode-dark header .status-selector .status-item:active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+body.vscode-dark header .tag-selector-search-bar .tag-search-bar input[type=text] {
+  color: #ccc;
+}
+
+body.vscode-dark .content table tr.loading-pnp-files td:not(:first-child)::before {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+body.vscode-dark .content table tr {
+  border-bottom-color: rgba(255, 255, 255, 0.1)
+}
+
+body.vscode-dark .content table tbody tr:not(:last-child):not(.loading-pnp-files):hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+body.vscode-dark .content table tbody tr:not(:last-child):not(.loading-pnp-files):active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+body.vscode-dark .content table tbody::-webkit-scrollbar {
+  background: #333;
+}
+
+body.vscode-dark .content table tbody::-webkit-scrollbar-thumb {
+  background-color: #1e1e1e;
+  border-color: #333;
+}
+
+body.vscode-dark .copy_icon::after {
+  background-color: #ccc;
+}
+
+body.vscode-dark .copy_icon:hover {
+  background-color: rgba(255, 255, 255, 0.2);
 }

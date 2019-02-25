@@ -8,7 +8,7 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as url from 'url';
 
-import {VSCExpress} from 'vscode-express';
+import {VSCExpress} from '../vscode-express';
 import {PnPFileNames, PnPConstants} from './PnPConstants';
 import {PnPMetamodelRepositoryClient} from './pnp-api/PnPMetamodelRepositoryClient';
 import {PnPUri} from './pnp-api/Validator/PnPUri';
