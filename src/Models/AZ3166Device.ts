@@ -54,7 +54,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
   static get serialport(): any {
     if (!AZ3166Device._serialport) {
       AZ3166Device._serialport =
-          require('../../../vendor/node-usb-native').SerialPort;
+          require('../../vendor/node-usb-native').SerialPort;
     }
     return AZ3166Device._serialport;
   }
@@ -438,15 +438,17 @@ export class AZ3166Device extends ArduinoDeviceBase {
           const executeSetAzIoTHub = async () => {
             try {
               const data = `${command} "${configValue}"\r\n`;
-              if (data.length <= 120) {
-                await this.sendDataViaSerialPort(port, data);
-              } else {
-                await this.sendDataViaSerialPort(port, data.slice(0, 100));
+
+              let restDataLength = data.length;
+              while (restDataLength > 0) {
+                const start = data.length - restDataLength;
+                const length = Math.min(100, restDataLength);
+                restDataLength -= length;
+                const dataChunk = data.substr(start, length);
+                await this.sendDataViaSerialPort(port, dataChunk);
                 await delay(1000);
-                await this.sendDataViaSerialPort(port, data.slice(100));
               }
 
-              await delay(1000);
               port.close();
             } catch (ignore) {
             }
