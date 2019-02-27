@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {FileNames} from '../../constants';
+import {TelemetryContext} from '../../telemetry';
 
 import {AnsiCCodeGeneratorBase} from './Interfaces/AnsiCCodeGeneratorBase';
 
@@ -14,7 +15,9 @@ const ansiConstants = {
 const templateFileNames = ['Readme.md', 'main.c', 'CMakeLists.txt'];
 
 export class AnsiCCodeGenGeneralImpl extends AnsiCCodeGeneratorBase {
-  constructor(context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
+  constructor(
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      private telemetryContext: TelemetryContext) {
     super(context, channel);
   }
 

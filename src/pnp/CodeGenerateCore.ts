@@ -137,8 +137,10 @@ export class CodeGenerateCore {
       codeGenFactory =
           new AnsiCCodeGeneratorFactory(context, channel, telemetryContext);
       targetItems = [
-        {label: 'MXChip IoT DevKit', description: ''},
-        {label: 'General Platform', description: ''}
+        {label: 'General Platform', description: ''},
+        {label: 'Device Boilerplate', description: ''},
+        {label: 'MXChip IoT DevKit', description: ''}
+
       ];
     }
 
@@ -160,9 +162,12 @@ export class CodeGenerateCore {
     }
 
     let codeGenDeviceType = CodeGenDeviceType.General;
-    if (targetSelection.label === 'MXChip IoT DevKit') {
+    if (targetSelection.label === 'Device Boilerplate') {
+      codeGenDeviceType = CodeGenDeviceType.Boilerplate;
+    } else if (targetSelection.label === 'MXChip IoT DevKit') {
       codeGenDeviceType = CodeGenDeviceType.IoTDevKit;
     }
+
     const codeGenerator =
         codeGenFactory.CreateCodeGeneratorImpl(codeGenDeviceType);
     if (!codeGenerator) {

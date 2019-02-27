@@ -1,7 +1,8 @@
 
 export enum CodeGenDeviceType {
   General = 1,
-  IoTDevKit = 2
+  Boilerplate = 2,
+  IoTDevKit = 3
 }
 
 export interface CodeGenerator {
