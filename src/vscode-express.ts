@@ -2,6 +2,13 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+export interface VSCExpressCommandResponsePayload {
+  code: number;
+  // tslint:disable-next-line:no-any
+  result?: any;
+  message?: string;
+}
+
 export class VSCExpress {
   static webviewPanelList: {[uri: string]: vscode.WebviewPanel} = {};
   private _webRootAbsolutePath: string;
@@ -30,10 +37,11 @@ export class VSCExpress {
     return context.panel;
   }
 
-  close(path: string) {
-    if (VSCExpress.webviewPanelList[path]) {
-      VSCExpress.webviewPanelList[path].dispose();
-      delete VSCExpress.webviewPanelList[path];
+  close(filePath: string) {
+    filePath = path.join(this._webRootAbsolutePath, filePath);
+    if (VSCExpress.webviewPanelList[filePath]) {
+      VSCExpress.webviewPanelList[filePath].dispose();
+      delete VSCExpress.webviewPanelList[filePath];
     }
   }
 }
@@ -57,15 +65,31 @@ export class VSCExpressPanelContext {
     const fileUrl = vscode.Uri.file(filePath).with({scheme: 'vscode-resource'});
 
     let html = fs.readFileSync(filePath, 'utf8');
-    html = html.replace(/<head>/, `<head><base href="${fileUrl.toString()}">`);
+    if (/(<head(\s.*)?>)/.test(html)) {
+      html = html.replace(
+          /(<head(\s.*)?>)/, `$1<base href="${fileUrl.toString()}">`);
+    } else if (/(<html(\s.*)?>)/.test(html)) {
+      html = html.replace(
+          /(<html(\s.*)?>)/,
+          `$1<head><base href="${fileUrl.toString()}"></head>`);
+    } else {
+      html = `<head><base href="${fileUrl.toString()}"></head>${html}`;
+    }
 
     if (!VSCExpress.webviewPanelList[this.filePath]) {
       this.panel = vscode.window.createWebviewPanel(
           'VSCExpress', this.title, this.viewColumn, this.options);
       this.panel.webview.html = html;
       this.panel.webview.onDidReceiveMessage(async message => {
-        const payload = await vscode.commands.executeCommand.apply(
-            null, [message.command as string, ...message.parameter]);
+        // tslint:disable-next-line:no-any
+        const payload: VSCExpressCommandResponsePayload = {code: 0};
+        try {
+          const result = await vscode.commands.executeCommand.apply(
+              null, [message.command as string, ...message.parameter]);
+          payload.result = result;
+        } catch (error) {
+          payload.message = error.message;
+        }
         this.panel.webview.postMessage({messageId: message.messageId, payload});
       });
       this.panel.onDidDispose(() => {

@@ -33,7 +33,9 @@ window.addEventListener('message', event => {
   for (let index = 0; index < callbackStack.length; index++) {
     const callbackItem = callbackStack[index];
     if (callbackItem.messageId === message.messageId) {
-      callbackItem.callback(message.payload);
+      if (callbackItem.callback) {
+        callbackItem.callback(message.payload);
+      }
       callbackStack.splice(index, 1);
       break;
     }
