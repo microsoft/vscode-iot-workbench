@@ -5,13 +5,12 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import impor = require('impor');
 import {TelemetryContext} from './telemetry';
 import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 
-
+const impor = require('impor')(__dirname);
 const ioTProjectModule =
     impor('./Models/IoTProject') as typeof import('./Models/IoTProject');
 

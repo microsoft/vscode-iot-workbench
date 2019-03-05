@@ -6,7 +6,6 @@
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import impor = require('impor');
 
 import * as utils from '../utils';
 import WebSiteManagementClient = require('azure-arm-website');
@@ -25,6 +24,7 @@ import {extensionName} from './Interfaces/Api';
 import {Guid} from 'guid-typescript';
 import {AzureComponentConfig, AzureConfigs, ComponentInfo, DependencyConfig, Dependency} from './AzureComponentConfig';
 
+const impor = require('impor')(__dirname);
 const azureUtilityModule =
     impor('./AzureUtility') as typeof import('./AzureUtility');
 

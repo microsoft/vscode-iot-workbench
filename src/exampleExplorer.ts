@@ -3,7 +3,6 @@
 
 'use strict';
 
-import impor = require('impor');
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
@@ -20,6 +19,7 @@ import {ContentProvider} from './contentProvider';
 
 type OptionsWithUri = import('request-promise').OptionsWithUri;
 
+const impor = require('impor')(__dirname);
 const request = impor('request-promise') as typeof import('request-promise');
 
 export class ExampleExplorer {

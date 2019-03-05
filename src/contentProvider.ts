@@ -1,9 +1,9 @@
 import * as express from 'express';
 import * as vscode from 'vscode';
-import impor = require('impor');
 import {ContentView, EventNames} from './constants';
 import {LocalWebServer} from './localWebServer';
 
+const impor = require('impor')(__dirname);
 type OptionsWithUri = import('request-promise').OptionsWithUri;
 type ExampleExplorer = import('./exampleExplorer').ExampleExplorer;
 type TelemetryContext = import('./telemetry').TelemetryContext;

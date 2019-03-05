@@ -4,7 +4,6 @@
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import impor = require('impor');
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames} from '../constants';
@@ -24,6 +23,7 @@ import {Workspace} from './Interfaces/Workspace';
 type Dependency = import('./AzureComponentConfig').Dependency;
 type TelemetryContext = import('../telemetry').TelemetryContext;
 
+const impor = require('impor')(__dirname);
 const az3166DeviceModule =
     impor('./AZ3166Device') as typeof import('./AZ3166Device');
 const azureComponentConfigModule =

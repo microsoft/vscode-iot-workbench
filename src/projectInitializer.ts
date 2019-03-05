@@ -5,7 +5,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import impor = require('impor');
 import * as path from 'path';
 import {ProjectTemplate} from './Models/Interfaces/ProjectTemplate';
 import * as utils from './utils';
@@ -15,6 +14,7 @@ import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {FileNames} from './constants';
 import {BoardProvider} from './boardProvider';
 
+const impor = require('impor')(__dirname);
 const azureFunctionsModule = impor('./Models/AzureFunctions') as
     typeof import('./Models/AzureFunctions');
 const ioTProjectModule =

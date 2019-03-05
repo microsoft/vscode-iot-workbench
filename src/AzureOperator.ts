@@ -6,8 +6,8 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import {TelemetryContext} from './telemetry';
-import impor = require('impor');
 
+const impor = require('impor')(__dirname);
 const ioTProjectModule =
     impor('./Models/IoTProject') as typeof import('./Models/IoTProject');
 

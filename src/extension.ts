@@ -5,7 +5,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import impor = require('impor');
 import {ProjectInitializer} from './projectInitializer';
 import {DeviceOperator} from './DeviceOperator';
 import {AzureOperator} from './AzureOperator';
@@ -18,6 +17,7 @@ import {TelemetryContext, callWithTelemetry, TelemetryWorker} from './telemetry'
 import {UsbDetector} from './usbDetector';
 import {HelpProvider} from './helpProvider';
 
+const impor = require('impor')(__dirname);
 const ioTProjectModule =
     impor('./Models/IoTProject') as typeof import('./Models/IoTProject');
 
