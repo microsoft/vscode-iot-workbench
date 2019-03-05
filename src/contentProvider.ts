@@ -1,11 +1,15 @@
 import * as express from 'express';
 import * as vscode from 'vscode';
-import request = require('request-promise');
-
+import impor = require('impor');
 import {ContentView, EventNames} from './constants';
-import {ExampleExplorer} from './exampleExplorer';
 import {LocalWebServer} from './localWebServer';
-import {TelemetryContext, TelemetryWorker} from './telemetry';
+
+type OptionsWithUri = import('request-promise').OptionsWithUri;
+type ExampleExplorer = import('./exampleExplorer').ExampleExplorer;
+type TelemetryContext = import('./telemetry').TelemetryContext;
+
+const request = impor('request-promise') as typeof import('request-promise');
+const telemetryModule = impor('./telemetry') as typeof import('./telemetry');
 
 export class ContentProvider implements vscode.TextDocumentContentProvider {
   private _webserver: LocalWebServer|null = null;
@@ -105,7 +109,8 @@ export class ContentProvider implements vscode.TextDocumentContentProvider {
         measurements: {duration: 0}
       };
 
-      TelemetryWorker.sendEvent(EventNames.openTutorial, telemetryContext);
+      telemetryModule.TelemetryWorker.sendEvent(
+          EventNames.openTutorial, telemetryContext);
     }
 
     return res.json({code: 0});
@@ -116,8 +121,8 @@ export class ContentProvider implements vscode.TextDocumentContentProvider {
       return res.json({code: 1});
     }
 
-    const options: request
-        .OptionsWithUri = {method: 'GET', uri: req.query.url, encoding: 'utf8'};
+    const options:
+        OptionsWithUri = {method: 'GET', uri: req.query.url, encoding: 'utf8'};
 
     const feed = await request(options).promise() as string;
     return res.send(feed);

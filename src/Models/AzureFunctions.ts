@@ -6,6 +6,7 @@
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import impor = require('impor');
 
 import * as utils from '../utils';
 import WebSiteManagementClient = require('azure-arm-website');
@@ -23,7 +24,9 @@ import {getExtension} from './Apis';
 import {extensionName} from './Interfaces/Api';
 import {Guid} from 'guid-typescript';
 import {AzureComponentConfig, AzureConfigs, ComponentInfo, DependencyConfig, Dependency} from './AzureComponentConfig';
-import {AzureUtility} from './AzureUtility';
+
+const azureUtilityModule =
+    impor('./AzureUtility') as typeof import('./AzureUtility');
 
 export class AzureFunctions implements Component, Provisionable, Deployable {
   dependencies: DependencyConfig[] = [];
@@ -212,12 +215,12 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
 
   async provision(): Promise<boolean> {
     try {
-      const subscriptionId = AzureUtility.subscriptionId;
+      const subscriptionId = azureUtilityModule.AzureUtility.subscriptionId;
       if (!subscriptionId) {
         return false;
       }
 
-      const resourceGroup = AzureUtility.resourceGroup;
+      const resourceGroup = azureUtilityModule.AzureUtility.resourceGroup;
       if (!resourceGroup) {
         return false;
       }

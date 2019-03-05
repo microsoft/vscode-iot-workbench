@@ -5,17 +5,22 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import {IoTProject} from './Models/IoTProject';
+import impor = require('impor');
 import {TelemetryContext} from './telemetry';
 import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 
+
+const ioTProjectModule =
+    impor('./Models/IoTProject') as typeof import('./Models/IoTProject');
+
 export class DeviceOperator {
   async compile(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    const project = new IoTProject(context, channel, telemetryContext);
+    const project =
+        new ioTProjectModule.IoTProject(context, channel, telemetryContext);
     const result = await project.load();
     if (!result) {
       await project.handleLoadFailure();
@@ -27,7 +32,8 @@ export class DeviceOperator {
   async upload(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    const project = new IoTProject(context, channel, telemetryContext);
+    const project =
+        new ioTProjectModule.IoTProject(context, channel, telemetryContext);
     const result = await project.load();
     if (!result) {
       await project.handleLoadFailure();
@@ -39,7 +45,8 @@ export class DeviceOperator {
   async configDeviceSettings(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    const project = new IoTProject(context, channel, telemetryContext);
+    const project =
+        new ioTProjectModule.IoTProject(context, channel, telemetryContext);
     const result = await project.load();
     if (!result) {
       await project.handleLoadFailure();

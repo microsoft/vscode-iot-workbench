@@ -3,11 +3,11 @@
 
 'use strict';
 
+import impor = require('impor');
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import {Example} from './Models/Interfaces/Example';
-import request = require('request-promise');
 import AdmZip = require('adm-zip');
 import {IoTWorkbenchSettings} from './IoTSettings';
 import * as utils from './utils';
@@ -17,6 +17,10 @@ import {ContentView, FileNames} from './constants';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 import {ContentProvider} from './contentProvider';
+
+type OptionsWithUri = import('request-promise').OptionsWithUri;
+
+const request = impor('request-promise') as typeof import('request-promise');
 
 export class ExampleExplorer {
   private exampleList: Example[] = [];
@@ -68,7 +72,7 @@ export class ExampleExplorer {
       channel.append('.');
     }, 1000);
 
-    const options: request.OptionsWithUri = {
+    const options: OptionsWithUri = {
       method: 'GET',
       uri: url,
       encoding: null  // Binary data
