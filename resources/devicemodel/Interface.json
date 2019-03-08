@@ -21,7 +21,7 @@
             "@container": "@language"
         },
         "displayUnit": {
-            "@id": "SchemaField/unit",
+            "@id": "SchemaField/displayUnit",
             "@container": "@language"
         },
         "double": "Schemas/Double/double",
@@ -57,9 +57,11 @@
             "@id": "SchemaField/schema",
             "@type": "@vocab"
         },
+        "schemas":  "Interface/schemas" ,
         "string": "Schemas/String/string",
         "synchronous": "ExecutionType/synchronous",
         "time": "Schemas/Time/time",
+        "unit":  "SchemaField/unit",
         "writable": "Property/writable"
     }
 } 
