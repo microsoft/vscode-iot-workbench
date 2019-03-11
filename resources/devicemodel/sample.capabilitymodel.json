@@ -3,7 +3,8 @@
   "@type": "CapabilityModel",
   "displayName": "{CAPABILITYMODELNAME}",
   "implements": [
-    "http://exampletest.com/test1/1.0.0"
+    "http://azureiot.com/interfaces/DeviceInformation/1.0.0",
+    "http://azureiot.com/interfaces/DeviceDiscovery/1.0.0"    
   ],
   "@context": "http://azureiot.com/v0/contexts/CapabilityModel.json"
 }
