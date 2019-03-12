@@ -5,7 +5,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import * as request from 'request-promise';
 import {VSCExpress} from 'vscode-express';
 import {BoardProvider} from './boardProvider';
 import {ProjectInitializer} from './projectInitializer';
@@ -21,6 +20,7 @@ import {UsbDetector} from './usbDetector';
 const impor = require('impor')(__dirname);
 const ioTProjectModule =
     impor('./Models/IoTProject') as typeof import('./Models/IoTProject');
+const request = impor('request-promise') as typeof import('request-promise');
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
