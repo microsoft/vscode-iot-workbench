@@ -5,6 +5,9 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import * as request from 'request-promise';
+import {VSCExpress} from 'vscode-express';
+import {BoardProvider} from './boardProvider';
 import {ProjectInitializer} from './projectInitializer';
 import {DeviceOperator} from './DeviceOperator';
 import {AzureOperator} from './AzureOperator';
@@ -12,11 +15,9 @@ import {IoTProject} from './Models/IoTProject';
 import {ExampleExplorer} from './exampleExplorer';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import {ConfigHandler} from './configHandler';
-import {ConfigKey, EventNames, ContentView} from './constants';
-import {ContentProvider} from './contentProvider';
-import {TelemetryContext, callWithTelemetry, TelemetryWorker} from './telemetry';
+import {ConfigKey, EventNames} from './constants';
+import {TelemetryContext, callWithTelemetry, TelemetryWorker, TelemetryProperties} from './telemetry';
 import {UsbDetector} from './usbDetector';
-import {HelpProvider} from './helpProvider';
 
 
 // this method is called when your extension is activated
@@ -59,13 +60,6 @@ export async function activate(context: vscode.ExtensionContext) {
       exampleExplorer.selectBoard.bind(exampleExplorer);
   const initializeExampleBinder =
       exampleExplorer.initializeExample.bind(exampleExplorer);
-
-
-  ContentProvider.getInstance().Initialize(
-      context.extensionPath, exampleExplorer);
-  context.subscriptions.push(
-      vscode.workspace.registerTextDocumentContentProvider(
-          ContentView.workbenchContentProtocol, ContentProvider.getInstance()));
 
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with  registerCommand
@@ -119,10 +113,11 @@ export async function activate(context: vscode.ExtensionContext) {
         exampleSelectBoardBinder);
   };
 
-  const examplesInitializeProvider = async () => {
+  const examplesInitializeProvider =
+      async (name?: string, url?: string, boardId?: string) => {
     callWithTelemetry(
         EventNames.loadExampleEvent, outputChannel, true, context,
-        initializeExampleBinder);
+        initializeExampleBinder, {}, name, url, boardId);
   };
 
   const projectInit = vscode.commands.registerCommand(
@@ -152,9 +147,59 @@ export async function activate(context: vscode.ExtensionContext) {
   const configureDevice = vscode.commands.registerCommand(
       'iotworkbench.configureDevice', deviceSettingsConfigProvider);
 
+  const sendTelemetry = vscode.commands.registerCommand(
+      'iotworkbench.sendTelemetry',
+      (additionalProperties: {[key: string]: string}) => {
+        const properties: TelemetryProperties = {
+          result: 'Succeeded',
+          error: '',
+          errorMessage: ''
+        };
+
+        for (const key of Object.keys(additionalProperties)) {
+          properties[key] = additionalProperties[key];
+        }
+
+        const telemetryContext:
+            TelemetryContext = {properties, measurements: {duration: 0}};
+
+        TelemetryWorker.sendEvent(EventNames.openTutorial, telemetryContext);
+      });
+
+  const openUri =
+      vscode.commands.registerCommand('iotworkbench.openUri', (uri: string) => {
+        vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(uri));
+      });
+
+  const httpRequest = vscode.commands.registerCommand(
+      'iotworkbench.httpRequest', async (uri: string) => {
+        const res = await request(uri);
+        return res;
+      });
+
+  const helpProvider = new VSCExpress(context, 'views');
+
   const helpInit =
       vscode.commands.registerCommand('iotworkbench.help', async () => {
-        await HelpProvider.open(context);
+        const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
+
+        if (boardId) {
+          const boardProvider = new BoardProvider(context);
+          const board = boardProvider.find({id: boardId});
+
+          if (board && board.helpUrl) {
+            await vscode.commands.executeCommand(
+                'vscode.open', vscode.Uri.parse(board.helpUrl));
+            return;
+          }
+        }
+        helpProvider.open(
+            'help.html', 'Welcome - Azure IoT Device Workbench',
+            vscode.ViewColumn.One, {
+              enableScripts: true,
+              enableCommandUris: true,
+              retainContextWhenHidden: true
+            });
         return;
       });
 
@@ -176,6 +221,9 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(azureDeploy);
   context.subscriptions.push(deviceToolchain);
   context.subscriptions.push(configureDevice);
+  context.subscriptions.push(sendTelemetry);
+  context.subscriptions.push(openUri);
+  context.subscriptions.push(httpRequest);
 
   const usbDetector = new UsbDetector(context, outputChannel);
   usbDetector.startListening();
@@ -184,16 +232,9 @@ export async function activate(context: vscode.ExtensionContext) {
   if (!shownHelpPage) {
     // Do not execute help command here
     // Help command may open board help link
-    const panel = vscode.window.createWebviewPanel(
-        'IoTWorkbenchHelp', 'Welcome - Azure IoT Device Workbench',
-        vscode.ViewColumn.One, {
-          enableScripts: true,
-          retainContextWhenHidden: true,
-        });
-
-    panel.webview.html =
-        await ContentProvider.getInstance().provideTextDocumentContent(
-            vscode.Uri.parse(ContentView.workbenchHelpURI));
+    helpProvider.open(
+        'help.html', 'Welcome - Azure IoT Device Workbench',
+        vscode.ViewColumn.One);
 
     ConfigHandler.update(
         ConfigKey.shownHelpPage, true, vscode.ConfigurationTarget.Global);

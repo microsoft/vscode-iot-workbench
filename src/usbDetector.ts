@@ -1,16 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as fs from 'fs-plus';
 import * as os from 'os';
-import * as path from 'path';
 import * as vscode from 'vscode';
+import {VSCExpress} from 'vscode-express';
 
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 import {ConfigHandler} from './configHandler';
-import {ContentView, EventNames} from './constants';
-import {ContentProvider} from './contentProvider';
+import {EventNames} from './constants';
 import {callWithTelemetry} from './telemetry';
 
 export interface DeviceInfo {
@@ -18,11 +16,8 @@ export interface DeviceInfo {
   productId: number;
 }
 
-const constants = {
-  iotworkbenchprojectFileName: '.iotworkbenchproject'
-};
-
 export class UsbDetector {
+  private static _vscexpress: VSCExpress|undefined;
   // tslint:disable-next-line: no-any
   private static _usbDetector: any =
       require('../../vendor/node-usb-native').detector;
@@ -67,22 +62,17 @@ export class UsbDetector {
             if (board.exampleUrl) {
               ArduinoPackageManager.installBoard(board);
 
-              const exampleUrl =
-                  ContentView.workbenchExampleURI + '?' +
-                  encodeURIComponent(
-                      'board=' + board.id +
-                      '&url=' + encodeURIComponent(board.exampleUrl || ''));
-
-              const panel = vscode.window.createWebviewPanel(
-                  'IoTWorkbenchExamples',
-                  'Examples - Azure IoT Device Workbench',
+              const exampleUrl = 'example.html?board=' + board.id +
+                  '&url=' + encodeURIComponent(board.exampleUrl || '');
+              UsbDetector._vscexpress = UsbDetector._vscexpress ||
+                  new VSCExpress(this.context, 'views');
+              UsbDetector._vscexpress.open(
+                  exampleUrl, 'Examples - Azure IoT Device Workbench',
                   vscode.ViewColumn.One, {
                     enableScripts: true,
-                    retainContextWhenHidden: true,
+                    enableCommandUris: true,
+                    retainContextWhenHidden: true
                   });
-              panel.webview.html =
-                  await ContentProvider.getInstance()
-                      .provideTextDocumentContent(vscode.Uri.parse(exampleUrl));
             }
           }, {board: board.name});
     }

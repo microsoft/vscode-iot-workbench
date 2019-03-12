@@ -1,3 +1,6 @@
+const callbackStack = [];
+const vscode = acquireVsCodeApi();
+
 var example = new Vue({
   el: '#main',
   data: {
@@ -10,7 +13,7 @@ var example = new Vue({
     boardId: ''
   },
   created: function() {
-    const query = parseQuery(location.href);
+    const query = parseQuery(_location ? _location.href : location.href);
     const url = query.url ||
         'https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/gallery/workbench-example-devkit-v2.json';
     this.boardId = query.board || '';
@@ -60,8 +63,11 @@ var example = new Vue({
       return 'example_' + new Date().getTime();
     },
     callAPI: function(name, url, boardId) {
-      var apiUrl = `/api/example?name=${encodeURIComponent(name)}&url=${encodeURIComponent(url)}&board=${boardId}`;
-      httpRequest(apiUrl);
+      if (!name || !url) {
+        command('iotworkbench.examples');
+        return;
+      }
+      command('iotworkbench.exampleInitialize', name, url, boardId);
     },
     openLink: openLink
   }
@@ -71,30 +77,20 @@ function openLink(url, example) {
   if (!url) {
     return;
   }
-  var apiUrl = `/api/link?url=${url}`;
+  command('iotworkbench.openUri', url);
   if (example) {
-    apiUrl += '&example=' + encodeURIComponent(example);
+    command('iotworkbench.sendTelemetry', {example});
   }
-  httpRequest(apiUrl);
 }
 
 function httpRequest(url, callback) {
-  var xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState === 4) {
-      if (xhr.status === 200) {
-        if (callback) {
-          callback(xhr.responseText);
-        }
-      } else {
-        if (callback) {
-          callback(null);
-        }
-      }
+  command('iotworkbench.httpRequest', url, (res) => {
+    if (res.code === 0) {
+      callback(res.result);
+    } else {
+      callback(null);
     }
-  }
-  xhr.open('GET', url, true);
-  xhr.send();
+  });
 }
 
 function parseQuery(url) {
@@ -213,7 +209,7 @@ function generateBadge(obj) {
 
 function generateFeed(obj) {
   let section = generateSection(obj, 'blog');
-  httpRequest('/api/feed?url=' + encodeURIComponent(obj.url), function(data) {
+  httpRequest(obj.url, function(data) {
     let parser = new DOMParser();
     let xmlDoc = parser.parseFromString(data,'text/xml');
     let items = xmlDoc.getElementsByTagName('item');
@@ -285,3 +281,44 @@ function generateAside(data) {
     });
   }
 }
+
+function command(cmd, callback) {
+  if (!cmd) {
+    return;
+  }
+  let args = Array.from(arguments);
+  if (typeof args[args.length - 1] === 'function') {
+    callback = args[args.length - 1];
+    args.length = args.length - 1;
+  } else {
+    callback = undefined;
+  }
+  args.shift();
+  const messageId = new Date().getTime() + Math.random();
+  
+  callbackStack.push({
+    messageId,
+    callback
+  });
+ 
+  vscode.postMessage({
+    messageId,
+    command: cmd,
+    parameter: args
+  });
+}
+ 
+window.addEventListener('message', event => {
+  const message = event.data;
+ 
+  for (let index = 0; index < callbackStack.length; index++) {
+    const callbackItem = callbackStack[index];
+    if (callbackItem.messageId === message.messageId) {
+      if (callbackItem.callback) {
+        callbackItem.callback(message.payload);
+      }
+      callbackStack.splice(index, 1);
+      break;
+    }
+  }
+});

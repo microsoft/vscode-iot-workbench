@@ -13,16 +13,17 @@ import {IoTWorkbenchSettings} from './IoTSettings';
 import * as utils from './utils';
 import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {TelemetryContext} from './telemetry';
-import {ContentView, FileNames} from './constants';
+import {FileNames} from './constants';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
-import {ContentProvider} from './contentProvider';
+import {VSCExpress} from 'vscode-express';
 
 export class ExampleExplorer {
-  private exampleList: Example[] = [];
   private _exampleName = '';
   private _exampleUrl = '';
   private _boardId = '';
+
+  private static _vscexpress: VSCExpress|undefined;
 
   private async moveTempFiles(fsPath: string) {
     const tempPath = path.join(fsPath, '.temp');
@@ -223,19 +224,17 @@ export class ExampleExplorer {
 
       if (board) {
         await ArduinoPackageManager.installBoard(board);
-        const exampleUrl = ContentView.workbenchExampleURI + '?' +
-            encodeURIComponent('board=' + board.id + '&url=' +
-                               encodeURIComponent(board.exampleUrl || ''));
-        const panel = vscode.window.createWebviewPanel(
-            'IoTWorkbenchExamples', 'Examples - Azure IoT Device Workbench',
+        const exampleUrl = 'example.html?board=' + board.id +
+            '&url=' + encodeURIComponent(board.exampleUrl || '');
+        ExampleExplorer._vscexpress =
+            ExampleExplorer._vscexpress || new VSCExpress(context, 'views');
+        ExampleExplorer._vscexpress.open(
+            exampleUrl, 'Examples - Azure IoT Device Workbench',
             vscode.ViewColumn.One, {
               enableScripts: true,
-              retainContextWhenHidden: true,
+              enableCommandUris: true,
+              retainContextWhenHidden: true
             });
-        panel.webview.html =
-            await ContentProvider.getInstance().provideTextDocumentContent(
-                vscode.Uri.parse(exampleUrl));
-
         return true;
       }
     }
@@ -245,8 +244,14 @@ export class ExampleExplorer {
 
   async initializeExample(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext) {
+      telemetryContext: TelemetryContext, name?: string, url?: string,
+      boardId?: string) {
     try {
+      if (name && url && boardId) {
+        this._exampleName = name;
+        this._exampleUrl = url;
+        this._boardId = boardId;
+      }
       const res = await this.initializeExampleInternal(
           context, channel, telemetryContext);
 
