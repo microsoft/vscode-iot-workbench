@@ -130,7 +130,7 @@ Open the command palette and select **IoT Device Workbench: Deploy to Azure...**
 
 ## Monitor DevKit State in Browser
 
-1. Open `web\index.html` in browser.
+1. Open `<Path to project>\web\index.html` in browser.
 2. Input the Function App name you write down.
 3. Click connect button.
 4. You should see DevKit state in a few seconds.

@@ -633,8 +633,8 @@ body[data-show-how-to-start="true"] .how_to_start {
       </div>
       <div class="main_menu">
         <div onclick="showHowToStart()">How To Start <span class="light">&#x2771;</span></div>
-        <div onclick="httpRequest('/api/new')">New Project <span class="light">&#x2771;</span></div>
-        <div onclick="httpRequest('/api/example')">Examples <span class="light">&#x2771;</span></div>
+        <div onclick="command('iotworkbench.initializeProject')">New Project <span class="light">&#x2771;</span></div>
+        <div onclick="command('iotworkbench.examples')">Examples <span class="light">&#x2771;</span></div>
       </div>
   </div>
 </div>
@@ -652,6 +652,9 @@ body[data-show-how-to-start="true"] .how_to_start {
   </div>
 </div>
 <script>
+const callbackStack = [];
+const vscode = acquireVsCodeApi();
+
 function updateIotData() {
   if (Math.random() > 0.6) {
     document.getElementById('bhp').innerHTML = (490.2 + Math.random() * 10 - 5).toFixed(1);
@@ -668,31 +671,24 @@ function updateIotData() {
 
 setInterval(updateIotData, 1000);
 
-function openLink(url) {
+function openLink(url, example) {
   if (!url) {
     return;
   }
-  var apiUrl = `/api/link?url=${url}`;
-  httpRequest(apiUrl);
+  command('iotworkbench.openUri', url);
+  if (example) {
+    command('iotworkbench.sendTelemetry', {example});
+  }
 }
 
 function httpRequest(url, callback) {
-  var xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState === 4) {
-      if (xhr.status === 200) {
-        if (callback) {
-          callback(xhr.responseText);
-        }
-      } else {
-        if (callback) {
-          callback(null);
-        }
-      }
+  command('iotworkbench.httpRequest', url, (res) => {
+    if (res.code === 0) {
+      callback(res.result);
+    } else {
+      callback(null);
     }
-  }
-  xhr.open('GET', url, true);
-  xhr.send();
+  });
 }
 
 function showHowToStart() {
@@ -702,6 +698,47 @@ function showHowToStart() {
 function hideHowToStart() {
   document.body.setAttribute('data-show-how-to-start', 'false');
 }
+
+function command(cmd, callback) {
+  if (!cmd) {
+    return;
+  }
+  let args = Array.from(arguments);
+  if (typeof args[args.length - 1] === 'function') {
+    callback = args[args.length - 1];
+    args.length = args.length - 1;
+  } else {
+    callback = undefined;
+  }
+  args.shift();
+  const messageId = new Date().getTime() + Math.random();
+  
+  callbackStack.push({
+    messageId,
+    callback
+  });
+ 
+  vscode.postMessage({
+    messageId,
+    command: cmd,
+    parameter: args
+  });
+}
+ 
+window.addEventListener('message', event => {
+  const message = event.data;
+ 
+  for (let index = 0; index < callbackStack.length; index++) {
+    const callbackItem = callbackStack[index];
+    if (callbackItem.messageId === message.messageId) {
+      if (callbackItem.callback) {
+        callbackItem.callback(message.payload);
+      }
+      callbackStack.splice(index, 1);
+      break;
+    }
+  }
+});
 </script>
 </body>
 </html>

@@ -34,12 +34,6 @@ export class EventNames {
   static readonly openTutorial = 'IoTWorkbench.OpenTutorial';
 }
 
-export class ContentView {
-  static readonly workbenchContentProtocol = 'iot-workbench';
-  static readonly workbenchExampleURI = 'iot-workbench://example';
-  static readonly workbenchHelpURI = 'iot-workbench://help';
-}
-
 export class FileNames {
   static readonly templateFileName = 'template.json';
   static readonly boardListFileName = 'boardlist.json';
