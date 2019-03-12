@@ -22,6 +22,12 @@ import {delay, getRegistryValues} from '../utils';
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 import {DeviceType} from './Interfaces/Device';
 
+const impor = require('impor')(__dirname);
+const forEach = impor('lodash.foreach') as typeof import('lodash/foreach');
+const trimStart =
+    impor('lodash.trimstart') as typeof import('lodash/trimstart');
+const filter = impor('lodash.filter') as typeof import('lodash/filter');
+
 interface SerialPortInfo {
   comName: string;
   manufacturer: string;
@@ -581,9 +587,9 @@ export class AZ3166Device extends ArduinoDeviceBase {
             }
 
             if (configMode) {
-              _.each(output.split('\n'), line => {
+              forEach(output.split('\n'), line => {
                 if (line) {
-                  line = _.trimStart(line.trim(), '#').trim();
+                  line = trimStart(line.trim(), '#').trim();
                   if (line && line.length) {
                     console.log('SerialOutput', line);
                   }

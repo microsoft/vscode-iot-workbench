@@ -6,7 +6,6 @@
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import {Example} from './Models/Interfaces/Example';
 import AdmZip = require('adm-zip');
 import {IoTWorkbenchSettings} from './IoTSettings';
 import * as utils from './utils';
@@ -227,7 +226,9 @@ export class ExampleExplorer {
       const board = boardProvider.find({id: boardSelection.id});
 
       if (board) {
-        await ArduinoPackageManager.installBoard(board);
+        // To avoid block example gallery, use async to install board here
+        // await ArduinoPackageManager.installBoard(board);
+        ArduinoPackageManager.installBoard(board);
         const exampleUrl = 'example.html?board=' + board.id +
             '&url=' + encodeURIComponent(board.exampleUrl || '');
         ExampleExplorer._vscexpress =
