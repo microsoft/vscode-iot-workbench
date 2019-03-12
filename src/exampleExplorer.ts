@@ -7,7 +7,6 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import {Example} from './Models/Interfaces/Example';
-import request = require('request-promise');
 import AdmZip = require('adm-zip');
 import {IoTWorkbenchSettings} from './IoTSettings';
 import * as utils from './utils';
@@ -17,6 +16,11 @@ import {FileNames} from './constants';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 import {VSCExpress} from 'vscode-express';
+
+type OptionsWithUri = import('request-promise').OptionsWithUri;
+
+const impor = require('impor')(__dirname);
+const request = impor('request-promise') as typeof import('request-promise');
 
 export class ExampleExplorer {
   private _exampleName = '';
@@ -69,7 +73,7 @@ export class ExampleExplorer {
       channel.append('.');
     }, 1000);
 
-    const options: request.OptionsWithUri = {
+    const options: OptionsWithUri = {
       method: 'GET',
       uri: url,
       encoding: null  // Binary data

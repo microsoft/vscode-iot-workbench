@@ -10,7 +10,7 @@
     "url": "https://github.com/Microsoft/vscode-iot-workbench/issues"
   },
   "homepage": "https://github.com/Microsoft/vscode-iot-workbench/blob/master/README.md",
-  "version": "0.2.4",
+  "version": "6.2.4-impor",
   "publisher": "vsciot-vscode",
   "icon": "logo.png",
   "aiKey": "5b869bc6-ca93-4f24-aa87-92871a3a616e",
@@ -201,6 +201,7 @@
     "fs-plus": "^3.0.1",
     "getmac": "^1.2.1",
     "guid-typescript": "^1.0.7",
+    "impor": "^0.0.2",
     "lodash": "^4.17.10",
     "ms-rest": "^2.3.0",
     "opn": "5.1.0",
