@@ -126,6 +126,9 @@ ul.example-list > li > .body > h2 {
   font-size: 17px;
   font-weight: 500;
   color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 ul.example-list > li > .body > .description {
@@ -519,7 +522,7 @@ body.vscode-dark .tutorial {
     <span v-if="featuredExample.difficulty" v-bind:class="'difficulty ' + featuredExample.difficulty"></span>
     <img v-bind:src="featuredExample.image || '/images/no-image.jpg'">
     <div class="body">
-      <h2>{{ featuredExample.name }}</h2>
+      <h2 v-bind:title="featuredExample.name">{{ featuredExample.name }}</h2>
       <div class="description" v-if="featuredExample.description" v-bind:title="featuredExample.fullDescription">{{ featuredExample.description }}</div>
       <div class="buttons">
         <button v-on:click="openLink(featuredExample.tutorial, featuredExample.name)" v-if="featuredExample.tutorial">View Tutorial</button>
@@ -534,7 +537,7 @@ body.vscode-dark .tutorial {
         <img v-bind:src="example.image || '/images/no-image.jpg'">
       </div>
       <div class="body">
-        <h2 v-bind:class="{'example-link': example.tutorial}">{{ example.name }}</h2>
+        <h2 v-bind:class="{'example-link': example.tutorial}" v-bind:title="example.name">{{ example.name }}</h2>
         <div class="description" v-if="example.description" v-bind:title="example.fullDescription">{{ example.description }}</div>
         <div class="buttons">
           <!-- Fake button. The entire block is clickable. -->
@@ -552,7 +555,7 @@ body.vscode-dark .tutorial {
         <img v-bind:src="example.image || '/images/no-image.jpg'">
       </div>
       <div class="body">
-        <h2 v-bind:class="{'example-link': example.tutorial}">{{ example.name }}</h2>
+        <h2 v-bind:class="{'example-link': example.tutorial}" v-bind:title="example.name">{{ example.name }}</h2>
         <div class="author">
           <img v-bind:src="example.author.avatar || 'images/no-avatar.svg'" class="avatar">
           <a href="#open-user-homepage" v-on:click.stop="openLink(example.author.homepage)" v-if="example.author.homepage">{{ example.author.name }}</a>

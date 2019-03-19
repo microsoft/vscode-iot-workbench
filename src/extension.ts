@@ -5,13 +5,11 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import * as request from 'request-promise';
 import {VSCExpress} from 'vscode-express';
 import {BoardProvider} from './boardProvider';
 import {ProjectInitializer} from './projectInitializer';
 import {DeviceOperator} from './DeviceOperator';
 import {AzureOperator} from './AzureOperator';
-import {IoTProject} from './Models/IoTProject';
 import {ExampleExplorer} from './exampleExplorer';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import {ConfigHandler} from './configHandler';
@@ -19,6 +17,10 @@ import {ConfigKey, EventNames} from './constants';
 import {TelemetryContext, callWithTelemetry, TelemetryWorker, TelemetryProperties} from './telemetry';
 import {UsbDetector} from './usbDetector';
 
+const impor = require('impor')(__dirname);
+const ioTProjectModule =
+    impor('./Models/IoTProject') as typeof import('./Models/IoTProject');
+const request = impor('request-promise') as typeof import('request-promise');
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -39,7 +41,8 @@ export async function activate(context: vscode.ExtensionContext) {
     properties: {result: 'Succeeded', error: '', errorMessage: ''},
     measurements: {duration: 0}
   };
-  const iotProject = new IoTProject(context, outputChannel, telemetryContext);
+  const iotProject =
+      new ioTProjectModule.IoTProject(context, outputChannel, telemetryContext);
   if (vscode.workspace.workspaceFolders) {
     try {
       await iotProject.load();
