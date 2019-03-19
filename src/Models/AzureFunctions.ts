@@ -289,7 +289,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
         return true;
       } else {
         throw new Error(
-            'Unable to create Azure Functions application. Please check the error and retry.');
+            'Creating Azure Functions application failed. Please check the error log in output window.');
       }
     } catch (error) {
       throw error;
