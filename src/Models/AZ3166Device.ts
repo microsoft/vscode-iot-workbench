@@ -131,9 +131,6 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
     this.generateCppPropertiesFile(this.board);
 
-    // Enable logging on IoT Devkit
-    await this.generatePlatformLocal();
-
     return true;
   }
 
@@ -761,7 +758,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
     const directoryName = path.join(arduinoPackagePath, files[0]);
     if (!fs.isDirectorySync(directoryName)) {
       throw new Error(
-          'The Arduino package of Devkit is not installed. Please follow the guide to install it');
+          'The Arduino package for MXChip IoT Devkit is not installed. Please follow the guide to install it');
     }
 
     const fileName = path.join(directoryName, constants.platformLocalFileName);
