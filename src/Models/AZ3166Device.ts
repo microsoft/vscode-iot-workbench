@@ -23,10 +23,10 @@ import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 import {DeviceType} from './Interfaces/Device';
 
 const impor = require('impor')(__dirname);
-const forEach = impor('lodash.foreach') as typeof import('lodash/foreach');
+const forEach = impor('lodash.foreach') as typeof import('lodash.foreach');
 const trimStart =
-    impor('lodash.trimstart') as typeof import('lodash/trimstart');
-const filter = impor('lodash.filter') as typeof import('lodash/filter');
+    impor('lodash.trimstart') as typeof import('lodash.trimstart');
+const filter = impor('lodash.filter') as typeof import('lodash.filter');
 
 interface SerialPortInfo {
   comName: string;
