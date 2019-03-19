@@ -18,10 +18,15 @@ Finish the [Getting Started Guide](./devkit-get-started.md) to:
 
 An active Azure subscription. If you do not have one, you can register via one of these methods:
 
-* Activate a [free 30-day trial Microsoft Azure account](https://azure.microsoft.com/free/).
-* Claim your [Azure credit](https://azure.microsoft.com/pricing/member-offers/msdn-benefits-details/) if you are an MSDN or Visual Studio subscriber.
+    * Activate a [free 30-day trial Microsoft Azure account](https://azure.microsoft.com/free/).
+    * If you are an MSDN or Visual Studio subscriber
+    Claim your [Azure credit](https://azure.microsoft.com/pricing/member-offers/msdn-benefits-details/).
 
-Create and link IoT Hub with Device Provisioning Service instance with [Set up auto provisioning](https://docs.microsoft.com/en-us/azure/iot-dps/quick-setup-auto-provision).
+## Even if you have a subscription
+Even if you do have an active Azure subscription but have not yet created an instance of the Device Provisioning service
+
+    * Create and link IoT Hub with Device Provisioning Service instance with
+    [Set up auto provisioning](https://docs.microsoft.com/en-us/azure/iot-dps/quick-setup-auto-provision).
 
 ## Open the project folder
 
