@@ -510,60 +510,68 @@ export class DeviceModelOperator {
         'vscode.openFolder', vscode.Uri.file(rootPath), false);
   }
 
-  async SubmitMetaModelFile(
+  async SubmitMetaModelFiles(
       context: vscode.ExtensionContext,
       channel: vscode.OutputChannel): Promise<boolean> {
-    if (!vscode.workspace.workspaceFolders ||
-        !vscode.workspace.workspaceFolders[0].uri.fsPath) {
-      vscode.window.showWarningMessage(
-          'No folder opened in current window. Please select a folder first');
-      return false;
+    const rootPath = await utils.selectWorkspaceItem(
+        'Please select a folder that contains Plug & Play meta model files to submit:',
+        {
+          canSelectFiles: false,
+          canSelectFolders: true,
+          canSelectMany: false,
+          defaultUri: vscode.workspace.workspaceFolders &&
+                  vscode.workspace.workspaceFolders.length > 0 ?
+              vscode.workspace.workspaceFolders[0].uri :
+              undefined,
+          openLabel: 'Select'
+        });
+
+    if (!rootPath) {
+      throw new Error('User cancelled folder selection.');
     }
+
     channel.show();
-    const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
 
     // Get the file to submit:
     const pnpFiles = fs.listSync(rootPath);
-    if (!pnpFiles || pnpFiles.length === 0) {
+    const fileItems: vscode.QuickPickItem[] = [];
+
+    if (pnpFiles && pnpFiles.length > 0) {
+      pnpFiles.forEach((filePath: string) => {
+        const fileName = path.basename(filePath);
+        if (fileName.endsWith(PnPConstants.interfaceSuffix) ||
+            fileName.endsWith(PnPConstants.capabilityModelSuffix)) {
+          fileItems.push({label: fileName, description: ''});
+        }
+      });
+    }
+
+    if (fileItems.length === 0) {
       const message =
-          'Unable to find Plug & Play files in current folder. Please open the folder that contains Plug & Play files and try again.';
+          'No Plug & Play files found in current folder. Please select the folder that contains Plug & Play files and try again.';
       vscode.window.showWarningMessage(message);
       return false;
     }
 
-    const fileItems: vscode.QuickPickItem[] = [];
-    pnpFiles.forEach((filePath: string) => {
-      const fileName = path.basename(filePath);
-      if (fileName.endsWith(PnPConstants.interfaceSuffix) ||
-          fileName.endsWith(PnPConstants.capabilityModelSuffix)) {
-        fileItems.push({label: fileName, description: ''});
-      }
-    });
-
-    if (fileItems.length === 0) {
-      vscode.window.showWarningMessage(
-          'Unable to find Plug & Play files in current folder. Please open the folder that contains Plug & Play files and try again.');
-      return false;
-    }
-
-    const fileSelection = await vscode.window.showQuickPick(fileItems, {
+    const selectedFiles = await vscode.window.showQuickPick(fileItems, {
       ignoreFocusOut: true,
       matchOnDescription: true,
       matchOnDetail: true,
       placeHolder: 'Select a Plug & Play file',
+      canPickMany: true
     });
 
-    if (!fileSelection) {
+    if (!selectedFiles || selectedFiles.length === 0) {
       return false;
     }
 
-    const metaModelType =
-        fileSelection.label.endsWith(PnPConstants.interfaceSuffix) ?
-        MetaModelType.Interface :
-        MetaModelType.CapabilityModel;
+    const interfaceFiles = selectedFiles.filter(file => {
+      return file.label.endsWith(PnPConstants.interfaceSuffix);
+    });
 
-    channel.appendLine(`File selected: ${fileSelection.label}`);
-    const filePath = path.join(rootPath, fileSelection.label);
+    const capabilityModels = selectedFiles.filter(file => {
+      return file.label.endsWith(PnPConstants.capabilityModelSuffix);
+    });
 
     let connectionString =
         ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
@@ -590,16 +598,44 @@ export class DeviceModelOperator {
 
     const pnpMetamodelRepositoryClient =
         new PnPMetamodelRepositoryClient(connectionString);
-    // submit the file
-    if (metaModelType === MetaModelType.Interface) {
+
+    for (const fileItem of interfaceFiles) {
+      channel.appendLine(`File to submit: ${fileItem.label}`);
+      const filePath = path.join(rootPath, fileItem.label);
       const result = await this.SubmitInterface(
-          pnpMetamodelRepositoryClient, filePath, fileSelection.label, channel);
-      return result;
-    } else {
-      const result = await this.SubmitCapabilityModel(
-          pnpMetamodelRepositoryClient, filePath, fileSelection.label, channel);
-      return result;
+          pnpMetamodelRepositoryClient, filePath, fileItem.label, channel);
+      if (!result) {
+        const message = `${
+            fileItem
+                .label} was not submitted to PnP Model Repository successfully, do you want to continue with rest files?`;
+        const continueWithOtherFiles =
+            await vscode.window.showInformationMessage(
+                message, DialogResponses.yes, DialogResponses.no);
+        if (continueWithOtherFiles === DialogResponses.no) {
+          return false;
+        }
+      }
     }
+
+    for (const fileItem of capabilityModels) {
+      channel.appendLine(`File to submit: ${fileItem.label}`);
+      const filePath = path.join(rootPath, fileItem.label);
+      const result = await this.SubmitCapabilityModel(
+          pnpMetamodelRepositoryClient, filePath, fileItem.label, channel);
+      if (!result) {
+        const message = `${
+            fileItem
+                .label} was not submitted to PnP Model Repository successfully, do you want to continue with rest files?`;
+        const continueWithOtherFiles =
+            await vscode.window.showInformationMessage(
+                message, DialogResponses.yes, DialogResponses.no);
+        if (continueWithOtherFiles === DialogResponses.no) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   private async SubmitInterface(

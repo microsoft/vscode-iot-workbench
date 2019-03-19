@@ -530,7 +530,7 @@ export async function activate(context: vscode.ExtensionContext) {
       }));
   context.subscriptions.push(vscode.commands.registerCommand(
       'iotworkbench.pnpSubmitFile', async () => {
-        deviceModelOperator.SubmitMetaModelFile(context, outputChannel);
+        deviceModelOperator.SubmitMetaModelFiles(context, outputChannel);
       }));
   context.subscriptions.push(vscode.commands.registerCommand(
       'iotworkbench.pnpGenerateCode', async () => {
