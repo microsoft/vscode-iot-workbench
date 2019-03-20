@@ -13,23 +13,29 @@ The [MXChip IoT DevKit](https://aka.ms/iot-devkit) is an all-in-one Arduino-comp
 
 Finish the [Getting Started Guide](./devkit-get-started.md) to:
 
-* Have your IoT DevKit connected to Wi-Fi.
-* Prepare the development environment.
+    * Have your IoT DevKit connected to Wi-Fi.
+    * Prepare the development environment.
 
 An active Azure subscription. If you do not have one, you can register via one of these methods:
 
-* Activate a [free 30-day trial Microsoft Azure account](https://azure.microsoft.com/free/).
-* Claim your [Azure credit](https://azure.microsoft.com/pricing/member-offers/msdn-benefits-details/) if you are an MSDN or Visual Studio subscriber.
+    * Activate a [free 30-day trial Microsoft Azure account](https://azure.microsoft.com/free/).
+    * If you are an MSDN or Visual Studio subscriber
+    Claim your [Azure credit](https://azure.microsoft.com/pricing/member-offers/msdn-benefits-details/).
 
-Create and link IoT Hub with Device Provisioning Service instance with [Set up auto provisioning](https://docs.microsoft.com/en-us/azure/iot-dps/quick-setup-auto-provision).
+## Even if you have a subscription
+
+Even if you do have an active Azure subscription but have not yet created an instance of the Device Provisioning service
+
+    * Create and link IoT Hub with Device Provisioning Service instance with
+    [Set up auto provisioning](https://docs.microsoft.com/en-us/azure/iot-dps/quick-setup-auto-provision).
 
 ## Open the project folder
 
 ### Start VS Code
 
-* Start Visual Studio Code.
-* Make sure [Azure IoT Device Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
-* Connect IoT DevKit to your PC.
+    * Start Visual Studio Code.
+    * Make sure [Azure IoT Device Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
+    * Connect IoT DevKit to your PC.
 
 ### Open Azure IoT Device Workbench Examples
 
@@ -111,8 +117,6 @@ Open integrated terminal in Visual Studio Code and run **dps_cert_gen in tool fo
 
 And you will see a **.pem** file generated in your folder.
 
-
-
 **Note:** Here we input **.build\DevKitDPS** when program ask for project name. Then the program will find compiled file with path **.build\DevKitDPS.ino.bin** and **.build\DevKitDPS.ino.elf**. Output compiled binary file to **.build** path is our default setting. If you changed build path or .ino file name before, you will need to provide a path to your compiled output file.
 
 ## Create a device enrollment entry in the Device Provisioning Service
@@ -148,8 +152,8 @@ Once your device boots, the following actions should take place:
 
 If you encounter problems, refer to [FAQs](https://microsoft.github.io/azure-iot-developer-kit/docs/faq/) or reach out to us from the following channels:
 
-* [Gitter.im](http://gitter.im/Microsoft/azure-iot-developer-kit)
-* [Stackoverflow](https://stackoverflow.com/questions/tagged/iot-devkit)
+    * [Gitter.im](http://gitter.im/Microsoft/azure-iot-developer-kit)
+    * [Stackoverflow](https://stackoverflow.com/questions/tagged/iot-devkit)
 
 ## Next Steps
 
@@ -157,8 +161,8 @@ Now that you have learned prepare the DevKit to enroll a device securely to DPS 
 
 Advance to the other tutorials to learn:
 
-* [Create and provision a simulated device](https://docs.microsoft.com/en-us/azure/iot-dps/quick-create-simulated-device)
-* [Manage device enrollments](https://docs.microsoft.com/en-us/azure/iot-dps/how-to-manage-enrollments)
-* [Revoke device access](https://docs.microsoft.com/en-us/azure/iot-dps/how-to-revoke-device-access-portal)
-* [Use HSM with SDK](https://docs.microsoft.com/en-us/azure/iot-dps/how-to-revoke-device-access-portal)
-* [Control access to Provisioning Service](https://docs.microsoft.com/en-us/azure/iot-dps/how-to-control-access)
+    * [Create and provision a simulated device](https://docs.microsoft.com/en-us/azure/iot-dps/quick-create-simulated-device)
+    * [Manage device enrollments](https://docs.microsoft.com/en-us/azure/iot-dps/how-to-manage-enrollments)
+    * [Revoke device access](https://docs.microsoft.com/en-us/azure/iot-dps/how-to-revoke-device-access-portal)
+    * [Use HSM with SDK](https://docs.microsoft.com/en-us/azure/iot-dps/how-to-revoke-device-access-portal)
+    * [Control access to Provisioning Service](https://docs.microsoft.com/en-us/azure/iot-dps/how-to-control-access)
