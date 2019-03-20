@@ -14,15 +14,16 @@ This document contains the detailed steps on how to provision Azure IoT Hub.
 
 	![IoT Device Workbench: Cloud -> Provision](pic/iot-workbench-cloud-provision.png)
 
-1. If you haven't login to Azure in Visual Studio Code before, the following will be pop-up to guide you for Azure sign-in. Otherwise, start with step 5 for resource group selection.
+1. If you haven't sign in to Azure in Visual Studio Code before, the following will be pop-up to guide you for Azure sign-in. 
 
-	![pop-up window for Azure sign-in](pic/vs-azure-login.png)
+	![azure sign in](pic/azure_signin.png)
 
-1. Click **Copy & Open** and go to the "Device Login" screen in the browser, paste the login code into the input field, and click **Continue**.
 
-	![An Azure CLI device login screen with an indication of where to enter a device authorization code.](pic/portal-enter-device-login.png)
+1. Input your Azure Account Id and password and make sure you sign in successfully. 
 
-1. Input your Azure Account Id and password in the next window in browser and after sign-in successfully, open the command palette in Visual Studio Code, type **Azure: Select Subscription** to select the subscription you want to use 
+	![sign_in successfully](pic/sign_in_success.png)
+
+1. open the command palette in Visual Studio Code, type **Azure: Select Subscription** to select the subscription you want to use 
 
 	![subscription](pic/subscription.png)
 
@@ -48,7 +49,7 @@ This document contains the detailed steps on how to provision Azure IoT Hub.
 
 	- Click **Select an existing IoT Hub** if you want to use an existing IoT Hub, and select the IoT Hub you plan to use.
 
-	- If you plan to use a new IoT Hub, click **Create a new IoT Hub**, first select the location with the same as the resource group.
+	- If you plan to create a new IoT Hub, click **Create a new IoT Hub**, first select the location with the same as the resource group.
 		>  Azure resources can be connected across regions, but keeping everything within the same data center reduces cost and minimizes latency.
 
 		Make sure **S1 - Standard tier** is selected as the pricing tier. Enter a unique name for IoT Hub name. IoT Hub names must be unique across Azure. 
