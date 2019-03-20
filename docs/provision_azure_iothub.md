@@ -22,23 +22,44 @@ This document contains the detailed steps on how to provision Azure IoT Hub.
 
 	![An Azure CLI device login screen with an indication of where to enter a device authorization code.](pic/portal-enter-device-login.png)
 
-1. Input your Azure Account Id and password in the next window in browser and after sign-in successfully, open the command palette in Visual Studio Code, type **Azure: Select Subscription** to select the subscription you want to use and then re-run **Azure IoT Device Workbench: Provision Azure Services...**
+1. Input your Azure Account Id and password in the next window in browser and after sign-in successfully, open the command palette in Visual Studio Code, type **Azure: Select Subscription** to select the subscription you want to use 
 
-1. In the dropdown list of **Select Resource Group**, if you plan to use a new resource group, click **Create Resource Group** and then provide the following information:
+	![subscription](pic/subscription.png)
 
-	| Name | Value |
-	| --- | --- |
-	| Resource Group Name  | YOUR_RESOURCE_GROUP_NAME |
-	| Resource Group Location | [Available Locations](https://azure.microsoft.com/en-us/global-infrastructure/locations/)|
+	Then re-run **Azure IoT Device Workbench: Provision Azure Services...**
 
-	> You could also select an existing resource group.  
+1. In the dropdown list of **Select Resource Group**, 
+
+	![resource group](pic/resource_group.png)
+
+	- To use a new resource group, click **Create Resource Group** and then provide the following information:
+
+		| Name | Value |
+		| --- | --- |
+		| Resource Group Name  | YOUR_RESOURCE_GROUP_NAME |
+		| Resource Group Location | [Available Locations](https://azure.microsoft.com/en-us/global-infrastructure/locations/)|
+
+	- If there are resource groups available, you could also select it directly from the dropdown list.  
 
 
-1. In the dropdown list of **Provision IoT Hub**, click **Create a new IoT Hub**, first select the location of with the same as the resource group.
-	>  Azure resources can be connected across regions, but keeping everything within the same data center reduces cost and minimizes latency.
+1. After the resource group is selected, in the dropdown list of **Provision IoT Hub**, 
 
-	Make sure **S1 - Standard tier** is selected as the pricing tier. Enter a unique name for IoT Hub name. IoT Hub names must be unique across Azure. 
+	![iothub](pic/iothub.png)
 
-1. Wait until the IoT Hub has been provisioned. Then, in the dropdown list of **Provision IoTHub Device**, select **Create a new IoT Hub device**. Provide a device name and press 'Enter'.
+	- Click **Select an existing IoT Hub** if you want to use an existing IoT Hub, and select the IoT Hub you plan to use.
 
-	Because you selected **S1 - Standard** as the pricing tier, you can transmit up to 400,000 messages a day to the IoT Hub for $50 per month. A **Free** tier that accepts up to 8,000 messages per day is also available. For more information on the various pricing tiers that are available, see [IoT Hub pricing](https://azure.microsoft.com/pricing/details/iot-hub/).
+	- If you plan to use a new IoT Hub, click **Create a new IoT Hub**, first select the location with the same as the resource group.
+		>  Azure resources can be connected across regions, but keeping everything within the same data center reduces cost and minimizes latency.
+
+		Make sure **S1 - Standard tier** is selected as the pricing tier. Enter a unique name for IoT Hub name. IoT Hub names must be unique across Azure. 
+
+		> Because you selected **S1 - Standard** as the pricing tier, you can transmit up to 400,000 messages a day to the IoT Hub for $50 per month. A **Free** tier that accepts up to 8,000 messages per day is also available. For more information on the various pricing tiers that are available, see [IoT Hub pricing](https://azure.microsoft.com/pricing/details/iot-hub/)
+
+1. Wait until the IoT Hub has been provisioned. Then, in the dropdown list of **Provision IoTHub Device**, 
+
+	![iothub_device](pic/iothub_device.png)
+
+	- To create a new device, select **Create a new IoT Hub device**. Provide a device name and press 'Enter'.
+	- To use a existing IoT Hub device, click **Select an existing IoT Hub device** and select the target device from the list.
+
+	Wait until the IoT Hub device has been provisioned
