@@ -17,6 +17,18 @@ export class PnPDiagnostic {
       vscode.languages.createDiagnosticCollection('pnpmetamodel');
   private _diagnostics: vscode.Diagnostic[] = [];
 
+  private _isValidStringValue(
+      value: string, range: string[], caseInsensitive: boolean) {
+    value = caseInsensitive ? value.toLowerCase() : value;
+    for (let testValue of range) {
+      testValue = caseInsensitive ? testValue.toLowerCase() : testValue;
+      if (testValue === value) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   constructor(
       private _pnpParser: PnPMetaModelParser,
       private pnpInterface: PnPMetaModelContext,
@@ -91,7 +103,9 @@ export class PnPDiagnostic {
       return [];
     }
     let values: string[] = [];
+    let caseInsensitive = false;
     if (jsonKey === '@context') {
+      caseInsensitive = true;
       const contextUri = this.pnpInterface === pnpContext ?
           'http://azureiot.com/v0/contexts/Interface.json' :
           'http://azureiot.com/v0/contexts/CapabilityModel.json';
@@ -107,7 +121,8 @@ export class PnPDiagnostic {
 
     if (values.indexOf('XMLSchema#string') !== -1) {
       return this.getStringPatternIssues(document, jsonValue, jsonKey);
-    } else if (values.indexOf(jsonValue.toFriendlyString()) === -1) {
+    } else if (!this._isValidStringValue(
+                   jsonValue.toFriendlyString(), values, caseInsensitive)) {
       const startIndex = jsonValue.span.startIndex;
       const endIndex = jsonValue.span.endIndex;
       const message = `Invalid value. Valid values:\n${values.join('\n')}`;
