@@ -1,14 +1,14 @@
-# Provision Azure Services #
+# Provision Azure IoT Hub #
 
 ## Overview ##
 
-When provisioning Azure Services in **Azure IoT Device Workbench**, the common provision process includes the provision of **Azure IoT Hub** and **Azure Functions**. 
+When provisioning Azure Services in **Azure IoT Device Workbench**, the common provision process includes the provision of **Azure IoT Hub**. 
 
   ![provision process](pic/provision_process.png)
 
-This document contains the detailed steps on how to provision those two components.
+This document contains the detailed steps on how to provision Azure IoT Hub.
 
-## Provision Azure IoT Hub ##
+## Steps for Provision Azure IoT Hub ##
 
 1. In the solution window, open the command palette and select **Azure IoT Device Workbench: Provision Azure Services...**.
 
@@ -39,25 +39,6 @@ This document contains the detailed steps on how to provision those two componen
 
 	Make sure **S1 - Standard tier** is selected as the pricing tier. Enter a unique name for IoT Hub name. IoT Hub names must be unique across Azure. 
 
-1. Wait until the IoT Hub has been provisioned. In the dropdown list of **Provision IoTHub Device**, select **Create a new IoT Hub device**. Provide a device name and press 'Enter'.
+1. Wait until the IoT Hub has been provisioned. Then, in the dropdown list of **Provision IoTHub Device**, select **Create a new IoT Hub device**. Provide a device name and press 'Enter'.
 
 	Because you selected **S1 - Standard** as the pricing tier, you can transmit up to 400,000 messages a day to the IoT Hub for $50 per month. A **Free** tier that accepts up to 8,000 messages per day is also available. For more information on the various pricing tiers that are available, see [IoT Hub pricing](https://azure.microsoft.com/pricing/details/iot-hub/).
-
-
-## Provision Azure Functions ##
-
-1. To provision Azure Functions in Visual Studio Code, the extension of **Azure Function** is required. Please install Azure Functions extension from the [market place](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions).
-
-1. Install the Prerequisites from [guide](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions) for your OS platform.
-
-1. In the dropdown list of **Provision process**, click **Azure Functions** and then provide a globally unique name for the new Function App.
-
-1. Then, in the dropdown list of **Select a storage account**, click **Create new storage account**. 
-
-	![Create a new storage](pic/new_storage.png)
-
-    Enter the name of the new storage account and make sure to use the same location of the resource group for the new resources.
-
-	> You could also select an existing storage account.  
-
-1. Wait until the Function App has been provisioned.
