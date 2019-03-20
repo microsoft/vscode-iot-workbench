@@ -14,7 +14,7 @@ This document contains the detailed steps on how to provision Azure IoT Hub.
 
 	![IoT Device Workbench: Cloud -> Provision](pic/iot-workbench-cloud-provision.png)
 
-1. If you haven't login to Azure in Visual Studio Code before, the following will be pop-up to guide you for Azure sign-in. 
+1. If you haven't login to Azure in Visual Studio Code before, the following will be pop-up to guide you for Azure sign-in. Otherwise, start with step 5 for resource group selection.
 
 	![pop-up window for Azure sign-in](pic/vs-azure-login.png)
 
