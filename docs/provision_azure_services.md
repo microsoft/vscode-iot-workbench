@@ -2,7 +2,7 @@
 
 ## Overview ##
 
-When provisioning Azure Services in **Azure IoT Device Workbench**, the common provision process would include the provision of **Azure IoT Hub** and **Azure Functions**. 
+When provisioning Azure Services in **Azure IoT Device Workbench**, the common provision process includes the provision of **Azure IoT Hub** and **Azure Functions**. 
 
   ![provision process](pic/provision_process.png)
 
@@ -22,7 +22,7 @@ This document contains the detailed steps on how to provision those two componen
 
 	![An Azure CLI device login screen with an indication of where to enter a device authorization code.](pic/portal-enter-device-login.png)
 
-1. Input your Azure Account Id and password in the next window in browser and after sign-in successfully, open the command palette in VS Code, type **Azure: Select Subscription** to select the subscription you want to use and then re-run **Azure IoT Device Workbench: Provision Azure Services...**
+1. Input your Azure Account Id and password in the next window in browser and after sign-in successfully, open the command palette in Visual Studio Code, type **Azure: Select Subscription** to select the subscription you want to use and then re-run **Azure IoT Device Workbench: Provision Azure Services...**
 
 1. In the dropdown list of **Select Resource Group**, if you plan to use a new resource group, click **Create Resource Group** and then provide the following information:
 
@@ -46,7 +46,7 @@ This document contains the detailed steps on how to provision those two componen
 
 ## Provision Azure Functions ##
 
-1. To provision Azure Functions in VS Code, the extension of **Azure Function** is required. Please install Azure Functions extension from [Azure Functions market place](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions).
+1. To provision Azure Functions in Visual Studio Code, the extension of **Azure Function** is required. Please install Azure Functions extension from the [market place](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions).
 
 1. Install the Prerequisites from [guide](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions) for your OS platform.
 
@@ -56,7 +56,7 @@ This document contains the detailed steps on how to provision those two componen
 
 	![Create a new storage](pic/new_storage.png)
 
-    Enter the name of the new storage account and make sure to use the location of the resource group for the new resources.
+    Enter the name of the new storage account and make sure to use the same location of the resource group for the new resources.
 
 	> You could also select an existing storage account.  
 
