@@ -60,6 +60,15 @@ var repository = new Vue({
     getCompanyName: () => {
       return 'Contoso Inc.';
     },
+    highlight: function(value) {
+      value = encodeHTML(value);
+      const filterKeywords = encodeHTML(this.filterKeywords.trim());
+      if (!filterKeywords) {
+        return value;
+      }
+      const filterReg = new RegExp(`(${filterKeywords})`, 'ig');
+      return value.replace(filterReg, '<em>$1</em>');
+    },
     createPnPFile,
     deletePnPFiles,
     editPnPFiles,
@@ -86,6 +95,13 @@ var repository = new Vue({
   }
 });
 
+function encodeHTML(value) {
+  let div = document.createElement('div');
+  div.innerText = value;
+  const html = div.innerHTML;
+  div = undefined;
+  return html;
+}
 
 function deletePnPFiles() {
   const fileIds = this.type.value === 'Interface' ? this.selectedInterfaces.value : this.selectedCapabilityModels.value;
