@@ -9,6 +9,6 @@ const packageJson = JSON.parse(fs.readFileSync('package.json'));
 const ISPROD = /^v?[0-9]+\.[0-9]+\.[0-9]+$/.test(packageJson.version);
   
 if (ISPROD) {
-  packageJson.codeGenConfigUrl = codeGenUrl;
+  packageJson.codeGenConfigUrl = 'https://azureboard2.blob.core.windows.net/pnp/iot-pnp-config-staging-v2.json';
   fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2) + '\n');
 }

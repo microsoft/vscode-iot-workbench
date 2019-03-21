@@ -22,14 +22,24 @@ import {DialogResponses} from '../DialogResponses';
 import extractzip = require('extract-zip');
 import * as utils from '../utils';
 
-export interface CodeGeneratorConfig {
-  version: string;
+
+interface CodeGeneratorDownloadLocation {
   win32Md5: string;
   win32PackageUrl: string;
   macOSMd5: string;
   macOSPackageUrl: string;
   ubuntuMd5: string;
   ubuntuPackageUrl: string;
+}
+
+interface CodeGeneratorConfigItem {
+  codeGeneratorVersion: string;
+  iotWorkbenchMinimalVersion: string;
+  codeGeneratorLocation: CodeGeneratorDownloadLocation;
+}
+
+interface CodeGeneratorConfig {
+  codeGeneratorConfigItems: CodeGeneratorConfigItem[];
 }
 
 export class CodeGenerateCore {
@@ -250,6 +260,8 @@ export class CodeGenerateCore {
     channel.show();
 
     const extensionPackage = require(context.asAbsolutePath('./package.json'));
+    const extensionVersion = extensionPackage.version;
+
     // download the config file for code generator
     const options: request.OptionsWithUri = {
       method: 'GET',
@@ -257,11 +269,36 @@ export class CodeGenerateCore {
       encoding: 'utf8',
       json: true
     };
+
+    let targetConfigItem: CodeGeneratorConfigItem|null = null;
+
     const pnpCodeGenConfig: CodeGeneratorConfig =
         await request(options).promise();
-    if (!pnpCodeGenConfig) {
+    if (pnpCodeGenConfig) {
+      pnpCodeGenConfig.codeGeneratorConfigItems.sort(
+          (configItem1, configItem2) => {
+            return compareVersion(
+                configItem2.codeGeneratorVersion,
+                configItem1.codeGeneratorVersion);  // reverse order
+          });
+
+      // if this is a RC build, always use the latest version of code generator.
+      if (!/^[0-9]+\.[0-9]+\.[0-9]+$/.test(extensionVersion)) {
+        targetConfigItem = pnpCodeGenConfig.codeGeneratorConfigItems[0];
+      } else {
+        for (const item of pnpCodeGenConfig.codeGeneratorConfigItems) {
+          if (compareVersion(
+                  extensionVersion, item.iotWorkbenchMinimalVersion) >= 0) {
+            targetConfigItem = item;
+            break;
+          }
+        }
+      }
+    }
+
+    if (!targetConfigItem) {
       channel.appendLine(
-          'Unable to check the updated version the PnP Code Generator.');
+          'Unable to get the updated version the PnP Code Generator.');
       return false;
     }
 
@@ -281,7 +318,8 @@ export class CodeGenerateCore {
       const currentVersion =
           ConfigHandler.get<string>(ConfigKey.pnpCodeGeneratorVersion);
       if (!currentVersion ||
-          compareVersion(pnpCodeGenConfig.version, currentVersion)) {
+          compareVersion(
+              targetConfigItem.codeGeneratorVersion, currentVersion) > 0) {
         needUpgrade = true;
       }
     }
@@ -296,29 +334,30 @@ export class CodeGenerateCore {
             channel.appendLine(
                 'Start upgrading Azure IoT Plug & Play Code Generator...');
 
+            const configItem = targetConfigItem as CodeGeneratorConfigItem;
             let downloadOption: request.OptionsWithUri;
             let md5value: string;
             if (platform === 'win32') {
               downloadOption = {
                 method: 'GET',
-                uri: pnpCodeGenConfig.win32PackageUrl,
+                uri: configItem.codeGeneratorLocation.win32PackageUrl,
                 encoding: null  // Binary data
               };
-              md5value = pnpCodeGenConfig.win32Md5;
+              md5value = configItem.codeGeneratorLocation.win32Md5;
             } else if (platform === 'darwin') {
               downloadOption = {
                 method: 'GET',
-                uri: pnpCodeGenConfig.macOSPackageUrl,
+                uri: configItem.codeGeneratorLocation.macOSPackageUrl,
                 encoding: null  // Binary data
               };
-              md5value = pnpCodeGenConfig.macOSMd5;
+              md5value = configItem.codeGeneratorLocation.macOSMd5;
             } else {
               downloadOption = {
                 method: 'GET',
-                uri: pnpCodeGenConfig.ubuntuPackageUrl,
+                uri: configItem.codeGeneratorLocation.ubuntuPackageUrl,
                 encoding: null  // Binary data
               };
-              md5value = pnpCodeGenConfig.ubuntuMd5;
+              md5value = configItem.codeGeneratorLocation.ubuntuMd5;
             }
 
             const loading = setInterval(() => {
@@ -354,7 +393,8 @@ export class CodeGenerateCore {
               channel.appendLine(
                   'Azure IoT Plug & Play Code Generator updated successfully.');
               await ConfigHandler.update(
-                  ConfigKey.pnpCodeGeneratorVersion, pnpCodeGenConfig.version,
+                  ConfigKey.pnpCodeGeneratorVersion,
+                  configItem.codeGeneratorVersion,
                   vscode.ConfigurationTarget.Global);
             } catch (error) {
               clearInterval(loading);
@@ -380,11 +420,11 @@ function compareVersion(verion1: string, verion2: string) {
   while (i < 3) {
     v1 = Number(ver1[i]);
     v2 = Number(ver2[i]);
-    if (v1 > v2) return true;
-    if (v1 < v2) return false;
+    if (v1 > v2) return 1;
+    if (v1 < v2) return -1;
     i++;
   }
-  return false;
+  return 0;
 }
 
 async function fileHash(filename: string, algorithm = 'md5') {

@@ -14,7 +14,7 @@
   "publisher": "vsciot-vscode",
   "icon": "logo.png",
   "aiKey": "5b869bc6-ca93-4f24-aa87-92871a3a616e",
-  "codeGenConfigUrl": "https://aka.ms/iot-pnp-config-staging.json",
+  "codeGenConfigUrl": "https://azureboard2.blob.core.windows.net/pnp/iot-pnp-config-staging-v2.json",
   "engines": {
     "vscode": "^1.30.0"
   },
