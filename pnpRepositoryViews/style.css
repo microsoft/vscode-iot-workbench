@@ -19,6 +19,12 @@ body {
   background: white;
 }
 
+em {
+  font-weight: bold;
+  font-style: normal;
+  background: rgba(0, 120, 215, 0.2);
+}
+
 input[type=checkbox] {
   width: 20px;
   height: 0;
@@ -739,6 +745,10 @@ header .search-bar button.dropdown.status {
 body.vscode-dark {
   color: #ccc;
   background: #1e1e1e;
+}
+
+body.vscode-dark em {
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 body.vscode-dark .with-icon::before {
