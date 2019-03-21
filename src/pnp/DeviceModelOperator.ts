@@ -25,6 +25,15 @@ const constants = {
 };
 
 
+enum OverwriteChoice {
+  Unknown = 1,
+  OverwriteAll = 2
+}
+
+interface SubmitOptions {
+  overwriteChoice: OverwriteChoice;
+}
+
 export class DeviceModelOperator {
   // Initial the folder for authoring device model, return the root path of the
   // workspace
@@ -513,18 +522,14 @@ export class DeviceModelOperator {
   async SubmitMetaModelFiles(
       context: vscode.ExtensionContext,
       channel: vscode.OutputChannel): Promise<boolean> {
-    const rootPath = await utils.selectWorkspaceItem(
-        'Please select a folder that contains Plug & Play meta model files to submit:',
-        {
-          canSelectFiles: false,
-          canSelectFolders: true,
-          canSelectMany: false,
-          defaultUri: vscode.workspace.workspaceFolders &&
-                  vscode.workspace.workspaceFolders.length > 0 ?
-              vscode.workspace.workspaceFolders[0].uri :
-              undefined,
-          openLabel: 'Select'
-        });
+    if (!vscode.workspace.workspaceFolders ||
+        !vscode.workspace.workspaceFolders[0].uri.fsPath) {
+      vscode.window.showWarningMessage(
+          'No folder opened in current window. Please select a folder first');
+      return false;
+    }
+
+    const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
 
     if (!rootPath) {
       throw new Error('User cancelled folder selection.');
@@ -599,12 +604,16 @@ export class DeviceModelOperator {
     const pnpMetamodelRepositoryClient =
         new PnPMetamodelRepositoryClient(connectionString);
 
+    let continueOnFailure = false;
+    const option: SubmitOptions = {overwriteChoice: OverwriteChoice.Unknown};
+
     for (const fileItem of interfaceFiles) {
       channel.appendLine(`File to submit: ${fileItem.label}`);
       const filePath = path.join(rootPath, fileItem.label);
       const result = await this.SubmitInterface(
-          pnpMetamodelRepositoryClient, filePath, fileItem.label, channel);
-      if (!result) {
+          option, pnpMetamodelRepositoryClient, filePath, fileItem.label,
+          channel);
+      if (!result && !continueOnFailure) {
         const message = `${
             fileItem
                 .label} was not submitted to PnP Model Repository successfully, do you want to continue with rest files?`;
@@ -613,6 +622,8 @@ export class DeviceModelOperator {
                 message, DialogResponses.yes, DialogResponses.no);
         if (continueWithOtherFiles === DialogResponses.no) {
           return false;
+        } else {
+          continueOnFailure = true;
         }
       }
     }
@@ -621,8 +632,9 @@ export class DeviceModelOperator {
       channel.appendLine(`File to submit: ${fileItem.label}`);
       const filePath = path.join(rootPath, fileItem.label);
       const result = await this.SubmitCapabilityModel(
-          pnpMetamodelRepositoryClient, filePath, fileItem.label, channel);
-      if (!result) {
+          option, pnpMetamodelRepositoryClient, filePath, fileItem.label,
+          channel);
+      if (!result && !continueOnFailure) {
         const message = `${
             fileItem
                 .label} was not submitted to PnP Model Repository successfully, do you want to continue with rest files?`;
@@ -631,6 +643,8 @@ export class DeviceModelOperator {
                 message, DialogResponses.yes, DialogResponses.no);
         if (continueWithOtherFiles === DialogResponses.no) {
           return false;
+        } else {
+          continueOnFailure = true;
         }
       }
     }
@@ -639,6 +653,7 @@ export class DeviceModelOperator {
   }
 
   private async SubmitInterface(
+      option: SubmitOptions,
       pnpMetamodelRepositoryClient: PnPMetamodelRepositoryClient,
       filePath: string, fileName: string,
       channel: vscode.OutputChannel): Promise<boolean> {
@@ -681,16 +696,21 @@ export class DeviceModelOperator {
         channel.appendLine(`Azure IoT Plug & Play interface file with id:"${
             fileId}" exists in server. `);
 
-        const msg = `The interface with id "${
-            fileId}" already exists in the Plug & Play Repository, do you want to overwrite it?`;
-        const result: vscode.MessageItem|undefined =
-            await vscode.window.showInformationMessage(
-                msg, DialogResponses.yes, DialogResponses.no);
-
-        if (result === DialogResponses.no) {
-          channel.appendLine('Submitting Plug & Play interface cancelled.');
-          return false;
+        if (option.overwriteChoice === OverwriteChoice.Unknown) {
+          const msg = `The interface with id "${
+              fileId}" already exists in the Plug & Play Repository, do you want to overwrite it?`;
+          const result: vscode.MessageItem|undefined =
+              await vscode.window.showInformationMessage(
+                  msg, DialogResponses.all, DialogResponses.yes,
+                  DialogResponses.no);
+          if (result === DialogResponses.no) {
+            channel.appendLine('Submitting Plug & Play interface cancelled.');
+            return false;
+          } else if (result === DialogResponses.all) {
+            option.overwriteChoice = OverwriteChoice.OverwriteAll;
+          }
         }
+
         channel.appendLine(
             `Start updating Plug & Play interface with id:"${fileId}"... `);
 
@@ -750,6 +770,7 @@ export class DeviceModelOperator {
   }
 
   private async SubmitCapabilityModel(
+      option: SubmitOptions,
       pnpMetamodelRepositoryClient: PnPMetamodelRepositoryClient,
       filePath: string, fileName: string,
       channel: vscode.OutputChannel): Promise<boolean> {
@@ -791,15 +812,20 @@ export class DeviceModelOperator {
           return false;
         }
 
-        const msg = `The capability model with id ${
-            fileId} already exists in the Plug & Play Repository, do you want to overwrite it?`;
-        const result: vscode.MessageItem|undefined =
-            await vscode.window.showInformationMessage(
-                msg, DialogResponses.yes, DialogResponses.no);
-
-        if (result === DialogResponses.no) {
-          channel.appendLine('Submit Plug & Play capability model cancelled.');
-          return false;
+        if (option.overwriteChoice === OverwriteChoice.Unknown) {
+          const msg = `The capability model with id "${
+              fileId}" already exists in the Plug & Play Repository, do you want to overwrite it?`;
+          const result: vscode.MessageItem|undefined =
+              await vscode.window.showInformationMessage(
+                  msg, DialogResponses.all, DialogResponses.yes,
+                  DialogResponses.no);
+          if (result === DialogResponses.no) {
+            channel.appendLine(
+                'Submitting Plug & Play capability model cancelled.');
+            return false;
+          } else if (result === DialogResponses.all) {
+            option.overwriteChoice = OverwriteChoice.OverwriteAll;
+          }
         }
 
         channel.appendLine(

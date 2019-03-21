@@ -112,7 +112,7 @@
       },
       {
         "command": "iotworkbench.pnpSubmitFile",
-        "title": "Submit file to Model Repository...",
+        "title": "Submit files to Model Repository...",
         "category": "Azure IoT Plug & Play"
       },
       {
