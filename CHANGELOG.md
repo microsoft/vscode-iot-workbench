@@ -1,6 +1,24 @@
 # Change Log
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
 
+## Version 0.2.5
+- Release date: Mar. 22nd, 2019
+
+### Added
+- Add dark theme for example gallery.
+- Provide the document to describe the detailed steps of `Provision Azure Services`.
+- IoT DevKit: Add new community contributed example of `Mxchip and Cloud Controlled Fan` into example gallery.
+- IoT DevKit: Add new example of `IoT Devkit Dictionary` into example gallery.
+
+### Changed
+- Local web server has been replaced with VS Code webview.
+- Improve the error handling when loading a new project.
+- Performance improvement.
+
+### Fixed
+- Connection string longer than 200 can be configured correctly.
+- Documentation issue fix.
+
 ## Version 0.2.4
 - Release date: Feb. 15th, 2019
 
