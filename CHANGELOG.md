@@ -6,9 +6,9 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 
 ### Added
 - Add dark theme for example gallery.
-- Provide the document to describe the detailed steps of `Provision Azure Services`
-- IoT Devkit: Add new community contributed example of `Mxchip and Cloud Controlled Fan` into example gallery.
-- IoT Devkit: Add new example of `IoT Devkit Dictionary` into example gallery.
+- Provide the document to describe the detailed steps of `Provision Azure Services`.
+- IoT DevKit: Add new community contributed example of `Mxchip and Cloud Controlled Fan` into example gallery.
+- IoT DevKit: Add new example of `IoT Devkit Dictionary` into example gallery.
 
 ### Changed
 - Local web server has been replaced with VS Code webview.
