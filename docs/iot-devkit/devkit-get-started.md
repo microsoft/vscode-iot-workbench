@@ -76,7 +76,9 @@ Follow these steps to prepare the development environment for the IoT DevKit:
     ![Install IoT Device Workbench](media/iot-devkit-get-started/install-workbench.png)
     Together with the IoT Device Workbench, other dependent extensions will be installed.
 
-4. Open **File > Preference > Settings** and add following lines to set the configurations for Arduino.
+4. Look for **Arduino** in the extension marketplace and install it.
+
+5. Open **File > Preference > Settings** and add following lines to set the configurations for Arduino.
 
 	![Config settings](media/iot-devkit-get-started/iot-workbench-setting.png)
 	
@@ -90,7 +92,7 @@ Follow these steps to prepare the development environment for the IoT DevKit:
 	* macOS
 
 		```JSON
-		"arduino.path": "/Application",
+		"arduino.path": "/Applications",
 		"arduino.additionalUrls": "https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/master/package_azureboard_index.json"
 		```
 
@@ -101,11 +103,11 @@ Follow these steps to prepare the development environment for the IoT DevKit:
 		"arduino.additionalUrls": "https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/master/package_azureboard_index.json"
 		```
 
-5. Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type and select **Arduino: Board Manager**. Search for **AZ3166** and install the latest version.
+6. Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type and select **Arduino: Board Manager**. Search for **AZ3166** and install the latest version.
 
     ![Install DevKit SDK](media/iot-devkit-get-started/install-sdk.png)
 
-6. ST-Link configuration.
+7. ST-Link configuration.
 	The [ST-Link/V2](http://www.st.com/en/development-tools/st-link-v2.html) is the USB interface that IoT DevKit uses to communicate with your development machine. Follow the platform specific steps to allow the machine access to your device.
 
 	* Windows

@@ -22,6 +22,12 @@ import {delay, getRegistryValues} from '../utils';
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 import {DeviceType} from './Interfaces/Device';
 
+const impor = require('impor')(__dirname);
+const forEach = impor('lodash.foreach') as typeof import('lodash.foreach');
+const trimStart =
+    impor('lodash.trimstart') as typeof import('lodash.trimstart');
+const filter = impor('lodash.filter') as typeof import('lodash.filter');
+
 interface SerialPortInfo {
   comName: string;
   manufacturer: string;
@@ -120,9 +126,6 @@ export class AZ3166Device extends ArduinoDeviceBase {
     }
 
     this.generateCppPropertiesFile(this.board);
-
-    // Enable logging on IoT Devkit
-    await this.generatePlatformLocal();
 
     return true;
   }
@@ -434,15 +437,17 @@ export class AZ3166Device extends ArduinoDeviceBase {
           const executeSetAzIoTHub = async () => {
             try {
               const data = `${command} "${configValue}"\r\n`;
-              if (data.length <= 120) {
-                await this.sendDataViaSerialPort(port, data);
-              } else {
-                await this.sendDataViaSerialPort(port, data.slice(0, 100));
+
+              let restDataLength = data.length;
+              while (restDataLength > 0) {
+                const start = data.length - restDataLength;
+                const length = Math.min(100, restDataLength);
+                restDataLength -= length;
+                const dataChunk = data.substr(start, length);
+                await this.sendDataViaSerialPort(port, dataChunk);
                 await delay(1000);
-                await this.sendDataViaSerialPort(port, data.slice(100));
               }
 
-              await delay(1000);
               port.close();
             } catch (ignore) {
             }
@@ -575,9 +580,9 @@ export class AZ3166Device extends ArduinoDeviceBase {
             }
 
             if (configMode) {
-              _.each(output.split('\n'), line => {
+              forEach(output.split('\n'), line => {
                 if (line) {
-                  line = _.trimStart(line.trim(), '#').trim();
+                  line = trimStart(line.trim(), '#').trim();
                   if (line && line.length) {
                     console.log('SerialOutput', line);
                   }
@@ -749,7 +754,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
     const directoryName = path.join(arduinoPackagePath, files[0]);
     if (!fs.isDirectorySync(directoryName)) {
       throw new Error(
-          'The Arduino package of Devkit is not installed. Please follow the guide to install it');
+          'The Arduino package for MXChip IoT Devkit is not installed. Please follow the guide to install it');
     }
 
     const fileName = path.join(directoryName, constants.platformLocalFileName);
