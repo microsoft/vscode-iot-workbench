@@ -16,7 +16,6 @@ import {ConfigHandler} from './configHandler';
 import {ConfigKey, EventNames} from './constants';
 import {TelemetryContext, callWithTelemetry, TelemetryWorker, TelemetryProperties} from './telemetry';
 import {UsbDetector} from './usbDetector';
-import {HelpProvider} from './helpProvider';
 import {CodeGenerateCore} from './pnp/CodeGenerateCore';
 import {PnPMetaModelUtility, PnPMetaModelContext} from './pnp/PnPMetaModelUtility';
 import {PnPMetaModelParser, PnPMetaModelGraph} from './pnp/PnPMetaModelGraph';
@@ -328,12 +327,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const codeGeneratorBinder =
       codeGenerator.ScaffoldDeviceStub.bind(codeGenerator);
-
-  ContentProvider.getInstance().Initialize(
-      context.extensionPath, exampleExplorer);
-  context.subscriptions.push(
-      vscode.workspace.registerTextDocumentContentProvider(
-          ContentView.workbenchContentProtocol, ContentProvider.getInstance()));
 
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with  registerCommand

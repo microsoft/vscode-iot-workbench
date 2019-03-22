@@ -478,17 +478,17 @@ export class IoTProject {
 
     workspace.folders.push({path: constants.deviceDefaultFolderName});
     let device: Component;
-      if (boardId === az3166DeviceModule.AZ3166Device.boardId) {
-          device = new az3166DeviceModule.AZ3166Device(
+    if (boardId === az3166DeviceModule.AZ3166Device.boardId) {
+      device = new az3166DeviceModule.AZ3166Device(
           this.extensionContext, this.channel, deviceDir, sketchContent);
-      } else if (boardId === ioTButtonDeviceModule.IoTButtonDevice.boardId) {
-      device =
-          new ioTButtonDeviceModule.IoTButtonDevice(this.extensionContext, deviceDir, sketchContent);
-      } else if (boardId === esp32DeviceModule.Esp32Device.boardId) {
-          device = new esp32DeviceModule.Esp32Device(
+    } else if (boardId === ioTButtonDeviceModule.IoTButtonDevice.boardId) {
+      device = new ioTButtonDeviceModule.IoTButtonDevice(
+          this.extensionContext, deviceDir, sketchContent);
+    } else if (boardId === esp32DeviceModule.Esp32Device.boardId) {
+      device = new esp32DeviceModule.Esp32Device(
           this.extensionContext, this.channel, deviceDir, sketchContent);
-      } else if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
-          device = new raspberryPiDeviceModule.RaspberryPiDevice(
+    } else if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
+      device = new raspberryPiDeviceModule.RaspberryPiDevice(
           this.extensionContext, deviceDir, this.channel, sketchContent);
     } else {
       throw new Error('The specified board is not supported.');

@@ -4,9 +4,10 @@
 'use strict';
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
+import * as fs from 'fs-plus';
 import * as vscode from 'vscode';
 import * as path from 'path';
-import {ProjectTemplate} from './Models/Interfaces/ProjectTemplate';
+import {ProjectTemplate, ProjectTemplateType} from './Models/Interfaces/ProjectTemplate';
 import * as utils from './utils';
 import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {TelemetryContext} from './telemetry';
@@ -177,7 +178,8 @@ export class ProjectInitializer {
               return;
             }
 
-            const project = new ioTProjectModule.IoTProject(context, channel, telemetryContext);
+            const project = new ioTProjectModule.IoTProject(
+                context, channel, telemetryContext);
 
             const sketchTemplateFilePath = context.asAbsolutePath(path.join(
                 FileNames.resourcesFolderName, boardSelection.id,

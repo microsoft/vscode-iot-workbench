@@ -253,7 +253,10 @@
     "getmac": "^1.2.1",
     "guid-typescript": "^1.0.7",
     "impor": "^0.0.2",
-
+    "lodash.filter": "^4.6.0",
+    "lodash.foreach": "^4.5.0",
+    "lodash.trimstart": "^4.5.1",
+    "lodash.uniq": "^4.5.0",
     "ms-rest": "^2.3.0",
     "opn": "5.1.0",
     "request": "^2.83.0",
