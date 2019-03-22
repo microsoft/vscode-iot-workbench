@@ -136,7 +136,7 @@ function createPnPFile() {
 
 function getNextPagePnPFiles(fileType) {
   fileType = typeof fileType === 'string' ? fileType : this.type.value;
-  let commandName, fileList, nextToken, loadingPnPFiles, tableId;
+  let commandName, fileList, nextToken, loadingPnPFiles;
   
   if(fileType === 'Interface') {
     commandName = 'iotworkbench.getAllInterfaces';
@@ -157,6 +157,7 @@ function getNextPagePnPFiles(fileType) {
   command(commandName, 50, nextToken.value, res => {
     Vue.set(fileList, 'value', fileList.value.concat(res.result.results));
     Vue.set(nextToken, 'value', res.result.continuationToken);
+    console.log(res.result.continuationToken)
     Vue.set(loadingPnPFiles, 'value', false);
   });
 }
@@ -310,7 +311,8 @@ function isMatchTags(tags, selectedTags, orAnd) {
 
 function onScrollTable(event) {
   const nextToken = this.type.value === 'Interface' ? this.interfaceNextToken.value : this.capabilityNextToken.value;
-  if (!nextToken || this.nextPageLoadingCounter) {
+  const loadingPnPFiles = this.type.value === 'Interface' ? this.loadingPnPInterfaces : this.loadingPnPCapabilityModels;
+  if (!nextToken || this.nextPageLoadingCounter || loadingPnPFiles.value) {
     return;
   }
   this.nextPageLoadingCounter = setTimeout(() => {
