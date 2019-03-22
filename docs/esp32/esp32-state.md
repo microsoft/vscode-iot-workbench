@@ -44,7 +44,7 @@ Find **ESP32 State** and click **Open Sample** button. A new VS Code window with
 
 ## Provision Azure Services
 
-In the solution window, open the command palette and select **Azure IoT Device Workbench: Cloud: Provision Azure Services...**.
+In the solution window, open the command palette and select **Azure IoT Device Workbench: Provision Azure Services...**.
 
 ![IoT Device Workbench: Cloud -> Provision](media/iot-workbench-cloud-provision.png)
 

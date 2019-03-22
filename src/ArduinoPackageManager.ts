@@ -1,14 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as fs from 'fs-plus';
-import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {FileNames} from './constants';
-import {Board} from './Models/Interfaces/Board';
+import {Board, BoardInstallation} from './Models/Interfaces/Board';
 
 export class ArduinoPackageManager {
+  private static INSTALLED_BOARDS: Board[] = [];
   private static async setAdditionalUrl(url: string) {
     const existedUrls =
         vscode.workspace.getConfiguration().get<string[]|string>(
@@ -46,12 +44,24 @@ export class ArduinoPackageManager {
       return;
     }
 
+    const cachedBoard = ArduinoPackageManager.INSTALLED_BOARDS.find(_board => {
+      const _installation = _board.installation as BoardInstallation;
+      const installation = board.installation as BoardInstallation;
+      return _installation.packageName === installation.packageName &&
+          _installation.architecture === installation.architecture;
+    });
+
+    if (cachedBoard) {
+      return;
+    }
+
     try {
       await ArduinoPackageManager.setAdditionalUrl(
           board.installation.additionalUrl);
       await vscode.commands.executeCommand(
           'arduino.installBoard', board.installation.packageName,
           board.installation.architecture);
+      ArduinoPackageManager.INSTALLED_BOARDS.push(board);
     } catch (ignore) {
       // If we fail to install board package,
       // it may because the user hasn't installed
