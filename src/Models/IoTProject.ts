@@ -8,6 +8,7 @@ import * as vscode from 'vscode';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames} from '../constants';
 import {EventNames} from '../constants';
+import {TelemetryProperties, TelemetryWorker} from '../telemetry';
 import {askAndNewProject, askAndOpenProject} from '../utils';
 
 import {checkAzureLogin} from './Apis';
@@ -90,7 +91,7 @@ export class IoTProject {
     this.telemetryContext = telemetryContext;
   }
 
-  async load(): Promise<boolean> {
+  async load(initLoad = false): Promise<boolean> {
     if (!vscode.workspace.workspaceFolders) {
       return false;
     }
@@ -103,13 +104,37 @@ export class IoTProject {
     this.projectRootPath =
         path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, '..');
 
+    const deviceLocation = path.join(
+        vscode.workspace.workspaceFolders[0].uri.fsPath, '..', devicePath);
+
+    const iotWorkbenchProjectFile =
+        path.join(deviceLocation, FileNames.iotworkbenchprojectFileName);
+    if (!fs.existsSync(iotWorkbenchProjectFile)) {
+      return false;
+    }
+
+    // only send telemetry when the IoT project is load when VS Code opens
+    if (initLoad) {
+      const properties: TelemetryProperties = {
+        result: 'Succeeded',
+        error: '',
+        errorMessage: ''
+      };
+      const telemetryContext:
+          TelemetryContext = {properties, measurements: {duration: 0}};
+
+      try {
+        TelemetryWorker.sendEvent(
+            EventNames.projectLoadEvent, telemetryContext);
+      } catch {
+        // If sending telemetry failed, skip the error to avoid blocking user.
+      }
+    }
+
     const azureConfigFileHandler =
         new azureComponentConfigModule.AzureConfigFileHandler(
             this.projectRootPath);
     azureConfigFileHandler.createIfNotExists();
-
-    const deviceLocation = path.join(
-        vscode.workspace.workspaceFolders[0].uri.fsPath, '..', devicePath);
 
     if (deviceLocation !== undefined) {
       const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
