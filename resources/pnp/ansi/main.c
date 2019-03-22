@@ -26,10 +26,10 @@ int main(int argc, char *argv[])
 {
     if (argc != 2)
     {
-        LogError("USAGE: {PROJECT_NAME} [IoTHub device connection string]");        
+        LogError("USAGE: {PROJECT_NAME} [IoTHub device connection string]");
         return 1;
     }
-        
+
     application_initialize(argv[1], NULL);
     
     while (1)
