@@ -78,8 +78,11 @@ IoT projects rely on internet connectivity. Use AP Mode on the DevKit to configu
 	![putty_window](media/putty_window.png)
 
 1. Type the following command in the Putty window to set the device connection string for IoT DevKit.
+
 	`set_az_iothub [device connection string]`
+
 	Replace the `[device connection string]` with the string you retrieved in step 2 and you will receive the following information:
+	
 	`INFO: Set Azure Iot hub connection string successfully.`
 
 1. Copy the **GetStarted.bin** you downloaded from step 1 into the disk named **AZ3166**.
