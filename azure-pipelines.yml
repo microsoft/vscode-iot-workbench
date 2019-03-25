@@ -21,7 +21,7 @@ jobs:
   - script: gts check
     displayName: 'check gts error'
     failOnStderr: True
-  - script: node updateCodeGenLink.js
+  - script: node updateDynamicResourceLink.js
     displayName: 'Update link for code generator'
   - script: vsce package
     displayName: 'Build VSIX package'
