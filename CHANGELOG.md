@@ -4,7 +4,7 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 ## Version 0.2.6
 - Release date: Mar. 26th, 2019
 
-### Changed
+### Fixed
 - Bug fixing.
 
 ## Version 0.2.5
