@@ -1,8 +1,8 @@
 const fs = require('fs');
 
-const codeGenUrl = process.env['prodCodeGenUrl'];
+const codeGenUrl = process.env['prodCodeGenUrl-v2'];
 if(!codeGenUrl){
-  throw new Error('Unable to find the variable of prodCodeGenUrl');
+  throw new Error('Unable to find the variable of prodCodeGenUrl-v2');
 }
 
 const packageJson = JSON.parse(fs.readFileSync('package.json'));

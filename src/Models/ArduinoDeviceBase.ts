@@ -12,8 +12,6 @@ import {ConfigKey, DependentExtensions, FileNames} from '../constants';
 import {Board} from './Interfaces/Board';
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
-import {ProjectTemplate, ProjectTemplateType} from './Interfaces/ProjectTemplate';
-import {IoTProject} from './IoTProject';
 import {OTA} from './OTA';
 
 const constants = {

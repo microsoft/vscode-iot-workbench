@@ -4,20 +4,22 @@
 'use strict';
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
 import * as fs from 'fs-plus';
+import * as vscode from 'vscode';
 import * as path from 'path';
-import {IoTProject} from './Models/IoTProject';
 import {ProjectTemplate, ProjectTemplateType} from './Models/Interfaces/ProjectTemplate';
-import {DialogResponses} from './DialogResponses';
-import {IoTWorkbenchSettings} from './IoTSettings';
 import * as utils from './utils';
-import {Board, BoardInstallation, BoardQuickPickItem} from './Models/Interfaces/Board';
+import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {TelemetryContext} from './telemetry';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {FileNames} from './constants';
 import {BoardProvider} from './boardProvider';
-import {AzureFunctions} from './Models/AzureFunctions';
+
+const impor = require('impor')(__dirname);
+const azureFunctionsModule = impor('./Models/AzureFunctions') as
+    typeof import('./Models/AzureFunctions');
+const ioTProjectModule =
+    impor('./Models/IoTProject') as typeof import('./Models/IoTProject');
 
 const constants = {
   defaultProjectName: 'IoTproject'
@@ -141,7 +143,7 @@ export class ProjectInitializer {
 
             if (result.type === 'AzureFunctions') {
               const isFunctionsExtensionAvailable =
-                  await AzureFunctions.isAvailable();
+                  await azureFunctionsModule.AzureFunctions.isAvailable();
               if (!isFunctionsExtensionAvailable) {
                 return false;
               }
@@ -176,7 +178,8 @@ export class ProjectInitializer {
               return;
             }
 
-            const project = new IoTProject(context, channel, telemetryContext);
+            const project = new ioTProjectModule.IoTProject(
+                context, channel, telemetryContext);
 
             const sketchTemplateFilePath = context.asAbsolutePath(path.join(
                 FileNames.resourcesFolderName, boardSelection.id,

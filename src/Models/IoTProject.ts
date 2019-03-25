@@ -8,16 +8,9 @@ import * as vscode from 'vscode';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames} from '../constants';
 import {EventNames} from '../constants';
-import {TelemetryContext, TelemetryWorker} from '../telemetry';
 import {askAndNewProject, askAndOpenProject} from '../utils';
 
 import {checkAzureLogin} from './Apis';
-import {AZ3166Device} from './AZ3166Device';
-import {AzureConfigFileHandler, AzureConfigs, Dependency, DependencyType} from './AzureComponentConfig';
-import {AzureFunctions} from './AzureFunctions';
-import {AzureUtility} from './AzureUtility';
-import {CosmosDB} from './CosmosDB';
-import {Esp32Device} from './Esp32Device';
 import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Deployable} from './Interfaces/Deployable';
@@ -26,11 +19,32 @@ import {ProjectTemplate, ProjectTemplateType} from './Interfaces/ProjectTemplate
 import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
 import {Workspace} from './Interfaces/Workspace';
-import {IoTButtonDevice} from './IoTButtonDevice';
-import {IoTHub} from './IoTHub';
-import {IoTHubDevice} from './IoTHubDevice';
-import {RaspberryPiDevice} from './RaspberryPiDevice';
-import {StreamAnalyticsJob} from './StreamAnalyticsJob';
+
+type Dependency = import('./AzureComponentConfig').Dependency;
+type TelemetryContext = import('../telemetry').TelemetryContext;
+
+const impor = require('impor')(__dirname);
+const az3166DeviceModule =
+    impor('./AZ3166Device') as typeof import('./AZ3166Device');
+const azureComponentConfigModule =
+    impor('./AzureComponentConfig') as typeof import('./AzureComponentConfig');
+const azureFunctionsModule =
+    impor('./AzureFunctions') as typeof import('./AzureFunctions');
+const azureUtilityModule =
+    impor('./AzureUtility') as typeof import('./AzureUtility');
+const cosmosDBModule = impor('./CosmosDB') as typeof import('./CosmosDB');
+const esp32DeviceModule =
+    impor('./Esp32Device') as typeof import('./Esp32Device');
+const ioTButtonDeviceModule =
+    impor('./IoTButtonDevice') as typeof import('./IoTButtonDevice');
+const ioTHubModule = impor('./IoTHub') as typeof import('./IoTHub');
+const ioTHubDeviceModule =
+    impor('./IoTHubDevice') as typeof import('./IoTHubDevice');
+const raspberryPiDeviceModule =
+    impor('./RaspberryPiDevice') as typeof import('./RaspberryPiDevice');
+const streamAnalyticsJobModule =
+    impor('./StreamAnalyticsJob') as typeof import('./StreamAnalyticsJob');
+const telemetryModule = impor('../telemetry') as typeof import('../telemetry');
 
 const constants = {
   deviceDefaultFolderName: 'Device',
@@ -90,7 +104,8 @@ export class IoTProject {
         path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, '..');
 
     const azureConfigFileHandler =
-        new AzureConfigFileHandler(this.projectRootPath);
+        new azureComponentConfigModule.AzureConfigFileHandler(
+            this.projectRootPath);
     azureConfigFileHandler.createIfNotExists();
 
     const deviceLocation = path.join(
@@ -102,16 +117,18 @@ export class IoTProject {
         return false;
       }
       let device = null;
-      if (boardId === AZ3166Device.boardId) {
-        device = new AZ3166Device(
+      if (boardId === az3166DeviceModule.AZ3166Device.boardId) {
+        device = new az3166DeviceModule.AZ3166Device(
             this.extensionContext, this.channel, deviceLocation);
-      } else if (boardId === IoTButtonDevice.boardId) {
-        device = new IoTButtonDevice(this.extensionContext, deviceLocation);
-      } else if (boardId === Esp32Device.boardId) {
-        device = new Esp32Device(
+      } else if (boardId === ioTButtonDeviceModule.IoTButtonDevice.boardId) {
+        device = new ioTButtonDeviceModule.IoTButtonDevice(
+            this.extensionContext, deviceLocation);
+      } else if (boardId === esp32DeviceModule.Esp32Device.boardId) {
+        device = new esp32DeviceModule.Esp32Device(
             this.extensionContext, this.channel, deviceLocation);
-      } else if (boardId === RaspberryPiDevice.boardId) {
-        device = new RaspberryPiDevice(
+      } else if (
+          boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
+        device = new raspberryPiDeviceModule.RaspberryPiDevice(
             this.extensionContext, deviceLocation, this.channel);
       }
       if (device) {
@@ -123,11 +140,12 @@ export class IoTProject {
     const componentConfigs = azureConfigFileHandler.getSortedComponents();
     if (!componentConfigs || componentConfigs.length === 0) {
       // Support backward compact
-      const iotHub = new IoTHub(this.projectRootPath, this.channel);
+      const iotHub =
+          new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
       await iotHub.updateConfigSettings();
       await iotHub.load();
       this.componentList.push(iotHub);
-      const device = new IoTHubDevice(this.channel);
+      const device = new ioTHubDeviceModule.IoTHubDevice(this.channel);
       this.componentList.push(device);
 
       const functionPath = ConfigHandler.get<string>(ConfigKey.functionPath);
@@ -135,9 +153,11 @@ export class IoTProject {
         const functionLocation = path.join(
             vscode.workspace.workspaceFolders[0].uri.fsPath, '..',
             functionPath);
-        const functionApp = new AzureFunctions(
-            functionLocation, functionPath, this.channel, null,
-            [{component: iotHub, type: DependencyType.Input}]);
+        const functionApp = new azureFunctionsModule.AzureFunctions(
+            functionLocation, functionPath, this.channel, null, [{
+              component: iotHub,
+              type: azureComponentConfigModule.DependencyType.Input
+            }]);
         await functionApp.updateConfigSettings();
         await functionApp.load();
         this.componentList.push(functionApp);
@@ -156,11 +176,12 @@ export class IoTProject {
     for (const componentConfig of componentConfigs) {
       switch (componentConfig.type) {
         case 'IoTHub': {
-          const iotHub = new IoTHub(this.projectRootPath, this.channel);
+          const iotHub =
+              new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
           await iotHub.load();
           components[iotHub.id] = iotHub;
           this.componentList.push(iotHub);
-          const device = new IoTHubDevice(this.channel);
+          const device = new ioTHubDeviceModule.IoTHubDevice(this.channel);
           this.componentList.push(device);
 
           break;
@@ -175,7 +196,7 @@ export class IoTProject {
               vscode.workspace.workspaceFolders[0].uri.fsPath, '..',
               functionPath);
           if (functionLocation) {
-            const functionApp = new AzureFunctions(
+            const functionApp = new azureFunctionsModule.AzureFunctions(
                 functionLocation, functionPath, this.channel);
             await functionApp.load();
             components[functionApp.id] = functionApp;
@@ -195,7 +216,7 @@ export class IoTProject {
           const queryPath = path.join(
               vscode.workspace.workspaceFolders[0].uri.fsPath, '..',
               constants.asaFolderName, 'query.asaql');
-          const asa = new StreamAnalyticsJob(
+          const asa = new streamAnalyticsJobModule.StreamAnalyticsJob(
               queryPath, this.extensionContext, this.projectRootPath,
               this.channel, dependencies);
           await asa.load();
@@ -212,7 +233,7 @@ export class IoTProject {
             }
             dependencies.push({component, type: dependent.type});
           }
-          const cosmosDB = new CosmosDB(
+          const cosmosDB = new cosmosDBModule.CosmosDB(
               this.extensionContext, this.projectRootPath, this.channel,
               dependencies);
           await cosmosDB.load();
@@ -326,9 +347,9 @@ export class IoTProject {
     let resourceGroup: string|undefined = '';
     if (provisionItemList.length > 0) {
       await checkAzureLogin();
-      AzureUtility.init(this.extensionContext, this.channel);
-      resourceGroup = await AzureUtility.getResourceGroup();
-      subscriptionId = AzureUtility.subscriptionId;
+      azureUtilityModule.AzureUtility.init(this.extensionContext, this.channel);
+      resourceGroup = await azureUtilityModule.AzureUtility.getResourceGroup();
+      subscriptionId = azureUtilityModule.AzureUtility.subscriptionId;
       if (!resourceGroup || !subscriptionId) {
         return false;
       }
@@ -451,22 +472,23 @@ export class IoTProject {
 
     // initialize the storage for azure component settings
     const azureConfigFileHandler =
-        new AzureConfigFileHandler(this.projectRootPath);
+        new azureComponentConfigModule.AzureConfigFileHandler(
+            this.projectRootPath);
     azureConfigFileHandler.createIfNotExists();
 
     workspace.folders.push({path: constants.deviceDefaultFolderName});
     let device: Component;
-    if (boardId === AZ3166Device.boardId) {
-      device = new AZ3166Device(
+    if (boardId === az3166DeviceModule.AZ3166Device.boardId) {
+      device = new az3166DeviceModule.AZ3166Device(
           this.extensionContext, this.channel, deviceDir, sketchContent);
-    } else if (boardId === IoTButtonDevice.boardId) {
-      device =
-          new IoTButtonDevice(this.extensionContext, deviceDir, sketchContent);
-    } else if (boardId === Esp32Device.boardId) {
-      device = new Esp32Device(
+    } else if (boardId === ioTButtonDeviceModule.IoTButtonDevice.boardId) {
+      device = new ioTButtonDeviceModule.IoTButtonDevice(
+          this.extensionContext, deviceDir, sketchContent);
+    } else if (boardId === esp32DeviceModule.Esp32Device.boardId) {
+      device = new esp32DeviceModule.Esp32Device(
           this.extensionContext, this.channel, deviceDir, sketchContent);
-    } else if (boardId === RaspberryPiDevice.boardId) {
-      device = new RaspberryPiDevice(
+    } else if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
+      device = new raspberryPiDeviceModule.RaspberryPiDevice(
           this.extensionContext, deviceDir, this.channel, sketchContent);
     } else {
       throw new Error('The specified board is not supported.');
@@ -495,7 +517,8 @@ export class IoTProject {
         // Save data to configFile
         break;
       case ProjectTemplateType.IotHub: {
-        const iothub = new IoTHub(this.projectRootPath, this.channel);
+        const iothub =
+            new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
         const isPrerequisitesAchieved = await iothub.checkPrerequisites();
         if (!isPrerequisitesAchieved) {
           return false;
@@ -504,7 +527,8 @@ export class IoTProject {
         break;
       }
       case ProjectTemplateType.AzureFunctions: {
-        const iothub = new IoTHub(this.projectRootPath, this.channel);
+        const iothub =
+            new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
         const isIotHubPrerequisitesAchieved = await iothub.checkPrerequisites();
         if (!isIotHubPrerequisitesAchieved) {
           return false;
@@ -519,10 +543,12 @@ export class IoTProject {
 
         workspace.folders.push({path: constants.functionDefaultFolderName});
 
-        const azureFunctions = new AzureFunctions(
+        const azureFunctions = new azureFunctionsModule.AzureFunctions(
             functionDir, constants.functionDefaultFolderName, this.channel,
-            null,
-            [{component: iothub, type: DependencyType.Input}] /*Dependencies*/);
+            null, [{
+              component: iothub,
+              type: azureComponentConfigModule.DependencyType.Input
+            }] /*Dependencies*/);
         const isFunctionsPrerequisitesAchieved =
             await azureFunctions.checkPrerequisites();
         if (!isFunctionsPrerequisitesAchieved) {
@@ -541,13 +567,14 @@ export class IoTProject {
         break;
       }
       case ProjectTemplateType.StreamAnalytics: {
-        const iothub = new IoTHub(this.projectRootPath, this.channel);
+        const iothub =
+            new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
         const isIotHubPrerequisitesAchieved = await iothub.checkPrerequisites();
         if (!isIotHubPrerequisitesAchieved) {
           return false;
         }
 
-        const cosmosDB = new CosmosDB(
+        const cosmosDB = new cosmosDBModule.CosmosDB(
             this.extensionContext, this.projectRootPath, this.channel);
         const isCosmosDBPrerequisitesAchieved =
             await cosmosDB.checkPrerequisites();
@@ -570,11 +597,17 @@ export class IoTProject {
                 .replace(/\[output\]/, `"cosmosdb-${cosmosDB.id}"`);
         fs.writeFileSync(queryPath, asaQueryContent);
 
-        const asa = new StreamAnalyticsJob(
+        const asa = new streamAnalyticsJobModule.StreamAnalyticsJob(
             queryPath, this.extensionContext, this.projectRootPath,
             this.channel, [
-              {component: iothub, type: DependencyType.Input},
-              {component: cosmosDB, type: DependencyType.Other}
+              {
+                component: iothub,
+                type: azureComponentConfigModule.DependencyType.Input
+              },
+              {
+                component: cosmosDB,
+                type: azureComponentConfigModule.DependencyType.Other
+              }
             ]);
         const isAsaPrerequisitesAchieved = await asa.checkPrerequisites();
         if (!isAsaPrerequisitesAchieved) {
@@ -626,7 +659,7 @@ export class IoTProject {
       // Need to add telemetry here otherwise, after restart VSCode, no
       // telemetry data will be sent.
       try {
-        TelemetryWorker.sendEvent(
+        telemetryModule.TelemetryWorker.sendEvent(
             EventNames.createNewProjectEvent, this.telemetryContext);
       } catch {
         // If sending telemetry failed, skip the error to avoid blocking user.
