@@ -10,6 +10,7 @@ import {TelemetryContext} from '../../telemetry';
 import {generateFoldersForIoTWorkbench} from '../Utilities';
 
 import {AnsiCCodeGeneratorBase} from './Interfaces/AnsiCCodeGeneratorBase';
+import { ProvisionType } from './Interfaces/CodeGenerator';
 
 const constants = {
   deviceDefaultFolderName: 'Device',
@@ -19,7 +20,8 @@ const constants = {
 export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      private telemetryContext: TelemetryContext) {
+      private telemetryContext: TelemetryContext,
+      private provisionType: ProvisionType) {
     super(context, channel);
   }
 
