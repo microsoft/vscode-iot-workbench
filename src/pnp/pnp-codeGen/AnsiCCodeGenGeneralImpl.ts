@@ -6,6 +6,7 @@ import {FileNames} from '../../constants';
 import {TelemetryContext} from '../../telemetry';
 
 import {AnsiCCodeGeneratorBase} from './Interfaces/AnsiCCodeGeneratorBase';
+import { ProvisionType } from './Interfaces/CodeGenerator';
 
 const ansiConstants = {
   languageName: 'ansi',
@@ -17,7 +18,8 @@ const templateFileNames = ['Readme.md', 'main.c', 'CMakeLists.txt'];
 export class AnsiCCodeGenGeneralImpl extends AnsiCCodeGeneratorBase {
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      private telemetryContext: TelemetryContext) {
+      private telemetryContext: TelemetryContext,
+      private provisionType: ProvisionType) {
     super(context, channel);
   }
 
@@ -28,9 +30,24 @@ export class AnsiCCodeGenGeneralImpl extends AnsiCCodeGeneratorBase {
     const retvalue = await this.GenerateAnsiCCodeCore(
         targetPath, filePath, connectionString);
 
+    let provisionFolderName;
+    switch(this.provisionType)
+    {
+      case ProvisionType.ConnectionString:
+        provisionFolderName = "connectionstring"
+        break;
+      case ProvisionType.IoTCSasKey:
+        provisionFolderName = "iotcsaskey";
+        break;
+      default:
+        provisionFolderName = "connectionString";
+        break;
+    }
+
     const resouceFolder = this.context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, ansiConstants.pnp,
-        ansiConstants.languageName));
+        ansiConstants.languageName,
+        provisionFolderName));
 
     const projectName = path.basename(targetPath);
 

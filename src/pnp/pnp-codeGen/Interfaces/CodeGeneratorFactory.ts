@@ -1,6 +1,6 @@
-import {CodeGenDeviceType, CodeGenerator} from './CodeGenerator';
+import {CodeGenDeviceType, CodeGenerator, ProvisionType} from './CodeGenerator';
 
 
 export interface CodeGeneratorFactory {
-  CreateCodeGeneratorImpl(deviceType: CodeGenDeviceType): CodeGenerator|null;
+  CreateCodeGeneratorImpl(deviceType: CodeGenDeviceType, provisionType: ProvisionType): CodeGenerator|null;
 }

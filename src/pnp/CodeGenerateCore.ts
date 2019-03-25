@@ -14,7 +14,7 @@ import {FileNames, ConfigKey} from '../constants';
 import {TelemetryContext} from '../telemetry';
 import {PnPConnector} from './PnPConnector';
 import {PnPConstants, CodeGenConstants} from './PnPConstants';
-import {CodeGenDeviceType} from './pnp-codeGen/Interfaces/CodeGenerator';
+import {CodeGenDeviceType, ProvisionType} from './pnp-codeGen/Interfaces/CodeGenerator';
 import {AnsiCCodeGeneratorFactory} from './pnp-codeGen/AnsiCCodeGeneratorFactory';
 import {CodeGeneratorFactory} from './pnp-codeGen/Interfaces/CodeGeneratorFactory';
 import {ConfigHandler} from '../configHandler';
@@ -31,6 +31,11 @@ export interface CodeGeneratorConfig {
   ubuntuMd5: string;
   ubuntuPackageUrl: string;
 }
+
+const provisionTypeLabel = {
+  connectionStringLabel: 'IoT Hub Device Connection String',
+  iotcSasKeyLabel: 'IoT Central | DPS symmetric key'
+};
 
 export class CodeGenerateCore {
   async ScaffoldDeviceStub(
@@ -156,11 +161,6 @@ export class CodeGenerateCore {
       return false;
     }
 
-    const folderPath = await this.GetFolderForCodeGen();
-    if (!folderPath) {
-      return false;
-    }
-
     let codeGenDeviceType = CodeGenDeviceType.General;
     if (targetSelection.label === 'Device Boilerplate') {
       codeGenDeviceType = CodeGenDeviceType.Boilerplate;
@@ -168,8 +168,37 @@ export class CodeGenerateCore {
       codeGenDeviceType = CodeGenDeviceType.IoTDevKit;
     }
 
+    let provisionType = ProvisionType.ConnectionString;
+    let provisionSelections: vscode.QuickPickItem[]|null = null;
+    provisionSelections = [
+      {label: provisionTypeLabel.connectionStringLabel, description: ''},
+      {label: provisionTypeLabel.iotcSasKeyLabel, description: ''}
+    ];
+
+    if (codeGenDeviceType !== CodeGenDeviceType.Boilerplate)
+    {
+      const provisionSelection = await vscode.window.showQuickPick(
+        provisionSelections,
+        {ignoreFocusOut: true, placeHolder: 'Please select a device provision type'});
+
+      if (!provisionSelection) {
+        return false;
+      }
+
+      if (provisionSelection.label === provisionTypeLabel.connectionStringLabel) {
+        provisionType = ProvisionType.ConnectionString;
+      } else if (provisionSelection.label === provisionTypeLabel.iotcSasKeyLabel) {
+        provisionType = ProvisionType.IoTCSasKey;
+      }
+    }
+
+    const folderPath = await this.GetFolderForCodeGen();
+    if (!folderPath) {
+      return false;
+    }
+
     const codeGenerator =
-        codeGenFactory.CreateCodeGeneratorImpl(codeGenDeviceType);
+        codeGenFactory.CreateCodeGeneratorImpl(codeGenDeviceType, provisionType);
     if (!codeGenerator) {
       return false;
     }
