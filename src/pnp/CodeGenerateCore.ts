@@ -47,7 +47,6 @@ interface CodeGeneratorConfig {
   codeGeneratorConfigItems: CodeGeneratorConfigItem[];
 }
 
-
 export class CodeGenerateCore {
   async ScaffoldDeviceStub(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
@@ -179,7 +178,7 @@ export class CodeGenerateCore {
       codeGenDeviceType = CodeGenDeviceType.IoTDevKit;
     }
 
-    let provisionType = ProvisionType.ConnectionString;
+    let provisionType = ProvisionType.DeviceConnectionString;
     let provisionSelections: vscode.QuickPickItem[]|null = null;
     provisionSelections = [
       {label: provisionTypeLabel.connectionStringLabel, description: ''},
@@ -197,7 +196,7 @@ export class CodeGenerateCore {
       }
 
       if (provisionSelection.label === provisionTypeLabel.connectionStringLabel) {
-        provisionType = ProvisionType.ConnectionString;
+        provisionType = ProvisionType.DeviceConnectionString;
       } else if (provisionSelection.label === provisionTypeLabel.iotcSasKeyLabel) {
         provisionType = ProvisionType.IoTCSasKey;
       }

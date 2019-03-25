@@ -30,18 +30,17 @@ export class AnsiCCodeGenGeneralImpl extends AnsiCCodeGeneratorBase {
     const retvalue = await this.GenerateAnsiCCodeCore(
         targetPath, filePath, connectionString);
 
-    let provisionFolderName;
+    let provisionFolderName = 'connectionString';
     switch(this.provisionType)
     {
-      case ProvisionType.ConnectionString:
-        provisionFolderName = "connectionstring"
+      case ProvisionType.DeviceConnectionString:
+        provisionFolderName = 'connectionstring';
         break;
       case ProvisionType.IoTCSasKey:
-        provisionFolderName = "iotcsaskey";
+        provisionFolderName = 'iotcsaskey';
         break;
       default:
-        provisionFolderName = "connectionString";
-        break;
+        throw new Error('Unsupported device provision type.');
     }
 
     const resouceFolder = this.context.asAbsolutePath(path.join(

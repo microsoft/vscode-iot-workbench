@@ -6,7 +6,7 @@ export enum CodeGenDeviceType {
 }
 
 export enum ProvisionType {
-  ConnectionString = 1,
+  DeviceConnectionString = 1,
   IoTCSasKey = 2,
   IoTCX509 = 3
 }
