@@ -32,6 +32,7 @@ export class EventNames {
   static readonly nsatsurvery = 'IoTWorkbench.NSATSurvey';
   static readonly selectSubscription = 'IoTWorkbench.SelectSubscription';
   static readonly openTutorial = 'IoTWorkbench.OpenTutorial';
+  static readonly projectLoadEvent = 'IoTWorkbench.ProjectLoadEvent';
 }
 
 export class FileNames {

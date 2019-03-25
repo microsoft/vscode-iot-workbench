@@ -45,7 +45,7 @@ export async function activate(context: vscode.ExtensionContext) {
       new ioTProjectModule.IoTProject(context, outputChannel, telemetryContext);
   if (vscode.workspace.workspaceFolders) {
     try {
-      await iotProject.load();
+      await iotProject.load(true);
     } catch (error) {
       // do nothing as we are not sure whether the project is initialized.
     }
