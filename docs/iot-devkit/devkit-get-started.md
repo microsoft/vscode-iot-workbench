@@ -54,6 +54,43 @@ IoT projects rely on internet connectivity. Use AP Mode on the DevKit to configu
 
 > Note:  After connected to internet, the currently-installed and latest available version of the IoT DevKit's firmware is displayed on the screen. If it's not running on the latest available version, follow the [firmware upgrading guide](https://microsoft.github.io/azure-iot-developer-kit/docs/firmware-upgrading/) to install the latest version.
 
+## Get Started with Azure IoT Hub
+
+1. Download the latest version of [GetStarted firmware](media/GetStarted.bin) for IoT DevKit which includes the bootloader.
+
+1. Follow the [tutorial](https://docs.microsoft.com/en-us/azure/iot-hub/quickstart-send-telemetry-node#create-an-iot-hub) to
+	- Create a new Azure IoT Hub from portal
+	- Register a new device into Azure IoT Hub and make a note of the device connection string, which looks like:
+	`HostName={YourIoTHubName}.azure-devices.net;DeviceId=MyNodeDevice;SharedAccessKey={YourSharedAccessKey}`
+
+1. Download SSH and Telnet client like [Putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) for Windows.
+
+1. Open **Device Manager** in Windows and identify the COM port for IoT DevKit.
+
+	![identify_com_port](media/identify_com_port.png)
+
+1. open Putty, type the right COM port and 115200 for Speed then click **Open**.
+
+	![putty_setting](media/putty_setting.png)
+
+1. On the device, hold down button A, then push and release the reset button. Observe the Configuration console in Putty window.
+
+	![putty_window](media/putty_window.png)
+
+1. Type the following command in the Putty window to set the device connection string for IoT DevKit.
+	`set_az_iothub [device connection string]`
+	Replace the `[device connection string]` with the string you retrieved in step 2 and you will receive the following information:
+	`INFO: Set Azure Iot hub connection string successfully.`
+
+1. Copy the **GetStarted.bin** you downloaded from step 1 into the disk named **AZ3166**.
+
+	![copy binary](media/copy_file.png)
+
+1. Wait for the IoT DevKit to restart and you will see it sending telemetry data to Azure IoT Hub after Wi-Fi is connected.
+
+	![sending data](media/sending_data.png)
+
+
 ## Install development environment
 
 We recommend [Azure IoT Device Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) extension for Visual Studio Code to develop on the IoT DevKit.
