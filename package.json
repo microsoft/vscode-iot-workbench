@@ -15,6 +15,9 @@
   "icon": "logo.png",
   "aiKey": "5b869bc6-ca93-4f24-aa87-92871a3a616e",
   "codeGenConfigUrl": "https://aka.ms/iot-pnp-config-staging-v2.json",
+  "graphUrl": "https://aka.ms/iot-pnp-graph-staging",
+  "interfaceUrl": "https://aka.ms/iot-pnp-interface-staging",
+  "capabilityModelUrl": "https://aka.ms/iot-pnp-capability-model-staging",
   "engines": {
     "vscode": "^1.30.0"
   },

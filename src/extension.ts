@@ -55,10 +55,10 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // PnP Language Server
   const pnpContext = new PnPMetaModelUtility(context);
-  const pnpInterface: PnPMetaModelContext = pnpContext.getInterface();
+  const pnpInterface: PnPMetaModelContext = await pnpContext.getInterface();
   const pnpCapabilityModel: PnPMetaModelContext =
-      pnpContext.getCapabilityModel();
-  const pnpGraph: PnPMetaModelGraph = pnpContext.getGraph();
+      await pnpContext.getCapabilityModel();
+  const pnpGraph: PnPMetaModelGraph = await pnpContext.getGraph();
   const pnpParser =
       new PnPMetaModelParser(pnpGraph, pnpInterface, pnpCapabilityModel);
   const pnpDiagnostic =

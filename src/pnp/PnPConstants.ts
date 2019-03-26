@@ -15,6 +15,7 @@ export class PnPFileNames {
   static readonly schemaFolderName = 'schemas';
   static readonly defaultInterfaceName = 'myInterface';
   static readonly defaultCapabilityModelName = 'myCapabilityModel';
+  static readonly etagCacheFileName = 'etagCache.json';
 }
 
 export class PnPConstants {
