@@ -63,8 +63,10 @@ IoT projects rely on internet connectivity. Use AP Mode on the DevKit to configu
 	- Register a new device into Azure IoT Hub and make a note of the device connection string, which looks like:
 	`HostName={YourIoTHubName}.azure-devices.net;DeviceId=MyNodeDevice;SharedAccessKey={YourSharedAccessKey}`
 
-1. Download SSH and Telnet client like [Putty](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) for Windows.
+1. Copy the **GetStarted.bin** you downloaded from step 1 into the disk named **AZ3166**.
 
+	![copy binary](media/copy_file.png)
+	
 1. Open **Device Manager** in Windows and identify the COM port for IoT DevKit.
 
 	![identify_com_port](media/identify_com_port.png)
@@ -82,12 +84,9 @@ IoT projects rely on internet connectivity. Use AP Mode on the DevKit to configu
 	`set_az_iothub [device connection string]`
 
 	Replace the `[device connection string]` with the string you retrieved in step 2 and you will receive the following information:
-	
+
 	`INFO: Set Azure Iot hub connection string successfully.`
 
-1. Copy the **GetStarted.bin** you downloaded from step 1 into the disk named **AZ3166**.
-
-	![copy binary](media/copy_file.png)
 
 1. Wait for the IoT DevKit to restart and you will see it sending telemetry data to Azure IoT Hub after Wi-Fi is connected.
 
