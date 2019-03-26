@@ -66,16 +66,10 @@ IoT projects rely on internet connectivity. Use AP Mode on the DevKit to configu
 1. Copy the **GetStarted.bin** you downloaded from step 1 into the disk named **AZ3166**.
 
 	![copy binary](media/copy_file.png)
-	
-1. Open **Device Manager** in Windows and identify the COM port for IoT DevKit.
 
-	![identify_com_port](media/identify_com_port.png)
 
-1. open Putty, type the right COM port and 115200 for Speed then click **Open**.
 
-	![putty_setting](media/putty_setting.png)
-
-1. On the device, hold down button A, then push and release the reset button. Observe the Configuration console in Putty window.
+1. On the device, hold down button **B**, push and release the **Reset** button, and then release button **B**. Your IoT DevKit enters AP mode for configuring the Wi-Fi connection and device connection string.
 
 	![putty_window](media/putty_window.png)
 
