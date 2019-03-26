@@ -33,9 +33,8 @@ class BlobService {
     return {};
   }
   private updateEtagObjCache(etagObjCache: EtagObjCache) {
-    const etagObjCacheFilePath = this.context.asAbsolutePath(path.join(
-        PnPFileNames.resourcesFolderName, PnPFileNames.deviceModelFolderName,
-        PnPFileNames.etagCacheFileName));
+    const etagObjCacheFilePath = this.context.asAbsolutePath(
+        path.join(FileNames.cacheFolderName, PnPFileNames.etagCacheFileName));
     fs.writeFileSync(
         etagObjCacheFilePath, JSON.stringify(etagObjCache, null, 2));
   }
@@ -79,6 +78,10 @@ class BlobService {
       }
     } catch (e) {
       // request regards 304 as an expection
+      if (e.statusCode !== 304) {
+        console.log(`Error occured when request remote file (${
+            uri}) with status code ${e.statusCode}`);
+      }
       return null;
     }
   }
