@@ -312,6 +312,12 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
         console.log(deviceConnectionString);
 
+        // Try to close serial monitor
+        try {
+          await vscode.commands.executeCommand('arduino.closeSerialMonitor');
+        } catch (ignore) {
+        }
+
         // Set selected connection string to device
         let res: boolean;
         const plat = os.platform();
@@ -363,6 +369,12 @@ export class AZ3166Device extends ArduinoDeviceBase {
         }
 
         console.log(UDS);
+
+        // Try to close serial monitor
+        try {
+          await vscode.commands.executeCommand('arduino.closeSerialMonitor');
+        } catch (ignore) {
+        }
 
         // Set selected connection string to device
         let res: boolean;
