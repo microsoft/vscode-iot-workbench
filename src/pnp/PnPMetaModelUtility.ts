@@ -2,6 +2,8 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+import {FileNames} from '../constants';
+
 import {PnPFileNames} from './PnPConstants';
 import {PnPMetaModelGraph} from './PnPMetaModelGraph';
 
@@ -21,9 +23,8 @@ interface EtagObjCache {
 class BlobService {
   constructor(private context: vscode.ExtensionContext) {}
   private getEtagObjCache() {
-    const etagObjCacheFilePath = this.context.asAbsolutePath(path.join(
-        PnPFileNames.resourcesFolderName, PnPFileNames.deviceModelFolderName,
-        PnPFileNames.etagCacheFileName));
+    const etagObjCacheFilePath = this.context.asAbsolutePath(
+        path.join(FileNames.cacheFolderName, PnPFileNames.etagCacheFileName));
     if (fs.existsSync(etagObjCacheFilePath)) {
       const etagObjCacheRawFile = fs.readFileSync(etagObjCacheFilePath, 'utf8');
       const etagObjCache = JSON.parse(etagObjCacheRawFile) as EtagObjCache;
