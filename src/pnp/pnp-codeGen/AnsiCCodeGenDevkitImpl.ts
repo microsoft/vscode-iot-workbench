@@ -10,7 +10,7 @@ import {TelemetryContext} from '../../telemetry';
 import {generateFoldersForIoTWorkbench} from '../Utilities';
 
 import {AnsiCCodeGeneratorBase} from './Interfaces/AnsiCCodeGeneratorBase';
-import { ProvisionType } from './Interfaces/CodeGenerator';
+import {ProvisionType} from './Interfaces/CodeGenerator';
 
 const constants = {
   deviceDefaultFolderName: 'Device',

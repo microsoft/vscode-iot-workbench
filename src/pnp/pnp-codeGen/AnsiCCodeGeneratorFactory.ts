@@ -13,7 +13,9 @@ export class AnsiCCodeGeneratorFactory implements CodeGeneratorFactory {
       private context: vscode.ExtensionContext,
       private channel: vscode.OutputChannel,
       private telemetryContext: TelemetryContext) {}
-  CreateCodeGeneratorImpl(deviceType: CodeGenDeviceType, provisionType: ProvisionType): CodeGenerator|null {
+  CreateCodeGeneratorImpl(
+      deviceType: CodeGenDeviceType,
+      provisionType: ProvisionType): CodeGenerator|null {
     if (deviceType === CodeGenDeviceType.General) {
       return new AnsiCCodeGenGeneralImpl(
           this.context, this.channel, this.telemetryContext, provisionType);

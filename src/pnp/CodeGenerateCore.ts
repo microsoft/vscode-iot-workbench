@@ -185,19 +185,22 @@ export class CodeGenerateCore {
       {label: provisionTypeLabel.iotcSasKeyLabel, description: ''}
     ];
 
-    if (codeGenDeviceType !== CodeGenDeviceType.Boilerplate)
-    {
-      const provisionSelection = await vscode.window.showQuickPick(
-        provisionSelections,
-        {ignoreFocusOut: true, placeHolder: 'Please select a device provision type'});
+    if (codeGenDeviceType !== CodeGenDeviceType.Boilerplate) {
+      const provisionSelection =
+          await vscode.window.showQuickPick(provisionSelections, {
+            ignoreFocusOut: true,
+            placeHolder: 'Please select a device provision type'
+          });
 
       if (!provisionSelection) {
         return false;
       }
 
-      if (provisionSelection.label === provisionTypeLabel.connectionStringLabel) {
+      if (provisionSelection.label ===
+          provisionTypeLabel.connectionStringLabel) {
         provisionType = ProvisionType.DeviceConnectionString;
-      } else if (provisionSelection.label === provisionTypeLabel.iotcSasKeyLabel) {
+      } else if (
+          provisionSelection.label === provisionTypeLabel.iotcSasKeyLabel) {
         provisionType = ProvisionType.IoTCSasKey;
       }
     }
@@ -207,8 +210,8 @@ export class CodeGenerateCore {
       return false;
     }
 
-    const codeGenerator =
-        codeGenFactory.CreateCodeGeneratorImpl(codeGenDeviceType, provisionType);
+    const codeGenerator = codeGenFactory.CreateCodeGeneratorImpl(
+        codeGenDeviceType, provisionType);
     if (!codeGenerator) {
       return false;
     }

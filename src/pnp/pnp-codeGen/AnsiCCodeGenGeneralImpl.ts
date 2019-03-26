@@ -6,7 +6,7 @@ import {FileNames} from '../../constants';
 import {TelemetryContext} from '../../telemetry';
 
 import {AnsiCCodeGeneratorBase} from './Interfaces/AnsiCCodeGeneratorBase';
-import { ProvisionType } from './Interfaces/CodeGenerator';
+import {ProvisionType} from './Interfaces/CodeGenerator';
 
 const ansiConstants = {
   languageName: 'ansi',
@@ -31,8 +31,7 @@ export class AnsiCCodeGenGeneralImpl extends AnsiCCodeGeneratorBase {
         targetPath, filePath, connectionString);
 
     let provisionFolderName = 'connectionString';
-    switch(this.provisionType)
-    {
+    switch (this.provisionType) {
       case ProvisionType.DeviceConnectionString:
         provisionFolderName = 'connectionstring';
         break;
@@ -45,8 +44,7 @@ export class AnsiCCodeGenGeneralImpl extends AnsiCCodeGeneratorBase {
 
     const resouceFolder = this.context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, ansiConstants.pnp,
-        ansiConstants.languageName,
-        provisionFolderName));
+        ansiConstants.languageName, provisionFolderName));
 
     const projectName = path.basename(targetPath);
 
