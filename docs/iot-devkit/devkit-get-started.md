@@ -34,20 +34,64 @@ To connect the IoT DevKit to your computer:
 
 ## Get Started with Azure IoT Hub
 
-1. Follow this [tutorial](https://docs.microsoft.com/en-us/azure/iot-hub/quickstart-send-telemetry-node#create-an-iot-hub) to
-	- Create a new Azure IoT Hub from portal.
-	- Register a new device into Azure IoT Hub and make a note of the device connection string, which looks like:
+1. Log in to the [Azure portal](https://portal.azure.com). 
+
+1. Choose +**Create a resource**, then choose **Internet of Things**.
+
+1. Click **Iot Hub** from the list on the right. You see the first screen for creating an IoT hub.
+
+   ![Screenshot showing creating a hub in the Azure portal](./media/iot-hub-create-screen-basics.png)
+
+   Fill in the fields.
+
+   **Subscription**: Select the subscription to use for your IoT hub.
+
+   **Resource Group**: You can create a new resource group or use an existing one. To create a new one, click **Create new** and fill in the name you want to use. To use an existing resource group, click **Use existing** and select the resource group from the dropdown list. 
+
+   **Region**: This is the region in which you want your hub to be located. Select the location closest to you from the dropdown list.
+
+   **IoT Hub Name**: Put in the name for your IoT Hub. This name must be globally unique. If the name you enter is available, a green check mark appears.
+
+1. Click **Next: Size and scale** to continue creating your IoT hub.
+
+   ![Screenshot showing setting size and scale for a new IoT hub using the Azure portal](./media/iot-hub-create-screen-size-scale.png)
+
+   On this screen, you can take the defaults and just click **Review + create** at the bottom. 
+
+   **Pricing and scale tier**: You can choose from several tiers depending on how many features you want and how many messages you send through your solution per day. The free tier is intended for testing and evaluation. It allows 500 devices to be connected to the IoT hub and up to 8,000 messages per day. Each Azure subscription can create one IoT Hub in the free tier. 
+
+   **IoT Hub units**: The number of messages allowed per unit per day depends on your hub's pricing tier. For example, if you want the IoT hub to support ingress of 700,000 messages, you choose two S1 tier units.
+
+   **Advanced / Device-to-cloud partitions**: This property relates the device-to-cloud messages to the number of simultaneous readers of the messages. Most IoT hubs only need four partitions. 
+
+1. Click **Review + create** to review your choices. You see something similar to this screen.
+
+   ![Screenshot reviewing information for creating the new IoT hub](./media/iot-hub-create-review.png)
+
+1. Click **Create** to create your new IoT hub. Creating the hub takes a few minutes.
+
+1. Navigate to the IoT Hub created and in the **IoT Devices** page, click **Add**.
+
+	![Screenshot register device](./media/register_iot_device.png)
+
+1. Provide a descriptive device ID. Use the default settings for auto-generating authentication keys and connecting the new device to your hub. Click **Save**
+
+	![Screenshot create device](./media/create_device.png)
+
+1. Navigate to the device created and make a note of the device connection string, which looks like:
 	`HostName={YourIoTHubName}.azure-devices.net;DeviceId=MyNodeDevice;SharedAccessKey={YourSharedAccessKey}`
 
-	>Please follow the section of **Create an IoT hub** and **Register a device** only. Please skip the section to run the simulated application.
+	![Screenshot device connection string](./media/device_connection_string.png)
 
-1. Download the latest version of [GetStarted firmware](https://aka.ms/devkit/prod/getstarted/latest) for IoT DevKit which includes the bootloader.
+1. Download the latest version of [GetStarted firmware](https://aka.ms/devkit/prod/getstarted/latest) for IoT DevKit.
+
+1. Connect IoT DevKit to your computer via USB. In Windows you see a new USB mass storage device in Windows Explorer called **AZ3166**.
 
 1. Drag and drop the `.bin` file you downloaded from step 1 into the disk named **AZ3166** and wait for IoT Devkit to restart.
 
 	![copy binary](media/copy_file.png)
 
-1. IoT projects rely on internet connectivity. Use AP Mode on the DevKit to configure and connect to Wi-Fi. 
+1. Internet connectivity is required to connect to Azure IoT Hub. Use AP Mode on the DevKit to configure and connect to Wi-Fi. 
 	Hold down button **B**, push and release the **Reset** button, and then release button **B**. Your IoT DevKit enters AP mode for configuring the Wi-Fi connection. The screen displays the service set identifier (SSID) of the DevKit and the configuration portal IP address:
 
     ![Reset button, button B, and SSID](media/iot-devkit-get-started/wifi-ap.jpg)
@@ -68,7 +112,7 @@ To connect the IoT DevKit to your computer:
 
     ![Wi-Fi IP address](media/iot-devkit-get-started/wifi-ip.jpg)
 
-1. Wait for the IoT DevKit to connect to Azure IoT Hub and you will see it sending telemetry data including temperature and humidity to Azure IoT Hub. The screen of the IoT Devkit would show message count and temperature/humidity data.
+1. Wait for the IoT DevKit to connect to Azure IoT Hub and you will see it sending telemetry data including temperature and humidity value to Azure IoT Hub. The screen of the IoT Devkit would show message count and temperature/humidity data.
 
 	![sending data](media/iot-devkit-get-started/sending_data.jpg)
 
