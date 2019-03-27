@@ -9,10 +9,11 @@ If you have already done this, you can try more samples from the [Projects Catal
 ## What you learn
 
 * How to connect the IoT DevKit to a wireless access point.
+* How to create an Azure IoT Hub and register a device for the IoT DevKit.
+* How to connect IoT Devkit to Azure IoT Hub.
 * How to install the development environment.
-* How to create an IoT Hub and register a device for the IoT DevKit.
 * How to collect sensor data by running a sample application on the IoT DevKit.
-* How to send the IoT DevKit sensor data to your IoT hub.
+* How to send the IoT DevKit sensor data to your Azure IoT hub.
 
 ## What you need
 
@@ -116,8 +117,9 @@ To connect the IoT DevKit to your computer:
 
 	![sending data](media/iot-devkit-get-started/sending_data.jpg)
 
+## Build your first application for IoT DevKit 
 
-## Install development environment
+### Install development environment
 
 We recommend [Azure IoT Device Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) extension for Visual Studio Code to develop on the IoT DevKit.
 
@@ -192,7 +194,7 @@ Follow these steps to prepare the development environment for the IoT DevKit:
 		sudo usermod -a -G plugdev $(whoami)
 		```
 
-## Build your first project
+### Build your first project
 
 Now you are all set with preparing and configuring your development environment. Let us build a "Hello World" sample for IoT: sending temperature telemetry data to Azure IoT Hub.
 Make sure your IoT DevKit is **not connected** to your computer. Start VS Code first, and then connect the IoT DevKit to your computer.
@@ -201,7 +203,7 @@ In the bottom right status bar, check the **MXCHIP AZ3166** is shown as selected
 
 ![Select board and serial port](media/iot-devkit-get-started/select-board.png)
 
-### Open Azure IoT Device Workbench Examples
+#### Open Azure IoT Device Workbench Examples
 
 Use `F1` or`Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type **Azure IoT Device Workbench**, and then select **Open Examples...**.
 
@@ -219,7 +221,7 @@ Find **Get Started** and click **Open Sample** button. A new VS Code window with
 
 ![Open sample](media/iot-devkit-get-started/open-sample.png)
 
-### Provision Azure service
+#### Provision Azure service
 
 In the solution window, open the command palette and select **Azure IoT Device Workbench: Provision Azure Services...**.
 
@@ -233,7 +235,7 @@ The whole process includes:
 * Select an existing IoT Hub or create a new IoT Hub.
 * Select an existing IoT Hub device or create a new IoT Hub device. 
 
-### Config IoT Hub Device Connection String
+#### Config IoT Hub Device Connection String
 
 1. Switch the IoT DevKit into **Configuration mode**. To do so:
 
@@ -260,7 +262,7 @@ The whole process includes:
 
     ![IoT DevKit Connection String OK](media/iot-workbench-connection-done.png) 
 
-### Build and upload the device code
+#### Build and upload the device code
 
 1. Open the command palette and select **Azure IoT Device Workbench: Upload Device Code**.
 
