@@ -32,59 +32,45 @@ To connect the IoT DevKit to your computer:
 
 ![Hardware connections](media/iot-devkit-get-started/connect.jpg)
 
-## Configure Wi-Fi
-
-IoT projects rely on internet connectivity. Use AP Mode on the DevKit to configure and connect to Wi-Fi.
-
-1. Hold down button **B**, push and release the **Reset** button, and then release button **B**. Your IoT DevKit enters AP mode for configuring the Wi-Fi connection. The screen displays the service set identifier (SSID) of the DevKit and the configuration portal IP address:
-
-    ![Reset button, button B, and SSID](media/iot-devkit-get-started/wifi-ap.jpg)
-
-2. Use a Web browser on a different Wi-Fi enabled device (computer or mobile phone) to connect to the IoT DevKit SSID displayed in the previous step. If it asks for a password, leave it empty.
-
-    ![Network info and Connect button](media/iot-devkit-get-started/connect-ssid.png)
-
-3. Open **192.168.0.1** in the browser. Select the Wi-Fi network that you want the IoT DevKit to connect to, type the password for the Wi-Fi conection, and then click **Connect**.
-
-    ![Password box and Connect button](media/iot-devkit-get-started/wifi-portal.png)
-
-4. The IoT DevKit reboots in a few seconds. You then see the Wi-Fi name and assigned IP address on the screen of the IoT DevKit:
-
-    ![Wi-Fi name and IP address](media/iot-devkit-get-started/wifi-ip.jpg)
-
-> Note:  After connected to internet, the currently-installed and latest available version of the IoT DevKit's firmware is displayed on the screen. If it's not running on the latest available version, follow the [firmware upgrading guide](https://microsoft.github.io/azure-iot-developer-kit/docs/firmware-upgrading/) to install the latest version.
-
 ## Get Started with Azure IoT Hub
 
-1. Download the latest version of [GetStarted firmware](media/GetStarted.bin) for IoT DevKit which includes the bootloader.
-
-1. Follow the [tutorial](https://docs.microsoft.com/en-us/azure/iot-hub/quickstart-send-telemetry-node#create-an-iot-hub) to
-	- Create a new Azure IoT Hub from portal
+1. Follow this [tutorial](https://docs.microsoft.com/en-us/azure/iot-hub/quickstart-send-telemetry-node#create-an-iot-hub) to
+	- Create a new Azure IoT Hub from portal.
 	- Register a new device into Azure IoT Hub and make a note of the device connection string, which looks like:
 	`HostName={YourIoTHubName}.azure-devices.net;DeviceId=MyNodeDevice;SharedAccessKey={YourSharedAccessKey}`
 
-1. Copy the **GetStarted.bin** you downloaded from step 1 into the disk named **AZ3166**.
+	>Please follow the section of **Create an IoT hub** and **Register a device** only. Please skip the section to run the simulated application.
+
+1. Download the latest version of [GetStarted firmware](https://aka.ms/devkit/prod/getstarted/latest) for IoT DevKit which includes the bootloader.
+
+1. Drag and drop the `.bin` file you downloaded from step 1 into the disk named **AZ3166** and wait for IoT Devkit to restart.
 
 	![copy binary](media/copy_file.png)
 
+1. IoT projects rely on internet connectivity. Use AP Mode on the DevKit to configure and connect to Wi-Fi. 
+	Hold down button **B**, push and release the **Reset** button, and then release button **B**. Your IoT DevKit enters AP mode for configuring the Wi-Fi connection. The screen displays the service set identifier (SSID) of the DevKit and the configuration portal IP address:
 
+    ![Reset button, button B, and SSID](media/iot-devkit-get-started/wifi-ap.jpg)
 
-1. On the device, hold down button **B**, push and release the **Reset** button, and then release button **B**. Your IoT DevKit enters AP mode for configuring the Wi-Fi connection and device connection string.
+1. Use a Web browser on a different Wi-Fi enabled device (computer or mobile phone) to connect to the IoT DevKit SSID displayed in the previous step. If it asks for a password, leave it empty.
 
-	![putty_window](media/putty_window.png)
+    ![Network info and Connect button](media/iot-devkit-get-started/connect-ssid.png)
 
-1. Type the following command in the Putty window to set the device connection string for IoT DevKit.
+1. Open **192.168.0.1** in the browser. Select the Wi-Fi network that you want the IoT DevKit to connect to, type the password for the Wi-Fi conection and input the device connection string you retrieved in step 1. Then click **Connect**.
 
-	`set_az_iothub [device connection string]`
+    ![Password box and Connect button](media/iot-devkit-get-started/wifi-portal.png)
 
-	Replace the `[device connection string]` with the string you retrieved in step 2 and you will receive the following information:
+1. The WiFi information and device connection string will be stored into the IoT DevKit. The following page will be displayed in the browser:
 
-	`INFO: Set Azure Iot hub connection string successfully.`
+    ![set succeed](media/iot-devkit-get-started/set_succeed.png)
 
+1. The IoT DevKit reboots in a few seconds. You then see the assigned Wi-Fi IP address on the screen of the IoT DevKit:
 
-1. Wait for the IoT DevKit to restart and you will see it sending telemetry data to Azure IoT Hub after Wi-Fi is connected.
+    ![Wi-Fi IP address](media/iot-devkit-get-started/wifi-ip.jpg)
 
-	![sending data](media/sending_data.png)
+1. Wait for the IoT DevKit to connect to Azure IoT Hub and you will see it sending telemetry data including temperature and humidity to Azure IoT Hub. The screen of the IoT Devkit would show message count and temperature/humidity data.
+
+	![sending data](media/iot-devkit-get-started/sending_data.jpg)
 
 
 ## Install development environment
