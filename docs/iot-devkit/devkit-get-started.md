@@ -101,7 +101,7 @@ To connect the IoT DevKit to your computer:
 
     ![Network info and Connect button](media/iot-devkit-get-started/connect-ssid.png)
 
-1. Open **192.168.0.1** in the browser. Select or iput the Wi-Fi network that you want the IoT DevKit to connect to, type the password for the Wi-Fi conection and input the device connection string you retrieved in step 1. Then click **Connect**.
+1. Open **192.168.0.1** in the browser. Select or input the Wi-Fi network that you want the IoT DevKit to connect to, type the password for the Wi-Fi conection and input the device connection string you retrieved in step 1. Then click **Connect**.
 
     ![Password box and Connect button](media/iot-devkit-get-started/wifi-portal.png)
 
