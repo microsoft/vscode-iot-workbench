@@ -187,8 +187,8 @@ export class ProjectInitializer {
             const content = fs.readFileSync(sketchTemplateFilePath, 'utf8');
 
             // Convert the string based template type to enum.
-            const type: ProjectTemplateType =
-                ProjectTemplateType[result.type as keyof typeof ProjectTemplateType];
+            const type: ProjectTemplateType = ProjectTemplateType
+                [result.type as keyof typeof ProjectTemplateType];
 
             return await project.create(
                 rootPath, content, type, boardSelection.id, openInNewWindow);
