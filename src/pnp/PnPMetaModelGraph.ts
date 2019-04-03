@@ -17,9 +17,7 @@ export interface PnPMetaModelGraph {
   Edges: GraphEdge[];
 }
 
-export interface Map<T> {
-  [key: string]: T;
-}
+export interface Map<T> { [key: string]: T; }
 
 export class PnPMetaModelParser {
   static LABEL = {
