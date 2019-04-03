@@ -14,7 +14,8 @@ import {ProvisionType} from './Interfaces/CodeGenerator';
 
 const constants = {
   deviceDefaultFolderName: 'Device',
-  sketchFileName: 'device-ansic.ino'
+  deviceConnectionStringSketchFileName: 'pnpdevice_connectionstring.ino',
+  deviceIotcSasKeySketchFileName: 'pnpdevice_iotcsaskey.ino'
 };
 
 export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
@@ -46,11 +47,23 @@ export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
     const project: IoTProject =
         new IoTProject(this.context, this.channel, this.telemetryContext);
 
-    const originPath = this.context.asAbsolutePath(path.join(
-        FileNames.resourcesFolderName, AZ3166Device.boardId,
-        constants.sketchFileName));
-    const originalContent = fs.readFileSync(originPath, 'utf8');
+    // Generate device code for IoT DevKit according to the provision option.
+    let sketchFileName;
+    switch (this.provisionType) {
+      case ProvisionType.DeviceConnectionString:
+        sketchFileName = constants.deviceConnectionStringSketchFileName;
+        break;
+      case ProvisionType.IoTCSasKey:
+        sketchFileName = constants.deviceIotcSasKeySketchFileName;
+        break;
+      default:
+        throw new Error('Unsupported device provision type.');
+    }
 
+    const originPath = this.context.asAbsolutePath(path.join(
+        FileNames.resourcesFolderName, AZ3166Device.boardId, sketchFileName));
+
+    const originalContent = fs.readFileSync(originPath, 'utf8');
     const pathPattern = /{PATHNAME}/g;
     const replaceStr = originalContent.replace(pathPattern, fileCoreName);
 

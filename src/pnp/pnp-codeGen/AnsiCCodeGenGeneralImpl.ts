@@ -30,7 +30,7 @@ export class AnsiCCodeGenGeneralImpl extends AnsiCCodeGeneratorBase {
     const retvalue = await this.GenerateAnsiCCodeCore(
         targetPath, filePath, connectionString);
 
-    let provisionFolderName = 'connectionString';
+    let provisionFolderName;
     switch (this.provisionType) {
       case ProvisionType.DeviceConnectionString:
         provisionFolderName = 'connectionstring';

@@ -696,7 +696,9 @@ export class Property extends Value {
 /**
  * The properties that are assigned to an Object.
  */
-export interface Properties { [key: string]: Value; }
+export interface Properties {
+  [key: string]: Value;
+}
 
 /**
  * A JSON array that contains elements.
