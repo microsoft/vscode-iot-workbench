@@ -23,11 +23,3 @@ export interface DownloadContentParameters {
   fileName: string;
   content: string;
 }
-
-/*export interface PnPContext {
-  resourceId?: string;
-  content: string;
-  published?: boolean;
-  etag?: string;
-  tags?: string[];
-}*/
