@@ -11,13 +11,15 @@ import * as url from 'url';
 import {VSCExpress} from '../vscode-express';
 import {PnPFileNames, PnPConstants} from './PnPConstants';
 import {PnPMetamodelRepositoryClient} from './pnp-api/PnPMetamodelRepositoryClient';
-import {PnPUri} from './pnp-api/Validator/PnPUri';
 import * as utils from '../utils';
-import {MetaModelType, PnPContext} from './pnp-api/DataContracts/PnPContext';
+import {MetaModelType} from './pnp-api/DataContracts/PnPContext';
 import {PnPConnector} from './PnPConnector';
 import {DialogResponses} from '../DialogResponses';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
+import {PnPConnectionStringBuilder} from './pnp-api/PnPConnectionStringBuilder';
+import {SearchResults} from './pnp-api/DataContracts/SearchResults';
+import {MetaModelMetaData} from './pnp-api/DataContracts/MetaModelMetaData';
 
 const constants = {
   storedFilesInfoKeyName: 'StoredFilesInfo',
@@ -232,9 +234,28 @@ export class DeviceModelOperator {
     return;
   }
 
-  async Connect(
+  async ConnectModelRepository(
       context: vscode.ExtensionContext,
       channel: vscode.OutputChannel): Promise<boolean> {
+    const repoItems = [
+      {label: 'Open Public Model Repository', description: ''},
+      {label: 'Open Organizational Model Repository', description: ''}
+    ];
+
+    const repoSelection = await vscode.window.showQuickPick(
+        repoItems,
+        {ignoreFocusOut: true, placeHolder: 'Please select an option:'});
+
+    if (!repoSelection) {
+      return false;
+    }
+
+    if (repoSelection.label === 'Open Public Model Repository') {
+      // TODO: Open Public Model repository
+      return true;
+    }
+
+    // Open Organizational Model repository
     let connectionString =
         ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
 
@@ -285,66 +306,86 @@ export class DeviceModelOperator {
 
 
   async GetAllInterfaces(
-      context: vscode.ExtensionContext, pageSize = 50,
-      continueToken: string|null = null) {
-    let connectionString =
-        ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
-    if (!connectionString) {
-      const option: vscode.InputBoxOptions = {
-        value: PnPConstants.repoConnectionStringTemplate,
-        prompt:
-            'Please input the connection string to the Plug & Play repository.',
-        ignoreFocusOut: true
-      };
+      context: vscode.ExtensionContext, usePublicRepository: boolean,
+      pageSize = 50, continueToken: string|null = null) {
+    if (usePublicRepository) {
+      const pnpMetamodelRepositoryClient =
+          new PnPMetamodelRepositoryClient(null);
 
-      const repoConnectionString = await vscode.window.showInputBox(option);
+      const result = await pnpMetamodelRepositoryClient.SearchInterfacesAsync(
+          '', continueToken, undefined, pageSize);
+      return result;
+    } else {
+      let connectionString =
+          ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
+      if (!connectionString) {
+        const option: vscode.InputBoxOptions = {
+          value: PnPConstants.repoConnectionStringTemplate,
+          prompt:
+              'Please input the connection string to the Plug & Play repository.',
+          ignoreFocusOut: true
+        };
 
-      if (!repoConnectionString) {
-        return [];
-      } else {
-        await ConfigHandler.update(
-            ConfigKey.pnpModelRepositoryKeyName, repoConnectionString,
-            vscode.ConfigurationTarget.Global);
-        connectionString = repoConnectionString;
+        const repoConnectionString = await vscode.window.showInputBox(option);
+        if (!repoConnectionString) {
+          return [];
+        } else {
+          await ConfigHandler.update(
+              ConfigKey.pnpModelRepositoryKeyName, repoConnectionString,
+              vscode.ConfigurationTarget.Global);
+          connectionString = repoConnectionString;
+        }
       }
+
+      const builder = PnPConnectionStringBuilder.Create(connectionString);
+      const pnpMetamodelRepositoryClient =
+          new PnPMetamodelRepositoryClient(connectionString);
+      const result = await pnpMetamodelRepositoryClient.SearchInterfacesAsync(
+          '', continueToken, builder.RepositoryIdValue, pageSize);
+      return result;
     }
-    const pnpMetamodelRepositoryClient =
-        new PnPMetamodelRepositoryClient(connectionString);
-    const result = await pnpMetamodelRepositoryClient.GetAllInterfacesAsync(
-        continueToken, pageSize);
-    return result;
   }
 
   async GetAllCapabilityModels(
-      context: vscode.ExtensionContext, pageSize = 50,
-      continueToken: string|null = null) {
-    let connectionString =
-        ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
-    if (!connectionString) {
-      const option: vscode.InputBoxOptions = {
-        value: PnPConstants.repoConnectionStringTemplate,
-        prompt:
-            'Please input the connection string to the Plug & Play repository.',
-        ignoreFocusOut: true
-      };
+      context: vscode.ExtensionContext, usePublicRepository: boolean,
+      pageSize = 50, continueToken: string|null = null) {
+    if (usePublicRepository) {
+      const pnpMetamodelRepositoryClient =
+          new PnPMetamodelRepositoryClient(null);
 
-      const repoConnectionString = await vscode.window.showInputBox(option);
+      const result = await pnpMetamodelRepositoryClient.SearchInterfacesAsync(
+          '', continueToken, undefined, pageSize);
+      return result;
+    } else {
+      let connectionString =
+          ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
+      if (!connectionString) {
+        const option: vscode.InputBoxOptions = {
+          value: PnPConstants.repoConnectionStringTemplate,
+          prompt:
+              'Please input the connection string to the Plug & Play repository.',
+          ignoreFocusOut: true
+        };
 
-      if (!repoConnectionString) {
-        return [];
-      } else {
-        await ConfigHandler.update(
-            ConfigKey.pnpModelRepositoryKeyName, repoConnectionString,
-            vscode.ConfigurationTarget.Global);
-        connectionString = repoConnectionString;
+        const repoConnectionString = await vscode.window.showInputBox(option);
+
+        if (!repoConnectionString) {
+          return [];
+        } else {
+          await ConfigHandler.update(
+              ConfigKey.pnpModelRepositoryKeyName, repoConnectionString,
+              vscode.ConfigurationTarget.Global);
+          connectionString = repoConnectionString;
+        }
       }
+      const pnpMetamodelRepositoryClient =
+          new PnPMetamodelRepositoryClient(connectionString);
+      const builder = PnPConnectionStringBuilder.Create(connectionString);
+      const result =
+          await pnpMetamodelRepositoryClient.SearchCapabilityModelsAsync(
+              '', continueToken, builder.RepositoryIdValue, pageSize);
+      return result;
     }
-    const pnpMetamodelRepositoryClient =
-        new PnPMetamodelRepositoryClient(connectionString);
-    const result =
-        await pnpMetamodelRepositoryClient.GetAllCapabilityModelsAsync(
-            continueToken, pageSize);
-    return result;
   }
 
   async DeletePnPFiles(
@@ -362,22 +403,22 @@ export class DeviceModelOperator {
     const connectionString =
         ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
     if (!connectionString) {
-      return;
+      return;  // TODO: delete from public model repository??
     }
 
     const pnpMetamodelRepositoryClient =
         new PnPMetamodelRepositoryClient(connectionString);
-
+    const builder = PnPConnectionStringBuilder.Create(connectionString);
     fileIds.forEach(async (id) => {
       channel.appendLine(`Start deleting ${metaModelValue} with id ${id}.`);
       try {
         if (metaModelType === MetaModelType.Interface) {
-          await pnpMetamodelRepositoryClient.DeleteInterfaceByInterfaceIdAsync(
-              PnPUri.Parse(id));
+          await pnpMetamodelRepositoryClient.DeleteInterfaceAsync(
+              id, undefined);
           channel.appendLine(`Deleting interface with id ${id} completed.`);
         } else {
-          await pnpMetamodelRepositoryClient
-              .DeleteCapabilityModelByCapabilityModelIdAsync(PnPUri.Parse(id));
+          await pnpMetamodelRepositoryClient.DeleteCapabilityModelAsync(
+              id, builder.RepositoryIdValue);
           channel.appendLine(
               `Deleting capabilty model with id ${id} completed.`);
         }
@@ -387,48 +428,6 @@ export class DeviceModelOperator {
       }
     });
   }
-
-  async PublishPnPFiles(
-      fileIds: string[], metaModelValue: string,
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
-    channel.show();
-    if (!fileIds || fileIds.length === 0) {
-      channel.appendLine(`Please select the ${metaModelValue} to publish.`);
-      return;
-    }
-
-    const metaModelType: MetaModelType =
-        MetaModelType[metaModelValue as keyof typeof MetaModelType];
-
-    const connectionString =
-        ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
-    if (!connectionString) {
-      return;
-    }
-
-    const pnpMetamodelRepositoryClient =
-        new PnPMetamodelRepositoryClient(connectionString);
-
-    fileIds.forEach(async (id) => {
-      channel.appendLine(`Start publishing ${metaModelValue} with id ${id}.`);
-      try {
-        if (metaModelType === MetaModelType.Interface) {
-          await pnpMetamodelRepositoryClient.PublishInterfaceAsync(
-              PnPUri.Parse(id));
-          channel.appendLine(`Publishing interface with id ${id} completed.`);
-        } else {
-          await pnpMetamodelRepositoryClient.PublishCapabilityModelAsync(
-              PnPUri.Parse(id));
-          channel.appendLine(
-              `Publishing capabilty model with id ${id} completed.`);
-        }
-      } catch (error) {
-        channel.appendLine(`Publishing ${metaModelValue} with id ${
-            id} failed. Error: ${error.message}`);
-      }
-    });
-  }
-
 
   async DownloadAndEditPnPFiles(
       fileIds: string[], metaModelValue: string,
@@ -463,19 +462,18 @@ export class DeviceModelOperator {
 
     for (const id of fileIds) {
       channel.appendLine(`Start getting ${metaModelValue} with id ${id}.`);
-      let fileContext: PnPContext;
+      let fileMetaData: MetaModelMetaData;
       try {
         if (metaModelType === MetaModelType.Interface) {
-          fileContext =
-              await pnpMetamodelRepositoryClient.GetInterfaceByInterfaceIdAsync(
-                  PnPUri.Parse(id));
+          fileMetaData = await pnpMetamodelRepositoryClient.GetInterfaceAsync(
+              id, undefined, true);
         } else {
-          fileContext =
-              await pnpMetamodelRepositoryClient
-                  .GetCapabilityModelByCapabilityModelIdAsync(PnPUri.Parse(id));
+          fileMetaData =
+              await pnpMetamodelRepositoryClient.GetCapabilityModelAsync(
+                  id, undefined, true);
         }
-        if (fileContext) {
-          const fileJson = JSON.parse(fileContext.content);
+        if (fileMetaData) {
+          const fileJson = JSON.parse(fileMetaData.contents as string);
           const pathName = url.parse(fileJson[constants.idName]).pathname;
           if (!pathName) {
             throw new Error(`Unable to parse the id of the file. id: ${
@@ -502,7 +500,8 @@ export class DeviceModelOperator {
           }
 
           fs.writeFileSync(
-              path.join(rootPath, candidateName), fileContext.content);
+              path.join(rootPath, candidateName),
+              fileMetaData.contents as string);
           await vscode.window.showTextDocument(
               vscode.Uri.file(path.join(rootPath, candidateName)));
           channel.appendLine(`Downloading ${metaModelValue} with id ${
@@ -603,6 +602,7 @@ export class DeviceModelOperator {
 
     const pnpMetamodelRepositoryClient =
         new PnPMetamodelRepositoryClient(connectionString);
+    const builder = PnPConnectionStringBuilder.Create(connectionString);
 
     let continueOnFailure = false;
     const option: SubmitOptions = {overwriteChoice: OverwriteChoice.Unknown};
@@ -611,8 +611,8 @@ export class DeviceModelOperator {
       channel.appendLine(`File to submit: ${fileItem.label}`);
       const filePath = path.join(rootPath, fileItem.label);
       const result = await this.SubmitInterface(
-          option, pnpMetamodelRepositoryClient, filePath, fileItem.label,
-          channel);
+          option, pnpMetamodelRepositoryClient, builder, filePath,
+          fileItem.label, channel);
       if (!result && !continueOnFailure) {
         const message = `${
             fileItem
@@ -632,8 +632,8 @@ export class DeviceModelOperator {
       channel.appendLine(`File to submit: ${fileItem.label}`);
       const filePath = path.join(rootPath, fileItem.label);
       const result = await this.SubmitCapabilityModel(
-          option, pnpMetamodelRepositoryClient, filePath, fileItem.label,
-          channel);
+          option, pnpMetamodelRepositoryClient, builder, filePath,
+          fileItem.label, channel);
       if (!result && !continueOnFailure) {
         const message = `${
             fileItem
@@ -655,7 +655,7 @@ export class DeviceModelOperator {
   private async SubmitInterface(
       option: SubmitOptions,
       pnpMetamodelRepositoryClient: PnPMetamodelRepositoryClient,
-      filePath: string, fileName: string,
+      builder: PnPConnectionStringBuilder, filePath: string, fileName: string,
       channel: vscode.OutputChannel): Promise<boolean> {
     try {
       const fileContent = fs.readFileSync(filePath, 'utf8');
@@ -682,17 +682,10 @@ export class DeviceModelOperator {
         channel.appendLine(
             `Connect to Plug & Play repository to check whether ${
                 fileId} exists in server...`);
-        const interfaceContext =
-            await pnpMetamodelRepositoryClient.GetInterfaceByInterfaceIdAsync(
-                PnPUri.Parse(fileId));
+        const interfaceMetaData =
+            await pnpMetamodelRepositoryClient.GetInterfaceAsync(
+                fileId, builder.RepositoryIdValue, true);
 
-        if (interfaceContext.published) {
-          // already published, we should not update it.
-          vscode.window.showWarningMessage(
-              `Azure IoT Plug & Play interface with id: "${
-                  fileId}" is already published. You could not updated it.`);
-          return false;
-        }
         channel.appendLine(`Azure IoT Plug & Play interface file with id:"${
             fileId}" exists in server. `);
 
@@ -714,18 +707,9 @@ export class DeviceModelOperator {
         channel.appendLine(
             `Start updating Plug & Play interface with id:"${fileId}"... `);
 
-        const interfaceTags =
-            await this.GetTagsforDocuments(fileName, interfaceContext.tags);
-
-        // Update the interface
-        const pnpContext: PnPContext = {
-          resourceId: interfaceContext.resourceId,
-          content: fileContent,
-          etag: interfaceContext.etag,
-          tags: interfaceTags
-        };
         const updatedContext =
-            await pnpMetamodelRepositoryClient.UpdateInterface(pnpContext);
+            await pnpMetamodelRepositoryClient.CreateOrUpdateInterfaceAsync(
+                fileContent, interfaceMetaData.etag, undefined);
         channel.appendLine(
             `Submitting Azure IoT Plug & Play interface file: fileName: "${
                 fileName}" successfully, interface id: "${fileId}". `);
@@ -739,16 +723,9 @@ export class DeviceModelOperator {
               `Plug & Play interface file does not exist in server, creating ${
                   fileId}... `);
           // Create the interface.
-          const interfaceTags = await this.GetTagsforDocuments(fileName);
-          const pnpContext: PnPContext = {
-            resourceId: '',
-            content: fileContent,
-            etag: '',
-            tags: interfaceTags
-          };
-          const result: PnPContext =
-              await pnpMetamodelRepositoryClient.CreateInterfaceAsync(
-                  pnpContext);
+          const result: MetaModelMetaData =
+              await pnpMetamodelRepositoryClient.CreateOrUpdateInterfaceAsync(
+                  fileContent, undefined, builder.RepositoryIdValue);
           channel.appendLine(`Submitting Plug & Play interface: fileName: "${
               fileName}" successfully, interface id: "${fileId}". `);
           vscode.window.showInformationMessage(
@@ -772,7 +749,7 @@ export class DeviceModelOperator {
   private async SubmitCapabilityModel(
       option: SubmitOptions,
       pnpMetamodelRepositoryClient: PnPMetamodelRepositoryClient,
-      filePath: string, fileName: string,
+      builder: PnPConnectionStringBuilder, filePath: string, fileName: string,
       channel: vscode.OutputChannel): Promise<boolean> {
     try {
       const fileContent = fs.readFileSync(filePath, 'utf8');
@@ -800,17 +777,8 @@ export class DeviceModelOperator {
             `Connect to Azure IoT Plug & Play repository to check whether "${
                 fileId}" exists in server...`);
         const capabilityModelContext =
-            await pnpMetamodelRepositoryClient
-                .GetCapabilityModelByCapabilityModelIdAsync(
-                    PnPUri.Parse(fileId));
-
-        if (capabilityModelContext.published) {
-          // already published, we should not update it.
-          vscode.window.showWarningMessage(
-              `Azure IoT Plug & Play capability model file with id: ${
-                  fileId} is already published. You could not updated it.`);
-          return false;
-        }
+            await pnpMetamodelRepositoryClient.GetCapabilityModelAsync(
+                fileId, builder.RepositoryIdValue, true);
 
         if (option.overwriteChoice === OverwriteChoice.Unknown) {
           const msg = `The capability model with id "${
@@ -832,19 +800,10 @@ export class DeviceModelOperator {
             `Start updating Plug & Play capability model with id:"${
                 fileId}"...`);
 
-        const capabilityModelTags = await this.GetTagsforDocuments(
-            fileName, capabilityModelContext.tags);
-
-        // Update the interface
-        const pnpContext: PnPContext = {
-          resourceId: capabilityModelContext.resourceId,
-          content: fileContent,
-          etag: capabilityModelContext.etag,
-          tags: capabilityModelTags
-        };
-        const updatedContext =
-            await pnpMetamodelRepositoryClient.UpdateCapabilityModelAsync(
-                pnpContext);
+        const updatedContext = await pnpMetamodelRepositoryClient
+                                   .CreateOrUpdateCapabilityModelAsync(
+                                       fileContent, capabilityModelContext.etag,
+                                       builder.RepositoryIdValue);
         channel.appendLine(
             `Submitting Plug & Play capability model: fileName: "${
                 fileName}" successfully, capability model id: "${fileId}". `);
@@ -857,17 +816,12 @@ export class DeviceModelOperator {
           channel.appendLine(
               `Plug & Play capability model file does not exist in server, creating "${
                   fileId}"... `);
+
           // Create the interface.
-          const capabilityModelTags = await this.GetTagsforDocuments(fileName);
-          const pnpContext: PnPContext = {
-            resourceId: '',
-            content: fileContent,
-            etag: '',
-            tags: capabilityModelTags
-          };
-          const result: PnPContext =
-              await pnpMetamodelRepositoryClient.CreateCapabilityModelAsync(
-                  pnpContext);
+          const result: MetaModelMetaData =
+              await pnpMetamodelRepositoryClient
+                  .CreateOrUpdateCapabilityModelAsync(
+                      fileContent, undefined, builder.RepositoryIdValue);
           channel.appendLine(
               `Submitting Plug & Play capability model: fileName: "${
                   fileName}" successfully, capability model id: "${fileId}". `);
@@ -888,26 +842,5 @@ export class DeviceModelOperator {
     }
 
     return true;
-  }
-
-  private async GetTagsforDocuments(fileName: string, inputTags?: string[]):
-      Promise<string[]|undefined> {
-    let tags = '';
-    if (inputTags && inputTags.length >= 0) {
-      tags = inputTags.join(';');
-    }
-
-    const option: vscode.InputBoxOptions = {
-      value: tags,
-      prompt: `Please input the tags for ${fileName}, separate by ';'`,
-      ignoreFocusOut: true
-    };
-    const result = await vscode.window.showInputBox(option);
-
-    if (result) {
-      return result.split(';');
-    } else {
-      return;
-    }
   }
 }

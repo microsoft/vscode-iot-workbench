@@ -519,14 +519,14 @@ export async function activate(context: vscode.ExtensionContext) {
       'iotworkbench.getAllInterfaces',
       async (pageSize?: number, continueToken?: string) => {
         return await deviceModelOperator.GetAllInterfaces(
-            context, pageSize, continueToken);
+            context, false, pageSize, continueToken);
       });
 
   vscode.commands.registerCommand(
       'iotworkbench.getAllCapabilityModels',
       async (pageSize?: number, continueToken?: string) => {
         return await deviceModelOperator.GetAllCapabilityModels(
-            context, pageSize, continueToken);
+            context, false, pageSize, continueToken);
       });
 
   vscode.commands.registerCommand(
@@ -544,13 +544,6 @@ export async function activate(context: vscode.ExtensionContext) {
       });
 
   vscode.commands.registerCommand(
-      'iotworkbench.publishPnPFiles',
-      async (fileIds: string[], metaModelValue: string) => {
-        await deviceModelOperator.PublishPnPFiles(
-            fileIds, metaModelValue, context, outputChannel);
-      });
-
-  vscode.commands.registerCommand(
       'iotworkbench.createPnPInterface', deviceModelCreateInterfaceProvider);
 
   vscode.commands.registerCommand(
@@ -559,7 +552,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(vscode.commands.registerCommand(
       'iotworkbench.pnpOpenRepository', async () => {
-        deviceModelOperator.Connect(context, outputChannel);
+        deviceModelOperator.ConnectModelRepository(context, outputChannel);
       }));
   context.subscriptions.push(vscode.commands.registerCommand(
       'iotworkbench.pnpSignOutRepository', async () => {

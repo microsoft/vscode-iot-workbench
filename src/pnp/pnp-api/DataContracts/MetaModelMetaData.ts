@@ -2,12 +2,22 @@
 // Licensed under the MIT License.
 
 export interface MetaModelMetaData {
+  contents?: string;
+  comment?: string;
+  description?: string;
+  displayName?: LocalizedData[];
   id: string;
-  displayName: string;
+  modelName: string;
   version: string;
-  descritption: string;
-  comments: string;
-  eTag: string;
-  resourceId: string;
-  published: boolean;
+  pnpMetamodelType: string;
+  etag: string;
+  tenantId: string;
+  tenantName: string;
+  createdOn: string;
+  lastUpdated: string;
+}
+
+export interface LocalizedData {
+  locale: string;
+  value: string;
 }

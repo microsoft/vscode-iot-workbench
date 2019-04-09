@@ -4,6 +4,6 @@
 import {MetaModelMetaData} from './MetaModelMetaData';
 
 export interface SearchResults {
-  continuationToken: string;
+  continuationToken?: string;
   results: MetaModelMetaData[];
 }
