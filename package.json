@@ -270,8 +270,7 @@
     "vscode-express": "^1.0.1",
     "vscode-extension-telemetry": "^0.1.0",
     "winreg": "^1.2.3",
-    "extract-zip": "^1.6.7",
-    "create-hmac": "^1.1.7"
+    "extract-zip": "^1.6.7"
   },
   "extensionDependencies": [
     "vsciot-vscode.azure-iot-toolkit"
