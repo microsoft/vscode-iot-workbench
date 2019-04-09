@@ -252,6 +252,11 @@ export class DeviceModelOperator {
 
     if (repoSelection.label === 'Open Public Model Repository') {
       // TODO: Open Public Model repository
+      DeviceModelOperator.vscexpress = DeviceModelOperator.vscexpress ||
+          new VSCExpress(context, 'pnpRepositoryViews');
+      await DeviceModelOperator.vscexpress.open(
+          'index.html', 'Plug & Play Repository', vscode.ViewColumn.Two,
+          {retainContextWhenHidden: true, enableScripts: true});
       return true;
     }
 
@@ -305,15 +310,15 @@ export class DeviceModelOperator {
   }
 
 
-  async GetAllInterfaces(
+  async GetInterfaces(
       context: vscode.ExtensionContext, usePublicRepository: boolean,
-      pageSize = 50, continueToken: string|null = null) {
+      searchString = '', pageSize = 50, continueToken: string|null = null) {
     if (usePublicRepository) {
       const pnpMetamodelRepositoryClient =
           new PnPMetamodelRepositoryClient(null);
 
       const result = await pnpMetamodelRepositoryClient.SearchInterfacesAsync(
-          '', continueToken, undefined, pageSize);
+          searchString, continueToken, undefined, pageSize);
       return result;
     } else {
       let connectionString =
@@ -341,20 +346,20 @@ export class DeviceModelOperator {
       const pnpMetamodelRepositoryClient =
           new PnPMetamodelRepositoryClient(connectionString);
       const result = await pnpMetamodelRepositoryClient.SearchInterfacesAsync(
-          '', continueToken, builder.RepositoryIdValue, pageSize);
+          searchString, continueToken, builder.RepositoryIdValue, pageSize);
       return result;
     }
   }
 
-  async GetAllCapabilityModels(
+  async GetCapabilityModels(
       context: vscode.ExtensionContext, usePublicRepository: boolean,
-      pageSize = 50, continueToken: string|null = null) {
+      searchString = '', pageSize = 50, continueToken: string|null = null) {
     if (usePublicRepository) {
       const pnpMetamodelRepositoryClient =
           new PnPMetamodelRepositoryClient(null);
 
       const result = await pnpMetamodelRepositoryClient.SearchInterfacesAsync(
-          '', continueToken, undefined, pageSize);
+          searchString, continueToken, undefined, pageSize);
       return result;
     } else {
       let connectionString =
@@ -383,7 +388,7 @@ export class DeviceModelOperator {
       const builder = PnPConnectionStringBuilder.Create(connectionString);
       const result =
           await pnpMetamodelRepositoryClient.SearchCapabilityModelsAsync(
-              '', continueToken, builder.RepositoryIdValue, pageSize);
+              searchString, continueToken, builder.RepositoryIdValue, pageSize);
       return result;
     }
   }

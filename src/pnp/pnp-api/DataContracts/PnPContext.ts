@@ -18,8 +18,3 @@ export interface SearchOptions {
   continuationToken: string|null;
   pageSize?: number;
 }
-
-export interface DownloadContentParameters {
-  fileName: string;
-  content: string;
-}
