@@ -9,6 +9,7 @@ const constants = {
   ValuePairDelimiter: ';',
   ValuePairSeparator: '=',
   HostNamePropertyName: 'HostName',
+  RepositoryIdPropertyName: 'RepositoryId',
   SharedAccessKeyNamePropertyName: 'SharedAccessKeyName',
   SharedAccessKeyValuePropertyName: 'SharedAccessKey',
   HostNameRegex: new RegExp('[a-zA-Z0-9_\\-\\.]+$'),
@@ -20,11 +21,13 @@ const constants = {
 
 export class PnPConnectionStringBuilder {
   private hostName: string;
+  private repositoryId: string;
   private sharedAccessKeyName: string;
   private sharedAccessKeyValue: string;
 
   private constructor() {
     this.hostName = '';
+    this.repositoryId = '';
     this.sharedAccessKeyName = '';
     this.sharedAccessKeyValue = '';
   }
@@ -39,6 +42,10 @@ export class PnPConnectionStringBuilder {
 
   get SharedAccessKeyValue() {
     return this.sharedAccessKeyValue;
+  }
+
+  get RepositoryIdValue() {
+    return this.repositoryId;
   }
 
 
@@ -85,6 +92,8 @@ export class PnPConnectionStringBuilder {
     for (const key in items) {
       if (key === constants.HostNamePropertyName) {
         this.hostName = items[key];
+      } else if (key === constants.RepositoryIdPropertyName) {
+        this.repositoryId = items[key];
       } else if (key === constants.SharedAccessKeyNamePropertyName) {
         this.sharedAccessKeyName = items[key];
       } else if (key === constants.SharedAccessKeyValuePropertyName) {
@@ -94,7 +103,10 @@ export class PnPConnectionStringBuilder {
 
     if (!this.hostName) {
       throw Error('Unable to find the host name in the connection string.');
+    } else if (!this.repositoryId) {
+      throw Error('Unable to find the repositoryId in the connection string.');
     }
+
     this.Validate();
   }
 

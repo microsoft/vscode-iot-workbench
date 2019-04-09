@@ -6,6 +6,7 @@ import * as vscode from 'vscode';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
 
+import {PnPConnectionStringBuilder} from './pnp-api/PnPConnectionStringBuilder';
 import {PnPMetamodelRepositoryClient} from './pnp-api/PnPMetamodelRepositoryClient';
 
 
@@ -20,9 +21,10 @@ export class PnPConnector {
     try {
       const pnpMetamodelRepositoryClient =
           new PnPMetamodelRepositoryClient(connectionString);
+      const builder = PnPConnectionStringBuilder.Create(connectionString);
       // try to get one interface.
-      const result =
-          await pnpMetamodelRepositoryClient.GetAllInterfacesAsync(null, 1);
+      const result = await pnpMetamodelRepositoryClient.SearchInterfacesAsync(
+          '', null, builder.RepositoryIdValue, 1);
       await ConfigHandler.update(
           ConfigKey.pnpModelRepositoryKeyName, connectionString,
           vscode.ConfigurationTarget.Global);

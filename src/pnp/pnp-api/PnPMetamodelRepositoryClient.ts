@@ -5,106 +5,113 @@
 
 import * as vscode from 'vscode';
 import * as request from 'request-promise';
-import * as url from 'url';
 import {SearchResults} from './DataContracts/SearchResults';
-import {PnPUri} from './Validator/PnPUri';
-import {MetaModelType, PnPContext} from './DataContracts/PnPContext';
+import {MetaModelType, SearchOptions, MetaModelUpsertRequest} from './DataContracts/PnPContext';
 import {PnPConnectionStringBuilder} from './PnPConnectionStringBuilder';
-import {PnPConnectionString} from './PnPConnectionString';
+import {PnPSharedAccessKey} from './PnPSharedAccessKey';
+import {GlobalConstants} from '../../constants';
+import {MetaModelMetaData} from './DataContracts/MetaModelMetaData';
 
 const constants = {
-  interfaceRoute: '/api/interfaces',
-  capabilityModelRoute: '/api/capabilitymodels',
-  mediaType: 'application/json'
+  mediaType: 'application/json',
+  apiModel: '/Models',
+  modelSearch: '/Models/Search'
 };
 
 
 export class PnPMetamodelRepositoryClient {
-  private pnpConnectionString: PnPConnectionString;
+  private pnpSharedAccessKey: PnPSharedAccessKey|null;
   private metaModelRepositoryHostName: vscode.Uri;
 
-  constructor(connectionString: string) {
+  constructor(connectionString: string|null) {
     if (!connectionString) {
-      throw new Error('The input connection string is empty');
-    }
-    this.pnpConnectionString = new PnPConnectionString(
-        PnPConnectionStringBuilder.Create(connectionString));
-    this.metaModelRepositoryHostName = this.pnpConnectionString.HttpEndpoint;
-  }
-
-  async GetInterfaceByInterfaceIdAsync(pnpUri: PnPUri): Promise<PnPContext> {
-    if (!pnpUri) {
-      throw new Error('pnpUri is required to get the interface.');
+      this.pnpSharedAccessKey = null;
+    } else {
+      this.pnpSharedAccessKey = new PnPSharedAccessKey(
+          PnPConnectionStringBuilder.Create(connectionString));
     }
 
-    return await this.MakeGetRequestAsync(
-        pnpUri.Id, MetaModelType.Interface, false);
-  }
-
-  async GetCapabilityModelByCapabilityModelIdAsync(pnpUri: PnPUri):
-      Promise<PnPContext> {
-    if (!pnpUri) {
-      throw new Error('pnpUri is required to get the capability model.');
+    const extension =
+        vscode.extensions.getExtension(GlobalConstants.extensionId);
+    if (!extension) {
+      throw new Error('Failed to load extension configuration file.');
     }
-
-    return await this.MakeGetRequestAsync(
-        pnpUri.Id, MetaModelType.CapabilityModel, false);
+    this.metaModelRepositoryHostName =
+        vscode.Uri.parse(extension.packageJSON.pnpRepositoryUrl);
   }
 
-  async GetInterfaceByResourceIdAsync(interfaceResourceId: string):
-      Promise<PnPContext> {
-    if (!interfaceResourceId) {
+  async GetInterfaceAsync(
+      modelId: string, repositoryId?: string,
+      expand = false): Promise<MetaModelMetaData> {
+    if (repositoryId && !this.pnpSharedAccessKey) {
       throw new Error(
-          'The name of the interface ResourceId should not be null');
+          'The repository connection string is required to get the interface.');
     }
 
-    return await this.MakeGetRequestAsync(
-        interfaceResourceId, MetaModelType.Interface, true);
+    return await this.MakeGetModelRequestAsync(
+        MetaModelType.Interface, modelId, repositoryId, expand);
   }
 
-  async GetCapabilityModelByResourceIdAsync(capabilityModelResourceId: string):
-      Promise<PnPContext> {
-    if (!capabilityModelResourceId) {
+  async GetCapabilityModelAsync(
+      modelId: string, repositoryId?: string,
+      expand = false): Promise<MetaModelMetaData> {
+    if (repositoryId && !this.pnpSharedAccessKey) {
       throw new Error(
-          'The name of the capability model ResourceId should not be null');
+          'The repository connection string is required to get the capability model.');
     }
 
-    return await this.MakeGetRequestAsync(
-        capabilityModelResourceId, MetaModelType.CapabilityModel, true);
+    return await this.MakeGetModelRequestAsync(
+        MetaModelType.CapabilityModel, modelId, repositoryId, expand);
   }
 
-
-  async GetAllInterfacesAsync(continuationToken: string|null, pageSize = 20):
-      Promise<SearchResults> {
+  async SearchInterfacesAsync(
+      searchString: string, continuationToken: string|null,
+      repositoryId?: string, pageSize = 20): Promise<SearchResults> {
     if (pageSize <= 0) {
       throw new Error('pageSize should be greater than 0');
     }
 
-    return await this.MakeGetAllRequestAsync(
-        MetaModelType.Interface, continuationToken, pageSize);
+    if (repositoryId && !this.pnpSharedAccessKey) {
+      throw new Error(
+          'The connection string is required to search intefaces in organizational model repository.');
+    }
+
+    return await this.MakeSearchRequestAsync(
+        MetaModelType.Interface, searchString, continuationToken, repositoryId,
+        pageSize);
   }
 
 
-  async GetAllCapabilityModelsAsync(
-      continuationToken: string|null, pageSize = 20): Promise<SearchResults> {
+  async SearchCapabilityModelsAsync(
+      searchString: string, continuationToken: string|null,
+      repositoryId?: string, pageSize = 20): Promise<SearchResults> {
     if (pageSize <= 0) {
       throw new Error('pageSize should be greater than 0');
     }
 
-    return await this.MakeGetAllRequestAsync(
-        MetaModelType.CapabilityModel, continuationToken, pageSize);
+    if (repositoryId && !this.pnpSharedAccessKey) {
+      throw new Error(
+          'The connection string is required to search capability models in organizational model repository.');
+    }
+
+    return await this.MakeSearchRequestAsync(
+        MetaModelType.CapabilityModel, searchString, continuationToken,
+        repositoryId, pageSize);
   }
 
 
-  async UpdateInterface(pnpContext: PnPContext): Promise<PnPContext> {
-    if (!pnpContext.resourceId) {
-      throw new Error('pnpContext does not contain the resource id to update.');
+  async CreateOrUpdateInterfaceAsync(
+      content: string, etag?: string,
+      repositoryId?: string): Promise<MetaModelMetaData> {
+    if (repositoryId && !this.pnpSharedAccessKey) {
+      throw new Error(
+          'The connection string is required to publish interface in organizational model repository.');
     }
 
     // TODO:
     // const parsedResult = PnPParser.ParsePnPInterface(pnpContext.content);
     return await this.MakeCreateOrUpdateRequestAsync(
-        pnpContext, 'PUT', MetaModelType.Interface);
+        MetaModelType.Interface, content, etag, repositoryId);
   }
 
   /// <summary>
@@ -112,176 +119,82 @@ export class PnPMetamodelRepositoryClient {
   /// </summary>
   /// <param name="pnpContext"><see cref="PnPContext"/> object.</param>
   /// <returns><see cref="PnPContext"/> object.</returns>
-  async UpdateCapabilityModelAsync(pnpContext: PnPContext):
-      Promise<PnPContext> {
-    if (!pnpContext.resourceId) {
-      throw new Error('pnpContext does not contain the resource id to update.');
-    }
-
-    // TODO:
-    // ParseTemplateResult parsedResult =
-    // PnPParser.ParsePnpTemplate(pnpContext.Content);
-    return await this.MakeCreateOrUpdateRequestAsync(
-        pnpContext, 'PUT', MetaModelType.CapabilityModel);
-  }
-
-  /// <summary>
-  /// Creates an interface with the give pnpContext.
-  /// </summary>
-  /// <param name="pnpContext"><see cref="PnPContext"/> object.</param>
-  /// <returns>Created <see cref="PnPContext"/> object.</returns>
-  async CreateInterfaceAsync(pnpContext: PnPContext): Promise<PnPContext> {
-    if (!pnpContext.content) {
-      throw new Error('pnpContext content is null or empty.');
-    }
-
-    // TODO:
-    // ParseInterfaceResult parsedResult =
-    // PnPParser.ParsePnPInterface(pnpContext.Content);
-    return await this.MakeCreateOrUpdateRequestAsync(
-        pnpContext, 'POST', MetaModelType.Interface);
-  }
-
-  /// <summary>
-  /// Creates an interface with the give pnpContext.
-  /// </summary>
-  /// <param name="pnpContext"><see cref="PnPContext"/> object.</param>
-  /// <returns>Created <see cref="PnPContext"/> object.</returns>
-  async CreateCapabilityModelAsync(pnpContext: PnPContext):
-      Promise<PnPContext> {
-    if (!pnpContext.content) {
+  async CreateOrUpdateCapabilityModelAsync(
+      content: string, etag?: string,
+      repositoryId?: string): Promise<MetaModelMetaData> {
+    if (repositoryId && !this.pnpSharedAccessKey) {
       throw new Error(
-          'pnpContext content is required to create capability model.');
+          'The connection string is required to publish capability model in organizational model repository.');
     }
 
-    // TODO:
-    // ParseTemplateResult parsedResult =
-    // PnPParser.ParsePnpTemplate(pnpContext.Content)
     return await this.MakeCreateOrUpdateRequestAsync(
-        pnpContext, 'POST', MetaModelType.CapabilityModel);
-  }
-
-
-  /// <summary>
-  /// Deletes an interface for given resource id.
-  /// </summary>
-  /// <param name="resourceId"><see cref="resourceId"/> object.</param>
-  async DeleteInterfaceByResourceIdAsync(resourceId: string) {
-    if (!resourceId) {
-      throw new Error('resourceId is required to delete the interface.');
-    }
-
-    await this.MakeDeleteRequestAsync(
-        resourceId, MetaModelType.Interface, true);
+        MetaModelType.CapabilityModel, content, etag, repositoryId);
   }
 
   /// <summary>
   /// Deletes an interface for given PnPUri.
   /// </summary>
   /// <param name="pnpInterfaceUri"><see cref="PnPUri"/> object.</param>
-  async DeleteInterfaceByInterfaceIdAsync(pnpInterfaceUri: PnPUri) {
-    if (!pnpInterfaceUri) {
-      throw new Error('pnpInterfaceUri is required to delete the interface.');
+  async DeleteInterfaceAsync(modelId: string, repositoryId?: string) {
+    if (repositoryId && !this.pnpSharedAccessKey) {
+      throw new Error(
+          'The connection string is required to delete interface in organizational model repository.');
     }
 
     await this.MakeDeleteRequestAsync(
-        pnpInterfaceUri.Id, MetaModelType.Interface);
+        MetaModelType.Interface, modelId, repositoryId);
   }
 
   /// <summary>
-  /// Deletes a capability model for given resource id.
-  /// </summary>
-  /// <param name="resourceId"><see cref="resourceId"/> object.</param>
-  async DeleteCapabilityModelByResourceIdAsync(resourceId: string) {
-    if (!resourceId) {
-      throw new Error('resourceId is required to delete the capability model.');
-    }
-
-    await this.MakeDeleteRequestAsync(
-        resourceId, MetaModelType.CapabilityModel, true);
-  }
-
-  /// <summary>
-  /// Deletes a capability model for given PnPUri.
+  /// Deletes a capability model for given model id.
   /// </summary>
   /// <param name="pnpCapabilityModelUri"><see cref="PnPUri"/> object.</param>
-  async DeleteCapabilityModelByCapabilityModelIdAsync(pnpCapabilityModelUri:
-                                                          PnPUri) {
-    if (!pnpCapabilityModelUri) {
+  async DeleteCapabilityModelAsync(modelId: string, repositoryId?: string) {
+    if (repositoryId && !this.pnpSharedAccessKey) {
       throw new Error(
-          'pnpCapabilityModelUri is required to delete the capability model.');
+          'The connection string is required to delete capability model in organizational model repository.');
     }
 
     await this.MakeDeleteRequestAsync(
-        pnpCapabilityModelUri.Id, MetaModelType.CapabilityModel);
-  }
-
-
-  /// <summary>
-  /// Publishes an interface.
-  /// </summary>
-  /// <param name="pnpUri">PnPUri of an interface.</param>
-  async PublishInterfaceAsync(pnpUri: PnPUri) {
-    if (!pnpUri) {
-      throw new Error('PnPUri is required to publish the interface.');
-    }
-
-    await this.MakePatchRequestAsync(pnpUri, MetaModelType.Interface);
-  }
-
-  /// <summary>
-  /// Publishes capability model.
-  /// </summary>
-  /// <param name="pnpUri">PnPUri of capability model.</param>
-  async PublishCapabilityModelAsync(pnpUri: PnPUri) {
-    if (!pnpUri) {
-      throw new Error('PnPUri is required to publish the capability model.');
-    }
-
-    await this.MakePatchRequestAsync(pnpUri, MetaModelType.CapabilityModel);
+        MetaModelType.CapabilityModel, modelId, repositoryId);
   }
 
 
   async MakeCreateOrUpdateRequestAsync(
-      pnpContext: PnPContext, httpMethod: string,
-      metaModelType: MetaModelType): Promise<PnPContext> {
-    let options: request.OptionsWithUri;
-    let targetUri: string;
+      metaModelType: MetaModelType, contents: string, etag?: string,
+      repositoryId?: string): Promise<MetaModelMetaData> {
+    let targetUri = this.metaModelRepositoryHostName.toString();
 
-    if (httpMethod === 'POST') {
-      targetUri = this.GetRepositoryEndPoint(metaModelType);
-      options = {
-        method: httpMethod,
-        uri: targetUri,
-        json: true,
-        headers: {
-          Authorization: this.pnpConnectionString.GetAuthorizationHeader(),
-          'Content-Type': 'application/json'
-        },
-        body: pnpContext
-      };
-    } else if (httpMethod === 'PUT') {
-      targetUri = this.GetRepositoryEndPoint(
-          metaModelType, pnpContext.resourceId, null, true);
-      options = {
-        method: httpMethod,
-        uri: targetUri,
-        encoding: 'utf8',
-        json: true,
-        headers: {
-          Authorization: this.pnpConnectionString.GetAuthorizationHeader(),
-          'Content-Type': 'application/json'
-        },
-        body: pnpContext
-      };
+    if (repositoryId) {
+      targetUri += `${constants.apiModel}?repositoryId=${repositoryId}`;
     } else {
-      throw new Error('');
+      targetUri += `${constants.apiModel}`;
     }
 
-    return new Promise<PnPContext>((resolve, reject) => {
+    let authenticationString = '';
+
+    if (this.pnpSharedAccessKey) {
+      authenticationString = this.pnpSharedAccessKey.GenerateSASToken();
+    }
+
+    const payload: MetaModelUpsertRequest = {etag, contents};
+
+    const options: request.OptionsWithUri = {
+      method: 'PUT',
+      uri: targetUri,
+      encoding: 'utf8',
+      json: true,
+      headers: {
+        Authorization: authenticationString,
+        'Content-Type': 'application/json'
+      },
+      body: payload
+    };
+
+    return new Promise<MetaModelMetaData>((resolve, reject) => {
       request(options)
           .then(response => {
-            const result: PnPContext = response as PnPContext;
+            const result: MetaModelMetaData = response as MetaModelMetaData;
             return resolve(result);
           })
           .catch(err => {
@@ -290,18 +203,29 @@ export class PnPMetamodelRepositoryClient {
     });
   }
 
-  private async MakeGetRequestAsync(
-      id: string, metaModelType: MetaModelType,
-      isResourceId = false): Promise<PnPContext> {
-    const targetUri =
-        this.GetRepositoryEndPoint(metaModelType, id, null, isResourceId);
-    const options: request.OptionsWithUri =
-        {method: 'GET', uri: targetUri, encoding: 'utf8', json: true};
+  private async MakeGetModelRequestAsync(
+      metaModelType: MetaModelType, modelId: string, repositoryId?: string,
+      expand = false): Promise<MetaModelMetaData> {
+    const targetUri = this.GenerateFetchModelUri(modelId, repositoryId, expand);
 
-    return new Promise<PnPContext>((resolve, reject) => {
+    let authenticationString = '';
+
+    if (this.pnpSharedAccessKey) {
+      authenticationString = this.pnpSharedAccessKey.GenerateSASToken();
+    }
+
+    const options: request.OptionsWithUri = {
+      method: 'GET',
+      uri: targetUri,
+      encoding: 'utf8',
+      json: true,
+      headers: {Authorization: authenticationString},
+    };
+
+    return new Promise<MetaModelMetaData>((resolve, reject) => {
       request(options)
           .then(response => {
-            const result: PnPContext = response as PnPContext;
+            const result: MetaModelMetaData = response as MetaModelMetaData;
             return resolve(result);
           })
           .catch(err => {
@@ -310,22 +234,42 @@ export class PnPMetamodelRepositoryClient {
     });
   }
 
-  private async MakeGetAllRequestAsync(
-      metaModelType: MetaModelType, continuationToken: string|null,
-      pageSize: number): Promise<SearchResults> {
-    const relativeUri = metaModelType === MetaModelType.Interface ?
-        constants.interfaceRoute :
-        constants.capabilityModelRoute;
-    let uriString = `${relativeUri}?pageSize=${pageSize}`;
-    if (continuationToken) {
-      uriString +=
-          `&continuationToken=${encodeURIComponent(continuationToken)}`;
+  private async MakeSearchRequestAsync(
+      metaModelType: MetaModelType, searchString: string,
+      continuationToken: string|null, repositoryId?: string,
+      pageSize = 20): Promise<SearchResults> {
+    const payload: SearchOptions = {
+      searchString,
+      pnpModelType: metaModelType,
+      continuationToken,
+      pageSize
+    };
+
+    let queryString = this.metaModelRepositoryHostName.toString();
+
+    if (repositoryId) {
+      queryString += `${constants.modelSearch}?repositoryId=${repositoryId}`;
+    } else {
+      queryString += `${constants.modelSearch}`;
     }
 
-    const uri =
-        url.resolve(this.metaModelRepositoryHostName.toString(), uriString);
-    const options: request
-        .OptionsWithUri = {method: 'GET', uri, encoding: 'utf8', json: true};
+    let authenticationString = '';
+
+    if (this.pnpSharedAccessKey) {
+      authenticationString = this.pnpSharedAccessKey.GenerateSASToken();
+    }
+
+    const options: request.OptionsWithUri = {
+      method: 'POST',
+      uri: queryString,
+      encoding: 'utf8',
+      json: true,
+      headers: {
+        'Authorization': authenticationString,
+        'Content-Type': 'application/json'
+      },
+      body: payload,
+    };
 
     return new Promise<SearchResults>((resolve, reject) => {
       request(options)
@@ -339,28 +283,6 @@ export class PnPMetamodelRepositoryClient {
     });
   }
 
-  private async MakePatchRequestAsync(
-      pnpUri: PnPUri, metaModelType: MetaModelType) {
-    const targetUri =
-        this.GetRepositoryEndPoint(metaModelType, pnpUri.Id, 'publish');
-
-    const options = {
-      method: 'PATCH',
-      uri: targetUri,
-      headers:
-          {Authorization: this.pnpConnectionString.GetAuthorizationHeader()},
-      resolveWithFullResponse: true
-    };
-    return new Promise<void>((resolve, reject) => {
-      request(options)
-          .then(response => {
-            return resolve();
-          })
-          .catch(err => {
-            reject(err);
-          });
-    });
-  }
 
   /// <summary>
   /// Helper method to make a Delete Request to PnP Metamodal repository
@@ -369,15 +291,23 @@ export class PnPMetamodelRepositoryClient {
   /// <param name="metaModelId">Metamodel id.</param>
   /// <param name="metaModelType"><see cref="MetaModelType"/> Interface or capability model.</param>
   private async MakeDeleteRequestAsync(
-      metaModelId: string, metaModelType: MetaModelType, isResourceId = false) {
-    const targetUri = this.GetRepositoryEndPoint(
-        metaModelType, metaModelId, null, isResourceId);
+      metaModelType: MetaModelType, modelId: string, repositoryId?: string) {
+    const queryString = repositoryId ? `&repositoryId=${repositoryId}` : '';
+    const resourceUrl = `${this.metaModelRepositoryHostName.toString()}${
+        constants.apiModel}?modelId=${modelId}${queryString}`;
+
+    let authenticationString = '';
+
+    if (this.pnpSharedAccessKey) {
+      authenticationString = this.pnpSharedAccessKey.GenerateSASToken();
+    }
 
     const options = {
       method: 'DELETE',
-      uri: targetUri,
+      uri: resourceUrl,
       headers: {
-        Authorization: this.pnpConnectionString.GetAuthorizationHeader(),
+        'Accept': 'application/json',
+        Authorization: authenticationString,
         'Content-Type': 'application/json'
       },
       resolveWithFullResponse: true
@@ -394,30 +324,16 @@ export class PnPMetamodelRepositoryClient {
     });
   }
 
-
-  private GetRepositoryEndPoint(
-      metaModelType: MetaModelType, metaModelId = '',
-      relativeRoute: string|null = null, isResourceId = false): string {
-    if (metaModelType === MetaModelType.Interface) {
-      relativeRoute = relativeRoute === null ?
-          constants.interfaceRoute :
-          constants.interfaceRoute + `/${relativeRoute}`;
-      if (isResourceId) {
-        relativeRoute += `/${metaModelId}`;
-      } else {
-        relativeRoute += `?interfaceId=${metaModelId}`;
-      }
+  private GenerateFetchModelUri(
+      modelId: string, repositoryId?: string, expand = false) {
+    let result = `${this.metaModelRepositoryHostName.toString()}${
+        constants.apiModel}?modelId=${encodeURIComponent(modelId)}`;
+    const expandString = expand ? `&expand=true` : '';
+    if (repositoryId) {
+      result += `${expandString}&repositoryId=${repositoryId}`;
     } else {
-      relativeRoute = relativeRoute === null ?
-          constants.capabilityModelRoute :
-          constants.capabilityModelRoute + `/${relativeRoute}`;
-      if (isResourceId) {
-        relativeRoute += `/${metaModelId}`;
-      } else {
-        relativeRoute += `?capabilityModelId=${metaModelId}`;
-      }
+      result += `${expandString}`;
     }
-    return url.resolve(
-        this.metaModelRepositoryHostName.toString(), relativeRoute);
+    return result;
   }
 }
