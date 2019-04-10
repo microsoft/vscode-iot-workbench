@@ -250,7 +250,7 @@ header .search-bar::before {
 header .search-bar input[type=text] {
   border: none;
   height: 30px;
-  width: calc(100% - 252px);
+  width: calc(100% - 65px);
   line-height: 30px;
   font-size: 12px;
   color: #333;
@@ -499,6 +499,11 @@ header .search-bar button.dropdown.status {
   background: rgba(0, 120, 215, 0.1);
 }
 
+button.tags,
+button.status {
+  display: none;
+}
+
 .content {
   margin: 0 18px 0 8px;
   height: calc(100% - 152px);
@@ -593,19 +598,14 @@ header .search-bar button.dropdown.status {
 .content table td:nth-child(4) {
   /* width: 120px; */
   width: calc(15% - 15px);
-  text-align: right;
+  /* text-align: right; */
 }
 
 .content table th:nth-child(5),
 .content table td:nth-child(5) {
   /* min-width: calc(30% - 70px);
   width: calc(100% - 464px); */
-  width: calc(15% - 15px);
-}
-
-.content table th:nth-child(6),
-.content table td:nth-child(6) {
-  width: 80px;
+  width: calc(15% + 65px);
 }
 
 .content table tbody {
@@ -676,7 +676,7 @@ header .search-bar button.dropdown.status {
 
 .content table tr.loading-pnp-files td:nth-child(4)::before {
   width: 70px;
-  right: 10px;
+  /* right: 10px; */
 }
 
 .content table tr.loading-pnp-files td:nth-child(5)::before {

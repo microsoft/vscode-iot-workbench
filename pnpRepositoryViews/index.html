@@ -62,54 +62,52 @@
   <th>Name</th>
   <th>ID</th>
   <th>Version</th>
-  <th>Custom Tags</th>
-  <th>Status</th>
+  <th>Publisher</th>
 </tr>
 </thead>
 <tbody v-on:wheel="onScrollTable" v-on:touchmove="onScrollTable" id="interfaceListTable">
 <tr v-show="filterKeywords && filterKeywords !== searchKeywords" v-on:click="searchOnServer">
-  <td colspan="6" style="width: 100%"><span class="info_icon"></span>Results below are filtered from local cache. Click here to search on server.</td>
+  <td colspan="5" style="width: 100%"><span class="info_icon"></span>Results below are filtered from local cache. Click here to search on server.</td>
 </tr>
 <tr v-for="interface in filterItems(interfaceList.value)" v-on:click="addRemoveInterface(interface.id)">
   <td><input type="checkbox" v-bind:value="interface.id" v-model="selectedInterfaces.value"></td>
   <td v-bind:title="interface.displayName"><div class="td_inner" v-html="highlight(getDisplayName(interface.displayName, 'en'))"></div></td>
   <td v-bind:title="interface.id"><div class="td_inner">{{ interface.id }}</div><span class="copy_icon" title="Copy" v-on:click.stop="copy($event, interface.id)"></span></td>
   <td v-bind:title="interface.version"><div class="td_inner">{{ interface.version }}</div></td>
-  <td> </td>
-  <td>{{ interface.published ? 'Published' : 'Saved' }}</td>
+  <td>{{ interface.tenantName }}</td>
 </tr>
 <tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
-  <td></td><td></td><td></td><td></td><td></td><td></td>
+  <td></td><td></td><td></td><td></td><td></td>
 </tr>
 <tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
-  <td></td><td></td><td></td><td></td><td></td><td></td>
+  <td></td><td></td><td></td><td></td><td></td>
 </tr>
 <tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
-  <td></td><td></td><td></td><td></td><td></td><td></td>
+  <td></td><td></td><td></td><td></td><td></td>
 </tr>
 <tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
-  <td></td><td></td><td></td><td></td><td></td><td></td>
+  <td></td><td></td><td></td><td></td><td></td>
 </tr>
 <tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
-  <td></td><td></td><td></td><td></td><td></td><td></td>
+  <td></td><td></td><td></td><td></td><td></td>
 </tr>
 <tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
-  <td></td><td></td><td></td><td></td><td></td><td></td>
+  <td></td><td></td><td></td><td></td><td></td>
 </tr>
 <tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
-  <td></td><td></td><td></td><td></td><td></td><td></td>
+  <td></td><td></td><td></td><td></td><td></td>
 </tr>
 <tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
-  <td></td><td></td><td></td><td></td><td></td><td></td>
+  <td></td><td></td><td></td><td></td><td></td>
 </tr>
 <tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
-  <td></td><td></td><td></td><td></td><td></td><td></td>
+  <td></td><td></td><td></td><td></td><td></td>
 </tr>
 <tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
-  <td></td><td></td><td></td><td></td><td></td><td></td>
+  <td></td><td></td><td></td><td></td><td></td>
 </tr>
 <tr v-show="!loadingPnPInterfaces.value && interfaceNextToken.value">
-  <td colspan="6"></td>
+  <td colspan="5"></td>
 </tr>
 </tbody>
 </table>
@@ -121,54 +119,52 @@
   <th>Name</th>
   <th>ID</th>
   <th>Version</th>
-  <th>Custom Tags</th>
-  <th>Status</th>
+  <th>Publisher</th>
 </tr>
 </thead>
 <tbody v-on:wheel="onScrollTable" v-on:touchmove="onScrollTable" id="capabilityListTable">
 <tr v-show="filterKeywords && filterKeywords !== searchKeywords" v-on:click="searchOnServer">
-  <td colspan="6" style="width: 100%"><span class="info_icon"></span>Results below are filtered from local cache. Click here to search on server.</td>
+  <td colspan="5" style="width: 100%"><span class="info_icon"></span>Results below are filtered from local cache. Click here to search on server.</td>
 </tr>
 <tr v-for="capability in filterItems(capabilityList.value)" v-on:click="addRemoveCapability(capability.id)">
   <td><input type="checkbox" v-bind:value="capability.id" v-model="selectedCapabilityModels.value"></td>
   <td v-bind:title="capability.displayName"><div class="td_inner" v-html="highlight(getDisplayName(capability.displayName, 'en'))"></div></td>
   <td v-bind:title="capability.id"><div class="td_inner">{{ capability.id }}</div><span class="copy_icon" title="Copy" v-on:click.stop="copy($event, capability.id)"></span></td>
   <td v-bind:title="capability.version"><div class="td_inner">{{ capability.version }}</div></td>
-  <td></td>
-  <td>{{ capability.published ? 'Published' : 'Saved' }}</td>
+  <td>{{ capability.tenantName }}</td>
 </tr>
 <tr class="loading-pnp-files" v-show="loadingPnPCapabilityModels.value">
-  <td></td><td></td><td></td><td></td><td></td><td></td>
+  <td></td><td></td><td></td><td></td><td></td>
 </tr>
 <tr class="loading-pnp-files" v-show="loadingPnPCapabilityModels.value">
-  <td></td><td></td><td></td><td></td><td></td><td></td>
+  <td></td><td></td><td></td><td></td><td></td>
 </tr>
 <tr class="loading-pnp-files" v-show="loadingPnPCapabilityModels.value">
-  <td></td><td></td><td></td><td></td><td></td><td></td>
+  <td></td><td></td><td></td><td></td><td></td>
 </tr>
 <tr class="loading-pnp-files" v-show="loadingPnPCapabilityModels.value">
-  <td></td><td></td><td></td><td></td><td></td><td></td>
+  <td></td><td></td><td></td><td></td><td></td>
 </tr>
 <tr class="loading-pnp-files" v-show="loadingPnPCapabilityModels.value">
-  <td></td><td></td><td></td><td></td><td></td><td></td>
+  <td></td><td></td><td></td><td></td><td></td>
 </tr>
 <tr class="loading-pnp-files" v-show="loadingPnPCapabilityModels.value">
-  <td></td><td></td><td></td><td></td><td></td><td></td>
+  <td></td><td></td><td></td><td></td><td></td>
 </tr>
 <tr class="loading-pnp-files" v-show="loadingPnPCapabilityModels.value">
-  <td></td><td></td><td></td><td></td><td></td><td></td>
+  <td></td><td></td><td></td><td></td><td></td>
 </tr>
 <tr class="loading-pnp-files" v-show="loadingPnPCapabilityModels.value">
-  <td></td><td></td><td></td><td></td><td></td><td></td>
+  <td></td><td></td><td></td><td></td><td></td>
 </tr>
 <tr class="loading-pnp-files" v-show="loadingPnPCapabilityModels.value">
-  <td></td><td></td><td></td><td></td><td></td><td></td>
+  <td></td><td></td><td></td><td></td><td></td>
 </tr>
 <tr class="loading-pnp-files" v-show="loadingPnPCapabilityModels.value">
-  <td></td><td></td><td></td><td></td><td></td><td></td>
+  <td></td><td></td><td></td><td></td><td></td>
 </tr>
 <tr v-show="!loadingPnPCapabilityModels.value && capabilityNextToken.value">
-  <td colspan="6"></td>
+  <td colspan="5"></td>
 </tr>
 </tbody>
 </table>
