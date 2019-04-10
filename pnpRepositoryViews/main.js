@@ -29,6 +29,7 @@ var repository = new Vue({
     filterStatus: 'All',
     filterTags: [],
     filterKeywords: '',
+    searchKeywords: '',
     filterTagsOrAnd: 'and',
     loadingPnPInterfaces: {
       value: true
@@ -86,7 +87,10 @@ var repository = new Vue({
     onScrollTable,
     searchTags,
     copy,
-    hasNoItemToPublish
+    hasNoItemToPublish,
+    getDisplayName,
+    searchOnServer,
+    clearKeywords
   },
   created: function() {
     this.companyName = this.getCompanyName();
@@ -139,13 +143,13 @@ function getNextPagePnPFiles(fileType) {
   let commandName, fileList, nextToken, loadingPnPFiles;
   
   if(fileType === 'Interface') {
-    commandName = 'iotworkbench.getAllInterfaces';
+    commandName = 'iotworkbench.getInterfaces';
     fileList = this.interfaceList;
     nextToken = this.interfaceNextToken;
     loadingPnPFiles = this.loadingPnPInterfaces;
     tableId = 'interfaceListTable';
   } else {
-    commandName = 'iotworkbench.getAllCapabilityModels';
+    commandName = 'iotworkbench.getCapabilityModels';
     fileList = this.capabilityList;
     nextToken = this.capabilityNextToken;
     loadingPnPFiles = this.loadingPnPCapabilityModels;
@@ -154,10 +158,9 @@ function getNextPagePnPFiles(fileType) {
 
   loadingPnPFiles.value = true;
 
-  command(commandName, 50, nextToken.value, res => {
+  command(commandName, this.searchKeywords, 50, nextToken.value, res => {
     Vue.set(fileList, 'value', fileList.value.concat(res.result.results));
     Vue.set(nextToken, 'value', res.result.continuationToken);
-    console.log(res.result.continuationToken)
     Vue.set(loadingPnPFiles, 'value', false);
   });
 }
@@ -202,8 +205,8 @@ function showHideTagSelector() {
 function clearFilter() {
   this.filterTags = [];
   this.filterStatus = 'All';
-  this.filterKeywords = '';
   this.showStatusSelector = false;
+  this.filterKeywords = '';
   this.showTagSelector = false;
 }
 
@@ -269,7 +272,8 @@ function filterItems(list) {
       return false;
     }
 
-    if (filterKeywords && item.displayName.toLowerCase().indexOf(filterKeywords.toLowerCase()) === -1) {
+    const displayName = getDisplayName(item.displayName, 'en');
+    if (filterKeywords && displayName.toLowerCase().indexOf(filterKeywords.toLowerCase()) === -1) {
       return false;
     }
 
@@ -310,6 +314,9 @@ function isMatchTags(tags, selectedTags, orAnd) {
 }
 
 function onScrollTable(event) {
+  if (this.filterKeywords) {
+    return;
+  }
   const nextToken = this.type.value === 'Interface' ? this.interfaceNextToken.value : this.capabilityNextToken.value;
   const loadingPnPFiles = this.type.value === 'Interface' ? this.loadingPnPInterfaces : this.loadingPnPCapabilityModels;
   if (!nextToken || this.nextPageLoadingCounter || loadingPnPFiles.value) {
@@ -357,4 +364,37 @@ function hasNoItemToPublish() {
     }
   }
   return true;
+}
+
+function getDisplayName(displayName, locale) {
+  if(!displayName || !displayName.length) {
+    return '';
+  }
+  let res = displayName.find(item => {
+    return item.locale === locale;
+  });
+  // use en as default locale
+  if (!res) {
+    res = displayName.find(item => {
+      return item.locale === 'en';
+    });
+  }
+  
+  if (!res) {
+    res = displayName[0];
+  }
+
+  return res.value;
+}
+
+function searchOnServer() {
+  this.searchKeywords = this.filterKeywords;
+  this.filterKeywords = '';
+  this.refreshPnPFileList();
+}
+
+function clearKeywords() {
+  this.searchKeywords = '';
+  this.filterKeywords = '';
+  this.refreshPnPFileList();
 }
