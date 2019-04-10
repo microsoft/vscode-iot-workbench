@@ -418,7 +418,7 @@ export class DeviceModelOperator {
       try {
         if (metaModelType === MetaModelType.Interface) {
           await pnpMetamodelRepositoryClient.DeleteInterfaceAsync(
-              id, undefined);
+              id, builder.RepositoryIdValue);
           channel.appendLine(`Deleting interface with id ${id} completed.`);
         } else {
           await pnpMetamodelRepositoryClient.DeleteCapabilityModelAsync(
