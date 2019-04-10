@@ -10,7 +10,7 @@ import {MetaModelType, SearchOptions, MetaModelUpsertRequest} from './DataContra
 import {PnPConnectionStringBuilder} from './PnPConnectionStringBuilder';
 import {PnPSharedAccessKey} from './PnPSharedAccessKey';
 import {GlobalConstants, ConfigKey} from '../../constants';
-import {MetaModelMetaData} from './DataContracts/MetaModelMetaData';
+import {PnPModelBase, PnPModel} from './DataContracts/PnPModel';
 import {ConfigHandler} from '../../configHandler';
 
 const constants = {
@@ -51,7 +51,7 @@ export class PnPMetamodelRepositoryClient {
 
   async GetInterfaceAsync(
       modelId: string, repositoryId?: string,
-      expand = false): Promise<MetaModelMetaData> {
+      expand = false): Promise<PnPModel> {
     if (repositoryId && !this.pnpSharedAccessKey) {
       throw new Error(
           'The repository connection string is required to get the interface.');
@@ -63,7 +63,7 @@ export class PnPMetamodelRepositoryClient {
 
   async GetCapabilityModelAsync(
       modelId: string, repositoryId?: string,
-      expand = false): Promise<MetaModelMetaData> {
+      expand = false): Promise<PnPModel> {
     if (repositoryId && !this.pnpSharedAccessKey) {
       throw new Error(
           'The repository connection string is required to get the capability model.');
@@ -111,7 +111,7 @@ export class PnPMetamodelRepositoryClient {
 
   async CreateOrUpdateInterfaceAsync(
       content: string, etag?: string,
-      repositoryId?: string): Promise<MetaModelMetaData> {
+      repositoryId?: string): Promise<PnPModelBase> {
     if (repositoryId && !this.pnpSharedAccessKey) {
       throw new Error(
           'The connection string is required to publish interface in organizational model repository.');
@@ -130,7 +130,7 @@ export class PnPMetamodelRepositoryClient {
   /// <returns><see cref="PnPContext"/> object.</returns>
   async CreateOrUpdateCapabilityModelAsync(
       content: string, etag?: string,
-      repositoryId?: string): Promise<MetaModelMetaData> {
+      repositoryId?: string): Promise<PnPModelBase> {
     if (repositoryId && !this.pnpSharedAccessKey) {
       throw new Error(
           'The connection string is required to publish capability model in organizational model repository.');
@@ -171,7 +171,7 @@ export class PnPMetamodelRepositoryClient {
 
   async MakeCreateOrUpdateRequestAsync(
       metaModelType: MetaModelType, contents: string, etag?: string,
-      repositoryId?: string): Promise<MetaModelMetaData> {
+      repositoryId?: string): Promise<PnPModelBase> {
     let targetUri = this.metaModelRepositoryHostName.toString();
 
     if (repositoryId) {
@@ -200,10 +200,10 @@ export class PnPMetamodelRepositoryClient {
       body: payload
     };
 
-    return new Promise<MetaModelMetaData>((resolve, reject) => {
+    return new Promise<PnPModelBase>((resolve, reject) => {
       request(options)
           .then(response => {
-            const result: MetaModelMetaData = response as MetaModelMetaData;
+            const result: PnPModelBase = response as PnPModelBase;
             return resolve(result);
           })
           .catch(err => {
@@ -214,7 +214,7 @@ export class PnPMetamodelRepositoryClient {
 
   private async MakeGetModelRequestAsync(
       metaModelType: MetaModelType, modelId: string, repositoryId?: string,
-      expand = false): Promise<MetaModelMetaData> {
+      expand = false): Promise<PnPModel> {
     const targetUri = this.GenerateFetchModelUri(modelId, repositoryId, expand);
 
     let authenticationString = '';
@@ -231,10 +231,10 @@ export class PnPMetamodelRepositoryClient {
       headers: {Authorization: authenticationString},
     };
 
-    return new Promise<MetaModelMetaData>((resolve, reject) => {
+    return new Promise<PnPModel>((resolve, reject) => {
       request(options)
           .then(response => {
-            const result: MetaModelMetaData = response as MetaModelMetaData;
+            const result: PnPModel = response as PnPModel;
             return resolve(result);
           })
           .catch(err => {

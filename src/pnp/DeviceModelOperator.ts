@@ -18,7 +18,7 @@ import {DialogResponses} from '../DialogResponses';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
 import {PnPConnectionStringBuilder} from './pnp-api/PnPConnectionStringBuilder';
-import {MetaModelMetaData} from './pnp-api/DataContracts/MetaModelMetaData';
+import {PnPModel, PnPModelBase} from './pnp-api/DataContracts/PnPModel';
 
 const constants = {
   storedFilesInfoKeyName: 'StoredFilesInfo',
@@ -357,8 +357,9 @@ export class DeviceModelOperator {
       const pnpMetamodelRepositoryClient =
           new PnPMetamodelRepositoryClient(null);
 
-      const result = await pnpMetamodelRepositoryClient.SearchInterfacesAsync(
-          searchString, continueToken, undefined, pageSize);
+      const result =
+          await pnpMetamodelRepositoryClient.SearchCapabilityModelsAsync(
+              searchString, continueToken, undefined, pageSize);
       return result;
     } else {
       let connectionString =
@@ -434,7 +435,7 @@ export class DeviceModelOperator {
   }
 
   async DownloadAndEditPnPFiles(
-      fileIds: string[], metaModelValue: string,
+      fileIds: string[], metaModelValue: string, usePublicRepository: boolean,
       context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
     channel.show();
     if (!fileIds || fileIds.length === 0) {
@@ -455,10 +456,18 @@ export class DeviceModelOperator {
       return;
     }
 
-    const connectionString =
-        ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
-    if (!connectionString) {
-      return;
+    let repositoryId: string|undefined = undefined;
+    let connectionString: string|null = null;
+
+    if (!usePublicRepository) {
+      const repoConnectionString =
+          ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
+      if (!repoConnectionString) {
+        return;
+      }
+      connectionString = repoConnectionString;
+      const builder = PnPConnectionStringBuilder.Create(connectionString);
+      repositoryId = builder.RepositoryIdValue;
     }
 
     const pnpMetamodelRepositoryClient =
@@ -466,15 +475,15 @@ export class DeviceModelOperator {
 
     for (const id of fileIds) {
       channel.appendLine(`Start getting ${metaModelValue} with id ${id}.`);
-      let fileMetaData: MetaModelMetaData;
+      let fileMetaData: PnPModel;
       try {
         if (metaModelType === MetaModelType.Interface) {
           fileMetaData = await pnpMetamodelRepositoryClient.GetInterfaceAsync(
-              id, undefined, true);
+              id, repositoryId, true);
         } else {
           fileMetaData =
               await pnpMetamodelRepositoryClient.GetCapabilityModelAsync(
-                  id, undefined, true);
+                  id, repositoryId, true);
         }
         if (fileMetaData) {
           const fileJson = JSON.parse(fileMetaData.contents as string);
@@ -727,7 +736,7 @@ export class DeviceModelOperator {
               `Plug & Play interface file does not exist in server, creating ${
                   fileId}... `);
           // Create the interface.
-          const result: MetaModelMetaData =
+          const result: PnPModelBase =
               await pnpMetamodelRepositoryClient.CreateOrUpdateInterfaceAsync(
                   fileContent, undefined, builder.RepositoryIdValue);
           channel.appendLine(`Submitting Plug & Play interface: fileName: "${
@@ -822,7 +831,7 @@ export class DeviceModelOperator {
                   fileId}"... `);
 
           // Create the interface.
-          const result: MetaModelMetaData =
+          const result: PnPModelBase =
               await pnpMetamodelRepositoryClient
                   .CreateOrUpdateCapabilityModelAsync(
                       fileContent, undefined, builder.RepositoryIdValue);

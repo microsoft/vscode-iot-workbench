@@ -542,9 +542,11 @@ export async function activate(context: vscode.ExtensionContext) {
 
   vscode.commands.registerCommand(
       'iotworkbench.editPnPFiles',
-      async (fileIds: string[], metaModelValue: string) => {
+      async (
+          fileIds: string[], metaModelValue: string,
+          publicRepository = false) => {
         await deviceModelOperator.DownloadAndEditPnPFiles(
-            fileIds, metaModelValue, context, outputChannel);
+            fileIds, metaModelValue, publicRepository, context, outputChannel);
       });
 
   vscode.commands.registerCommand(
