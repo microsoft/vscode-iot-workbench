@@ -38,6 +38,7 @@ export class EventNames {
 export class FileNames {
   static readonly templateFileName = 'template.json';
   static readonly boardListFileName = 'boardlist.json';
+  static readonly platformListFileName = 'platformList.json';
   static readonly resourcesFolderName = 'resources';
   static readonly iotworkbenchprojectFileName = '.iotworkbenchproject';
   static readonly settingsJsonFileName = 'settings.json';
@@ -63,4 +64,10 @@ export class GlobalConstants {
 export class DependentExtensions {
   static readonly azureFunctions = 'ms-azuretools.vscode-azurefunctions';
   static readonly arduino = 'vsciot-vscode.vscode-arduino';
+}
+
+// DefaultDirectoryType: Types of folder to create under default workbench path
+export enum DefaultDirectoryType {
+  example = 'example',
+  project = 'project'
 }
