@@ -503,8 +503,16 @@ header .search-bar button.dropdown.status {
   height: calc(100% - 152px);
 }
 
-#main.show-search-bar .content {
+#main.show-search-bar:not(.show-search-result) .content {
   height: calc(100% - 189px);
+}
+
+#main.show-search-result:not(.show-search-bar) .content {
+  height: calc(100% - 184px);
+}
+
+#main.show-search-bar.show-search-result .content {
+  height: calc(100% - 221px);
 }
 
 .content table {
@@ -742,6 +750,27 @@ header .search-bar button.dropdown.status {
   left: 0;
 }
 
+.info_icon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  -webkit-mask-image: url(image/Info.svg);
+  mask-image: url(image/Info.svg);
+  background-color: #333;
+  vertical-align: text-bottom;
+  margin: 0 0.6em;
+}
+
+.search_result {
+  height: 32px;
+  line-height: 32px;
+}
+
+.search_result .link {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 body.vscode-dark {
   color: #ccc;
   background: #1e1e1e;
@@ -858,4 +887,8 @@ body.vscode-dark .copy_icon::after {
 
 body.vscode-dark .copy_icon:hover {
   background-color: rgba(255, 255, 255, 0.2);
+}
+
+body.vscode-dark .info_icon {
+  background-color: #ccc;
 }

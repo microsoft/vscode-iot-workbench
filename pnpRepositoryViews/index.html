@@ -6,7 +6,7 @@
 <script src="vue.js"></script>
 </head>
 <body>
-<div id="main" v-bind:class="{'show-search-bar': showSearchBar}" v-cloak>
+<div id="main" v-bind:class="{'show-search-bar': showSearchBar, 'show-search-result': searchKeywords !== ''}" v-cloak>
 
 <header v-bind:class="{'show-status-selector': showStatusSelector, 'show-tag-selector': showTagSelector}">
 <h1 class="company-name">{{ companyName }}</h1>
@@ -17,7 +17,7 @@
 <div class="action-bar">
   <button class="with-icon new" v-on:click="createPnPFile">New</button>
   <button class="with-icon download" v-on:click="editPnPFiles" v-bind:disabled="type.value === 'Interface' && !this.selectedInterfaces.value.length || type.value === 'CapabilityModel' && !this.selectedCapabilityModels.value.length">Download</button>
-  <button class="with-icon publish" v-on:click="publishPnPFiles" v-bind:disabled="hasNoItemToPublish()">Publish</button>
+  <button class="with-icon publish" v-if="false" v-on:click="publishPnPFiles" v-bind:disabled="hasNoItemToPublish()">Publish</button>
   <button class="with-icon delete" v-on:click="deletePnPFiles" v-bind:disabled="type.value === 'Interface' && !this.selectedInterfaces.value.length || type.value === 'CapabilityModel' && !this.selectedCapabilityModels.value.length">Delete</button>
   <button class="with-icon refresh right" v-on:click="refreshPnPFileList"></button>
   <button class="with-icon filter right" v-on:click="showHideSearchBar"></button>
@@ -54,7 +54,7 @@
 </div>
 </header>
 <div class="content">
-
+<div class="search_result" v-if="searchKeywords !== ''">Search results with keywords: <strong>{{searchKeywords}}</strong>. Click <span class="link" v-on:click="clearKeywords">here</span> to clear keywords.</div>
 <table v-show="type.value === 'Interface'">
 <thead>
 <tr>
@@ -67,9 +67,12 @@
 </tr>
 </thead>
 <tbody v-on:wheel="onScrollTable" v-on:touchmove="onScrollTable" id="interfaceListTable">
+<tr v-show="filterKeywords && filterKeywords !== searchKeywords" v-on:click="searchOnServer">
+  <td colspan="6" style="width: 100%"><span class="info_icon"></span>Results below are filtered from local cache. Click here to search on server.</td>
+</tr>
 <tr v-for="interface in filterItems(interfaceList.value)" v-on:click="addRemoveInterface(interface.id)">
   <td><input type="checkbox" v-bind:value="interface.id" v-model="selectedInterfaces.value"></td>
-  <td v-bind:title="interface.displayName"><div class="td_inner" v-html="highlight(interface.displayName)"></div></td>
+  <td v-bind:title="interface.displayName"><div class="td_inner" v-html="highlight(getDisplayName(interface.displayName, 'en'))"></div></td>
   <td v-bind:title="interface.id"><div class="td_inner">{{ interface.id }}</div><span class="copy_icon" title="Copy" v-on:click.stop="copy($event, interface.id)"></span></td>
   <td v-bind:title="interface.version"><div class="td_inner">{{ interface.version }}</div></td>
   <td> </td>
@@ -123,9 +126,12 @@
 </tr>
 </thead>
 <tbody v-on:wheel="onScrollTable" v-on:touchmove="onScrollTable" id="capabilityListTable">
+<tr v-show="filterKeywords && filterKeywords !== searchKeywords" v-on:click="searchOnServer">
+  <td colspan="6" style="width: 100%"><span class="info_icon"></span>Results below are filtered from local cache. Click here to search on server.</td>
+</tr>
 <tr v-for="capability in filterItems(capabilityList.value)" v-on:click="addRemoveCapability(capability.id)">
   <td><input type="checkbox" v-bind:value="capability.id" v-model="selectedCapabilityModels.value"></td>
-  <td v-bind:title="capability.displayName"><div class="td_inner" v-html="highlight(capability.displayName)"></div></td>
+  <td v-bind:title="capability.displayName"><div class="td_inner" v-html="highlight(getDisplayName(capability.displayName, 'en'))"></div></td>
   <td v-bind:title="capability.id"><div class="td_inner">{{ capability.id }}</div><span class="copy_icon" title="Copy" v-on:click.stop="copy($event, capability.id)"></span></td>
   <td v-bind:title="capability.version"><div class="td_inner">{{ capability.version }}</div></td>
   <td></td>
