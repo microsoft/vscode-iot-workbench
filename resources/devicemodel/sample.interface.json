@@ -51,23 +51,22 @@
       "@type": "Command",
       "description": "This command will begin blinking the LED for given time interval.",
       "name": "blink",
+      "commandType": "synchronous",
       "requestSchema": {
-        "@type": "Object",
-        "fields": [
-          {
-            "name": "interval",
-            "schema": "long"
-          }
-        ]
+        "name": "interval",
+        "schema": "long"
       },
       "responseSchema": {
-        "@type": "Object",
-        "fields": [
-          {
-            "name": "description",
-            "schema": "string"
-          }
-        ]
+        "name": "blinkResponse",
+        "schema": {
+          "@type": "Object",
+          "fields": [
+            {
+              "name": "description",
+              "schema": "string"
+            }
+          ]
+        }
       }
     }
   ],
