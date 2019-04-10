@@ -518,17 +518,19 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerCommand(
       'iotworkbench.getInterfaces',
       async (
-          searchString?: string, pageSize?: number, continueToken?: string) => {
+          searchString?: string, publicRepository = false, pageSize?: number,
+          continueToken?: string) => {
         return await deviceModelOperator.GetInterfaces(
-            context, false, searchString, pageSize, continueToken);
+            context, publicRepository, searchString, pageSize, continueToken);
       });
 
   vscode.commands.registerCommand(
       'iotworkbench.getCapabilityModels',
       async (
-          searchString?: string, pageSize?: number, continueToken?: string) => {
+          searchString?: string, publicRepository = false, pageSize?: number,
+          continueToken?: string) => {
         return await deviceModelOperator.GetCapabilityModels(
-            context, false, searchString, pageSize, continueToken);
+            context, publicRepository, searchString, pageSize, continueToken);
       });
 
   vscode.commands.registerCommand(

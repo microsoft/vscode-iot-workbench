@@ -8,7 +8,7 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as url from 'url';
 
-import {VSCExpress} from '../vscode-express';
+import {VSCExpress} from 'vscode-express';
 import {PnPFileNames, PnPConstants} from './PnPConstants';
 import {PnPMetamodelRepositoryClient} from './pnp-api/PnPMetamodelRepositoryClient';
 import * as utils from '../utils';
@@ -254,7 +254,7 @@ export class DeviceModelOperator {
       DeviceModelOperator.vscexpress = DeviceModelOperator.vscexpress ||
           new VSCExpress(context, 'pnpRepositoryViews');
       await DeviceModelOperator.vscexpress.open(
-          'index.html', 'Plug & Play Repository', vscode.ViewColumn.Two,
+          'index.html?public', 'Plug & Play Repository', vscode.ViewColumn.Two,
           {retainContextWhenHidden: true, enableScripts: true});
       return true;
     }
