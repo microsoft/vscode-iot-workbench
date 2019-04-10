@@ -1,7 +1,7 @@
 var repository = new Vue({
   el: '#main',
   data: {
-    companyName: '',
+    companyName: _location.search === '?public' ? 'Public model repository' : 'Organizational model repository',
     selectedInterfaces: {
       value: []
     },
@@ -54,13 +54,11 @@ var repository = new Vue({
       ]
     },
     filterTagsKeywords: '',
-    nextPageLoadingCounter: null
+    nextPageLoadingCounter: null,
+    publicRepository: _location.search === '?public'
   },
   methods: {
     command,
-    getCompanyName: () => {
-      return 'Contoso Inc.';
-    },
     highlight: function(value) {
       value = encodeHTML(value);
       const filterKeywords = encodeHTML(this.filterKeywords.trim());
@@ -93,7 +91,6 @@ var repository = new Vue({
     clearKeywords
   },
   created: function() {
-    this.companyName = this.getCompanyName();
     getNextPagePnPFiles.call(this, 'Interface');
     getNextPagePnPFiles.call(this, 'CapabilityModel');
   }
@@ -158,7 +155,7 @@ function getNextPagePnPFiles(fileType) {
 
   loadingPnPFiles.value = true;
 
-  command(commandName, this.searchKeywords, 50, nextToken.value, res => {
+  command(commandName, this.searchKeywords, this.publicRepository, 50, nextToken.value, res => {
     Vue.set(fileList, 'value', fileList.value.concat(res.result.results));
     Vue.set(nextToken, 'value', res.result.continuationToken);
     Vue.set(loadingPnPFiles, 'value', false);
