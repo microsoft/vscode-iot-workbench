@@ -12,6 +12,7 @@ import {ConfigKey, DependentExtensions, FileNames} from '../constants';
 import {Board} from './Interfaces/Board';
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
+import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {OTA} from './OTA';
 
 const constants = {
@@ -185,7 +186,7 @@ export abstract class ArduinoDeviceBase implements Device {
   }
 
   async generateSketchFile(
-      sketchTemplateFileName: string, board: Board, boardInfo: string,
+      templateFilesInfo: TemplateFileInfo[], board: Board, boardInfo: string,
       boardConfig: string): Promise<boolean> {
     // Create arduino.json config file
     const arduinoJSONFilePath =
@@ -220,19 +221,25 @@ export abstract class ArduinoDeviceBase implements Device {
           `Device: create arduino config file failed: ${error.message}`);
     }
 
-    // Create an empty arduino sketch
-    const sketchTemplateFilePath =
-        this.extensionContext.asAbsolutePath(path.join(
-            FileNames.resourcesFolderName, board.id, sketchTemplateFileName));
-    const newSketchFilePath =
-        path.join(this.deviceFolder, constants.defaultSketchFileName);
-
-    try {
-      const content = fs.readFileSync(sketchTemplateFilePath).toString();
-      fs.writeFileSync(newSketchFilePath, content);
-    } catch (error) {
-      throw new Error(`Create arduino sketch file failed: ${error.message}`);
-    }
+    templateFilesInfo.forEach(fileInfo => {
+      let targetFilePath = '';
+      if (fileInfo.fileName.endsWith('.ino')) {
+        targetFilePath = path.join(
+            this.deviceFolder, fileInfo.targetPath,
+            constants.defaultSketchFileName);
+      } else {
+        targetFilePath = path.join(
+            this.deviceFolder, fileInfo.targetPath, fileInfo.fileName);
+      }
+      if (fileInfo.fileContent) {
+        try {
+          fs.writeFileSync(targetFilePath, fileInfo.fileContent);
+        } catch (error) {
+          throw new Error(
+              `Create arduino sketch file failed: ${error.message}`);
+        }
+      }
+    });
     return true;
   }
 

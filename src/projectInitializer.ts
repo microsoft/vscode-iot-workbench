@@ -7,7 +7,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-plus';
 import * as path from 'path';
-import {ProjectTemplate} from './Models/Interfaces/ProjectTemplate';
+import {ProjectTemplate, ProjectTemplateType, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
 import * as utils from './utils';
 import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {Platform} from './Models/Interfaces/Platform';
@@ -111,11 +111,27 @@ export class ProjectInitializer {
               }
             }
 
+            // Update telemetry
+            const originPath = context.asAbsolutePath(path.join(
+              FileNames.resourcesFolderName, boardSelection.id));
+            const templateFilesInfo: TemplateFileInfo[] = [];
+            result.templateFilesInfo.forEach(fileInfo => {
+              const filePath = path.join(originPath, fileInfo.fileName);
+              const fileContent = fs.readFileSync(filePath, 'utf8');
+              templateFilesInfo.push({
+                fileName: fileInfo.fileName,
+                sourcePath: fileInfo.sourcePath,
+                targetPath: fileInfo.targetPath,
+                fileContent: fileContent
+              })
+            })
+
+            const projectTemplateType: ProjectTemplateType = result.type;
+
             const project = new ioTProjectModule.IoTProject(
                 context, channel, telemetryContext);
-            let openInNewWindow = true;
             return await project.create(
-              projectPath, result, boardSelection.id, openInNewWindow);
+              projectPath, templateFilesInfo, projectTemplateType, boardSelection.id, true);
           } catch (error) {
             throw error;
           }

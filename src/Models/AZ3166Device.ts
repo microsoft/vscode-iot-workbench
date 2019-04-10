@@ -21,6 +21,7 @@ import {delay, getRegistryValues} from '../utils';
 
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 import {DeviceType} from './Interfaces/Device';
+import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 
 const impor = require('impor')(__dirname);
 const forEach = impor('lodash.foreach') as typeof import('lodash.foreach');
@@ -74,7 +75,6 @@ export class AZ3166Device extends ArduinoDeviceBase {
     return this.componentId;
   }
 
-  private sketchName = '';
   private static _boardId = 'devkit';
 
   static get boardId() {
@@ -83,13 +83,10 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      devicePath: string, sketchName?: string) {
+      devicePath: string, private templateFilesInfo: TemplateFileInfo[] = []) {
     super(context, devicePath, DeviceType.MXChip_AZ3166);
     this.channel = channel;
     this.componentId = Guid.create().toString();
-    if (sketchName) {
-      this.sketchName = sketchName;
-    }
   }
 
   name = 'AZ3166';
@@ -135,7 +132,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
   }
 
   async create(): Promise<boolean> {
-    if (!this.sketchName) {
+    if (!this.templateFilesInfo) {
       throw new Error('No sketch file found.');
     }
     const deviceFolderPath = this.deviceFolder;
@@ -150,7 +147,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
     this.generateCommonFiles();
     this.generateCppPropertiesFile(this.board);
     await this.generateSketchFile(
-        this.sketchName, this.board, constants.boardInfo,
+        this.templateFilesInfo, this.board, constants.boardInfo,
         constants.uploadMethod);
     return true;
   }

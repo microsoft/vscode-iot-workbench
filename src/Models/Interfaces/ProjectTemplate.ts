@@ -8,10 +8,17 @@ export enum ProjectTemplateType {
   StreamAnalytics
 }
 
+export interface TemplateFileInfo {
+  fileName: string;
+  sourcePath: string;
+  targetPath: string;
+  fileContent?: string;
+}
+
 export interface ProjectTemplate {
   label: string;
   detail: string;
   description: string;
   type: string;
-  sketch: string;
+  templateFilesInfo: TemplateFileInfo[];
 }

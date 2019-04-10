@@ -5,28 +5,57 @@
             "detail": "Create project with device only code.",
             "label": "Device only",
             "type": "Basic",
-            "sketch": "emptySketch.ino"
+            "templateFilesInfo": [
+                {
+                    "fileName": "emptySketch.ino",
+                    "sourcePath" : ".",
+                    "targetPath" : "."
+                },
+                {
+                  "fileName": "Dockerfile",
+                  "sourcePath" : ".",
+                  "targetPath" : "."
+                }
+            ]
         },
         {
             "description": "",
             "detail": "Create project that connects to Azure IoT Hub, such as sending sensor data to cloud.",
             "label": "With Azure IoT Hub",
             "type": "IotHub",
-            "sketch": "simple_iothub.ino"
+            "templateFilesInfo": [
+                {
+                    "fileName": "simple_iothub.ino",
+                    "sourcePath" : ".",
+                    "targetPath" : "."
+                }
+            ]
         },
         {
             "description": "",
             "detail": "Create project that connects to Azure IoT Hub and processes device data further in Azure Functions.",
             "label": "With Azure Functions",
             "type": "AzureFunctions",
-            "sketch": "simple_iothub.ino"
+            "templateFilesInfo": [
+                {
+                    "fileName": "simple_iothub.ino",
+                    "sourcePath" : ".",
+                    "targetPath" : "."
+                }
+            ]
         },
         {
             "description": "",
             "detail": "Create project that processes device data from IoT Hub in Stream Analytics and store the result in Cosmos DB.",
             "label": "With Stream Analytics and Cosmos DB",
             "type": "StreamAnalytics",
-            "sketch": "simple_iothub.ino"
+            "templateFilesInfo": [
+                {
+                    "fileName": "simple_iothub.ino",
+                    "sourcePath" : ".",
+                    "targetPath" : "."
+                }
+            ]
         }
     ]
 }

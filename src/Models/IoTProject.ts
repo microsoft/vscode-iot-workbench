@@ -16,7 +16,7 @@ import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Deployable} from './Interfaces/Deployable';
 import {Device} from './Interfaces/Device';
-import {ProjectTemplate, ProjectTemplateType} from './Interfaces/ProjectTemplate';
+import {ProjectTemplate, ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
 import {Workspace} from './Interfaces/Workspace';
@@ -475,8 +475,8 @@ export class IoTProject {
   }
 
   async create(
-      rootFolderPath: string, projectTemplateItem: ProjectTemplate,
-      boardId: string, openInNewWindow: boolean): Promise<boolean> {
+      rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
+      projectType: ProjectTemplateType, boardId: string, openInNewWindow: boolean): Promise<boolean> {
     if (!fs.existsSync(rootFolderPath)) {
       throw new Error(
           'Unable to find the root path, please open the folder and initialize project again.');
@@ -505,18 +505,18 @@ export class IoTProject {
     if (boardId === az3166DeviceModule.AZ3166Device.boardId) {
       device = new az3166DeviceModule.AZ3166Device(
           this.extensionContext, this.channel, deviceDir,
-          projectTemplateItem.sketch);
-    } else if (boardId === ioTButtonDeviceModule.IoTButtonDevice.boardId) {
-      device = new ioTButtonDeviceModule.IoTButtonDevice(
-          this.extensionContext, deviceDir, projectTemplateItem.sketch);
-    } else if (boardId === esp32DeviceModule.Esp32Device.boardId) {
-      device = new esp32DeviceModule.Esp32Device(
-          this.extensionContext, this.channel, deviceDir,
-          projectTemplateItem.sketch);
-    } else if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
-      device = new raspberryPiDeviceModule.RaspberryPiDevice(
-          this.extensionContext, deviceDir, this.channel,
-          projectTemplateItem.sketch);
+          templateFilesInfo);
+    // } else if (boardId === ioTButtonDeviceModule.IoTButtonDevice.boardId) {
+    //   device = new ioTButtonDeviceModule.IoTButtonDevice(
+    //       this.extensionContext, deviceDir, templateFilesInfo);
+    // } else if (boardId === esp32DeviceModule.Esp32Device.boardId) {
+    //   device = new esp32DeviceModule.Esp32Device(
+    //       this.extensionContext, this.channel, deviceDir,
+    //       templateFilesInfo);
+    // } else if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
+    //   device = new raspberryPiDeviceModule.RaspberryPiDevice(
+    //       this.extensionContext, deviceDir, this.channel,
+    //       templateFilesInfo);
     } else {
       throw new Error('The specified board is not supported.');
     }
@@ -537,8 +537,7 @@ export class IoTProject {
     workspace.settings[`IoTWorkbench.${ConfigKey.devicePath}`] =
         constants.deviceDefaultFolderName;
 
-    const type: ProjectTemplateType = (ProjectTemplateType)
-        [projectTemplateItem.type as keyof typeof ProjectTemplateType];
+    const type: ProjectTemplateType = projectType;
 
     switch (type) {
       case ProjectTemplateType.Basic:

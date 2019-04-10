@@ -65,9 +65,3 @@ export class DependentExtensions {
   static readonly azureFunctions = 'ms-azuretools.vscode-azurefunctions';
   static readonly arduino = 'vsciot-vscode.vscode-arduino';
 }
-
-// DefaultDirectoryType: Types of folder to create under default workbench path
-export enum DefaultDirectoryType {
-  example = 'example',
-  project = 'project'
-}
