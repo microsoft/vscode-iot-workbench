@@ -111,7 +111,7 @@ function deletePnPFiles() {
 
 function editPnPFiles() {
   const fileIds = this.type.value === 'Interface' ? this.selectedInterfaces.value : this.selectedCapabilityModels.value;
-  command('iotworkbench.editPnPFiles', fileIds, this.type.value, refreshPnPFileList.bind(this));
+  command('iotworkbench.editPnPFiles', fileIds, this.type.value, this.publicRepository, refreshPnPFileList.bind(this));
 }
 
 function publishPnPFiles() {
