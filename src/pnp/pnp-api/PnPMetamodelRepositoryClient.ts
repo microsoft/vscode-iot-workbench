@@ -9,8 +9,9 @@ import {SearchResults} from './DataContracts/SearchResults';
 import {MetaModelType, SearchOptions, MetaModelUpsertRequest} from './DataContracts/PnPContext';
 import {PnPConnectionStringBuilder} from './PnPConnectionStringBuilder';
 import {PnPSharedAccessKey} from './PnPSharedAccessKey';
-import {GlobalConstants} from '../../constants';
+import {GlobalConstants, ConfigKey} from '../../constants';
 import {MetaModelMetaData} from './DataContracts/MetaModelMetaData';
+import {ConfigHandler} from '../../configHandler';
 
 const constants = {
   mediaType: 'application/json',
@@ -24,20 +25,28 @@ export class PnPMetamodelRepositoryClient {
   private metaModelRepositoryHostName: vscode.Uri;
 
   constructor(connectionString: string|null) {
-    if (!connectionString) {
+    if (!connectionString) {  // Connect to public repo
       this.pnpSharedAccessKey = null;
+      const storedConnectionString =
+          ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
+      if (storedConnectionString) {
+        const builder =
+            PnPConnectionStringBuilder.Create(storedConnectionString);
+        this.metaModelRepositoryHostName = vscode.Uri.parse(builder.HostName);
+      } else {
+        const extension =
+            vscode.extensions.getExtension(GlobalConstants.extensionId);
+        if (!extension) {
+          throw new Error('Failed to load extension configuration file.');
+        }
+        this.metaModelRepositoryHostName =
+            vscode.Uri.parse(extension.packageJSON.pnpRepositoryUrl);
+      }
     } else {
-      this.pnpSharedAccessKey = new PnPSharedAccessKey(
-          PnPConnectionStringBuilder.Create(connectionString));
+      const builder = PnPConnectionStringBuilder.Create(connectionString);
+      this.metaModelRepositoryHostName = vscode.Uri.parse(builder.HostName);
+      this.pnpSharedAccessKey = new PnPSharedAccessKey(builder);
     }
-
-    const extension =
-        vscode.extensions.getExtension(GlobalConstants.extensionId);
-    if (!extension) {
-      throw new Error('Failed to load extension configuration file.');
-    }
-    this.metaModelRepositoryHostName =
-        vscode.Uri.parse(extension.packageJSON.pnpRepositoryUrl);
   }
 
   async GetInterfaceAsync(

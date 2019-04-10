@@ -18,7 +18,6 @@ import {DialogResponses} from '../DialogResponses';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
 import {PnPConnectionStringBuilder} from './pnp-api/PnPConnectionStringBuilder';
-import {SearchResults} from './pnp-api/DataContracts/SearchResults';
 import {MetaModelMetaData} from './pnp-api/DataContracts/MetaModelMetaData';
 
 const constants = {

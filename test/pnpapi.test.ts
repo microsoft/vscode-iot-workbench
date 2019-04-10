@@ -48,7 +48,7 @@ suite('IoT Workbench: PnPAPI', () => {
     const result = await pnpMetamodelRepositoryClient.SearchInterfacesAsync(
         '', null, builder.RepositoryIdValue, 50);
     assert.equal(result.results.length <= 50, true);
-    assert.equal(result.results.length > 0, true);
+    assert.equal(result.results.length >= 0, true);
 
     if (result && result.continuationToken) {
       const newResult =
