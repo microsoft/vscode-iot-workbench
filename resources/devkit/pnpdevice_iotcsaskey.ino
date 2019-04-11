@@ -40,8 +40,8 @@ static const char* dpsIdScope = "[DPS Id Scope]";
 // TODO: Specify synmmetric keys if you intend on using IoT Central and symmetric key based auth.
 static const char* sasKey = "[DPS symmetric key]";
 
-// TODO: specify your device ID
-static const char* deviceId = "[device Id]";
+// TODO: specify your device registration ID
+static const char* registrationId = "[registration Id]";
 
 // TODO: Fill in PNP_DEVICE_CAPABILITY_MODEL_URI and PNP_MODEL_REPOSITORY_URI if you indend on using IoT Central.
 #define PNP_DEVICE_CAPABILITY_MODEL_URI "[your capabilityModel Id]"
@@ -112,24 +112,24 @@ static bool initializeIotHubViaProvisioning(bool traceOn)
         return false;
     }
 
-    if (prov_dev_set_symmetric_key_info(deviceId, sasKey) != 0)
+    if (prov_dev_set_symmetric_key_info(registrationId, sasKey) != 0)
     {
         LogError("prov_dev_set_symmetric_key_info failed.");
         return false;
     }
-    
+
     if (prov_dev_security_init(secureDeviceTypeForProvisioning) != 0)
     {
         LogError("prov_dev_security_init failed");
         return false;
     }
-    
+
     if ((provDeviceLLHandle = Prov_Device_LL_Create(globalDpsEndpoint, dpsIdScope, Prov_Device_MQTT_Protocol)) == NULL)
     {
         LogError("failed calling Prov_Device_Create");
         return false;
     }
-    
+
     if ((provDeviceResult = Prov_Device_LL_SetOption(provDeviceLLHandle, PROV_OPTION_LOG_TRACE, &traceOn)) != PROV_DEVICE_RESULT_OK)
     {
         LogError("Setting provisioning tracing on failed, error=%d", provDeviceResult);
@@ -141,13 +141,13 @@ static bool initializeIotHubViaProvisioning(bool traceOn)
         LogError("Setting provisioning TrustedCerts failed, error=%d", provDeviceResult);
         return false;
     }
-    
+
     if ((provDeviceResult = Prov_Device_LL_SetProvisioningData(provDeviceLLHandle, pnpSample_CustomProvisioningData)) != PROV_DEVICE_RESULT_OK)
     {
         LogError("Failed setting provisioning data, error=%d", provDeviceResult);
         return false;
     }
-    
+
     if ((provDeviceResult = Prov_Device_LL_Register_Device(provDeviceLLHandle, provisioningRegisterCallback, &appDpsRegistrationStatus, NULL, NULL)) != PROV_DEVICE_RESULT_OK)
     {
         LogError("Prov_Device_Register_Device failed, error=%d", provDeviceResult);

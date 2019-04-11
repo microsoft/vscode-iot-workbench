@@ -33,8 +33,8 @@ static const char* dpsIdScope = "[DPS Id Scope]";
 // TODO: Specify synmmetric keys if you intend on using IoT Central and symmetric key based auth.
 static const char* sasKey = "[DPS symmetric key]";
 
-// TODO: specify your device ID
-static const char* deviceId = "[device Id]"; 
+// TODO: specify your device registration ID
+static const char* registrationId = "[registration Id]"; 
 
 // TODO: Fill in PNP_DEVICE_CAPABILITY_MODEL_URI and PNP_MODEL_REPOSITORY_URI if you indend on using IoT Central.
 #define PNP_DEVICE_CAPABILITY_MODEL_URI "[your capabilityModel Id]"
@@ -105,7 +105,7 @@ static bool initializeIotHubViaProvisioning(bool traceOn)
         return false;
     }
 
-    if (prov_dev_set_symmetric_key_info(deviceId, sasKey) != 0)
+    if (prov_dev_set_symmetric_key_info(registrationId, sasKey) != 0)
     {
         LogError("prov_dev_set_symmetric_key_info failed.");
         return false;
