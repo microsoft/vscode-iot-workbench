@@ -7,7 +7,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, DependentExtensions, FileNames} from '../constants';
+import {ConfigKey, DependentExtensions, FileNames, PlatformType} from '../constants';
 
 import {Board} from './Interfaces/Board';
 import {ComponentType} from './Interfaces/Component';
@@ -30,6 +30,7 @@ export abstract class ArduinoDeviceBase implements Device {
   protected componentType: ComponentType;
   protected deviceFolder: string;
   protected vscodeFolderPath: string;
+  protected boardFolderPath: string;
   protected extensionContext: vscode.ExtensionContext;
 
   abstract name: string;
@@ -44,6 +45,8 @@ export abstract class ArduinoDeviceBase implements Device {
     this.extensionContext = context;
     this.vscodeFolderPath =
         path.join(this.deviceFolder, FileNames.vscodeSettingsFolderName);
+    this.boardFolderPath = context.asAbsolutePath(
+        path.join(FileNames.resourcesFolderName, PlatformType.ARDUINO));
   }
 
   getDeviceType(): DeviceType {
@@ -153,10 +156,8 @@ export abstract class ArduinoDeviceBase implements Device {
       const plat = os.platform();
 
       if (plat === 'win32') {
-        const propertiesFilePathWin32 =
-            this.extensionContext.asAbsolutePath(path.join(
-                FileNames.resourcesFolderName, board.id,
-                constants.cppPropertiesFileNameWin));
+        const propertiesFilePathWin32 = path.join(
+            this.boardFolderPath, board.id, constants.cppPropertiesFileNameWin);
         const propertiesContentWin32 =
             fs.readFileSync(propertiesFilePathWin32).toString();
         const rootPathPattern = /{ROOTPATH}/g;
@@ -172,10 +173,8 @@ export abstract class ArduinoDeviceBase implements Device {
       // TODO: Let's use the same file for Linux and MacOS for now. Need to
       // revisit this part.
       else {
-        const propertiesFilePathMac =
-            this.extensionContext.asAbsolutePath(path.join(
-                FileNames.resourcesFolderName, board.id,
-                constants.cppPropertiesFileNameMac));
+        const propertiesFilePathMac = path.join(
+            this.boardFolderPath, board.id, constants.cppPropertiesFileNameMac);
         const propertiesContentMac =
             fs.readFileSync(propertiesFilePathMac).toString();
         fs.writeFileSync(cppPropertiesFilePath, propertiesContentMac);

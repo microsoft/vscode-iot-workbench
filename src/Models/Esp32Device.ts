@@ -12,9 +12,9 @@ import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
 
-
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 import {DeviceType} from './Interfaces/Device';
+import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 
 const constants = {
   defaultBoardInfo: 'esp32:esp32:m5stack-core-esp32',
@@ -37,7 +37,7 @@ export class Esp32Device extends ArduinoDeviceBase {
   }
 
   get board() {
-    const boardProvider = new BoardProvider(this.extensionContext);
+    const boardProvider = new BoardProvider(this.boardFolderPath);
     const esp32 = boardProvider.find({id: Esp32Device._boardId});
     return esp32;
   }
@@ -70,13 +70,10 @@ export class Esp32Device extends ArduinoDeviceBase {
 
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      devicePath: string, sketchFileTemplateName?: string) {
+      devicePath: string, private templateFilesInfo: TemplateFileInfo[] = []) {
     super(context, devicePath, DeviceType.IoT_Button);
     this.channel = channel;
     this.componentId = Guid.create().toString();
-    if (sketchFileTemplateName) {
-      this.sketchFileTemplateName = sketchFileTemplateName;
-    }
   }
 
   async checkPrerequisites(): Promise<boolean> {
@@ -99,9 +96,6 @@ export class Esp32Device extends ArduinoDeviceBase {
   }
 
   async create(): Promise<boolean> {
-    if (!this.sketchFileTemplateName) {
-      throw new Error('No sketch file found.');
-    }
     const deviceFolderPath = this.deviceFolder;
 
     if (!fs.existsSync(deviceFolderPath)) {
@@ -114,7 +108,7 @@ export class Esp32Device extends ArduinoDeviceBase {
     this.generateCommonFiles();
     this.generateCppPropertiesFile(this.board);
     await this.generateSketchFile(
-        this.sketchFileTemplateName, this.board, constants.defaultBoardInfo,
+        this.templateFilesInfo, this.board, constants.defaultBoardInfo,
         constants.defaultBoardConfig);
     return true;
   }

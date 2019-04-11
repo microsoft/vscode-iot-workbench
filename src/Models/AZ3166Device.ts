@@ -15,7 +15,7 @@ import * as WinReg from 'winreg';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey} from '../constants';
+import {ConfigKey, PlatformType} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 import {delay, getRegistryValues} from '../utils';
 
@@ -92,7 +92,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
   name = 'AZ3166';
 
   get board() {
-    const boardProvider = new BoardProvider(this.extensionContext);
+    const boardProvider = new BoardProvider(this.boardFolderPath);
     const az3166 = boardProvider.find({id: AZ3166Device._boardId});
     return az3166;
   }

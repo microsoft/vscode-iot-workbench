@@ -5,9 +5,12 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import * as path from 'path';
+import {FileNames, PlatformType} from './constants';
 import {VSCExpress} from 'vscode-express';
 import {BoardProvider} from './boardProvider';
 import {ProjectInitializer} from './projectInitializer';
+import {LibraryManager} from './libraryManager';
 import {DeviceOperator} from './DeviceOperator';
 import {AzureOperator} from './AzureOperator';
 import {ExampleExplorer} from './exampleExplorer';
@@ -55,6 +58,10 @@ export async function activate(context: vscode.ExtensionContext) {
   const projectInitializerBinder =
       projectInitializer.InitializeProject.bind(projectInitializer);
 
+  const libraryManager = new LibraryManager();
+  const libraryManagerBinder =
+      libraryManager.ManageLibrary.bind(libraryManager);
+
   const deviceOperator = new DeviceOperator();
   const azureOperator = new AzureOperator();
 
@@ -72,6 +79,12 @@ export async function activate(context: vscode.ExtensionContext) {
     callWithTelemetry(
         EventNames.createNewProjectEvent, outputChannel, true, context,
         projectInitializerBinder);
+  };
+
+  const libraryManageProvider = async () => {
+    callWithTelemetry(
+        EventNames.manageLibraryEvent, outputChannel, true, context,
+        libraryManagerBinder);
   };
 
   const azureProvisionProvider = async () => {
@@ -125,6 +138,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const projectInit = vscode.commands.registerCommand(
       'iotworkbench.initializeProject', projectInitProvider);
+
+  const libraryManage = vscode.commands.registerCommand(
+      'iotworkbench.manageLibrary', libraryManageProvider);
 
   const examples = vscode.commands.registerCommand(
       'iotworkbench.examples', examplesProvider);
@@ -187,7 +203,9 @@ export async function activate(context: vscode.ExtensionContext) {
         const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
 
         if (boardId) {
-          const boardProvider = new BoardProvider(context);
+          const boardFolderPath = context.asAbsolutePath(
+              path.join(FileNames.resourcesFolderName, PlatformType.ARDUINO));
+          const boardProvider = new BoardProvider(boardFolderPath);
           const board = boardProvider.find({id: boardId});
 
           if (board && board.helpUrl) {

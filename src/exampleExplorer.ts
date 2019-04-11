@@ -11,7 +11,7 @@ import {IoTWorkbenchSettings} from './IoTSettings';
 import * as utils from './utils';
 import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {TelemetryContext} from './telemetry';
-import {FileNames} from './constants';
+import {FileNames, PlatformType} from './constants';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 import {VSCExpress} from 'vscode-express';
@@ -185,7 +185,9 @@ export class ExampleExplorer {
   async selectBoard(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    const boardProvider = new BoardProvider(context);
+    const boardFolderPath = context.asAbsolutePath(
+        path.join(FileNames.resourcesFolderName, PlatformType.ARDUINO));
+    const boardProvider = new BoardProvider(boardFolderPath);
     const boardItemList: BoardQuickPickItem[] = [];
     const boards = boardProvider.list.filter(board => board.exampleUrl);
     boards.forEach((board: Board) => {

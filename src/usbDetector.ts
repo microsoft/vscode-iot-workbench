@@ -2,12 +2,14 @@
 // Licensed under the MIT License.
 
 import * as os from 'os';
+import * as path from 'path';
 import * as vscode from 'vscode';
 import {VSCExpress} from 'vscode-express';
 
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 import {ConfigHandler} from './configHandler';
+import {FileNames, PlatformType} from './constants';
 import {EventNames} from './constants';
 import {callWithTelemetry} from './telemetry';
 
@@ -28,7 +30,9 @@ export class UsbDetector {
 
   getBoardFromDeviceInfo(device: DeviceInfo) {
     if (device.vendorId && device.productId) {
-      const boardProvider = new BoardProvider(this.context);
+      const boardFolderPath = this.context.asAbsolutePath(
+          path.join(FileNames.resourcesFolderName, PlatformType.ARDUINO));
+      const boardProvider = new BoardProvider(boardFolderPath);
       const board = boardProvider.find(
           {vendorId: device.vendorId, productId: device.productId});
 

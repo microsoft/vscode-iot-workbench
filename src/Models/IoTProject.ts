@@ -476,7 +476,8 @@ export class IoTProject {
 
   async create(
       rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
-      projectType: ProjectTemplateType, boardId: string, openInNewWindow: boolean): Promise<boolean> {
+      projectType: ProjectTemplateType, boardId: string,
+      openInNewWindow: boolean): Promise<boolean> {
     if (!fs.existsSync(rootFolderPath)) {
       throw new Error(
           'Unable to find the root path, please open the folder and initialize project again.');
@@ -504,19 +505,19 @@ export class IoTProject {
     let device: Component;
     if (boardId === az3166DeviceModule.AZ3166Device.boardId) {
       device = new az3166DeviceModule.AZ3166Device(
-          this.extensionContext, this.channel, deviceDir,
-          templateFilesInfo);
-    // } else if (boardId === ioTButtonDeviceModule.IoTButtonDevice.boardId) {
-    //   device = new ioTButtonDeviceModule.IoTButtonDevice(
-    //       this.extensionContext, deviceDir, templateFilesInfo);
-    // } else if (boardId === esp32DeviceModule.Esp32Device.boardId) {
-    //   device = new esp32DeviceModule.Esp32Device(
-    //       this.extensionContext, this.channel, deviceDir,
-    //       templateFilesInfo);
-    // } else if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
-    //   device = new raspberryPiDeviceModule.RaspberryPiDevice(
-    //       this.extensionContext, deviceDir, this.channel,
-    //       templateFilesInfo);
+          this.extensionContext, this.channel, deviceDir, templateFilesInfo);
+      // } else if (boardId === ioTButtonDeviceModule.IoTButtonDevice.boardId) {
+      //   device = new ioTButtonDeviceModule.IoTButtonDevice(
+      //       this.extensionContext, deviceDir, templateFilesInfo);
+      // } else if (boardId === esp32DeviceModule.Esp32Device.boardId) {
+      //   device = new esp32DeviceModule.Esp32Device(
+      //       this.extensionContext, this.channel, deviceDir,
+      //       templateFilesInfo);
+      // } else if (boardId ===
+      // raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
+      //   device = new raspberryPiDeviceModule.RaspberryPiDevice(
+      //       this.extensionContext, deviceDir, this.channel,
+      //       templateFilesInfo);
     } else {
       throw new Error('The specified board is not supported.');
     }

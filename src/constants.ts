@@ -16,6 +16,7 @@ export class ConfigKey {
 
 export class EventNames {
   static readonly createNewProjectEvent = 'IoTWorkbench.NewProject';
+  static readonly manageLibraryEvent = 'IoTWorkbench.ManageLibrary';
   static readonly azureProvisionEvent = 'IoTWorkbench.AzureProvision';
   static readonly azureDeployEvent = 'IoTWorkbench.AzureDeploy';
   static readonly createAzureFunctionsEvent =
@@ -64,4 +65,9 @@ export class GlobalConstants {
 export class DependentExtensions {
   static readonly azureFunctions = 'ms-azuretools.vscode-azurefunctions';
   static readonly arduino = 'vsciot-vscode.vscode-arduino';
+}
+
+export class PlatformType {
+  static readonly ARDUINO = 'Arduino';
+  static readonly LINUX = 'Linux';
 }
