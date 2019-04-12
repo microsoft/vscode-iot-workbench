@@ -6,20 +6,20 @@ import {FileNames} from '../../constants';
 import {TelemetryContext} from '../../telemetry';
 
 import {AnsiCCodeGeneratorBase} from './Interfaces/AnsiCCodeGeneratorBase';
-import {ProvisionType} from './Interfaces/CodeGenerator';
+import {DeviceConnectionType} from './Interfaces/CodeGenerator';
 
 const ansiConstants = {
   languageName: 'ansi',
   pnp: 'pnp'
 };
 
-const templateFileNames = ['Readme.md', 'main.c', 'CMakeLists.txt'];
+const templateFileNames = ['Readme.md', 'main.c.sample', 'CMakeLists.txt'];
 
 export class AnsiCCodeGenGeneralImpl extends AnsiCCodeGeneratorBase {
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       private telemetryContext: TelemetryContext,
-      private provisionType: ProvisionType) {
+      private provisionType: DeviceConnectionType) {
     super(context, channel);
   }
 
@@ -30,13 +30,13 @@ export class AnsiCCodeGenGeneralImpl extends AnsiCCodeGeneratorBase {
     const retvalue = await this.GenerateAnsiCCodeCore(
         targetPath, filePath, connectionString);
 
-    let provisionFolderName;
+    let folderName;
     switch (this.provisionType) {
-      case ProvisionType.DeviceConnectionString:
-        provisionFolderName = 'connectionstring';
+      case DeviceConnectionType.DeviceConnectionString:
+        folderName = 'connectionstring';
         break;
-      case ProvisionType.IoTCSasKey:
-        provisionFolderName = 'iotcsaskey';
+      case DeviceConnectionType.IoTCSasKey:
+        folderName = 'iotcsaskey';
         break;
       default:
         throw new Error('Unsupported device provision type.');
@@ -44,7 +44,7 @@ export class AnsiCCodeGenGeneralImpl extends AnsiCCodeGeneratorBase {
 
     const resouceFolder = this.context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, ansiConstants.pnp,
-        ansiConstants.languageName, provisionFolderName));
+        ansiConstants.languageName, folderName));
 
     const projectName = path.basename(targetPath);
 

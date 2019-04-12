@@ -1,11 +1,10 @@
 
 export enum CodeGenDeviceType {
   General = 1,
-  Boilerplate = 2,
-  IoTDevKit = 3
+  IoTDevKit = 2
 }
 
-export enum ProvisionType {
+export enum DeviceConnectionType {
   DeviceConnectionString = 1,
   IoTCSasKey = 2,
   IoTCX509 = 3

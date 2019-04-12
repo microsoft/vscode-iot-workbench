@@ -5,7 +5,7 @@ import {TelemetryContext} from '../../telemetry';
 import {AnciCCodeGenBoilerplateImpl} from './AnciCCodeGenBoilerplateImpl';
 import {AnsiCCodeGenDevkitImpl} from './AnsiCCodeGenDevkitImpl';
 import {AnsiCCodeGenGeneralImpl} from './AnsiCCodeGenGeneralImpl';
-import {CodeGenDeviceType, CodeGenerator, ProvisionType} from './Interfaces/CodeGenerator';
+import {CodeGenDeviceType, CodeGenerator, DeviceConnectionType} from './Interfaces/CodeGenerator';
 import {CodeGeneratorFactory} from './Interfaces/CodeGeneratorFactory';
 
 export class AnsiCCodeGeneratorFactory implements CodeGeneratorFactory {
@@ -15,16 +15,13 @@ export class AnsiCCodeGeneratorFactory implements CodeGeneratorFactory {
       private telemetryContext: TelemetryContext) {}
   CreateCodeGeneratorImpl(
       deviceType: CodeGenDeviceType,
-      provisionType: ProvisionType): CodeGenerator|null {
+      connectionType: DeviceConnectionType): CodeGenerator|null {
     if (deviceType === CodeGenDeviceType.General) {
       return new AnsiCCodeGenGeneralImpl(
-          this.context, this.channel, this.telemetryContext, provisionType);
+          this.context, this.channel, this.telemetryContext, connectionType);
     } else if (deviceType === CodeGenDeviceType.IoTDevKit) {
       return new AnsiCCodeGenDevkitImpl(
-          this.context, this.channel, this.telemetryContext, provisionType);
-    } else if (deviceType === CodeGenDeviceType.Boilerplate) {
-      return new AnciCCodeGenBoilerplateImpl(
-          this.context, this.channel, this.telemetryContext);
+          this.context, this.channel, this.telemetryContext, connectionType);
     }
     return null;
   }

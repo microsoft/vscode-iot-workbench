@@ -10,7 +10,7 @@ import {TelemetryContext} from '../../telemetry';
 import {generateFoldersForIoTWorkbench} from '../Utilities';
 
 import {AnsiCCodeGeneratorBase} from './Interfaces/AnsiCCodeGeneratorBase';
-import {ProvisionType} from './Interfaces/CodeGenerator';
+import {DeviceConnectionType} from './Interfaces/CodeGenerator';
 
 const constants = {
   deviceDefaultFolderName: 'Device',
@@ -22,7 +22,7 @@ export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       private telemetryContext: TelemetryContext,
-      private provisionType: ProvisionType) {
+      private connectionType: DeviceConnectionType) {
     super(context, channel);
   }
 
@@ -49,11 +49,11 @@ export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
 
     // Generate device code for IoT DevKit according to the provision option.
     let sketchFileName;
-    switch (this.provisionType) {
-      case ProvisionType.DeviceConnectionString:
+    switch (this.connectionType) {
+      case DeviceConnectionType.DeviceConnectionString:
         sketchFileName = constants.deviceConnectionStringSketchFileName;
         break;
-      case ProvisionType.IoTCSasKey:
+      case DeviceConnectionType.IoTCSasKey:
         sketchFileName = constants.deviceIotcSasKeySketchFileName;
         break;
       default:

@@ -14,7 +14,7 @@ import {FileNames, ConfigKey} from '../constants';
 import {TelemetryContext} from '../telemetry';
 import {PnPConnector} from './PnPConnector';
 import {PnPConstants, CodeGenConstants} from './PnPConstants';
-import {CodeGenDeviceType, ProvisionType} from './pnp-codeGen/Interfaces/CodeGenerator';
+import {CodeGenDeviceType, DeviceConnectionType} from './pnp-codeGen/Interfaces/CodeGenerator';
 import {AnsiCCodeGeneratorFactory} from './pnp-codeGen/AnsiCCodeGeneratorFactory';
 import {CodeGeneratorFactory} from './pnp-codeGen/Interfaces/CodeGeneratorFactory';
 import {ConfigHandler} from '../configHandler';
@@ -32,9 +32,11 @@ interface CodeGeneratorDownloadLocation {
   ubuntuPackageUrl: string;
 }
 
-const provisionTypeLabel = {
-  connectionStringLabel: 'IoT Hub Device Connection String',
-  iotcSasKeyLabel: 'IoT Central | DPS symmetric key'
+const deviceConnectionConstants = {
+  connectionStringLabel: 'Via IoT Hub device connection string',
+  connectionStringDetail: 'To connect to Azure IoT Hub directly',
+  iotcSasKeyLabel: 'Via DPS (Device Provision Service) symmetric key',
+  iotcSasKeyDetail: 'To connect to Azure IoT Hub or Azure IoT Central'
 };
 
 interface CodeGeneratorConfigItem {
@@ -152,9 +154,15 @@ export class CodeGenerateCore {
       codeGenFactory =
           new AnsiCCodeGeneratorFactory(context, channel, telemetryContext);
       targetItems = [
-        {label: 'General Platform', description: ''},
-        {label: 'Device Boilerplate', description: ''},
-        {label: 'MXChip IoT DevKit', description: ''}
+        {
+          label: 'General',
+          detail:
+              'Generate device agnostic standard ANSI C code to integrate into existing device project.'
+        },
+        {
+          label: 'MXChip IoT DevKit',
+          detail: 'Generate Arduino project for MXChip IoT DevKit'
+        }
 
       ];
     }
@@ -172,37 +180,41 @@ export class CodeGenerateCore {
     }
 
     let codeGenDeviceType = CodeGenDeviceType.General;
-    if (targetSelection.label === 'Device Boilerplate') {
-      codeGenDeviceType = CodeGenDeviceType.Boilerplate;
-    } else if (targetSelection.label === 'MXChip IoT DevKit') {
+    if (targetSelection.label === 'MXChip IoT DevKit') {
       codeGenDeviceType = CodeGenDeviceType.IoTDevKit;
     }
 
-    let provisionType = ProvisionType.DeviceConnectionString;
-    let provisionSelections: vscode.QuickPickItem[]|null = null;
-    provisionSelections = [
-      {label: provisionTypeLabel.connectionStringLabel, description: ''},
-      {label: provisionTypeLabel.iotcSasKeyLabel, description: ''}
+    let connectionType = DeviceConnectionType.DeviceConnectionString;
+    let deviceConnectionSelections: vscode.QuickPickItem[]|null = null;
+    deviceConnectionSelections = [
+      {
+        label: deviceConnectionConstants.connectionStringLabel,
+        detail: deviceConnectionConstants.connectionStringDetail
+      },
+      {
+        label: deviceConnectionConstants.iotcSasKeyLabel,
+        detail: deviceConnectionConstants.iotcSasKeyDetail
+      }
     ];
 
-    if (codeGenDeviceType !== CodeGenDeviceType.Boilerplate) {
-      const provisionSelection =
-          await vscode.window.showQuickPick(provisionSelections, {
-            ignoreFocusOut: true,
-            placeHolder: 'Please select a device provision type'
-          });
+    const deviceConnectionSelection =
+        await vscode.window.showQuickPick(deviceConnectionSelections, {
+          ignoreFocusOut: true,
+          placeHolder:
+              'Please specify how will the device connect to Azure IoT?'
+        });
 
-      if (!provisionSelection) {
-        return false;
-      }
+    if (!deviceConnectionSelection) {
+      return false;
+    }
 
-      if (provisionSelection.label ===
-          provisionTypeLabel.connectionStringLabel) {
-        provisionType = ProvisionType.DeviceConnectionString;
-      } else if (
-          provisionSelection.label === provisionTypeLabel.iotcSasKeyLabel) {
-        provisionType = ProvisionType.IoTCSasKey;
-      }
+    if (deviceConnectionSelection.label ===
+        deviceConnectionConstants.connectionStringLabel) {
+      connectionType = DeviceConnectionType.DeviceConnectionString;
+    } else if (
+        deviceConnectionSelection.label ===
+        deviceConnectionConstants.iotcSasKeyLabel) {
+      connectionType = DeviceConnectionType.IoTCSasKey;
     }
 
     const folderPath = await this.GetFolderForCodeGen();
@@ -211,7 +223,7 @@ export class CodeGenerateCore {
     }
 
     const codeGenerator = codeGenFactory.CreateCodeGeneratorImpl(
-        codeGenDeviceType, provisionType);
+        codeGenDeviceType, connectionType);
     if (!codeGenerator) {
       return false;
     }

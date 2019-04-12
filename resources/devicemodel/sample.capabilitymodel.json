@@ -1,10 +1,9 @@
 {
-  "@id": "http://example.com/{CAPABILITYMODELNAME}/1.0.0",
+  "@id": "http://vsc-pnp-sample.com/{CAPABILITYMODELNAME}/1.0.0",
   "@type": "CapabilityModel",
   "displayName": "{CAPABILITYMODELNAME}",
   "implements": [
-    "http://azureiot.com/interfaces/DeviceInformation/1.0.0",
-    "http://azureiot.com/interfaces/DeviceDiscovery/1.0.0"
+    "http://azureiot.com/interfaces/DeviceInformation/1.0.0"
   ],
   "@context": "http://azureiot.com/v0/contexts/CapabilityModel.json"
 }

@@ -26,7 +26,7 @@ For more details about setting up development environment for compiling the C De
 
 1. In order to connect to IoT Central:
     * You need to have provisioned a private preview IoT Central instance. See [here](https://github.com/Azure/Azure-IoT-PnP-Preview/blob/master/docs/tutorial.md) for more end-to-end setup instructions.
-    * Open `main.c`. Specify paramaters requested by the commented **TODO's** for your configuration.
+    * Rename `main.c.sample` to `main.c`. Then open `main.c`. Specify paramaters requested by the commented **TODO's** for your configuration.
 
       ```c
       // TODO: Specify DPS scope ID if you intend on using IoT Central. 
@@ -35,8 +35,8 @@ For more details about setting up development environment for compiling the C De
       // TODO: Specify synmmetric keys if you intend on using IoT Central and symmetric key based auth.
       static const char* sasKey = "[DPS symmetric key]";
 
-      // TODO: specify your device ID
-      static const char* deviceId = "[device Id]"; 
+      // TODO: specify your device registration ID
+      static const char* registrationId = "[registration Id]"; 
 
       // TODO: Fill in PNP_DEVICE_CAPABILITY_MODEL_URI and PNP_MODEL_REPOSITORY_URI if you indend on using IoT Central.
       #define PNP_DEVICE_CAPABILITY_MODEL_URI "[your capabilityModel Id]"
@@ -60,7 +60,7 @@ For more details about setting up development environment for compiling the C De
     cmake --build . -- /m /p:Configuration=Release
     ```
 
-1. Once the build success, you can test it by specifying the IoT Hub device connection string as its parameter.
+1. Once the build success, you can test it by invoking the following command.
     ```bash
     ..\\{PROJECT_NAME}\\Release\\{PROJECT_NAME}.exe
     ```
@@ -89,7 +89,7 @@ For more details about setting up development environment for compiling the C De
 
 1. In order to connect to IoT Central:
     * You need to have provisioned a private preview IoT Central instance. See [here](https://github.com/Azure/Azure-IoT-PnP-Preview/blob/master/docs/tutorial.md) for more end-to-end setup instructions.
-    * Open `main.c`. Specify paramaters requested by the commented **TODO's** for your configuration.
+    * Rename `main.c.sample` to `main.c`. Then open `main.c`. Specify paramaters requested by the commented **TODO's** for your configuration.
 
       ```c
       // TODO: Specify DPS scope ID if you intend on using IoT Central. 
@@ -98,8 +98,8 @@ For more details about setting up development environment for compiling the C De
       // TODO: Specify synmmetric keys if you intend on using IoT Central and symmetric key based auth.
       static const char* sasKey = "[DPS symmetric key]";
 
-      // TODO: specify your device ID
-      static const char* deviceId = "[device Id]"; 
+      // TODO: specify your device registration ID
+      static const char* registrationId = "[registration Id]"; 
 
       // TODO: Fill in PNP_DEVICE_CAPABILITY_MODEL_URI and PNP_MODEL_REPOSITORY_URI if you indend on using IoT Central.
       #define PNP_DEVICE_CAPABILITY_MODEL_URI "[your capabilityModel Id]"
@@ -123,7 +123,7 @@ For more details about setting up development environment for compiling the C De
     cmake --build .
     ```
 
-1. Once the build success, you can test it by specifying the IoT Hub device connection string as its parameter.
+1. Once the build success, you can test it by invoking the following command.
     ```bash
     ./{PROJECT_NAME}/{PROJECT_NAME}
     ```

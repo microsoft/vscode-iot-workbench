@@ -24,6 +24,8 @@ typedef enum APP_DPS_REGISTRATION_STATUS_TAG
 const SECURE_DEVICE_TYPE secureDeviceTypeForProvisioning = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
 const IOTHUB_SECURITY_TYPE secureDeviceTypeForIotHub = IOTHUB_SECURITY_TYPE_SYMMETRIC_KEY;
 
+// Please follow the below tutorial to create a device enrollment entry.
+// https://docs.microsoft.com/en-us/azure/iot-dps/quick-create-simulated-device-symm-key#create-a-device-enrollment-entry-in-the-portal 
 // Note: You cannot use an arbitrary DPS instance with the PnP IoT Central example.
 static const char* globalDpsEndpoint = "global.azure-devices-provisioning.net";
 
