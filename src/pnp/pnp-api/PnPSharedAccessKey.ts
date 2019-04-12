@@ -11,7 +11,8 @@ const constants = {
   AudienceFieldName: 'sr',
   SignatureFieldName: 'sig',
   KeyNameFieldName: 'skn',
-  ExpiryFieldName: 'se'
+  ExpiryFieldName: 'se',
+  ExpiryInMinutes: 30
 };
 
 
@@ -45,7 +46,9 @@ export class PnPSharedAccessKey {
     this.repositoryId = builder.RepositoryIdValue;
     const now = new Date();
     const ms = 1000;
-    this.expiry = (now.setDate(new Date().getDate() + 1) / ms).toFixed(0);
+    this.expiry =
+        (Math.round(now.getTime() / ms) + constants.ExpiryInMinutes * 60)
+            .toString();
   }
 
   GenerateSASToken(): string {
