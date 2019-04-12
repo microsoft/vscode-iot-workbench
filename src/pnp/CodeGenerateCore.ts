@@ -155,7 +155,7 @@ export class CodeGenerateCore {
           new AnsiCCodeGeneratorFactory(context, channel, telemetryContext);
       targetItems = [
         {
-          label: 'General',
+          label: 'Standard',
           detail:
               'Generate device agnostic standard ANSI C code to integrate into existing device project.'
         },
