@@ -1,19 +1,23 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import {ConnectionString} from 'azure-iothub';
+import {Docker, Options} from 'docker-cli-js';
 import * as fs from 'fs-plus';
+import {Guid} from 'guid-typescript';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, DependentExtensions, FileNames, PlatformType} from '../constants';
+import {ConfigKey, DependentExtensions, DockerCacheConfig, FileNames, PlatformType} from '../constants';
 
 import {Board} from './Interfaces/Board';
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
 import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {OTA} from './OTA';
+import {DialogResponses} from '../DialogResponses';
 
 const constants = {
   defaultSketchFileName: 'device.ino',
@@ -21,7 +25,7 @@ const constants = {
   cppPropertiesFileName: 'c_cpp_properties.json',
   cppPropertiesFileNameMac: 'c_cpp_properties_macos.json',
   cppPropertiesFileNameWin: 'c_cpp_properties_win32.json',
-  outputPath: './.build'
+  outputPath: './.build',
 };
 
 
@@ -30,23 +34,36 @@ export abstract class ArduinoDeviceBase implements Device {
   protected componentType: ComponentType;
   protected deviceFolder: string;
   protected vscodeFolderPath: string;
+  protected arduinoPackagePath: string;
   protected boardFolderPath: string;
   protected extensionContext: vscode.ExtensionContext;
+  protected channel: vscode.OutputChannel;
+  protected docker: Docker;
+  protected componentId: string;
+  private projectName: string;
 
   abstract name: string;
   abstract id: string;
 
   constructor(
       context: vscode.ExtensionContext, devicePath: string,
-      deviceType: DeviceType) {
+      channel: vscode.OutputChannel, deviceType: DeviceType) {
     this.deviceType = deviceType;
     this.componentType = ComponentType.Device;
     this.deviceFolder = devicePath;
     this.extensionContext = context;
+    this.channel = channel;
+    this.componentId = Guid.create().toString();
     this.vscodeFolderPath =
         path.join(this.deviceFolder, FileNames.vscodeSettingsFolderName);
+    this.arduinoPackagePath =
+        path.join(this.vscodeFolderPath, DockerCacheConfig.arduinoPackagePath);
     this.boardFolderPath = context.asAbsolutePath(
         path.join(FileNames.resourcesFolderName, PlatformType.ARDUINO));
+    const pathSplit = devicePath.split('\\');
+    this.projectName = pathSplit[pathSplit.length - 2];
+    const options = new Options('', this.deviceFolder);
+    this.docker = new Docker(options);
   }
 
   getDeviceType(): DeviceType {
@@ -57,29 +74,7 @@ export abstract class ArduinoDeviceBase implements Device {
     return this.componentType;
   }
 
-  static async isAvailable(): Promise<boolean> {
-    if (!vscode.extensions.getExtension(DependentExtensions.arduino)) {
-      const choice = await vscode.window.showInformationMessage(
-          'Arduino extension is required for the current project. Do you want to install it from marketplace?',
-          'Yes', 'No');
-      if (choice === 'Yes') {
-        vscode.commands.executeCommand(
-            'vscode.open',
-            vscode.Uri.parse(
-                'vscode:extension/' + DependentExtensions.arduino));
-      }
-      return false;
-    }
-
-    return true;
-  }
-
   async checkPrerequisites(): Promise<boolean> {
-    const isArduinoExtensionAvailable = await ArduinoDeviceBase.isAvailable();
-    if (!isArduinoExtensionAvailable) {
-      return false;
-    }
-
     return true;
   }
 
@@ -89,12 +84,123 @@ export abstract class ArduinoDeviceBase implements Device {
       if (!result) {
         return false;
       }
-      await vscode.commands.executeCommand('arduino.verify');
+
+      // Step 1: check whether docker is installed
+      this.channel.show();
+      this.channel.appendLine('Check whether Docker is installed...');
+      let dockerInstalled = false;
+      await this.docker.command(`--version`).then((data) => {
+        dockerInstalled = true;
+        this.channel.show();
+        this.channel.appendLine(data.raw);
+        this.channel.appendLine(`##debug## Docker client is installed.`);
+      });
+      if (!dockerInstalled) {
+        // Docker is not installed.
+        const option = await vscode.window.showInformationMessage(
+            'Docker is required to compile the code. Do you want to install Docker now?',
+            DialogResponses.yes, DialogResponses.cancel);
+        if (option === DialogResponses.yes) {
+          vscode.commands.executeCommand(
+              'vscode.open', vscode.Uri.parse('https://www.docker.com/'));
+        }
+        return false;        
+      }
+
+      // Step 2: Check image successfully build. If not, build it.
+      if (!this.projectName) {
+        this.channel.show();
+        this.channel.appendLine(`ProjectName is invalid: ${this.projectName}`);
+        return false;
+      }
+      const imageName =
+          `${DockerCacheConfig.arduinoAppDockerImage}:${this.projectName}`;
+      const containerName = `${this.projectName}`;
+      let imageExist = false;
+      await this.docker.command(`images -q ${imageName}`).then((data) => {
+        if (data.raw === '') {
+          this.channel.show();
+          this.channel.appendLine(data.raw);
+          this.channel.appendLine(`##debug## image has not been built.`);
+        } else {
+          imageExist = true;
+        }
+      }).catch((err) => {
+        this.channel.show();
+        this.channel.appendLine(`Fail to check image existence. Error message: ${err}`);
+        return false;
+      });
+
+      if (!imageExist) {
+        // Build app image
+        await this.docker.command(`build -t ${imageName} .`).then((data) => {
+          this.channel.show();
+          this.channel.appendLine(data.raw);
+          this.channel.appendLine(
+              `##debug## Build docker app image ${imageName}`);
+        }).catch((err) => {
+          this.channel.show();
+          this.channel.appendLine(`Fail to build docker app image ${imageName}. Error message: ${err}`);
+          return false;
+        });
+      }
+
+      // Step 3: Compile application
+      if (!fs.existsSync(this.arduinoPackagePath)) {
+        fs.mkdirSync(this.arduinoPackagePath);
+      }
+
+      this.channel.show();
+      this.channel.appendLine('Compile the application...');
+      this.channel.appendLine('This may take a while. Please be patient...');
+
+      await this.docker
+          .command(`run --name ${containerName} -v ${
+              this.arduinoPackagePath}:/root/ ${imageName}`)
+          .then((data) => {
+            this.channel.show();
+            this.channel.appendLine(data.raw);
+            this.channel.appendLine(`##debug## Compile application.`);
+          }).catch((err) => {
+            this.channel.show();
+            this.channel.appendLine(`Fail to run compilation. Container name: ${containerName}. Error message: ${err}`);
+            return false;
+          });
+
+      // Step 4: Copy binary file to local      
+      if (!fs.existsSync(this.deviceFolder)) {
+        this.channel.show();
+        this.channel.appendLine(`Unable to find the device folder inside the project.`);
+        return false;
+      }
+      try {
+        const outputFilePath =
+            path.join(this.deviceFolder, DockerCacheConfig.outputPath);
+        fs.mkdirSync(outputFilePath);
+      } catch (error) {
+        this.channel.show();
+        this.channel.appendLine(`Fail to create output path.`);
+        return false;
+      }
+      await this.docker.command(`cp ${containerName}:/work/device/ ./${DockerCacheConfig.outputPath}`)
+          .then((data) => {
+            this.channel.show();
+            this.channel.appendLine(`##debug## Copy binary file to local finish.`);
+          });
+
+      // Step 5: Clean up docker container
+      await this.docker.command(`container rm ${containerName}`)
+          .then((data) => {
+            this.channel.show();
+            this.channel.appendLine(
+                `##debug## Container ${containerName} has been clean.`);
+          });
       return true;
     } catch (error) {
       throw error;
     }
   }
+
 
   async upload(): Promise<boolean> {
     try {
@@ -160,13 +266,14 @@ export abstract class ArduinoDeviceBase implements Device {
             this.boardFolderPath, board.id, constants.cppPropertiesFileNameWin);
         const propertiesContentWin32 =
             fs.readFileSync(propertiesFilePathWin32).toString();
-        const rootPathPattern = /{ROOTPATH}/g;
+        const cacheFolderPattern = /{CACHEFOLDER}/g;
         const versionPattern = /{VERSION}/g;
-        const homeDir = os.homedir();
-        const localAppData: string = path.join(homeDir, 'AppData', 'Local');
+        const cacheFolder = path.join(
+                                    FileNames.vscodeSettingsFolderName,
+                                    DockerCacheConfig.arduinoPackagePath)
+                                .replace(/\\/g, '\\\\');
         const replaceStr =
-            propertiesContentWin32
-                .replace(rootPathPattern, localAppData.replace(/\\/g, '\\\\'))
+            propertiesContentWin32.replace(cacheFolderPattern, cacheFolder)
                 .replace(versionPattern, this.version);
         fs.writeFileSync(cppPropertiesFilePath, replaceStr);
       }
@@ -187,38 +294,38 @@ export abstract class ArduinoDeviceBase implements Device {
   async generateSketchFile(
       templateFilesInfo: TemplateFileInfo[], board: Board, boardInfo: string,
       boardConfig: string): Promise<boolean> {
-    // Create arduino.json config file
-    const arduinoJSONFilePath =
-        path.join(this.vscodeFolderPath, constants.arduinoJsonFileName);
-    const arduinoJSONObj = {
-      'board': boardInfo,
-      'sketch': constants.defaultSketchFileName,
-      'configuration': boardConfig,
-      'output': constants.outputPath
-    };
+    // // Create arduino.json config file
+    // const arduinoJSONFilePath =
+    //     path.join(this.vscodeFolderPath, constants.arduinoJsonFileName);
+    // const arduinoJSONObj = {
+    //   'board': boardInfo,
+    //   'sketch': constants.defaultSketchFileName,
+    //   'configuration': boardConfig,
+    //   'output': constants.outputPath
+    // };
 
-    try {
-      fs.writeFileSync(
-          arduinoJSONFilePath, JSON.stringify(arduinoJSONObj, null, 4));
-    } catch (error) {
-      throw new Error(
-          `Device: create arduino config file failed: ${error.message}`);
-    }
+    // try {
+    //   fs.writeFileSync(
+    //       arduinoJSONFilePath, JSON.stringify(arduinoJSONObj, null, 4));
+    // } catch (error) {
+    //   throw new Error(
+    //       `Device: create arduino config file failed: ${error.message}`);
+    // }
 
-    // Create settings.json config file
-    const settingsJSONFilePath =
-        path.join(this.vscodeFolderPath, FileNames.settingsJsonFileName);
-    const settingsJSONObj = {
-      'files.exclude': {'.build': true, '.iotworkbenchproject': true}
-    };
+    // // Create settings.json config file
+    // const settingsJSONFilePath =
+    //     path.join(this.vscodeFolderPath, FileNames.settingsJsonFileName);
+    // const settingsJSONObj = {
+    //   'files.exclude': {'.build': true, '.iotworkbenchproject': true}
+    // };
 
-    try {
-      fs.writeFileSync(
-          settingsJSONFilePath, JSON.stringify(settingsJSONObj, null, 4));
-    } catch (error) {
-      throw new Error(
-          `Device: create arduino config file failed: ${error.message}`);
-    }
+    // try {
+    //   fs.writeFileSync(
+    //       settingsJSONFilePath, JSON.stringify(settingsJSONObj, null, 4));
+    // } catch (error) {
+    //   throw new Error(
+    //       `Device: create arduino config file failed: ${error.message}`);
+    // }
 
     templateFilesInfo.forEach(fileInfo => {
       let targetFilePath = '';
@@ -239,6 +346,8 @@ export abstract class ArduinoDeviceBase implements Device {
         }
       }
     });
+
+    // Create
     return true;
   }
 

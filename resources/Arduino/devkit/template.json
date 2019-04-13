@@ -15,6 +15,21 @@
                   "fileName": "Dockerfile",
                   "sourcePath" : ".",
                   "targetPath" : "."
+                },
+                {
+                  "fileName": ".dockerignore",
+                  "sourcePath" : ".",
+                  "targetPath" : "."
+                },
+                {
+                  "fileName": "arduino-cli.yaml",
+                  "sourcePath" : ".",
+                  "targetPath" : "."
+                },
+                {
+                  "fileName": "devkit_start.sh",
+                  "sourcePath" : ".",
+                  "targetPath" : "."
                 }
             ]
         },

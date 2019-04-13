@@ -3,9 +3,9 @@
 
 import {exec} from 'child_process';
 import * as crypto from 'crypto';
+import {Docker, Options} from 'docker-cli-js';
 import * as fs from 'fs-plus';
 import * as getmac from 'getmac';
-import {Guid} from 'guid-typescript';
 import * as _ from 'lodash';
 import * as opn from 'opn';
 import * as os from 'os';
@@ -15,7 +15,7 @@ import * as WinReg from 'winreg';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, PlatformType} from '../constants';
+import {ConfigKey, DockerCacheConfig, PlatformType} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 import {delay, getRegistryValues} from '../utils';
 
@@ -57,6 +57,17 @@ async function cmd(command: string) {
 }
 
 export class AZ3166Device extends ArduinoDeviceBase {
+  private static _boardId = 'devkit';
+  name = 'AZ3166';
+  // tslint:disable-next-line: no-any
+  private static _serialport: any;
+
+  constructor(
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      devicePath: string, private templateFilesInfo: TemplateFileInfo[] = []) {
+    super(context, devicePath, channel, DeviceType.MXChip_AZ3166);
+  }
+
   // tslint:disable-next-line: no-any
   static get serialport(): any {
     if (!AZ3166Device._serialport) {
@@ -66,30 +77,13 @@ export class AZ3166Device extends ArduinoDeviceBase {
     return AZ3166Device._serialport;
   }
 
-  // tslint:disable-next-line: no-any
-  private static _serialport: any;
-  private channel: vscode.OutputChannel;
-
-  private componentId: string;
-  get id() {
-    return this.componentId;
-  }
-
-  private static _boardId = 'devkit';
-
   static get boardId() {
     return AZ3166Device._boardId;
   }
 
-  constructor(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      devicePath: string, private templateFilesInfo: TemplateFileInfo[] = []) {
-    super(context, devicePath, DeviceType.MXChip_AZ3166);
-    this.channel = channel;
-    this.componentId = Guid.create().toString();
+  get id() {
+    return this.componentId;
   }
-
-  name = 'AZ3166';
 
   get board() {
     const boardProvider = new BoardProvider(this.boardFolderPath);
@@ -98,21 +92,19 @@ export class AZ3166Device extends ArduinoDeviceBase {
   }
 
   get version() {
-    const packageRootPath = this.getArduinoPackagePath();
-    let version = '0.0.1';
+    // Currently hard code here: version 1.6.1
+    return '1.6.1';
+    // const packageRootPath = this.getArduinoPackagePath();
+    // let version = '0.0.1';
 
-    if (fs.existsSync(packageRootPath)) {
-      const versions = fs.readdirSync(packageRootPath);
-      if (versions[0]) {
-        version = versions[0];
-      }
-    }
+    // if (fs.existsSync(packageRootPath)) {
+    //   const versions = fs.readdirSync(packageRootPath);
+    //   if (versions[0]) {
+    //     version = versions[0];
+    //   }
+    // }
 
-    return version;
-  }
-
-  async checkPrerequisites(): Promise<boolean> {
-    return super.checkPrerequisites();
+    // return version;
   }
 
   async load(): Promise<boolean> {
@@ -153,7 +145,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
   }
 
   async preCompileAction(): Promise<boolean> {
-    await this.generatePlatformLocal();
+    // await this.generatePlatformLocal();
     return true;
   }
 
@@ -177,7 +169,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
       }
     }
     // Enable logging on IoT Devkit
-    await this.generatePlatformLocal();
+    // await this.generatePlatformLocal();
     return true;
   }
 
@@ -730,70 +722,110 @@ export class AZ3166Device extends ArduinoDeviceBase {
     return true;
   }
 
-  private async generatePlatformLocal() {
-    const arduinoPackagePath = this.getArduinoPackagePath();
+  // private async generatePlatformLocal() {
+  //   try {
+  //     // Download AZ3166 package
+  //     // Check arduino app image has been built
+  //     let imageExist = false;
+  //     await this.docker.command(`images -q
+  //     ${DockerCacheConfig.arduinoAppDockerImage}:${DockerCacheConfig.arduinoAppDockerImageTag}}`)
+  //       .then((data)=>{
+  //         const imageID = data.raw;
+  //         if (imageID) {
+  //           imageExist = true;
+  //         }
+  //       });
+  //     if (!imageExist) {
+  //       await this.docker.command(`build -t
+  //       ${DockerCacheConfig.arduinoAppDockerImage}:${DockerCacheConfig.arduinoAppDockerImageTag}
+  //       .`);
+  //     }
+  //     this.docker.command('build -t arduinoapp .').then((data) => {
+  //       this.channel.show();
+  //       this.channel.appendLine(data.raw);
+  //       this.channel.appendLine('##debug## Build docker app image.');
+  //     }).catch((err) => {
+  //       this.channel.show();
+  //       this.channel.appendLine(err);
+  //     })
 
-    function getHashMacAsync() {
-      return new Promise((resolve) => {
-        getmac.getMac((err, macAddress) => {
-          if (err) {
-            throw (err);
-          }
-          const hashMacAddress = crypto.createHash('sha256')
-                                     .update(macAddress, 'utf8')
-                                     .digest('hex');
-          resolve(hashMacAddress);
-        });
-      });
-    }
+  //     // Check image succussfully build
+  //     this.docker.command('image ls').then((data) => {
+  //       this.channel.show();
+  //       this.channel.appendLine(data.raw);
+  //       this.channel.appendLine('##debug## image ls.');
+  //     });
+  //   } catch (error) {
+  //     throw error;
+  //   }
 
-    if (!fs.existsSync(arduinoPackagePath)) {
-      throw new Error(
-          'Unable to find the Arduino package path, please install the latest Arduino package for Devkit.');
-    }
+  //   const arduinoPackagePath = this.getArduinoPackagePath();
 
-    const files = fs.readdirSync(arduinoPackagePath);
-    for (let i = files.length - 1; i >= 0; i--) {
-      if (files[i] === '.DS_Store') {
-        files.splice(i, 1);
-      }
-    }
+  //   function getHashMacAsync() {
+  //     return new Promise((resolve) => {
+  //       getmac.getMac((err, macAddress) => {
+  //         if (err) {
+  //           throw (err);
+  //         }
+  //         const hashMacAddress = crypto.createHash('sha256')
+  //                                    .update(macAddress, 'utf8')
+  //                                    .digest('hex');
+  //         resolve(hashMacAddress);
+  //       });
+  //     });
+  //   }
 
-    if (files.length === 0 || files.length > 1) {
-      throw new Error(
-          'There are unexpected files or folders under Arduino package installation path. Please clear the folder and reinstall the package for Devkit.');
-    }
+  //   if (!fs.existsSync(arduinoPackagePath)) {
+  //     throw new Error(
+  //         'Unable to find the Arduino package path, please install the latest
+  //         Arduino package for Devkit.');
+  //   }
 
-    const directoryName = path.join(arduinoPackagePath, files[0]);
-    if (!fs.isDirectorySync(directoryName)) {
-      throw new Error(
-          'The Arduino package for MXChip IoT Devkit is not installed. Please follow the guide to install it');
-    }
+  //   const files = fs.readdirSync(arduinoPackagePath);
+  //   for (let i = files.length - 1; i >= 0; i--) {
+  //     if (files[i] === '.DS_Store') {
+  //       files.splice(i, 1);
+  //     }
+  //   }
 
-    const fileName = path.join(directoryName, constants.platformLocalFileName);
-    if (!fs.existsSync(fileName)) {
-      const enableTrace = 1;
-      let hashMacAddress;
-      try {
-        hashMacAddress = await getHashMacAsync();
-      } catch (error) {
-        throw error;
-      }
-      // Create the file of platform.local.txt
-      const targetFileName =
-          path.join(directoryName, constants.platformLocalFileName);
+  //   if (files.length === 0 || files.length > 1) {
+  //     throw new Error(
+  //         'There are unexpected files or folders under Arduino package
+  //         installation path. Please clear the folder and reinstall the
+  //         package for Devkit.');
+  //   }
 
-      const content = `${constants.cExtraFlag}${hashMacAddress}" ${
-                          constants.traceExtraFlag}${enableTrace}\r\n` +
-          `${constants.cppExtraFlag}${hashMacAddress}" ${
-                          constants.traceExtraFlag}${enableTrace}\r\n`;
-      try {
-        fs.writeFileSync(targetFileName, content);
-      } catch (e) {
-        throw e;
-      }
-    }
-  }
+  //   const directoryName = path.join(arduinoPackagePath, files[0]);
+  //   if (!fs.isDirectorySync(directoryName)) {
+  //     throw new Error(
+  //         'The Arduino package for MXChip IoT Devkit is not installed. Please
+  //         follow the guide to install it');
+  //   }
+
+  //   const fileName = path.join(directoryName,
+  //   constants.platformLocalFileName); if (!fs.existsSync(fileName)) {
+  //     const enableTrace = 1;
+  //     let hashMacAddress;
+  //     try {
+  //       hashMacAddress = await getHashMacAsync();
+  //     } catch (error) {
+  //       throw error;
+  //     }
+  //     // Create the file of platform.local.txt
+  //     const targetFileName =
+  //         path.join(directoryName, constants.platformLocalFileName);
+
+  //     const content = `${constants.cExtraFlag}${hashMacAddress}" ${
+  //                         constants.traceExtraFlag}${enableTrace}\r\n` +
+  //         `${constants.cppExtraFlag}${hashMacAddress}" ${
+  //                         constants.traceExtraFlag}${enableTrace}\r\n`;
+  //     try {
+  //       fs.writeFileSync(targetFileName, content);
+  //     } catch (e) {
+  //       throw e;
+  //     }
+  //   }
+  // }
 
   private getArduinoPackagePath() {
     const plat = os.platform();

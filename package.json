@@ -25,6 +25,7 @@
     "*",
     "workspaceContains:**/.iotworkbenchproject",
     "onCommand:iotworkbench.initializeProject",
+    "onCommand:iotworkbench.manageLibrary",
     "onCommand:iotworkbench.examples",
     "onCommand:iotworkbench.help",
     "onCommand:iotworkbench.workbench",
@@ -42,6 +43,11 @@
       {
         "command": "iotworkbench.initializeProject",
         "title": "Create Project...",
+        "category": "Azure IoT Device Workbench"
+      },
+      {
+        "command": "iotworkbench.manageLibrary",
+        "title": "Manage Library...",
         "category": "Azure IoT Device Workbench"
       },
       {
@@ -199,6 +205,7 @@
     "body-parser": "^1.18.2",
     "copy-paste": "1.3.0",
     "crc": "^3.8.0",
+    "docker-cli-js": "^2.5.2",
     "eventemitter2": "^5.0.0",
     "fs-plus": "^3.0.1",
     "getmac": "^1.2.1",

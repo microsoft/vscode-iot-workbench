@@ -128,6 +128,9 @@ export class ProjectInitializer {
 
             const projectTemplateType: ProjectTemplateType = result.type;
 
+            if (projectPath) {
+              utils.mkdirRecursivelySync(projectPath);
+            }
             const project = new ioTProjectModule.IoTProject(
                 context, channel, telemetryContext);
             return await project.create(
@@ -256,9 +259,9 @@ export class ProjectInitializer {
 
     const projectPath =
         projectName ? path.join(projectRootPath, projectName) : undefined;
-    if (projectPath) {
-      utils.mkdirRecursivelySync(projectPath);
-    }
+
+    // We don't create the projectpath here in case user may cancel their
+    // initialization in following steps Just generate a valid path for project
     return projectPath;
   }
 }
