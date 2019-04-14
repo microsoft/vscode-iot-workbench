@@ -58,10 +58,6 @@ export async function activate(context: vscode.ExtensionContext) {
   const projectInitializerBinder =
       projectInitializer.InitializeProject.bind(projectInitializer);
 
-  const libraryManager = new LibraryManager();
-  const libraryManagerBinder =
-      libraryManager.ManageLibrary.bind(libraryManager);
-
   const deviceOperator = new DeviceOperator();
   const azureOperator = new AzureOperator();
 
@@ -84,7 +80,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const libraryManageProvider = async () => {
     callWithTelemetry(
         EventNames.manageLibraryEvent, outputChannel, true, context,
-        libraryManagerBinder);
+        deviceOperator.manageLibrary);
   };
 
   const azureProvisionProvider = async () => {
@@ -238,6 +234,7 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(workbenchPath);
   context.subscriptions.push(deviceCompile);
   context.subscriptions.push(deviceUpload);
+  context.subscriptions.push(libraryManage);
   context.subscriptions.push(azureProvision);
   context.subscriptions.push(azureDeploy);
   context.subscriptions.push(deviceToolchain);

@@ -11,13 +11,14 @@ import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, DependentExtensions, DockerCacheConfig, FileNames, PlatformType} from '../constants';
+import {DialogResponses} from '../DialogResponses';
 
 import {Board} from './Interfaces/Board';
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
+import {LibraryManageable} from './Interfaces/LibraryManageable';
 import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {OTA} from './OTA';
-import {DialogResponses} from '../DialogResponses';
 
 const constants = {
   defaultSketchFileName: 'device.ino',
@@ -29,7 +30,7 @@ const constants = {
 };
 
 
-export abstract class ArduinoDeviceBase implements Device {
+export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
   protected deviceType: DeviceType;
   protected componentType: ComponentType;
   protected deviceFolder: string;
@@ -79,126 +80,179 @@ export abstract class ArduinoDeviceBase implements Device {
   }
 
   async compile(): Promise<boolean> {
+    // Step 1: check whether docker is installed
+    this.channel.show();
+    this.channel.appendLine('Check whether Docker is installed...');
     try {
-      const result = await this.preCompileAction();
-      if (!result) {
-        return false;
-      }
-
-      // Step 1: check whether docker is installed
-      this.channel.show();
-      this.channel.appendLine('Check whether Docker is installed...');
-      let dockerInstalled = false;
-      await this.docker.command(`--version`).then((data) => {
-        dockerInstalled = true;
+      await this.docker.command(`ps`).then((data) => {
         this.channel.show();
-        this.channel.appendLine(data.raw);
         this.channel.appendLine(`##debug## Docker client is installed.`);
       });
-      if (!dockerInstalled) {
-        // Docker is not installed.
-        const option = await vscode.window.showInformationMessage(
-            'Docker is required to compile the code. Do you want to install Docker now?',
-            DialogResponses.yes, DialogResponses.cancel);
-        if (option === DialogResponses.yes) {
-          vscode.commands.executeCommand(
-              'vscode.open', vscode.Uri.parse('https://www.docker.com/'));
-        }
-        return false;        
+    } catch (error) {
+      this.channel.show();
+      this.channel.appendLine(
+          `##debug## Docker client is not correctlly installed or is not running.`);
+      const option = await vscode.window.showInformationMessage(
+          'Docker is required to compile the code. Do you want to install Docker now?',
+          DialogResponses.yes, DialogResponses.cancel);
+      if (option === DialogResponses.yes) {
+        vscode.commands.executeCommand(
+            'vscode.open', vscode.Uri.parse('https://www.docker.com/'));
       }
+      return false;
+    }
 
-      // Step 2: Check image successfully build. If not, build it.
-      if (!this.projectName) {
-        this.channel.show();
-        this.channel.appendLine(`ProjectName is invalid: ${this.projectName}`);
-        return false;
-      }
-      const imageName =
-          `${DockerCacheConfig.arduinoAppDockerImage}:${this.projectName}`;
-      const containerName = `${this.projectName}`;
-      let imageExist = false;
-      await this.docker.command(`images -q ${imageName}`).then((data) => {
-        if (data.raw === '') {
+    // Step 2: Check image successfully build. If not, build it.
+    if (!this.projectName) {
+      this.channel.show();
+      this.channel.appendLine(`ProjectName is invalid: ${this.projectName}`);
+      return false;
+    }
+    const imageName =
+        `${DockerCacheConfig.arduinoAppDockerImage}:${this.projectName}`;
+    let imageExist = false;
+    await this.docker.command(`images -q ${imageName}`)
+        .then((data) => {
+          if (data.raw === '') {
+            this.channel.show();
+            this.channel.appendLine(data.raw);
+            this.channel.appendLine(`##debug## image has not been built.`);
+          } else {
+            imageExist = true;
+          }
+        })
+        .catch((err) => {
           this.channel.show();
-          this.channel.appendLine(data.raw);
-          this.channel.appendLine(`##debug## image has not been built.`);
-        } else {
-          imageExist = true;
-        }
-      }).catch((err) => {
-        this.channel.show();
-        this.channel.appendLine(`Fail to check image existence. Error message: ${err}`);
-        return false;
-      });
-
-      if (!imageExist) {
-        // Build app image
-        await this.docker.command(`build -t ${imageName} .`).then((data) => {
-          this.channel.show();
-          this.channel.appendLine(data.raw);
           this.channel.appendLine(
-              `##debug## Build docker app image ${imageName}`);
-        }).catch((err) => {
-          this.channel.show();
-          this.channel.appendLine(`Fail to build docker app image ${imageName}. Error message: ${err}`);
+              `Fail to check image existence. Error message: ${err}`);
           return false;
         });
-      }
 
-      // Step 3: Compile application
-      if (!fs.existsSync(this.arduinoPackagePath)) {
-        fs.mkdirSync(this.arduinoPackagePath);
-      }
-
-      this.channel.show();
-      this.channel.appendLine('Compile the application...');
-      this.channel.appendLine('This may take a while. Please be patient...');
-
-      await this.docker
-          .command(`run --name ${containerName} -v ${
-              this.arduinoPackagePath}:/root/ ${imageName}`)
+    if (!imageExist) {
+      // Build app image
+      await this.docker.command(`build -t ${imageName} . --no-cache`)
           .then((data) => {
             this.channel.show();
             this.channel.appendLine(data.raw);
-            this.channel.appendLine(`##debug## Compile application.`);
-          }).catch((err) => {
+            this.channel.appendLine(
+                `##debug## Build docker app image ${imageName}`);
+          })
+          .catch((err) => {
             this.channel.show();
-            this.channel.appendLine(`Fail to run compilation. Container name: ${containerName}. Error message: ${err}`);
+            this.channel.appendLine(`Fail to build docker app image ${
+                imageName}. Error message: ${err}`);
             return false;
           });
+    }
 
-      // Step 4: Copy binary file to local      
-      if (!fs.existsSync(this.deviceFolder)) {
-        this.channel.show();
-        this.channel.appendLine(`Unable to find the device folder inside the project.`);
-        return false;
+    // Step 3: Compile application
+    const containerName = `${this.projectName}`;
+    try {
+      if (!fs.existsSync(this.arduinoPackagePath)) {
+        fs.mkdirSync(this.arduinoPackagePath);
       }
-      try {
-        const outputFilePath =
-            path.join(this.deviceFolder, DockerCacheConfig.outputPath);
-        fs.mkdirSync(outputFilePath);
-      } catch (error) {
-        this.channel.show();
-        this.channel.appendLine(`Fail to create output path.`);
-        return false;
-      }
-      await this.docker.command(`cp ${containerName}:/work/device/ ./${DockerCacheConfig.outputPath}`)
-          .then((data) => {
-            this.channel.show();
-            this.channel.appendLine(`##debug## Copy binary file to local finish.`);
-          });
+    } catch (error) {
+      this.channel.show();
+      this.channel.appendLine(error);
+      this.channel.appendLine(`##debug## Fail to create arduino package path: ${
+          this.arduinoPackagePath}.`);
+      return false;
+    }
 
-      // Step 5: Clean up docker container
-      await this.docker.command(`container rm ${containerName}`)
+    this.channel.show();
+    this.channel.appendLine('Compile the application...');
+    this.channel.appendLine('This may take a while. Please be patient...');
+
+    let containerExist = true;
+    await this.docker.command(`ps -a -q -f "name=${containerName}"`)
+        .then((data) => {
+          if (data.raw === '') {
+            containerExist = false;
+          }
+        })
+        .catch((err) => {
+          this.channel.show();
+          this.channel.appendLine(err);
+          return false;
+        });
+    if (containerExist) {
+      this.channel.show();
+      this.channel.appendLine(`##debug## container ${
+          containerName} has existed. Kill the container...`);
+      await this.docker.command(`rm ${containerName}`)
           .then((data) => {
             this.channel.show();
             this.channel.appendLine(
-                `##debug## Container ${containerName} has been clean.`);
+                `##debug## container ${containerName} has been killed.`);
+          })
+          .catch((err) => {
+            this.channel.show();
+            this.channel.appendLine(err);
+            this.channel.appendLine(
+                `##debug## Fail to kill container ${containerName}.`);
+            return false;
           });
-      return true;
-    } catch (error) {
-      throw error;
     }
+
+    await this.docker
+        .command(`run --name ${containerName} -v ${
+            this.arduinoPackagePath}:/root/ ${imageName} compile`)
+        .then((data) => {
+          this.channel.show();
+          this.channel.appendLine(data.raw);
+          this.channel.appendLine(`##debug## Compile application.`);
+        })
+        .catch((err) => {
+          this.channel.show();
+          this.channel.appendLine(`Fail to run compilation. Container name: ${
+              containerName}. Error message: ${err}`);
+          return false;
+        });
+
+    // Step 4: Copy binary file to local
+    if (!fs.existsSync(this.deviceFolder)) {
+      this.channel.show();
+      this.channel.appendLine(
+          `Unable to find the device folder inside the project.`);
+      return false;
+    }
+
+    const outputFilePath =
+        path.join(this.deviceFolder, DockerCacheConfig.outputPath);
+    try {
+      if (!fs.existsSync(outputFilePath)) {
+        fs.mkdirSync(outputFilePath);
+      }
+    } catch (error) {
+      this.channel.show();
+      this.channel.appendLine(error);
+      this.channel.appendLine(`##debug## Fail to create output path.`);
+      return false;
+    }
+    await this.docker
+        .command(`cp ${containerName}:/work/device/ ${outputFilePath}`)
+        .then((data) => {
+          this.channel.show();
+          this.channel.appendLine(
+              `##debug## Copy binary file to local finish. Output path: ${
+                  outputFilePath}.`);
+        });
+
+    // Step 5: Clean up docker container
+    await this.docker.command(`container rm ${containerName}`)
+        .then((data) => {
+          this.channel.show();
+          this.channel.appendLine(
+              `##debug## Container ${containerName} has been clean.`);
+        })
+        .catch((err) => {
+          this.channel.show();
+          this.channel.appendLine(err);
+          this.channel.appendLine(
+              `##debug## Fail to kill container ${containerName}.`);
+          return false;
+        });
+    return true;
   }
 
 
@@ -215,13 +269,20 @@ export abstract class ArduinoDeviceBase implements Device {
     }
   }
 
+  async manageLibrary(): Promise<boolean> {
+    try {
+      // const libraryList;
+      // await this.docker.command(``)
+    } catch (error) {
+      throw error;
+    }
+    return true;
+  }
 
   abstract async configDeviceSettings(): Promise<boolean>;
 
   abstract async load(): Promise<boolean>;
   abstract async create(): Promise<boolean>;
-
-  abstract async preCompileAction(): Promise<boolean>;
 
   abstract async preUploadAction(): Promise<boolean>;
 
@@ -347,7 +408,6 @@ export abstract class ArduinoDeviceBase implements Device {
       }
     });
 
-    // Create
     return true;
   }
 

@@ -44,6 +44,19 @@ export class DeviceOperator {
     await project.upload();
   }
 
+  async manageLibrary(
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext) {
+    const project =
+        new ioTProjectModule.IoTProject(context, channel, telemetryContext);
+    const result = await project.load();
+    if (!result) {
+      await project.handleLoadFailure();
+      return;
+    }
+    await project.manageLibrary();
+  }
+
   async configDeviceSettings(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {

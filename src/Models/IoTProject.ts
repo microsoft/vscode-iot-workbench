@@ -16,6 +16,7 @@ import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Deployable} from './Interfaces/Deployable';
 import {Device} from './Interfaces/Device';
+import {LibraryManageable} from './Interfaces/LibraryManageable';
 import {ProjectTemplate, ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
@@ -82,6 +83,9 @@ export class IoTProject {
     return (comp as Uploadable).upload !== undefined;
   }
 
+  private canManageLibrary(comp: {}): comp is LibraryManageable {
+    return (comp as LibraryManageable).manageLibrary !== undefined;
+  }
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
@@ -334,6 +338,25 @@ export class IoTProject {
         if (res === false) {
           const error = new Error(
               'Unable to upload the sketch, please check output window for detail.');
+          throw error;
+        }
+      }
+    }
+    return true;
+  }
+
+  async manageLibrary(): Promise<boolean> {
+    for (const item of this.componentList) {
+      if (this.canManageLibrary(item)) {
+        const isPrerequisitesAchieved = await item.checkPrerequisites();
+        if (!isPrerequisitesAchieved) {
+          return false;
+        }
+
+        const res = await item.manageLibrary();
+        if (res === false) {
+          const error = new Error(
+              'Unable to manage libraries, please check output window for detail.');
           throw error;
         }
       }

@@ -144,11 +144,6 @@ export class AZ3166Device extends ArduinoDeviceBase {
     return true;
   }
 
-  async preCompileAction(): Promise<boolean> {
-    // await this.generatePlatformLocal();
-    return true;
-  }
-
   async preUploadAction(): Promise<boolean> {
     const isStlinkInstalled = await this.stlinkDriverInstalled();
     if (!isStlinkInstalled) {

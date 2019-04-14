@@ -155,10 +155,6 @@ export class Esp32Device extends ArduinoDeviceBase {
     return false;
   }
 
-  async preCompileAction(): Promise<boolean> {
-    return true;
-  }
-
   async preUploadAction(): Promise<boolean> {
     return true;
   }
