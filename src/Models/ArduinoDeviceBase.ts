@@ -41,7 +41,8 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
   protected channel: vscode.OutputChannel;
   protected docker: Docker;
   protected componentId: string;
-  private projectName: string;
+  private containerName: string;
+  private imageName: string;
 
   abstract name: string;
   abstract id: string;
@@ -61,10 +62,14 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
         path.join(this.vscodeFolderPath, DockerCacheConfig.arduinoPackagePath);
     this.boardFolderPath = context.asAbsolutePath(
         path.join(FileNames.resourcesFolderName, PlatformType.ARDUINO));
-    const pathSplit = devicePath.split('\\');
-    this.projectName = pathSplit[pathSplit.length - 2];
+
+    // Docker-related
     const options = new Options('', this.deviceFolder);
     this.docker = new Docker(options);
+    // Use projectName as unique containerName
+    const pathSplit = devicePath.split('\\');
+    this.containerName = pathSplit[pathSplit.length - 2];    
+    this.imageName = `${DockerCacheConfig.arduinoAppDockerImage}:${this.containerName}`;
   }
 
   getDeviceType(): DeviceType {
@@ -103,15 +108,14 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
     }
 
     // Step 2: Check image successfully build. If not, build it.
-    if (!this.projectName) {
+    if (!this.containerName) {
       this.channel.show();
-      this.channel.appendLine(`ProjectName is invalid: ${this.projectName}`);
+      this.channel.appendLine(`containerName is invalid: ${this.containerName}`);
       return false;
     }
-    const imageName =
-        `${DockerCacheConfig.arduinoAppDockerImage}:${this.projectName}`;
+
     let imageExist = false;
-    await this.docker.command(`images -q ${imageName}`)
+    await this.docker.command(`images -q ${this.imageName}`)
         .then((data) => {
           if (data.raw === '') {
             this.channel.show();
@@ -130,23 +134,22 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
 
     if (!imageExist) {
       // Build app image
-      await this.docker.command(`build -t ${imageName} . --no-cache`)
+      await this.docker.command(`build -t ${this.imageName} . --no-cache`)
           .then((data) => {
             this.channel.show();
             this.channel.appendLine(data.raw);
             this.channel.appendLine(
-                `##debug## Build docker app image ${imageName}`);
+                `##debug## Build docker app image ${this.imageName}`);
           })
           .catch((err) => {
             this.channel.show();
             this.channel.appendLine(`Fail to build docker app image ${
-                imageName}. Error message: ${err}`);
+              this.imageName}. Error message: ${err}`);
             return false;
           });
     }
 
     // Step 3: Compile application
-    const containerName = `${this.projectName}`;
     try {
       if (!fs.existsSync(this.arduinoPackagePath)) {
         fs.mkdirSync(this.arduinoPackagePath);
@@ -164,7 +167,7 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
     this.channel.appendLine('This may take a while. Please be patient...');
 
     let containerExist = true;
-    await this.docker.command(`ps -a -q -f "name=${containerName}"`)
+    await this.docker.command(`ps -a -q -f "name=${this.containerName}"`)
         .then((data) => {
           if (data.raw === '') {
             containerExist = false;
@@ -178,25 +181,25 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
     if (containerExist) {
       this.channel.show();
       this.channel.appendLine(`##debug## container ${
-          containerName} has existed. Kill the container...`);
-      await this.docker.command(`rm ${containerName}`)
+          this.containerName} has existed. Kill the container...`);
+      await this.docker.command(`rm ${this.containerName}`)
           .then((data) => {
             this.channel.show();
             this.channel.appendLine(
-                `##debug## container ${containerName} has been killed.`);
+                `##debug## container ${this.containerName} has been killed.`);
           })
           .catch((err) => {
             this.channel.show();
             this.channel.appendLine(err);
             this.channel.appendLine(
-                `##debug## Fail to kill container ${containerName}.`);
+                `##debug## Fail to kill container ${this.containerName}.`);
             return false;
           });
     }
 
     await this.docker
-        .command(`run --name ${containerName} -v ${
-            this.arduinoPackagePath}:/root/ ${imageName} compile`)
+        .command(`run --name ${this.containerName} -v ${
+            this.arduinoPackagePath}:/root/ ${imageName} compileapp`)
         .then((data) => {
           this.channel.show();
           this.channel.appendLine(data.raw);
@@ -205,7 +208,7 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
         .catch((err) => {
           this.channel.show();
           this.channel.appendLine(`Fail to run compilation. Container name: ${
-              containerName}. Error message: ${err}`);
+            this.containerName}. Error message: ${err}`);
           return false;
         });
 
@@ -230,7 +233,7 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
       return false;
     }
     await this.docker
-        .command(`cp ${containerName}:/work/device/ ${outputFilePath}`)
+        .command(`cp ${this.containerName}:/work/device/ ${outputFilePath}`)
         .then((data) => {
           this.channel.show();
           this.channel.appendLine(
@@ -239,17 +242,17 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
         });
 
     // Step 5: Clean up docker container
-    await this.docker.command(`container rm ${containerName}`)
+    await this.docker.command(`container rm ${this.containerName}`)
         .then((data) => {
           this.channel.show();
           this.channel.appendLine(
-              `##debug## Container ${containerName} has been clean.`);
+              `##debug## Container ${this.containerName} has been clean.`);
         })
         .catch((err) => {
           this.channel.show();
           this.channel.appendLine(err);
           this.channel.appendLine(
-              `##debug## Fail to kill container ${containerName}.`);
+              `##debug## Fail to kill container ${this.containerName}.`);
           return false;
         });
     return true;
@@ -272,7 +275,11 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
   async manageLibrary(): Promise<boolean> {
     try {
       // const libraryList;
-      // await this.docker.command(``)
+      await this.docker
+        .command(`run --name ${this.containerName} -v ${
+          this.arduinoPackagePath}:/root/ ${this.imageName} lib search`).then((data) => {
+
+          });
     } catch (error) {
       throw error;
     }
