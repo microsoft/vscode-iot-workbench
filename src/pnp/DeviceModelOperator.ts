@@ -582,6 +582,30 @@ export class DeviceModelOperator {
       return false;
     }
 
+    const unsavedFiles =
+        vscode.workspace.textDocuments.filter(file => file.isDirty);
+
+    // Is there any unsaved files to be submitted?
+    const filterResult = unsavedFiles.filter(
+        file => selectedFiles.some(
+            ({label}) => path.basename(file.fileName) === label));
+
+    if (filterResult.length > 0) {
+      const unsavedFileList =
+          filterResult.map(file => path.basename(file.fileName)).toString();
+      const messge = `The following file(s) contain unsaved changes: ${
+          unsavedFileList}, do you want to save them?`;
+      const choice = await vscode.window.showWarningMessage(
+          messge, DialogResponses.yes, DialogResponses.cancel);
+      if (choice === DialogResponses.yes) {
+        for (const document of filterResult) {
+          await document.save();
+        }
+      } else {
+        return false;
+      }
+    }
+
     const interfaceFiles = selectedFiles.filter(file => {
       return file.label.endsWith(PnPConstants.interfaceSuffix);
     });
