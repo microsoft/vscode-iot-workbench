@@ -16,12 +16,14 @@ import {ConfigKey, EventNames} from './constants';
 import {TelemetryContext, TelemetryProperties} from './telemetry';
 
 const impor = require('impor')(__dirname);
-const exampleExplorerModule = impor('./exampleExplorer') as typeof import('./exampleExplorer');
+const exampleExplorerModule =
+    impor('./exampleExplorer') as typeof import('./exampleExplorer');
 const ioTProjectModule =
     impor('./Models/IoTProject') as typeof import('./Models/IoTProject');
 const telemetryModule = impor('./telemetry') as typeof import('./telemetry');
 const request = impor('request-promise') as typeof import('request-promise');
-const usbDetectorModule = impor('./usbDetector') as typeof import('./usbDetector');
+const usbDetectorModule =
+    impor('./usbDetector') as typeof import('./usbDetector');
 
 let telemetryWorkerInitialized = false;
 // this method is called when your extension is activated
@@ -40,10 +42,11 @@ export async function activate(context: vscode.ExtensionContext) {
     properties: {result: 'Succeeded', error: '', errorMessage: ''},
     measurements: {duration: 0}
   };
-  
+
   if (vscode.workspace.workspaceFolders) {
     try {
-      const iotProject = new ioTProjectModule.IoTProject(context, outputChannel, telemetryContext);
+      const iotProject = new ioTProjectModule.IoTProject(
+          context, outputChannel, telemetryContext);
       await iotProject.load(true);
     } catch (error) {
       // do nothing as we are not sure whether the project is initialized.
@@ -66,7 +69,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const projectInitProvider = async () => {
     const projectInitializer = new ProjectInitializer();
     const projectInitializerBinder =
-      projectInitializer.InitializeProject.bind(projectInitializer);
+        projectInitializer.InitializeProject.bind(projectInitializer);
     telemetryModule.callWithTelemetry(
         EventNames.createNewProjectEvent, outputChannel, true, context,
         projectInitializerBinder);
@@ -116,7 +119,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const examplesInitializeProvider =
       async (name?: string, url?: string, boardId?: string) => {
-        telemetryModule.callWithTelemetry(
+    telemetryModule.callWithTelemetry(
         EventNames.loadExampleEvent, outputChannel, true, context,
         initializeExampleBinder, {}, name, url, boardId);
   };
@@ -164,13 +167,14 @@ export async function activate(context: vscode.ExtensionContext) {
         const telemetryContext:
             TelemetryContext = {properties, measurements: {duration: 0}};
 
-            
+
         // Initialize Telemetry
         if (!telemetryWorkerInitialized) {
           telemetryModule.TelemetryWorker.Initialize(context);
           telemetryWorkerInitialized = true;
         }
-        telemetryModule.TelemetryWorker.sendEvent(EventNames.openTutorial, telemetryContext);
+        telemetryModule.TelemetryWorker.sendEvent(
+            EventNames.openTutorial, telemetryContext);
       });
 
   const openUri =
@@ -246,7 +250,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
   setTimeout(() => {
     // delay to detect usb
-    const usbDetector = new usbDetectorModule.UsbDetector(context, outputChannel);
+    const usbDetector =
+        new usbDetectorModule.UsbDetector(context, outputChannel);
     usbDetector.startListening();
   }, 200);
 }
