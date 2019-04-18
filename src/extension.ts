@@ -17,11 +17,11 @@ import {ConfigKey, EventNames} from './constants';
 import {TelemetryContext, callWithTelemetry, TelemetryWorker, TelemetryProperties} from './telemetry';
 import {UsbDetector} from './usbDetector';
 import {CodeGenerateCore} from './pnp/CodeGenerateCore';
-import {PnPMetaModelUtility, PnPMetaModelContext} from './pnp/PnPMetaModelUtility';
-import {PnPMetaModelParser, PnPMetaModelGraph} from './pnp/PnPMetaModelGraph';
+import {DigitalTwinMetaModelUtility, DigitalTwinMetaModelContext} from './pnp/DigitalTwinMetaModelUtility';
+import {DigitalTwinMetaModelParser, DigitalTwinMetaModelGraph} from './pnp/DigitalTwinMetaModelGraph';
 import {DeviceModelOperator} from './pnp/DeviceModelOperator';
-import {PnPMetaModelJsonParser} from './pnp/PnPMetaModelJsonParser';
-import {PnPDiagnostic} from './pnp/PnPDiagnostic';
+import {DigitalTwinMetaModelJsonParser} from './pnp/DigitalTwinMetaModelJsonParser';
+import {DigitalTwinDiagnostic} from './pnp/DigitalTwinDiagnostic';
 
 const impor = require('impor')(__dirname);
 const ioTProjectModule =
@@ -54,15 +54,16 @@ export async function activate(context: vscode.ExtensionContext) {
   const deviceModelOperator = new DeviceModelOperator();
 
   // PnP Language Server
-  const pnpContext = new PnPMetaModelUtility(context);
-  const pnpInterface: PnPMetaModelContext = await pnpContext.getInterface();
-  const pnpCapabilityModel: PnPMetaModelContext =
-      await pnpContext.getCapabilityModel();
-  const pnpGraph: PnPMetaModelGraph = await pnpContext.getGraph();
-  const pnpParser =
-      new PnPMetaModelParser(pnpGraph, pnpInterface, pnpCapabilityModel);
-  const pnpDiagnostic =
-      new PnPDiagnostic(pnpParser, pnpInterface, pnpCapabilityModel);
+  const dtContext = new DigitalTwinMetaModelUtility(context);
+  const dtInterface: DigitalTwinMetaModelContext =
+      await dtContext.getInterface();
+  const dtCapabilityModel: DigitalTwinMetaModelContext =
+      await dtContext.getCapabilityModel();
+  const dtGraph: DigitalTwinMetaModelGraph = await dtContext.getGraph();
+  const dtParser =
+      new DigitalTwinMetaModelParser(dtGraph, dtInterface, dtCapabilityModel);
+  const dtDiagnostic =
+      new DigitalTwinDiagnostic(dtParser, dtInterface, dtCapabilityModel);
 
   const activeEditor = vscode.window.activeTextEditor;
 
@@ -71,9 +72,9 @@ export async function activate(context: vscode.ExtensionContext) {
     if (/\.(interface|capabilitymodel)\.json$/.test(document.uri.fsPath)) {
       const documentType = getDocumentType(document);
       if (documentType === 'Interface') {
-        pnpDiagnostic.update(pnpInterface, document);
+        dtDiagnostic.update(dtInterface, document);
       } else {
-        pnpDiagnostic.update(pnpCapabilityModel, document);
+        dtDiagnostic.update(dtCapabilityModel, document);
       }
     }
   }
@@ -88,9 +89,9 @@ export async function activate(context: vscode.ExtensionContext) {
     waitingForUpdatingDiagnostic = setTimeout(() => {
       const documentType = getDocumentType(document);
       if (documentType === 'Interface') {
-        pnpDiagnostic.update(pnpInterface, document);
+        dtDiagnostic.update(dtInterface, document);
       } else {
-        pnpDiagnostic.update(pnpCapabilityModel, document);
+        dtDiagnostic.update(dtCapabilityModel, document);
       }
     }, 0);
   });
@@ -108,9 +109,9 @@ export async function activate(context: vscode.ExtensionContext) {
     waitingForUpdatingDiagnostic = setTimeout(() => {
       const documentType = getDocumentType(document);
       if (documentType === 'Interface') {
-        pnpDiagnostic.update(pnpInterface, document);
+        dtDiagnostic.update(dtInterface, document);
       } else {
-        pnpDiagnostic.update(pnpCapabilityModel, document);
+        dtDiagnostic.update(dtCapabilityModel, document);
       }
       waitingForUpdatingDiagnostic = null;
     }, 500);
@@ -128,9 +129,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
     const documentType = getDocumentType(document);
     if (documentType === 'Interface') {
-      pnpDiagnostic.update(pnpInterface, document);
+      dtDiagnostic.update(dtInterface, document);
     } else {
-      pnpDiagnostic.update(pnpCapabilityModel, document);
+      dtDiagnostic.update(dtCapabilityModel, document);
     }
   });
 
@@ -141,9 +142,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
     const documentType = getDocumentType(document);
     if (documentType === 'Interface') {
-      pnpDiagnostic.delete(document);
+      dtDiagnostic.delete(document);
     } else {
-      pnpDiagnostic.delete(document);
+      dtDiagnostic.delete(document);
     }
   });
 
@@ -156,19 +157,20 @@ export async function activate(context: vscode.ExtensionContext) {
       {
         async provideHover(
             document, position, token): Promise<vscode.Hover|null> {
-          const id = PnPMetaModelJsonParser.getIdAtPosition(
-              document, position, pnpInterface);
+          const id = DigitalTwinMetaModelJsonParser.getIdAtPosition(
+              document, position, dtInterface);
           let hoverText: string|undefined = undefined;
           if (id) {
             if (id === '@id') {
               hoverText =
-                  'An identifier for PnP capability model or interface.';
+                  'An identifier for Digital Twin capability model or interface.';
             } else if (id === '@type') {
-              hoverText = 'The type of PnP meta model object.';
+              hoverText = 'The type of Digital Twin meta model object.';
             } else if (id === '@context') {
-              hoverText = 'The context for PnP capability model or interface.';
+              hoverText =
+                  'The context for Digital Twin capability model or interface.';
             } else {
-              hoverText = pnpParser.getCommentFromId(id);
+              hoverText = dtParser.getCommentFromId(id);
             }
           }
           return hoverText ? new vscode.Hover(hoverText) : null;
@@ -186,17 +188,17 @@ export async function activate(context: vscode.ExtensionContext) {
         null {
           const documentType = getDocumentType(document);
 
-          const jsonInfo =
-              PnPMetaModelJsonParser.getJsonInfoAtPosition(document, position);
-          const contextType =
-              PnPMetaModelJsonParser.getPnpContextTypeAtPosition(
-                  document, position, documentType);
+          const jsonInfo = DigitalTwinMetaModelJsonParser.getJsonInfoAtPosition(
+              document, position);
+          const contextType = DigitalTwinMetaModelJsonParser
+                                  .getDigitalTwinContextTypeAtPosition(
+                                      document, position, documentType);
 
-          let pnpContext: PnPMetaModelContext;
+          let dtContext: DigitalTwinMetaModelContext;
           if (contextType === 'Interface') {
-            pnpContext = pnpInterface;
+            dtContext = dtInterface;
           } else {
-            pnpContext = pnpCapabilityModel;
+            dtContext = dtCapabilityModel;
           }
 
           if (!jsonInfo) {
@@ -212,26 +214,26 @@ export async function activate(context: vscode.ExtensionContext) {
             } else if (jsonInfo.key === '@type') {
               if (jsonInfo.lastKey) {
                 const id =
-                    pnpParser.getIdFromShortName(pnpContext, jsonInfo.lastKey);
+                    dtParser.getIdFromShortName(dtContext, jsonInfo.lastKey);
                 if (!id) {
                   return null;
                 }
-                values = pnpParser.getTypesFromId(pnpContext, id);
+                values = dtParser.getTypesFromId(dtContext, id);
               } else {
                 values = [contextType];
               }
 
             } else {
-              values = pnpParser.getStringValuesFromShortName(
-                  pnpContext, jsonInfo.key);
+              values = dtParser.getStringValuesFromShortName(
+                  dtContext, jsonInfo.key);
             }
 
-            const range = PnPMetaModelJsonParser.getTokenRange(
+            const range = DigitalTwinMetaModelJsonParser.getTokenRange(
                 jsonInfo.json.tokens, jsonInfo.offset);
             const startPosition = document.positionAt(range.startIndex);
             const endPosition = document.positionAt(range.endIndex);
             const completionItems =
-                PnPMetaModelJsonParser.getCompletionItemsFromArray(
+                DigitalTwinMetaModelJsonParser.getCompletionItemsFromArray(
                     values, position, startPosition, endPosition);
             return new vscode.CompletionList(completionItems, false);
           } else {
@@ -241,9 +243,9 @@ export async function activate(context: vscode.ExtensionContext) {
                 Array<{label: string, required: boolean, type?: string}> = [];
             if (!jsonInfo.type) {
               const id =
-                  pnpParser.getIdFromShortName(pnpContext, jsonInfo.lastKey);
+                  dtParser.getIdFromShortName(dtContext, jsonInfo.lastKey);
               if (id) {
-                const values = pnpParser.getTypesFromId(pnpContext, id);
+                const values = dtParser.getTypesFromId(dtContext, id);
                 if (values.length === 1 && values[0] !== 'Interface' &&
                     values[0] !== 'CapabilityModel') {
                   jsonInfo.type = values[0];
@@ -257,8 +259,8 @@ export async function activate(context: vscode.ExtensionContext) {
                   jsonInfo.properties.indexOf('@context') === -1) {
                 completionKeyList.push({label: '@context', required: true});
               }
-              keyList = pnpParser.getTypedPropertiesFromType(
-                  pnpContext, jsonInfo.type);
+              keyList =
+                  dtParser.getTypedPropertiesFromType(dtContext, jsonInfo.type);
             } else {
               keyList = [{label: '@type', required: true}];
             }
@@ -276,12 +278,12 @@ export async function activate(context: vscode.ExtensionContext) {
                   {label: '@id', required: true, type: 'string'});
             }
 
-            const range = PnPMetaModelJsonParser.getTokenRange(
+            const range = DigitalTwinMetaModelJsonParser.getTokenRange(
                 jsonInfo.json.tokens, jsonInfo.offset);
             const startPosition = document.positionAt(range.startIndex);
             const endPosition = document.positionAt(range.endIndex);
             const completionItems =
-                PnPMetaModelJsonParser.getCompletionItemsFromArray(
+                DigitalTwinMetaModelJsonParser.getCompletionItemsFromArray(
                     completionKeyList, position, startPosition, endPosition);
             console.log(completionItems);
             return new vscode.CompletionList(completionItems, false);
