@@ -1,19 +1,19 @@
 {
-    "@context": {
-        "@vocab": "http://azureiot.com/v0/classes/",
-        "@language": "en",
-        "comment": "Entity/comment",
-        "description": {
-            "@id": "Entity/description",
-            "@container": "@language"
-        },
-        "displayName": {
-            "@id": "Entity/displayName",
-            "@container": "@language"
-        },
-        "implements": {
-            "@id": "CapabilityModel/implements",
-            "@type": "@id"
-        }
+  "@context": {
+    "@vocab": "http://azureiot.com/v0/classes/",
+    "@language": "en",
+    "comment": "Entity/comment",
+    "description": {
+      "@id": "Entity/description",
+      "@container": "@language"
+    },
+    "displayName": {
+      "@id": "Entity/displayName",
+      "@container": "@language"
+    },
+    "implements": {
+      "@id": "CapabilityModel/implements",
+      "@type": "@id"
     }
+  }
 }
