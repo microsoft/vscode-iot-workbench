@@ -46,7 +46,7 @@ export class DeviceModelOperator {
       rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
     } else {
       rootPath = await utils.selectWorkspaceItem(
-          'Select the folder that will contain your Plug & Play files:', {
+          'Select the folder that will contain your Digital Twin files:', {
             canSelectFiles: false,
             canSelectFolders: true,
             canSelectMany: false,
@@ -144,15 +144,15 @@ export class DeviceModelOperator {
       fs.writeFileSync(targetInterface, replaceStr);
     } catch (error) {
       throw new Error(
-          `Creating Plug & Play interface failed: ${error.message}`);
+          `Creating Digital Twin interface failed: ${error.message}`);
     }
     await vscode.commands.executeCommand(
         'vscode.openFolder', vscode.Uri.file(rootPath), false);
 
     await vscode.window.showTextDocument(vscode.Uri.file(targetInterface));
 
-    vscode.window.showInformationMessage(`New Plug & Play interface ${
-        interfaceFileName} was created successfully`);
+    vscode.window.showInformationMessage(`New Digital Twin interface ${
+        interfaceFileName} was created successfully.`);
     return;
   }
 
@@ -166,7 +166,7 @@ export class DeviceModelOperator {
 
     const option: vscode.InputBoxOptions = {
       value: PnPFileNames.defaultCapabilityModelName,
-      prompt: `Please input capability model name here.`,
+      prompt: `Please input capability model name here:`,
       ignoreFocusOut: true,
       validateInput: (capabilityModelName: string) => {
         if (!capabilityModelName) {
@@ -219,7 +219,7 @@ export class DeviceModelOperator {
       fs.writeFileSync(targetCapabilityModel, replaceStr);
     } catch (error) {
       throw new Error(
-          `Creating Plug & Play capability model failed: ${error.message}`);
+          `Creating Digital Twin capability model failed: ${error.message}`);
     }
 
     await vscode.commands.executeCommand(
@@ -228,8 +228,8 @@ export class DeviceModelOperator {
     await vscode.window.showTextDocument(
         vscode.Uri.file(targetCapabilityModel));
 
-    vscode.window.showInformationMessage(`New Plug & Play capability model ${
-        capabilityModelFileName} created successfully`);
+    vscode.window.showInformationMessage(`New Digital Twin capability model ${
+        capabilityModelFileName} created successfully.`);
     return;
   }
 
@@ -241,20 +241,21 @@ export class DeviceModelOperator {
       {label: 'Open Organizational Model Repository', description: ''}
     ];
 
-    const repoSelection = await vscode.window.showQuickPick(
-        repoItems,
-        {ignoreFocusOut: true, placeHolder: 'Please select an option:'});
+    const repoSelection = await vscode.window.showQuickPick(repoItems, {
+      ignoreFocusOut: true,
+      placeHolder: 'Please select a repository to connect:'
+    });
 
     if (!repoSelection) {
       return false;
     }
 
     if (repoSelection.label === 'Open Public Model Repository') {
-      // TODO: Open Public Model repository
+      // Open Public Model repository
       DeviceModelOperator.vscexpress = DeviceModelOperator.vscexpress ||
           new VSCExpress(context, 'pnpRepositoryViews');
       await DeviceModelOperator.vscexpress.open(
-          'index.html?public', 'Plug & Play Repository', vscode.ViewColumn.Two,
+          'index.html?public', 'Digital Twin Repository', vscode.ViewColumn.Two,
           {retainContextWhenHidden: true, enableScripts: true});
       return true;
     }
@@ -267,7 +268,7 @@ export class DeviceModelOperator {
       const option: vscode.InputBoxOptions = {
         value: PnPConstants.repoConnectionStringTemplate,
         prompt:
-            'Please input the connection string to the Plug & Play repository.',
+            'Please input the connection string to the Digital Twin repository:',
         ignoreFocusOut: true
       };
 
@@ -290,7 +291,7 @@ export class DeviceModelOperator {
       DeviceModelOperator.vscexpress = DeviceModelOperator.vscexpress ||
           new VSCExpress(context, 'pnpRepositoryViews');
       await DeviceModelOperator.vscexpress.open(
-          'index.html', 'Plug & Play Repository', vscode.ViewColumn.Two,
+          'index.html', 'Digital Twin Repository', vscode.ViewColumn.Two,
           {retainContextWhenHidden: true, enableScripts: true});
       return true;
     }
@@ -304,7 +305,7 @@ export class DeviceModelOperator {
     if (DeviceModelOperator.vscexpress) {
       DeviceModelOperator.vscexpress.close('index.html');
     }
-    const message = 'Sign out Plug & Play repository successfully';
+    const message = 'Sign out Digital Twin repository successfully';
     vscode.window.showInformationMessage(message);
   }
 
@@ -320,25 +321,12 @@ export class DeviceModelOperator {
           searchString, continueToken, undefined, pageSize);
       return result;
     } else {
-      let connectionString =
+      const connectionString =
           ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
       if (!connectionString) {
-        const option: vscode.InputBoxOptions = {
-          value: PnPConstants.repoConnectionStringTemplate,
-          prompt:
-              'Please input the connection string to the Plug & Play repository.',
-          ignoreFocusOut: true
-        };
-
-        const repoConnectionString = await vscode.window.showInputBox(option);
-        if (!repoConnectionString) {
-          return [];
-        } else {
-          await ConfigHandler.update(
-              ConfigKey.pnpModelRepositoryKeyName, repoConnectionString,
-              vscode.ConfigurationTarget.Global);
-          connectionString = repoConnectionString;
-        }
+        vscode.window.showWarningMessage(
+            'Failed to get interfaces from Digital Twin repository. Please sign out and sign in with a valid connection string.');
+        return;
       }
 
       const builder = PnPConnectionStringBuilder.Create(connectionString);
@@ -362,26 +350,12 @@ export class DeviceModelOperator {
               searchString, continueToken, undefined, pageSize);
       return result;
     } else {
-      let connectionString =
+      const connectionString =
           ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
       if (!connectionString) {
-        const option: vscode.InputBoxOptions = {
-          value: PnPConstants.repoConnectionStringTemplate,
-          prompt:
-              'Please input the connection string to the Plug & Play repository.',
-          ignoreFocusOut: true
-        };
-
-        const repoConnectionString = await vscode.window.showInputBox(option);
-
-        if (!repoConnectionString) {
-          return [];
-        } else {
-          await ConfigHandler.update(
-              ConfigKey.pnpModelRepositoryKeyName, repoConnectionString,
-              vscode.ConfigurationTarget.Global);
-          connectionString = repoConnectionString;
-        }
+        vscode.window.showWarningMessage(
+            'Failed to get capability models from Digital Twin repository. Please sign out and sign in with a valid connection string.');
+        return;
       }
       const pnpMetamodelRepositoryClient =
           new PnPMetamodelRepositoryClient(connectionString);
@@ -408,30 +382,36 @@ export class DeviceModelOperator {
     const connectionString =
         ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
     if (!connectionString) {
+      vscode.window.showWarningMessage(
+          'Failed to delete models from Digital Twin repository. Please sign out and sign in with a valid connection string.');
       return;  // TODO: delete from public model repository??
     }
 
     const pnpMetamodelRepositoryClient =
         new PnPMetamodelRepositoryClient(connectionString);
     const builder = PnPConnectionStringBuilder.Create(connectionString);
-    fileIds.forEach(async (id) => {
-      channel.appendLine(`Start deleting ${metaModelValue} with id ${id}.`);
+    for (const id of fileIds) {
+      channel.appendLine(`${PnPConstants.pnpPrefix} Start deleting ${
+          metaModelValue} with id ${id}.`);
       try {
         if (metaModelType === MetaModelType.Interface) {
           await pnpMetamodelRepositoryClient.DeleteInterfaceAsync(
               id, builder.RepositoryIdValue);
-          channel.appendLine(`Deleting interface with id ${id} completed.`);
+          channel.appendLine(
+              `${PnPConstants.pnpPrefix} Deleting interface with id ${
+                  id} completed.`);
         } else {
           await pnpMetamodelRepositoryClient.DeleteCapabilityModelAsync(
               id, builder.RepositoryIdValue);
           channel.appendLine(
-              `Deleting capabilty model with id ${id} completed.`);
+              `${PnPConstants.pnpPrefix} Deleting capabilty model with id ${
+                  id} completed.`);
         }
       } catch (error) {
-        channel.appendLine(`Deleting ${metaModelValue} with id ${
-            id} failed. Error: ${error.message}`);
+        channel.appendLine(`${PnPConstants.pnpPrefix} Deleting ${
+            metaModelValue} with id ${id} failed. Error: ${error.message}`);
       }
-    });
+    }
   }
 
   async DownloadAndEditPnPFiles(
@@ -439,7 +419,8 @@ export class DeviceModelOperator {
       context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
     channel.show();
     if (!fileIds || fileIds.length === 0) {
-      channel.appendLine('Please select the Plug & Play files to download.');
+      channel.appendLine(
+          `${PnPConstants.pnpPrefix} No Digital Twin models is selected.`);
       return;
     }
 
@@ -474,7 +455,8 @@ export class DeviceModelOperator {
         new PnPMetamodelRepositoryClient(connectionString);
 
     for (const id of fileIds) {
-      channel.appendLine(`Start getting ${metaModelValue} with id ${id}.`);
+      channel.appendLine(`${PnPConstants.pnpPrefix} Start getting ${
+          metaModelValue} with id ${id}.`);
       let fileMetaData: PnPModel;
       try {
         if (metaModelType === MetaModelType.Interface) {
@@ -517,13 +499,13 @@ export class DeviceModelOperator {
               fileMetaData.contents as string);
           await vscode.window.showTextDocument(
               vscode.Uri.file(path.join(rootPath, candidateName)));
-          channel.appendLine(`Downloading ${metaModelValue} with id ${
-              id} into ${candidateName} completed.`);
+          channel.appendLine(`${PnPConstants.pnpPrefix} Downloading ${
+              metaModelValue} with id ${id} into ${candidateName} completed.`);
         }
 
       } catch (error) {
-        channel.appendLine(`Downloading ${metaModelValue} with id ${
-            id} failed. Error: ${error.message}`);
+        channel.appendLine(`${PnPConstants.pnpPrefix} Downloading ${
+            metaModelValue} with id ${id} failed. Error: ${error.message}`);
       }
     }
 
@@ -565,7 +547,7 @@ export class DeviceModelOperator {
 
     if (fileItems.length === 0) {
       const message =
-          'No Plug & Play files found in current folder. Please select the folder that contains Plug & Play files and try again.';
+          'No Digital Twin models found in current folder. Please select the folder that contains Digital Twin files and try again.';
       vscode.window.showWarningMessage(message);
       return false;
     }
@@ -574,7 +556,7 @@ export class DeviceModelOperator {
       ignoreFocusOut: true,
       matchOnDescription: true,
       matchOnDetail: true,
-      placeHolder: 'Select a Plug & Play file',
+      placeHolder: 'Select Digital Twin models',
       canPickMany: true
     });
 
@@ -620,7 +602,7 @@ export class DeviceModelOperator {
       const option: vscode.InputBoxOptions = {
         value: PnPConstants.repoConnectionStringTemplate,
         prompt:
-            'Please input the connection string to access the Plug & Play repository.',
+            'Please input the connection string to access the Digital Twin repository.',
         ignoreFocusOut: true
       };
 
@@ -645,7 +627,8 @@ export class DeviceModelOperator {
     const option: SubmitOptions = {overwriteChoice: OverwriteChoice.Unknown};
 
     for (const fileItem of interfaceFiles) {
-      channel.appendLine(`File to submit: ${fileItem.label}`);
+      channel.appendLine(
+          `${PnPConstants.pnpPrefix} File to submit: ${fileItem.label}`);
       const filePath = path.join(rootPath, fileItem.label);
       const result = await this.SubmitInterface(
           option, pnpMetamodelRepositoryClient, builder, filePath,
@@ -653,7 +636,7 @@ export class DeviceModelOperator {
       if (!result && !continueOnFailure) {
         const message = `${
             fileItem
-                .label} was not submitted to PnP Model Repository successfully, do you want to continue with rest files?`;
+                .label} was not submitted to Digital Twin Model Repository successfully, do you want to continue with rest files?`;
         const continueWithOtherFiles =
             await vscode.window.showInformationMessage(
                 message, DialogResponses.yes, DialogResponses.no);
@@ -666,7 +649,8 @@ export class DeviceModelOperator {
     }
 
     for (const fileItem of capabilityModels) {
-      channel.appendLine(`File to submit: ${fileItem.label}`);
+      channel.appendLine(
+          `${PnPConstants.pnpPrefix} File to submit: ${fileItem.label}`);
       const filePath = path.join(rootPath, fileItem.label);
       const result = await this.SubmitCapabilityModel(
           option, pnpMetamodelRepositoryClient, builder, filePath,
@@ -674,7 +658,7 @@ export class DeviceModelOperator {
       if (!result && !continueOnFailure) {
         const message = `${
             fileItem
-                .label} was not submitted to PnP Model Repository successfully, do you want to continue with rest files?`;
+                .label} was not submitted to Digital Twin Model Repository successfully, do you want to continue with rest files?`;
         const continueWithOtherFiles =
             await vscode.window.showInformationMessage(
                 message, DialogResponses.yes, DialogResponses.no);
@@ -702,81 +686,97 @@ export class DeviceModelOperator {
         const fileJson = JSON.parse(fileContent);
         fileId = fileJson[constants.idName];
       } catch (error) {
+        channel.appendLine(`${PnPConstants.pnpPrefix} ${
+            fileName} is not a valid Digital Twin model. Please modify the content and submit it again.`);
         vscode.window.showWarningMessage(`${
-            fileName} is not a valid json file. Please modify the content and submit it again.`);
+            fileName} is not a valid Digital Twin model. Please modify the content and submit it again.`);
         return false;
       }
 
       if (!fileId) {
         vscode.window.showWarningMessage(
-            'Unable to find interface id from the Plug & Play interface file. Please provide a valid file.');
+            'Unable to find id from the Digital Twin interface file. Please provide a valid file.');
         return false;
       }
-      channel.appendLine(`Load and parse file: "${fileName}" successfully.`);
+      channel.appendLine(`${PnPConstants.pnpPrefix} Load and parse file: "${
+          fileName}" successfully.`);
       // check whether file exists in model repo, try to update the file.
       try {
         // First, get the file to retrieve the latest etag.
-        channel.appendLine(
-            `Connect to Plug & Play repository to check whether ${
-                fileId} exists in server...`);
+        channel.appendLine(`${
+            PnPConstants
+                .pnpPrefix} Connect to Digital Twin repository to check whether ${
+            fileId} exists in server...`);
         const interfaceMetaData =
             await pnpMetamodelRepositoryClient.GetInterfaceAsync(
                 fileId, builder.RepositoryIdValue, true);
 
-        channel.appendLine(`Azure IoT Plug & Play interface file with id:"${
+        channel.appendLine(`${
+            PnPConstants
+                .pnpPrefix} Azure IoT Digital Twin interface file with id:"${
             fileId}" exists in server. `);
 
         if (option.overwriteChoice === OverwriteChoice.Unknown) {
           const msg = `The interface with id "${
-              fileId}" already exists in the Plug & Play Repository, do you want to overwrite it?`;
+              fileId}" already exists in the Digital Twin Repository, do you want to overwrite it?`;
           const result: vscode.MessageItem|undefined =
               await vscode.window.showInformationMessage(
                   msg, DialogResponses.all, DialogResponses.yes,
                   DialogResponses.no);
           if (result === DialogResponses.no) {
-            channel.appendLine('Submitting Plug & Play interface cancelled.');
+            channel.appendLine(`${
+                PnPConstants
+                    .pnpPrefix} Submitting Digital Twin interface cancelled.`);
             return false;
           } else if (result === DialogResponses.all) {
             option.overwriteChoice = OverwriteChoice.OverwriteAll;
           }
         }
 
-        channel.appendLine(
-            `Start updating Plug & Play interface with id:"${fileId}"... `);
+        channel.appendLine(`${
+            PnPConstants
+                .pnpPrefix} Start updating Digital Twin interface with id:"${
+            fileId}"... `);
 
         const updatedContext =
             await pnpMetamodelRepositoryClient.CreateOrUpdateInterfaceAsync(
                 fileContent, interfaceMetaData.etag, undefined);
-        channel.appendLine(
-            `Submitting Azure IoT Plug & Play interface file: fileName: "${
-                fileName}" successfully, interface id: "${fileId}". `);
+        channel.appendLine(`${
+            PnPConstants
+                .pnpPrefix} Submitting Azure IoT Digital Twin interface file: fileName: "${
+            fileName}" successfully, interface id: "${fileId}". `);
         vscode.window.showInformationMessage(
-            `Azure IoT Plug & Play interface with interface id: "${
+            `Azure IoT Digital Twin interface with interface id: "${
                 fileId}" updated successfully`);
       } catch (error) {
         if (error.statusCode === 404)  // Not found
         {
-          channel.appendLine(
-              `Plug & Play interface file does not exist in server, creating ${
-                  fileId}... `);
+          channel.appendLine(`${
+              PnPConstants
+                  .pnpPrefix} Digital Twin interface file does not exist in server, creating ${
+              fileId}... `);
           // Create the interface.
           const result: PnPModelBase =
               await pnpMetamodelRepositoryClient.CreateOrUpdateInterfaceAsync(
                   fileContent, undefined, builder.RepositoryIdValue);
-          channel.appendLine(`Submitting Plug & Play interface: fileName: "${
+          channel.appendLine(`${
+              PnPConstants
+                  .pnpPrefix} Submitting Digital Twin interface: fileName: "${
               fileName}" successfully, interface id: "${fileId}". `);
           vscode.window.showInformationMessage(
-              `Plug & Play interface with interface id: "${
+              `Digital Twin interface with interface id: "${
                   fileId}" created successfully`);
         } else {
           throw error;
         }
       }
     } catch (error) {
-      channel.appendLine(`Submitting Plug & Play interface: fileName: "${
+      channel.appendLine(`${
+          PnPConstants
+              .pnpPrefix} Submitting Digital Twin interface: fileName: "${
           fileName}" failed, error: ${error.message}.`);
       vscode.window.showWarningMessage(
-          `Unable to submit Plug & Play interface, error: ${error.message}`);
+          `Unable to submit Digital Twin interface, error: ${error.message}`);
       return false;
     }
 
@@ -796,84 +796,95 @@ export class DeviceModelOperator {
         const fileJson = JSON.parse(fileContent);
         fileId = fileJson[constants.idName];
       } catch (error) {
+        channel.appendLine(`${PnPConstants.pnpPrefix} ${
+            fileName} is not a valid Digital Twin model. Please modify the content and submit it again.`);
         vscode.window.showWarningMessage(`${
-            fileName} is not a valid json file. Please modify the content and submit it again.`);
+            fileName} is not a valid Digital Twin model. Please modify the content and submit it again.`);
         return false;
       }
 
       if (!fileId) {
         vscode.window.showWarningMessage(
-            'Unable to find id from the Plug & Play capability model file. Please provide a valid file');
+            'Unable to find id from the Digital Twin capability model file. Please provide a valid file');
         return false;
       }
-      channel.appendLine(`Load and parse file: ${fileName} successfully.`);
+      channel.appendLine(`${PnPConstants.pnpPrefix} Load and parse file: ${
+          fileName} successfully.`);
       // check whether file exists in model repo, try to update the file.
       try {
         // First, get the file to retrieve the latest etag.
-        channel.appendLine(
-            `Connect to Azure IoT Plug & Play repository to check whether "${
-                fileId}" exists in server...`);
+        channel.appendLine(`${
+            PnPConstants
+                .pnpPrefix} Connect to Azure IoT Digital Twin repository to check whether "${
+            fileId}" exists in server...`);
         const capabilityModelContext =
             await pnpMetamodelRepositoryClient.GetCapabilityModelAsync(
                 fileId, builder.RepositoryIdValue, true);
 
         if (option.overwriteChoice === OverwriteChoice.Unknown) {
           const msg = `The capability model with id "${
-              fileId}" already exists in the Plug & Play Repository, do you want to overwrite it?`;
+              fileId}" already exists in the Digital Twin Repository, do you want to overwrite it?`;
           const result: vscode.MessageItem|undefined =
               await vscode.window.showInformationMessage(
                   msg, DialogResponses.all, DialogResponses.yes,
                   DialogResponses.no);
           if (result === DialogResponses.no) {
-            channel.appendLine(
-                'Submitting Plug & Play capability model cancelled.');
+            channel.appendLine(`${
+                PnPConstants
+                    .pnpPrefix} Submitting Digital Twin capability model cancelled.`);
             return false;
           } else if (result === DialogResponses.all) {
             option.overwriteChoice = OverwriteChoice.OverwriteAll;
           }
         }
 
-        channel.appendLine(
-            `Start updating Plug & Play capability model with id:"${
-                fileId}"...`);
+        channel.appendLine(`${
+            PnPConstants
+                .pnpPrefix} Start updating Digital Twin capability model with id:"${
+            fileId}"...`);
 
         const updatedContext = await pnpMetamodelRepositoryClient
                                    .CreateOrUpdateCapabilityModelAsync(
                                        fileContent, capabilityModelContext.etag,
                                        builder.RepositoryIdValue);
-        channel.appendLine(
-            `Submitting Plug & Play capability model: fileName: "${
-                fileName}" successfully, capability model id: "${fileId}". `);
+        channel.appendLine(`${
+            PnPConstants
+                .pnpPrefix} Submitting Digital Twin capability model: fileName: "${
+            fileName}" successfully, capability model id: "${fileId}". `);
         vscode.window.showInformationMessage(
-            `Plug & Play capability model with id: "${
+            `Digital Twin capability model with id: "${
                 fileId}" updated successfully`);
       } catch (error) {
         if (error.statusCode === 404)  // Not found
         {
-          channel.appendLine(
-              `Plug & Play capability model file does not exist in server, creating "${
-                  fileId}"... `);
+          channel.appendLine(`${
+              PnPConstants
+                  .pnpPrefix} Digital Twin capability model file does not exist in server, creating "${
+              fileId}"... `);
 
           // Create the interface.
           const result: PnPModelBase =
               await pnpMetamodelRepositoryClient
                   .CreateOrUpdateCapabilityModelAsync(
                       fileContent, undefined, builder.RepositoryIdValue);
-          channel.appendLine(
-              `Submitting Plug & Play capability model: fileName: "${
-                  fileName}" successfully, capability model id: "${fileId}". `);
+          channel.appendLine(`${
+              PnPConstants
+                  .pnpPrefix} Submitting Digital Twin capability model: fileName: "${
+              fileName}" successfully, capability model id: "${fileId}". `);
           vscode.window.showInformationMessage(
-              `Plug & Play capability model with id: "${
+              `Digital Twin capability model with id: "${
                   fileId}" created successfully`);
         } else {
           throw error;
         }
       }
     } catch (error) {
-      channel.appendLine(`Submitting Plug & Play capability model: fileName: "${
+      channel.appendLine(`${
+          PnPConstants
+              .pnpPrefix} Submitting Digital Twin capability model: fileName: "${
           fileName}" failed, error: ${error.message}.`);
       vscode.window.showWarningMessage(
-          `Unable to submit Plug & Play capability model, error: ${
+          `Unable to submit Digital Twin capability model, error: ${
               error.message}`);
       return false;
     }

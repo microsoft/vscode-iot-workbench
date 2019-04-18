@@ -25,16 +25,16 @@ export class PnPConnector {
       // try to get one interface.
       const result = await pnpMetamodelRepositoryClient.SearchInterfacesAsync(
           '', null, builder.RepositoryIdValue, 1);
+      // Save connection string info
       await ConfigHandler.update(
           ConfigKey.pnpModelRepositoryKeyName, connectionString,
           vscode.ConfigurationTarget.Global);
       vscode.window.showInformationMessage(
-          'Connect to Metamodel Repository successfully.');
-      // Save connection string into
+          'Connect to Digital Twin Repository successfully.');
       return true;
     } catch (error) {
       vscode.window.showErrorMessage(
-          `Unable to connect to Metamodel Repository, error: ${error}`);
+          `Failed to connect to Digital Twin Repository, error: ${error}`);
       return false;
     }
   }

@@ -52,11 +52,11 @@
       "description": "This command will begin blinking the LED for given time interval.",
       "name": "blink",
       "commandType": "synchronous",
-      "requestSchema": {
+      "request": {
         "name": "interval",
         "schema": "long"
       },
-      "responseSchema": {
+      "response": {
         "name": "blinkResponse",
         "schema": {
           "@type": "Object",

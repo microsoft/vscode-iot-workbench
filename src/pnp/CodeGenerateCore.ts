@@ -95,7 +95,7 @@ export class CodeGenerateCore {
       ignoreFocusOut: true,
       matchOnDescription: true,
       matchOnDetail: true,
-      placeHolder: 'Select a Plug & Play capability model file',
+      placeHolder: 'Select a Digital Twin capability model file',
     });
 
     if (!fileSelection) {
@@ -283,7 +283,7 @@ export class CodeGenerateCore {
         const files = fs.readdirSync(projectPath);
         if (files && files[0]) {
           const message =
-              `Plug & Play Code Generator would overwrite existing files in the folder ${
+              `Digital Twin Code Generator would overwrite existing files in the folder ${
                   projectName}. Do you want to continue?`;
 
           const choice = await vscode.window.showInformationMessage(
@@ -372,11 +372,11 @@ export class CodeGenerateCore {
       await vscode.window.withProgress(
           {
             location: vscode.ProgressLocation.Notification,
-            title: 'Upgrade Azure IoT Plug & Play Code Generator...'
+            title: 'Upgrade Azure IoT Digital Twin Code Generator...'
           },
           async () => {
             channel.appendLine(
-                'Start upgrading Azure IoT Plug & Play Code Generator...');
+                'Start upgrading Azure IoT Digital Twin Code Generator...');
 
             const configItem = targetConfigItem as CodeGeneratorConfigItem;
             let downloadOption: request.OptionsWithUri;
@@ -410,7 +410,7 @@ export class CodeGenerateCore {
 
             try {
               channel.appendLine(
-                  'Step 1: Downloading package for Azure IoT Plug & Play Code Generator...');
+                  'Step 1: Downloading package for Azure IoT Digital Twin Code Generator...');
               const zipData = await request(downloadOption).promise();
               const tempPath =
                   path.join(os.tmpdir(), FileNames.iotworkbenchTempFolder);
@@ -431,11 +431,11 @@ export class CodeGenerateCore {
               }
 
               channel.appendLine(
-                  'Step 3: Extracting Azure IoT Plug & Play Code Generator.');
+                  'Step 3: Extracting Azure IoT Digital Twin Code Generator.');
 
               await extract(filePath, codeGenCommandPath);
               channel.appendLine(
-                  'Azure IoT Plug & Play Code Generator updated successfully.');
+                  'Azure IoT Digital Twin Code Generator updated successfully.');
               await ConfigHandler.update(
                   ConfigKey.pnpCodeGeneratorVersion,
                   configItem.codeGeneratorVersion,
@@ -447,7 +447,7 @@ export class CodeGenerateCore {
             }
           });
       vscode.window.showInformationMessage(
-          'Azure IoT Plug & Play Code Generator updated successfully');
+          'Azure IoT Digital Twin Code Generator updated successfully');
     }
     // No need to upgrade
     return true;

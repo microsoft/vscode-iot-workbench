@@ -1,6 +1,6 @@
 # Use generated code in your device project
 
-One of the features VS Code Plug & Play tooling provides is generating stub code based on Device Capability Model (DCM) you specified.
+One of the features VS Code Digital Twin tooling provides is generating stub code based on Device Capability Model (DCM) you specified.
 
 Follow the steps to use the generated code with the Azure IoT Device C SDK source to compile a device app.
 

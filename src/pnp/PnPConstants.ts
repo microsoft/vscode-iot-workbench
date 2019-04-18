@@ -20,9 +20,10 @@ export class PnPFileNames {
 
 export class PnPConstants {
   static readonly repoConnectionStringTemplate =
-      'HostName=<Host Name>;SharedAccessKeyName=<Shared AccessKey Name>;SharedAccessKey=<access Key>';
+      'HostName=<Host Name>;RepositoryId=<repository id>;SharedAccessKeyName=<Shared AccessKey Name>;SharedAccessKey=<access Key>';
   static readonly interfaceSuffix = '.interface.json';
   static readonly capabilityModelSuffix = '.capabilitymodel.json';
+  static readonly pnpPrefix = '[Digital Twin]';
 }
 
 export class CodeGenConstants {

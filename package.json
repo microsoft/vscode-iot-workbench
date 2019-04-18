@@ -14,7 +14,7 @@
   "publisher": "vsciot-vscode",
   "icon": "logo.png",
   "aiKey": "5b869bc6-ca93-4f24-aa87-92871a3a616e",
-  "pnpRepositoryUrl": "https://raviypublicpreview.azurewebsites.net",
+  "pnpRepositoryUrl": "https://www.azureiotrepository-test.com",
   "codeGenConfigUrl": "https://aka.ms/iot-pnp-config-staging-v2.json",
   "graphUrl": "https://aka.ms/iot-pnp-graph-staging",
   "interfaceUrl": "https://aka.ms/iot-pnp-interface-staging",
@@ -97,32 +97,32 @@
       {
         "command": "iotworkbench.pnpOpenRepository",
         "title": "Open Model Repository...",
-        "category": "Azure IoT Plug & Play"
+        "category": "Azure IoT Digital Twin"
       },
       {
         "command": "iotworkbench.pnpSignOutRepository",
         "title": "Sign out Model Repository",
-        "category": "Azure IoT Plug & Play"
+        "category": "Azure IoT Digital Twin"
       },
       {
         "command": "iotworkbench.pnpCreateInterface",
         "title": "Create Interface...",
-        "category": "Azure IoT Plug & Play"
+        "category": "Azure IoT Digital Twin"
       },
       {
         "command": "iotworkbench.pnpCreateCapabilityModel",
         "title": "Create Capability Model...",
-        "category": "Azure IoT Plug & Play"
+        "category": "Azure IoT Digital Twin"
       },
       {
         "command": "iotworkbench.pnpSubmitFile",
         "title": "Submit files to Model Repository...",
-        "category": "Azure IoT Plug & Play"
+        "category": "Azure IoT Digital Twin"
       },
       {
         "command": "iotworkbench.pnpGenerateCode",
         "title": "Generate Device Code Stub...",
-        "category": "Azure IoT Plug & Play"
+        "category": "Azure IoT Digital Twin"
       }
     ],
     "configuration": [
