@@ -28,7 +28,7 @@ export class DigitalTwinConnector {
           '', null, builder.RepositoryIdValue, 1);
       // Save connection string info
       await ConfigHandler.update(
-          ConfigKey.pnpModelRepositoryKeyName, connectionString,
+          ConfigKey.modelRepositoryKeyName, connectionString,
           vscode.ConfigurationTarget.Global);
       vscode.window.showInformationMessage(
           'Connect to Digital Twin Repository successfully.');

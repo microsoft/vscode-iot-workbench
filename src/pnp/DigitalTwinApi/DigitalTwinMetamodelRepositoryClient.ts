@@ -21,14 +21,14 @@ const constants = {
 
 
 export class DigitalTwinMetamodelRepositoryClient {
-  private pnpSharedAccessKey: DigitalTwinSharedAccessKey|null;
+  private dtSharedAccessKey: DigitalTwinSharedAccessKey|null;
   private metaModelRepositoryHostName: vscode.Uri;
 
   constructor(connectionString: string|null) {
     if (!connectionString) {  // Connect to public repo
-      this.pnpSharedAccessKey = null;
+      this.dtSharedAccessKey = null;
       const storedConnectionString =
-          ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
+          ConfigHandler.get<string>(ConfigKey.modelRepositoryKeyName);
       if (storedConnectionString) {
         const builder =
             DigitalTwinConnectionStringBuilder.Create(storedConnectionString);
@@ -40,20 +40,20 @@ export class DigitalTwinMetamodelRepositoryClient {
           throw new Error('Failed to load extension configuration file.');
         }
         this.metaModelRepositoryHostName =
-            vscode.Uri.parse(extension.packageJSON.pnpRepositoryUrl);
+            vscode.Uri.parse(extension.packageJSON.DigitalTwinRepositoryUrl);
       }
     } else {
       const builder =
           DigitalTwinConnectionStringBuilder.Create(connectionString);
       this.metaModelRepositoryHostName = vscode.Uri.parse(builder.HostName);
-      this.pnpSharedAccessKey = new DigitalTwinSharedAccessKey(builder);
+      this.dtSharedAccessKey = new DigitalTwinSharedAccessKey(builder);
     }
   }
 
   async GetInterfaceAsync(
       modelId: string, repositoryId?: string,
       expand = false): Promise<DigitalTwinModel> {
-    if (repositoryId && !this.pnpSharedAccessKey) {
+    if (repositoryId && !this.dtSharedAccessKey) {
       throw new Error(
           'The repository connection string is required to get the interface.');
     }
@@ -65,7 +65,7 @@ export class DigitalTwinMetamodelRepositoryClient {
   async GetCapabilityModelAsync(
       modelId: string, repositoryId?: string,
       expand = false): Promise<DigitalTwinModel> {
-    if (repositoryId && !this.pnpSharedAccessKey) {
+    if (repositoryId && !this.dtSharedAccessKey) {
       throw new Error(
           'The repository connection string is required to get the capability model.');
     }
@@ -81,7 +81,7 @@ export class DigitalTwinMetamodelRepositoryClient {
       throw new Error('pageSize should be greater than 0');
     }
 
-    if (repositoryId && !this.pnpSharedAccessKey) {
+    if (repositoryId && !this.dtSharedAccessKey) {
       throw new Error(
           'The connection string is required to search intefaces in organizational model repository.');
     }
@@ -99,7 +99,7 @@ export class DigitalTwinMetamodelRepositoryClient {
       throw new Error('pageSize should be greater than 0');
     }
 
-    if (repositoryId && !this.pnpSharedAccessKey) {
+    if (repositoryId && !this.dtSharedAccessKey) {
       throw new Error(
           'The connection string is required to search capability models in organizational model repository.');
     }
@@ -113,7 +113,7 @@ export class DigitalTwinMetamodelRepositoryClient {
   async CreateOrUpdateInterfaceAsync(
       content: string, etag?: string,
       repositoryId?: string): Promise<DigitalTwinModelBase> {
-    if (repositoryId && !this.pnpSharedAccessKey) {
+    if (repositoryId && !this.dtSharedAccessKey) {
       throw new Error(
           'The connection string is required to publish interface in organizational model repository.');
     }
@@ -132,7 +132,7 @@ export class DigitalTwinMetamodelRepositoryClient {
   async CreateOrUpdateCapabilityModelAsync(
       content: string, etag?: string,
       repositoryId?: string): Promise<DigitalTwinModelBase> {
-    if (repositoryId && !this.pnpSharedAccessKey) {
+    if (repositoryId && !this.dtSharedAccessKey) {
       throw new Error(
           'The connection string is required to publish capability model in organizational model repository.');
     }
@@ -146,7 +146,7 @@ export class DigitalTwinMetamodelRepositoryClient {
   /// </summary>
   /// <param name="pnpInterfaceUri"><see cref="PnPUri"/> object.</param>
   async DeleteInterfaceAsync(modelId: string, repositoryId?: string) {
-    if (repositoryId && !this.pnpSharedAccessKey) {
+    if (repositoryId && !this.dtSharedAccessKey) {
       throw new Error(
           'The connection string is required to delete interface in organizational model repository.');
     }
@@ -160,7 +160,7 @@ export class DigitalTwinMetamodelRepositoryClient {
   /// </summary>
   /// <param name="pnpCapabilityModelUri"><see cref="PnPUri"/> object.</param>
   async DeleteCapabilityModelAsync(modelId: string, repositoryId?: string) {
-    if (repositoryId && !this.pnpSharedAccessKey) {
+    if (repositoryId && !this.dtSharedAccessKey) {
       throw new Error(
           'The connection string is required to delete capability model in organizational model repository.');
     }
@@ -183,8 +183,8 @@ export class DigitalTwinMetamodelRepositoryClient {
 
     let authenticationString = '';
 
-    if (this.pnpSharedAccessKey) {
-      authenticationString = this.pnpSharedAccessKey.GenerateSASToken();
+    if (this.dtSharedAccessKey) {
+      authenticationString = this.dtSharedAccessKey.GenerateSASToken();
     }
 
     const payload: MetaModelUpsertRequest = {etag, contents};
@@ -221,8 +221,8 @@ export class DigitalTwinMetamodelRepositoryClient {
 
     let authenticationString = '';
 
-    if (this.pnpSharedAccessKey) {
-      authenticationString = this.pnpSharedAccessKey.GenerateSASToken();
+    if (this.dtSharedAccessKey) {
+      authenticationString = this.dtSharedAccessKey.GenerateSASToken();
     }
 
     const options: request.OptionsWithUri = {
@@ -266,8 +266,8 @@ export class DigitalTwinMetamodelRepositoryClient {
 
     let authenticationString = '';
 
-    if (this.pnpSharedAccessKey) {
-      authenticationString = this.pnpSharedAccessKey.GenerateSASToken();
+    if (this.dtSharedAccessKey) {
+      authenticationString = this.dtSharedAccessKey.GenerateSASToken();
     }
 
     const options: request.OptionsWithUri = {
@@ -309,8 +309,8 @@ export class DigitalTwinMetamodelRepositoryClient {
 
     let authenticationString = '';
 
-    if (this.pnpSharedAccessKey) {
-      authenticationString = this.pnpSharedAccessKey.GenerateSASToken();
+    if (this.dtSharedAccessKey) {
+      authenticationString = this.dtSharedAccessKey.GenerateSASToken();
     }
 
     const options = {

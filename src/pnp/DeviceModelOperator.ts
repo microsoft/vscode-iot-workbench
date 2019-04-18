@@ -264,7 +264,7 @@ export class DeviceModelOperator {
 
     // Open Organizational Model repository
     let connectionString =
-        ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
+        ConfigHandler.get<string>(ConfigKey.modelRepositoryKeyName);
 
     if (!connectionString) {
       const option: vscode.InputBoxOptions = {
@@ -280,7 +280,7 @@ export class DeviceModelOperator {
         return false;
       } else {
         await ConfigHandler.update(
-            ConfigKey.pnpModelRepositoryKeyName, repoConnectionString,
+            ConfigKey.modelRepositoryKeyName, repoConnectionString,
             vscode.ConfigurationTarget.Global);
         connectionString = repoConnectionString;
       }
@@ -302,7 +302,7 @@ export class DeviceModelOperator {
 
   async Disconnect() {
     await ConfigHandler.update(
-        ConfigKey.pnpModelRepositoryKeyName, '',
+        ConfigKey.modelRepositoryKeyName, '',
         vscode.ConfigurationTarget.Global);
     if (DeviceModelOperator.vscexpress) {
       DeviceModelOperator.vscexpress.close('index.html');
@@ -324,7 +324,7 @@ export class DeviceModelOperator {
       return result;
     } else {
       const connectionString =
-          ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
+          ConfigHandler.get<string>(ConfigKey.modelRepositoryKeyName);
       if (!connectionString) {
         vscode.window.showWarningMessage(
             'Failed to get interfaces from Digital Twin repository. Please sign out and sign in with a valid connection string.');
@@ -354,7 +354,7 @@ export class DeviceModelOperator {
       return result;
     } else {
       const connectionString =
-          ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
+          ConfigHandler.get<string>(ConfigKey.modelRepositoryKeyName);
       if (!connectionString) {
         vscode.window.showWarningMessage(
             'Failed to get capability models from Digital Twin repository. Please sign out and sign in with a valid connection string.');
@@ -384,7 +384,7 @@ export class DeviceModelOperator {
         MetaModelType[metaModelValue as keyof typeof MetaModelType];
 
     const connectionString =
-        ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
+        ConfigHandler.get<string>(ConfigKey.modelRepositoryKeyName);
     if (!connectionString) {
       vscode.window.showWarningMessage(
           'Failed to delete models from Digital Twin repository. Please sign out and sign in with a valid connection string.');
@@ -447,7 +447,7 @@ export class DeviceModelOperator {
 
     if (!usePublicRepository) {
       const repoConnectionString =
-          ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
+          ConfigHandler.get<string>(ConfigKey.modelRepositoryKeyName);
       if (!repoConnectionString) {
         return;
       }
@@ -603,7 +603,7 @@ export class DeviceModelOperator {
     });
 
     let connectionString =
-        ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
+        ConfigHandler.get<string>(ConfigKey.modelRepositoryKeyName);
     if (!connectionString) {
       const option: vscode.InputBoxOptions = {
         value: DigitalTwinConstants.repoConnectionStringTemplate,

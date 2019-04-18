@@ -113,7 +113,7 @@ export class CodeGenerateCore {
 
     // Get the connection string of the pnp repo
     let connectionString =
-        ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
+        ConfigHandler.get<string>(ConfigKey.modelRepositoryKeyName);
 
     if (!connectionString) {
       const option: vscode.InputBoxOptions = {
@@ -261,7 +261,7 @@ export class CodeGenerateCore {
       console.log(`Selected folder: ${folderUri[0].fsPath}`);
       const rootPath = folderUri[0].fsPath;
 
-      const name = 'pnp_app';
+      const name = 'iot_application';
       const projectName = await vscode.window.showInputBox({
         value: name,
         prompt: 'Please input project name.',
@@ -316,10 +316,9 @@ export class CodeGenerateCore {
 
     let targetConfigItem: CodeGeneratorConfigItem|null = null;
 
-    const pnpCodeGenConfig: CodeGeneratorConfig =
-        await request(options).promise();
-    if (pnpCodeGenConfig) {
-      pnpCodeGenConfig.codeGeneratorConfigItems.sort(
+    const codeGenConfig: CodeGeneratorConfig = await request(options).promise();
+    if (codeGenConfig) {
+      codeGenConfig.codeGeneratorConfigItems.sort(
           (configItem1, configItem2) => {
             return compareVersion(
                 configItem2.codeGeneratorVersion,
@@ -328,9 +327,9 @@ export class CodeGenerateCore {
 
       // if this is a RC build, always use the latest version of code generator.
       if (!/^[0-9]+\.[0-9]+\.[0-9]+$/.test(extensionVersion)) {
-        targetConfigItem = pnpCodeGenConfig.codeGeneratorConfigItems[0];
+        targetConfigItem = codeGenConfig.codeGeneratorConfigItems[0];
       } else {
-        for (const item of pnpCodeGenConfig.codeGeneratorConfigItems) {
+        for (const item of codeGenConfig.codeGeneratorConfigItems) {
           if (compareVersion(
                   extensionVersion, item.iotWorkbenchMinimalVersion) >= 0) {
             targetConfigItem = item;
@@ -360,7 +359,7 @@ export class CodeGenerateCore {
     } else {
       // Then check the version
       const currentVersion =
-          ConfigHandler.get<string>(ConfigKey.pnpCodeGeneratorVersion);
+          ConfigHandler.get<string>(ConfigKey.codeGeneratorVersion);
       if (!currentVersion ||
           compareVersion(
               targetConfigItem.codeGeneratorVersion, currentVersion) > 0) {
@@ -437,7 +436,7 @@ export class CodeGenerateCore {
               channel.appendLine(
                   'Azure IoT Digital Twin Code Generator updated successfully.');
               await ConfigHandler.update(
-                  ConfigKey.pnpCodeGeneratorVersion,
+                  ConfigKey.codeGeneratorVersion,
                   configItem.codeGeneratorVersion,
                   vscode.ConfigurationTarget.Global);
             } catch (error) {
