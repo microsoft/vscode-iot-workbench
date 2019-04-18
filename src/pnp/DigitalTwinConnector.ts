@@ -6,11 +6,11 @@ import * as vscode from 'vscode';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
 
-import {PnPConnectionStringBuilder} from './pnp-api/PnPConnectionStringBuilder';
-import {PnPMetamodelRepositoryClient} from './pnp-api/PnPMetamodelRepositoryClient';
+import {DigitalTwinConnectionStringBuilder} from './DigitalTwinApi/DigitalTwinConnectionStringBuilder';
+import {DigitalTwinMetamodelRepositoryClient} from './DigitalTwinApi/DigitalTwinMetamodelRepositoryClient';
 
 
-export class PnPConnector {
+export class DigitalTwinConnector {
   static async ConnectMetamodelRepository(connectionString: string):
       Promise<boolean> {
     if (!connectionString) {
@@ -20,8 +20,9 @@ export class PnPConnector {
 
     try {
       const pnpMetamodelRepositoryClient =
-          new PnPMetamodelRepositoryClient(connectionString);
-      const builder = PnPConnectionStringBuilder.Create(connectionString);
+          new DigitalTwinMetamodelRepositoryClient(connectionString);
+      const builder =
+          DigitalTwinConnectionStringBuilder.Create(connectionString);
       // try to get one interface.
       const result = await pnpMetamodelRepositoryClient.SearchInterfacesAsync(
           '', null, builder.RepositoryIdValue, 1);

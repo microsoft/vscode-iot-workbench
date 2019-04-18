@@ -4,7 +4,7 @@
 'use strict';
 
 import {createHmac} from 'crypto';
-import {PnPConnectionStringBuilder} from './PnPConnectionStringBuilder';
+import {DigitalTwinConnectionStringBuilder} from './DigitalTwinConnectionStringBuilder';
 
 const constants = {
   SharedAccessSignature: 'SharedAccessSignature',
@@ -16,7 +16,7 @@ const constants = {
 };
 
 
-export class PnPSharedAccessKey {
+export class DigitalTwinSharedAccessKey {
   private keyId: string;
   private secret: string;
   private audience: string;
@@ -39,7 +39,7 @@ export class PnPSharedAccessKey {
     return this.repositoryId;
   }
 
-  constructor(builder: PnPConnectionStringBuilder) {
+  constructor(builder: DigitalTwinConnectionStringBuilder) {
     this.audience = builder.HostName;
     this.keyId = builder.SharedAccessKeyName;
     this.secret = builder.SharedAccessKeyValue;
@@ -66,8 +66,8 @@ export class PnPSharedAccessKey {
         this.keyId}&rid=${this.repositoryId}`;
   }
 
-  static Parse(connectionString: string): PnPSharedAccessKey {
-    const builder = PnPConnectionStringBuilder.Create(connectionString);
-    return new PnPSharedAccessKey(builder);
+  static Parse(connectionString: string): DigitalTwinSharedAccessKey {
+    const builder = DigitalTwinConnectionStringBuilder.Create(connectionString);
+    return new DigitalTwinSharedAccessKey(builder);
   }
 }

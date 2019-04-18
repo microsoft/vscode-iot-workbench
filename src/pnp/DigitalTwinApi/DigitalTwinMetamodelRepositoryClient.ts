@@ -6,11 +6,11 @@
 import * as vscode from 'vscode';
 import * as request from 'request-promise';
 import {SearchResults} from './DataContracts/SearchResults';
-import {MetaModelType, SearchOptions, MetaModelUpsertRequest} from './DataContracts/PnPContext';
-import {PnPConnectionStringBuilder} from './PnPConnectionStringBuilder';
-import {PnPSharedAccessKey} from './PnPSharedAccessKey';
+import {MetaModelType, SearchOptions, MetaModelUpsertRequest} from './DataContracts/DigitalTwinContext';
+import {DigitalTwinConnectionStringBuilder} from './DigitalTwinConnectionStringBuilder';
+import {DigitalTwinSharedAccessKey} from './DigitalTwinSharedAccessKey';
 import {GlobalConstants, ConfigKey} from '../../constants';
-import {PnPModelBase, PnPModel} from './DataContracts/PnPModel';
+import {DigitalTwinModelBase, DigitalTwinModel} from './DataContracts/DigitalTwinModel';
 import {ConfigHandler} from '../../configHandler';
 
 const constants = {
@@ -20,8 +20,8 @@ const constants = {
 };
 
 
-export class PnPMetamodelRepositoryClient {
-  private pnpSharedAccessKey: PnPSharedAccessKey|null;
+export class DigitalTwinMetamodelRepositoryClient {
+  private pnpSharedAccessKey: DigitalTwinSharedAccessKey|null;
   private metaModelRepositoryHostName: vscode.Uri;
 
   constructor(connectionString: string|null) {
@@ -31,7 +31,7 @@ export class PnPMetamodelRepositoryClient {
           ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
       if (storedConnectionString) {
         const builder =
-            PnPConnectionStringBuilder.Create(storedConnectionString);
+            DigitalTwinConnectionStringBuilder.Create(storedConnectionString);
         this.metaModelRepositoryHostName = vscode.Uri.parse(builder.HostName);
       } else {
         const extension =
@@ -43,15 +43,16 @@ export class PnPMetamodelRepositoryClient {
             vscode.Uri.parse(extension.packageJSON.pnpRepositoryUrl);
       }
     } else {
-      const builder = PnPConnectionStringBuilder.Create(connectionString);
+      const builder =
+          DigitalTwinConnectionStringBuilder.Create(connectionString);
       this.metaModelRepositoryHostName = vscode.Uri.parse(builder.HostName);
-      this.pnpSharedAccessKey = new PnPSharedAccessKey(builder);
+      this.pnpSharedAccessKey = new DigitalTwinSharedAccessKey(builder);
     }
   }
 
   async GetInterfaceAsync(
       modelId: string, repositoryId?: string,
-      expand = false): Promise<PnPModel> {
+      expand = false): Promise<DigitalTwinModel> {
     if (repositoryId && !this.pnpSharedAccessKey) {
       throw new Error(
           'The repository connection string is required to get the interface.');
@@ -63,7 +64,7 @@ export class PnPMetamodelRepositoryClient {
 
   async GetCapabilityModelAsync(
       modelId: string, repositoryId?: string,
-      expand = false): Promise<PnPModel> {
+      expand = false): Promise<DigitalTwinModel> {
     if (repositoryId && !this.pnpSharedAccessKey) {
       throw new Error(
           'The repository connection string is required to get the capability model.');
@@ -111,7 +112,7 @@ export class PnPMetamodelRepositoryClient {
 
   async CreateOrUpdateInterfaceAsync(
       content: string, etag?: string,
-      repositoryId?: string): Promise<PnPModelBase> {
+      repositoryId?: string): Promise<DigitalTwinModelBase> {
     if (repositoryId && !this.pnpSharedAccessKey) {
       throw new Error(
           'The connection string is required to publish interface in organizational model repository.');
@@ -130,7 +131,7 @@ export class PnPMetamodelRepositoryClient {
   /// <returns><see cref="PnPContext"/> object.</returns>
   async CreateOrUpdateCapabilityModelAsync(
       content: string, etag?: string,
-      repositoryId?: string): Promise<PnPModelBase> {
+      repositoryId?: string): Promise<DigitalTwinModelBase> {
     if (repositoryId && !this.pnpSharedAccessKey) {
       throw new Error(
           'The connection string is required to publish capability model in organizational model repository.');
@@ -171,7 +172,7 @@ export class PnPMetamodelRepositoryClient {
 
   async MakeCreateOrUpdateRequestAsync(
       metaModelType: MetaModelType, contents: string, etag?: string,
-      repositoryId?: string): Promise<PnPModelBase> {
+      repositoryId?: string): Promise<DigitalTwinModelBase> {
     let targetUri = this.metaModelRepositoryHostName.toString();
 
     if (repositoryId) {
@@ -200,10 +201,11 @@ export class PnPMetamodelRepositoryClient {
       body: payload
     };
 
-    return new Promise<PnPModelBase>((resolve, reject) => {
+    return new Promise<DigitalTwinModelBase>((resolve, reject) => {
       request(options)
           .then(response => {
-            const result: PnPModelBase = response as PnPModelBase;
+            const result: DigitalTwinModelBase =
+                response as DigitalTwinModelBase;
             return resolve(result);
           })
           .catch(err => {
@@ -214,7 +216,7 @@ export class PnPMetamodelRepositoryClient {
 
   private async MakeGetModelRequestAsync(
       metaModelType: MetaModelType, modelId: string, repositoryId?: string,
-      expand = false): Promise<PnPModel> {
+      expand = false): Promise<DigitalTwinModel> {
     const targetUri = this.GenerateFetchModelUri(modelId, repositoryId, expand);
 
     let authenticationString = '';
@@ -231,10 +233,10 @@ export class PnPMetamodelRepositoryClient {
       headers: {Authorization: authenticationString},
     };
 
-    return new Promise<PnPModel>((resolve, reject) => {
+    return new Promise<DigitalTwinModel>((resolve, reject) => {
       request(options)
           .then(response => {
-            const result: PnPModel = response as PnPModel;
+            const result: DigitalTwinModel = response as DigitalTwinModel;
             return resolve(result);
           })
           .catch(err => {

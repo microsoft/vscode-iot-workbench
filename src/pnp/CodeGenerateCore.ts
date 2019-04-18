@@ -12,11 +12,11 @@ import * as crypto from 'crypto';
 import request = require('request-promise');
 import {FileNames, ConfigKey} from '../constants';
 import {TelemetryContext} from '../telemetry';
-import {PnPConnector} from './PnPConnector';
-import {PnPConstants, CodeGenConstants} from './PnPConstants';
-import {CodeGenDeviceType, DeviceConnectionType} from './pnp-codeGen/Interfaces/CodeGenerator';
-import {AnsiCCodeGeneratorFactory} from './pnp-codeGen/AnsiCCodeGeneratorFactory';
-import {CodeGeneratorFactory} from './pnp-codeGen/Interfaces/CodeGeneratorFactory';
+import {DigitalTwinConnector} from './DigitalTwinConnector';
+import {DigitalTwinConstants, CodeGenConstants} from './DigitalTwinConstants';
+import {CodeGenDeviceType, DeviceConnectionType} from './DigitalTwinCodeGen/Interfaces/CodeGenerator';
+import {AnsiCCodeGeneratorFactory} from './DigitalTwinCodeGen/AnsiCCodeGeneratorFactory';
+import {CodeGeneratorFactory} from './DigitalTwinCodeGen/Interfaces/CodeGeneratorFactory';
 import {ConfigHandler} from '../configHandler';
 import {DialogResponses} from '../DialogResponses';
 import extractzip = require('extract-zip');
@@ -79,7 +79,7 @@ export class CodeGenerateCore {
     const pnpItems: vscode.QuickPickItem[] = [];
     pnpFiles.forEach((filePath: string) => {
       const fileName = path.basename(filePath);
-      if (fileName.endsWith(PnPConstants.capabilityModelSuffix)) {
+      if (fileName.endsWith(DigitalTwinConstants.capabilityModelSuffix)) {
         pnpItems.push({label: fileName, description: ''});
       }
     });
@@ -117,7 +117,7 @@ export class CodeGenerateCore {
 
     if (!connectionString) {
       const option: vscode.InputBoxOptions = {
-        value: PnPConstants.repoConnectionStringTemplate,
+        value: DigitalTwinConstants.repoConnectionStringTemplate,
         prompt:
             `Please input the connection string to access the model repository.`,
         ignoreFocusOut: true
@@ -128,8 +128,8 @@ export class CodeGenerateCore {
       if (!connectionString) {
         return false;
       } else {
-        const result =
-            await PnPConnector.ConnectMetamodelRepository(connectionString);
+        const result = await DigitalTwinConnector.ConnectMetamodelRepository(
+            connectionString);
         if (!result) {
           return false;
         }

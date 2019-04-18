@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import * as utils from '../../../utils';
-import {CodeGenConstants} from '../../PnPConstants';
+import {CodeGenConstants} from '../../DigitalTwinConstants';
 
 import {CodeGenerator} from './CodeGenerator';
 

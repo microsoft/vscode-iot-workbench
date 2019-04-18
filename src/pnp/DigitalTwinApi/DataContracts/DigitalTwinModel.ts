@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-export interface PnPModelBase {
+export interface DigitalTwinModelBase {
   contents?: string;
   comment?: string;
   description?: string;
@@ -17,7 +17,9 @@ export interface PnPModelBase {
   lastUpdated: string;
 }
 
-export interface PnPModel extends PnPModelBase { contents: string; }
+export interface DigitalTwinModel extends DigitalTwinModelBase {
+  contents: string;
+}
 
 export interface LocalizedData {
   locale: string;

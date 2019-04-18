@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 
 import {FileNames} from '../constants';
 
-import {PnPFileNames} from './PnPConstants';
+import {DigitalTwinFileNames} from './DigitalTwinConstants';
 import {PnPMetaModelGraph} from './PnPMetaModelGraph';
 
 const impor = require('impor')(__dirname);
@@ -23,8 +23,8 @@ interface EtagObjCache {
 class BlobService {
   constructor(private context: vscode.ExtensionContext) {}
   private getEtagObjCache() {
-    const etagObjCacheFilePath = this.context.asAbsolutePath(
-        path.join(FileNames.cacheFolderName, PnPFileNames.etagCacheFileName));
+    const etagObjCacheFilePath = this.context.asAbsolutePath(path.join(
+        FileNames.cacheFolderName, DigitalTwinFileNames.etagCacheFileName));
     if (fs.existsSync(etagObjCacheFilePath)) {
       const etagObjCacheRawFile = fs.readFileSync(etagObjCacheFilePath, 'utf8');
       const etagObjCache = JSON.parse(etagObjCacheRawFile) as EtagObjCache;
@@ -33,8 +33,8 @@ class BlobService {
     return {};
   }
   private updateEtagObjCache(etagObjCache: EtagObjCache) {
-    const etagObjCacheFilePath = this.context.asAbsolutePath(
-        path.join(FileNames.cacheFolderName, PnPFileNames.etagCacheFileName));
+    const etagObjCacheFilePath = this.context.asAbsolutePath(path.join(
+        FileNames.cacheFolderName, DigitalTwinFileNames.etagCacheFileName));
     fs.writeFileSync(
         etagObjCacheFilePath, JSON.stringify(etagObjCache, null, 2));
   }
@@ -113,8 +113,9 @@ export class PnPMetaModelUtility {
   async getGraph() {
     const graphFileFromRemote = await this.blobService.getFile(this.graphUrl);
     const graphFilePath = this.context.asAbsolutePath(path.join(
-        PnPFileNames.resourcesFolderName, PnPFileNames.deviceModelFolderName,
-        PnPFileNames.graphFileName));
+        DigitalTwinFileNames.resourcesFolderName,
+        DigitalTwinFileNames.deviceModelFolderName,
+        DigitalTwinFileNames.graphFileName));
     const pnpGraphfaceString =
         graphFileFromRemote || fs.readFileSync(graphFilePath, 'utf8');
     if (graphFileFromRemote) {
@@ -127,8 +128,9 @@ export class PnPMetaModelUtility {
     const interfaceFileFromRemote =
         await this.blobService.getFile(this.interfaceUrl);
     const interfaceFilePath = this.context.asAbsolutePath(path.join(
-        PnPFileNames.resourcesFolderName, PnPFileNames.deviceModelFolderName,
-        PnPFileNames.interfaceFileName));
+        DigitalTwinFileNames.resourcesFolderName,
+        DigitalTwinFileNames.deviceModelFolderName,
+        DigitalTwinFileNames.interfaceFileName));
     const pnpInterfaceString =
         interfaceFileFromRemote || fs.readFileSync(interfaceFilePath, 'utf8');
     if (interfaceFileFromRemote) {
@@ -141,8 +143,9 @@ export class PnPMetaModelUtility {
     const capabilityModelFileFromRemote =
         await this.blobService.getFile(this.capabilityModelUrl);
     const capabilityModelFilePath = this.context.asAbsolutePath(path.join(
-        PnPFileNames.resourcesFolderName, PnPFileNames.deviceModelFolderName,
-        PnPFileNames.capabilityModelFileName));
+        DigitalTwinFileNames.resourcesFolderName,
+        DigitalTwinFileNames.deviceModelFolderName,
+        DigitalTwinFileNames.capabilityModelFileName));
     const pnpCapabilityModelString = capabilityModelFileFromRemote ||
         fs.readFileSync(capabilityModelFilePath, 'utf8');
     if (capabilityModelFileFromRemote) {

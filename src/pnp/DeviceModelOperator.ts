@@ -9,16 +9,16 @@ import * as path from 'path';
 import * as url from 'url';
 
 import {VSCExpress} from 'vscode-express';
-import {PnPFileNames, PnPConstants} from './PnPConstants';
-import {PnPMetamodelRepositoryClient} from './pnp-api/PnPMetamodelRepositoryClient';
+import {DigitalTwinFileNames, DigitalTwinConstants} from './DigitalTwinConstants';
+import {DigitalTwinMetamodelRepositoryClient} from './DigitalTwinApi/DigitalTwinMetamodelRepositoryClient';
 import * as utils from '../utils';
-import {MetaModelType} from './pnp-api/DataContracts/PnPContext';
-import {PnPConnector} from './PnPConnector';
+import {MetaModelType} from './DigitalTwinApi/DataContracts/DigitalTwinContext';
+import {DigitalTwinConnector} from './DigitalTwinConnector';
 import {DialogResponses} from '../DialogResponses';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
-import {PnPConnectionStringBuilder} from './pnp-api/PnPConnectionStringBuilder';
-import {PnPModel, PnPModelBase} from './pnp-api/DataContracts/PnPModel';
+import {DigitalTwinConnectionStringBuilder} from './DigitalTwinApi/DigitalTwinConnectionStringBuilder';
+import {DigitalTwinModel, DigitalTwinModelBase} from './DigitalTwinApi/DataContracts/DigitalTwinModel';
 
 const constants = {
   storedFilesInfoKeyName: 'StoredFilesInfo',
@@ -73,8 +73,8 @@ export class DeviceModelOperator {
     const files = fs.listSync(rootPath);
 
     const deviceModelFile = files.find(
-        fileName => fileName.endsWith(PnPConstants.interfaceSuffix) ||
-            fileName.endsWith(PnPConstants.capabilityModelSuffix));
+        fileName => fileName.endsWith(DigitalTwinConstants.interfaceSuffix) ||
+            fileName.endsWith(DigitalTwinConstants.capabilityModelSuffix));
 
     if (!deviceModelFile) {
       return false;
@@ -92,7 +92,7 @@ export class DeviceModelOperator {
     }
 
     const option: vscode.InputBoxOptions = {
-      value: PnPFileNames.defaultInterfaceName,
+      value: DigitalTwinFileNames.defaultInterfaceName,
       prompt: `Please input interface name here.`,
       ignoreFocusOut: true,
       validateInput: (interfaceName: string) => {
@@ -100,7 +100,7 @@ export class DeviceModelOperator {
           return 'Please provide a valid interface name.';
         }
         if (!/\.interface\.json$/i.test(interfaceName)) {
-          interfaceName += PnPConstants.interfaceSuffix;
+          interfaceName += DigitalTwinConstants.interfaceSuffix;
         }
 
         if (/^([a-z_]|[a-z_][-a-z0-9_.]*[a-z0-9_])(\.interface\.json)?$/i.test(
@@ -123,15 +123,16 @@ export class DeviceModelOperator {
     } else {
       interfaceFileName = interfaceFileName.trim();
       if (!/\.interface\.json$/i.test(interfaceFileName)) {
-        interfaceFileName += PnPConstants.interfaceSuffix;
+        interfaceFileName += DigitalTwinConstants.interfaceSuffix;
       }
     }
 
     const targetInterface = path.join(rootPath, interfaceFileName);
 
     const interfaceTemplate = context.asAbsolutePath(path.join(
-        PnPFileNames.resourcesFolderName, PnPFileNames.deviceModelFolderName,
-        PnPFileNames.sampleInterfaceName));
+        DigitalTwinFileNames.resourcesFolderName,
+        DigitalTwinFileNames.deviceModelFolderName,
+        DigitalTwinFileNames.sampleInterfaceName));
 
     try {
       const interfaceNamePattern = /{INTERFACENAME}/g;
@@ -165,7 +166,7 @@ export class DeviceModelOperator {
     }
 
     const option: vscode.InputBoxOptions = {
-      value: PnPFileNames.defaultCapabilityModelName,
+      value: DigitalTwinFileNames.defaultCapabilityModelName,
       prompt: `Please input capability model name here:`,
       ignoreFocusOut: true,
       validateInput: (capabilityModelName: string) => {
@@ -173,7 +174,7 @@ export class DeviceModelOperator {
           return 'Please provide a valid capability model name.';
         }
         if (!/\.capabilitymodel\.json$/i.test(capabilityModelName)) {
-          capabilityModelName += PnPConstants.capabilityModelSuffix;
+          capabilityModelName += DigitalTwinConstants.capabilityModelSuffix;
         }
         if (/^([a-z_]|[a-z_][-a-z0-9_.]*[a-z0-9_])(\.capabilitymodel\.json)?$/i
                 .test(capabilityModelName)) {
@@ -196,15 +197,16 @@ export class DeviceModelOperator {
     } else {
       capabilityModelFileName = capabilityModelFileName.trim();
       if (!/\.capabilitymodel\.json$/i.test(capabilityModelFileName)) {
-        capabilityModelFileName += PnPConstants.capabilityModelSuffix;
+        capabilityModelFileName += DigitalTwinConstants.capabilityModelSuffix;
       }
     }
 
     const targetCapabilityModel = path.join(rootPath, capabilityModelFileName);
 
     const capabilityModel = context.asAbsolutePath(path.join(
-        PnPFileNames.resourcesFolderName, PnPFileNames.deviceModelFolderName,
-        PnPFileNames.sampleCapabilityModelName));
+        DigitalTwinFileNames.resourcesFolderName,
+        DigitalTwinFileNames.deviceModelFolderName,
+        DigitalTwinFileNames.sampleCapabilityModelName));
 
     try {
       const content = fs.readFileSync(capabilityModel, 'utf8');
@@ -266,7 +268,7 @@ export class DeviceModelOperator {
 
     if (!connectionString) {
       const option: vscode.InputBoxOptions = {
-        value: PnPConstants.repoConnectionStringTemplate,
+        value: DigitalTwinConstants.repoConnectionStringTemplate,
         prompt:
             'Please input the connection string to the Digital Twin repository:',
         ignoreFocusOut: true
@@ -285,7 +287,7 @@ export class DeviceModelOperator {
     }
 
     const result =
-        await PnPConnector.ConnectMetamodelRepository(connectionString);
+        await DigitalTwinConnector.ConnectMetamodelRepository(connectionString);
 
     if (result) {
       DeviceModelOperator.vscexpress = DeviceModelOperator.vscexpress ||
@@ -315,7 +317,7 @@ export class DeviceModelOperator {
       searchString = '', pageSize = 50, continueToken: string|null = null) {
     if (usePublicRepository) {
       const pnpMetamodelRepositoryClient =
-          new PnPMetamodelRepositoryClient(null);
+          new DigitalTwinMetamodelRepositoryClient(null);
 
       const result = await pnpMetamodelRepositoryClient.SearchInterfacesAsync(
           searchString, continueToken, undefined, pageSize);
@@ -329,9 +331,10 @@ export class DeviceModelOperator {
         return;
       }
 
-      const builder = PnPConnectionStringBuilder.Create(connectionString);
+      const builder =
+          DigitalTwinConnectionStringBuilder.Create(connectionString);
       const pnpMetamodelRepositoryClient =
-          new PnPMetamodelRepositoryClient(connectionString);
+          new DigitalTwinMetamodelRepositoryClient(connectionString);
       const result = await pnpMetamodelRepositoryClient.SearchInterfacesAsync(
           searchString, continueToken, builder.RepositoryIdValue, pageSize);
       return result;
@@ -343,7 +346,7 @@ export class DeviceModelOperator {
       searchString = '', pageSize = 50, continueToken: string|null = null) {
     if (usePublicRepository) {
       const pnpMetamodelRepositoryClient =
-          new PnPMetamodelRepositoryClient(null);
+          new DigitalTwinMetamodelRepositoryClient(null);
 
       const result =
           await pnpMetamodelRepositoryClient.SearchCapabilityModelsAsync(
@@ -358,8 +361,9 @@ export class DeviceModelOperator {
         return;
       }
       const pnpMetamodelRepositoryClient =
-          new PnPMetamodelRepositoryClient(connectionString);
-      const builder = PnPConnectionStringBuilder.Create(connectionString);
+          new DigitalTwinMetamodelRepositoryClient(connectionString);
+      const builder =
+          DigitalTwinConnectionStringBuilder.Create(connectionString);
       const result =
           await pnpMetamodelRepositoryClient.SearchCapabilityModelsAsync(
               searchString, continueToken, builder.RepositoryIdValue, pageSize);
@@ -388,27 +392,28 @@ export class DeviceModelOperator {
     }
 
     const pnpMetamodelRepositoryClient =
-        new PnPMetamodelRepositoryClient(connectionString);
-    const builder = PnPConnectionStringBuilder.Create(connectionString);
+        new DigitalTwinMetamodelRepositoryClient(connectionString);
+    const builder = DigitalTwinConnectionStringBuilder.Create(connectionString);
     for (const id of fileIds) {
-      channel.appendLine(`${PnPConstants.pnpPrefix} Start deleting ${
+      channel.appendLine(`${DigitalTwinConstants.pnpPrefix} Start deleting ${
           metaModelValue} with id ${id}.`);
       try {
         if (metaModelType === MetaModelType.Interface) {
           await pnpMetamodelRepositoryClient.DeleteInterfaceAsync(
               id, builder.RepositoryIdValue);
           channel.appendLine(
-              `${PnPConstants.pnpPrefix} Deleting interface with id ${
+              `${DigitalTwinConstants.pnpPrefix} Deleting interface with id ${
                   id} completed.`);
         } else {
           await pnpMetamodelRepositoryClient.DeleteCapabilityModelAsync(
               id, builder.RepositoryIdValue);
-          channel.appendLine(
-              `${PnPConstants.pnpPrefix} Deleting capabilty model with id ${
-                  id} completed.`);
+          channel.appendLine(`${
+              DigitalTwinConstants
+                  .pnpPrefix} Deleting capabilty model with id ${
+              id} completed.`);
         }
       } catch (error) {
-        channel.appendLine(`${PnPConstants.pnpPrefix} Deleting ${
+        channel.appendLine(`${DigitalTwinConstants.pnpPrefix} Deleting ${
             metaModelValue} with id ${id} failed. Error: ${error.message}`);
       }
     }
@@ -419,17 +424,17 @@ export class DeviceModelOperator {
       context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
     channel.show();
     if (!fileIds || fileIds.length === 0) {
-      channel.appendLine(
-          `${PnPConstants.pnpPrefix} No Digital Twin models is selected.`);
+      channel.appendLine(`${
+          DigitalTwinConstants.pnpPrefix} No Digital Twin models is selected.`);
       return;
     }
 
     const metaModelType: MetaModelType =
         MetaModelType[metaModelValue as keyof typeof MetaModelType];
 
-    let suffix = PnPConstants.interfaceSuffix;
+    let suffix = DigitalTwinConstants.interfaceSuffix;
     if (metaModelType === MetaModelType.CapabilityModel) {
-      suffix = PnPConstants.capabilityModelSuffix;
+      suffix = DigitalTwinConstants.capabilityModelSuffix;
     }
 
     const rootPath = await this.InitializeFolder();
@@ -447,17 +452,18 @@ export class DeviceModelOperator {
         return;
       }
       connectionString = repoConnectionString;
-      const builder = PnPConnectionStringBuilder.Create(connectionString);
+      const builder =
+          DigitalTwinConnectionStringBuilder.Create(connectionString);
       repositoryId = builder.RepositoryIdValue;
     }
 
     const pnpMetamodelRepositoryClient =
-        new PnPMetamodelRepositoryClient(connectionString);
+        new DigitalTwinMetamodelRepositoryClient(connectionString);
 
     for (const id of fileIds) {
-      channel.appendLine(`${PnPConstants.pnpPrefix} Start getting ${
+      channel.appendLine(`${DigitalTwinConstants.pnpPrefix} Start getting ${
           metaModelValue} with id ${id}.`);
-      let fileMetaData: PnPModel;
+      let fileMetaData: DigitalTwinModel;
       try {
         if (metaModelType === MetaModelType.Interface) {
           fileMetaData = await pnpMetamodelRepositoryClient.GetInterfaceAsync(
@@ -499,12 +505,12 @@ export class DeviceModelOperator {
               fileMetaData.contents as string);
           await vscode.window.showTextDocument(
               vscode.Uri.file(path.join(rootPath, candidateName)));
-          channel.appendLine(`${PnPConstants.pnpPrefix} Downloading ${
+          channel.appendLine(`${DigitalTwinConstants.pnpPrefix} Downloading ${
               metaModelValue} with id ${id} into ${candidateName} completed.`);
         }
 
       } catch (error) {
-        channel.appendLine(`${PnPConstants.pnpPrefix} Downloading ${
+        channel.appendLine(`${DigitalTwinConstants.pnpPrefix} Downloading ${
             metaModelValue} with id ${id} failed. Error: ${error.message}`);
       }
     }
@@ -538,8 +544,8 @@ export class DeviceModelOperator {
     if (pnpFiles && pnpFiles.length > 0) {
       pnpFiles.forEach((filePath: string) => {
         const fileName = path.basename(filePath);
-        if (fileName.endsWith(PnPConstants.interfaceSuffix) ||
-            fileName.endsWith(PnPConstants.capabilityModelSuffix)) {
+        if (fileName.endsWith(DigitalTwinConstants.interfaceSuffix) ||
+            fileName.endsWith(DigitalTwinConstants.capabilityModelSuffix)) {
           fileItems.push({label: fileName, description: ''});
         }
       });
@@ -589,18 +595,18 @@ export class DeviceModelOperator {
     }
 
     const interfaceFiles = selectedFiles.filter(file => {
-      return file.label.endsWith(PnPConstants.interfaceSuffix);
+      return file.label.endsWith(DigitalTwinConstants.interfaceSuffix);
     });
 
     const capabilityModels = selectedFiles.filter(file => {
-      return file.label.endsWith(PnPConstants.capabilityModelSuffix);
+      return file.label.endsWith(DigitalTwinConstants.capabilityModelSuffix);
     });
 
     let connectionString =
         ConfigHandler.get<string>(ConfigKey.pnpModelRepositoryKeyName);
     if (!connectionString) {
       const option: vscode.InputBoxOptions = {
-        value: PnPConstants.repoConnectionStringTemplate,
+        value: DigitalTwinConstants.repoConnectionStringTemplate,
         prompt:
             'Please input the connection string to access the Digital Twin repository.',
         ignoreFocusOut: true
@@ -611,8 +617,8 @@ export class DeviceModelOperator {
       if (!connectionString) {
         return false;
       } else {
-        const result =
-            await PnPConnector.ConnectMetamodelRepository(connectionString);
+        const result = await DigitalTwinConnector.ConnectMetamodelRepository(
+            connectionString);
         if (!result) {
           return false;
         }
@@ -620,15 +626,15 @@ export class DeviceModelOperator {
     }
 
     const pnpMetamodelRepositoryClient =
-        new PnPMetamodelRepositoryClient(connectionString);
-    const builder = PnPConnectionStringBuilder.Create(connectionString);
+        new DigitalTwinMetamodelRepositoryClient(connectionString);
+    const builder = DigitalTwinConnectionStringBuilder.Create(connectionString);
 
     let continueOnFailure = false;
     const option: SubmitOptions = {overwriteChoice: OverwriteChoice.Unknown};
 
     for (const fileItem of interfaceFiles) {
-      channel.appendLine(
-          `${PnPConstants.pnpPrefix} File to submit: ${fileItem.label}`);
+      channel.appendLine(`${DigitalTwinConstants.pnpPrefix} File to submit: ${
+          fileItem.label}`);
       const filePath = path.join(rootPath, fileItem.label);
       const result = await this.SubmitInterface(
           option, pnpMetamodelRepositoryClient, builder, filePath,
@@ -649,8 +655,8 @@ export class DeviceModelOperator {
     }
 
     for (const fileItem of capabilityModels) {
-      channel.appendLine(
-          `${PnPConstants.pnpPrefix} File to submit: ${fileItem.label}`);
+      channel.appendLine(`${DigitalTwinConstants.pnpPrefix} File to submit: ${
+          fileItem.label}`);
       const filePath = path.join(rootPath, fileItem.label);
       const result = await this.SubmitCapabilityModel(
           option, pnpMetamodelRepositoryClient, builder, filePath,
@@ -675,9 +681,9 @@ export class DeviceModelOperator {
 
   private async SubmitInterface(
       option: SubmitOptions,
-      pnpMetamodelRepositoryClient: PnPMetamodelRepositoryClient,
-      builder: PnPConnectionStringBuilder, filePath: string, fileName: string,
-      channel: vscode.OutputChannel): Promise<boolean> {
+      pnpMetamodelRepositoryClient: DigitalTwinMetamodelRepositoryClient,
+      builder: DigitalTwinConnectionStringBuilder, filePath: string,
+      fileName: string, channel: vscode.OutputChannel): Promise<boolean> {
     try {
       const fileContent = fs.readFileSync(filePath, 'utf8');
 
@@ -686,7 +692,7 @@ export class DeviceModelOperator {
         const fileJson = JSON.parse(fileContent);
         fileId = fileJson[constants.idName];
       } catch (error) {
-        channel.appendLine(`${PnPConstants.pnpPrefix} ${
+        channel.appendLine(`${DigitalTwinConstants.pnpPrefix} ${
             fileName} is not a valid Digital Twin model. Please modify the content and submit it again.`);
         vscode.window.showWarningMessage(`${
             fileName} is not a valid Digital Twin model. Please modify the content and submit it again.`);
@@ -698,13 +704,14 @@ export class DeviceModelOperator {
             'Unable to find id from the Digital Twin interface file. Please provide a valid file.');
         return false;
       }
-      channel.appendLine(`${PnPConstants.pnpPrefix} Load and parse file: "${
-          fileName}" successfully.`);
+      channel.appendLine(
+          `${DigitalTwinConstants.pnpPrefix} Load and parse file: "${
+              fileName}" successfully.`);
       // check whether file exists in model repo, try to update the file.
       try {
         // First, get the file to retrieve the latest etag.
         channel.appendLine(`${
-            PnPConstants
+            DigitalTwinConstants
                 .pnpPrefix} Connect to Digital Twin repository to check whether ${
             fileId} exists in server...`);
         const interfaceMetaData =
@@ -712,7 +719,7 @@ export class DeviceModelOperator {
                 fileId, builder.RepositoryIdValue, true);
 
         channel.appendLine(`${
-            PnPConstants
+            DigitalTwinConstants
                 .pnpPrefix} Azure IoT Digital Twin interface file with id:"${
             fileId}" exists in server. `);
 
@@ -725,7 +732,7 @@ export class DeviceModelOperator {
                   DialogResponses.no);
           if (result === DialogResponses.no) {
             channel.appendLine(`${
-                PnPConstants
+                DigitalTwinConstants
                     .pnpPrefix} Submitting Digital Twin interface cancelled.`);
             return false;
           } else if (result === DialogResponses.all) {
@@ -734,7 +741,7 @@ export class DeviceModelOperator {
         }
 
         channel.appendLine(`${
-            PnPConstants
+            DigitalTwinConstants
                 .pnpPrefix} Start updating Digital Twin interface with id:"${
             fileId}"... `);
 
@@ -742,7 +749,7 @@ export class DeviceModelOperator {
             await pnpMetamodelRepositoryClient.CreateOrUpdateInterfaceAsync(
                 fileContent, interfaceMetaData.etag, undefined);
         channel.appendLine(`${
-            PnPConstants
+            DigitalTwinConstants
                 .pnpPrefix} Submitting Azure IoT Digital Twin interface file: fileName: "${
             fileName}" successfully, interface id: "${fileId}". `);
         vscode.window.showInformationMessage(
@@ -752,15 +759,15 @@ export class DeviceModelOperator {
         if (error.statusCode === 404)  // Not found
         {
           channel.appendLine(`${
-              PnPConstants
+              DigitalTwinConstants
                   .pnpPrefix} Digital Twin interface file does not exist in server, creating ${
               fileId}... `);
           // Create the interface.
-          const result: PnPModelBase =
+          const result: DigitalTwinModelBase =
               await pnpMetamodelRepositoryClient.CreateOrUpdateInterfaceAsync(
                   fileContent, undefined, builder.RepositoryIdValue);
           channel.appendLine(`${
-              PnPConstants
+              DigitalTwinConstants
                   .pnpPrefix} Submitting Digital Twin interface: fileName: "${
               fileName}" successfully, interface id: "${fileId}". `);
           vscode.window.showInformationMessage(
@@ -772,7 +779,7 @@ export class DeviceModelOperator {
       }
     } catch (error) {
       channel.appendLine(`${
-          PnPConstants
+          DigitalTwinConstants
               .pnpPrefix} Submitting Digital Twin interface: fileName: "${
           fileName}" failed, error: ${error.message}.`);
       vscode.window.showWarningMessage(
@@ -785,9 +792,9 @@ export class DeviceModelOperator {
 
   private async SubmitCapabilityModel(
       option: SubmitOptions,
-      pnpMetamodelRepositoryClient: PnPMetamodelRepositoryClient,
-      builder: PnPConnectionStringBuilder, filePath: string, fileName: string,
-      channel: vscode.OutputChannel): Promise<boolean> {
+      pnpMetamodelRepositoryClient: DigitalTwinMetamodelRepositoryClient,
+      builder: DigitalTwinConnectionStringBuilder, filePath: string,
+      fileName: string, channel: vscode.OutputChannel): Promise<boolean> {
     try {
       const fileContent = fs.readFileSync(filePath, 'utf8');
 
@@ -796,7 +803,7 @@ export class DeviceModelOperator {
         const fileJson = JSON.parse(fileContent);
         fileId = fileJson[constants.idName];
       } catch (error) {
-        channel.appendLine(`${PnPConstants.pnpPrefix} ${
+        channel.appendLine(`${DigitalTwinConstants.pnpPrefix} ${
             fileName} is not a valid Digital Twin model. Please modify the content and submit it again.`);
         vscode.window.showWarningMessage(`${
             fileName} is not a valid Digital Twin model. Please modify the content and submit it again.`);
@@ -808,13 +815,14 @@ export class DeviceModelOperator {
             'Unable to find id from the Digital Twin capability model file. Please provide a valid file');
         return false;
       }
-      channel.appendLine(`${PnPConstants.pnpPrefix} Load and parse file: ${
-          fileName} successfully.`);
+      channel.appendLine(
+          `${DigitalTwinConstants.pnpPrefix} Load and parse file: ${
+              fileName} successfully.`);
       // check whether file exists in model repo, try to update the file.
       try {
         // First, get the file to retrieve the latest etag.
         channel.appendLine(`${
-            PnPConstants
+            DigitalTwinConstants
                 .pnpPrefix} Connect to Azure IoT Digital Twin repository to check whether "${
             fileId}" exists in server...`);
         const capabilityModelContext =
@@ -830,7 +838,7 @@ export class DeviceModelOperator {
                   DialogResponses.no);
           if (result === DialogResponses.no) {
             channel.appendLine(`${
-                PnPConstants
+                DigitalTwinConstants
                     .pnpPrefix} Submitting Digital Twin capability model cancelled.`);
             return false;
           } else if (result === DialogResponses.all) {
@@ -839,7 +847,7 @@ export class DeviceModelOperator {
         }
 
         channel.appendLine(`${
-            PnPConstants
+            DigitalTwinConstants
                 .pnpPrefix} Start updating Digital Twin capability model with id:"${
             fileId}"...`);
 
@@ -848,7 +856,7 @@ export class DeviceModelOperator {
                                        fileContent, capabilityModelContext.etag,
                                        builder.RepositoryIdValue);
         channel.appendLine(`${
-            PnPConstants
+            DigitalTwinConstants
                 .pnpPrefix} Submitting Digital Twin capability model: fileName: "${
             fileName}" successfully, capability model id: "${fileId}". `);
         vscode.window.showInformationMessage(
@@ -858,17 +866,17 @@ export class DeviceModelOperator {
         if (error.statusCode === 404)  // Not found
         {
           channel.appendLine(`${
-              PnPConstants
+              DigitalTwinConstants
                   .pnpPrefix} Digital Twin capability model file does not exist in server, creating "${
               fileId}"... `);
 
           // Create the interface.
-          const result: PnPModelBase =
+          const result: DigitalTwinModelBase =
               await pnpMetamodelRepositoryClient
                   .CreateOrUpdateCapabilityModelAsync(
                       fileContent, undefined, builder.RepositoryIdValue);
           channel.appendLine(`${
-              PnPConstants
+              DigitalTwinConstants
                   .pnpPrefix} Submitting Digital Twin capability model: fileName: "${
               fileName}" successfully, capability model id: "${fileId}". `);
           vscode.window.showInformationMessage(
@@ -880,7 +888,7 @@ export class DeviceModelOperator {
       }
     } catch (error) {
       channel.appendLine(`${
-          PnPConstants
+          DigitalTwinConstants
               .pnpPrefix} Submitting Digital Twin capability model: fileName: "${
           fileName}" failed, error: ${error.message}.`);
       vscode.window.showWarningMessage(

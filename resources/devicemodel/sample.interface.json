@@ -1,5 +1,5 @@
 {
-  "@id": "http://vsc-pnp-sample.com/{INTERFACENAME}/1.0.0",
+  "@id": "http://vsc-digitaltwin-sample.com/{INTERFACENAME}/1.0.0",
   "@type": "Interface",
   "displayName": "{INTERFACENAME}",
   "contents": [
