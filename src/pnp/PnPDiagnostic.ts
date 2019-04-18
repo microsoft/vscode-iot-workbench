@@ -38,6 +38,9 @@ export class PnPDiagnostic {
       Issue[] {
     const text = document.getText();
     const json = Json.parse(text);
+    if (!json || !json.value) {
+      return [];
+    }
     let issues = this.getJsonValueIssues(pnpContext, document, json.value);
     issues =
         issues.concat(this.getTypeIssues(pnpContext, document, json.value));
