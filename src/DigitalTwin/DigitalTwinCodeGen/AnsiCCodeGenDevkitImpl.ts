@@ -14,8 +14,8 @@ import {DeviceConnectionType} from './Interfaces/CodeGenerator';
 
 const constants = {
   deviceDefaultFolderName: 'Device',
-  deviceConnectionStringSketchFileName: 'pnpdevice_connectionstring.ino',
-  deviceIotcSasKeySketchFileName: 'pnpdevice_iotcsaskey.ino'
+  deviceConnectionStringSketchFileName: 'dt_device_connectionstring.ino',
+  deviceIotcSasKeySketchFileName: 'dt_device_iotcsaskey.ino'
 };
 
 export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {

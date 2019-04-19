@@ -7,12 +7,7 @@ compileAsC99()
 
 cmake_minimum_required(VERSION 2.8)
 
-file(GLOB {PROJECT_NAME}_h_files
-    "*.h"
-    "./utilities/*.h"
-)
-
-file(GLOB {PROJECT_NAME}_c_files
+file(GLOB {PROJECT_NAME}_src
     "*.c"
     "./utilities/*.c"
 )
@@ -22,9 +17,8 @@ include_directories(./utilities)
 include_directories(../deps/parson)
 include_directories(${SHARED_UTIL_INC_FOLDER})
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
-include_directories(${PNP_CLIENT_INC_FOLDER})
-include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
+include_directories(${DIGITALTWIN_CLIENT_INC_FOLDER})
 
-add_executable({PROJECT_NAME} ${{PROJECT_NAME}_c_files} ${{PROJECT_NAME}_h_files})
+add_executable({PROJECT_NAME} ${{PROJECT_NAME}_src})
 
-target_link_libraries({PROJECT_NAME} parson iothub_client pnp_client prov_device_ll_client prov_mqtt_transport)
+target_link_libraries({PROJECT_NAME} parson iothub_client digitaltwin_client)

@@ -2,15 +2,22 @@
 // Core header files for C and IoTHub layer
 //
 #include <stdio.h>
+#include "IoT_DevKit_HW.h"
+#include "AZ3166WiFi.h"
+#include "azureiotcerts.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/xlogging.h"
-#include "application.h"
+#include "src/{PATHNAME}/application.h"
+
 
 // IoT Central requires DPS.  Include required header and constants
 #include "azure_prov_client/iothub_security_factory.h"
 #include "azure_prov_client/prov_device_ll_client.h"
 #include "azure_prov_client/prov_transport_mqtt_client.h"
 #include "azure_prov_client/prov_security_factory.h"
+
+static bool networkConnected;
+static bool digitalTwinInitialized;
 
 // State of DPS registration process.  We cannot proceed with DPS until we get into the state APP_DPS_REGISTRATION_SUCCEEDED.
 typedef enum APP_DPS_REGISTRATION_STATUS_TAG
@@ -24,9 +31,7 @@ typedef enum APP_DPS_REGISTRATION_STATUS_TAG
 const SECURE_DEVICE_TYPE secureDeviceTypeForProvisioning = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
 const IOTHUB_SECURITY_TYPE secureDeviceTypeForIotHub = IOTHUB_SECURITY_TYPE_SYMMETRIC_KEY;
 
-// Please follow the below tutorial to create a device enrollment entry.
-// https://docs.microsoft.com/en-us/azure/iot-dps/quick-create-simulated-device-symm-key#create-a-device-enrollment-entry-in-the-portal 
-// Note: You cannot use an arbitrary DPS instance with the PnP IoT Central example.
+// Note: You cannot use an arbitrary DPS instance with the DigitalTwin IoT Central example.
 static const char* globalDpsEndpoint = "global.azure-devices-provisioning.net";
 
 // TODO: Specify DPS scope ID if you intend on using IoT Central. 
@@ -36,17 +41,17 @@ static const char* dpsIdScope = "[DPS Id Scope]";
 static const char* sasKey = "[DPS symmetric key]";
 
 // TODO: specify your device registration ID
-static const char* registrationId = "[registration Id]"; 
+static const char* registrationId = "[registration Id]";
 
-// TODO: Fill in PNP_DEVICE_CAPABILITY_MODEL_URI and PNP_MODEL_REPOSITORY_URI if you indend on using IoT Central.
-#define PNP_DEVICE_CAPABILITY_MODEL_URI "[your capabilityModel Id]"
-#define PNP_MODEL_REPOSITORY_URI "[your model repository service URI]"
+// TODO: Fill in DIGITALTWIN_DEVICE_CAPABILITY_MODEL_URI and DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_INLINE_DATA if you indend on using IoT Central.
+#define DIGITALTWIN_DEVICE_CAPABILITY_MODEL_URI "[your capabilityModel Id]"
+#define DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_INLINE_DATA "[To fill in with the inline contents of interfaces and capability model.]"
 
-static const char* pnpSample_CustomProvisioningData = "{"
+static const char* digitalTwinSample_CustomProvisioningData = "{"
                                                             "\"__iot:interfaces\":"
                                                             "{"
-                                                            "\"CapabilityModelUri\": \"" PNP_DEVICE_CAPABILITY_MODEL_URI "\" ,"
-                                                            "\"ModelRepositoryUri\": \"" PNP_MODEL_REPOSITORY_URI "\""
+                                                            "\"CapabilityModelUri\": \"" DIGITALTWIN_DEVICE_CAPABILITY_MODEL_URI "\" ,"
+                                                            "\"CapabilityModel\": \"" DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_INLINE_DATA "\""
                                                             "}"
                                                       "}";
 
@@ -56,13 +61,13 @@ static const int dpsRegistrationPollSleep = 1000;
 // Maximum amount of times we'll poll for DPS registration being ready.
 static const int dpsRegistrationMaxPolls = 60;
 
-// State of PnP registration process.  We cannot proceed with PnP until we get into the state APP_PNP_REGISTRATION_SUCCEEDED.
-typedef enum APP_PNP_REGISTRATION_STATUS_TAG
+// State of DigitalTwin registration process.  We cannot proceed with DigitalTwin until we get into the state APP_DIGITALTWIN_REGISTRATION_SUCCEEDED.
+typedef enum APP_DIGITALTWIN_REGISTRATION_STATUS_TAG
 {
-    APP_PNP_REGISTRATION_PENDING,
-    APP_PNP_REGISTRATION_SUCCEEDED,
-    APP_PNP_REGISTRATION_FAILED
-} APP_PNP_REGISTRATION_STATUS;
+    APP_DIGITALTWIN_REGISTRATION_PENDING,
+    APP_DIGITALTWIN_REGISTRATION_SUCCEEDED,
+    APP_DIGITALTWIN_REGISTRATION_FAILED
+} APP_DIGITALTWIN_REGISTRATION_STATUS;
 
 #define IOT_HUB_CONN_STR_MAX_LEN 1024
 
@@ -112,31 +117,37 @@ static bool initializeIotHubViaProvisioning(bool traceOn)
         LogError("prov_dev_set_symmetric_key_info failed.");
         return false;
     }
-    
+
     if (prov_dev_security_init(secureDeviceTypeForProvisioning) != 0)
     {
         LogError("prov_dev_security_init failed");
         return false;
     }
-    
+
     if ((provDeviceLLHandle = Prov_Device_LL_Create(globalDpsEndpoint, dpsIdScope, Prov_Device_MQTT_Protocol)) == NULL)
     {
         LogError("failed calling Prov_Device_Create");
         return false;
     }
-    
+
     if ((provDeviceResult = Prov_Device_LL_SetOption(provDeviceLLHandle, PROV_OPTION_LOG_TRACE, &traceOn)) != PROV_DEVICE_RESULT_OK)
     {
         LogError("Setting provisioning tracing on failed, error=%d", provDeviceResult);
         return false;
     }
-    
-    if ((provDeviceResult = Prov_Device_LL_SetProvisioningData(provDeviceLLHandle, pnpSample_CustomProvisioningData)) != PROV_DEVICE_RESULT_OK)
+
+    if ((provDeviceResult = Prov_Device_LL_SetOption(provDeviceLLHandle, "TrustedCerts", certificates)) != PROV_DEVICE_RESULT_OK)
+    {
+        LogError("Setting provisioning TrustedCerts failed, error=%d", provDeviceResult);
+        return false;
+    }
+
+    if ((provDeviceResult = Prov_Device_LL_Set_Provisioning_Payload(provDeviceLLHandle, digitalTwinSample_CustomProvisioningData)) != PROV_DEVICE_RESULT_OK)
     {
         LogError("Failed setting provisioning data, error=%d", provDeviceResult);
         return false;
     }
-    
+
     if ((provDeviceResult = Prov_Device_LL_Register_Device(provDeviceLLHandle, provisioningRegisterCallback, &appDpsRegistrationStatus, NULL, NULL)) != PROV_DEVICE_RESULT_OK)
     {
         LogError("Prov_Device_Register_Device failed, error=%d", provDeviceResult);
@@ -154,7 +165,7 @@ static bool initializeIotHubViaProvisioning(bool traceOn)
         {
             LogInfo("DPS successfully registered.  Continuing on to creation of IoTHub device client handle.");
         }
-        else if (appDpsRegistrationStatus == APP_PNP_REGISTRATION_PENDING)
+        else if (appDpsRegistrationStatus == APP_DIGITALTWIN_REGISTRATION_PENDING)
         {
             LogError("Timed out attempting to register DPS device");
             return false;
@@ -187,7 +198,7 @@ static bool initializeIotHubViaProvisioning(bool traceOn)
         }
 
         LogInfo("IoT Hub Connection String: %s", connectionString);
-        application_initialize(connectionString, NULL);
+        application_initialize(connectionString, certificates);
     }
     else
     {
@@ -203,18 +214,39 @@ static bool initializeIotHubViaProvisioning(bool traceOn)
     return true;
 }
 
-// main entry point.
-int main()
-{
-    bool initializeResult = initializeIotHubViaProvisioning(false);
-    if (initializeResult)
+void setup() {
+    char buff[128];
+
+    // Initialize the board
+    int ret = initIoTDevKit(1);
+    if (ret != 0)
     {
-        while (true)
-        {
-            application_run();
-            ThreadAPI_Sleep(100);
-        }
+        networkConnected = false;
+        Screen.print(1, "Failed: %d", ret);
+        return;
+    }
+    else
+    {
+        networkConnected = true;
+        IPAddress ip = WiFi.localIP();
+        snprintf(buff, sizeof(buff), "%s\r\nWiFi Connected\r\n%s", WiFi.SSID(), ip.get_address());
+        Screen.print(1, buff);
     }
 
-    return 0;
+    // Initialize device model application
+    digitalTwinInitialized = initializeIotHubViaProvisioning(false);
+    digitalWrite(LED_AZURE, 1);
+    snprintf(buff, sizeof(buff), "%s\r\nDigitalTwin enabled\r\nRunning...\r\n", getDevKitName());
+    Screen.print(1, buff);
+}
+
+void loop() {
+    // put your main code here, to run repeatedly:
+    if (networkConnected && digitalTwinInitialized)
+    {
+        application_run();
+    }
+
+    invokeDevKitPeripheral();
+    delay(500);
 }

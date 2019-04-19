@@ -10,7 +10,7 @@ import {DeviceConnectionType} from './Interfaces/CodeGenerator';
 
 const ansiConstants = {
   languageName: 'ansi',
-  pnp: 'pnp'
+  digitalTwin: 'digitaltwin'
 };
 
 const templateFileNames = ['Readme.md', 'main.c.sample', 'CMakeLists.txt'];
@@ -26,7 +26,7 @@ export class AnsiCCodeGenGeneralImpl extends AnsiCCodeGeneratorBase {
   async GenerateCode(
       targetPath: string, filePath: string, fileCoreName: string,
       connectionString: string): Promise<boolean> {
-    // Invoke PnP toolset to generate the code
+    // Invoke DigitalTwinCodeGen toolset to generate the code
     const retvalue = await this.GenerateAnsiCCodeCore(
         targetPath, filePath, connectionString);
 
@@ -43,7 +43,7 @@ export class AnsiCCodeGenGeneralImpl extends AnsiCCodeGeneratorBase {
     }
 
     const resouceFolder = this.context.asAbsolutePath(path.join(
-        FileNames.resourcesFolderName, ansiConstants.pnp,
+        FileNames.resourcesFolderName, ansiConstants.digitalTwin,
         ansiConstants.languageName, folderName));
 
     const projectName = path.basename(targetPath);
