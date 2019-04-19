@@ -10,16 +10,16 @@
 
 <header v-bind:class="{'show-status-selector': showStatusSelector, 'show-tag-selector': showTagSelector}">
 <h1 class="company-name">{{ companyName }}</h1>
-<div class="pnp-file-type-tab">
+<div class="digital-twin-file-type-tab">
   <span v-bind:class="{active: type.value === 'CapabilityModel'}" v-on:click="type.value = 'CapabilityModel'">Device Capability Models</span>
   <span v-bind:class="{active: type.value === 'Interface'}" v-on:click="type.value = 'Interface'">Interfaces</span>
 </div>
 <div class="action-bar">
-  <button class="with-icon new" v-if="!publicRepository" v-on:click="createPnPFile">New</button>
-  <button class="with-icon download" v-on:click="editPnPFiles" v-bind:disabled="type.value === 'Interface' && !this.selectedInterfaces.value.length || type.value === 'CapabilityModel' && !this.selectedCapabilityModels.value.length">Download</button>
-  <button class="with-icon publish" v-if="false" v-on:click="publishPnPFiles" v-bind:disabled="hasNoItemToPublish()">Publish</button>
-  <button class="with-icon delete" v-if="!publicRepository" v-on:click="deletePnPFiles" v-bind:disabled="type.value === 'Interface' && !this.selectedInterfaces.value.length || type.value === 'CapabilityModel' && !this.selectedCapabilityModels.value.length">Delete</button>
-  <button class="with-icon refresh right" v-on:click="refreshPnPFileList"></button>
+  <button class="with-icon new" v-if="!publicRepository" v-on:click="createDigitalTwinFile">New</button>
+  <button class="with-icon download" v-on:click="editDigitalTwinFiles" v-bind:disabled="type.value === 'Interface' && !this.selectedInterfaces.value.length || type.value === 'CapabilityModel' && !this.selectedCapabilityModels.value.length">Download</button>
+  <button class="with-icon publish" v-if="false" v-on:click="publishDigitalTwinFiles" v-bind:disabled="hasNoItemToPublish()">Publish</button>
+  <button class="with-icon delete" v-if="!publicRepository" v-on:click="deleteDigitalTwinFiles" v-bind:disabled="type.value === 'Interface' && !this.selectedInterfaces.value.length || type.value === 'CapabilityModel' && !this.selectedCapabilityModels.value.length">Delete</button>
+  <button class="with-icon refresh right" v-on:click="refreshDigitalTwinFileList"></button>
   <button class="with-icon filter right" v-on:click="showHideSearchBar"></button>
 </div>
 <div class="with-icon search-bar">
@@ -76,37 +76,37 @@
   <td v-bind:title="interface.version"><div class="td_inner">{{ interface.version }}</div></td>
   <td>{{ interface.tenantName }}</td>
 </tr>
-<tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinInterfaces.value">
   <td></td><td></td><td></td><td></td><td></td>
 </tr>
-<tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinInterfaces.value">
   <td></td><td></td><td></td><td></td><td></td>
 </tr>
-<tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinInterfaces.value">
   <td></td><td></td><td></td><td></td><td></td>
 </tr>
-<tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinInterfaces.value">
   <td></td><td></td><td></td><td></td><td></td>
 </tr>
-<tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinInterfaces.value">
   <td></td><td></td><td></td><td></td><td></td>
 </tr>
-<tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinInterfaces.value">
   <td></td><td></td><td></td><td></td><td></td>
 </tr>
-<tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinInterfaces.value">
   <td></td><td></td><td></td><td></td><td></td>
 </tr>
-<tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinInterfaces.value">
   <td></td><td></td><td></td><td></td><td></td>
 </tr>
-<tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinInterfaces.value">
   <td></td><td></td><td></td><td></td><td></td>
 </tr>
-<tr class="loading-pnp-files" v-show="loadingPnPInterfaces.value">
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinInterfaces.value">
   <td></td><td></td><td></td><td></td><td></td>
 </tr>
-<tr v-show="!loadingPnPInterfaces.value && interfaceNextToken.value">
+<tr v-show="!loadingDigitalTwinInterfaces.value && interfaceNextToken.value">
   <td colspan="5"></td>
 </tr>
 </tbody>
@@ -133,37 +133,37 @@
   <td v-bind:title="capability.version"><div class="td_inner">{{ capability.version }}</div></td>
   <td>{{ capability.tenantName }}</td>
 </tr>
-<tr class="loading-pnp-files" v-show="loadingPnPCapabilityModels.value">
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinCapabilityModels.value">
   <td></td><td></td><td></td><td></td><td></td>
 </tr>
-<tr class="loading-pnp-files" v-show="loadingPnPCapabilityModels.value">
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinCapabilityModels.value">
   <td></td><td></td><td></td><td></td><td></td>
 </tr>
-<tr class="loading-pnp-files" v-show="loadingPnPCapabilityModels.value">
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinCapabilityModels.value">
   <td></td><td></td><td></td><td></td><td></td>
 </tr>
-<tr class="loading-pnp-files" v-show="loadingPnPCapabilityModels.value">
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinCapabilityModels.value">
   <td></td><td></td><td></td><td></td><td></td>
 </tr>
-<tr class="loading-pnp-files" v-show="loadingPnPCapabilityModels.value">
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinCapabilityModels.value">
   <td></td><td></td><td></td><td></td><td></td>
 </tr>
-<tr class="loading-pnp-files" v-show="loadingPnPCapabilityModels.value">
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinCapabilityModels.value">
   <td></td><td></td><td></td><td></td><td></td>
 </tr>
-<tr class="loading-pnp-files" v-show="loadingPnPCapabilityModels.value">
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinCapabilityModels.value">
   <td></td><td></td><td></td><td></td><td></td>
 </tr>
-<tr class="loading-pnp-files" v-show="loadingPnPCapabilityModels.value">
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinCapabilityModels.value">
   <td></td><td></td><td></td><td></td><td></td>
 </tr>
-<tr class="loading-pnp-files" v-show="loadingPnPCapabilityModels.value">
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinCapabilityModels.value">
   <td></td><td></td><td></td><td></td><td></td>
 </tr>
-<tr class="loading-pnp-files" v-show="loadingPnPCapabilityModels.value">
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinCapabilityModels.value">
   <td></td><td></td><td></td><td></td><td></td>
 </tr>
-<tr v-show="!loadingPnPCapabilityModels.value && capabilityNextToken.value">
+<tr v-show="!loadingDigitalTwinCapabilityModels.value && capabilityNextToken.value">
   <td colspan="5"></td>
 </tr>
 </tbody>

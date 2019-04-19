@@ -31,10 +31,10 @@ var repository = new Vue({
     filterKeywords: '',
     searchKeywords: '',
     filterTagsOrAnd: 'and',
-    loadingPnPInterfaces: {
+    loadingDigitalTwinInterfaces: {
       value: true
     },
-    loadingPnPCapabilityModels: {
+    loadingDigitalTwinCapabilityModels: {
       value: true
     },
     allTags: {
@@ -68,12 +68,11 @@ var repository = new Vue({
       const filterReg = new RegExp(`(${filterKeywords})`, 'ig');
       return value.replace(filterReg, '<em>$1</em>');
     },
-    createPnPFile,
-    deletePnPFiles,
-    editPnPFiles,
-    publishPnPFiles,
-    getNextPagePnPFiles,
-    refreshPnPFileList,
+    createDigitalTwinFile,
+    deleteDigitalTwinFiles,
+    editDigitalTwinFiles,
+    getNextPageDigitalTwinFiles,
+    refreshDigitalTwinFileList,
     showHideSearchBar,
     showHideStatusSelector,
     showHideTagSelector,
@@ -91,8 +90,8 @@ var repository = new Vue({
     clearKeywords
   },
   created: function() {
-    getNextPagePnPFiles.call(this, 'Interface');
-    getNextPagePnPFiles.call(this, 'CapabilityModel');
+    getNextPageDigitalTwinFiles.call(this, 'Interface');
+    getNextPageDigitalTwinFiles.call(this, 'CapabilityModel');
   }
 });
 
@@ -104,84 +103,67 @@ function encodeHTML(value) {
   return html;
 }
 
-function deletePnPFiles() {
+function deleteDigitalTwinFiles() {
   const fileIds = this.type.value === 'Interface' ? this.selectedInterfaces.value : this.selectedCapabilityModels.value;
-  command('iotworkbench.deleteMetamodelFiles', fileIds, this.type.value, refreshPnPFileList.bind(this));
+  command('iotworkbench.deleteMetamodelFiles', fileIds, this.type.value, refreshDigitalTwinFileList.bind(this));
 }
 
-function editPnPFiles() {
+function editDigitalTwinFiles() {
   const fileIds = this.type.value === 'Interface' ? this.selectedInterfaces.value : this.selectedCapabilityModels.value;
-  command('iotworkbench.editMetamodelFiles', fileIds, this.type.value, this.publicRepository, refreshPnPFileList.bind(this));
+  command('iotworkbench.editMetamodelFiles', fileIds, this.type.value, this.publicRepository, refreshDigitalTwinFileList.bind(this));
 }
 
-function publishPnPFiles() {
-  const fullItemList = this.type.value === 'Interface' ? this.interfaceList.value : this.capabilityList.value;
-  const fileIds = this.type.value === 'Interface' ? this.selectedInterfaces.value : this.selectedCapabilityModels.value;
-  const publishFileIds = [];
-  for (let i = 0; i < fileIds.length; i++) {
-    const item = fullItemList.find(item => item.id === fileIds[i]);
-    if (item && !item.published) {
-      publishFileIds.push(item.id);
-    }
-  }
-
-  if (publishFileIds.length) {
-    command('iotworkbench.publishPnPFiles', publishFileIds, this.type.value, refreshPnPFileList.bind(this));
-  }
-}
-
-function createPnPFile() {
+function createDigitalTwinFile() {
   const commandName = this.type.value === 'Interface' ? 'iotworkbench.digitalTwinCreateInterface' : 'iotworkbench.digitalTwinCreateCapabilityModel';
   command(commandName);
 }
 
-function getNextPagePnPFiles(fileType) {
+function getNextPageDigitalTwinFiles(fileType) {
   fileType = typeof fileType === 'string' ? fileType : this.type.value;
-  let commandName, fileList, nextToken, loadingPnPFiles;
+  let commandName, fileList, nextToken, loadingDigitalTwinFiles;
   
   if(fileType === 'Interface') {
     commandName = 'iotworkbench.getInterfaces';
     fileList = this.interfaceList;
     nextToken = this.interfaceNextToken;
-    loadingPnPFiles = this.loadingPnPInterfaces;
+    loadingDigitalTwinFiles = this.loadingDigitalTwinInterfaces;
     tableId = 'interfaceListTable';
   } else {
     commandName = 'iotworkbench.getCapabilityModels';
     fileList = this.capabilityList;
     nextToken = this.capabilityNextToken;
-    loadingPnPFiles = this.loadingPnPCapabilityModels;
+    loadingDigitalTwinFiles = this.loadingDigitalTwinCapabilityModels;
     tableId = 'capabilityListTable';
   }
 
-  loadingPnPFiles.value = true;
+  loadingDigitalTwinFiles.value = true;
 
   command(commandName, this.searchKeywords, this.publicRepository, 50, nextToken.value, res => {
-    console.log(res)
     Vue.set(fileList, 'value', fileList.value.concat(res.result.results));
     Vue.set(nextToken, 'value', res.result.continuationToken);
-    Vue.set(loadingPnPFiles, 'value', false);
+    Vue.set(loadingDigitalTwinFiles, 'value', false);
   });
 }
 
-function refreshPnPFileList() {
+function refreshDigitalTwinFileList() {
   let nextToken, selectedList;
   if(this.type.value === 'Interface') {
     fileList = this.interfaceList;
     nextToken = this.interfaceNextToken;
     selectedList = this.selectedInterfaces;
-    loadingPnPFiles = this.loadingPnPInterfaces;
+    loadingDigitalTwinFiles = this.loadingDigitalTwinInterfaces;
   } else {
     fileList = this.capabilityList;
     nextToken = this.capabilityNextToken;
     selectedList = this.selectedCapabilityModels;
-    loadingPnPFiles = this.loadingPnPCapabilityModels;
+    loadingDigitalTwinFiles = this.loadingDigitalTwinCapabilityModels;
   }
 
   Vue.set(fileList, 'value', []);
   Vue.set(nextToken, 'value', '');
   Vue.set(selectedList, 'value', []);
-  Vue.set(loadingPnPFiles, 'value', true);
-  setTimeout(getNextPagePnPFiles.bind(this), 1000); // wait for server refresh
+  Vue.set(loadingDigitalTwinFiles, 'value', true);
+  setTimeout(getNextPageDigitalTwinFiles.bind(this), 1000); // wait for server refresh
 }
 
 function showHideSearchBar() {
@@ -316,8 +298,8 @@ function onScrollTable(event) {
     return;
   }
   const nextToken = this.type.value === 'Interface' ? this.interfaceNextToken.value : this.capabilityNextToken.value;
-  const loadingPnPFiles = this.type.value === 'Interface' ? this.loadingPnPInterfaces : this.loadingPnPCapabilityModels;
-  if (!nextToken || this.nextPageLoadingCounter || loadingPnPFiles.value) {
+  const loadingDigitalTwinFiles = this.type.value === 'Interface' ? this.loadingDigitalTwinInterfaces : this.loadingDigitalTwinCapabilityModels;
+  if (!nextToken || this.nextPageLoadingCounter || loadingDigitalTwinFiles.value) {
     return;
   }
   this.nextPageLoadingCounter = setTimeout(() => {
@@ -325,7 +307,7 @@ function onScrollTable(event) {
     const heightOffset = event.target.scrollTop;
     const viewHeight = event.target.offsetHeight;
     if (viewHeight + heightOffset >= totalHeight) {
-      this.getNextPagePnPFiles(this.type);
+      this.getNextPageDigitalTwinFiles(this.type);
     }
     this.nextPageLoadingCounter = null;
   }, 1000);
@@ -388,11 +370,11 @@ function getDisplayName(displayName, locale) {
 function searchOnServer() {
   this.searchKeywords = this.filterKeywords;
   this.filterKeywords = '';
-  this.refreshPnPFileList();
+  this.refreshDigitalTwinFileList();
 }
 
 function clearKeywords() {
   this.searchKeywords = '';
   this.filterKeywords = '';
-  this.refreshPnPFileList();
+  this.refreshDigitalTwinFileList();
 }

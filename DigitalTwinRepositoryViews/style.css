@@ -146,12 +146,12 @@ header h1.company-name {
   height: 30px;
 }
 
-header .pnp-file-type-tab {
+header .digital-twin-file-type-tab {
   font-size: 15px;
   margin-bottom: 20px;
 }
 
-header .pnp-file-type-tab span {
+header .digital-twin-file-type-tab span {
   margin-right: 20px;
   height: 25px;
   line-height: 25px;
@@ -162,7 +162,7 @@ header .pnp-file-type-tab span {
   cursor: pointer;
 }
 
-header .pnp-file-type-tab span.active {
+header .digital-twin-file-type-tab span.active {
   border-color: #0078d7;
 }
 
@@ -542,7 +542,7 @@ button.status {
   box-sizing: border-box;
 }
 
-.content table tr:not(:last-child):not(.loading-pnp-files) {
+.content table tr:not(:last-child):not(.loading-digital-twin-files) {
   cursor: pointer;
 }
 
@@ -636,19 +636,19 @@ button.status {
   border-radius: 5px;
 }
 
-.content table tbody tr:not(:last-child):not(.loading-pnp-files):hover {
+.content table tbody tr:not(:last-child):not(.loading-digital-twin-files):hover {
   background: rgba(0, 120, 215, 0.1);
 }
 
-.content table tbody tr:not(:last-child):not(.loading-pnp-files):active {
+.content table tbody tr:not(:last-child):not(.loading-digital-twin-files):active {
   background: rgba(0, 120, 215, 0.2);
 }
 
-.content table tr.loading-pnp-files {
+.content table tr.loading-digital-twin-files {
   cursor: default;
 }
 
-.content table tr.loading-pnp-files td::before {
+.content table tr.loading-digital-twin-files td::before {
   content: "";
   display: block;
   height: 8px;
@@ -657,7 +657,7 @@ button.status {
   position: absolute;
 }
 
-.content table tr.loading-pnp-files td:nth-child(1)::before {
+.content table tr.loading-digital-twin-files td:nth-child(1)::before {
   height: 16px;
   width: 16px;
   border: 1px solid #c8c8c8;
@@ -666,24 +666,24 @@ button.status {
   left: 1px;
 }
 
-.content table tr.loading-pnp-files td:nth-child(2)::before {
+.content table tr.loading-digital-twin-files td:nth-child(2)::before {
   width: 80px;
 }
 
-.content table tr.loading-pnp-files td:nth-child(3)::before {
+.content table tr.loading-digital-twin-files td:nth-child(3)::before {
   width: 120px;
 }
 
-.content table tr.loading-pnp-files td:nth-child(4)::before {
+.content table tr.loading-digital-twin-files td:nth-child(4)::before {
   width: 70px;
   /* right: 10px; */
 }
 
-.content table tr.loading-pnp-files td:nth-child(5)::before {
+.content table tr.loading-digital-twin-files td:nth-child(5)::before {
   width: 40px;
 }
 
-.content table tr.loading-pnp-files td:nth-child(6)::before {
+.content table tr.loading-digital-twin-files td:nth-child(6)::before {
   width: 40px;
 }
 
@@ -857,7 +857,7 @@ body.vscode-dark header .tag-selector-search-bar .tag-search-bar input[type=text
   color: #ccc;
 }
 
-body.vscode-dark .content table tr.loading-pnp-files td:not(:first-child)::before {
+body.vscode-dark .content table tr.loading-digital-twin-files td:not(:first-child)::before {
   background: rgba(255, 255, 255, 0.2);
 }
 
@@ -865,11 +865,11 @@ body.vscode-dark .content table tr {
   border-bottom-color: rgba(255, 255, 255, 0.1)
 }
 
-body.vscode-dark .content table tbody tr:not(:last-child):not(.loading-pnp-files):hover {
+body.vscode-dark .content table tbody tr:not(:last-child):not(.loading-digital-twin-files):hover {
   background: rgba(255, 255, 255, 0.1);
 }
 
-body.vscode-dark .content table tbody tr:not(:last-child):not(.loading-pnp-files):active {
+body.vscode-dark .content table tbody tr:not(:last-child):not(.loading-digital-twin-files):active {
   background: rgba(255, 255, 255, 0.2);
 }
 
