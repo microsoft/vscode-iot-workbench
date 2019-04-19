@@ -19,15 +19,15 @@ export abstract class AnsiCCodeGeneratorBase implements CodeGenerator {
   async GenerateAnsiCCodeCore(
       targetPath: string, filePath: string,
       connectionString: string): Promise<boolean> {
-    // Invoke PnP toolset to generate the code
+    // Invoke DigitalTwinCodeGen toolset to generate the code
     const platform = os.platform();
     const homeDir = os.homedir();
     const cmdPath = path.join(homeDir, CodeGenConstants.codeGeneratorToolPath);
     let codeGenCommand = '';
     if (platform === 'win32') {
-      codeGenCommand = 'PnPCodeGen.exe';
+      codeGenCommand = 'DigitalTwinCodeGen.exe';
     } else {
-      codeGenCommand = './PnPCodeGen';
+      codeGenCommand = './DigitalTwinCodeGen';
     }
 
     const command = `${codeGenCommand} scaffold  --jsonldUri "${

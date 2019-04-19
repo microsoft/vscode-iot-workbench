@@ -17,7 +17,7 @@ include_directories(./utilities)
 include_directories(../deps/parson)
 include_directories(${SHARED_UTIL_INC_FOLDER})
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
-include_directories(${PNP_CLIENT_INC_FOLDER})
+include_directories(${DIGITALTWIN_CLIENT_INC_FOLDER})
 
 add_executable({PROJECT_NAME} ${{PROJECT_NAME}_src})
 

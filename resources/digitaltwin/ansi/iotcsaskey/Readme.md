@@ -38,9 +38,9 @@ For more details about setting up development environment for compiling the C De
       // TODO: specify your device registration ID
       static const char* registrationId = "[registration Id]"; 
 
-      // TODO: Fill in PNP_DEVICE_CAPABILITY_MODEL_URI and PNP_MODEL_REPOSITORY_URI if you indend on using IoT Central.
-      #define PNP_DEVICE_CAPABILITY_MODEL_URI "[your capabilityModel Id]"
-      #define PNP_MODEL_REPOSITORY_URI "[your model repository service URI]"
+      // TODO: Fill in DIGITALTWIN_DEVICE_CAPABILITY_MODEL_URI and DIGITALTWIN_MODEL_REPOSITORY_URI if you indend on using IoT Central.
+      #define DIGITALTWIN_DEVICE_CAPABILITY_MODEL_URI "[your capabilityModel Id]"
+      #define DIGITALTWIN_MODEL_REPOSITORY_URI "[your model repository service URI]"
       ```
 
 1. Open the `CMakeLists.txt` in the **azure-iot-sdk-c-pnp** folder. Include the **{PROJECT_NAME}** folder so that it will be built together with the Device SDK. Add the line below to the end of the file.
@@ -101,9 +101,9 @@ For more details about setting up development environment for compiling the C De
       // TODO: specify your device registration ID
       static const char* registrationId = "[registration Id]"; 
 
-      // TODO: Fill in PNP_DEVICE_CAPABILITY_MODEL_URI and PNP_MODEL_REPOSITORY_URI if you indend on using IoT Central.
-      #define PNP_DEVICE_CAPABILITY_MODEL_URI "[your capabilityModel Id]"
-      #define PNP_MODEL_REPOSITORY_URI "[your model repository service URI]"
+      // TODO: Fill in DIGITALTWIN_DEVICE_CAPABILITY_MODEL_URI and DIGITALTWIN_MODEL_REPOSITORY_URI if you indend on using IoT Central.
+      #define DIGITALTWIN_DEVICE_CAPABILITY_MODEL_URI "[your capabilityModel Id]"
+      #define DIGITALTWIN_MODEL_REPOSITORY_URI "[your model repository service URI]"
       ```
 
 1. Open the `CMakeLists.txt` in the **azure-iot-sdk-c-pnp** folder. Include the **{PROJECT_NAME}** folder so that it will be built together with the Device SDK. Add the line below to the end of the file.
