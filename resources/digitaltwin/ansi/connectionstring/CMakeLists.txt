@@ -21,4 +21,4 @@ include_directories(${DIGITALTWIN_CLIENT_INC_FOLDER})
 
 add_executable({PROJECT_NAME} ${{PROJECT_NAME}_src})
 
-target_link_libraries({PROJECT_NAME} parson iothub_client pnp_client)
+target_link_libraries({PROJECT_NAME} parson iothub_client digitaltwin_client)
