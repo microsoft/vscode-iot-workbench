@@ -31,7 +31,7 @@ typedef enum APP_DPS_REGISTRATION_STATUS_TAG
 const SECURE_DEVICE_TYPE secureDeviceTypeForProvisioning = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
 const IOTHUB_SECURITY_TYPE secureDeviceTypeForIotHub = IOTHUB_SECURITY_TYPE_SYMMETRIC_KEY;
 
-// Note: You cannot use an arbitrary DPS instance with the DigitalTwinIoT Central example.
+// Note: You cannot use an arbitrary DPS instance with the DigitalTwin IoT Central example.
 static const char* globalDpsEndpoint = "global.azure-devices-provisioning.net";
 
 // TODO: Specify DPS scope ID if you intend on using IoT Central. 
@@ -61,7 +61,7 @@ static const int dpsRegistrationPollSleep = 1000;
 // Maximum amount of times we'll poll for DPS registration being ready.
 static const int dpsRegistrationMaxPolls = 60;
 
-// State of DigitalTwinregistration process.  We cannot proceed with DigitalTwinuntil we get into the state APP_DIGITALTWIN_REGISTRATION_SUCCEEDED.
+// State of DigitalTwin registration process.  We cannot proceed with DigitalTwin until we get into the state APP_DIGITALTWIN_REGISTRATION_SUCCEEDED.
 typedef enum APP_DIGITALTWIN_REGISTRATION_STATUS_TAG
 {
     APP_DIGITALTWIN_REGISTRATION_PENDING,
@@ -236,7 +236,7 @@ void setup() {
     // Initialize device model application
     digitalTwinInitialized = initializeIotHubViaProvisioning(false);
     digitalWrite(LED_AZURE, 1);
-    snprintf(buff, sizeof(buff), "%s\r\nDigitalTwinenabled\r\nRunning...\r\n", getDevKitName());
+    snprintf(buff, sizeof(buff), "%s\r\nDigitalTwin enabled\r\nRunning...\r\n", getDevKitName());
     Screen.print(1, buff);
 }
 
