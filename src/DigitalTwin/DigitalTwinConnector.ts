@@ -19,12 +19,12 @@ export class DigitalTwinConnector {
     }
 
     try {
-      const pnpMetamodelRepositoryClient =
+      const dtMetamodelRepositoryClient =
           new DigitalTwinMetamodelRepositoryClient(connectionString);
       const builder =
           DigitalTwinConnectionStringBuilder.Create(connectionString);
       // try to get one interface.
-      const result = await pnpMetamodelRepositoryClient.SearchInterfacesAsync(
+      const result = await dtMetamodelRepositoryClient.SearchInterfacesAsync(
           '', null, builder.RepositoryIdValue, 1);
       // Save connection string info
       await ConfigHandler.update(

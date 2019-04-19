@@ -95,32 +95,32 @@
         "category": "Azure IoT Device Workbench"
       },
       {
-        "command": "iotworkbench.pnpOpenRepository",
+        "command": "iotworkbench.digitalTwinOpenRepository",
         "title": "Open Model Repository...",
         "category": "Azure IoT Digital Twin"
       },
       {
-        "command": "iotworkbench.pnpSignOutRepository",
+        "command": "iotworkbench.digitalTwinSignOutRepository",
         "title": "Sign out Model Repository",
         "category": "Azure IoT Digital Twin"
       },
       {
-        "command": "iotworkbench.pnpCreateInterface",
+        "command": "iotworkbench.digitalTwinCreateInterface",
         "title": "Create Interface...",
         "category": "Azure IoT Digital Twin"
       },
       {
-        "command": "iotworkbench.pnpCreateCapabilityModel",
+        "command": "iotworkbench.digitalTwinCreateCapabilityModel",
         "title": "Create Capability Model...",
         "category": "Azure IoT Digital Twin"
       },
       {
-        "command": "iotworkbench.pnpSubmitFile",
+        "command": "iotworkbench.digitalTwinSubmitFile",
         "title": "Submit files to Model Repository...",
         "category": "Azure IoT Digital Twin"
       },
       {
-        "command": "iotworkbench.pnpGenerateCode",
+        "command": "iotworkbench.digitalTwinGenerateCode",
         "title": "Generate Device Code Stub...",
         "category": "Azure IoT Digital Twin"
       }

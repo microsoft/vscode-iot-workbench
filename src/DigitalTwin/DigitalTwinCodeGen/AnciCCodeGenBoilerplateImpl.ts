@@ -14,7 +14,7 @@ export class AnciCCodeGenBoilerplateImpl extends AnsiCCodeGeneratorBase {
   async GenerateCode(
       targetPath: string, filePath: string, fileCoreName: string,
       connectionString: string): Promise<boolean> {
-    // Invoke PnP toolset to generate the code
+    // Invoke toolset to generate the code
     const retvalue = await this.GenerateAnsiCCodeCore(
         targetPath, filePath, connectionString);
 

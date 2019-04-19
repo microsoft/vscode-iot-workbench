@@ -5,12 +5,12 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {SearchResults} from '../src/pnp/DigitalTwinApi/DataContracts/SearchResults';
-import {DigitalTwinMetamodelRepositoryClient} from '../src/pnp/DigitalTwinApi/DigitalTwinMetamodelRepositoryClient';
+import {SearchResults} from '../src/DigitalTwin/DigitalTwinApi/DataContracts/SearchResults';
+import {DigitalTwinMetamodelRepositoryClient} from '../src/DigitalTwin/DigitalTwinApi/DigitalTwinMetamodelRepositoryClient';
 
 import {TestExtensionContext} from './stub';
-import {DigitalTwinSharedAccessKey} from '../src/pnp/DigitalTwinApi/DigitalTwinSharedAccessKey';
-import {DigitalTwinConnectionStringBuilder} from '../src/pnp/DigitalTwinApi/DigitalTwinConnectionStringBuilder';
+import {DigitalTwinSharedAccessKey} from '../src/DigitalTwin/DigitalTwinApi/DigitalTwinSharedAccessKey';
+import {DigitalTwinConnectionStringBuilder} from '../src/DigitalTwin/DigitalTwinApi/DigitalTwinConnectionStringBuilder';
 
 const constants = {
   connectionString: '',

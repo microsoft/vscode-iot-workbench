@@ -74,24 +74,24 @@ export class CodeGenerateCore {
     }
 
     // Step 1: list all files from device model folder for selection.
-    const pnpFiles = fs.listSync(rootPath);
+    const metamodelFiles = fs.listSync(rootPath);
 
-    const pnpItems: vscode.QuickPickItem[] = [];
-    pnpFiles.forEach((filePath: string) => {
+    const metamodelItems: vscode.QuickPickItem[] = [];
+    metamodelFiles.forEach((filePath: string) => {
       const fileName = path.basename(filePath);
       if (fileName.endsWith(DigitalTwinConstants.capabilityModelSuffix)) {
-        pnpItems.push({label: fileName, description: ''});
+        metamodelItems.push({label: fileName, description: ''});
       }
     });
 
-    if (pnpItems.length === 0) {
+    if (metamodelItems.length === 0) {
       const message =
           'Unable to find capability model files in the folder. Please open a folder that contains capability model files.';
       vscode.window.showWarningMessage(message);
       return false;
     }
 
-    const fileSelection = await vscode.window.showQuickPick(pnpItems, {
+    const fileSelection = await vscode.window.showQuickPick(metamodelItems, {
       ignoreFocusOut: true,
       matchOnDescription: true,
       matchOnDetail: true,
@@ -111,7 +111,7 @@ export class CodeGenerateCore {
 
     const selectedFilePath = path.join(rootPath, fileSelection.label);
 
-    // Get the connection string of the pnp repo
+    // Get the connection string of the digital twin repo
     let connectionString =
         ConfigHandler.get<string>(ConfigKey.modelRepositoryKeyName);
 
@@ -341,7 +341,7 @@ export class CodeGenerateCore {
 
     if (!targetConfigItem) {
       channel.appendLine(
-          'Unable to get the updated version the PnP Code Generator.');
+          'Unable to get the updated version the Digital Twin Code Generator.');
       return false;
     }
 
@@ -353,7 +353,7 @@ export class CodeGenerateCore {
     const codeGenCommandPath =
         path.join(homeDir, CodeGenConstants.codeGeneratorToolPath);
 
-    // Can we find the target dir for PnP Code Generator?
+    // Can we find the target dir for Code Generator?
     if (!fs.isDirectorySync(codeGenCommandPath)) {
       needUpgrade = true;
     } else {

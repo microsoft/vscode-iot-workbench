@@ -118,8 +118,6 @@ export class DigitalTwinMetamodelRepositoryClient {
           'The connection string is required to publish interface in organizational model repository.');
     }
 
-    // TODO:
-    // const parsedResult = PnPParser.ParsePnPInterface(pnpContext.content);
     return await this.MakeCreateOrUpdateRequestAsync(
         MetaModelType.Interface, content, etag, repositoryId);
   }
@@ -127,8 +125,6 @@ export class DigitalTwinMetamodelRepositoryClient {
   /// <summary>
   /// Updates the capability model with the new context content.
   /// </summary>
-  /// <param name="pnpContext"><see cref="PnPContext"/> object.</param>
-  /// <returns><see cref="PnPContext"/> object.</returns>
   async CreateOrUpdateCapabilityModelAsync(
       content: string, etag?: string,
       repositoryId?: string): Promise<DigitalTwinModelBase> {
@@ -142,9 +138,8 @@ export class DigitalTwinMetamodelRepositoryClient {
   }
 
   /// <summary>
-  /// Deletes an interface for given PnPUri.
+  /// Deletes an interface for given modelId.
   /// </summary>
-  /// <param name="pnpInterfaceUri"><see cref="PnPUri"/> object.</param>
   async DeleteInterfaceAsync(modelId: string, repositoryId?: string) {
     if (repositoryId && !this.dtSharedAccessKey) {
       throw new Error(
@@ -158,7 +153,6 @@ export class DigitalTwinMetamodelRepositoryClient {
   /// <summary>
   /// Deletes a capability model for given model id.
   /// </summary>
-  /// <param name="pnpCapabilityModelUri"><see cref="PnPUri"/> object.</param>
   async DeleteCapabilityModelAsync(modelId: string, repositoryId?: string) {
     if (repositoryId && !this.dtSharedAccessKey) {
       throw new Error(

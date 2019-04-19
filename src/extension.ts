@@ -16,12 +16,12 @@ import {ConfigHandler} from './configHandler';
 import {ConfigKey, EventNames} from './constants';
 import {TelemetryContext, callWithTelemetry, TelemetryWorker, TelemetryProperties} from './telemetry';
 import {UsbDetector} from './usbDetector';
-import {CodeGenerateCore} from './pnp/CodeGenerateCore';
-import {DigitalTwinMetaModelUtility, DigitalTwinMetaModelContext} from './pnp/DigitalTwinMetaModelUtility';
-import {DigitalTwinMetaModelParser, DigitalTwinMetaModelGraph} from './pnp/DigitalTwinMetaModelGraph';
-import {DeviceModelOperator} from './pnp/DeviceModelOperator';
-import {DigitalTwinMetaModelJsonParser} from './pnp/DigitalTwinMetaModelJsonParser';
-import {DigitalTwinDiagnostic} from './pnp/DigitalTwinDiagnostic';
+import {CodeGenerateCore} from './DigitalTwin/CodeGenerateCore';
+import {DigitalTwinMetaModelUtility, DigitalTwinMetaModelContext} from './DigitalTwin/DigitalTwinMetaModelUtility';
+import {DigitalTwinMetaModelParser, DigitalTwinMetaModelGraph} from './DigitalTwin/DigitalTwinMetaModelGraph';
+import {DeviceModelOperator} from './DigitalTwin/DeviceModelOperator';
+import {DigitalTwinMetaModelJsonParser} from './DigitalTwin/DigitalTwinMetaModelJsonParser';
+import {DigitalTwinDiagnostic} from './DigitalTwin/DigitalTwinDiagnostic';
 
 const impor = require('impor')(__dirname);
 const ioTProjectModule =
@@ -53,7 +53,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const deviceModelOperator = new DeviceModelOperator();
 
-  // PnP Language Server
+  // Digital Twin Language Server
   const dtContext = new DigitalTwinMetaModelUtility(context);
   const dtInterface: DigitalTwinMetaModelContext =
       await dtContext.getInterface();
@@ -536,50 +536,43 @@ export async function activate(context: vscode.ExtensionContext) {
       });
 
   vscode.commands.registerCommand(
-      'iotworkbench.deletePnPFiles',
+      'iotworkbench.deleteMetamodelFiles',
       async (interfaceIds: string[], metaModelValue: string) => {
-        await deviceModelOperator.DeletePnPFiles(
+        await deviceModelOperator.DeleteMetamodelFiles(
             interfaceIds, metaModelValue, context, outputChannel);
       });
 
   vscode.commands.registerCommand(
-      'iotworkbench.editPnPFiles',
+      'iotworkbench.editMetamodelFiles',
       async (
           fileIds: string[], metaModelValue: string,
           publicRepository = false) => {
-        await deviceModelOperator.DownloadAndEditPnPFiles(
+        await deviceModelOperator.DownloadAndEditMetamodelFiles(
             fileIds, metaModelValue, publicRepository, context, outputChannel);
       });
 
-  vscode.commands.registerCommand(
-      'iotworkbench.createPnPInterface', deviceModelCreateInterfaceProvider);
-
-  vscode.commands.registerCommand(
-      'iotworkbench.createPnPCapabilityModel',
-      deviceModelCreateCapabilityModelProvider);
-
   context.subscriptions.push(vscode.commands.registerCommand(
-      'iotworkbench.pnpOpenRepository', async () => {
+      'iotworkbench.digitalTwinOpenRepository', async () => {
         deviceModelOperator.ConnectModelRepository(context, outputChannel);
       }));
   context.subscriptions.push(vscode.commands.registerCommand(
-      'iotworkbench.pnpSignOutRepository', async () => {
+      'iotworkbench.digitalTwinSignOutRepository', async () => {
         deviceModelOperator.Disconnect();
       }));
   context.subscriptions.push(vscode.commands.registerCommand(
-      'iotworkbench.pnpCreateInterface', async () => {
+      'iotworkbench.digitalTwinCreateInterface', async () => {
         deviceModelOperator.CreateInterface(context, outputChannel);
       }));
   context.subscriptions.push(vscode.commands.registerCommand(
-      'iotworkbench.pnpCreateCapabilityModel', async () => {
+      'iotworkbench.digitalTwinCreateCapabilityModel', async () => {
         deviceModelOperator.CreateCapabilityModel(context, outputChannel);
       }));
   context.subscriptions.push(vscode.commands.registerCommand(
-      'iotworkbench.pnpSubmitFile', async () => {
+      'iotworkbench.digitalTwinSubmitFile', async () => {
         deviceModelOperator.SubmitMetaModelFiles(context, outputChannel);
       }));
   context.subscriptions.push(vscode.commands.registerCommand(
-      'iotworkbench.pnpGenerateCode', async () => {
+      'iotworkbench.digitalTwinGenerateCode', async () => {
         callWithTelemetry(
             EventNames.scaffoldDeviceStubEvent, outputChannel, true, context,
             codeGeneratorBinder);

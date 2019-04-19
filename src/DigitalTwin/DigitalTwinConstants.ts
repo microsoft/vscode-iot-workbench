@@ -7,7 +7,6 @@ export class DigitalTwinFileNames {
   static readonly graphFileName = 'graph.json';
   static readonly interfaceFileName = 'Interface.json';
   static readonly capabilityModelFileName = 'CapabilityModel.json';
-  static readonly iotworkbenchprojectFileName = '.vscode-pnp';
   static readonly settingsJsonFileName = 'settings.json';
   static readonly vscodeSettingsFolderName = '.vscode';
   static readonly sampleInterfaceName = 'sample.interface.json';
@@ -23,7 +22,7 @@ export class DigitalTwinConstants {
       'HostName=<Host Name>;RepositoryId=<repository id>;SharedAccessKeyName=<Shared AccessKey Name>;SharedAccessKey=<access Key>';
   static readonly interfaceSuffix = '.interface.json';
   static readonly capabilityModelSuffix = '.capabilitymodel.json';
-  static readonly pnpPrefix = '[Azure Digital Twins]';
+  static readonly dtPrefix = '[Azure Digital Twins]';
 }
 
 export class CodeGenConstants {
