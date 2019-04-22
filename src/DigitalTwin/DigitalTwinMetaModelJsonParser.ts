@@ -344,7 +344,7 @@ export class DigitalTwinMetaModelJsonParser {
         DigitalTwinMetaModelJsonParser.isValueString(json.tokens, offset);
     let key = '';
     let lastKey = '';
-    let type = '';
+    let type: string|string[] = [];
     let properties: string[] = [];
 
     if (isValue) {
@@ -368,7 +368,15 @@ export class DigitalTwinMetaModelJsonParser {
         const jsonValue = jsonValueFromStack as Json.ObjectValue;
 
         if (jsonValue.hasProperty('@type')) {
-          type = jsonValue.getPropertyValue('@type').toFriendlyString();
+          const typeObject = jsonValue.getPropertyValue('@type');
+          if (typeObject.valueKind === Json.ValueKind.StringValue) {
+            type = typeObject.toFriendlyString();
+          } else {
+            for (const currentTypeObject of (typeObject as Json.ArrayValue)
+                     .elements) {
+              type.push(currentTypeObject.toFriendlyString());
+            }
+          }
         } else if (jsonContext.length > 0) {
           let i = jsonContext.length - 1;
           let lastKeyInContext: number|string = '';
