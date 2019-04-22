@@ -745,7 +745,7 @@ export class DeviceModelOperator {
 
         const updatedContext =
             await dtMetamodelRepositoryClient.CreateOrUpdateInterfaceAsync(
-                fileContent, interfaceMetaData.etag, undefined);
+                fileContent, interfaceMetaData.etag, builder.RepositoryIdValue);
         channel.appendLine(`${
             DigitalTwinConstants
                 .dtPrefix} Submitting Azure IoT Digital Twin interface file: fileName: "${
