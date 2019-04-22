@@ -34,13 +34,13 @@ export class DigitalTwinMetamodelRepositoryClient {
             DigitalTwinConnectionStringBuilder.Create(storedConnectionString);
         this.metaModelRepositoryHostName = vscode.Uri.parse(builder.HostName);
       } else {
-        const extension =
-            vscode.extensions.getExtension(GlobalConstants.extensionId);
-        if (!extension) {
-          throw new Error('Failed to load extension configuration file.');
+        const dtRepositoryUrl =
+            ConfigHandler.get<string>(ConfigKey.digitalTwinRepositoryUrl);
+        if (!dtRepositoryUrl) {
+          throw new Error(
+              'The default Digital Twin Repository URL is not provided. Please set DigitalTwinRepositoryUrl in configuration.');
         }
-        this.metaModelRepositoryHostName =
-            vscode.Uri.parse(extension.packageJSON.DigitalTwinRepositoryUrl);
+        this.metaModelRepositoryHostName = vscode.Uri.parse(dtRepositoryUrl);
       }
     } else {
       const builder =

@@ -14,6 +14,7 @@ export class ConfigKey {
   static readonly shownHelpPage = 'ShownHelpPage';
   static readonly codeGeneratorVersion = 'DTCodeGenVersion';
   static readonly modelRepositoryKeyName = 'DTModelRepositoryKey';
+  static readonly digitalTwinRepositoryUrl = 'DigitalTwinRepositoryUrl';
 }
 
 export class EventNames {

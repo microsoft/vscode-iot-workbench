@@ -26,5 +26,5 @@ export class DigitalTwinConstants {
 }
 
 export class CodeGenConstants {
-  static readonly codeGeneratorToolPath = 'pnp-codegen';
+  static readonly codeGeneratorToolPath = 'digitaltwin-codegen';
 }
