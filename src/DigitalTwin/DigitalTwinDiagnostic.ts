@@ -75,7 +75,16 @@ export class DigitalTwinDiagnostic {
       dtContext: DigitalTwinMetaModelContext, document: vscode.TextDocument,
       jsonValue: Json.ObjectValue, jsonKey?: string) {
     if (jsonValue.hasProperty('@type')) {
-      return jsonValue.getPropertyValue('@type').toFriendlyString();
+      const typeValue = jsonValue.getPropertyValue('@type');
+      if (typeValue.valueKind === Json.ValueKind.StringValue) {
+        return typeValue.toFriendlyString();
+      } else if (typeValue.valueKind === Json.ValueKind.ArrayValue) {
+        const types: string[] = [];
+        for (const typeObject of (typeValue as Json.ArrayValue).elements) {
+          types.push(typeObject.toFriendlyString());
+        }
+        return types;
+      }
     }
 
     let types: string[];
@@ -198,10 +207,9 @@ export class DigitalTwinDiagnostic {
       jsonValue: Json.ObjectValue, jsonKey?: string) {
     let issues: Issue[] = [];
     const typeIssue =
-        this.getInvalidTypeIssue(dtContext, document, jsonValue, jsonKey);
+        this.getInvalidTypeIssues(dtContext, document, jsonValue, jsonKey);
     if (typeIssue) {
-      issues.push(typeIssue);
-      return issues;
+      return typeIssue;
     }
 
     const type = this.getType(dtContext, document, jsonValue, jsonKey);
@@ -221,9 +229,17 @@ export class DigitalTwinDiagnostic {
       dtContext = this.dtCapabilityModel;
     }
 
-    const missingRequiredPropertiesIssues =
-        this.getMissingRequiredPropertiesIssues(jsonValue, type);
-    issues = issues.concat(missingRequiredPropertiesIssues);
+    if (Array.isArray(type)) {
+      for (const currentType of type) {
+        const missingRequiredPropertiesIssues =
+            this.getMissingRequiredPropertiesIssues(jsonValue, currentType);
+        issues = issues.concat(missingRequiredPropertiesIssues);
+      }
+    } else {
+      const missingRequiredPropertiesIssues =
+          this.getMissingRequiredPropertiesIssues(jsonValue, type);
+      issues = issues.concat(missingRequiredPropertiesIssues);
+    }
 
     const unexpectedPropertiesIssues =
         this.getUnexpectedPropertiesIssues(dtContext, jsonValue, type);
@@ -327,7 +343,7 @@ export class DigitalTwinDiagnostic {
     return issues;
   }
 
-  getInvalidTypeIssue(
+  getInvalidTypeIssues(
       dtContext: DigitalTwinMetaModelContext, document: vscode.TextDocument,
       jsonValue: Json.ObjectValue, jsonKey?: string) {
     let types: string[];
@@ -345,13 +361,38 @@ export class DigitalTwinDiagnostic {
     }
 
     const type = this.getType(dtContext, document, jsonValue, jsonKey);
-    if (type && types.indexOf(type) === -1) {
+    if (typeof type === 'string' && types.indexOf(type) === -1) {
       const typeValue = jsonValue.getPropertyValue('@type') as Json.StringValue;
       const startIndex = typeValue.span.startIndex;
       const endIndex = typeValue.span.endIndex;
       const message = `Invalid type. Valid types:\n${types.join('\n')}`;
       const issue: Issue = {startIndex, endIndex, message};
-      return issue;
+      return [issue];
+    } else if (Array.isArray(type)) {
+      const typeValue = jsonValue.getPropertyValue('@type') as Json.ArrayValue;
+      const issues: Issue[] = [];
+      for (let index = 0; index < type.length; index++) {
+        const currentType = type[index];
+        const currentTypeObject = typeValue.elements[index] as Json.StringValue;
+        const startIndex = currentTypeObject.span.startIndex;
+        const endIndex = currentTypeObject.span.endIndex;
+        if (types.indexOf(currentType) === -1) {
+          issues.push({
+            startIndex,
+            endIndex,
+            message: `Invalid type. Valid types:\n${types.join('\n')}`
+          });
+        } else if (type.indexOf(currentType) !== index) {
+          issues.push({
+            startIndex,
+            endIndex,
+            message: `${currentType} has already been added before.`
+          });
+        }
+      }
+      if (issues.length) {
+        return issues;
+      }
     }
 
     return null;
@@ -401,11 +442,24 @@ export class DigitalTwinDiagnostic {
 
   getUnexpectedPropertiesIssues(
       dtContext: DigitalTwinMetaModelContext, jsonValue: Json.ObjectValue,
-      type: string) {
-    let properties = this._dtParser.getTypedPropertiesFromType(dtContext, type)
-                         .map(property => property.label);
-    properties = uniq(
-        properties.concat(this._dtParser.getRequiredPropertiesFromType(type)));
+      type: string|string[]) {
+    let properties: string[] = [];
+    if (Array.isArray(type)) {
+      for (const currentType of type) {
+        const currentProperties =
+            this._dtParser.getTypedPropertiesFromType(dtContext, currentType)
+                .map(property => property.label);
+        properties = properties.concat(
+            currentProperties,
+            this._dtParser.getRequiredPropertiesFromType(currentType));
+      }
+    } else {
+      properties = this._dtParser.getTypedPropertiesFromType(dtContext, type)
+                       .map(property => property.label);
+      properties =
+          properties.concat(this._dtParser.getRequiredPropertiesFromType(type));
+    }
+    properties = uniq(properties);
     const issues: Issue[] = [];
 
     for (let i = 0; i < jsonValue.propertyNames.length; i++) {

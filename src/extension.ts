@@ -222,7 +222,6 @@ export async function activate(context: vscode.ExtensionContext) {
               } else {
                 values = [contextType];
               }
-
             } else {
               values = dtParser.getStringValuesFromShortName(
                   dtContext, jsonInfo.key);
@@ -259,8 +258,36 @@ export async function activate(context: vscode.ExtensionContext) {
                   jsonInfo.properties.indexOf('@context') === -1) {
                 completionKeyList.push({label: '@context', required: true});
               }
-              keyList =
-                  dtParser.getTypedPropertiesFromType(dtContext, jsonInfo.type);
+              if (Array.isArray(jsonInfo.type)) {
+                for (const currentType of jsonInfo.type) {
+                  keyList = keyList.concat(dtParser.getTypedPropertiesFromType(
+                      dtContext, currentType));
+                }
+                const completionObject: {
+                  [key: string]: {required: boolean, type: string|undefined}
+                } = {};
+                for (const keyObject of keyList) {
+                  completionObject[keyObject.label] = {
+                    required: completionObject[keyObject.label] &&
+                            completionObject[keyObject.label].required ||
+                        keyObject.required,
+                    type: completionObject[keyObject.label] ?
+                        completionObject[keyObject.label].type :
+                        keyObject.type
+                  };
+                }
+                keyList = [];
+                for (const key of Object.keys(completionObject)) {
+                  keyList.push({
+                    label: key,
+                    required: completionObject[key].required,
+                    type: completionObject[key].type
+                  });
+                }
+              } else {
+                keyList = dtParser.getTypedPropertiesFromType(
+                    dtContext, jsonInfo.type);
+              }
             } else {
               keyList = [{label: '@type', required: true}];
             }

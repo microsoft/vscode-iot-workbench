@@ -84,7 +84,7 @@ export class DigitalTwinMetaModelParser {
     // }
 
     // for (const edge of this.graph.Edges) {
-    //     if (edge.Label === PnpParser.LABEL.LABEL && edge.TargetNode.Value ===
+    //     if (edge.Label === DigitalTwinMetaModelParser.LABEL.LABEL && edge.TargetNode.Value ===
     //     type) {
     //         this.cache.IdFromLabel[type] = edge.SourceNode.Id;
     //         return edge.SourceNode.Id;
@@ -138,8 +138,9 @@ export class DigitalTwinMetaModelParser {
       return this.cache.TypedPropertiesFromId[id];
     }
     const keys = this.getPropertiesFromId(dtContext, id);
-    const type = this.getLabelFromId(dtContext, id);
-    const getRequiredProperties = this.getRequiredPropertiesFromType(type);
+    const type = this.getShortNameFromId(id);
+    const getRequiredProperties =
+        type ? this.getRequiredPropertiesFromType(type) : [];
     const results: Array<{label: string, required: boolean, type: string}> = [];
     for (const key of keys) {
       const id = this.getIdFromShortName(dtContext, key);
@@ -280,7 +281,7 @@ export class DigitalTwinMetaModelParser {
     return id;
     // for (const edge of this.graph.Edges) {
     //     if (edge.SourceNode.Id === id && edge.Label ===
-    //     PnpParser.LABEL.LABEL) {
+    //     DigitalTwinMetaModelParser.LABEL.LABEL) {
     //         return edge.TargetNode.Value;
     //     }
     // }
