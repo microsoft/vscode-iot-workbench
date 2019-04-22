@@ -274,15 +274,10 @@ export class DeviceModelOperator {
         ignoreFocusOut: true
       };
 
-      const repoConnectionString = await vscode.window.showInputBox(option);
+      connectionString = await vscode.window.showInputBox(option);
 
-      if (!repoConnectionString) {
+      if (!connectionString) {
         return false;
-      } else {
-        await ConfigHandler.update(
-            ConfigKey.modelRepositoryKeyName, repoConnectionString,
-            vscode.ConfigurationTarget.Global);
-        connectionString = repoConnectionString;
       }
     }
 
@@ -290,6 +285,10 @@ export class DeviceModelOperator {
         await DigitalTwinConnector.ConnectMetamodelRepository(connectionString);
 
     if (result) {
+      await ConfigHandler.update(
+          ConfigKey.modelRepositoryKeyName, connectionString,
+          vscode.ConfigurationTarget.Global);
+
       DeviceModelOperator.vscexpress = DeviceModelOperator.vscexpress ||
           new VSCExpress(context, 'DigitalTwinRepositoryViews');
       await DeviceModelOperator.vscexpress.open(
