@@ -206,10 +206,10 @@ export class DigitalTwinDiagnostic {
       dtContext: DigitalTwinMetaModelContext, document: vscode.TextDocument,
       jsonValue: Json.ObjectValue, jsonKey?: string) {
     let issues: Issue[] = [];
-    const typeIssue =
+    const typeIssues =
         this.getInvalidTypeIssues(dtContext, document, jsonValue, jsonKey);
-    if (typeIssue) {
-      return typeIssue;
+    if (typeIssues) {
+      return typeIssues;
     }
 
     const type = this.getType(dtContext, document, jsonValue, jsonKey);

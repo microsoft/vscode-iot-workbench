@@ -84,8 +84,8 @@ export class DigitalTwinMetaModelParser {
     // }
 
     // for (const edge of this.graph.Edges) {
-    //     if (edge.Label === DigitalTwinMetaModelParser.LABEL.LABEL && edge.TargetNode.Value ===
-    //     type) {
+    //     if (edge.Label === DigitalTwinMetaModelParser.LABEL.LABEL &&
+    //     edge.TargetNode.Value === type) {
     //         this.cache.IdFromLabel[type] = edge.SourceNode.Id;
     //         return edge.SourceNode.Id;
     //     }
