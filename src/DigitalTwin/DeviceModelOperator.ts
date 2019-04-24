@@ -35,11 +35,6 @@ interface SubmitOptions {
   overwriteChoice: OverwriteChoice;
 }
 
-interface MetaModelFileInfo {
-  fileName: string;
-  filePath: string;
-}
-
 export class DeviceModelOperator {
   // Initial the folder for authoring device model, return the root path of the
   // workspace
@@ -541,7 +536,7 @@ export class DeviceModelOperator {
     channel.show();
 
     // Get the file to submit:
-    const metamodelFiles: MetaModelFileInfo[] = [];
+    const fileItems: vscode.QuickPickItem[] = [];
 
     const fileList = fs.listTreeSync(rootPath);
     if (fileList && fileList.length > 0) {
@@ -550,17 +545,10 @@ export class DeviceModelOperator {
           const fileName = path.basename(filePath);
           if (fileName.endsWith(DigitalTwinConstants.interfaceSuffix) ||
               fileName.endsWith(DigitalTwinConstants.capabilityModelSuffix)) {
-            metamodelFiles.push({fileName, filePath: path.dirname(filePath)});
+            fileItems.push(
+                {label: fileName, description: path.dirname(filePath)});
           }
         }
-      });
-    }
-
-    const fileItems: vscode.QuickPickItem[] = [];
-
-    if (metamodelFiles && metamodelFiles.length > 0) {
-      metamodelFiles.forEach((file: MetaModelFileInfo) => {
-        fileItems.push({label: file.fileName, description: file.filePath});
       });
     }
 

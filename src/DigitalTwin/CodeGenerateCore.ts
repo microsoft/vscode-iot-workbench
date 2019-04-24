@@ -74,15 +74,20 @@ export class CodeGenerateCore {
     }
 
     // Step 1: list all files from device model folder for selection.
-    const metamodelFiles = fs.listSync(rootPath);
-
     const metamodelItems: vscode.QuickPickItem[] = [];
-    metamodelFiles.forEach((filePath: string) => {
-      const fileName = path.basename(filePath);
-      if (fileName.endsWith(DigitalTwinConstants.capabilityModelSuffix)) {
-        metamodelItems.push({label: fileName, description: ''});
-      }
-    });
+
+    const fileList = fs.listTreeSync(rootPath);
+    if (fileList && fileList.length > 0) {
+      fileList.forEach((filePath: string) => {
+        if (!fs.isDirectorySync(filePath)) {
+          const fileName = path.basename(filePath);
+          if (fileName.endsWith(DigitalTwinConstants.capabilityModelSuffix)) {
+            metamodelItems.push(
+                {label: fileName, description: path.dirname(filePath)});
+          }
+        }
+      });
+    }
 
     if (metamodelItems.length === 0) {
       const message =
@@ -109,7 +114,8 @@ export class CodeGenerateCore {
     }
     const fileCoreName = matchItems[1];
 
-    const selectedFilePath = path.join(rootPath, fileSelection.label);
+    const selectedFilePath =
+        path.join(fileSelection.description as string, fileSelection.label);
 
     // Get the connection string of the digital twin repo
     let connectionString =
