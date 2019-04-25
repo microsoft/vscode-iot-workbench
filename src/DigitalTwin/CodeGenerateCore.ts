@@ -36,7 +36,8 @@ const deviceConnectionConstants = {
   connectionStringLabel: 'Via IoT Hub device connection string',
   connectionStringDetail: 'To connect to Azure IoT Hub directly',
   iotcSasKeyLabel: 'Via DPS (Device Provision Service) symmetric key',
-  iotcSasKeyDetail: 'To connect to Azure IoT Hub or Azure IoT Central'
+  iotcSasKeyDetail:
+      'To connect to Azure IoT Hub, Azure IoT Central or Azure IoT Certification Service'
 };
 
 interface CodeGeneratorConfigItem {
