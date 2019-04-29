@@ -6,7 +6,7 @@
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import AdmZip = require('adm-zip');
+import * as AdmZip from 'adm-zip';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import * as utils from './utils';
 import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';

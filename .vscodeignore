@@ -10,3 +10,8 @@ test/**
 docs/**
 .gitignore
 tsconfig.json
+node_modules/**
+webpack.config.js
+genAiKey.js
+gts.cmd
+vendor/**
