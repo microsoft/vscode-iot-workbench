@@ -1,0 +1,22 @@
+{
+  "templates": [
+      {
+          "description": "",
+          "detail": "Create project that connects to Azure IoT Hub, such as sending sensor data to cloud.",
+          "label": "With Azure IoT Hub",
+          "type": "IotHub",
+          "templateFilesInfo": [
+            {
+                "fileName": "CMakeLists.txt",
+                "sourcePath" : ".",
+                "targetPath" : "./azureIoT"
+            },
+            {
+                "fileName": "iothub_convenience_sample.c",
+                "sourcePath" : ".",
+                "targetPath" : "./azureIoT"
+            }
+          ]
+      }
+  ]
+}

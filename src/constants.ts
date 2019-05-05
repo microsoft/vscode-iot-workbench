@@ -46,6 +46,8 @@ export class FileNames {
   static readonly devcontainerFolderName = '.devcontainer';
   static readonly vscodeSettingsFolderName = '.vscode';
   static readonly workspaceExtensionName = '.code-workspace';
+  static readonly dockerfileName = 'Dockerfile';
+  static readonly devcontainerJSONFileName = 'devcontainer.json';
 }
 
 export enum AzureFunctionsLanguage {

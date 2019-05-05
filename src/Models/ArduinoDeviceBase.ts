@@ -9,7 +9,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, DependentExtensions, DockerCacheConfig, FileNames, PlatformType} from '../constants';
+import {FileNames, PlatformType} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 
 import {Board} from './Interfaces/Board';
@@ -25,9 +25,7 @@ const constants = {
   cppPropertiesFileName: 'c_cpp_properties.json',
   cppPropertiesFileNameMac: 'c_cpp_properties_macos.json',
   cppPropertiesFileNameWin: 'c_cpp_properties_win32.json',
-  outputPath: './.build',
-  dockerfileName: 'Dockerfile',
-  devcontainerJSONFileName: 'devcontainer.json'
+  outputPath: './.build'
 };
 
 
@@ -171,9 +169,9 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
     }
   
     const dockerfileSourcePath = path.join(
-      this.boardFolderPath, board.id, constants.dockerfileName);
+      this.boardFolderPath, board.id, FileNames.dockerfileName);
     const dockerfileTargetPath = path.join(
-      this.devcontainerFolderPath, constants.dockerfileName);
+      this.devcontainerFolderPath, FileNames.dockerfileName);
     if (fs.existsSync(dockerfileSourcePath)) {
       try {
         const dockerfileContent = fs.readFileSync(dockerfileSourcePath, 'utf8');
@@ -181,11 +179,14 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
       } catch (error) {
         throw new Error(`Create Dockerfile failed: ${error.message}`);
       }
+    } else {
+      throw new Error(`Cannot find Dockerfile template file.`);
     }
+
     const devcontainerJSONFileSourcePath = path.join(
-      this.boardFolderPath, board.id, constants.devcontainerJSONFileName);
+      this.boardFolderPath, board.id, FileNames.devcontainerJSONFileName);
     const devcontainerJSONFileTargetPath = path.join(
-      this.devcontainerFolderPath, constants.devcontainerJSONFileName);
+      this.devcontainerFolderPath, FileNames.devcontainerJSONFileName);
     if (fs.existsSync(devcontainerJSONFileSourcePath)) {
       try {
         const devcontainerJSONContent = fs.readFileSync(devcontainerJSONFileSourcePath, 'utf8');
@@ -193,7 +194,9 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
       } catch (error) {
         throw new Error(`Create devcontainer.json file failed: ${error.message}`);
       }
-    } 
+    } else {
+      throw new Error(`Cannot find devcontainer json source file.`);
+    }
 
     templateFilesInfo.forEach(fileInfo => {
       let targetFilePath = '';

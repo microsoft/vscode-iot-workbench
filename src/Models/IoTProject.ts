@@ -513,11 +513,10 @@ export class IoTProject {
       //   device = new esp32DeviceModule.Esp32Device(
       //       this.extensionContext, this.channel, deviceDir,
       //       templateFilesInfo);
-      // } else if (boardId ===
-      // raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
-      //   device = new raspberryPiDeviceModule.RaspberryPiDevice(
-      //       this.extensionContext, deviceDir, this.channel,
-      //       templateFilesInfo);
+      } else if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
+        device = new raspberryPiDeviceModule.RaspberryPiDevice(
+            this.extensionContext, this.projectRootPath, this.channel,
+            templateFilesInfo);
     } else {
       throw new Error('The specified board is not supported.');
     }

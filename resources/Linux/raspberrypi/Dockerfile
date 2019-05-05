@@ -1,0 +1,1 @@
+FROM devicedevex.azurecr.io/public/azure-c-sdk:20190411-ubuntu

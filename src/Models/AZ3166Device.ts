@@ -92,7 +92,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
   get version() {
     // Currently hard code here: version 1.6.1
-    return '1.6.1';
+    return '1.6.2';
     // const packageRootPath = this.getArduinoPackagePath();
     // let version = '0.0.1';
 
