@@ -4,8 +4,6 @@ const path = require('path');
 const cp = require('child_process');
 const fs = require('fs-plus');
 
-fs.copySync('vendor', 'out/vendor');
-
 function getEntry() {
   const entry = {};
   const npmListRes = cp.execSync('npm list -only prod -json', {
