@@ -314,7 +314,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
         // Try to close serial monitor
         try {
-          await vscode.commands.executeCommand('arduino.closeSerialMonitor');
+          await vscode.commands.executeCommand(
+              'arduino.closeSerialMonitor', null, false);
         } catch (ignore) {
         }
 
@@ -372,7 +373,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
         // Try to close serial monitor
         try {
-          await vscode.commands.executeCommand('arduino.closeSerialMonitor');
+          await vscode.commands.executeCommand(
+              'arduino.closeSerialMonitor', null, false);
         } catch (ignore) {
         }
 
