@@ -43,6 +43,7 @@ export class FileNames {
   static readonly resourcesFolderName = 'resources';
   static readonly iotworkbenchprojectFileName = '.iotworkbenchproject';
   static readonly settingsJsonFileName = 'settings.json';
+  static readonly devcontainerFolderName = '.devcontainer';
   static readonly vscodeSettingsFolderName = '.vscode';
   static readonly workspaceExtensionName = '.code-workspace';
 }
@@ -64,7 +65,7 @@ export class GlobalConstants {
 
 export class DependentExtensions {
   static readonly azureFunctions = 'ms-azuretools.vscode-azurefunctions';
-  static readonly arduino = 'vsciot-vscode.vscode-arduino';
+  static readonly remote = 'ms-vscode-remote.remote-containers';
 }
 
 export class PlatformType {

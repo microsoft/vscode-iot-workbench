@@ -3,7 +3,6 @@
 
 import {exec} from 'child_process';
 import * as crypto from 'crypto';
-import {Docker, Options} from 'docker-cli-js';
 import * as fs from 'fs-plus';
 import * as getmac from 'getmac';
 import * as _ from 'lodash';
@@ -64,8 +63,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      devicePath: string, private templateFilesInfo: TemplateFileInfo[] = []) {
-    super(context, devicePath, channel, DeviceType.MXChip_AZ3166);
+      projectPath: string, private templateFilesInfo: TemplateFileInfo[] = []) {
+    super(context, projectPath, channel, DeviceType.MXChip_AZ3166);
   }
 
   // tslint:disable-next-line: no-any
@@ -108,10 +107,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
   }
 
   async load(): Promise<boolean> {
-    const deviceFolderPath = this.deviceFolder;
-
-    if (!fs.existsSync(deviceFolderPath)) {
-      throw new Error('Unable to find the device folder inside the project.');
+    if (!fs.existsSync(this.projectFolder)) {
+      throw new Error('Unable to find the project folder.');
     }
 
     if (!this.board) {
@@ -127,10 +124,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
     if (!this.templateFilesInfo) {
       throw new Error('No sketch file found.');
     }
-    const deviceFolderPath = this.deviceFolder;
-
-    if (!fs.existsSync(deviceFolderPath)) {
-      throw new Error('Unable to find the device folder inside the project.');
+    if (!fs.existsSync(this.projectFolder)) {
+      throw new Error('Unable to find the project folder.');
     }
     if (!this.board) {
       throw new Error('Unable to find the board in the config file.');

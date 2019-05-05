@@ -76,9 +76,9 @@ export class Esp32Device extends ArduinoDeviceBase {
   }
 
   async load(): Promise<boolean> {
-    const deviceFolderPath = this.deviceFolder;
+    const projectFolderPath = this.projectFolder;
 
-    if (!fs.existsSync(deviceFolderPath)) {
+    if (!fs.existsSync(projectFolderPath)) {
       throw new Error('Unable to find the device folder inside the project.');
     }
 
@@ -91,9 +91,9 @@ export class Esp32Device extends ArduinoDeviceBase {
   }
 
   async create(): Promise<boolean> {
-    const deviceFolderPath = this.deviceFolder;
+    const projectFolderPath = this.projectFolder;
 
-    if (!fs.existsSync(deviceFolderPath)) {
+    if (!fs.existsSync(projectFolderPath)) {
       throw new Error('Unable to find the device folder inside the project.');
     }
     if (!this.board) {
