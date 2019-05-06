@@ -14,7 +14,7 @@ import * as WinReg from 'winreg';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, DockerCacheConfig, PlatformType} from '../constants';
+import {ConfigKey} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 import {delay, getRegistryValues} from '../utils';
 
@@ -132,10 +132,9 @@ export class AZ3166Device extends ArduinoDeviceBase {
     }
 
     this.generateCommonFiles();
-    this.generateCppPropertiesFile(this.board);
-    await this.generateSketchFile(
-        this.templateFilesInfo, this.board, constants.boardInfo,
-        constants.uploadMethod);
+    await this.generateDockerRelatedFiles(this.board);
+    await this.generateCppPropertiesFile(this.board);
+    await this.generateSketchFile(this.templateFilesInfo);
     return true;
   }
 

@@ -41,6 +41,10 @@ export class RaspberryPiDevice implements Device {
   private channel: vscode.OutputChannel;
   private static _boardId = 'raspberrypi';
 
+  protected devcontainerFolderPath: string;
+  protected vscodeFolderPath: string;
+  protected boardFolderPath: string;
+
   static get boardId() {
     return RaspberryPiDevice._boardId;
   }
@@ -54,6 +58,12 @@ export class RaspberryPiDevice implements Device {
     this.extensionContext = context;
     this.channel = channel;
     this.componentId = Guid.create().toString();
+    this.devcontainerFolderPath = 
+        path.join(this.projectFolder, FileNames.devcontainerFolderName);
+    this.vscodeFolderPath =
+        path.join(this.projectFolder, FileNames.vscodeSettingsFolderName);
+    this.boardFolderPath = context.asAbsolutePath(
+        path.join(FileNames.resourcesFolderName, PlatformType.LINUX));
   }
 
   name = 'RaspberryPi';
@@ -88,48 +98,91 @@ export class RaspberryPiDevice implements Device {
       throw new Error('Unable to find the project folder.');
     }
     
-    const LinuxBoardFolderPath = this.extensionContext.asAbsolutePath(
-      path.join(FileNames.resourcesFolderName, PlatformType.LINUX));
-    const devcontainerFolderPath = path.join(this.projectFolder, FileNames.devcontainerFolderName);
-    if (!fs.existsSync(devcontainerFolderPath)) {
-      fs.mkdirSync(devcontainerFolderPath);
-    }   
+    this.generateCommonFiles();
+    await this.generateCppPropertiesFile();
+    await this.generateDockerRelatedFiles();
+    await this.generateSketchFile(this.templateFilesInfo);
 
-    // Generate Dockerfile
-    const dockerfileSourcePath = path.join(LinuxBoardFolderPath, 
-      RaspberryPiDevice.boardId, FileNames.dockerfileName);
-    if (!fs.existsSync(dockerfileSourcePath)) {
-      throw new Error('Cannot find Dockerfile template file.');
-    }
-    const dockerfileTargetPath = path.join(
-      devcontainerFolderPath, FileNames.dockerfileName);
-    try {
-      const dockerfileContent = fs.readFileSync(dockerfileSourcePath, 'utf8');
-      fs.writeFileSync(dockerfileTargetPath, dockerfileContent);
-    } catch (error) {
-      throw new Error(`Create Dockerfile failed: ${error.message}`);
+    return true;
+  }
+
+  // Helper function
+  generateCommonFiles(): void {
+    if (!fs.existsSync(this.vscodeFolderPath)) {
+      fs.mkdirSync(this.vscodeFolderPath);
     }
 
-    // Generate devcontainer.json
-    const devcontainerJSONFileSourcePath = path.join(LinuxBoardFolderPath, 
-      RaspberryPiDevice.boardId, FileNames.devcontainerJSONFileName);
-    if (!fs.existsSync(devcontainerJSONFileSourcePath)) {
-      throw new Error('Cannot find devcontainer json template file.');
+    if (!fs.existsSync(this.devcontainerFolderPath)) {
+      fs.mkdirSync(this.devcontainerFolderPath);
     }
-    const devcontainerJSONFileTargetPath = path.join(
-      devcontainerFolderPath, FileNames.devcontainerJSONFileName);
+  }
+
+  async generateCppPropertiesFile(): Promise<boolean> {
+    // Create c_cpp_properties.json file
+    const cppPropertiesFilePath =
+        path.join(this.vscodeFolderPath, FileNames.cppPropertiesFileName);
+
+    if (fs.existsSync(cppPropertiesFilePath)) {
+      return true;
+    }
+
     try {
-      const devcontainerJSONContent = fs.readFileSync(devcontainerJSONFileSourcePath, 'utf8');
-      fs.writeFileSync(devcontainerJSONFileTargetPath, devcontainerJSONContent);
+      const propertiesSourceFile = path.join(
+        this.boardFolderPath, RaspberryPiDevice.boardId, FileNames.cppPropertiesFileName);
+      const propertiesContent =
+          fs.readFileSync(propertiesSourceFile).toString();
+      fs.writeFileSync(cppPropertiesFilePath, propertiesContent);
     } catch (error) {
-      throw new Error(`Create devcontainer.json file failed: ${error.message}`);
+      throw new Error(`Create cpp properties file failed: ${error.message}`);
     }
+
+    return true;
+  }
+
+  async generateDockerRelatedFiles(): Promise<boolean> {
+        // Dockerfile       
+        const dockerfileTargetPath = path.join(
+          this.devcontainerFolderPath, FileNames.dockerfileName);
+
+        if (fs.existsSync(dockerfileTargetPath)) {
+          return true;
+        }
+
+        try {
+          const dockerfileSourcePath = path.join(
+            this.boardFolderPath, RaspberryPiDevice.boardId, FileNames.dockerfileName);
+          const dockerfileContent = fs.readFileSync(dockerfileSourcePath, 'utf8');
+          fs.writeFileSync(dockerfileTargetPath, dockerfileContent);
+        } catch (error) {
+          throw new Error(`Create Dockerfile failed: ${error.message}`);
+        }
     
+        // devcontainer.json
+        const devcontainerJSONFileTargetPath = path.join(
+          this.devcontainerFolderPath, FileNames.devcontainerJSONFileName);
+
+        if (fs.existsSync(devcontainerJSONFileTargetPath)) {
+          return true;
+        }
+
+        try {
+          const devcontainerJSONFileSourcePath = path.join(
+            this.boardFolderPath, RaspberryPiDevice.boardId, FileNames.devcontainerJSONFileName);
+          const devcontainerJSONContent = fs.readFileSync(devcontainerJSONFileSourcePath, 'utf8');
+          fs.writeFileSync(devcontainerJSONFileTargetPath, devcontainerJSONContent);
+        } catch (error) {
+          throw new Error(`Create devcontainer.json file failed: ${error.message}`);
+        }
+
+        return true;
+  }
+  
+  async generateSketchFile(templateFilesInfo: TemplateFileInfo[]): Promise<boolean> {
     // Generate sketch file
-    if (!this.templateFilesInfo) {
+    if (!templateFilesInfo) {
       throw new Error('No sketch file found.');
     }    
-    this.templateFilesInfo.forEach(fileInfo => {
+    templateFilesInfo.forEach(fileInfo => {
       const targetFilePath = path.join(
             this.projectFolder, fileInfo.targetPath, fileInfo.fileName);
       if (fileInfo.fileContent) {

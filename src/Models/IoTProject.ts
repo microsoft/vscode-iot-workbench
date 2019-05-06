@@ -709,18 +709,7 @@ export class IoTProject {
           () => vscode.commands.executeCommand(
               'vscode.openFolder', vscode.Uri.file(this.projectRootPath),
               false),
-          1000); // TODO: Remove this magic number 1000
-
-      // setTimeout(        
-      //     async () => {
-      //       vscode.commands.executeCommand(
-      //         'vscode.openFolder', vscode.Uri.file(this.projectRootPath),
-      //         openInNewWindow);            
-      //       await device.checkPrerequisites();
-      //       vscode.commands.executeCommand('openindocker.reopenInContainer');  
-      //       vscode.commands.executeCommand('openindocker.openFolder');  
-      //     },
-      //     1000);
+          500); // TODO: Remove this magic number
 
       return true;
     } catch (error) {

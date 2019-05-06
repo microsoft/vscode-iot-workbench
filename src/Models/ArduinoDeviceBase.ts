@@ -21,10 +21,6 @@ import {OTA} from './OTA';
 
 const constants = {
   defaultSketchFileName: 'device.ino',
-  arduinoJsonFileName: 'arduino.json',
-  cppPropertiesFileName: 'c_cpp_properties.json',
-  cppPropertiesFileNameMac: 'c_cpp_properties_macos.json',
-  cppPropertiesFileNameWin: 'c_cpp_properties_win32.json',
   outputPath: './.build'
 };
 
@@ -115,89 +111,76 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
 
   // Helper functions:
   generateCommonFiles(): void {
-    if (!fs.existsSync(this.projectFolder)) {
-      throw new Error('Unable to find the project folder.');
-    }
-
     if (!fs.existsSync(this.vscodeFolderPath)) {
       fs.mkdirSync(this.vscodeFolderPath);
     }
-  }
 
-  generateCppPropertiesFile(board: Board): void {
-    // Create c_cpp_properties.json file
-    const cppPropertiesFilePath =
-        path.join(this.vscodeFolderPath, constants.cppPropertiesFileName);
-
-    if (fs.existsSync(cppPropertiesFilePath)) {
-      return;
-    }
-
-    try {
-      const plat = os.platform();
-
-      if (plat === 'win32') {
-        const propertiesFilePathWin32 = path.join(
-            this.boardFolderPath, board.id, constants.cppPropertiesFileNameWin);
-        const propertiesContentWin32 =
-            fs.readFileSync(propertiesFilePathWin32).toString();
-        const versionPattern = /{VERSION}/g;
-        const replaceStr =
-            propertiesContentWin32.replace(versionPattern, this.version);
-        fs.writeFileSync(cppPropertiesFilePath, replaceStr);
-      }
-      // TODO: Let's use the same file for Linux and MacOS for now. Need to
-      // revisit this part.
-      else {
-        const propertiesFilePathMac = path.join(
-            this.boardFolderPath, board.id, constants.cppPropertiesFileNameMac);
-        const propertiesContentMac =
-            fs.readFileSync(propertiesFilePathMac).toString();
-        fs.writeFileSync(cppPropertiesFilePath, propertiesContentMac);
-      }
-    } catch (error) {
-      throw new Error(`Create cpp properties file failed: ${error.message}`);
-    }
-  }
-
-  async generateSketchFile(
-      templateFilesInfo: TemplateFileInfo[], board: Board, boardInfo: string,
-      boardConfig: string): Promise<boolean> {
-    // Generate docker related file: Dockerfile & devcontainer.json
     if (!fs.existsSync(this.devcontainerFolderPath)) {
       fs.mkdirSync(this.devcontainerFolderPath);
     }
-  
-    const dockerfileSourcePath = path.join(
-      this.boardFolderPath, board.id, FileNames.dockerfileName);
-    const dockerfileTargetPath = path.join(
-      this.devcontainerFolderPath, FileNames.dockerfileName);
-    if (fs.existsSync(dockerfileSourcePath)) {
-      try {
-        const dockerfileContent = fs.readFileSync(dockerfileSourcePath, 'utf8');
-        fs.writeFileSync(dockerfileTargetPath, dockerfileContent);
-      } catch (error) {
-        throw new Error(`Create Dockerfile failed: ${error.message}`);
-      }
-    } else {
-      throw new Error(`Cannot find Dockerfile template file.`);
+  }
+
+  async generateCppPropertiesFile(board: Board): Promise<boolean> {
+    // Create c_cpp_properties.json file
+    const cppPropertiesFilePath =
+        path.join(this.vscodeFolderPath, FileNames.cppPropertiesFileName);
+
+    if (fs.existsSync(cppPropertiesFilePath)) {
+      return true;
     }
 
-    const devcontainerJSONFileSourcePath = path.join(
-      this.boardFolderPath, board.id, FileNames.devcontainerJSONFileName);
-    const devcontainerJSONFileTargetPath = path.join(
-      this.devcontainerFolderPath, FileNames.devcontainerJSONFileName);
-    if (fs.existsSync(devcontainerJSONFileSourcePath)) {
-      try {
-        const devcontainerJSONContent = fs.readFileSync(devcontainerJSONFileSourcePath, 'utf8');
-        fs.writeFileSync(devcontainerJSONFileTargetPath, devcontainerJSONContent);
-      } catch (error) {
-        throw new Error(`Create devcontainer.json file failed: ${error.message}`);
-      }
-    } else {
-      throw new Error(`Cannot find devcontainer json source file.`);
+    try {
+      const propertiesSourceFile = path.join(
+        this.boardFolderPath, board.id, FileNames.cppPropertiesFileName);
+      const propertiesContent =
+          fs.readFileSync(propertiesSourceFile).toString();
+      fs.writeFileSync(cppPropertiesFilePath, propertiesContent);
+    } catch (error) {
+      throw new Error(`Create cpp properties file failed: ${error.message}`);
     }
 
+    return true;
+  }
+
+  async generateDockerRelatedFiles(board: Board): Promise<boolean> {
+        // Dockerfile       
+        const dockerfileTargetPath = path.join(
+          this.devcontainerFolderPath, FileNames.dockerfileName);
+
+        if (fs.existsSync(dockerfileTargetPath)) {
+          return true;
+        }
+
+        try {
+          const dockerfileSourcePath = path.join(
+            this.boardFolderPath, board.id, FileNames.dockerfileName);
+          const dockerfileContent = fs.readFileSync(dockerfileSourcePath, 'utf8');
+          fs.writeFileSync(dockerfileTargetPath, dockerfileContent);
+        } catch (error) {
+          throw new Error(`Create Dockerfile failed: ${error.message}`);
+        }
+    
+        // devcontainer.json
+        const devcontainerJSONFileTargetPath = path.join(
+          this.devcontainerFolderPath, FileNames.devcontainerJSONFileName);
+
+        if (fs.existsSync(devcontainerJSONFileTargetPath)) {
+          return true;
+        }
+
+        try {
+          const devcontainerJSONFileSourcePath = path.join(
+            this.boardFolderPath, board.id, FileNames.devcontainerJSONFileName);
+          const devcontainerJSONContent = fs.readFileSync(devcontainerJSONFileSourcePath, 'utf8');
+          fs.writeFileSync(devcontainerJSONFileTargetPath, devcontainerJSONContent);
+        } catch (error) {
+          throw new Error(`Create devcontainer.json file failed: ${error.message}`);
+        }
+
+        return true;
+  }
+
+  async generateSketchFile(templateFilesInfo: TemplateFileInfo[]): Promise<boolean> {
     templateFilesInfo.forEach(fileInfo => {
       let targetFilePath = '';
       if (fileInfo.fileName.endsWith('.ino')) {

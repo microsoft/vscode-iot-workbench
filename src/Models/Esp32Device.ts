@@ -101,10 +101,8 @@ export class Esp32Device extends ArduinoDeviceBase {
     }
 
     this.generateCommonFiles();
-    this.generateCppPropertiesFile(this.board);
-    await this.generateSketchFile(
-        this.templateFilesInfo, this.board, constants.defaultBoardInfo,
-        constants.defaultBoardConfig);
+    await this.generateCppPropertiesFile(this.board);
+    await this.generateSketchFile(this.templateFilesInfo);
     return true;
   }
 

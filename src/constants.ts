@@ -48,6 +48,7 @@ export class FileNames {
   static readonly workspaceExtensionName = '.code-workspace';
   static readonly dockerfileName = 'Dockerfile';
   static readonly devcontainerJSONFileName = 'devcontainer.json';
+  static readonly cppPropertiesFileName = 'c_cpp_properties.json';
 }
 
 export enum AzureFunctionsLanguage {
@@ -75,8 +76,8 @@ export class PlatformType {
   static readonly LINUX = 'Linux';
 }
 
-export class DockerCacheConfig {
-  static readonly arduinoPackagePath = '.cache';
-  static readonly arduinoAppDockerImage = 'arduinoapp';
-  static readonly outputPath = '.build';
-}
+// export class DockerCacheConfig {
+//   static readonly arduinoPackagePath = '.cache';
+//   static readonly arduinoAppDockerImage = 'arduinoapp';
+//   static readonly outputPath = '.build';
+// }
