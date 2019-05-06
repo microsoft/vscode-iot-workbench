@@ -107,10 +107,12 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
 
   abstract async preUploadAction(): Promise<boolean>;
 
-  abstract get version(): string;
-
   // Helper functions:
   generateCommonFiles(): void {
+    if (!fs.existsSync(this.projectFolder)) {
+      throw new Error('Unable to find the project folder.');
+    }
+
     if (!fs.existsSync(this.vscodeFolderPath)) {
       fs.mkdirSync(this.vscodeFolderPath);
     }
@@ -181,6 +183,10 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
   }
 
   async generateSketchFile(templateFilesInfo: TemplateFileInfo[]): Promise<boolean> {
+    if (!templateFilesInfo) {
+      throw new Error('No sketch file found.');
+    }
+    
     templateFilesInfo.forEach(fileInfo => {
       let targetFilePath = '';
       if (fileInfo.fileName.endsWith('.ino')) {

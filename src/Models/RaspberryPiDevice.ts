@@ -1,10 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as cp from 'child_process';
 import * as fs from 'fs-plus';
 import {Guid} from 'guid-typescript';
-import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
@@ -15,10 +13,6 @@ import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
 import {SSH} from './SSH';
-
-const constants = {
-  defaultSketchFileName: 'app.js'
-};
 
 class RaspberryPiUploadConfig {
   static host = 'raspberrypi';
@@ -37,7 +31,6 @@ export class RaspberryPiDevice implements Device {
   private deviceType: DeviceType;
   private componentType: ComponentType;
   private projectFolder: string;
-  private extensionContext: vscode.ExtensionContext;
   private channel: vscode.OutputChannel;
   private static _boardId = 'raspberrypi';
 
@@ -55,7 +48,6 @@ export class RaspberryPiDevice implements Device {
     this.deviceType = DeviceType.Raspberry_Pi;
     this.componentType = ComponentType.Device;
     this.projectFolder = projectPath;
-    this.extensionContext = context;
     this.channel = channel;
     this.componentId = Guid.create().toString();
     this.devcontainerFolderPath = 
@@ -81,15 +73,14 @@ export class RaspberryPiDevice implements Device {
   }
 
   async load(): Promise<boolean> {
-    const projectFolderPath = this.projectFolder;
-
-    if (!fs.existsSync(projectFolderPath)) {
-      throw new Error('Unable to find the device folder inside the project.');
+    if (!fs.existsSync(this.projectFolder)) {
+      throw new Error('Unable to find the project folder.');
     }
 
-    // if (!fs.existsSync(path.join(projectFolderPath, 'node_modules'))) {
-    //   cp.exec('npm install', {cwd: projectFolderPath});
-    // }
+    this.generateCommonFiles();
+    await this.generateDockerRelatedFiles();
+    await this.generateCppPropertiesFile();
+
     return true;
   }
 

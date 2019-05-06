@@ -66,7 +66,7 @@ export class ProjectInitializer {
             // Step 3: Select board
             const boardFolderPath = context.asAbsolutePath(path.join(
                 FileNames.resourcesFolderName, platformSelection.label));
-            const boardSelection =  await this.SelectBoard(boardFolderPath);
+            const boardSelection = await this.SelectBoard(boardFolderPath);
             if (!boardSelection) {
               telemetryContext.properties.errorMessage =
                   'Board selection canceled.';

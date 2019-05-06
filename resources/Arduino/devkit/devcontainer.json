@@ -1,5 +1,5 @@
 {
-  "image": "devkit_app1",
+  "image": "devkit_app",
   "name": "devkit_app_container",
   "dockerFile": "Dockerfile",
   "extensions": [

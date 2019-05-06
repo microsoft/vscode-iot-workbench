@@ -75,9 +75,3 @@ export class PlatformType {
   static readonly ARDUINO = 'Arduino';
   static readonly LINUX = 'Linux';
 }
-
-// export class DockerCacheConfig {
-//   static readonly arduinoPackagePath = '.cache';
-//   static readonly arduinoAppDockerImage = 'arduinoapp';
-//   static readonly outputPath = '.build';
-// }
