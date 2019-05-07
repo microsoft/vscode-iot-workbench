@@ -96,7 +96,7 @@ export class IoTProject {
 
   // Check whether the iot-workbench extension is currently in remote container or local
   private isRemote(context: vscode.ExtensionContext) {
-    if (((<any>vscode).ExtensionExecutionContext && (<any>context).executionContext ===(<any>vscode).ExtensionExecutionContext.Remote) ||
+    if (((vscode as any).ExtensionExecutionContext && (context as any).executionContext ===(vscode as any).ExtensionExecutionContext.Remote) ||
         (process.argv[0].indexOf(`${path.sep}.vscode-remote${path.sep}`) > 0)) {
         return true;
     }
@@ -681,7 +681,7 @@ export class IoTProject {
     }
     const projectConfigFile = path.join(vscodeFolderPath, constants.projectConfigFileName);
     if (!fs.existsSync(projectConfigFile)) {
-      fs.writeFileSync(projectConfigFile, JSON.stringify(projectConfig, null, 4))
+      fs.writeFileSync(projectConfigFile, JSON.stringify(projectConfig, null, 4));
     }
     // const workspaceConfigFilePath = path.join(
     //     this.projectRootPath,
