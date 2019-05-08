@@ -464,7 +464,7 @@ export class DigitalTwinDiagnostic {
 
     for (let i = 0; i < jsonValue.propertyNames.length; i++) {
       const property = jsonValue.propertyNames[i];
-      if (properties.indexOf(property) === -1) {
+      if (property !== '@type' && properties.indexOf(property) === -1) {
         const startIndex = jsonValue.properties[i].name.span.startIndex;
         const endIndex = jsonValue.properties[i].name.span.endIndex;
         const message = `${property} is unexpected.`;

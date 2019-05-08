@@ -240,7 +240,8 @@ export async function activate(context: vscode.ExtensionContext) {
                 Array<{label: string, required: boolean, type?: string}> = [];
             const completionKeyList:
                 Array<{label: string, required: boolean, type?: string}> = [];
-            if (!jsonInfo.type) {
+            if (!jsonInfo.type ||
+                Array.isArray(jsonInfo.type) && jsonInfo.type.length === 0) {
               const id =
                   dtParser.getIdFromShortName(dtContext, jsonInfo.lastKey);
               if (id) {
