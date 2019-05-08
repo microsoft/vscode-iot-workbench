@@ -252,7 +252,7 @@ export async function activate(context: vscode.ExtensionContext) {
               }
             }
 
-            if (typeof jsonInfo.type === 'string' && jsonInfo.type ||
+            if (typeof jsonInfo.type === 'string' && jsonInfo.type === '' ||
                 Array.isArray(jsonInfo.type) && jsonInfo.type.length > 0) {
               if ((jsonInfo.type === 'Interface' ||
                    jsonInfo.type === 'CapabilityModel') &&
