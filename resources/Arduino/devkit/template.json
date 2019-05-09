@@ -22,7 +22,7 @@
                 {
                     "fileName": "simple_iothub.ino",
                     "sourcePath" : ".",
-                    "targetPath" : "."
+                    "targetPath" : "./device"
                 }
             ]
         }

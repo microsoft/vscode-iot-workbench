@@ -9,12 +9,12 @@
             {
                 "fileName": "CMakeLists.txt",
                 "sourcePath" : ".",
-                "targetPath" : "./azureIoT"
+                "targetPath" : "./src"
             },
             {
                 "fileName": "iothub_convenience_sample.c",
                 "sourcePath" : ".",
-                "targetPath" : "./azureIoT"
+                "targetPath" : "./src"
             }
           ]
       }

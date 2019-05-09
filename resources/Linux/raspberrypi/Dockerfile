@@ -1,1 +1,1 @@
-FROM devicedevex.azurecr.io/public/azure-c-sdk:20190411-ubuntu
+FROM devicedevex.azurecr.io/public/linux-arm64-azure-app:20190411

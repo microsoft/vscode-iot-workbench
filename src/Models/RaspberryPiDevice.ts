@@ -9,6 +9,7 @@ import * as vscode from 'vscode';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames, PlatformType} from '../constants';
 import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
+import {runCommand} from '../utils';
 
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
@@ -37,6 +38,7 @@ export class RaspberryPiDevice implements Device {
   protected devcontainerFolderPath: string;
   protected vscodeFolderPath: string;
   protected boardFolderPath: string;
+  protected outputPath: string;
 
   static get boardId() {
     return RaspberryPiDevice._boardId;
@@ -56,6 +58,8 @@ export class RaspberryPiDevice implements Device {
         path.join(this.projectFolder, FileNames.vscodeSettingsFolderName);
     this.boardFolderPath = context.asAbsolutePath(
         path.join(FileNames.resourcesFolderName, PlatformType.LINUX));
+    this.outputPath = 
+        path.join(this.projectFolder, FileNames.outputPathName);
   }
 
   name = 'RaspberryPi';
@@ -190,8 +194,30 @@ export class RaspberryPiDevice implements Device {
   }
 
   async compile(): Promise<boolean> {
-    await vscode.window.showInformationMessage(
-        'Compiling device code for Raspberry Pi is not supported');
+    try {
+      if (!fs.existsSync(this.outputPath)) {
+        fs.mkdirSync(this.outputPath);
+      }
+
+      this.channel.show();
+      this.channel.appendLine('### Compile raspberrypi device code');
+      const compileBashFile = "/work/compile_app.sh";
+      await runCommand(`bash ${compileBashFile} ${this.projectFolder}/src`, '', this.channel);
+
+      const binFilePath = "/work/azure-iot-sdk-c/cmake/iot_application";
+      if (fs.existsSync(binFilePath)) {
+        // If successfully compiled, copy compiled files to user workspace
+        const getOutputFileCmd = `cp -r ${binFilePath} ${this.outputPath}`;
+        await runCommand(getOutputFileCmd, '', this.channel);
+      } else {
+        // If compilation failed, just inform user instead of blocking user
+        this.channel.show();
+        this.channel.appendLine('### Compile raspberrypi device code failed.');
+      }
+    } catch (error) {
+      throw Error(`Compile device code failed. Error message: ${error.message}`);
+    }
+
     return true;
   }
 

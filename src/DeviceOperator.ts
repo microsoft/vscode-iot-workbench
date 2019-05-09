@@ -81,6 +81,7 @@ export class DeviceOperator {
     boards.forEach((board: Board) => {
       boardItemList.push({
         name: board.name,
+        fqbn: board.fqbn,
         id: board.id,
         detailInfo: board.detailInfo,
         label: board.name,

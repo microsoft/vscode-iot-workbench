@@ -176,6 +176,7 @@ export class ProjectInitializer {
       boardItemList.push({
         name: board.name,
         id: board.id,
+        fqbn: board.fqbn,
         detailInfo: board.detailInfo,
         label: board.name,
         description: board.detailInfo,

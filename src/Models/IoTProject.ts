@@ -176,7 +176,11 @@ export class IoTProject {
         if (boardId === az3166DeviceModule.AZ3166Device.boardId) {
           device = new az3166DeviceModule.AZ3166Device(
               this.extensionContext, this.channel, this.projectRootPath);
-        }
+        } else if (
+          boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
+        device = new raspberryPiDeviceModule.RaspberryPiDevice(
+            this.extensionContext, this.projectRootPath, this.channel);
+      }
         if (device) {
           this.componentList.push(device);
           await device.load();
@@ -248,7 +252,7 @@ export class IoTProject {
       // The IoTproject is open locally. Open it in remote.
       try {
         // await this.checkRemoteExtension();
-        vscode.commands.executeCommand(`openindocker.reopenInContainer`);
+        await vscode.commands.executeCommand(`openindocker.reopenInContainer`);
         return true;
       } catch (error) {
         throw error;
@@ -259,26 +263,26 @@ export class IoTProject {
   }
 
   async handleLoadFailure() {
-    if (!vscode.workspace.workspaceFolders ||
-        !vscode.workspace.workspaceFolders[0]) {
-      await askAndNewProject(this.telemetryContext);
-      return;
-    }
+    // if (!vscode.workspace.workspaceFolders ||
+    //     !vscode.workspace.workspaceFolders[0]) {
+    //   await askAndNewProject(this.telemetryContext);
+    //   return;
+    // }
 
-    const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    const workbenchFileName =
-        path.join(rootPath, FileNames.iotworkbenchprojectFileName);
+    // const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+    // const workbenchFileName =
+    //     path.join(rootPath, FileNames.iotworkbenchprojectFileName);
 
-    const workspaceFiles = fs.readdirSync(rootPath).filter(
-        file => path.extname(file).endsWith(FileNames.workspaceExtensionName));
+    // const workspaceFiles = fs.readdirSync(rootPath).filter(
+    //     file => path.extname(file).endsWith(FileNames.workspaceExtensionName));
 
-    if (fs.existsSync(workbenchFileName) && workspaceFiles &&
-        workspaceFiles[0]) {
-      await askAndOpenProject(
-          rootPath, workspaceFiles[0], this.telemetryContext);
-    } else {
-      await askAndNewProject(this.telemetryContext);
-    }
+    // if (fs.existsSync(workbenchFileName) && workspaceFiles &&
+    //     workspaceFiles[0]) {
+    //   await askAndOpenProject(
+    //       rootPath, workspaceFiles[0], this.telemetryContext);
+    // } else {
+    //   await askAndNewProject(this.telemetryContext);
+    // }
   }
 
   async compile(): Promise<boolean> {

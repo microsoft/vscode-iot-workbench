@@ -12,6 +12,7 @@ export interface BoardInstallation {
 export interface Board {
   name: string;
   id: string;
+  fqbn: string;
   detailInfo: string;
   defaultBaudRate?: number;
   vendorId?: string;

@@ -67,8 +67,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
   // tslint:disable-next-line: no-any
   static get serialport(): any {
     if (!AZ3166Device._serialport) {
-      AZ3166Device._serialport =
-          require('../../../vendor/node-usb-native').SerialPort;
+      // AZ3166Device._serialport =
+      //     require('../../../vendor/node-usb-native').SerialPort;
     }
     return AZ3166Device._serialport;
   }

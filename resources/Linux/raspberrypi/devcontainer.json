@@ -3,6 +3,7 @@
   "name": "rpi_app_container",
   "dockerFile": "Dockerfile",
   "extensions": [
-    "ms-vscode.cpptools"
+    "ms-vscode.cpptools",
+    "twxs.cmake"
   ]
 }

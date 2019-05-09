@@ -11,6 +11,7 @@ import * as vscode from 'vscode';
 import {ConfigHandler} from '../configHandler';
 import {FileNames, PlatformType} from '../constants';
 import {DialogResponses} from '../DialogResponses';
+import {runCommand} from '../utils';
 
 import {Board} from './Interfaces/Board';
 import {ComponentType} from './Interfaces/Component';
@@ -32,12 +33,14 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
   protected devcontainerFolderPath: string;
   protected vscodeFolderPath: string;
   protected boardFolderPath: string;
+  protected outputPath: string;
   protected extensionContext: vscode.ExtensionContext;
   protected channel: vscode.OutputChannel;
   protected componentId: string;
 
   abstract name: string;
   abstract id: string;
+  abstract board: Board | undefined;
 
   constructor(
       context: vscode.ExtensionContext, projectPath: string,
@@ -54,6 +57,8 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
         path.join(this.projectFolder, FileNames.vscodeSettingsFolderName);
     this.boardFolderPath = context.asAbsolutePath(
         path.join(FileNames.resourcesFolderName, PlatformType.ARDUINO));
+    this.outputPath = 
+        path.join(this.projectFolder, FileNames.outputPathName);
   }
 
   getDeviceType(): DeviceType {
@@ -69,6 +74,23 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
   }
 
   async compile(): Promise<boolean> {
+    try {
+      if (this.board === undefined) {
+        throw Error(`device board is undefined.`);
+      }
+
+      if (!fs.existsSync(this.outputPath)) {
+        fs.mkdirSync(this.outputPath);
+      }
+
+      this.channel.show();
+      this.channel.appendLine('### Compile arduino based device code');
+      
+      const command = `arduino-cli compile --fqbn ${this.board.fqbn} ${this.projectFolder}/device --output ${this.outputPath}/output --debug`;
+      await runCommand(command, '', this.channel);
+    } catch (error) {
+      throw Error(`Compile device code failed. Error message: ${error.message}`);
+    }
     return true;
   }
 
