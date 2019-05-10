@@ -238,6 +238,12 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const shownHelpPage = ConfigHandler.get<boolean>(ConfigKey.shownHelpPage);
   if (!shownHelpPage) {
+    const iotTools =
+        vscode.extensions.getExtension('vsciot-vscode.azure-iot-tools');
+    // If Azure IoT Tools has been installed, do not open help page
+    if (iotTools) {
+      return;
+    }
     // Do not execute help command here
     // Help command may open board help link
     helpProvider.open(
