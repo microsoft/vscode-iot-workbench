@@ -52,7 +52,11 @@ export class AzureConfigFileHandler {
     const azureConfigFolderPath =
         path.join(this.projectRootPath, AzureComponentsStorage.folderName);
     if (!fs.existsSync(azureConfigFolderPath)) {
-      fs.mkdirSync(azureConfigFolderPath);
+      try {
+        fs.mkdirSync(azureConfigFolderPath);
+      } catch (error) {
+        throw Error(`Failed to create azure config folder. Error message: ${error.message}`);
+      }
     }
     const azureConfigFilePath =
         path.join(azureConfigFolderPath, AzureComponentsStorage.fileName);

@@ -167,8 +167,6 @@ export class IoTProject {
 
       if (this.projectRootPath !== undefined) {
         const boardId = projectConfigJSON[`${ConfigKey.boardId}`];
-        // const config = vscode.workspace.getConfiguration('IoTWorkbench');
-        // const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
         if (!boardId) {
           return false;
         }
@@ -197,21 +195,6 @@ export class IoTProject {
         this.componentList.push(iotHub);
         const device = new ioTHubDeviceModule.IoTHubDevice(this.channel);
         this.componentList.push(device);
-
-        // const functionPath = ConfigHandler.get<string>(ConfigKey.functionPath);
-        // if (functionPath) {
-        //   const functionLocation = path.join(
-        //       vscode.workspace.workspaceFolders[0].uri.fsPath, '..',
-        //       functionPath);
-        //   const functionApp = new azureFunctionsModule.AzureFunctions(
-        //       functionLocation, functionPath, this.channel, null, [{
-        //         component: iotHub,
-        //         type: azureComponentConfigModule.DependencyType.Input
-        //       }]);
-        //   await functionApp.updateConfigSettings();
-        //   await functionApp.load();
-        //   this.componentList.push(functionApp);
-        // }
 
         this.componentList.forEach(item => {
           item.checkPrerequisites();
@@ -251,15 +234,16 @@ export class IoTProject {
     } else {
       // The IoTproject is open locally. Open it in remote.
       try {
-        // await this.checkRemoteExtension();
-        await vscode.commands.executeCommand(`openindocker.reopenInContainer`);
+        if (this.checkRemoteExtension()) {
+            await vscode.commands.executeCommand(`openindocker.reopenInContainer`);
+        } else {
+          throw Error(`The Remote Extension is not available. Failed to load the IoT project in remote.`);
+        }
         return true;
       } catch (error) {
         throw error;
       }
     }
-
-
   }
 
   async handleLoadFailure() {
@@ -487,36 +471,10 @@ export class IoTProject {
     this.projectRootPath = rootFolderPath;
 
     const projectConfig :{[key: string]: string} = {};
-
-    // const workspace: Workspace = {folders: [], settings: {}};
-    // workspace.folders.push({path: '.'});
-
-    // // Whatever the template is, we will always create the device.
-    // const deviceDir =
-    //     path.join(this.projectRootPath, constants.deviceDefaultFolderName);
-
-    // if (!fs.existsSync(deviceDir)) {
-    //   fs.mkdirSync(deviceDir);
-    // }
-
-    // // initialize the storage for azure component settings
-    // const azureConfigFileHandler =
-    //     new azureComponentConfigModule.AzureConfigFileHandler(
-    //         this.projectRootPath);
-    // azureConfigFileHandler.createIfNotExists();
-
-    // workspace.folders.push({path: constants.deviceDefaultFolderName});
     let device: Component;
     if (boardId === az3166DeviceModule.AZ3166Device.boardId) {
       device = new az3166DeviceModule.AZ3166Device(
           this.extensionContext, this.channel, this.projectRootPath, templateFilesInfo);
-      // } else if (boardId === ioTButtonDeviceModule.IoTButtonDevice.boardId) {
-      //   device = new ioTButtonDeviceModule.IoTButtonDevice(
-      //       this.extensionContext, deviceDir, templateFilesInfo);
-      // } else if (boardId === esp32DeviceModule.Esp32Device.boardId) {
-      //   device = new esp32DeviceModule.Esp32Device(
-      //       this.extensionContext, this.channel, deviceDir,
-      //       templateFilesInfo);
       } else if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
         device = new raspberryPiDeviceModule.RaspberryPiDevice(
             this.extensionContext, this.projectRootPath, this.channel,
@@ -531,16 +489,7 @@ export class IoTProject {
     }
 
     projectConfig[`${ConfigKey.boardId}`] = boardId;
-    // workspace.settings[`IoTWorkbench.${ConfigKey.boardId}`] = boardId;
     this.componentList.push(device);
-
-    // TODO: Consider naming for project level settings.
-    // const settings = {projectsettings: [] as ProjectSetting[]};
-    // settings.projectsettings.push(
-    //     {name: ConfigKey.devicePath, value: constants.deviceDefaultFolderName});
-
-    // workspace.settings[`IoTWorkbench.${ConfigKey.devicePath}`] =
-    //     constants.deviceDefaultFolderName;
 
     const type: ProjectTemplateType = projectType;
 

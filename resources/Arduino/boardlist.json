@@ -3,7 +3,7 @@
         {
             "name": "IoT DevKit",
             "id": "devkit",
-            "fqbn": "AZ3166:stm32f4:MXCHIP_AZ3166",
+            "model": "AZ3166:stm32f4:MXCHIP_AZ3166",
             "detailInfo": "MXChip - Microsoft Azure IoT Developer Kit",
             "defaultBaudRate": 115200,
             "vendorId": "0483",

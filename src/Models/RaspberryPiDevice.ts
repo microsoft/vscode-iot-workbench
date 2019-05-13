@@ -103,12 +103,20 @@ export class RaspberryPiDevice implements Device {
 
   // Helper function
   generateCommonFiles(): void {
-    if (!fs.existsSync(this.vscodeFolderPath)) {
-      fs.mkdirSync(this.vscodeFolderPath);
+    if (!fs.existsSync(this.vscodeFolderPath)) {    
+      try {
+        fs.mkdirSync(this.vscodeFolderPath);
+      } catch (error) {
+        throw Error(`Failed to create .vscode folder. Error message: ${error.message}`);
+      }
     }
 
     if (!fs.existsSync(this.devcontainerFolderPath)) {
-      fs.mkdirSync(this.devcontainerFolderPath);
+      try {
+        fs.mkdirSync(this.devcontainerFolderPath);
+      } catch (error) {
+        throw Error(`Failed to create .devcontainer folder. Error message: ${error.message}`);
+      }
     }
   }
 
@@ -196,7 +204,11 @@ export class RaspberryPiDevice implements Device {
   async compile(): Promise<boolean> {
     try {
       if (!fs.existsSync(this.outputPath)) {
-        fs.mkdirSync(this.outputPath);
+        try {
+          fs.mkdirSync(this.outputPath);
+        } catch (error) {
+          throw Error(`Failed to create output path ${this.outputPath}. Error message: ${error.message}`);
+        }
       }
 
       this.channel.show();

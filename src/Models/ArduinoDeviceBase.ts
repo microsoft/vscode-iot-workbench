@@ -76,17 +76,21 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
   async compile(): Promise<boolean> {
     try {
       if (this.board === undefined) {
-        throw Error(`device board is undefined.`);
+        throw Error(`Device board is undefined.`);
       }
 
       if (!fs.existsSync(this.outputPath)) {
-        fs.mkdirSync(this.outputPath);
+        try {
+          fs.mkdirSync(this.outputPath);
+        } catch (error) {
+          throw Error(`Failed to create output path ${this.outputPath}. Error message: ${error.message}`);
+        }
       }
 
       this.channel.show();
       this.channel.appendLine('### Compile arduino based device code');
       
-      const command = `arduino-cli compile --fqbn ${this.board.fqbn} ${this.projectFolder}/device --output ${this.outputPath}/output --debug`;
+      const command = `arduino-cli compile --fqbn ${this.board.model} ${this.projectFolder}/device --output ${this.outputPath}/output --debug`;
       await runCommand(command, '', this.channel);
     } catch (error) {
       throw Error(`Compile device code failed. Error message: ${error.message}`);
@@ -135,12 +139,20 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
       throw new Error('Unable to find the project folder.');
     }
 
-    if (!fs.existsSync(this.vscodeFolderPath)) {
-      fs.mkdirSync(this.vscodeFolderPath);
+    if (!fs.existsSync(this.vscodeFolderPath)) {      
+      try {
+        fs.mkdirSync(this.vscodeFolderPath);
+      } catch (error) {
+        throw Error(`Failed to create .vscode folder. Error message: ${error.message}`);
+      }
     }
 
     if (!fs.existsSync(this.devcontainerFolderPath)) {
-      fs.mkdirSync(this.devcontainerFolderPath);
+      try {
+        fs.mkdirSync(this.devcontainerFolderPath);
+      } catch (error) {
+        throw Error(`Failed to create .devcontainer folder. Error message: ${error.message}`);
+      }
     }
   }
 

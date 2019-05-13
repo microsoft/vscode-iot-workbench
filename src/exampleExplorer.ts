@@ -194,7 +194,6 @@ export class ExampleExplorer {
       boardItemList.push({
         name: board.name,
         id: board.id,
-        fqbn: board.fqbn,
         detailInfo: board.detailInfo,
         label: board.name,
         description: board.detailInfo,
@@ -205,7 +204,6 @@ export class ExampleExplorer {
     boardItemList.push({
       name: '',
       id: 'no_device',
-      fqbn: '',
       detailInfo: '',
       label: '$(issue-opened) My device is not in the list...',
       description: '',

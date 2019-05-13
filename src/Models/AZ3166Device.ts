@@ -14,6 +14,7 @@ import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 import {delay, getRegistryValues} from '../utils';
+import * as path from 'path';
 
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 import {DeviceType} from './Interfaces/Device';
@@ -40,7 +41,8 @@ const constants = {
   cExtraFlag: 'compiler.c.extra_flags=-DCORRELATIONID="',
   cppExtraFlag: 'compiler.cpp.extra_flags=-DCORRELATIONID="',
   traceExtraFlag: ' -DENABLETRACE=',
-  informationPageUrl: 'https://aka.ms/AA35xln'
+  informationPageUrl: 'https://aka.ms/AA35xln',
+  binFileExt: '.bin'
 };
 
 enum configDeviceOptions {
@@ -85,6 +87,41 @@ export class AZ3166Device extends ArduinoDeviceBase {
     const boardProvider = new BoardProvider(this.boardFolderPath);
     const az3166 = boardProvider.find({id: AZ3166Device._boardId});
     return az3166;
+  }
+  
+  async compile(): Promise<boolean> {
+    await super.compile();
+    await this.generateBinFile();
+    return true;
+  }
+
+  private async generateBinFile(): Promise<boolean> {
+    try {
+      if (!fs.existsSync(this.outputPath)) {
+        throw Error(`Output path does not exist.`);
+      }
+
+      const binFiles = fs.readdirSync(this.outputPath).filter(
+        file => path.extname(file).endsWith(constants.binFileExt));
+      if (binFiles && binFiles[0]) {
+        const binFilePath = path.join(this.outputPath, binFiles[0]);
+        const appbin = fs.readFileSync(binFilePath, 'binary');
+        // Temperately hard-code AZ3166 version
+        const AZ3166Version = '1.6.2';
+        const bootBinFilePath = path.join('/root/.arduino15/packages/AZ3166/hardware/stm32f4', AZ3166Version, 'bootloader/boot.bin');
+        const bootBin = fs.readFileSync(bootBinFilePath, 'binary');
+        const fileContent = bootBin + '\xFF'.repeat(0xc000-bootBin.length) + appbin;
+
+        fs.writeFileSync(binFilePath, fileContent, 'binary');
+        fs.writeFileSync(binFilePath.replace('.bin', '.ota.bin'), appbin);
+      } else {
+        throw Error(`Cannot find the bin File. Please compile code first.`)
+      }
+    } catch(error) {
+      throw Error(`Generate devkit bin file failed. Error message: ${error.message}`);
+    }
+
+    return true;
   }
 
   async load(): Promise<boolean> {
