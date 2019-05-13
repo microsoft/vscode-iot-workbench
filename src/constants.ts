@@ -43,8 +43,13 @@ export class FileNames {
   static readonly resourcesFolderName = 'resources';
   static readonly iotworkbenchprojectFileName = '.iotworkbenchproject';
   static readonly settingsJsonFileName = 'settings.json';
+  static readonly devcontainerFolderName = '.devcontainer';
   static readonly vscodeSettingsFolderName = '.vscode';
   static readonly workspaceExtensionName = '.code-workspace';
+  static readonly dockerfileName = 'Dockerfile';
+  static readonly devcontainerJSONFileName = 'devcontainer.json';
+  static readonly cppPropertiesFileName = 'c_cpp_properties.json';
+  static readonly outputPathName = '.build';
 }
 
 export enum AzureFunctionsLanguage {
@@ -64,16 +69,10 @@ export class GlobalConstants {
 
 export class DependentExtensions {
   static readonly azureFunctions = 'ms-azuretools.vscode-azurefunctions';
-  static readonly arduino = 'vsciot-vscode.vscode-arduino';
+  static readonly remote = 'ms-vscode-remote.remote-containers';
 }
 
 export class PlatformType {
   static readonly ARDUINO = 'Arduino';
   static readonly LINUX = 'Linux';
-}
-
-export class DockerCacheConfig {
-  static readonly arduinoPackagePath = '.cache';
-  static readonly arduinoAppDockerImage = 'arduinoapp';
-  static readonly outputPath = '.build';
 }

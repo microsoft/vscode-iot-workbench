@@ -175,6 +175,7 @@ export class ProjectInitializer {
     boards.forEach((board: Board) => {
       boardItemList.push({
         name: board.name,
+        model: board.model,
         id: board.id,
         detailInfo: board.detailInfo,
         label: board.name,

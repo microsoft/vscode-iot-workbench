@@ -2,22 +2,19 @@
 // Licensed under the MIT License.
 
 import {exec} from 'child_process';
-import * as crypto from 'crypto';
-import {Docker, Options} from 'docker-cli-js';
 import * as fs from 'fs-plus';
-import * as getmac from 'getmac';
 import * as _ from 'lodash';
 import * as opn from 'opn';
 import * as os from 'os';
-import * as path from 'path';
 import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, DockerCacheConfig, PlatformType} from '../constants';
+import {ConfigKey} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 import {delay, getRegistryValues} from '../utils';
+import * as path from 'path';
 
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 import {DeviceType} from './Interfaces/Device';
@@ -44,7 +41,8 @@ const constants = {
   cExtraFlag: 'compiler.c.extra_flags=-DCORRELATIONID="',
   cppExtraFlag: 'compiler.cpp.extra_flags=-DCORRELATIONID="',
   traceExtraFlag: ' -DENABLETRACE=',
-  informationPageUrl: 'https://aka.ms/AA35xln'
+  informationPageUrl: 'https://aka.ms/AA35xln',
+  binFileExt: '.bin'
 };
 
 enum configDeviceOptions {
@@ -64,15 +62,15 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      devicePath: string, private templateFilesInfo: TemplateFileInfo[] = []) {
-    super(context, devicePath, channel, DeviceType.MXChip_AZ3166);
+      projectPath: string, private templateFilesInfo: TemplateFileInfo[] = []) {
+    super(context, projectPath, channel, DeviceType.MXChip_AZ3166);
   }
 
   // tslint:disable-next-line: no-any
   static get serialport(): any {
     if (!AZ3166Device._serialport) {
-      AZ3166Device._serialport =
-          require('../../../vendor/node-usb-native').SerialPort;
+      // AZ3166Device._serialport =
+      //     require('../../../vendor/node-usb-native').SerialPort;
     }
     return AZ3166Device._serialport;
   }
@@ -90,57 +88,71 @@ export class AZ3166Device extends ArduinoDeviceBase {
     const az3166 = boardProvider.find({id: AZ3166Device._boardId});
     return az3166;
   }
-
-  get version() {
-    // Currently hard code here: version 1.6.1
-    return '1.6.1';
-    // const packageRootPath = this.getArduinoPackagePath();
-    // let version = '0.0.1';
-
-    // if (fs.existsSync(packageRootPath)) {
-    //   const versions = fs.readdirSync(packageRootPath);
-    //   if (versions[0]) {
-    //     version = versions[0];
-    //   }
-    // }
-
-    // return version;
+  
+  async compile(): Promise<boolean> {
+    await super.compile();
+    await this.generateBinFile();
+    return true;
   }
 
-  async load(): Promise<boolean> {
-    const deviceFolderPath = this.deviceFolder;
+  private async generateBinFile(): Promise<boolean> {
+    try {
+      if (!fs.existsSync(this.outputPath)) {
+        throw Error(`Output path does not exist.`);
+      }
 
-    if (!fs.existsSync(deviceFolderPath)) {
-      throw new Error('Unable to find the device folder inside the project.');
+      const binFiles = fs.readdirSync(this.outputPath).filter(
+        file => path.extname(file).endsWith(constants.binFileExt));
+      if (binFiles && binFiles[0]) {
+        const binFilePath = path.join(this.outputPath, binFiles[0]);
+        const appbin = fs.readFileSync(binFilePath, 'binary');
+        // Temperately hard-code AZ3166 version
+        const AZ3166Version = '1.6.2';
+        const bootBinFilePath = path.join('/root/.arduino15/packages/AZ3166/hardware/stm32f4', AZ3166Version, 'bootloader/boot.bin');
+        const bootBin = fs.readFileSync(bootBinFilePath, 'binary');
+        const fileContent = bootBin + '\xFF'.repeat(0xc000-bootBin.length) + appbin;
+
+        fs.writeFileSync(binFilePath, fileContent, 'binary');
+        fs.writeFileSync(binFilePath.replace('.bin', '.ota.bin'), appbin);
+      } else {
+        throw Error(`Cannot find the bin File. Please compile code first.`);
+      }
+    } catch(error) {
+      throw Error(`Generate devkit bin file failed. Error message: ${error.message}`);
     }
-
-    if (!this.board) {
-      throw new Error('Unable to find the board in the config file.');
-    }
-
-    this.generateCppPropertiesFile(this.board);
 
     return true;
   }
 
-  async create(): Promise<boolean> {
-    if (!this.templateFilesInfo) {
-      throw new Error('No sketch file found.');
+  async load(): Promise<boolean> {
+    if (!fs.existsSync(this.projectFolder)) {
+      throw new Error('Unable to find the project folder.');
     }
-    const deviceFolderPath = this.deviceFolder;
 
-    if (!fs.existsSync(deviceFolderPath)) {
-      throw new Error('Unable to find the device folder inside the project.');
-    }
     if (!this.board) {
       throw new Error('Unable to find the board in the config file.');
     }
 
     this.generateCommonFiles();
-    this.generateCppPropertiesFile(this.board);
-    await this.generateSketchFile(
-        this.templateFilesInfo, this.board, constants.boardInfo,
-        constants.uploadMethod);
+    await this.generateDockerRelatedFiles(this.board);
+    await this.generateCppPropertiesFile(this.board);
+
+    return true;
+  }
+
+  async create(): Promise<boolean> {
+    if (!fs.existsSync(this.projectFolder)) {
+      throw new Error('Unable to find the project folder.');
+    }
+
+    if (!this.board) {
+      throw new Error('Unable to find the board in the config file.');
+    }
+
+    this.generateCommonFiles();
+    await this.generateDockerRelatedFiles(this.board);
+    await this.generateCppPropertiesFile(this.board);
+    await this.generateSketchFile(this.templateFilesInfo);
     return true;
   }
 
@@ -715,130 +727,5 @@ export class AZ3166Device extends ArduinoDeviceBase {
     }
     // For other OS platform, there is no need to install STLink Driver.
     return true;
-  }
-
-  // private async generatePlatformLocal() {
-  //   try {
-  //     // Download AZ3166 package
-  //     // Check arduino app image has been built
-  //     let imageExist = false;
-  //     await this.docker.command(`images -q
-  //     ${DockerCacheConfig.arduinoAppDockerImage}:${DockerCacheConfig.arduinoAppDockerImageTag}}`)
-  //       .then((data)=>{
-  //         const imageID = data.raw;
-  //         if (imageID) {
-  //           imageExist = true;
-  //         }
-  //       });
-  //     if (!imageExist) {
-  //       await this.docker.command(`build -t
-  //       ${DockerCacheConfig.arduinoAppDockerImage}:${DockerCacheConfig.arduinoAppDockerImageTag}
-  //       .`);
-  //     }
-  //     this.docker.command('build -t arduinoapp .').then((data) => {
-  //       this.channel.show();
-  //       this.channel.appendLine(data.raw);
-  //       this.channel.appendLine('##debug## Build docker app image.');
-  //     }).catch((err) => {
-  //       this.channel.show();
-  //       this.channel.appendLine(err);
-  //     })
-
-  //     // Check image succussfully build
-  //     this.docker.command('image ls').then((data) => {
-  //       this.channel.show();
-  //       this.channel.appendLine(data.raw);
-  //       this.channel.appendLine('##debug## image ls.');
-  //     });
-  //   } catch (error) {
-  //     throw error;
-  //   }
-
-  //   const arduinoPackagePath = this.getArduinoPackagePath();
-
-  //   function getHashMacAsync() {
-  //     return new Promise((resolve) => {
-  //       getmac.getMac((err, macAddress) => {
-  //         if (err) {
-  //           throw (err);
-  //         }
-  //         const hashMacAddress = crypto.createHash('sha256')
-  //                                    .update(macAddress, 'utf8')
-  //                                    .digest('hex');
-  //         resolve(hashMacAddress);
-  //       });
-  //     });
-  //   }
-
-  //   if (!fs.existsSync(arduinoPackagePath)) {
-  //     throw new Error(
-  //         'Unable to find the Arduino package path, please install the latest
-  //         Arduino package for Devkit.');
-  //   }
-
-  //   const files = fs.readdirSync(arduinoPackagePath);
-  //   for (let i = files.length - 1; i >= 0; i--) {
-  //     if (files[i] === '.DS_Store') {
-  //       files.splice(i, 1);
-  //     }
-  //   }
-
-  //   if (files.length === 0 || files.length > 1) {
-  //     throw new Error(
-  //         'There are unexpected files or folders under Arduino package
-  //         installation path. Please clear the folder and reinstall the
-  //         package for Devkit.');
-  //   }
-
-  //   const directoryName = path.join(arduinoPackagePath, files[0]);
-  //   if (!fs.isDirectorySync(directoryName)) {
-  //     throw new Error(
-  //         'The Arduino package for MXChip IoT Devkit is not installed. Please
-  //         follow the guide to install it');
-  //   }
-
-  //   const fileName = path.join(directoryName,
-  //   constants.platformLocalFileName); if (!fs.existsSync(fileName)) {
-  //     const enableTrace = 1;
-  //     let hashMacAddress;
-  //     try {
-  //       hashMacAddress = await getHashMacAsync();
-  //     } catch (error) {
-  //       throw error;
-  //     }
-  //     // Create the file of platform.local.txt
-  //     const targetFileName =
-  //         path.join(directoryName, constants.platformLocalFileName);
-
-  //     const content = `${constants.cExtraFlag}${hashMacAddress}" ${
-  //                         constants.traceExtraFlag}${enableTrace}\r\n` +
-  //         `${constants.cppExtraFlag}${hashMacAddress}" ${
-  //                         constants.traceExtraFlag}${enableTrace}\r\n`;
-  //     try {
-  //       fs.writeFileSync(targetFileName, content);
-  //     } catch (e) {
-  //       throw e;
-  //     }
-  //   }
-  // }
-
-  private getArduinoPackagePath() {
-    const plat = os.platform();
-
-    // TODO: Currently, we do not support portable Arduino installation.
-    let arduinoPackagePath = '';
-    const homeDir = os.homedir();
-
-    if (plat === 'win32') {
-      arduinoPackagePath =
-          path.join(homeDir, 'AppData', 'Local', 'Arduino15', 'packages');
-    } else if (plat === 'darwin') {
-      arduinoPackagePath =
-          path.join(homeDir, 'Library', 'Arduino15', 'packages');
-    } else if (plat === 'linux') {
-      arduinoPackagePath = path.join(homeDir, '.arduino15', 'packages');
-    }
-
-    return path.join(arduinoPackagePath, 'AZ3166', 'hardware', 'stm32f4');
   }
 }

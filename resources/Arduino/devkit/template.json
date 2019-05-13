@@ -9,27 +9,7 @@
                 {
                     "fileName": "emptySketch.ino",
                     "sourcePath" : ".",
-                    "targetPath" : "."
-                },
-                {
-                  "fileName": "Dockerfile",
-                  "sourcePath" : ".",
-                  "targetPath" : "."
-                },
-                {
-                  "fileName": ".dockerignore",
-                  "sourcePath" : ".",
-                  "targetPath" : "."
-                },
-                {
-                  "fileName": "arduino-cli.yaml",
-                  "sourcePath" : ".",
-                  "targetPath" : "."
-                },
-                {
-                  "fileName": "devkit_start.sh",
-                  "sourcePath" : ".",
-                  "targetPath" : "."
+                    "targetPath" : "./device"
                 }
             ]
         },
@@ -42,33 +22,7 @@
                 {
                     "fileName": "simple_iothub.ino",
                     "sourcePath" : ".",
-                    "targetPath" : "."
-                }
-            ]
-        },
-        {
-            "description": "",
-            "detail": "Create project that connects to Azure IoT Hub and processes device data further in Azure Functions.",
-            "label": "With Azure Functions",
-            "type": "AzureFunctions",
-            "templateFilesInfo": [
-                {
-                    "fileName": "simple_iothub.ino",
-                    "sourcePath" : ".",
-                    "targetPath" : "."
-                }
-            ]
-        },
-        {
-            "description": "",
-            "detail": "Create project that processes device data from IoT Hub in Stream Analytics and store the result in Cosmos DB.",
-            "label": "With Stream Analytics and Cosmos DB",
-            "type": "StreamAnalytics",
-            "templateFilesInfo": [
-                {
-                    "fileName": "simple_iothub.ino",
-                    "sourcePath" : ".",
-                    "targetPath" : "."
+                    "targetPath" : "./device"
                 }
             ]
         }
