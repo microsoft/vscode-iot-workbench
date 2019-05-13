@@ -115,7 +115,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
         fs.writeFileSync(binFilePath, fileContent, 'binary');
         fs.writeFileSync(binFilePath.replace('.bin', '.ota.bin'), appbin);
       } else {
-        throw Error(`Cannot find the bin File. Please compile code first.`)
+        throw Error(`Cannot find the bin File. Please compile code first.`);
       }
     } catch(error) {
       throw Error(`Generate devkit bin file failed. Error message: ${error.message}`);
