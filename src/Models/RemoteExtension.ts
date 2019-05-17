@@ -18,7 +18,7 @@ export class RemoteExtension {
     return false;
   }
 
-  static async IsAvailable(): Promise<boolean> {
+  static async isAvailable(): Promise<boolean> {
     if (!vscode.extensions.getExtension(DependentExtensions.remote)) {
       const choice = await vscode.window.showInformationMessage(
           'Remote extension is required for the current project. Do you want to install it from marketplace?',
@@ -36,7 +36,7 @@ export class RemoteExtension {
 
   
   static async checkRemoteExtension(): Promise<boolean> {
-    return await RemoteExtension.IsAvailable();
+    return await RemoteExtension.isAvailable();
   }
 
 }

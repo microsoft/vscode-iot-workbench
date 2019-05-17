@@ -21,12 +21,10 @@ import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 import {DeviceType} from './Interfaces/Device';
 import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 
-
 const impor = require('impor')(__dirname);
 const forEach = impor('lodash.foreach') as typeof import('lodash.foreach');
 const trimStart =
     impor('lodash.trimstart') as typeof import('lodash.trimstart');
-const filter = impor('lodash.filter') as typeof import('lodash.filter');
 
 interface SerialPortInfo {
   comName: string;
@@ -93,96 +91,92 @@ export class AZ3166Device extends ArduinoDeviceBase {
   }
   
   async compile(): Promise<boolean> {
-    await super.compile();
-    await this.generateBinFile();
+    try {
+      await super.compile();
+    } catch (error) {
+      throw new Error(`Failed to compile AZ3166 device code using arduino-cli. Error message: ${error.message}`);
+    }
+
+    try {
+      await this.generateBinFile();
+    } catch (error) {
+      throw new Error(`Failed to generate bin file for DevKit bootloader. Error message: ${error.message}`);
+    }
+
     return true;
   }
 
   async upload(): Promise<boolean> {
-    try {
-      if (!this.outputPath) {
-        vscode.window.showWarningMessage(
-            'No device compile output folder found.');
-        this.channel.show();
-        this.channel.appendLine('No device compile output folder found.');
-        return false;
-      }
-
-      const binFiles = fs.readdirSync(this.outputPath).filter(
-        file => path.extname(file).endsWith(constants.binFileExt) && !path.basename(file).endsWith(constants.otaBinFileExt));
-      // const binFiles = fs.listSync(this.outputPath, ['bin']);
-      if (!binFiles || !binFiles.length) {
-        const message =
-            'No bin file found. Please run the command of Device Compile first.';
-        vscode.window.showWarningMessage(message);
-        this.channel.show();
-        this.channel.appendLine(message);
-        return false;
-      }
-
-      try {
-        const hostVolumes = 
-        await sdk.FileSystem.listVolume();
-        const AZ3166Disk = hostVolumes.find(volume => {
-          const nameProperty = Object.getOwnPropertyDescriptor(volume, 'name');
-          if (nameProperty !== undefined && nameProperty.value === 'AZ3166') {
-            return true;
-          }
-          return false;
-        })
-
-        if (!AZ3166Disk) {
-          const message =
-          'No AZ3166 device found. Please plug in a devkit board.';
-          vscode.window.showWarningMessage(message);
-          this.channel.show();
-          this.channel.appendLine(message);
-          return false;
-        }
-
-        const binFilePath = path.join(this.outputPath, binFiles[0]);
-        const binFileHardCode = "C:\\Users\\dilin\\workspace\\deviceDevEx\\vscode-iot-workbench-github\\data\\devkit_project\\.build\\output.bin";
-        try {
-          await sdk.FileSystem.transferFile(binFilePath, AZ3166Disk.path);
-        } catch (error) {
-          throw new Error(`copy bin file to AZ3166 board failed. ${error.message}`);
-        }
-      } catch (error) {
-        throw error;
-      }
-    
-      this.channel.show();
-      this.channel.appendLine(`Successfully deploy binary file to AZ3166 board.`);
-      return true;
-    } catch (error) {
-      throw error;
+    if (!fs.existsSync(this.outputPath)) {
+      throw new Error(`Output path ${this.outputPath} does not exist`);
     }
+
+    const binFiles = fs.readdirSync(this.outputPath).filter(
+      file => path.extname(file).endsWith(constants.binFileExt) && !path.basename(file).endsWith(constants.otaBinFileExt));
+    if (!binFiles || !binFiles.length) {
+      throw new Error(`No bin file found.`);
+    }
+
+    let hostVolumes;
+    try {
+      hostVolumes = await sdk.FileSystem.listVolume();
+    } catch (error) {
+      throw new Error(`List host volume failed. Error message: ${error.message}`);
+    }
+
+    const az3166Disk = hostVolumes.find(volume => volume.name === "AZ3166");
+
+    if (!az3166Disk) {
+      const message = 'No AZ3166 device found. Please plug in a devkit board.';
+      vscode.window.showWarningMessage(message);
+      throw new Error(message);
+    }
+    const binFilePath = path.join(this.outputPath, binFiles[0]);
+    try {
+      await sdk.FileSystem.transferFile(binFilePath, az3166Disk.path);
+    } catch (error) {
+      throw new Error(`Copy bin file to AZ3166 board failed. ${error.message}`);
+    }
+
+    this.channel.show();
+    this.channel.appendLine(`Successfully deploy bin file to AZ3166 board.`);
+
+    return true;
   }
 
   private async generateBinFile(): Promise<boolean> {
-    try {
-      if (!fs.existsSync(this.outputPath)) {
-        throw new Error(`Output path ${this.outputPath} does not exist.`);
-      }
+    if (!fs.existsSync(this.outputPath)) {
+      throw new Error(`Output path ${this.outputPath} does not exist`);
+    }
 
-      const binFiles = fs.readdirSync(this.outputPath).filter(
+    let binFiles;
+    try {
+      binFiles = fs.readdirSync(this.outputPath).filter(
         file => path.extname(file).endsWith(constants.binFileExt));
-      if (binFiles && binFiles[0]) {
+    } catch (error) {
+      throw new Error(`Failed to get bin Files from directory ${this.outputPath}.`);
+    }
+
+    if (binFiles && binFiles[0]) {
+      try {
         const binFilePath = path.join(this.outputPath, binFiles[0]);
         const appbin = fs.readFileSync(binFilePath, 'binary');
         // Temperately hard-code AZ3166 version
-        const AZ3166Version = '1.6.2';
-        const bootBinFilePath = path.join('/root/.arduino15/packages/AZ3166/hardware/stm32f4', AZ3166Version, 'bootloader/boot.bin');
+        const az3166Version = '1.6.2';
+        const bootBinFilePath = path.join('/root/.arduino15/packages/AZ3166/hardware/stm32f4', az3166Version, 'bootloader/boot.bin');
+        if (!fs.existsSync(bootBinFilePath)) {
+          throw new Error(`Cannot find the boot bin file: ${bootBinFilePath}.`);
+        }
         const bootBin = fs.readFileSync(bootBinFilePath, 'binary');
         const fileContent = bootBin + '\xFF'.repeat(0xc000-bootBin.length) + appbin;
 
         fs.writeFileSync(binFilePath, fileContent, 'binary');
         fs.writeFileSync(binFilePath.replace(`${constants.binFileExt}`, `${constants.otaBinFileExt}`), appbin);
-      } else {
-        throw new Error(`Cannot find the bin File under directory ${this.outputPath}. Please compile code first.`);
+      } catch (error) {
+        throw new Error(`Failed to generate ${constants.binFileExt} file and ${constants.otaBinFileExt} file. Error message: ${error.message}`);
       }
-    } catch(error) {
-      throw new Error(`Generate devkit bin file failed. Error message: ${error.message}`);
+    } else {
+      throw new Error(`Cannot find the bin File under directory ${this.outputPath}. Please compile code first.`);
     }
 
     this.channel.show();
@@ -192,7 +186,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
   async load(): Promise<boolean> {
     if (!fs.existsSync(this.projectFolder)) {
-      throw new Error('Unable to find the project folder.');
+      throw new Error(`Unable to find the project folder. ${this.projectFolder}`);
     }
 
     if (!this.board) {
@@ -215,7 +209,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
       throw new Error('Unable to find the board in the config file.');
     }
 
-    try {      
+    try {
       await this.generateCommonFiles();
       await this.generateDockerRelatedFiles(this.board);
       await this.generateCppPropertiesFile(this.board);

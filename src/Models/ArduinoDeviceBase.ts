@@ -74,27 +74,28 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
   }
 
   async compile(): Promise<boolean> {
+    if (this.board === undefined) {
+      throw new Error(`Device board is undefined.`);
+    }
+
+    if (!fs.existsSync(this.outputPath)) {
+      try {
+        fs.mkdirSync(this.outputPath);
+      } catch (error) {
+        throw new Error(`Failed to create output path ${this.outputPath}. Error message: ${error.message}`);
+      }
+    }
+
+    this.channel.show();
+    this.channel.appendLine('Compiling arduino based device code...');
+
+    const command = `arduino-cli compile --fqbn ${this.board.model} ${this.projectFolder}/device --output ${this.outputPath}/output --debug`;
     try {
-      if (this.board === undefined) {
-        throw new Error(`Device board is undefined.`);
-      }
-
-      if (!fs.existsSync(this.outputPath)) {
-        try {
-          fs.mkdirSync(this.outputPath);
-        } catch (error) {
-          throw new Error(`Failed to create output path ${this.outputPath}. Error message: ${error.message}`);
-        }
-      }
-
-      this.channel.show();
-      this.channel.appendLine('### Compile arduino based device code');
-      
-      const command = `arduino-cli compile --fqbn ${this.board.model} ${this.projectFolder}/device --output ${this.outputPath}/output --debug`;
       await runCommand(command, '', this.channel);
     } catch (error) {
       throw new Error(`Compile device code failed. Error message: ${error.message}`);
     }
+
     return true;
   }
 

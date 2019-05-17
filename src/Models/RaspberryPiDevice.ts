@@ -322,29 +322,77 @@ export class RaspberryPiDevice implements Device {
     }
   }
 
-  async configSSH(): Promise<boolean> {
-    // Raspberry Pi host    
+  async _autoDiscoverDeviceIp(): Promise<vscode.QuickPickItem[]> {
     const sshDevicePickItems: vscode.QuickPickItem[] = [];
     const deviceInfos = await sdk.SSH.discover();
     deviceInfos.forEach((deviceInfo) => {
       sshDevicePickItems.push({
         label: deviceInfo.ip as string,
         description: deviceInfo.host || '<Unknown>'
-      })
+      });
     });
-    
-    const deviceSelection = await vscode.window.showQuickPick(sshDevicePickItems, {
-      ignoreFocusOut: true,
-      matchOnDescription: true,
-      matchOnDetail: true,
-      placeHolder: 'Select a Raspberry Pi Device to upload executable file',
-    });
+    return sshDevicePickItems;
+  }
 
-    if (!deviceSelection) {
-      this.channel.show();
-      this.channel.appendLine('Device selection canceled.');
+  async configSSH(): Promise<boolean> {
+    // Raspberry Pi host
+    const sshDiscoverOrInputItems: vscode.QuickPickItem[] = [
+      {
+        label: '$(search) Auto discover',
+        detail: 'Auto discover SSH enabled device in LAN'
+      },
+      {
+        label: '$(gear) Manual setup',
+        detail: 'Setup device SSH configuration manually'
+      }
+    ];
+    const sshDiscoverOrInputChoice =
+        await vscode.window.showQuickPick(sshDiscoverOrInputItems, {
+          ignoreFocusOut: true,
+          matchOnDescription: true,
+          matchOnDetail: true,
+          placeHolder: 'Select an option',
+        });
+    if (!sshDiscoverOrInputChoice) {
       return false;
     }
+
+    let raspiHost: string|undefined;
+
+    if (sshDiscoverOrInputChoice.label === '$(search) Auto discover') {
+      let selectDeviceChoice: vscode.QuickPickItem|undefined;
+      do {
+        selectDeviceChoice =
+            await vscode.window.showQuickPick(this._autoDiscoverDeviceIp(), {
+              ignoreFocusOut: true,
+              matchOnDescription: true,
+              matchOnDetail: true,
+              placeHolder: 'Select a device',
+            });
+      } while (selectDeviceChoice &&
+               selectDeviceChoice.label === '$(sync) Discover again');
+
+      if (!selectDeviceChoice) {
+        return false;
+      }
+
+      if (selectDeviceChoice.label !== '$(gear) Manual setup') {
+        raspiHost = selectDeviceChoice.label;
+      }
+    }
+
+    if (!raspiHost) {
+      const raspiHostOption: vscode.InputBoxOptions = {
+        value: RaspberryPiUploadConfig.host,
+        prompt: `Please input Raspberry Pi device ip or hostname here.`,
+        ignoreFocusOut: true
+      };
+      raspiHost = await vscode.window.showInputBox(raspiHostOption);
+      if (raspiHost === undefined) {
+        return false;
+      }
+    }
+    raspiHost = raspiHost || RaspberryPiUploadConfig.host;
 
     // Raspberry Pi SSH port
     const raspiPortOption: vscode.InputBoxOptions = {
@@ -396,7 +444,7 @@ export class RaspberryPiDevice implements Device {
     }
     raspiPath = raspiPath || RaspberryPiUploadConfig.projectPath;
 
-    RaspberryPiUploadConfig.host = deviceSelection.label;
+    RaspberryPiUploadConfig.host = raspiHost;
     RaspberryPiUploadConfig.port = raspiPort;
     RaspberryPiUploadConfig.user = raspiUser;
     RaspberryPiUploadConfig.password = raspiPassword;

@@ -217,6 +217,7 @@ export class IoTProject {
   }
 
   async handleLoadFailure() {
+    // [TODO]
     if (!vscode.workspace.workspaceFolders ||
         !vscode.workspace.workspaceFolders[0] ||
         !fs.existsSync(this.projectConfigFile)) {
