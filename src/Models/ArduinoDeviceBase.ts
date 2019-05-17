@@ -76,14 +76,14 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
   async compile(): Promise<boolean> {
     try {
       if (this.board === undefined) {
-        throw Error(`Device board is undefined.`);
+        throw new Error(`Device board is undefined.`);
       }
 
       if (!fs.existsSync(this.outputPath)) {
         try {
           fs.mkdirSync(this.outputPath);
         } catch (error) {
-          throw Error(`Failed to create output path ${this.outputPath}. Error message: ${error.message}`);
+          throw new Error(`Failed to create output path ${this.outputPath}. Error message: ${error.message}`);
         }
       }
 
@@ -93,36 +93,18 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
       const command = `arduino-cli compile --fqbn ${this.board.model} ${this.projectFolder}/device --output ${this.outputPath}/output --debug`;
       await runCommand(command, '', this.channel);
     } catch (error) {
-      throw Error(`Compile device code failed. Error message: ${error.message}`);
+      throw new Error(`Compile device code failed. Error message: ${error.message}`);
     }
     return true;
   }
 
 
   async upload(): Promise<boolean> {
-    try {
-      const result = await this.preUploadAction();
-      if (!result) {
-        return false;
-      }
-      await vscode.commands.executeCommand('arduino.upload');
-      return true;
-    } catch (error) {
-      throw error;
-    }
+    return true;
   }
 
   async manageLibrary(): Promise<boolean> {
-    // try {
-    //   // const libraryList;
-    //   await this.docker
-    //     .command(`run --name ${this.containerName} -v ${
-    //       this.arduinoPackagePath}:/root/ ${this.imageName} lib search`).then((data) => {
-
-    //       });
-    // } catch (error) {
-    //   throw error;
-    // }
+    // TODO: implement library management
     return true;
   }
 
@@ -134,16 +116,16 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
   abstract async preUploadAction(): Promise<boolean>;
 
   // Helper functions:
-  generateCommonFiles(): void {
+  async generateCommonFiles(): Promise<boolean> {
     if (!fs.existsSync(this.projectFolder)) {
       throw new Error('Unable to find the project folder.');
     }
 
-    if (!fs.existsSync(this.vscodeFolderPath)) {      
+    if (!fs.existsSync(this.vscodeFolderPath)) {
       try {
         fs.mkdirSync(this.vscodeFolderPath);
       } catch (error) {
-        throw Error(`Failed to create .vscode folder. Error message: ${error.message}`);
+        throw new Error(`Failed to create folder ${this.vscodeFolderPath}. Error message: ${error.message}`);
       }
     }
 
@@ -151,9 +133,11 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
       try {
         fs.mkdirSync(this.devcontainerFolderPath);
       } catch (error) {
-        throw Error(`Failed to create .devcontainer folder. Error message: ${error.message}`);
+        throw new Error(`Failed to create folder ${this.devcontainerFolderPath}. Error message: ${error.message}`);
       }
     }
+
+    return true;
   }
 
   async generateCppPropertiesFile(board: Board): Promise<boolean> {
@@ -179,7 +163,7 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
   }
 
   async generateDockerRelatedFiles(board: Board): Promise<boolean> {
-        // Dockerfile       
+        // Dockerfile
         const dockerfileTargetPath = path.join(
           this.devcontainerFolderPath, FileNames.dockerfileName);
 
@@ -193,24 +177,24 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
           const dockerfileContent = fs.readFileSync(dockerfileSourcePath, 'utf8');
           fs.writeFileSync(dockerfileTargetPath, dockerfileContent);
         } catch (error) {
-          throw new Error(`Create Dockerfile failed: ${error.message}`);
+          throw new Error(`Create ${FileNames.dockerfileName} failed: ${error.message}`);
         }
     
         // devcontainer.json
-        const devcontainerJSONFileTargetPath = path.join(
-          this.devcontainerFolderPath, FileNames.devcontainerJSONFileName);
+        const devcontainerJsonFileTargetPath = path.join(
+          this.devcontainerFolderPath, FileNames.devcontainerJsonFileName);
 
-        if (fs.existsSync(devcontainerJSONFileTargetPath)) {
+        if (fs.existsSync(devcontainerJsonFileTargetPath)) {
           return true;
         }
 
         try {
-          const devcontainerJSONFileSourcePath = path.join(
-            this.boardFolderPath, board.id, FileNames.devcontainerJSONFileName);
-          const devcontainerJSONContent = fs.readFileSync(devcontainerJSONFileSourcePath, 'utf8');
-          fs.writeFileSync(devcontainerJSONFileTargetPath, devcontainerJSONContent);
+          const devcontainerJsonFileSourcePath = path.join(
+            this.boardFolderPath, board.id, FileNames.devcontainerJsonFileName);
+          const devcontainerJSONContent = fs.readFileSync(devcontainerJsonFileSourcePath, 'utf8');
+          fs.writeFileSync(devcontainerJsonFileTargetPath, devcontainerJSONContent);
         } catch (error) {
-          throw new Error(`Create devcontainer.json file failed: ${error.message}`);
+          throw new Error(`Create ${FileNames.devcontainerJsonFileName} file failed: ${error.message}`);
         }
 
         return true;

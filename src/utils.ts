@@ -254,3 +254,47 @@ export function runCommand(
     });
   });
 }
+
+export enum BuiltInCommands {
+  CloseActiveEditor = 'workbench.action.closeActiveEditor',
+  CloseAllEditors = 'workbench.action.closeAllEditors',
+  CursorMove = 'cursorMove',
+  Diff = 'vscode.diff',
+  EditorScroll = 'editorScroll',
+  ExecuteDocumentSymbolProvider = 'vscode.executeDocumentSymbolProvider',
+  ExecuteCodeLensProvider = 'vscode.executeCodeLensProvider',
+  FocusFilesExplorer = 'workbench.files.action.focusFilesExplorer',
+  Open = 'vscode.open',
+  OpenFolder = 'vscode.openFolder',
+  OpenInTerminal = 'openInTerminal',
+  NextEditor = 'workbench.action.nextEditor',
+  PreviewHtml = 'vscode.previewHtml',
+  RevealLine = 'revealLine',
+  SetContext = 'setContext',
+  ShowExplorerActivity = 'workbench.view.explorer',
+  ShowReferences = 'editor.action.showReferences'
+}
+
+export enum CommandContext {
+  IsRemote = 'remote:isRemote',
+  IsLocal = 'remote:isLocal'
+  // ActiveFileStatus = 'gitlens:activeFileStatus',
+  // AnnotationStatus = 'gitlens:annotationStatus',
+  // CanToggleCodeLens = 'gitlens:canToggleCodeLens',
+  // Enabled = 'gitlens:enabled',
+  // HasRemotes = 'gitlens:hasRemotes',
+  // Key = 'gitlens:key',
+  // Readonly = 'gitlens:readonly',
+  // ViewsCanCompare = 'gitlens:views:canCompare',
+  // ViewsCanCompareFile = 'gitlens:views:canCompare:file',
+  // ViewsCompareKeepResults = 'gitlens:views:compare:keepResults',
+  // ViewsHideSupportGitLens = 'gitlens:views:supportGitLens:hide',
+  // ViewsFileHistoryEditorFollowing = 'gitlens:views:fileHistory:editorFollowing',
+  // ViewsLineHistoryEditorFollowing = 'gitlens:views:lineHistory:editorFollowing',
+  // ViewsRepositoriesAutoRefresh = 'gitlens:views:repositories:autoRefresh',
+  // ViewsSearchKeepResults = 'gitlens:views:search:keepResults',
+  // Vsls = 'gitlens:vsls'
+}
+export function setCommandContext(key: CommandContext | string, value: any) {
+  return vscode.commands.executeCommand(BuiltInCommands.SetContext, key, value);
+}

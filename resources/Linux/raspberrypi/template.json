@@ -12,7 +12,7 @@
                 "targetPath" : "./src"
             },
             {
-                "fileName": "iothub_convenience_sample.c",
+                "fileName": "iothub_sample.c",
                 "sourcePath" : ".",
                 "targetPath" : "./src"
             }
