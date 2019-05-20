@@ -89,7 +89,7 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
     this.channel.show();
     this.channel.appendLine('Compiling arduino based device code...');
 
-    const command = `arduino-cli compile --fqbn ${this.board.model} ${this.projectFolder}/device --output ${this.outputPath}/output --debug`;
+    const command = `arduino-cli compile --fqbn ${this.board.model} ${this.projectFolder}/device --output ${this.outputPath}/output --verbose`;
     try {
       await runCommand(command, '', this.channel);
     } catch (error) {
