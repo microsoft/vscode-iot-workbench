@@ -14,6 +14,7 @@ import {runCommand} from '../utils';
 
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
+import { ScaffoldGenerator } from './ScaffoldGenerator';
 
 class RaspberryPiUploadConfig {
   static host = 'raspberrypi';
@@ -81,9 +82,8 @@ export class RaspberryPiDevice implements Device {
       throw new Error('Unable to find the project folder.');
     }
 
-    await this.generateCommonFiles();
-    await this.generateDockerRelatedFiles();
-    await this.generateCppPropertiesFile();
+    await ScaffoldGenerator.scaffolIoTProjectdFiles(this.projectFolder, this.vscodeFolderPath, 
+      this.boardFolderPath, this.devcontainerFolderPath, RaspberryPiDevice.boardId);
 
     return true;
   }
@@ -93,100 +93,20 @@ export class RaspberryPiDevice implements Device {
       throw new Error('Unable to find the project folder.');
     }
     
-    await this.generateCommonFiles();
-    await this.generateCppPropertiesFile();
-    await this.generateDockerRelatedFiles();
+    await ScaffoldGenerator.scaffolIoTProjectdFiles(this.projectFolder, this.vscodeFolderPath, 
+      this.boardFolderPath, this.devcontainerFolderPath, RaspberryPiDevice.boardId);
     await this.generateSketchFile(this.templateFilesInfo);
 
     return true;
   }
 
-  // Helper function
-  async generateCommonFiles(): Promise<boolean> {
-    if (!fs.existsSync(this.vscodeFolderPath)) {    
-      try {
-        fs.mkdirSync(this.vscodeFolderPath);
-      } catch (error) {
-        throw new Error(`Failed to create folder ${this.vscodeFolderPath}. Error message: ${error.message}`);
-      }
-    }
-
-    if (!fs.existsSync(this.devcontainerFolderPath)) {
-      try {
-        fs.mkdirSync(this.devcontainerFolderPath);
-      } catch (error) {
-        throw new Error(`Failed to create folder ${this.devcontainerFolderPath}. Error message: ${error.message}`);
-      }
-    }
-
-    return true;
-  }
-
-  async generateCppPropertiesFile(): Promise<boolean> {
-    // Create c_cpp_properties.json file
-    const cppPropertiesFilePath =
-        path.join(this.vscodeFolderPath, FileNames.cppPropertiesFileName);
-
-    if (fs.existsSync(cppPropertiesFilePath)) {
-      return true;
-    }
-
-    try {
-      const propertiesSourceFile = path.join(
-        this.boardFolderPath, RaspberryPiDevice.boardId, FileNames.cppPropertiesFileName);
-      const propertiesContent =
-          fs.readFileSync(propertiesSourceFile).toString();
-      fs.writeFileSync(cppPropertiesFilePath, propertiesContent);
-    } catch (error) {
-      throw new Error(`Create cpp properties file failed: ${error.message}`);
-    }
-
-    return true;
-  }
-
-  async generateDockerRelatedFiles(): Promise<boolean> {
-        // Dockerfile
-        const dockerfileTargetPath = path.join(
-          this.devcontainerFolderPath, FileNames.dockerfileName);
-
-        if (fs.existsSync(dockerfileTargetPath)) {
-          return true;
-        }
-
-        try {
-          const dockerfileSourcePath = path.join(
-            this.boardFolderPath, RaspberryPiDevice.boardId, FileNames.dockerfileName);
-          const dockerfileContent = fs.readFileSync(dockerfileSourcePath, 'utf8');
-          fs.writeFileSync(dockerfileTargetPath, dockerfileContent);
-        } catch (error) {
-          throw new Error(`Create ${FileNames.dockerfileName} failed: ${error.message}`);
-        }
-    
-        // devcontainer.json
-        const devcontainerJsonFileTargetPath = path.join(
-          this.devcontainerFolderPath, FileNames.devcontainerJsonFileName);
-
-        if (fs.existsSync(devcontainerJsonFileTargetPath)) {
-          return true;
-        }
-
-        try {
-          const devcontainerJsonFileSourcePath = path.join(
-            this.boardFolderPath, RaspberryPiDevice.boardId, FileNames.devcontainerJsonFileName);
-          const devcontainerJSONContent = fs.readFileSync(devcontainerJsonFileSourcePath, 'utf8');
-          fs.writeFileSync(devcontainerJsonFileTargetPath, devcontainerJSONContent);
-        } catch (error) {
-          throw new Error(`Create ${FileNames.devcontainerJsonFileName} file failed: ${error.message}`);
-        }
-
-        return true;
-  }
   
   async generateSketchFile(templateFilesInfo: TemplateFileInfo[]): Promise<boolean> {
     // Generate sketch file
     if (!templateFilesInfo) {
       throw new Error('No sketch file found.');
-    }    
+    }
+
     templateFilesInfo.forEach(fileInfo => {
       const targetFilePath = path.join(
             this.projectFolder, fileInfo.targetPath, fileInfo.fileName);
@@ -204,43 +124,40 @@ export class RaspberryPiDevice implements Device {
   }
 
   async compile(): Promise<boolean> {
-    try {
-      if (!fs.existsSync(this.outputPath)) {
-        try {
-          fs.mkdirSync(this.outputPath);
-        } catch (error) {
-          throw new Error(`Failed to create output path ${this.outputPath}. Error message: ${error.message}`);
-        }
-      }
-
-      this.channel.show();
-      this.channel.appendLine('Compiling Raspberry Pi device code...');
-      const compileBashFile = "/work/compile_app.sh";
+    if (!fs.existsSync(this.outputPath)) {
       try {
-        await runCommand(`bash ${compileBashFile} ${this.projectFolder}/src`, '', this.channel);
+        fs.mkdirSync(this.outputPath);
       } catch (error) {
-        throw new Error(`Failed to compile Raspberry Pi device code. Error message: ${error.message}`);
+        throw new Error(`Failed to create output path ${this.outputPath}. Error message: ${error.message}`);
       }
-
-      // If successfully compiled, copy compiled files to user workspace
-      const binFilePath = "/work/azure-iot-sdk-c/cmake/iot_application";
-      if (fs.existsSync(binFilePath)) {
-        const getOutputFileCmd = `cp -rf ${binFilePath} ${this.outputPath}`;
-        try {
-          await runCommand(getOutputFileCmd, '', this.channel);
-        } catch (error) {
-          throw new Error(`Failed to copy compiled files to output folder ${this.outputPath}. Error message: ${error.message}`);
-        }
-      } else {
-        this.channel.show();
-        this.channel.appendLine('Bin files not found. Compilation may have failed. Please compile code again.');
-      }
-
-      this.channel.show();
-      this.channel.appendLine('Successfully compile Raspberry Pi device code.');
-    } catch (error) {
-      throw new Error(`Compilation of Raspberry Pi device code failed. Error message: ${error.message}`);
     }
+
+    this.channel.show();
+    this.channel.appendLine('Compiling Raspberry Pi device code...');
+    const compileBashFile = "/work/compile_app.sh";
+    try {
+      await runCommand(`bash ${compileBashFile} ${this.projectFolder}/src`, '', this.channel);
+    } catch (error) {
+      throw new Error(`Failed to compile Raspberry Pi device code. Error message: ${error.message}`);
+    }
+
+    // If successfully compiled, copy compiled files to user workspace
+    const binFilePath = "/work/azure-iot-sdk-c/cmake/iot_application";
+    if (fs.existsSync(binFilePath)) {
+      const getOutputFileCmd = `cp -rf ${binFilePath} ${this.outputPath}`;
+      try {
+        await runCommand(getOutputFileCmd, '', this.channel);
+      } catch (error) {
+        throw new Error(`Failed to copy compiled files to output folder ${this.outputPath}. Error message: ${error.message}`);
+      }
+    } else {
+      this.channel.show();
+      this.channel.appendLine('Bin files not found. Compilation may have failed.');
+      return false;
+    }
+
+    this.channel.show();
+    this.channel.appendLine('Successfully compile Raspberry Pi device code.');
 
     return true;
   }

@@ -9,14 +9,15 @@ import * as os from 'os';
 import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
 import * as sdk from 'vscode-iot-device-cube-sdk';
+import * as path from 'path';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 import {delay, getRegistryValues} from '../utils';
-import * as path from 'path';
 
+import {ScaffoldGenerator} from './ScaffoldGenerator';
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 import {DeviceType} from './Interfaces/Device';
 import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
@@ -185,34 +186,24 @@ export class AZ3166Device extends ArduinoDeviceBase {
   }
 
   async load(): Promise<boolean> {
-    if (!fs.existsSync(this.projectFolder)) {
-      throw new Error(`Unable to find the project folder. ${this.projectFolder}`);
-    }
-
     if (!this.board) {
       throw new Error('Unable to find the board in the config file.');
     }
 
-    await this.generateCommonFiles();
-    await this.generateDockerRelatedFiles(this.board);
-    await this.generateCppPropertiesFile(this.board);
+    await ScaffoldGenerator.scaffolIoTProjectdFiles(this.projectFolder, this.vscodeFolderPath, 
+      this.boardFolderPath, this.devcontainerFolderPath, this.board.id);
 
     return true;
   }
 
   async create(): Promise<boolean> {
-    if (!fs.existsSync(this.projectFolder)) {
-      throw new Error('Unable to find the project folder.');
-    }
-
     if (!this.board) {
       throw new Error('Unable to find the board in the config file.');
     }
 
     try {
-      await this.generateCommonFiles();
-      await this.generateDockerRelatedFiles(this.board);
-      await this.generateCppPropertiesFile(this.board);
+      await ScaffoldGenerator.scaffolIoTProjectdFiles(this.projectFolder, this.vscodeFolderPath, 
+        this.boardFolderPath, this.devcontainerFolderPath, this.board.id);
       await this.generateSketchFile(this.templateFilesInfo);
     } catch (error) {
       throw error;

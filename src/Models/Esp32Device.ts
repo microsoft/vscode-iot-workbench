@@ -76,33 +76,37 @@ export class Esp32Device extends ArduinoDeviceBase {
   }
 
   async load(): Promise<boolean> {
-    const projectFolderPath = this.projectFolder;
+    // TODO: Currently not support Esp32
+    
+    // const projectFolderPath = this.projectFolder;
 
-    if (!fs.existsSync(projectFolderPath)) {
-      throw new Error('Unable to find the device folder inside the project.');
-    }
+    // if (!fs.existsSync(projectFolderPath)) {
+    //   throw new Error('Unable to find the device folder inside the project.');
+    // }
 
-    if (!this.board) {
-      throw new Error('Unable to find the board in the config file.');
-    }
+    // if (!this.board) {
+    //   throw new Error('Unable to find the board in the config file.');
+    // }
 
-    this.generateCppPropertiesFile(this.board);
+    // this.generateCppPropertiesFile(this.board);
     return true;
   }
 
   async create(): Promise<boolean> {
-    const projectFolderPath = this.projectFolder;
+    // TODO: Currently not support Esp32
 
-    if (!fs.existsSync(projectFolderPath)) {
-      throw new Error('Unable to find the device folder inside the project.');
-    }
-    if (!this.board) {
-      throw new Error('Unable to find the board in the config file.');
-    }
+    // const projectFolderPath = this.projectFolder;
 
-    await this.generateCommonFiles();
-    await this.generateCppPropertiesFile(this.board);
-    await this.generateSketchFile(this.templateFilesInfo);
+    // if (!fs.existsSync(projectFolderPath)) {
+    //   throw new Error('Unable to find the device folder inside the project.');
+    // }
+    // if (!this.board) {
+    //   throw new Error('Unable to find the board in the config file.');
+    // }
+
+    // await this.generateCommonFiles();
+    // await this.generateCppPropertiesFile(this.board);
+    // await this.generateSketchFile(this.templateFilesInfo);
     return true;
   }
 

@@ -2,19 +2,6 @@
     "templates": [
         {
             "description": "",
-            "detail": "Create project with device only code.",
-            "label": "Device only",
-            "type": "Basic",
-            "templateFilesInfo": [
-                {
-                    "fileName": "emptySketch.ino",
-                    "sourcePath" : ".",
-                    "targetPath" : "./device"
-                }
-            ]
-        },
-        {
-            "description": "",
             "detail": "Create project that connects to Azure IoT Hub, such as sending sensor data to cloud.",
             "label": "With Azure IoT Hub",
             "type": "IotHub",
