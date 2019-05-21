@@ -114,15 +114,15 @@ export class IoTButtonDevice implements Device {
     }
 
     // Create settings.json config file
-    const settingsJSONFilePath =
+    const settingsJsonFilePath =
         path.join(vscodeFolderPath, FileNames.settingsJsonFileName);
-    const settingsJSONObj = {
+    const settingsJsonObj = {
       'files.exclude': {'.build': true, '.iotworkbenchproject': true}
     };
 
     try {
       fs.writeFileSync(
-          settingsJSONFilePath, JSON.stringify(settingsJSONObj, null, 4));
+          settingsJsonFilePath, JSON.stringify(settingsJsonObj, null, 4));
     } catch (error) {
       throw new Error(`Device: create config file failed: ${error.message}`);
     }

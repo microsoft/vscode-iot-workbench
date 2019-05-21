@@ -55,7 +55,7 @@ export class AzureConfigFileHandler {
       try {
         fs.mkdirSync(azureConfigFolderPath);
       } catch (error) {
-        throw Error(`Failed to create azure config folder. Error message: ${error.message}`);
+        throw new Error(`Failed to create azure config folder. Error message: ${error.message}`);
       }
     }
     const azureConfigFilePath =

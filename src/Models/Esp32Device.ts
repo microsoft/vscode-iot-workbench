@@ -100,7 +100,7 @@ export class Esp32Device extends ArduinoDeviceBase {
       throw new Error('Unable to find the board in the config file.');
     }
 
-    this.generateCommonFiles();
+    await this.generateCommonFiles();
     await this.generateCppPropertiesFile(this.board);
     await this.generateSketchFile(this.templateFilesInfo);
     return true;
