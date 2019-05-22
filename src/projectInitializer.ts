@@ -14,6 +14,8 @@ import {TelemetryContext} from './telemetry';
 import {FileNames, PlatformType} from './constants';
 import {BoardProvider} from './boardProvider';
 import {IoTWorkbenchSettings} from './IoTSettings';
+import {RemoteExtension} from './Models/RemoteExtension';
+import * as sdk from 'vscode-iot-device-cube-sdk';
 
 const impor = require('impor')(__dirname);
 const azureFunctionsModule = impor('./Models/AzureFunctions') as
@@ -129,7 +131,7 @@ export class ProjectInitializer {
             const projectTemplateType: ProjectTemplateType = result.type;
 
             if (projectPath) {
-              utils.mkdirRecursivelySync(projectPath);
+              await utils.mkdirRecursively(projectPath);
             }
             const project = new ioTProjectModule.IoTProject(
                 context, channel, telemetryContext);
@@ -218,23 +220,30 @@ export class ProjectInitializer {
 
   private async GenerateProjectFolder() {
     // Get default workbench path.
-    const settings: IoTWorkbenchSettings = new IoTWorkbenchSettings();
+    const settings: IoTWorkbenchSettings = await IoTWorkbenchSettings.createAsync();
     const workbench = await settings.workbenchPath();
-
+    
     const projectRootPath = path.join(workbench, 'projects');
-    if (!utils.directoryExistsSync(projectRootPath)) {
-      utils.mkdirRecursivelySync(projectRootPath);
+    if (!await sdk.FileSystem.exists(workbench)) {
+      utils.mkdirRecursively(workbench);
     }
+    const projectRootPathExists = await sdk.FileSystem.exists(projectRootPath);
+    if (!projectRootPathExists) {
+      await utils.mkdirRecursively(projectRootPath);
+    }
+    
 
     let counter = 0;
     const name = constants.defaultProjectName;
     let candidateName = name;
     while (true) {
       const projectPath = path.join(projectRootPath, candidateName);
-      if (!utils.fileExistsSync(projectPath) &&
-          !utils.directoryExistsSync(projectPath)) {
+      const projectPathExists = await utils.fileExists(projectPath);
+      const projectDirectoryExists = await utils.directoryExists(projectPath);
+      if (!projectPathExists && !projectDirectoryExists) {
         break;
       }
+      
       counter++;
       candidateName = `${name}_${counter}`;
     }
@@ -243,14 +252,16 @@ export class ProjectInitializer {
       value: candidateName,
       prompt: 'Input project name.',
       ignoreFocusOut: true,
-      validateInput: (projectName: string) => {
+      validateInput: async (projectName: string) => {
         if (!/^([a-z0-9_]|[a-z0-9_][-a-z0-9_.]*[a-z0-9_])(\.ino)?$/i.test(
                 projectName)) {
           return 'Project name can only contain letters, numbers, "-" and ".", and cannot start or end with "-" or ".".';
         }
+
         const projectPath = path.join(projectRootPath, projectName);
-        if (!utils.fileExistsSync(projectPath) &&
-            !utils.directoryExistsSync(projectPath)) {
+        const projectPathExists = await utils.fileExists(projectPath);
+        const projectDirectoryExists = await utils.directoryExists(projectPath);        
+        if (!projectPathExists && !projectDirectoryExists) {
           return;
         } else {
           return `${projectPath} exists, please choose another name.`;

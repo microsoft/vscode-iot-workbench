@@ -15,6 +15,7 @@ import {FileNames, PlatformType} from './constants';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 import {VSCExpress} from 'vscode-express';
+import * as sdk from 'vscode-iot-device-cube-sdk';
 
 type OptionsWithUri = import('request-promise').OptionsWithUri;
 
@@ -96,17 +97,17 @@ export class ExampleExplorer {
     }
   }
 
-  private async GenerateExampleFolder(exampleName: string) {
-    const settings: IoTWorkbenchSettings = new IoTWorkbenchSettings();
+  private async GenerateExampleFolder(exampleName: string, context: vscode.ExtensionContext) {
+    const settings: IoTWorkbenchSettings = await IoTWorkbenchSettings.createAsync();
     const workbench = await settings.workbenchPath();
 
-    if (!utils.directoryExistsSync(workbench)) {
-      utils.mkdirRecursivelySync(workbench);
+    if (!await utils.directoryExists(workbench)) {
+      await utils.mkdirRecursively(workbench);
     }
 
     const name = path.join(workbench, 'examples', exampleName);
-    if (!utils.fileExistsSync(name) && !utils.directoryExistsSync(name)) {
-      utils.mkdirRecursivelySync(name);
+    if (!await utils.fileExists(name) && !await utils.directoryExists(name)) {
+      await utils.mkdirRecursively(name);
       return name;
     }
 
@@ -114,7 +115,7 @@ export class ExampleExplorer {
         fs.listSync(name, [FileNames.workspaceExtensionName]);
     if (workspaceFiles && workspaceFiles.length > 0) {
       const workspaceFile = workspaceFiles[0];  // just pick the first one
-      if (fs.existsSync(workspaceFile)) {
+      if (await sdk.FileSystem.exists(workspaceFile)) {
         const selection = await vscode.window.showQuickPick(
             [
               {
@@ -148,12 +149,12 @@ export class ExampleExplorer {
     const customizedName = await vscode.window.showInputBox({
       prompt: 'Input example folder name',
       ignoreFocusOut: true,
-      validateInput: (exampleName: string) => {
+      validateInput: async (exampleName: string) => {
         if (exampleName === null) {
           return;
         }
         const name = path.join(workbench, 'examples', exampleName);
-        if (!utils.fileExistsSync(name) && !utils.directoryExistsSync(name)) {
+        if (! await utils.fileExists(name) && !await utils.directoryExists(name)) {
           if (!/^([a-z0-9_]|[a-z0-9_][-a-z0-9_.]*[a-z0-9_])$/i.test(
                   exampleName)) {
             return 'Folder name can only contain letters, numbers, "-" and ".", and cannot start or end with "-" or ".".';
@@ -174,9 +175,9 @@ export class ExampleExplorer {
     }
 
     const customizedPath = path.join(workbench, 'examples', customizedName);
-    if (!utils.fileExistsSync(customizedPath) &&
-        !utils.directoryExistsSync(customizedPath)) {
-      utils.mkdirRecursivelySync(customizedPath);
+    if (!await utils.fileExists(customizedPath) &&
+        !await utils.directoryExists(customizedPath)) {
+      await utils.mkdirRecursively(customizedPath);
     }
 
     return customizedPath;
@@ -296,7 +297,7 @@ export class ExampleExplorer {
     telemetryContext.properties.board = board ? board.name : '';
 
     const url = this._exampleUrl;
-    const fsPath = await this.GenerateExampleFolder(this._exampleName);
+    const fsPath = await this.GenerateExampleFolder(this._exampleName, context);
 
     if (!fsPath) {
       return false;

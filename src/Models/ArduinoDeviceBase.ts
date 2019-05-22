@@ -11,7 +11,7 @@ import * as vscode from 'vscode';
 import {ConfigHandler} from '../configHandler';
 import {FileNames, PlatformType} from '../constants';
 import {DialogResponses} from '../DialogResponses';
-import {runCommand} from '../utils';
+import * as utils from '../utils';
 
 import {Board} from './Interfaces/Board';
 import {ComponentType} from './Interfaces/Component';
@@ -19,6 +19,7 @@ import {Device, DeviceType} from './Interfaces/Device';
 import {LibraryManageable} from './Interfaces/LibraryManageable';
 import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {OTA} from './OTA';
+import * as sdk from 'vscode-iot-device-cube-sdk';
 
 const constants = {
   defaultSketchFileName: 'device.ino',
@@ -91,7 +92,7 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
 
     const command = `arduino-cli compile --fqbn ${this.board.model} ${this.projectFolder}/device --output ${this.outputPath}/output --verbose`;
     try {
-      await runCommand(command, '', this.channel);
+      await utils.runCommand(command, '', this.channel);
     } catch (error) {
       throw new Error(`Compile device code failed. Error message: ${error.message}`);
     }
@@ -120,26 +121,29 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
     if (!templateFilesInfo) {
       throw new Error('No sketch file found.');
     }
-    
-    templateFilesInfo.forEach(fileInfo => {
+
+    // Cannot use forEach here since it's async
+    for (const fileInfo of templateFilesInfo) {
       let targetFilePath = '';
+      const targetFolderPath = path.join(this.projectFolder, fileInfo.targetPath);
+      if (!await sdk.FileSystem.exists(targetFolderPath)) {
+        await utils.mkdirRecursively(targetFolderPath);
+      }
+
       if (fileInfo.fileName.endsWith('.ino')) {
-        targetFilePath = path.join(
-            this.projectFolder, fileInfo.targetPath,
-            constants.defaultSketchFileName);
+        targetFilePath = path.join(targetFolderPath, constants.defaultSketchFileName);
       } else {
-        targetFilePath = path.join(
-            this.projectFolder, fileInfo.targetPath, fileInfo.fileName);
+        targetFilePath = path.join(targetFolderPath, fileInfo.fileName);
       }
       if (fileInfo.fileContent) {
         try {
-          fs.writeFileSync(targetFilePath, fileInfo.fileContent);
+          await sdk.FileSystem.writeFile(targetFilePath, fileInfo.fileContent);
         } catch (error) {
           throw new Error(
               `Create arduino sketch file failed: ${error.message}`);
         }
       }
-    });
+    }
 
     return true;
   }

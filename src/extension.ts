@@ -19,6 +19,7 @@ import {ConfigHandler} from './configHandler';
 import {ConfigKey, EventNames} from './constants';
 import {TelemetryContext, callWithTelemetry, TelemetryWorker, TelemetryProperties} from './telemetry';
 import {UsbDetector} from './usbDetector';
+import {RemoteExtension} from './Models/RemoteExtension';
 
 const impor = require('impor')(__dirname);
 const ioTProjectModule =
@@ -222,7 +223,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const workbenchPath =
       vscode.commands.registerCommand('iotworkbench.workbench', async () => {
-        const settings = new IoTWorkbenchSettings();
+        const settings: IoTWorkbenchSettings = await IoTWorkbenchSettings.createAsync();
         await settings.setWorkbenchPath();
         return;
       });

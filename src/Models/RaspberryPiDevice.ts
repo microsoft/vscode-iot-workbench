@@ -6,6 +6,7 @@ import {Guid} from 'guid-typescript';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as sdk from 'vscode-iot-device-cube-sdk';
+import * as utils from '../utils';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames, PlatformType} from '../constants';
@@ -82,14 +83,14 @@ export class RaspberryPiDevice implements Device {
       throw new Error('Unable to find the project folder.');
     }
 
-    await ScaffoldGenerator.scaffolIoTProjectdFiles(this.projectFolder, this.vscodeFolderPath, 
-      this.boardFolderPath, this.devcontainerFolderPath, RaspberryPiDevice.boardId);
+    // await ScaffoldGenerator.scaffolIoTProjectdFiles(this.projectFolder, this.vscodeFolderPath, 
+    //   this.boardFolderPath, this.devcontainerFolderPath, RaspberryPiDevice.boardId);
 
     return true;
   }
 
   async create(): Promise<boolean> {
-    if (!fs.existsSync(this.projectFolder)) {
+    if (!await sdk.FileSystem.exists(this.projectFolder)) {
       throw new Error('Unable to find the project folder.');
     }
     
@@ -107,18 +108,23 @@ export class RaspberryPiDevice implements Device {
       throw new Error('No sketch file found.');
     }
 
-    templateFilesInfo.forEach(fileInfo => {
-      const targetFilePath = path.join(
-            this.projectFolder, fileInfo.targetPath, fileInfo.fileName);
+    // Cannot use forEach here since it's async
+    for (const fileInfo of templateFilesInfo) {
+      const targetFolderPath = path.join(this.projectFolder, fileInfo.targetPath);
+      if (!await sdk.FileSystem.exists(targetFolderPath)) {
+        await utils.mkdirRecursively(targetFolderPath);
+      }
+
+      const targetFilePath = path.join(targetFolderPath, fileInfo.fileName);
       if (fileInfo.fileContent) {
         try {
-          fs.writeFileSync(targetFilePath, fileInfo.fileContent);
+          await sdk.FileSystem.writeFile(targetFilePath, fileInfo.fileContent);
         } catch (error) {
           throw new Error(
               `Failed to create sketch file for Raspberry Pi: ${error.message}`);
         }
       }
-    });
+    }
 
     return true;
   }
