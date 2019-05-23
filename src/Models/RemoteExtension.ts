@@ -1,7 +1,6 @@
 
 'use strict';
 
-import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import {DependentExtensions} from '../constants';

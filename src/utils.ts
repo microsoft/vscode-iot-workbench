@@ -7,10 +7,12 @@ import * as path from 'path';
 import {setTimeout} from 'timers';
 import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
+import * as sdk from 'vscode-iot-device-cube-sdk';
 
 import {AzureFunctionsLanguage, GlobalConstants} from './constants';
 import {DialogResponses} from './DialogResponses';
 import {TelemetryContext} from './telemetry';
+import {RemoteExtension} from './Models/RemoteExtension';
 
 export function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -49,35 +51,36 @@ export function getRegistryValues(
       });
 }
 
-export function directoryExistsSync(dirPath: string): boolean {
-  try {
-    return fs.statSync(dirPath).isDirectory();
-  } catch (e) {
-    return false;
-  }
+export async function directoryExists(dirPath: string): Promise<boolean> {
+    if (!await sdk.FileSystem.exists(dirPath)) {
+      return false;
+    }
+    const isDirectory = await sdk.FileSystem.isDirectory(dirPath);
+    return isDirectory;
 }
 
-export function mkdirRecursivelySync(dirPath: string): void {
-  if (directoryExistsSync(dirPath)) {
+export async function mkdirRecursively(dirPath: string): Promise<void> {
+  if (await directoryExists(dirPath)) {
     return;
   }
   const dirname = path.dirname(dirPath);
   if (path.normalize(dirname) === path.normalize(dirPath)) {
-    fs.mkdirSync(dirPath);
-  } else if (directoryExistsSync(dirname)) {
-    fs.mkdirSync(dirPath);
+    await sdk.FileSystem.mkDir(dirPath);
+  } else if (await directoryExists(dirname)) {
+    await sdk.FileSystem.mkDir(dirPath);
   } else {
-    mkdirRecursivelySync(dirname);
-    fs.mkdirSync(dirPath);
+    await mkdirRecursively(dirname);
+    await sdk.FileSystem.mkDir(dirPath);
   }
 }
 
-export function fileExistsSync(filePath: string): boolean {
-  try {
-    return fs.statSync(filePath).isFile();
-  } catch (e) {
+export async function fileExists(filePath: string): Promise<boolean> {
+  const directoryExists = await sdk.FileSystem.exists(filePath);
+  if (!directoryExists) {
     return false;
   }
+  const isFile = await sdk.FileSystem.isFile(filePath);
+  return isFile;
 }
 
 export function getScriptTemplateNameFromLanguage(language: string): string|
@@ -165,7 +168,8 @@ export async function selectWorkspaceItem(
                                  (await showOpenDialog(options))[0].fsPath;
 }
 
-export async function askAndNewProject(telemetryContext: TelemetryContext) {
+export async function askAndNewProject(context: vscode.ExtensionContext, telemetryContext: TelemetryContext) {
+  
   const message =
       'An IoT project is needed to process the operation, do you want to create an IoT project?';
   const result: vscode.MessageItem|undefined =
@@ -175,18 +179,27 @@ export async function askAndNewProject(telemetryContext: TelemetryContext) {
   if (result === DialogResponses.yes) {
     telemetryContext.properties.errorMessage =
         'Operation failed and user create new project';
-    await vscode.commands.executeCommand('iotworkbench.initializeProject');
+    if (RemoteExtension.isRemote(context)) {
+      // When in remote. Open folder in local.
+      // User experience needs further discussion.
+      const message =
+        `Please choose "File"->"New Window", and execute "Azure IoT Device Workbench: Create Project…" in the new window.`;
+      vscode.window.showWarningMessage(message);
+
+      // await vscode.commands.executeCommand(`openindocker.reopenLocally`);
+    } else {
+      await vscode.commands.executeCommand('iotworkbench.initializeProject');
+    }
   } else {
     telemetryContext.properties.errorMessage = 'Operation failed.';
   }
 }
 
 export async function askAndOpenProject(
-    rootPath: string, workspaceFile: string,
+    rootPath: string, context: vscode.ExtensionContext,
     telemetryContext: TelemetryContext) {
   const message =
-      `Operation failed because the IoT project is not opened. Current folder contains an IoT project '${
-          workspaceFile}', do you want to open it?`;
+      `Operation failed because the IoT project is not opened. Current folder contains an IoT project, do you want to open it?`;
   const result: vscode.MessageItem|undefined =
       await vscode.window.showInformationMessage(
           message, DialogResponses.yes, DialogResponses.no);
@@ -194,9 +207,17 @@ export async function askAndOpenProject(
   if (result === DialogResponses.yes) {
     telemetryContext.properties.errorMessage =
         'Operation failed and user open project from folder.';
-    const workspaceFilePath = path.join(rootPath, workspaceFile);
-    await vscode.commands.executeCommand(
-        'vscode.openFolder', vscode.Uri.file(workspaceFilePath), false);
+    if (RemoteExtension.isRemote(context)) {
+      // When in remote. Open folder in local.
+      // User experience needs further discussion.
+      const message = 
+        `Please choose "File"->"New Window", and execute "Azure IoT Device Workbench: Create Project…" in the new window.`;
+      vscode.window.showWarningMessage(message);
+  
+      // await vscode.commands.executeCommand(`openindocker.reopenLocally`);
+    } else {
+      await vscode.commands.executeCommand('iotcube.openInContainer', rootPath);
+    }
   } else {
     telemetryContext.properties.errorMessage = 'Operation failed.';
   }

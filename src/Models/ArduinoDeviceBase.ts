@@ -11,7 +11,7 @@ import * as vscode from 'vscode';
 import {ConfigHandler} from '../configHandler';
 import {FileNames, PlatformType} from '../constants';
 import {DialogResponses} from '../DialogResponses';
-import {runCommand} from '../utils';
+import * as utils from '../utils';
 
 import {Board} from './Interfaces/Board';
 import {ComponentType} from './Interfaces/Component';
@@ -19,6 +19,7 @@ import {Device, DeviceType} from './Interfaces/Device';
 import {LibraryManageable} from './Interfaces/LibraryManageable';
 import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {OTA} from './OTA';
+import * as sdk from 'vscode-iot-device-cube-sdk';
 
 const constants = {
   defaultSketchFileName: 'device.ino',
@@ -91,7 +92,7 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
 
     const command = `arduino-cli compile --fqbn ${this.board.model} ${this.projectFolder}/device --output ${this.outputPath}/output --verbose`;
     try {
-      await runCommand(command, '', this.channel);
+      await utils.runCommand(command, '', this.channel);
     } catch (error) {
       throw new Error(`Compile device code failed. Error message: ${error.message}`);
     }
@@ -116,115 +117,33 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
 
   abstract async preUploadAction(): Promise<boolean>;
 
-  // Helper functions:
-  async generateCommonFiles(): Promise<boolean> {
-    if (!fs.existsSync(this.projectFolder)) {
-      throw new Error('Unable to find the project folder.');
-    }
-
-    if (!fs.existsSync(this.vscodeFolderPath)) {
-      try {
-        fs.mkdirSync(this.vscodeFolderPath);
-      } catch (error) {
-        throw new Error(`Failed to create folder ${this.vscodeFolderPath}. Error message: ${error.message}`);
-      }
-    }
-
-    if (!fs.existsSync(this.devcontainerFolderPath)) {
-      try {
-        fs.mkdirSync(this.devcontainerFolderPath);
-      } catch (error) {
-        throw new Error(`Failed to create folder ${this.devcontainerFolderPath}. Error message: ${error.message}`);
-      }
-    }
-
-    return true;
-  }
-
-  async generateCppPropertiesFile(board: Board): Promise<boolean> {
-    // Create c_cpp_properties.json file
-    const cppPropertiesFilePath =
-        path.join(this.vscodeFolderPath, FileNames.cppPropertiesFileName);
-
-    if (fs.existsSync(cppPropertiesFilePath)) {
-      return true;
-    }
-
-    try {
-      const propertiesSourceFile = path.join(
-        this.boardFolderPath, board.id, FileNames.cppPropertiesFileName);
-      const propertiesContent =
-          fs.readFileSync(propertiesSourceFile).toString();
-      fs.writeFileSync(cppPropertiesFilePath, propertiesContent);
-    } catch (error) {
-      throw new Error(`Create cpp properties file failed: ${error.message}`);
-    }
-
-    return true;
-  }
-
-  async generateDockerRelatedFiles(board: Board): Promise<boolean> {
-        // Dockerfile
-        const dockerfileTargetPath = path.join(
-          this.devcontainerFolderPath, FileNames.dockerfileName);
-
-        if (fs.existsSync(dockerfileTargetPath)) {
-          return true;
-        }
-
-        try {
-          const dockerfileSourcePath = path.join(
-            this.boardFolderPath, board.id, FileNames.dockerfileName);
-          const dockerfileContent = fs.readFileSync(dockerfileSourcePath, 'utf8');
-          fs.writeFileSync(dockerfileTargetPath, dockerfileContent);
-        } catch (error) {
-          throw new Error(`Create ${FileNames.dockerfileName} failed: ${error.message}`);
-        }
-    
-        // devcontainer.json
-        const devcontainerJsonFileTargetPath = path.join(
-          this.devcontainerFolderPath, FileNames.devcontainerJsonFileName);
-
-        if (fs.existsSync(devcontainerJsonFileTargetPath)) {
-          return true;
-        }
-
-        try {
-          const devcontainerJsonFileSourcePath = path.join(
-            this.boardFolderPath, board.id, FileNames.devcontainerJsonFileName);
-          const devcontainerJSONContent = fs.readFileSync(devcontainerJsonFileSourcePath, 'utf8');
-          fs.writeFileSync(devcontainerJsonFileTargetPath, devcontainerJSONContent);
-        } catch (error) {
-          throw new Error(`Create ${FileNames.devcontainerJsonFileName} file failed: ${error.message}`);
-        }
-
-        return true;
-  }
-
   async generateSketchFile(templateFilesInfo: TemplateFileInfo[]): Promise<boolean> {
     if (!templateFilesInfo) {
       throw new Error('No sketch file found.');
     }
-    
-    templateFilesInfo.forEach(fileInfo => {
+
+    // Cannot use forEach here since it's async
+    for (const fileInfo of templateFilesInfo) {
       let targetFilePath = '';
+      const targetFolderPath = path.join(this.projectFolder, fileInfo.targetPath);
+      if (!await sdk.FileSystem.exists(targetFolderPath)) {
+        await utils.mkdirRecursively(targetFolderPath);
+      }
+
       if (fileInfo.fileName.endsWith('.ino')) {
-        targetFilePath = path.join(
-            this.projectFolder, fileInfo.targetPath,
-            constants.defaultSketchFileName);
+        targetFilePath = path.join(targetFolderPath, constants.defaultSketchFileName);
       } else {
-        targetFilePath = path.join(
-            this.projectFolder, fileInfo.targetPath, fileInfo.fileName);
+        targetFilePath = path.join(targetFolderPath, fileInfo.fileName);
       }
       if (fileInfo.fileContent) {
         try {
-          fs.writeFileSync(targetFilePath, fileInfo.fileContent);
+          await sdk.FileSystem.writeFile(targetFilePath, fileInfo.fileContent);
         } catch (error) {
           throw new Error(
               `Create arduino sketch file failed: ${error.message}`);
         }
       }
-    });
+    }
 
     return true;
   }

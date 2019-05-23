@@ -4,6 +4,7 @@
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import * as utils from '../utils';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames, GlobalConstants} from '../constants';
@@ -22,6 +23,7 @@ import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
 import {Workspace} from './Interfaces/Workspace';
 import {RemoteExtension} from './RemoteExtension';
+import * as sdk from 'vscode-iot-device-cube-sdk';
 
 type Dependency = import('./AzureComponentConfig').Dependency;
 type TelemetryContext = import('../telemetry').TelemetryContext;
@@ -67,6 +69,7 @@ export class IoTProject {
   private extensionContext: vscode.ExtensionContext;
   private channel: vscode.OutputChannel;
   private telemetryContext: TelemetryContext;
+  private isRemote: boolean;
 
   private canProvision(comp: {}): comp is Provisionable {
     return (comp as Provisionable).provision !== undefined;
@@ -94,6 +97,7 @@ export class IoTProject {
     this.extensionContext = context;
     this.channel = channel;
     this.telemetryContext = telemetryContext;
+    this.isRemote = RemoteExtension.isRemote(context);
   }
 
 
@@ -102,134 +106,133 @@ export class IoTProject {
       return false;
     }
 
-    if (RemoteExtension.isRemote(this.extensionContext)) {
-      // The IoT project is open in remote side. Load the IoT project.
-      this.projectRootPath = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath);
-      this.projectConfigFile = path.join(this.projectRootPath, FileNames.vscodeSettingsFolderName, constants.projectConfigFileName);
-      if (!fs.existsSync(this.projectConfigFile)) {
+    // Check if it is a iot project workspace
+    this.projectRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+    const iotWorkbenchProjectFile =
+        path.join(this.projectRootPath, FileNames.iotworkbenchprojectFileName);
+    // if (this.isRemote) {
+
+    // }
+    if (!fs.existsSync(iotWorkbenchProjectFile)) {
+      return false;
+    }
+
+    this.projectConfigFile = path.join(this.projectRootPath, FileNames.vscodeSettingsFolderName, constants.projectConfigFileName);
+    if (!fs.existsSync(this.projectConfigFile)) {
+      return false;
+    }
+    const projectConfigJson = require(this.projectConfigFile);
+
+    // only send telemetry when the IoT project is load when VS Code opens
+    if (initLoad) {
+      const properties: TelemetryProperties = {
+        result: 'Succeeded',
+        error: '',
+        errorMessage: ''
+      };
+      const telemetryContext:
+          TelemetryContext = {properties, measurements: {duration: 0}};
+
+      try {
+        TelemetryWorker.sendEvent(
+            EventNames.projectLoadEvent, telemetryContext);
+      } catch {
+        // If sending telemetry failed, skip the error to avoid blocking user.
+      }
+    }
+
+    const azureConfigFileHandler =
+        new azureComponentConfigModule.AzureConfigFileHandler(
+            this.projectRootPath);
+    azureConfigFileHandler.createIfNotExists();
+
+    if (this.projectRootPath !== undefined) {
+      const boardId = projectConfigJson[`${ConfigKey.boardId}`];
+      if (!boardId) {
         return false;
       }
-      const projectConfigJson = require(this.projectConfigFile);
-
-      // only send telemetry when the IoT project is load when VS Code opens
-      if (initLoad) {
-        const properties: TelemetryProperties = {
-          result: 'Succeeded',
-          error: '',
-          errorMessage: ''
-        };
-        const telemetryContext:
-            TelemetryContext = {properties, measurements: {duration: 0}};
-
-        try {
-          TelemetryWorker.sendEvent(
-              EventNames.projectLoadEvent, telemetryContext);
-        } catch {
-          // If sending telemetry failed, skip the error to avoid blocking user.
-        }
-      }
-
-      const azureConfigFileHandler =
-          new azureComponentConfigModule.AzureConfigFileHandler(
-              this.projectRootPath);
-      azureConfigFileHandler.createIfNotExists();
-
-      if (this.projectRootPath !== undefined) {
-        const boardId = projectConfigJson[`${ConfigKey.boardId}`];
-        if (!boardId) {
-          return false;
-        }
-        let device = null;
-        if (boardId === az3166DeviceModule.AZ3166Device.boardId) {
-          device = new az3166DeviceModule.AZ3166Device(
-              this.extensionContext, this.channel, this.projectRootPath);
-        } else if (
-          boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
-        device = new raspberryPiDeviceModule.RaspberryPiDevice(
-            this.extensionContext, this.projectRootPath, this.channel);
-      }
-        if (device) {
-          this.componentList.push(device);
-          await device.load();
-        }
-      }
-
-      const componentConfigs = azureConfigFileHandler.getSortedComponents();
-      if (!componentConfigs || componentConfigs.length === 0) {
-        // Support backward compact
-        const iotHub =
-            new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
-        await iotHub.updateConfigSettings();
-        await iotHub.load();
-        this.componentList.push(iotHub);
-        const device = new ioTHubDeviceModule.IoTHubDevice(this.channel);
+      let device = null;
+      if (boardId === az3166DeviceModule.AZ3166Device.boardId) {
+        device = new az3166DeviceModule.AZ3166Device(
+            this.extensionContext, this.channel, this.projectRootPath);
+      } else if (
+        boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
+      device = new raspberryPiDeviceModule.RaspberryPiDevice(
+          this.extensionContext, this.projectRootPath, this.channel);
+    }
+      if (device) {
         this.componentList.push(device);
-
-        this.componentList.forEach(item => {
-          item.checkPrerequisites();
-        });
-
-        return true;
+        await device.load();
       }
+    }
 
-
-      const components: {[key: string]: Component} = {};
-
-      for (const componentConfig of componentConfigs) {
-        switch (componentConfig.type) {
-          case 'IoTHub': {
-            const iotHub =
-                new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
-            await iotHub.load();
-            components[iotHub.id] = iotHub;
-            this.componentList.push(iotHub);
-            const device = new ioTHubDeviceModule.IoTHubDevice(this.channel);
-            this.componentList.push(device);
-
-            break;
-          }
-          default: {
-            throw new Error(
-                `Component not supported with type of ${componentConfig.type}.`);
-          }
-        }
-      }
+    const componentConfigs = azureConfigFileHandler.getSortedComponents();
+    if (!componentConfigs || componentConfigs.length === 0) {
+      // Support backward compact
+      const iotHub =
+          new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
+      await iotHub.updateConfigSettings();
+      await iotHub.load();
+      this.componentList.push(iotHub);
+      const device = new ioTHubDeviceModule.IoTHubDevice(this.channel);
+      this.componentList.push(device);
 
       this.componentList.forEach(item => {
         item.checkPrerequisites();
       });
 
       return true;
-    } else {
-      // The IoTproject is open locally. Open it in remote.
-      try {
-        if (RemoteExtension.checkRemoteExtension()) {
-          await vscode.commands.executeCommand(`openindocker.reopenInContainer`);
-        } else {
-          throw new Error(`The Remote Extension is not available. Failed to load the IoT project in remote.`);
-        }
+    }
 
-        return true;
-      } catch (error) {
-        throw error;
+
+    const components: {[key: string]: Component} = {};
+
+    for (const componentConfig of componentConfigs) {
+      switch (componentConfig.type) {
+        case 'IoTHub': {
+          const iotHub =
+              new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
+          await iotHub.load();
+          components[iotHub.id] = iotHub;
+          this.componentList.push(iotHub);
+          const device = new ioTHubDeviceModule.IoTHubDevice(this.channel);
+          this.componentList.push(device);
+
+          break;
+        }
+        default: {
+          throw new Error(
+              `Component not supported with type of ${componentConfig.type}.`);
+        }
       }
     }
+
+    this.componentList.forEach(item => {
+      item.checkPrerequisites();
+    });
+
+    return true;
   }
 
   async handleLoadFailure() {
     // [TODO]
     if (!vscode.workspace.workspaceFolders ||
         !vscode.workspace.workspaceFolders[0] ||
-        !fs.existsSync(this.projectConfigFile)) {
-      if (RemoteExtension.isRemote(this.extensionContext)) {
-        // When in remote. Open folder in local.
-        // await vscode.commands.executeCommand(`openindocker.reopenLocally`);
-      } else {
-
-      }
+        !await sdk.FileSystem.exists(this.projectConfigFile)) {
       // When in local
-      await askAndNewProject(this.telemetryContext);
+      await askAndNewProject(this.extensionContext, this.telemetryContext);
       return;
+    }
+
+    const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+    const workbenchFileName =
+        path.join(rootPath, FileNames.iotworkbenchprojectFileName);
+
+    if (await sdk.FileSystem.exists(workbenchFileName)) {
+      await askAndOpenProject(
+          rootPath, this.extensionContext, this.telemetryContext);
+    } else {
+      await askAndNewProject(this.extensionContext, this.telemetryContext);
     }
   }
 
@@ -427,7 +430,8 @@ export class IoTProject {
       rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
       projectType: ProjectTemplateType, boardId: string,
       openInNewWindow: boolean): Promise<boolean> {
-    if (!fs.existsSync(rootFolderPath)) {
+    const rootFolderPathExists = await sdk.FileSystem.exists(rootFolderPath);
+    if (!rootFolderPathExists) {
       throw new Error(
           'Unable to find the root path, please open the folder and initialize project again.');
     }
@@ -593,13 +597,13 @@ export class IoTProject {
     }
 
     const vscodeFolderPath = path.join(this.projectRootPath, FileNames.vscodeSettingsFolderName);
-    if (!fs.existsSync(vscodeFolderPath)) {
-      fs.mkdirSync(vscodeFolderPath);
+    if (!await sdk.FileSystem.exists(vscodeFolderPath)) {
+      utils.mkdirRecursively(vscodeFolderPath);
     }
     const projectConfigFile = path.join(vscodeFolderPath, constants.projectConfigFileName);
-    if (!fs.existsSync(projectConfigFile)) {
+    if (!await sdk.FileSystem.exists(projectConfigFile)) {
       const indentationSpace = 4;
-      fs.writeFileSync(projectConfigFile, JSON.stringify(projectConfig, null, indentationSpace));
+      sdk.FileSystem.writeFile(projectConfigFile, JSON.stringify(projectConfig, null, indentationSpace));
     }
     // const workspaceConfigFilePath = path.join(
     //     this.projectRootPath,
@@ -624,9 +628,9 @@ export class IoTProject {
     try {
       
       setTimeout(
-          () => vscode.commands.executeCommand(
-              'vscode.openFolder', vscode.Uri.file(this.projectRootPath),
-              false),
+        // TODO: better implement this through VS Remote API.
+        // Currently implemented in helper extension iotcube.
+          () => vscode.commands.executeCommand('iotcube.openInContainer', this.projectRootPath),
           500); // TODO: Remove this magic number
 
       return true;
