@@ -74,7 +74,7 @@ export class GlobalConstants {
 
 export class DependentExtensions {
   static readonly azureFunctions = 'ms-azuretools.vscode-azurefunctions';
-  static readonly remote = 'ms-vscode-remote.remote-containers';
+  static readonly remote = 'ms-vscode-remote.vscode-remote-extensionpack';
 }
 
 export class PlatformType {

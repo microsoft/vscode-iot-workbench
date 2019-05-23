@@ -78,8 +78,10 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
   async compile(): Promise<boolean> {
     const isRemote = RemoteExtension.isRemote(this.extensionContext);
     if (!isRemote) {
-      await utils.askAndOpenInRemote(OperationType.compile, this.channel);
-      return false;
+      const res = await utils.askAndOpenInRemote(OperationType.compile, this.channel);
+      if (!res) {
+        return false;
+      }
     }
 
     if (this.board === undefined) {
@@ -111,8 +113,10 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
   async upload(): Promise<boolean> {
     const isRemote = RemoteExtension.isRemote(this.extensionContext);
     if (!isRemote) {
-      await utils.askAndOpenInRemote(OperationType.upload, this.channel);
-      return false;
+      const res = await utils.askAndOpenInRemote(OperationType.upload, this.channel);
+      if (!res) {
+        return false;
+      }
     }
 
     return true;

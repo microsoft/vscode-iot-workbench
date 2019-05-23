@@ -2,14 +2,11 @@
 
 import * as fs from 'fs-plus';
 import * as path from 'path';
-import * as vscode from 'vscode';
 import {FileNames} from '../constants';
 import * as sdk from 'vscode-iot-device-cube-sdk';
 import * as utils from '../utils';
-import { RemoteExtension } from './RemoteExtension';
 
 export class ScaffoldGenerator {
-  private static writeFileFunction = undefined;
 
   // /**
   //  * Generate common files: 1. iot workbench project file; 2. .vscode folder; 3. .devcontainer folder

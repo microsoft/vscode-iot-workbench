@@ -9,7 +9,7 @@ import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
 import * as sdk from 'vscode-iot-device-cube-sdk';
 
-import {AzureFunctionsLanguage, GlobalConstants, OperationType} from './constants';
+import {AzureFunctionsLanguage, GlobalConstants, OperationType, DependentExtensions} from './constants';
 import {DialogResponses} from './DialogResponses';
 import {TelemetryContext} from './telemetry';
 import {RemoteExtension} from './Models/RemoteExtension';
@@ -168,8 +168,32 @@ export async function selectWorkspaceItem(
                                  (await showOpenDialog(options))[0].fsPath;
 }
 
-export async function askAndNewProject(context: vscode.ExtensionContext, telemetryContext: TelemetryContext) {
-  
+export async function askAndOpenInRemote(operation: OperationType, channel: vscode.OutputChannel): Promise<boolean> {
+  const message =
+      `${operation} can only be executed in remote container. Do you want to reopen the IoT project in container?`;
+  const result: vscode.MessageItem|undefined =
+      await vscode.window.showInformationMessage(
+          message, DialogResponses.yes, DialogResponses.no);
+
+  if (result === DialogResponses.yes) {
+    const res = await RemoteExtension.checkRemoteExtension();
+    if (!res) {
+      const message = `Remote extension is not available. Please install ${DependentExtensions.remote} first.`;
+      channel.show();
+      channel.appendLine(message);
+      return false;
+    }
+    await vscode.commands.executeCommand('openindocker.reopenInContainer');
+  } else {
+    const message = `${operation} can only be executed in remote container.`;
+    channel.show();
+    channel.appendLine(message);
+  }
+
+  return false;
+}
+
+export async function askAndNewProject(telemetryContext: TelemetryContext) {
   const message =
       'An IoT project is needed to process the operation, do you want to create an IoT project?';
   const result: vscode.MessageItem|undefined =
@@ -179,63 +203,7 @@ export async function askAndNewProject(context: vscode.ExtensionContext, telemet
   if (result === DialogResponses.yes) {
     telemetryContext.properties.errorMessage =
         'Operation failed and user create new project';
-    if (RemoteExtension.isRemote(context)) {
-      // When in remote. Open folder in local.
-      // User experience needs further discussion.
-      const message =
-        `Please choose "File"->"New Window", and execute "Azure IoT Device Workbench: Create Project…" in the new window.`;
-      vscode.window.showWarningMessage(message);
-
-      // await vscode.commands.executeCommand(`openindocker.reopenLocally`);
-    } else {
-      await vscode.commands.executeCommand('iotworkbench.initializeProject');
-    }
-  } else {
-    telemetryContext.properties.errorMessage = 'Operation failed.';
-  }
-}
-
-export async function askAndOpenInRemote(operation: OperationType, channel: vscode.OutputChannel) {
-  const message =
-      `${operation} can only be executed in remote container. Do you want to reopen the IoT project in container?`;
-  const result: vscode.MessageItem|undefined =
-      await vscode.window.showInformationMessage(
-          message, DialogResponses.yes, DialogResponses.no);
-
-  if (result === DialogResponses.yes) {
-    await vscode.commands.executeCommand('openindocker.reopenInContainer');
-  } else {
-    const message = `${operation} can only be executed in remote container.`;
-    channel.show();
-    channel.appendLine(message);
-  }
-
-  return;
-}
-
-export async function askAndOpenProject(
-    rootPath: string, context: vscode.ExtensionContext,
-    telemetryContext: TelemetryContext) {
-  const message =
-      `Operation failed because the IoT project is not opened. Current folder contains an IoT project, do you want to open it?`;
-  const result: vscode.MessageItem|undefined =
-      await vscode.window.showInformationMessage(
-          message, DialogResponses.yes, DialogResponses.no);
-
-  if (result === DialogResponses.yes) {
-    telemetryContext.properties.errorMessage =
-        'Operation failed and user open project from folder.';
-    if (RemoteExtension.isRemote(context)) {
-      // When in remote. Open folder in local.
-      // User experience needs further discussion.
-      const message = 
-        `Please choose "File"->"New Window", and execute "Azure IoT Device Workbench: Create Project…" in the new window.`;
-      vscode.window.showWarningMessage(message);
-  
-      // await vscode.commands.executeCommand(`openindocker.reopenLocally`);
-    } else {
-      await vscode.commands.executeCommand('iotcube.openInContainer', rootPath);
-    }
+    await vscode.commands.executeCommand('iotworkbench.initializeProject');
   } else {
     telemetryContext.properties.errorMessage = 'Operation failed.';
   }
