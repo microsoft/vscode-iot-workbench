@@ -52,6 +52,11 @@ export class FileNames {
   static readonly outputPathName = '.build';
 }
 
+export enum OperationType {
+  compile = 'Compile device code',
+  upload = 'Upload device code'
+}
+
 export enum AzureFunctionsLanguage {
   CSharpScript = 'C#Script',
   JavaScript = 'JavaScript',

@@ -93,7 +93,10 @@ export class AZ3166Device extends ArduinoDeviceBase {
   
   async compile(): Promise<boolean> {
     try {
-      await super.compile();
+      const res = await super.compile();
+      if (!res) {
+        return false;
+      }
     } catch (error) {
       throw new Error(`Failed to compile AZ3166 device code using arduino-cli. Error message: ${error.message}`);
     }
@@ -104,10 +107,17 @@ export class AZ3166Device extends ArduinoDeviceBase {
       throw new Error(`Failed to generate bin file for DevKit bootloader. Error message: ${error.message}`);
     }
 
+    vscode.window.showInformationMessage('DevKit device code compilation succeeded.');
+
     return true;
   }
 
   async upload(): Promise<boolean> {
+    const res = await super.upload();
+    if (!res) {
+      return false;
+    }
+
     if (!fs.existsSync(this.outputPath)) {
       throw new Error(`Output path ${this.outputPath} does not exist`);
     }
@@ -139,8 +149,10 @@ export class AZ3166Device extends ArduinoDeviceBase {
       throw new Error(`Copy bin file to AZ3166 board failed. ${error.message}`);
     }
 
+    const message = `Successfully deploy bin file to AZ3166 board.`;
     this.channel.show();
-    this.channel.appendLine(`Successfully deploy bin file to AZ3166 board.`);
+    this.channel.appendLine(message);
+    vscode.window.showInformationMessage(message);
 
     return true;
   }

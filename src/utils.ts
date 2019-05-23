@@ -9,7 +9,7 @@ import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
 import * as sdk from 'vscode-iot-device-cube-sdk';
 
-import {AzureFunctionsLanguage, GlobalConstants} from './constants';
+import {AzureFunctionsLanguage, GlobalConstants, OperationType} from './constants';
 import {DialogResponses} from './DialogResponses';
 import {TelemetryContext} from './telemetry';
 import {RemoteExtension} from './Models/RemoteExtension';
@@ -193,6 +193,24 @@ export async function askAndNewProject(context: vscode.ExtensionContext, telemet
   } else {
     telemetryContext.properties.errorMessage = 'Operation failed.';
   }
+}
+
+export async function askAndOpenInRemote(operation: OperationType, channel: vscode.OutputChannel) {
+  const message =
+      `${operation} can only be executed in remote container. Do you want to reopen the IoT project in container?`;
+  const result: vscode.MessageItem|undefined =
+      await vscode.window.showInformationMessage(
+          message, DialogResponses.yes, DialogResponses.no);
+
+  if (result === DialogResponses.yes) {
+    await vscode.commands.executeCommand('openindocker.reopenInContainer');
+  } else {
+    const message = `${operation} can only be executed in remote container.`;
+    channel.show();
+    channel.appendLine(message);
+  }
+
+  return;
 }
 
 export async function askAndOpenProject(
