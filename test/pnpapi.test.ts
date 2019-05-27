@@ -128,27 +128,31 @@ suite('IoT Workbench: PnPAPI', () => {
     const newinteface =
         data.replace('1.0.0', `1.0.${Math.floor(Math.random() * 1000000)}`);
 
+    const fileJson = JSON.parse(newinteface);
+    const fileId = fileJson['@id'];
     const result =
         await pnpMetamodelRepositoryClient.CreateOrUpdateInterfaceAsync(
-            newinteface, undefined, builder.RepositoryIdValue);
+            newinteface, fileId, undefined, builder.RepositoryIdValue);
 
-    assert.equal((result.contents as string).length > 0, true);
+    assert.equal(result.length > 0, true);
 
+    const interfaceContext =
+        await pnpMetamodelRepositoryClient.GetInterfaceAsync(
+            fileId, builder.RepositoryIdValue, true);
 
-
-    const updatedContext =
+    const updatedResult =
         await pnpMetamodelRepositoryClient.CreateOrUpdateInterfaceAsync(
-            newinteface, result.etag, builder.RepositoryIdValue);
-    assert.equal((updatedContext.contents as string).length > 0, true);
-    assert.equal(updatedContext.etag !== result.etag, true);
-    assert.equal(updatedContext.id, result.id);
+            newinteface, fileId, interfaceContext.etag,
+            builder.RepositoryIdValue);
+
+    assert.equal(updatedResult !== result, true);
 
     await pnpMetamodelRepositoryClient.DeleteInterfaceAsync(
-        result.id, builder.RepositoryIdValue);
-    if (result.id) {
+        fileId, builder.RepositoryIdValue);
+    if (fileId) {
       try {
         await pnpMetamodelRepositoryClient.GetInterfaceAsync(
-            result.id, builder.RepositoryIdValue, true);
+            fileId, builder.RepositoryIdValue, true);
       } catch (error) {
         assert.equal(error.statusCode, 404);
       }

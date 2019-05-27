@@ -23,6 +23,7 @@ export class DigitalTwinConstants {
   static readonly interfaceSuffix = '.interface.json';
   static readonly capabilityModelSuffix = '.capabilitymodel.json';
   static readonly dtPrefix = '[Azure Digital Twins]';
+  static readonly apiVersion = '2019-07-01-Preview';
 }
 
 export class CodeGenConstants {

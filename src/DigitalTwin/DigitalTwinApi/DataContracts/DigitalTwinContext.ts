@@ -13,8 +13,8 @@ export interface MetaModelUpsertRequest {
 }
 
 export interface SearchOptions {
-  searchString: string;
-  pnpModelType: MetaModelType;
+  searchKeyword: string;
+  modelFilterType: MetaModelType;
   continuationToken: string|null;
   pageSize?: number;
 }

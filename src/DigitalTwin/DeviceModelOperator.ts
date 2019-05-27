@@ -750,9 +750,10 @@ export class DeviceModelOperator {
                 .dtPrefix} Start updating Digital Twin interface with id:"${
             fileId}"... `);
 
-        const updatedContext =
+        const result =
             await dtMetamodelRepositoryClient.CreateOrUpdateInterfaceAsync(
-                fileContent, interfaceMetaData.etag, builder.RepositoryIdValue);
+                fileContent, fileId, interfaceMetaData.etag,
+                builder.RepositoryIdValue);
         channel.appendLine(`${
             DigitalTwinConstants
                 .dtPrefix} Submitting Azure IoT Digital Twin interface file: fileName: "${
@@ -768,9 +769,9 @@ export class DeviceModelOperator {
                   .dtPrefix} Digital Twin interface file does not exist in server, creating ${
               fileId}... `);
           // Create the interface.
-          const result: DigitalTwinModelBase =
+          const result =
               await dtMetamodelRepositoryClient.CreateOrUpdateInterfaceAsync(
-                  fileContent, undefined, builder.RepositoryIdValue);
+                  fileContent, fileId, undefined, builder.RepositoryIdValue);
           channel.appendLine(`${
               DigitalTwinConstants
                   .dtPrefix} Submitting Digital Twin interface: fileName: "${
@@ -856,10 +857,10 @@ export class DeviceModelOperator {
                 .dtPrefix} Start updating Digital Twin capability model with id:"${
             fileId}"...`);
 
-        const updatedContext = await dtMetamodelRepositoryClient
-                                   .CreateOrUpdateCapabilityModelAsync(
-                                       fileContent, capabilityModelContext.etag,
-                                       builder.RepositoryIdValue);
+        const result = await dtMetamodelRepositoryClient
+                           .CreateOrUpdateCapabilityModelAsync(
+                               fileContent, capabilityModelContext.etag,
+                               builder.RepositoryIdValue);
         channel.appendLine(`${
             DigitalTwinConstants
                 .dtPrefix} Submitting Digital Twin capability model: fileName: "${
@@ -876,10 +877,10 @@ export class DeviceModelOperator {
               fileId}"... `);
 
           // Create the interface.
-          const result: DigitalTwinModelBase =
-              await dtMetamodelRepositoryClient
-                  .CreateOrUpdateCapabilityModelAsync(
-                      fileContent, undefined, builder.RepositoryIdValue);
+          const result = await dtMetamodelRepositoryClient
+                             .CreateOrUpdateCapabilityModelAsync(
+                                 fileContent, fileId, undefined,
+                                 builder.RepositoryIdValue);
           channel.appendLine(`${
               DigitalTwinConstants
                   .dtPrefix} Submitting Digital Twin capability model: fileName: "${

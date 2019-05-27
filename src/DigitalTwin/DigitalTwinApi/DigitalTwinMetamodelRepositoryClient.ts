@@ -9,14 +9,15 @@ import {SearchResults} from './DataContracts/SearchResults';
 import {MetaModelType, SearchOptions, MetaModelUpsertRequest} from './DataContracts/DigitalTwinContext';
 import {DigitalTwinConnectionStringBuilder} from './DigitalTwinConnectionStringBuilder';
 import {DigitalTwinSharedAccessKey} from './DigitalTwinSharedAccessKey';
-import {GlobalConstants, ConfigKey} from '../../constants';
-import {DigitalTwinModelBase, DigitalTwinModel} from './DataContracts/DigitalTwinModel';
+import {ConfigKey} from '../../constants';
+import {DigitalTwinModel} from './DataContracts/DigitalTwinModel';
 import {ConfigHandler} from '../../configHandler';
+import {DigitalTwinConstants} from '../DigitalTwinConstants';
 
 const constants = {
   mediaType: 'application/json',
-  apiModel: '/Models',
-  modelSearch: '/Models/Search'
+  apiModel: '/models/ref:modelId',
+  modelSearch: '/models/search'
 };
 
 
@@ -111,30 +112,29 @@ export class DigitalTwinMetamodelRepositoryClient {
 
 
   async CreateOrUpdateInterfaceAsync(
-      content: string, etag?: string,
-      repositoryId?: string): Promise<DigitalTwinModelBase> {
+      content: string, modelId: string, etag?: string,
+      repositoryId?: string): Promise<string> {
     if (repositoryId && !this.dtSharedAccessKey) {
       throw new Error(
           'The connection string is required to publish interface in organizational model repository.');
     }
 
     return await this.MakeCreateOrUpdateRequestAsync(
-        MetaModelType.Interface, content, etag, repositoryId);
+        MetaModelType.Interface, content, modelId, etag, repositoryId);
   }
 
   /// <summary>
   /// Updates the capability model with the new context content.
   /// </summary>
   async CreateOrUpdateCapabilityModelAsync(
-      content: string, etag?: string,
-      repositoryId?: string): Promise<DigitalTwinModelBase> {
+      content: string, modelId: string, etag?: string, repositoryId?: string) {
     if (repositoryId && !this.dtSharedAccessKey) {
       throw new Error(
           'The connection string is required to publish capability model in organizational model repository.');
     }
 
     return await this.MakeCreateOrUpdateRequestAsync(
-        MetaModelType.CapabilityModel, content, etag, repositoryId);
+        MetaModelType.CapabilityModel, content, modelId, etag, repositoryId);
   }
 
   /// <summary>
@@ -165,14 +165,17 @@ export class DigitalTwinMetamodelRepositoryClient {
 
 
   async MakeCreateOrUpdateRequestAsync(
-      metaModelType: MetaModelType, contents: string, etag?: string,
-      repositoryId?: string): Promise<DigitalTwinModelBase> {
+      metaModelType: MetaModelType, contents: string, modelId: string,
+      etag?: string, repositoryId?: string,
+      apiVersion = DigitalTwinConstants.apiVersion): Promise<string> {
     let targetUri = this.metaModelRepositoryHostName.toString();
 
     if (repositoryId) {
-      targetUri += `${constants.apiModel}?repositoryId=${repositoryId}`;
+      targetUri += `${constants.apiModel}?modelId=${modelId}&repositoryId=${
+          repositoryId}&api-version=${apiVersion}`;
     } else {
-      targetUri += `${constants.apiModel}`;
+      targetUri +=
+          `${constants.apiModel}?modelId=${modelId}&api-version=${apiVersion}`;
     }
 
     let authenticationString = '';
@@ -181,7 +184,7 @@ export class DigitalTwinMetamodelRepositoryClient {
       authenticationString = this.dtSharedAccessKey.GenerateSASToken();
     }
 
-    const payload: MetaModelUpsertRequest = {etag, contents};
+    const payload: MetaModelUpsertRequest = {contents};
 
     const options: request.OptionsWithUri = {
       method: 'PUT',
@@ -192,15 +195,14 @@ export class DigitalTwinMetamodelRepositoryClient {
         Authorization: authenticationString,
         'Content-Type': 'application/json'
       },
+      resolveWithFullResponse: true,
       body: payload
     };
 
-    return new Promise<DigitalTwinModelBase>((resolve, reject) => {
+    return new Promise<string>((resolve, reject) => {
       request(options)
           .then(response => {
-            const result: DigitalTwinModelBase =
-                response as DigitalTwinModelBase;
-            return resolve(result);
+            return resolve(response.headers['etag']);
           })
           .catch(err => {
             reject(err);
@@ -210,8 +212,10 @@ export class DigitalTwinMetamodelRepositoryClient {
 
   private async MakeGetModelRequestAsync(
       metaModelType: MetaModelType, modelId: string, repositoryId?: string,
-      expand = false): Promise<DigitalTwinModel> {
-    const targetUri = this.GenerateFetchModelUri(modelId, repositoryId, expand);
+      expand = false,
+      apiVersion = DigitalTwinConstants.apiVersion): Promise<DigitalTwinModel> {
+    const targetUri =
+        this.GenerateFetchModelUri(modelId, apiVersion, repositoryId, expand);
 
     let authenticationString = '';
 
@@ -225,12 +229,14 @@ export class DigitalTwinMetamodelRepositoryClient {
       encoding: 'utf8',
       json: true,
       headers: {Authorization: authenticationString},
+      resolveWithFullResponse: true
     };
 
     return new Promise<DigitalTwinModel>((resolve, reject) => {
       request(options)
           .then(response => {
-            const result: DigitalTwinModel = response as DigitalTwinModel;
+            const result: DigitalTwinModel = response.body as DigitalTwinModel;
+            result.etag = response.headers['etag'];
             return resolve(result);
           })
           .catch(err => {
@@ -241,11 +247,11 @@ export class DigitalTwinMetamodelRepositoryClient {
 
   private async MakeSearchRequestAsync(
       metaModelType: MetaModelType, searchString: string,
-      continuationToken: string|null, repositoryId?: string,
-      pageSize = 20): Promise<SearchResults> {
+      continuationToken: string|null, repositoryId?: string, pageSize = 20,
+      apiVersion = DigitalTwinConstants.apiVersion): Promise<SearchResults> {
     const payload: SearchOptions = {
-      searchString,
-      pnpModelType: metaModelType,
+      searchKeyword: searchString,
+      modelFilterType: metaModelType,
       continuationToken,
       pageSize
     };
@@ -253,9 +259,10 @@ export class DigitalTwinMetamodelRepositoryClient {
     let queryString = this.metaModelRepositoryHostName.toString();
 
     if (repositoryId) {
-      queryString += `${constants.modelSearch}?repositoryId=${repositoryId}`;
+      queryString += `${constants.modelSearch}?repositoryId=${
+          repositoryId}&api-version=${apiVersion}`;
     } else {
-      queryString += `${constants.modelSearch}`;
+      queryString += `${constants.modelSearch}?api-version=${apiVersion}`;
     }
 
     let authenticationString = '';
@@ -296,10 +303,12 @@ export class DigitalTwinMetamodelRepositoryClient {
   /// <param name="metaModelId">Metamodel id.</param>
   /// <param name="metaModelType"><see cref="MetaModelType"/> Interface or capability model.</param>
   private async MakeDeleteRequestAsync(
-      metaModelType: MetaModelType, modelId: string, repositoryId?: string) {
+      metaModelType: MetaModelType, modelId: string, repositoryId?: string,
+      apiVersion = DigitalTwinConstants.apiVersion) {
     const queryString = repositoryId ? `&repositoryId=${repositoryId}` : '';
     const resourceUrl = `${this.metaModelRepositoryHostName.toString()}${
-        constants.apiModel}?modelId=${modelId}${queryString}`;
+        constants.apiModel}?modelId=${modelId}${queryString}&api-version=${
+        apiVersion}`;
 
     let authenticationString = '';
 
@@ -330,9 +339,11 @@ export class DigitalTwinMetamodelRepositoryClient {
   }
 
   private GenerateFetchModelUri(
-      modelId: string, repositoryId?: string, expand = false) {
+      modelId: string, apiVersion: string, repositoryId?: string,
+      expand = false) {
     let result = `${this.metaModelRepositoryHostName.toString()}${
-        constants.apiModel}?modelId=${encodeURIComponent(modelId)}`;
+        constants.apiModel}?modelId=${
+        encodeURIComponent(modelId)}&api-version=${apiVersion}`;
     const expandString = expand ? `&expand=true` : '';
     if (repositoryId) {
       result += `${expandString}&repositoryId=${repositoryId}`;

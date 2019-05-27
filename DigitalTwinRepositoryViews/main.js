@@ -85,7 +85,6 @@ var repository = new Vue({
     searchTags,
     copy,
     hasNoItemToPublish,
-    getDisplayName,
     searchOnServer,
     clearKeywords
   },
@@ -252,7 +251,7 @@ function filterItems(list) {
       return false;
     }
 
-    const displayName = getDisplayName(item.displayName, 'en');
+    const displayName = item.displayName;
     if (filterKeywords && displayName.toLowerCase().indexOf(filterKeywords.toLowerCase()) === -1) {
       return false;
     }
@@ -344,27 +343,6 @@ function hasNoItemToPublish() {
     }
   }
   return true;
-}
-
-function getDisplayName(displayName, locale) {
-  if(!displayName || !displayName.length) {
-    return '';
-  }
-  let res = displayName.find(item => {
-    return item.locale === locale;
-  });
-  // use en as default locale
-  if (!res) {
-    res = displayName.find(item => {
-      return item.locale === 'en';
-    });
-  }
-  
-  if (!res) {
-    res = displayName[0];
-  }
-
-  return res.value;
 }
 
 function searchOnServer() {

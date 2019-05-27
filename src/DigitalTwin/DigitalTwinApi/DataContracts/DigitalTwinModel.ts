@@ -9,10 +9,9 @@ export interface DigitalTwinModelBase {
   id: string;
   modelName: string;
   version: string;
-  pnpMetamodelType: string;
+  type: string;
   etag: string;
   tenantId: string;
-  tenantName: string;
   createdOn: string;
   lastUpdated: string;
 }
