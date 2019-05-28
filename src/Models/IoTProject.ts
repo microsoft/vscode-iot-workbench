@@ -624,12 +624,14 @@ export class IoTProject {
     }
 
     try {
-      const res = await RemoteExtension.checkRemoteExtension();
-      if (!res) {
-        const message = `Remote extension is not available. Please install ${DependentExtensions.remote} first.`;
-        this.channel.show();
-        this.channel.appendLine(message);
-        return false;
+      if (!RemoteExtension.isRemote(this.extensionContext)) {
+          const res = await RemoteExtension.checkRemoteExtension();
+          if (!res) {
+            const message = `Remote extension is not available. Please install ${DependentExtensions.remote} first.`;
+            this.channel.show();
+            this.channel.appendLine(message);
+            return false;
+        }
       }
       setTimeout(
         // TODO: better implement this through VS Remote API.
