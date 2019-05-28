@@ -189,6 +189,13 @@ export class RaspberryPiDevice implements Device {
     }
     
     try {
+      const binFilePath = path.join(this.outputPath, 'iot_application/azure_exe');
+      if (!fs.existsSync(binFilePath)) {
+        const message = `Binary file does not exist. Please compile device code first.`;
+        await vscode.window.showWarningMessage(message);
+        return false;
+      }
+
       if (!RaspberryPiUploadConfig.updated) {
         const res = await this.configSSH();
         if (!res) {
@@ -200,7 +207,6 @@ export class RaspberryPiDevice implements Device {
       const ssh = new sdk.SSH();
       await ssh.open(RaspberryPiUploadConfig.host, RaspberryPiUploadConfig.port, RaspberryPiUploadConfig.user, RaspberryPiUploadConfig.password);
       try {
-        const binFilePath = path.join(this.outputPath, 'iot_application/azure_exe');
         await ssh.uploadFile(binFilePath, RaspberryPiUploadConfig.projectPath);
       } catch (error) {
         throw new Error(`Deploy binary file to device ${RaspberryPiUploadConfig.user}@${RaspberryPiUploadConfig.host} failed. ${error.message}`);

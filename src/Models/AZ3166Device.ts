@@ -119,14 +119,18 @@ export class AZ3166Device extends ArduinoDeviceBase {
     }
 
     if (!fs.existsSync(this.outputPath)) {
-      throw new Error(`Output path ${this.outputPath} does not exist`);
+      const message = `Output path ${this.outputPath} does not exist. Please compile device code first.`;
+      await vscode.window.showWarningMessage(message);
+      return false;
     }
 
     const binFiles = fs.readdirSync(this.outputPath).filter(
-      file => path.extname(file).endsWith(constants.binFileExt) && !path.basename(file).endsWith(constants.otaBinFileExt));
-    if (!binFiles || !binFiles.length) {
-      throw new Error(`No bin file found.`);
-    }
+        file => path.extname(file).endsWith(constants.binFileExt) && !path.basename(file).endsWith(constants.otaBinFileExt));
+      if (!binFiles || !binFiles.length) {
+        const message = `No bin file found. Please compile device code first.`;
+        await vscode.window.showWarningMessage(message);
+        return false;
+      }
 
     let hostVolumes;
     try {
