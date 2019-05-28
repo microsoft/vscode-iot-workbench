@@ -46,7 +46,9 @@ export class DeviceModelOperator {
       rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
     } else {
       rootPath = await utils.selectWorkspaceItem(
-          'Select the folder that will contain your Digital Twin files:', {
+          `Select the folder that will contain your ${
+              DigitalTwinConstants.productName} models:`,
+          {
             canSelectFiles: false,
             canSelectFolders: true,
             canSelectMany: false,
@@ -145,15 +147,17 @@ export class DeviceModelOperator {
       fs.writeFileSync(targetInterface, replaceStr);
     } catch (error) {
       throw new Error(
-          `Creating Digital Twin interface failed: ${error.message}`);
+          `Creating ${DigitalTwinConstants.productName} interface failed: ${
+              error.message}`);
     }
     await vscode.commands.executeCommand(
         'vscode.openFolder', vscode.Uri.file(rootPath), false);
 
     await vscode.window.showTextDocument(vscode.Uri.file(targetInterface));
 
-    vscode.window.showInformationMessage(`New Digital Twin interface ${
-        interfaceFileName} was created successfully.`);
+    vscode.window.showInformationMessage(
+        `New ${DigitalTwinConstants.productName} interface ${
+            interfaceFileName} was created successfully.`);
     return;
   }
 
@@ -220,8 +224,9 @@ export class DeviceModelOperator {
           content.replace(capabilityModelNamePattern, matchItems[1]);
       fs.writeFileSync(targetCapabilityModel, replaceStr);
     } catch (error) {
-      throw new Error(
-          `Creating Digital Twin capability model failed: ${error.message}`);
+      throw new Error(`Creating ${
+          DigitalTwinConstants.productName} capability model failed: ${
+          error.message}`);
     }
 
     await vscode.commands.executeCommand(
@@ -230,8 +235,9 @@ export class DeviceModelOperator {
     await vscode.window.showTextDocument(
         vscode.Uri.file(targetCapabilityModel));
 
-    vscode.window.showInformationMessage(`New Digital Twin capability model ${
-        capabilityModelFileName} created successfully.`);
+    vscode.window.showInformationMessage(
+        `New ${DigitalTwinConstants.productName} capability model ${
+            capabilityModelFileName} created successfully.`);
     return;
   }
 
@@ -257,7 +263,8 @@ export class DeviceModelOperator {
       DeviceModelOperator.vscexpress = DeviceModelOperator.vscexpress ||
           new VSCExpress(context, 'DigitalTwinRepositoryViews');
       await DeviceModelOperator.vscexpress.open(
-          'index.html?public', 'Digital Twin Repository', vscode.ViewColumn.Two,
+          'index.html?public', `${DigitalTwinConstants.productName} Repository`,
+          vscode.ViewColumn.Two,
           {retainContextWhenHidden: true, enableScripts: true});
       return true;
     }
@@ -269,8 +276,8 @@ export class DeviceModelOperator {
     if (!connectionString) {
       const option: vscode.InputBoxOptions = {
         value: DigitalTwinConstants.repoConnectionStringTemplate,
-        prompt:
-            'Please input the connection string to the Digital Twin repository:',
+        prompt: `Please input the connection string to the ${
+            DigitalTwinConstants.productName} repository:`,
         ignoreFocusOut: true
       };
 
@@ -292,7 +299,8 @@ export class DeviceModelOperator {
       DeviceModelOperator.vscexpress = DeviceModelOperator.vscexpress ||
           new VSCExpress(context, 'DigitalTwinRepositoryViews');
       await DeviceModelOperator.vscexpress.open(
-          'index.html', 'Digital Twin Repository', vscode.ViewColumn.Two,
+          'index.html', `${DigitalTwinConstants.productName} Repository`,
+          vscode.ViewColumn.Two,
           {retainContextWhenHidden: true, enableScripts: true});
       return true;
     }
@@ -306,7 +314,8 @@ export class DeviceModelOperator {
     if (DeviceModelOperator.vscexpress) {
       DeviceModelOperator.vscexpress.close('index.html');
     }
-    const message = 'Sign out Digital Twin repository successfully';
+    const message =
+        `Sign out ${DigitalTwinConstants.productName} repository successfully`;
     vscode.window.showInformationMessage(message);
   }
 
@@ -325,8 +334,9 @@ export class DeviceModelOperator {
       const connectionString =
           ConfigHandler.get<string>(ConfigKey.modelRepositoryKeyName);
       if (!connectionString) {
-        vscode.window.showWarningMessage(
-            'Failed to get interfaces from Digital Twin repository. Please sign out and sign in with a valid connection string.');
+        vscode.window.showWarningMessage(`Failed to get interfaces from ${
+            DigitalTwinConstants
+                .productName} repository. Please sign out and sign in with a valid connection string.`);
         return;
       }
 
@@ -355,8 +365,9 @@ export class DeviceModelOperator {
       const connectionString =
           ConfigHandler.get<string>(ConfigKey.modelRepositoryKeyName);
       if (!connectionString) {
-        vscode.window.showWarningMessage(
-            'Failed to get capability models from Digital Twin repository. Please sign out and sign in with a valid connection string.');
+        vscode.window.showWarningMessage(`Failed to get capability models from ${
+            DigitalTwinConstants
+                .productName} repository. Please sign out and sign in with a valid connection string.`);
         return;
       }
       const dtMetamodelRepositoryClient =
@@ -385,8 +396,9 @@ export class DeviceModelOperator {
     const connectionString =
         ConfigHandler.get<string>(ConfigKey.modelRepositoryKeyName);
     if (!connectionString) {
-      vscode.window.showWarningMessage(
-          'Failed to delete models from Digital Twin repository. Please sign out and sign in with a valid connection string.');
+      vscode.window.showWarningMessage(`Failed to delete models from ${
+          DigitalTwinConstants
+              .productName} repository. Please sign out and sign in with a valid connection string.`);
       return;  // TODO: delete from public model repository??
     }
 
@@ -422,8 +434,8 @@ export class DeviceModelOperator {
       context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
     channel.show();
     if (!fileIds || fileIds.length === 0) {
-      channel.appendLine(`${
-          DigitalTwinConstants.dtPrefix} No Digital Twin models is selected.`);
+      channel.appendLine(`${DigitalTwinConstants.dtPrefix} No ${
+          DigitalTwinConstants.productName} model is selected.`);
       return;
     }
 
@@ -553,8 +565,10 @@ export class DeviceModelOperator {
     }
 
     if (fileItems.length === 0) {
-      const message =
-          'No Digital Twin models found in current folder. Please select the folder that contains Digital Twin files and try again.';
+      const message = `No ${
+          DigitalTwinConstants
+              .productName} models found in current folder. Please select the folder that contains ${
+          DigitalTwinConstants.productName} models and try again.`;
       vscode.window.showWarningMessage(message);
       return false;
     }
@@ -563,7 +577,7 @@ export class DeviceModelOperator {
       ignoreFocusOut: true,
       matchOnDescription: true,
       matchOnDetail: true,
-      placeHolder: 'Select Digital Twin models',
+      placeHolder: `Select ${DigitalTwinConstants.productName} models`,
       canPickMany: true
     });
 
@@ -610,8 +624,8 @@ export class DeviceModelOperator {
     if (!connectionString) {
       const option: vscode.InputBoxOptions = {
         value: DigitalTwinConstants.repoConnectionStringTemplate,
-        prompt:
-            'Please input the connection string to access the Digital Twin repository.',
+        prompt: `Please input the connection string to access the ${
+            DigitalTwinConstants.productName} repository.`,
         ignoreFocusOut: true
       };
 
@@ -644,9 +658,9 @@ export class DeviceModelOperator {
           option, dtMetamodelRepositoryClient, builder, filePath,
           fileItem.label, channel);
       if (!result && !continueOnFailure) {
-        const message = `${
-            fileItem
-                .label} was not submitted to Digital Twin Model Repository successfully, do you want to continue with rest files?`;
+        const message = `${fileItem.label} was not submitted to ${
+            DigitalTwinConstants
+                .productName} Model Repository successfully, do you want to continue with rest files?`;
         const continueWithOtherFiles =
             await vscode.window.showInformationMessage(
                 message, DialogResponses.yes, DialogResponses.no);
@@ -667,9 +681,9 @@ export class DeviceModelOperator {
           option, dtMetamodelRepositoryClient, builder, filePath,
           fileItem.label, channel);
       if (!result && !continueOnFailure) {
-        const message = `${
-            fileItem
-                .label} was not submitted to Digital Twin Model Repository successfully, do you want to continue with rest files?`;
+        const message = `${fileItem.label} was not submitted to ${
+            DigitalTwinConstants
+                .productName} Model Repository successfully, do you want to continue with rest files?`;
         const continueWithOtherFiles =
             await vscode.window.showInformationMessage(
                 message, DialogResponses.yes, DialogResponses.no);
@@ -698,15 +712,19 @@ export class DeviceModelOperator {
         fileId = fileJson[constants.idName];
       } catch (error) {
         channel.appendLine(`${DigitalTwinConstants.dtPrefix} ${
-            fileName} is not a valid Digital Twin model. Please modify the content and submit it again.`);
-        vscode.window.showWarningMessage(`${
-            fileName} is not a valid Digital Twin model. Please modify the content and submit it again.`);
+            fileName} is not a valid ${
+            DigitalTwinConstants
+                .productName} model. Please modify the content and submit it again.`);
+        vscode.window.showWarningMessage(`${fileName} is not a valid ${
+            DigitalTwinConstants
+                .productName} model. Please modify the content and submit it again.`);
         return false;
       }
 
       if (!fileId) {
-        vscode.window.showWarningMessage(
-            'Unable to find id from the Digital Twin interface file. Please provide a valid file.');
+        vscode.window.showWarningMessage(`Unable to find id from the ${
+            DigitalTwinConstants
+                .productName} interface file. Please provide a valid file.`);
         return false;
       }
       channel.appendLine(
@@ -715,81 +733,77 @@ export class DeviceModelOperator {
       // check whether file exists in model repo, try to update the file.
       try {
         // First, get the file to retrieve the latest etag.
-        channel.appendLine(`${
-            DigitalTwinConstants
-                .dtPrefix} Connect to Digital Twin repository to check whether ${
+        channel.appendLine(`${DigitalTwinConstants.dtPrefix} Connect to ${
+            DigitalTwinConstants.productName} repository to check whether ${
             fileId} exists in server...`);
         const interfaceMetaData =
             await dtMetamodelRepositoryClient.GetInterfaceAsync(
                 fileId, builder.RepositoryIdValue, true);
 
-        channel.appendLine(`${
-            DigitalTwinConstants
-                .dtPrefix} Azure IoT Digital Twin interface file with id:"${
+        channel.appendLine(`${DigitalTwinConstants.dtPrefix} ${
+            DigitalTwinConstants.productName} interface file with id:"${
             fileId}" exists in server. `);
 
         if (option.overwriteChoice === OverwriteChoice.Unknown) {
-          const msg = `The interface with id "${
-              fileId}" already exists in the Digital Twin Repository, do you want to overwrite it?`;
+          const msg =
+              `The interface with id "${fileId}" already exists in the ${
+                  DigitalTwinConstants
+                      .productName} Repository, do you want to overwrite it?`;
           const result: vscode.MessageItem|undefined =
               await vscode.window.showInformationMessage(
                   msg, DialogResponses.all, DialogResponses.yes,
                   DialogResponses.no);
           if (result === DialogResponses.no) {
-            channel.appendLine(`${
-                DigitalTwinConstants
-                    .dtPrefix} Submitting Digital Twin interface cancelled.`);
+            channel.appendLine(`${DigitalTwinConstants.dtPrefix} Submitting ${
+                DigitalTwinConstants.productName} interface cancelled.`);
             return false;
           } else if (result === DialogResponses.all) {
             option.overwriteChoice = OverwriteChoice.OverwriteAll;
           }
         }
 
-        channel.appendLine(`${
-            DigitalTwinConstants
-                .dtPrefix} Start updating Digital Twin interface with id:"${
+        channel.appendLine(`${DigitalTwinConstants.dtPrefix} Start updating ${
+            DigitalTwinConstants.productName} interface with id:"${
             fileId}"... `);
 
         const result =
             await dtMetamodelRepositoryClient.CreateOrUpdateInterfaceAsync(
                 fileContent, fileId, interfaceMetaData.etag,
                 builder.RepositoryIdValue);
-        channel.appendLine(`${
-            DigitalTwinConstants
-                .dtPrefix} Submitting Azure IoT Digital Twin interface file: fileName: "${
+        channel.appendLine(`${DigitalTwinConstants.dtPrefix} Submitting ${
+            DigitalTwinConstants.productName} interface file: fileName: "${
             fileName}" successfully, interface id: "${fileId}". `);
-        vscode.window.showInformationMessage(
-            `Azure IoT Digital Twin interface with interface id: "${
-                fileId}" updated successfully`);
+        vscode.window.showInformationMessage(`${
+            DigitalTwinConstants.productName} interface with interface id: "${
+            fileId}" updated successfully`);
       } catch (error) {
         if (error.statusCode === 404)  // Not found
         {
-          channel.appendLine(`${
+          channel.appendLine(`${DigitalTwinConstants.dtPrefix} ${
               DigitalTwinConstants
-                  .dtPrefix} Digital Twin interface file does not exist in server, creating ${
+                  .productName} interface file does not exist in server, creating ${
               fileId}... `);
           // Create the interface.
           const result =
               await dtMetamodelRepositoryClient.CreateOrUpdateInterfaceAsync(
                   fileContent, fileId, undefined, builder.RepositoryIdValue);
-          channel.appendLine(`${
-              DigitalTwinConstants
-                  .dtPrefix} Submitting Digital Twin interface: fileName: "${
+          channel.appendLine(`${DigitalTwinConstants.dtPrefix} Submitting ${
+              DigitalTwinConstants.productName} interface: fileName: "${
               fileName}" successfully, interface id: "${fileId}". `);
-          vscode.window.showInformationMessage(
-              `Digital Twin interface with interface id: "${
-                  fileId}" created successfully`);
+          vscode.window.showInformationMessage(`${
+              DigitalTwinConstants.productName} interface with interface id: "${
+              fileId}" created successfully`);
         } else {
           throw error;
         }
       }
     } catch (error) {
-      channel.appendLine(`${
-          DigitalTwinConstants
-              .dtPrefix} Submitting Digital Twin interface: fileName: "${
+      channel.appendLine(`${DigitalTwinConstants.dtPrefix} Submitting ${
+          DigitalTwinConstants.productName} interface: fileName: "${
           fileName}" failed, error: ${error.message}.`);
-      vscode.window.showWarningMessage(
-          `Unable to submit Digital Twin interface, error: ${error.message}`);
+      vscode.window.showWarningMessage(`Unable to submit ${
+          DigitalTwinConstants.productName} interface, error: ${
+          error.message}`);
       return false;
     }
 
@@ -810,15 +824,19 @@ export class DeviceModelOperator {
         fileId = fileJson[constants.idName];
       } catch (error) {
         channel.appendLine(`${DigitalTwinConstants.dtPrefix} ${
-            fileName} is not a valid Digital Twin model. Please modify the content and submit it again.`);
-        vscode.window.showWarningMessage(`${
-            fileName} is not a valid Digital Twin model. Please modify the content and submit it again.`);
+            fileName} is not a valid ${
+            DigitalTwinConstants
+                .productName} model. Please modify the content and submit it again.`);
+        vscode.window.showWarningMessage(`${fileName} is not a valid ${
+            DigitalTwinConstants
+                .productName} model. Please modify the content and submit it again.`);
         return false;
       }
 
       if (!fileId) {
-        vscode.window.showWarningMessage(
-            'Unable to find id from the Digital Twin capability model file. Please provide a valid file');
+        vscode.window.showWarningMessage(`Unable to find id from the ${
+            DigitalTwinConstants
+                .productName} capability model file. Please provide a valid file.`);
         return false;
       }
       channel.appendLine(
@@ -827,53 +845,51 @@ export class DeviceModelOperator {
       // check whether file exists in model repo, try to update the file.
       try {
         // First, get the file to retrieve the latest etag.
-        channel.appendLine(`${
-            DigitalTwinConstants
-                .dtPrefix} Connect to Azure IoT Digital Twin repository to check whether "${
+        channel.appendLine(`${DigitalTwinConstants.dtPrefix} Connect to ${
+            DigitalTwinConstants.productName} repository to check whether "${
             fileId}" exists in server...`);
         const capabilityModelContext =
             await dtMetamodelRepositoryClient.GetCapabilityModelAsync(
                 fileId, builder.RepositoryIdValue, true);
 
         if (option.overwriteChoice === OverwriteChoice.Unknown) {
-          const msg = `The capability model with id "${
-              fileId}" already exists in the Digital Twin Repository, do you want to overwrite it?`;
+          const msg =
+              `The capability model with id "${fileId}" already exists in the ${
+                  DigitalTwinConstants
+                      .productName} Repository, do you want to overwrite it?`;
           const result: vscode.MessageItem|undefined =
               await vscode.window.showInformationMessage(
                   msg, DialogResponses.all, DialogResponses.yes,
                   DialogResponses.no);
           if (result === DialogResponses.no) {
-            channel.appendLine(`${
-                DigitalTwinConstants
-                    .dtPrefix} Submitting Digital Twin capability model cancelled.`);
+            channel.appendLine(`${DigitalTwinConstants.dtPrefix} Submitting ${
+                DigitalTwinConstants.productName} capability model cancelled.`);
             return false;
           } else if (result === DialogResponses.all) {
             option.overwriteChoice = OverwriteChoice.OverwriteAll;
           }
         }
 
-        channel.appendLine(`${
-            DigitalTwinConstants
-                .dtPrefix} Start updating Digital Twin capability model with id:"${
+        channel.appendLine(`${DigitalTwinConstants.dtPrefix} Start updating ${
+            DigitalTwinConstants.productName} capability model with id:"${
             fileId}"...`);
 
         const result = await dtMetamodelRepositoryClient
                            .CreateOrUpdateCapabilityModelAsync(
                                fileContent, capabilityModelContext.etag,
                                builder.RepositoryIdValue);
-        channel.appendLine(`${
-            DigitalTwinConstants
-                .dtPrefix} Submitting Digital Twin capability model: fileName: "${
+        channel.appendLine(`${DigitalTwinConstants.dtPrefix} Submitting ${
+            DigitalTwinConstants.productName} capability model: fileName: "${
             fileName}" successfully, capability model id: "${fileId}". `);
         vscode.window.showInformationMessage(
-            `Digital Twin capability model with id: "${
+            `${DigitalTwinConstants.productName} capability model with id: "${
                 fileId}" updated successfully`);
       } catch (error) {
         if (error.statusCode === 404)  // Not found
         {
-          channel.appendLine(`${
+          channel.appendLine(`${DigitalTwinConstants.dtPrefix} ${
               DigitalTwinConstants
-                  .dtPrefix} Digital Twin capability model file does not exist in server, creating "${
+                  .productName} capability model file does not exist in server, creating "${
               fileId}"... `);
 
           // Create the interface.
@@ -881,25 +897,23 @@ export class DeviceModelOperator {
                              .CreateOrUpdateCapabilityModelAsync(
                                  fileContent, fileId, undefined,
                                  builder.RepositoryIdValue);
-          channel.appendLine(`${
-              DigitalTwinConstants
-                  .dtPrefix} Submitting Digital Twin capability model: fileName: "${
+          channel.appendLine(`${DigitalTwinConstants.dtPrefix} Submitting ${
+              DigitalTwinConstants.productName} capability model: fileName: "${
               fileName}" successfully, capability model id: "${fileId}". `);
           vscode.window.showInformationMessage(
-              `Digital Twin capability model with id: "${
+              `${DigitalTwinConstants.productName} capability model with id: "${
                   fileId}" created successfully`);
         } else {
           throw error;
         }
       }
     } catch (error) {
-      channel.appendLine(`${
-          DigitalTwinConstants
-              .dtPrefix} Submitting Digital Twin capability model: fileName: "${
+      channel.appendLine(`${DigitalTwinConstants.dtPrefix} Submitting ${
+          DigitalTwinConstants.productName} capability model: fileName: "${
           fileName}" failed, error: ${error.message}.`);
-      vscode.window.showWarningMessage(
-          `Unable to submit Digital Twin capability model, error: ${
-              error.message}`);
+      vscode.window.showWarningMessage(`Unable to submit ${
+          DigitalTwinConstants.productName} capability model, error: ${
+          error.message}`);
       return false;
     }
 

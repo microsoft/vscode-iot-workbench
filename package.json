@@ -94,34 +94,34 @@
         "category": "Azure IoT Device Workbench"
       },
       {
-        "command": "iotworkbench.digitalTwinOpenRepository",
+        "command": "iotworkbench.iotPnPOpenRepository",
         "title": "Open Model Repository...",
-        "category": "Azure IoT Digital Twin"
+        "category": "IoT Plug and Play"
       },
       {
-        "command": "iotworkbench.digitalTwinSignOutRepository",
+        "command": "iotworkbench.iotPnPSignOutRepository",
         "title": "Sign out Model Repository",
-        "category": "Azure IoT Digital Twin"
+        "category": "IoT Plug and Play"
       },
       {
-        "command": "iotworkbench.digitalTwinCreateInterface",
+        "command": "iotworkbench.iotPnPCreateInterface",
         "title": "Create Interface...",
-        "category": "Azure IoT Digital Twin"
+        "category": "IoT Plug and Play"
       },
       {
-        "command": "iotworkbench.digitalTwinCreateCapabilityModel",
+        "command": "iotworkbench.iotPnPCreateCapabilityModel",
         "title": "Create Capability Model...",
-        "category": "Azure IoT Digital Twin"
+        "category": "IoT Plug and Play"
       },
       {
-        "command": "iotworkbench.digitalTwinSubmitFile",
+        "command": "iotworkbench.iotPnPSubmitFile",
         "title": "Submit files to Model Repository...",
-        "category": "Azure IoT Digital Twin"
+        "category": "IoT Plug and Play"
       },
       {
-        "command": "iotworkbench.digitalTwinGenerateCode",
+        "command": "iotworkbench.iotPnPGenerateCode",
         "title": "Generate Device Code Stub...",
-        "category": "Azure IoT Digital Twin"
+        "category": "IoT Plug and Play"
       }
     ],
     "configuration": [
@@ -186,13 +186,13 @@
             "type": "boolean",
             "default": false
           },
-          "IoTWorkbench.DTModelRepositoryKey": {
+          "IoTWorkbench.IoTPnPModelRepositoryKey": {
             "type": "string"
           },
-          "IoTWorkbench.DTCodeGenVersion": {
+          "IoTWorkbench.IoTPnPCodeGenVersion": {
             "type": "string"
           },
-          "IoTWorkbench.DigitalTwinRepositoryUrl": {
+          "IoTWorkbench.IoTPnPRepositoryUrl": {
             "type": "string",
             "default": "https://canary-repo.azureiotrepository.com"
           }

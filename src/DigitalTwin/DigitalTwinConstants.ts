@@ -22,10 +22,11 @@ export class DigitalTwinConstants {
       'HostName=<Host Name>;RepositoryId=<repository id>;SharedAccessKeyName=<Shared AccessKey Name>;SharedAccessKey=<access Key>';
   static readonly interfaceSuffix = '.interface.json';
   static readonly capabilityModelSuffix = '.capabilitymodel.json';
-  static readonly dtPrefix = '[Azure Digital Twins]';
+  static readonly dtPrefix = '[IoT Plug and Play]';
   static readonly apiVersion = '2019-07-01-Preview';
+  static readonly productName = 'IoT Plug and Play';
 }
 
 export class CodeGenConstants {
-  static readonly codeGeneratorToolPath = 'digitaltwin-codegen';
+  static readonly codeGeneratorToolPath = 'iotpnp-codegen';
 }

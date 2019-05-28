@@ -22,6 +22,7 @@ import {DigitalTwinMetaModelParser, DigitalTwinMetaModelGraph} from './DigitalTw
 import {DeviceModelOperator} from './DigitalTwin/DeviceModelOperator';
 import {DigitalTwinMetaModelJsonParser} from './DigitalTwin/DigitalTwinMetaModelJsonParser';
 import {DigitalTwinDiagnostic} from './DigitalTwin/DigitalTwinDiagnostic';
+import {DigitalTwinConstants} from './DigitalTwin/DigitalTwinConstants';
 
 const impor = require('impor')(__dirname);
 const ioTProjectModule =
@@ -53,7 +54,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const deviceModelOperator = new DeviceModelOperator();
 
-  // Digital Twin Language Server
+  // IoT Plug and Play Language Server
   const dtContext = new DigitalTwinMetaModelUtility(context);
   const dtInterface: DigitalTwinMetaModelContext =
       await dtContext.getInterface();
@@ -155,26 +156,29 @@ export async function activate(context: vscode.ExtensionContext) {
         pattern: '**/*.{interface,capabilitymodel}.json'
       },
       {
-        async provideHover(
-            document, position, token): Promise<vscode.Hover|null> {
-          const id = DigitalTwinMetaModelJsonParser.getIdAtPosition(
-              document, position, dtInterface);
-          let hoverText: string|undefined = undefined;
-          if (id) {
-            if (id === '@id') {
-              hoverText =
-                  'An identifier for Digital Twin capability model or interface.';
-            } else if (id === '@type') {
-              hoverText = 'The type of Digital Twin meta model object.';
-            } else if (id === '@context') {
-              hoverText =
-                  'The context for Digital Twin capability model or interface.';
-            } else {
-              hoverText = dtParser.getCommentFromId(id);
+        async provideHover(document, position, token):
+            Promise<vscode.Hover|null> {
+              const id = DigitalTwinMetaModelJsonParser.getIdAtPosition(
+                  document, position, dtInterface);
+              let hoverText: string|undefined = undefined;
+              if (id) {
+                if (id === '@id') {
+                  hoverText = `An identifier for ${
+                      DigitalTwinConstants
+                          .productName} capability model or interface.`;
+                } else if (id === '@type') {
+                  hoverText = `The type of ${
+                      DigitalTwinConstants.productName} meta model object.`;
+                } else if (id === '@context') {
+                  hoverText = `The context for ${
+                      DigitalTwinConstants
+                          .productName} capability model or interface.`;
+                } else {
+                  hoverText = dtParser.getCommentFromId(id);
+                }
+              }
+              return hoverText ? new vscode.Hover(hoverText) : null;
             }
-          }
-          return hoverText ? new vscode.Hover(hoverText) : null;
-        }
       });
 
   vscode.languages.registerCompletionItemProvider(
@@ -581,27 +585,27 @@ export async function activate(context: vscode.ExtensionContext) {
       });
 
   context.subscriptions.push(vscode.commands.registerCommand(
-      'iotworkbench.digitalTwinOpenRepository', async () => {
+      'iotworkbench.iotPnPOpenRepository', async () => {
         deviceModelOperator.ConnectModelRepository(context, outputChannel);
       }));
   context.subscriptions.push(vscode.commands.registerCommand(
-      'iotworkbench.digitalTwinSignOutRepository', async () => {
+      'iotworkbench.iotPnPSignOutRepository', async () => {
         deviceModelOperator.Disconnect();
       }));
   context.subscriptions.push(vscode.commands.registerCommand(
-      'iotworkbench.digitalTwinCreateInterface', async () => {
+      'iotworkbench.iotPnPCreateInterface', async () => {
         deviceModelOperator.CreateInterface(context, outputChannel);
       }));
   context.subscriptions.push(vscode.commands.registerCommand(
-      'iotworkbench.digitalTwinCreateCapabilityModel', async () => {
+      'iotworkbench.iotPnPCreateCapabilityModel', async () => {
         deviceModelOperator.CreateCapabilityModel(context, outputChannel);
       }));
   context.subscriptions.push(vscode.commands.registerCommand(
-      'iotworkbench.digitalTwinSubmitFile', async () => {
+      'iotworkbench.iotPnPSubmitFile', async () => {
         deviceModelOperator.SubmitMetaModelFiles(context, outputChannel);
       }));
   context.subscriptions.push(vscode.commands.registerCommand(
-      'iotworkbench.digitalTwinGenerateCode', async () => {
+      'iotworkbench.iotPnPGenerateCode', async () => {
         callWithTelemetry(
             EventNames.scaffoldDeviceStubEvent, outputChannel, true, context,
             codeGeneratorBinder);

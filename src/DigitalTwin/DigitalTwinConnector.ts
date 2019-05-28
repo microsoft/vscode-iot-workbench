@@ -8,6 +8,7 @@ import {ConfigKey} from '../constants';
 
 import {DigitalTwinConnectionStringBuilder} from './DigitalTwinApi/DigitalTwinConnectionStringBuilder';
 import {DigitalTwinMetamodelRepositoryClient} from './DigitalTwinApi/DigitalTwinMetamodelRepositoryClient';
+import {DigitalTwinConstants} from './DigitalTwinConstants';
 
 
 export class DigitalTwinConnector {
@@ -30,12 +31,12 @@ export class DigitalTwinConnector {
       await ConfigHandler.update(
           ConfigKey.modelRepositoryKeyName, connectionString,
           vscode.ConfigurationTarget.Global);
-      vscode.window.showInformationMessage(
-          'Connect to Digital Twin Repository successfully.');
+      vscode.window.showInformationMessage(`Connect to ${
+          DigitalTwinConstants.productName} Repository successfully.`);
       return true;
     } catch (error) {
-      vscode.window.showErrorMessage(
-          `Failed to connect to Digital Twin Repository, error: ${error}`);
+      vscode.window.showErrorMessage(`Failed to connect to ${
+          DigitalTwinConstants.productName} Repository, error: ${error}`);
       return false;
     }
   }

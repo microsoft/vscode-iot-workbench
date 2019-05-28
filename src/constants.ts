@@ -12,9 +12,9 @@ export class ConfigKey {
   static readonly boardId = 'BoardId';
   static readonly asaPath = 'StreamAnalyticsPath';
   static readonly shownHelpPage = 'ShownHelpPage';
-  static readonly codeGeneratorVersion = 'DTCodeGenVersion';
-  static readonly modelRepositoryKeyName = 'DTModelRepositoryKey';
-  static readonly digitalTwinRepositoryUrl = 'DigitalTwinRepositoryUrl';
+  static readonly codeGeneratorVersion = 'IoTPnPCodeGenVersion';
+  static readonly modelRepositoryKeyName = 'IoTPnPModelRepositoryKey';
+  static readonly iotPnPRepositoryUrl = 'IoTPnPRepositoryUrl';
 }
 
 export class EventNames {

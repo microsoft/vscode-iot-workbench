@@ -1,5 +1,5 @@
 {
-  "@id": "http://vsc-digitaltwin-sample.com/{CAPABILITYMODELNAME}/1.0.0",
+  "@id": "http://vsc-iotpnp-sample.com/{CAPABILITYMODELNAME}/1.0.0",
   "@type": "CapabilityModel",
   "displayName": "{CAPABILITYMODELNAME}",
   "implements": [

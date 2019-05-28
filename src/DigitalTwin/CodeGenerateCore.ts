@@ -101,7 +101,8 @@ export class CodeGenerateCore {
       ignoreFocusOut: true,
       matchOnDescription: true,
       matchOnDetail: true,
-      placeHolder: 'Select a Digital Twin capability model file',
+      placeHolder:
+          `Select a ${DigitalTwinConstants.productName} capability model file`,
     });
 
     if (!fileSelection) {
@@ -118,7 +119,7 @@ export class CodeGenerateCore {
     const selectedFilePath =
         path.join(fileSelection.description as string, fileSelection.label);
 
-    // Get the connection string of the digital twin repo
+    // Get the connection string of the IoT Plug and Play repo
     let connectionString =
         ConfigHandler.get<string>(ConfigKey.modelRepositoryKeyName);
 
@@ -289,9 +290,10 @@ export class CodeGenerateCore {
         // if the selected folder is not empty, ask user to select another one.
         const files = fs.readdirSync(projectPath);
         if (files && files[0]) {
-          const message =
-              `Digital Twin Code Generator would overwrite existing files in the folder ${
-                  projectName}. Do you want to continue?`;
+          const message = `${
+              DigitalTwinConstants
+                  .productName} Code Generator would overwrite existing files in the folder ${
+              projectName}. Do you want to continue?`;
 
           const choice = await vscode.window.showInformationMessage(
               message, DialogResponses.yes, DialogResponses.cancel);
@@ -347,8 +349,8 @@ export class CodeGenerateCore {
     }
 
     if (!targetConfigItem) {
-      channel.appendLine(
-          'Unable to get the updated version the Digital Twin Code Generator.');
+      channel.appendLine(`Unable to get the updated version the ${
+          DigitalTwinConstants.productName} Code Generator.`);
       return false;
     }
 
@@ -378,11 +380,12 @@ export class CodeGenerateCore {
       await vscode.window.withProgress(
           {
             location: vscode.ProgressLocation.Notification,
-            title: 'Upgrade Azure IoT Digital Twin Code Generator...'
+            title:
+                `Upgrade  ${DigitalTwinConstants.productName} Code Generator...`
           },
           async () => {
-            channel.appendLine(
-                'Start upgrading Azure IoT Digital Twin Code Generator...');
+            channel.appendLine(`Start upgrading ${
+                DigitalTwinConstants.productName} Code Generator...`);
 
             const configItem = targetConfigItem as CodeGeneratorConfigItem;
             let downloadOption: request.OptionsWithUri;
@@ -415,8 +418,8 @@ export class CodeGenerateCore {
             }, 1000);
 
             try {
-              channel.appendLine(
-                  'Step 1: Downloading package for Azure IoT Digital Twin Code Generator...');
+              channel.appendLine(`Step 1: Downloading package for ${
+                  DigitalTwinConstants.productName} Code Generator...`);
               const zipData = await request(downloadOption).promise();
               const tempPath =
                   path.join(os.tmpdir(), FileNames.iotworkbenchTempFolder);
@@ -436,12 +439,13 @@ export class CodeGenerateCore {
                 channel.appendLine('Validating hash code successfully.');
               }
 
-              channel.appendLine(
-                  'Step 3: Extracting Azure IoT Digital Twin Code Generator.');
+              channel.appendLine(`Step 3: Extracting Azure IoT ${
+                  DigitalTwinConstants.productName} Code Generator.`);
 
               await extract(filePath, codeGenCommandPath);
-              channel.appendLine(
-                  'Azure IoT Digital Twin Code Generator updated successfully.');
+              channel.appendLine(`${
+                  DigitalTwinConstants
+                      .productName} Code Generator updated successfully.`);
               await ConfigHandler.update(
                   ConfigKey.codeGeneratorVersion,
                   configItem.codeGeneratorVersion,
@@ -452,8 +456,9 @@ export class CodeGenerateCore {
               throw error;
             }
           });
-      vscode.window.showInformationMessage(
-          'Azure IoT Digital Twin Code Generator updated successfully');
+      vscode.window.showInformationMessage(`${
+          DigitalTwinConstants
+              .productName} Code Generator updated successfully`);
     }
     // No need to upgrade
     return true;
