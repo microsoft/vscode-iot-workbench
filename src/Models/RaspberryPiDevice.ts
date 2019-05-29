@@ -187,7 +187,7 @@ export class RaspberryPiDevice implements Device {
         return false;
       }
     }
-    
+
     try {
       const binFilePath = path.join(this.outputPath, 'iot_application/azure_exe');
       if (!fs.existsSync(binFilePath)) {
@@ -279,6 +279,17 @@ export class RaspberryPiDevice implements Device {
         description: deviceInfo.host || '<Unknown>'
       });
     });
+
+    sshDevicePickItems.push(
+      {
+        label: '$(sync) Discover again',
+        detail: 'Auto discover SSH enabled device in LAN'
+      },
+      {
+        label: '$(gear) Manual setup',
+        detail: 'Setup device SSH configuration manually'
+      });
+
     return sshDevicePickItems;
   }
 
@@ -310,8 +321,9 @@ export class RaspberryPiDevice implements Device {
     if (sshDiscoverOrInputChoice.label === '$(search) Auto discover') {
       let selectDeviceChoice: vscode.QuickPickItem|undefined;
       do {
+        const selectDeviceItems = this._autoDiscoverDeviceIp();
         selectDeviceChoice =
-            await vscode.window.showQuickPick(this._autoDiscoverDeviceIp(), {
+            await vscode.window.showQuickPick(selectDeviceItems, {
               ignoreFocusOut: true,
               matchOnDescription: true,
               matchOnDetail: true,
