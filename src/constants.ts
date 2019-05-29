@@ -52,6 +52,11 @@ export class FileNames {
   static readonly outputPathName = '.build';
 }
 
+export enum OperationType {
+  compile = 'Compile device code',
+  upload = 'Upload device code'
+}
+
 export enum AzureFunctionsLanguage {
   CSharpScript = 'C#Script',
   JavaScript = 'JavaScript',
@@ -69,7 +74,7 @@ export class GlobalConstants {
 
 export class DependentExtensions {
   static readonly azureFunctions = 'ms-azuretools.vscode-azurefunctions';
-  static readonly remote = 'ms-vscode-remote.remote-containers';
+  static readonly remote = 'ms-vscode-remote.vscode-remote-extensionpack';
 }
 
 export class PlatformType {

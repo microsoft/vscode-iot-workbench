@@ -1,1 +1,1 @@
-FROM devicedevex.azurecr.io/public/linux-arm64-azure-app:20190411
+FROM devicedevex.azurecr.io/public/cube/linux-arm64-azure-app:20190411

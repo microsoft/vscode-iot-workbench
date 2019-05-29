@@ -7,10 +7,10 @@ import * as vscode from 'vscode';
 import * as utils from '../utils';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, FileNames, GlobalConstants} from '../constants';
-import {EventNames} from '../constants';
+import {ConfigKey, FileNames} from '../constants';
+import {EventNames, DependentExtensions} from '../constants';
 import {TelemetryProperties, TelemetryWorker} from '../telemetry';
-import {askAndNewProject, askAndOpenProject} from '../utils';
+import {askAndNewProject} from '../utils';
 
 import {checkAzureLogin} from './Apis';
 import {Compilable} from './Interfaces/Compilable';
@@ -57,11 +57,6 @@ const constants = {
   projectConfigFileName: 'projectConfig.json' // Use this file to store boardId since we currently use folder instead of workspace as a workaround
 };
 
-interface ProjectSetting {
-  name: string;
-  value: string;
-}
-
 export class IoTProject {
   private componentList: Component[];
   private projectRootPath = '';
@@ -69,7 +64,6 @@ export class IoTProject {
   private extensionContext: vscode.ExtensionContext;
   private channel: vscode.OutputChannel;
   private telemetryContext: TelemetryContext;
-  private isRemote: boolean;
 
   private canProvision(comp: {}): comp is Provisionable {
     return (comp as Provisionable).provision !== undefined;
@@ -97,27 +91,24 @@ export class IoTProject {
     this.extensionContext = context;
     this.channel = channel;
     this.telemetryContext = telemetryContext;
-    this.isRemote = RemoteExtension.isRemote(context);
   }
-
 
   async load(initLoad = false): Promise<boolean> {
     if (!vscode.workspace.workspaceFolders) {
       return false;
     }
 
-    // Check if it is a iot project workspace
+    // Check if it is an iot project workspace
     this.projectRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    const iotWorkbenchProjectFile =
-        path.join(this.projectRootPath, FileNames.iotworkbenchprojectFileName);
-    // if (this.isRemote) {
+    const iotWorkbenchProjectFile = 
+      path.join(this.projectRootPath, FileNames.iotworkbenchprojectFileName);
 
-    // }
     if (!fs.existsSync(iotWorkbenchProjectFile)) {
       return false;
     }
 
-    this.projectConfigFile = path.join(this.projectRootPath, FileNames.vscodeSettingsFolderName, constants.projectConfigFileName);
+    this.projectConfigFile = path.join(this.projectRootPath, 
+      FileNames.vscodeSettingsFolderName, constants.projectConfigFileName);
     if (!fs.existsSync(this.projectConfigFile)) {
       return false;
     }
@@ -215,12 +206,10 @@ export class IoTProject {
   }
 
   async handleLoadFailure() {
-    // [TODO]
     if (!vscode.workspace.workspaceFolders ||
         !vscode.workspace.workspaceFolders[0] ||
-        !await sdk.FileSystem.exists(this.projectConfigFile)) {
-      // When in local
-      await askAndNewProject(this.extensionContext, this.telemetryContext);
+        !fs.existsSync(this.projectConfigFile)) {
+      await askAndNewProject(this.telemetryContext);
       return;
     }
 
@@ -228,12 +217,22 @@ export class IoTProject {
     const workbenchFileName =
         path.join(rootPath, FileNames.iotworkbenchprojectFileName);
 
-    if (await sdk.FileSystem.exists(workbenchFileName)) {
-      await askAndOpenProject(
-          rootPath, this.extensionContext, this.telemetryContext);
-    } else {
-      await askAndNewProject(this.extensionContext, this.telemetryContext);
+    if (!fs.existsSync(workbenchFileName)) {
+      await askAndNewProject(this.telemetryContext);
+      return;
     }
+
+    const projectConfigJson = require(this.projectConfigFile);
+    const boardId = projectConfigJson[`${ConfigKey.boardId}`];
+    if (!boardId) {
+      // Handles situation when boardId in project config file is wrongly modified by user.
+      const message = `Board Id cannot be found in ${this.projectConfigFile}. File may have been wrongly modified.`;
+      this.channel.show();
+      this.channel.appendLine(message);
+      throw new Error(message);
+    }
+
+    throw new Error(`unknown load failure`);
   }
 
   async compile(): Promise<boolean> {
@@ -619,14 +618,21 @@ export class IoTProject {
       try {
         telemetryModule.TelemetryWorker.sendEvent(
             EventNames.createNewProjectEvent, this.telemetryContext);
-        // await vscode.commands.executeCommand('openindocker.reopenInContainer'); 
       } catch {
         // If sending telemetry failed, skip the error to avoid blocking user.
       }
     }
 
     try {
-      
+      if (!RemoteExtension.isRemote(this.extensionContext)) {
+          const res = await RemoteExtension.checkRemoteExtension();
+          if (!res) {
+            const message = `Remote extension is not available. Please install ${DependentExtensions.remote} first.`;
+            this.channel.show();
+            this.channel.appendLine(message);
+            return false;
+        }
+      }
       setTimeout(
         // TODO: better implement this through VS Remote API.
         // Currently implemented in helper extension iotcube.

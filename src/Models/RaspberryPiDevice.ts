@@ -9,13 +9,14 @@ import * as sdk from 'vscode-iot-device-cube-sdk';
 import * as utils from '../utils';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, FileNames, PlatformType} from '../constants';
+import {ConfigKey, FileNames, PlatformType, OperationType} from '../constants';
 import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {runCommand} from '../utils';
 
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
-import { ScaffoldGenerator } from './ScaffoldGenerator';
+import {ScaffoldGenerator} from './ScaffoldGenerator';
+import {RemoteExtension} from './RemoteExtension';
 
 class RaspberryPiUploadConfig {
   static host = 'raspberrypi';
@@ -36,6 +37,7 @@ export class RaspberryPiDevice implements Device {
   private projectFolder: string;
   private channel: vscode.OutputChannel;
   private static _boardId = 'raspberrypi';
+  private extensionContext: vscode.ExtensionContext;
 
   protected devcontainerFolderPath: string;
   protected vscodeFolderPath: string;
@@ -54,6 +56,7 @@ export class RaspberryPiDevice implements Device {
     this.projectFolder = projectPath;
     this.channel = channel;
     this.componentId = Guid.create().toString();
+    this.extensionContext = context;
     this.devcontainerFolderPath = 
         path.join(this.projectFolder, FileNames.devcontainerFolderName);
     this.vscodeFolderPath =
@@ -130,6 +133,14 @@ export class RaspberryPiDevice implements Device {
   }
 
   async compile(): Promise<boolean> {
+    const isRemote = RemoteExtension.isRemote(this.extensionContext);
+    if (!isRemote) {
+      const res = await utils.askAndOpenInRemote(OperationType.compile, this.channel);
+      if (!res) {
+        return false;
+      }
+    }
+
     if (!fs.existsSync(this.outputPath)) {
       try {
         fs.mkdirSync(this.outputPath);
@@ -169,7 +180,22 @@ export class RaspberryPiDevice implements Device {
   }
 
   async upload(): Promise<boolean> {
+    const isRemote = RemoteExtension.isRemote(this.extensionContext);
+    if (!isRemote) {
+      const res = await utils.askAndOpenInRemote(OperationType.upload, this.channel);
+      if (!res) {
+        return false;
+      }
+    }
+    
     try {
+      const binFilePath = path.join(this.outputPath, 'iot_application/azure_exe');
+      if (!fs.existsSync(binFilePath)) {
+        const message = `Binary file does not exist. Please compile device code first.`;
+        await vscode.window.showWarningMessage(message);
+        return false;
+      }
+
       if (!RaspberryPiUploadConfig.updated) {
         const res = await this.configSSH();
         if (!res) {
@@ -181,7 +207,6 @@ export class RaspberryPiDevice implements Device {
       const ssh = new sdk.SSH();
       await ssh.open(RaspberryPiUploadConfig.host, RaspberryPiUploadConfig.port, RaspberryPiUploadConfig.user, RaspberryPiUploadConfig.password);
       try {
-        const binFilePath = path.join(this.outputPath, 'iot_application/azure_exe');
         await ssh.uploadFile(binFilePath, RaspberryPiUploadConfig.projectPath);
       } catch (error) {
         throw new Error(`Deploy binary file to device ${RaspberryPiUploadConfig.user}@${RaspberryPiUploadConfig.host} failed. ${error.message}`);

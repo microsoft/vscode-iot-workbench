@@ -9,7 +9,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {FileNames, PlatformType} from '../constants';
+import {FileNames, PlatformType, OperationType} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 import * as utils from '../utils';
 
@@ -20,6 +20,7 @@ import {LibraryManageable} from './Interfaces/LibraryManageable';
 import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {OTA} from './OTA';
 import * as sdk from 'vscode-iot-device-cube-sdk';
+import { RemoteExtension } from './RemoteExtension';
 
 const constants = {
   defaultSketchFileName: 'device.ino',
@@ -75,6 +76,14 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
   }
 
   async compile(): Promise<boolean> {
+    const isRemote = RemoteExtension.isRemote(this.extensionContext);
+    if (!isRemote) {
+      const res = await utils.askAndOpenInRemote(OperationType.compile, this.channel);
+      if (!res) {
+        return false;
+      }
+    }
+
     if (this.board === undefined) {
       throw new Error(`Device board is undefined.`);
     }
@@ -102,6 +111,14 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
 
 
   async upload(): Promise<boolean> {
+    const isRemote = RemoteExtension.isRemote(this.extensionContext);
+    if (!isRemote) {
+      const res = await utils.askAndOpenInRemote(OperationType.upload, this.channel);
+      if (!res) {
+        return false;
+      }
+    }
+
     return true;
   }
 
