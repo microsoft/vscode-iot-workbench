@@ -74,6 +74,30 @@ export async function mkdirRecursively(dirPath: string): Promise<void> {
   }
 }
 
+
+export function directoryExistsSync(dirPath: string): boolean {
+  try {
+    return fs.statSync(dirPath).isDirectory();
+  } catch (e) {
+    return false;
+  }
+}
+
+export async function mkdirRecursivelyInWorkspace(dirPath: string): Promise<void> {
+  if (directoryExistsSync(dirPath)) {
+    return;
+  }
+  const dirname = path.dirname(dirPath);
+  if (path.normalize(dirname) === path.normalize(dirPath)) {
+    fs.mkdirSync(dirPath);
+  } else if (directoryExistsSync(dirname)) {
+    fs.mkdirSync(dirPath);
+  } else {
+    mkdirRecursivelyInWorkspace(dirname);
+    fs.mkdirSync(dirPath);
+  }
+}
+
 export async function fileExists(filePath: string): Promise<boolean> {
   const directoryExists = await sdk.FileSystem.exists(filePath);
   if (!directoryExists) {

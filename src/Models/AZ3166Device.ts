@@ -206,8 +206,9 @@ export class AZ3166Device extends ArduinoDeviceBase {
       throw new Error('Unable to find the board in the config file.');
     }
 
-    // await ScaffoldGenerator.scaffolIoTProjectdFiles(this.projectFolder, this.vscodeFolderPath, 
-    //   this.boardFolderPath, this.devcontainerFolderPath, this.board.id);
+    const scaffoldGenerator = new ScaffoldGenerator();
+    await scaffoldGenerator.scaffolIoTProjectdFilesInWorkspace(this.projectFolder, this.vscodeFolderPath,
+      this.boardFolderPath, this.devcontainerFolderPath, this.board.id);
 
     return true;
   }
@@ -218,7 +219,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
     }
 
     try {
-      await ScaffoldGenerator.scaffolIoTProjectdFiles(this.projectFolder, this.vscodeFolderPath, 
+      const scaffoldGenerator = new ScaffoldGenerator();
+      await scaffoldGenerator.scaffolIoTProjectdFilesInLocal(this.projectFolder, this.vscodeFolderPath,
         this.boardFolderPath, this.devcontainerFolderPath, this.board.id);
       await this.generateSketchFile(this.templateFilesInfo);
     } catch (error) {

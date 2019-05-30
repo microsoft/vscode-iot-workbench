@@ -86,8 +86,9 @@ export class RaspberryPiDevice implements Device {
       throw new Error('Unable to find the project folder.');
     }
 
-    // await ScaffoldGenerator.scaffolIoTProjectdFiles(this.projectFolder, this.vscodeFolderPath, 
-    //   this.boardFolderPath, this.devcontainerFolderPath, RaspberryPiDevice.boardId);
+    const scaffoldGenerator = new ScaffoldGenerator();
+    await scaffoldGenerator.scaffolIoTProjectdFilesInWorkspace(this.projectFolder, this.vscodeFolderPath,
+      this.boardFolderPath, this.devcontainerFolderPath, RaspberryPiDevice.boardId);
 
     return true;
   }
@@ -97,7 +98,8 @@ export class RaspberryPiDevice implements Device {
       throw new Error('Unable to find the project folder.');
     }
     
-    await ScaffoldGenerator.scaffolIoTProjectdFiles(this.projectFolder, this.vscodeFolderPath, 
+    const scaffoldGenerator = new ScaffoldGenerator();
+    await scaffoldGenerator.scaffolIoTProjectdFilesInLocal(this.projectFolder, this.vscodeFolderPath,
       this.boardFolderPath, this.devcontainerFolderPath, RaspberryPiDevice.boardId);
     await this.generateSketchFile(this.templateFilesInfo);
 
