@@ -53,6 +53,7 @@ const telemetryModule = impor('../telemetry') as typeof import('../telemetry');
 
 const constants = {
   asaFolderName: 'StreamAnalytics',
+  functionDefaultFolderName: 'Functions',
   workspaceConfigExtension: '.code-workspace',
   projectConfigFileName: 'projectConfig.json' // Use this file to store boardId since we currently use folder instead of workspace as a workaround
 };
@@ -293,12 +294,6 @@ export class IoTProject {
   }
 
   async provision(): Promise<boolean> {
-    const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
-    if (!devicePath) {
-      throw new Error(
-          'Cannot run IoT Device Workbench command in a non-IoTWorkbench project. Please initialize an IoT Device Workbench project first.');
-    }
-
     const provisionItemList: string[] = [];
     for (const item of this.componentList) {
       if (this.canProvision(item)) {
@@ -474,103 +469,95 @@ export class IoTProject {
         this.componentList.push(iothub);
         break;
       }
-      // case ProjectTemplateType.AzureFunctions: {
-      //   const iothub =
-      //       new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
-      //   const isIotHubPrerequisitesAchieved = await iothub.checkPrerequisites();
-      //   if (!isIotHubPrerequisitesAchieved) {
-      //     return false;
-      //   }
+      case ProjectTemplateType.AzureFunctions: {
+        const iothub =
+            new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
+        const isIotHubPrerequisitesAchieved = await iothub.checkPrerequisites();
+        if (!isIotHubPrerequisitesAchieved) {
+          return false;
+        }
 
-      //   const functionDir = path.join(
-      //       this.projectRootPath, constants.functionDefaultFolderName);
+        const functionDir = path.join(this.projectRootPath, constants.functionDefaultFolderName);
 
-      //   if (!fs.existsSync(functionDir)) {
-      //     fs.mkdirSync(functionDir);
-      //   }
+        if (!await sdk.FileSystem.exists(functionDir)) {
+          await sdk.FileSystem.mkDir(functionDir);
+        }
 
-      //   workspace.folders.push({path: constants.functionDefaultFolderName});
+        const azureFunctions = new azureFunctionsModule.AzureFunctions(
+            functionDir, constants.functionDefaultFolderName, this.channel,
+            null, [{
+              component: iothub,
+              type: azureComponentConfigModule.DependencyType.Input
+            }] /*Dependencies*/);
+        const isFunctionsPrerequisitesAchieved =
+            await azureFunctions.checkPrerequisites();
+        if (!isFunctionsPrerequisitesAchieved) {
+          return false;
+        }
 
-      //   const azureFunctions = new azureFunctionsModule.AzureFunctions(
-      //       functionDir, constants.functionDefaultFolderName, this.channel,
-      //       null, [{
-      //         component: iothub,
-      //         type: azureComponentConfigModule.DependencyType.Input
-      //       }] /*Dependencies*/);
-      //   const isFunctionsPrerequisitesAchieved =
-      //       await azureFunctions.checkPrerequisites();
-      //   if (!isFunctionsPrerequisitesAchieved) {
-      //     return false;
-      //   }
-      //   settings.projectsettings.push({
-      //     name: ConfigKey.functionPath,
-      //     value: constants.functionDefaultFolderName
-      //   });
+        projectConfig[`IoTWorkbench.${ConfigKey.functionPath}`] =
+            constants.functionDefaultFolderName;
 
-      //   workspace.settings[`IoTWorkbench.${ConfigKey.functionPath}`] =
-      //       constants.functionDefaultFolderName;
+        this.componentList.push(iothub);
+        this.componentList.push(azureFunctions);
+        break;
+      }
+      case ProjectTemplateType.StreamAnalytics: {
+        const iothub =
+            new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
+        const isIotHubPrerequisitesAchieved = await iothub.checkPrerequisites();
+        if (!isIotHubPrerequisitesAchieved) {
+          return false;
+        }
 
-      //   this.componentList.push(iothub);
-      //   this.componentList.push(azureFunctions);
-      //   break;
-      // }
-      // case ProjectTemplateType.StreamAnalytics: {
-      //   const iothub =
-      //       new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
-      //   const isIotHubPrerequisitesAchieved = await iothub.checkPrerequisites();
-      //   if (!isIotHubPrerequisitesAchieved) {
-      //     return false;
-      //   }
+        const cosmosDB = new cosmosDBModule.CosmosDB(
+            this.extensionContext, this.projectRootPath, this.channel);
+        const isCosmosDBPrerequisitesAchieved =
+            await cosmosDB.checkPrerequisites();
+        if (!isCosmosDBPrerequisitesAchieved) {
+          return false;
+        }
 
-      //   const cosmosDB = new cosmosDBModule.CosmosDB(
-      //       this.extensionContext, this.projectRootPath, this.channel);
-      //   const isCosmosDBPrerequisitesAchieved =
-      //       await cosmosDB.checkPrerequisites();
-      //   if (!isCosmosDBPrerequisitesAchieved) {
-      //     return false;
-      //   }
+        const asaDir = path.join(this.projectRootPath, constants.asaFolderName);
 
-      //   const asaDir = path.join(this.projectRootPath, constants.asaFolderName);
+        if (!await sdk.FileSystem.exists(asaDir)) {
+          await sdk.FileSystem.mkDir(asaDir);
+        }
 
-      //   if (!fs.existsSync(asaDir)) {
-      //     fs.mkdirSync(asaDir);
-      //   }
+        const asaFilePath = this.extensionContext.asAbsolutePath(
+            path.join(FileNames.resourcesFolderName, 'asaql', 'query.asaql'));
+        const queryPath = path.join(asaDir, 'query.asaql');
+        const asaQueryContent =
+            fs.readFileSync(asaFilePath, 'utf8')
+                .replace(/\[input\]/, `"iothub-${iothub.id}"`)
+                .replace(/\[output\]/, `"cosmosdb-${cosmosDB.id}"`);
+        await sdk.FileSystem.writeFile(queryPath, asaQueryContent);
 
-      //   const asaFilePath = this.extensionContext.asAbsolutePath(
-      //       path.join(FileNames.resourcesFolderName, 'asaql', 'query.asaql'));
-      //   const queryPath = path.join(asaDir, 'query.asaql');
-      //   const asaQueryContent =
-      //       fs.readFileSync(asaFilePath, 'utf8')
-      //           .replace(/\[input\]/, `"iothub-${iothub.id}"`)
-      //           .replace(/\[output\]/, `"cosmosdb-${cosmosDB.id}"`);
-      //   fs.writeFileSync(queryPath, asaQueryContent);
+        const asa = new streamAnalyticsJobModule.StreamAnalyticsJob(
+            queryPath, this.extensionContext, this.projectRootPath,
+            this.channel, [
+              {
+                component: iothub,
+                type: azureComponentConfigModule.DependencyType.Input
+              },
+              {
+                component: cosmosDB,
+                type: azureComponentConfigModule.DependencyType.Other
+              }
+            ]);
+        const isAsaPrerequisitesAchieved = await asa.checkPrerequisites();
+        if (!isAsaPrerequisitesAchieved) {
+          return false;
+        }
 
-      //   const asa = new streamAnalyticsJobModule.StreamAnalyticsJob(
-      //       queryPath, this.extensionContext, this.projectRootPath,
-      //       this.channel, [
-      //         {
-      //           component: iothub,
-      //           type: azureComponentConfigModule.DependencyType.Input
-      //         },
-      //         {
-      //           component: cosmosDB,
-      //           type: azureComponentConfigModule.DependencyType.Other
-      //         }
-      //       ]);
-      //   const isAsaPrerequisitesAchieved = await asa.checkPrerequisites();
-      //   if (!isAsaPrerequisitesAchieved) {
-      //     return false;
-      //   }
+        projectConfig[`IoTWorkbench.${ConfigKey.asaPath}`] =
+            constants.asaFolderName;
 
-      //   workspace.folders.push({path: constants.asaFolderName});
-      //   workspace.settings[`IoTWorkbench.${ConfigKey.asaPath}`] =
-      //       constants.asaFolderName;
-
-      //   this.componentList.push(iothub);
-      //   this.componentList.push(cosmosDB);
-      //   this.componentList.push(asa);
-      //   break;
-      // }
+        this.componentList.push(iothub);
+        this.componentList.push(cosmosDB);
+        this.componentList.push(asa);
+        break;
+      }
       default:
         break;
     }
@@ -604,13 +591,6 @@ export class IoTProject {
       const indentationSpace = 4;
       sdk.FileSystem.writeFile(projectConfigFile, JSON.stringify(projectConfig, null, indentationSpace));
     }
-    // const workspaceConfigFilePath = path.join(
-    //     this.projectRootPath,
-    //     `${path.basename(this.projectRootPath)}${
-    //         constants.workspaceConfigExtension}`);
-
-    // fs.writeFileSync(
-    //     workspaceConfigFilePath, JSON.stringify(workspace, null, 4));
 
     if (!openInNewWindow) {
       // Need to add telemetry here otherwise, after restart VSCode, no
