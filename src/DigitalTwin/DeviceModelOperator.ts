@@ -876,7 +876,7 @@ export class DeviceModelOperator {
 
         const result = await dtMetamodelRepositoryClient
                            .CreateOrUpdateCapabilityModelAsync(
-                               fileContent, capabilityModelContext.etag,
+                               fileContent, fileId, capabilityModelContext.etag,
                                builder.RepositoryIdValue);
         channel.appendLine(`${DigitalTwinConstants.dtPrefix} Submitting ${
             DigitalTwinConstants.productName} capability model: fileName: "${
