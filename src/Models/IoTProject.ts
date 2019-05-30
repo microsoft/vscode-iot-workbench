@@ -432,7 +432,14 @@ export class IoTProject {
 
     this.projectRootPath = rootFolderPath;
 
+    // initialize the storage for azure component settings
+    const azureConfigFileHandler =
+        new azureComponentConfigModule.AzureConfigFileHandler(
+            this.projectRootPath);
+    azureConfigFileHandler.createIfNotExists();
+
     const projectConfig :{[key: string]: string} = {};
+    
     let device: Component;
     if (boardId === az3166DeviceModule.AZ3166Device.boardId) {
       device = new az3166DeviceModule.AZ3166Device(
@@ -453,9 +460,7 @@ export class IoTProject {
     projectConfig[`${ConfigKey.boardId}`] = boardId;
     this.componentList.push(device);
 
-    const type: ProjectTemplateType = projectType;
-
-    switch (type) {
+    switch (projectType) {
       case ProjectTemplateType.Basic:
         // Save data to configFile
         break;

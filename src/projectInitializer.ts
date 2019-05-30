@@ -128,7 +128,8 @@ export class ProjectInitializer {
               });
             });
 
-            const projectTemplateType: ProjectTemplateType = result.type;
+            // const projectTemplateType: ProjectTemplateType = result.type;
+            const projectTemplateType: ProjectTemplateType = (ProjectTemplateType)[result.type as keyof typeof ProjectTemplateType];
 
             if (projectPath) {
               await utils.mkdirRecursively(projectPath);
