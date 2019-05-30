@@ -13,6 +13,7 @@ export class ConfigKey {
   static readonly asaPath = 'StreamAnalyticsPath';
   static readonly shownHelpPage = 'ShownHelpPage';
   static readonly codeGeneratorVersion = 'IoTPnPCodeGenVersion';
+  static readonly codeGeneratorExecutionInfo = 'IoTPnPCodeGenExecutionInfo';
   static readonly modelRepositoryKeyName = 'IoTPnPModelRepositoryKey';
   static readonly iotPnPRepositoryUrl = 'IoTPnPRepositoryUrl';
 }
@@ -36,6 +37,8 @@ export class EventNames {
   static readonly selectSubscription = 'IoTWorkbench.SelectSubscription';
   static readonly openTutorial = 'IoTWorkbench.OpenTutorial';
   static readonly scaffoldDeviceStubEvent = 'IoTWorkbench.ScaffoldDeviceStub';
+  static readonly regenerateDeviceStubEvent =
+      'IoTWorkbench.RegenerateDeviceStub';
 }
 
 export class FileNames {

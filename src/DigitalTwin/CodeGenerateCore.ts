@@ -16,7 +16,6 @@ import {DigitalTwinConnector} from './DigitalTwinConnector';
 import {DigitalTwinConstants, CodeGenConstants} from './DigitalTwinConstants';
 import {CodeGenDeviceType, DeviceConnectionType} from './DigitalTwinCodeGen/Interfaces/CodeGenerator';
 import {AnsiCCodeGeneratorFactory} from './DigitalTwinCodeGen/AnsiCCodeGeneratorFactory';
-import {CodeGeneratorFactory} from './DigitalTwinCodeGen/Interfaces/CodeGeneratorFactory';
 import {ConfigHandler} from '../configHandler';
 import {DialogResponses} from '../DialogResponses';
 import extractzip = require('extract-zip');
@@ -50,10 +49,29 @@ interface CodeGeneratorConfig {
   codeGeneratorConfigItems: CodeGeneratorConfigItem[];
 }
 
+interface CodeGenExecutionInfo {
+  filePath: string;
+  repoConnectionString: string;
+  targetFolder: string;
+  languageLabel: string;
+  codeGenDeviceType: CodeGenDeviceType;
+  deviceConnectionType: DeviceConnectionType;
+}
+
+
 export class CodeGenerateCore {
-  async ScaffoldDeviceStub(
+  async GenerateDeviceCodeStub(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext) {
+      telemetryContext: TelemetryContext): Promise<boolean> {
+    const upgradestate: boolean =
+        await this.UpgradeCodeGenerator(context, channel);
+
+    if (!upgradestate) {
+      channel.appendLine(`${
+          DigitalTwinConstants
+              .dtPrefix} Unable to upgrade the Code Generator to the latest version.\r\n Trying to use the existing version.`);
+    }
+
     if (!vscode.workspace.workspaceFolders) {
       return false;
     }
@@ -66,15 +84,7 @@ export class CodeGenerateCore {
       return false;
     }
 
-    const upgradestate: boolean =
-        await this.UpgradeCodeGenerator(context, channel);
-
-    if (!upgradestate) {
-      channel.appendLine(
-          'Unable to upgrade the Code Generator to the latest version.\r\n Trying to use the existing version.');
-    }
-
-    // Step 1: list all files from device model folder for selection.
+    // list all capability models from device model folder for selection.
     const metamodelItems: vscode.QuickPickItem[] = [];
 
     const fileList = fs.listTreeSync(rootPath);
@@ -106,7 +116,7 @@ export class CodeGenerateCore {
     });
 
     if (!fileSelection) {
-      return;
+      return false;
     }
 
     const matchItems =
@@ -155,12 +165,10 @@ export class CodeGenerateCore {
       return false;
     }
 
-    let codeGenFactory: CodeGeneratorFactory|null = null;
+
     let targetItems: vscode.QuickPickItem[]|null = null;
 
     if (languageSelection.label === 'ANSI C') {
-      codeGenFactory =
-          new AnsiCCodeGeneratorFactory(context, channel, telemetryContext);
       targetItems = [
         {
           label: 'Standard',
@@ -171,11 +179,10 @@ export class CodeGenerateCore {
           label: 'MXChip IoT DevKit',
           detail: 'Generate Arduino project for MXChip IoT DevKit'
         }
-
       ];
     }
 
-    if (!targetItems || !codeGenFactory) {
+    if (!targetItems) {
       return false;
     }
 
@@ -225,31 +232,101 @@ export class CodeGenerateCore {
       connectionType = DeviceConnectionType.IoTCSasKey;
     }
 
+
     const folderPath = await this.GetFolderForCodeGen();
     if (!folderPath) {
       return false;
     }
 
+    const codeGenExecutionInfo: CodeGenExecutionInfo = {
+      filePath: selectedFilePath,
+      repoConnectionString: connectionString,
+      targetFolder: folderPath,
+      languageLabel: 'ANSI C',
+      codeGenDeviceType,
+      deviceConnectionType: connectionType
+    };
+
+    const executionResult = await this.GenerateDeviceCodeCore(
+        codeGenExecutionInfo, context, channel, telemetryContext);
+    await ConfigHandler.update(
+        ConfigKey.codeGeneratorExecutionInfo,
+        JSON.stringify(codeGenExecutionInfo),
+        vscode.ConfigurationTarget.Workspace);
+    return executionResult;
+  }
+
+  async RegenerateDeviceCodeStub(
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext): Promise<boolean> {
+    const upgradestate: boolean =
+        await this.UpgradeCodeGenerator(context, channel);
+    if (!upgradestate) {
+      channel.appendLine(`${
+          DigitalTwinConstants
+              .dtPrefix} Unable to upgrade the Code Generator to the latest version.\r\n Trying to use the existing version.`);
+    }
+
+    const executionInfo =
+        ConfigHandler.get<string>(ConfigKey.codeGeneratorExecutionInfo);
+
+    if (executionInfo) {
+      const codeGenExecutionInfo: CodeGenExecutionInfo =
+          JSON.parse(executionInfo as string);
+      if (codeGenExecutionInfo) {
+        // Does the source file exist?
+        if (fs.existsSync(codeGenExecutionInfo.filePath)) {
+          utils.mkdirRecursivelySync(codeGenExecutionInfo.targetFolder);
+          channel.appendLine(`${
+              DigitalTwinConstants.dtPrefix} Regenerate Device Code Stub for ${
+              codeGenExecutionInfo.filePath} into ${
+              codeGenExecutionInfo.targetFolder}. Language: ${
+              codeGenExecutionInfo.languageLabel}`);
+          const executionResult = await this.GenerateDeviceCodeCore(
+              codeGenExecutionInfo, context, channel, telemetryContext);
+          return executionResult;
+        }
+      }
+    }
+    const messge =
+        'Unable to regenerate device code due to configuration change, would you like to generate device code again?';
+    const choice = await vscode.window.showWarningMessage(
+        messge, DialogResponses.yes, DialogResponses.no);
+    if (choice === DialogResponses.yes) {
+      await vscode.commands.executeCommand('iotworkbench.iotPnPGenerateCode');
+      return true;
+    }
+    return false;
+  }
+
+  async GenerateDeviceCodeCore(
+      codeGenExecutionInfo: CodeGenExecutionInfo,
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext): Promise<boolean> {
+    // We only support Ansi C
+    const codeGenFactory =
+        new AnsiCCodeGeneratorFactory(context, channel, telemetryContext);
+
     const codeGenerator = codeGenFactory.CreateCodeGeneratorImpl(
-        codeGenDeviceType, connectionType);
+        codeGenExecutionInfo.codeGenDeviceType,
+        codeGenExecutionInfo.deviceConnectionType);
     if (!codeGenerator) {
       return false;
     }
 
+    const fileCoreName = path.basename(codeGenExecutionInfo.filePath);
     await vscode.window.withProgress(
         {
           location: vscode.ProgressLocation.Notification,
-          title: `Generate code stub for ${fileSelection.label} ...`
+          title: `Generate code stub for ${fileCoreName} ...`
         },
         async () => {
-          if (!connectionString) {
-            return;
-          }
           const result = await codeGenerator.GenerateCode(
-              folderPath, selectedFilePath, fileCoreName, connectionString);
+              codeGenExecutionInfo.targetFolder, codeGenExecutionInfo.filePath,
+              fileCoreName, codeGenExecutionInfo.repoConnectionString);
           if (result) {
             vscode.window.showInformationMessage(
-                `Generate code stub for ${fileSelection.label} completed`);
+                `Generate code stub for ${fileCoreName} completed`);
           }
         });
     return true;

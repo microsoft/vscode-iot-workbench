@@ -122,6 +122,11 @@
         "command": "iotworkbench.iotPnPGenerateCode",
         "title": "Generate Device Code Stub...",
         "category": "IoT Plug and Play"
+      },
+      {
+        "command": "iotworkbench.iotPnPRegenerateCode",
+        "title": "Regenerate Device Code Stub...",
+        "category": "IoT Plug and Play"
       }
     ],
     "configuration": [
@@ -195,6 +200,9 @@
           "IoTWorkbench.IoTPnPRepositoryUrl": {
             "type": "string",
             "default": "https://canary-repo.azureiotrepository.com"
+          },
+          "IoTWorkbench.IoTPnPCodeGenExecutionInfo": {
+            "type": "string"
           }
         }
       }

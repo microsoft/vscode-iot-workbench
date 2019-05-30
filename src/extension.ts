@@ -361,7 +361,10 @@ export async function activate(context: vscode.ExtensionContext) {
       exampleExplorer.initializeExample.bind(exampleExplorer);
 
   const codeGeneratorBinder =
-      codeGenerator.ScaffoldDeviceStub.bind(codeGenerator);
+      codeGenerator.GenerateDeviceCodeStub.bind(codeGenerator);
+
+  const codeRegeneratorBinder =
+      codeGenerator.RegenerateDeviceCodeStub.bind(codeGenerator);
 
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with  registerCommand
@@ -609,6 +612,12 @@ export async function activate(context: vscode.ExtensionContext) {
         callWithTelemetry(
             EventNames.scaffoldDeviceStubEvent, outputChannel, true, context,
             codeGeneratorBinder);
+      }));
+  context.subscriptions.push(vscode.commands.registerCommand(
+      'iotworkbench.iotPnPRegenerateCode', async () => {
+        callWithTelemetry(
+            EventNames.regenerateDeviceStubEvent, outputChannel, true, context,
+            codeRegeneratorBinder);
       }));
 }
 
