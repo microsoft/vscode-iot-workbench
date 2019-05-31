@@ -45,6 +45,11 @@ export async function activate(context: vscode.ExtensionContext) {
 
   if (vscode.workspace.workspaceFolders) {
     try {
+      // Initialize Telemetry
+      if (!telemetryWorkerInitialized) {
+        telemetryModule.TelemetryWorker.Initialize(context);
+        telemetryWorkerInitialized = true;
+      }
       const iotProject = new ioTProjectModule.IoTProject(
           context, outputChannel, telemetryContext);
       await iotProject.load(true);
@@ -67,6 +72,12 @@ export async function activate(context: vscode.ExtensionContext) {
   // The commandId parameter must match the command field in package.json
 
   const projectInitProvider = async () => {
+    // Initialize Telemetry
+    if (!telemetryWorkerInitialized) {
+      telemetryModule.TelemetryWorker.Initialize(context);
+      telemetryWorkerInitialized = true;
+    }
+
     const projectInitializer = new ProjectInitializer();
     const projectInitializerBinder =
         projectInitializer.InitializeProject.bind(projectInitializer);
@@ -76,42 +87,84 @@ export async function activate(context: vscode.ExtensionContext) {
   };
 
   const azureProvisionProvider = async () => {
+    // Initialize Telemetry
+    if (!telemetryWorkerInitialized) {
+      telemetryModule.TelemetryWorker.Initialize(context);
+      telemetryWorkerInitialized = true;
+    }
+
     telemetryModule.callWithTelemetry(
         EventNames.azureProvisionEvent, outputChannel, true, context,
         azureOperator.Provision);
   };
 
   const azureDeployProvider = async () => {
+    // Initialize Telemetry
+    if (!telemetryWorkerInitialized) {
+      telemetryModule.TelemetryWorker.Initialize(context);
+      telemetryWorkerInitialized = true;
+    }
+
     telemetryModule.callWithTelemetry(
         EventNames.azureDeployEvent, outputChannel, true, context,
         azureOperator.Deploy);
   };
 
   const deviceCompileProvider = async () => {
+    // Initialize Telemetry
+    if (!telemetryWorkerInitialized) {
+      telemetryModule.TelemetryWorker.Initialize(context);
+      telemetryWorkerInitialized = true;
+    }
+
     telemetryModule.callWithTelemetry(
         EventNames.deviceCompileEvent, outputChannel, true, context,
         deviceOperator.compile);
   };
 
   const deviceUploadProvider = async () => {
+    // Initialize Telemetry
+    if (!telemetryWorkerInitialized) {
+      telemetryModule.TelemetryWorker.Initialize(context);
+      telemetryWorkerInitialized = true;
+    }
+
     telemetryModule.callWithTelemetry(
         EventNames.deviceUploadEvent, outputChannel, true, context,
         deviceOperator.upload);
   };
 
   const devicePackageManager = async () => {
+    // Initialize Telemetry
+    if (!telemetryWorkerInitialized) {
+      telemetryModule.TelemetryWorker.Initialize(context);
+      telemetryWorkerInitialized = true;
+    }
+
     telemetryModule.callWithTelemetry(
         EventNames.devicePackageEvent, outputChannel, true, context,
         deviceOperator.downloadPackage);
   };
 
   const deviceSettingsConfigProvider = async () => {
+    // Initialize Telemetry
+    if (!telemetryWorkerInitialized) {
+      telemetryModule.TelemetryWorker.Initialize(context);
+      telemetryWorkerInitialized = true;
+    }
+
     telemetryModule.callWithTelemetry(
         EventNames.configDeviceSettingsEvent, outputChannel, true, context,
         deviceOperator.configDeviceSettings);
   };
 
   const examplesProvider = async () => {
+    // Initialize Telemetry
+    if (!telemetryWorkerInitialized) {
+      telemetryModule.TelemetryWorker.Initialize(context);
+      telemetryWorkerInitialized = true;
+    }
+
     telemetryModule.callWithTelemetry(
         EventNames.openExamplePageEvent, outputChannel, true, context,
         exampleSelectBoardBinder);
@@ -119,6 +172,12 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const examplesInitializeProvider =
       async (name?: string, url?: string, boardId?: string) => {
+    // Initialize Telemetry
+    if (!telemetryWorkerInitialized) {
+      telemetryModule.TelemetryWorker.Initialize(context);
+      telemetryWorkerInitialized = true;
+    }
+
     telemetryModule.callWithTelemetry(
         EventNames.loadExampleEvent, outputChannel, true, context,
         initializeExampleBinder, {}, name, url, boardId);
