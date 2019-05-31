@@ -36,6 +36,7 @@ export class EventNames {
   static readonly nsatsurvery = 'IoTWorkbench.NSATSurvey';
   static readonly selectSubscription = 'IoTWorkbench.SelectSubscription';
   static readonly openTutorial = 'IoTWorkbench.OpenTutorial';
+  static readonly projectLoadEvent = 'IoTWorkbench.ProjectLoadEvent';
   static readonly scaffoldDeviceStubEvent = 'IoTWorkbench.ScaffoldDeviceStub';
   static readonly regenerateDeviceStubEvent =
       'IoTWorkbench.RegenerateDeviceStub';

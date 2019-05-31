@@ -60,7 +60,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
   static get serialport(): any {
     if (!AZ3166Device._serialport) {
       AZ3166Device._serialport =
-          require('../../../vendor/node-usb-native').SerialPort;
+          require('../../vendor/node-usb-native').SerialPort;
     }
     return AZ3166Device._serialport;
   }
@@ -308,6 +308,13 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
         console.log(deviceConnectionString);
 
+        // Try to close serial monitor
+        try {
+          await vscode.commands.executeCommand(
+              'arduino.closeSerialMonitor', null, false);
+        } catch (ignore) {
+        }
+
         // Set selected connection string to device
         let res: boolean;
         const plat = os.platform();
@@ -359,6 +366,13 @@ export class AZ3166Device extends ArduinoDeviceBase {
         }
 
         console.log(UDS);
+
+        // Try to close serial monitor
+        try {
+          await vscode.commands.executeCommand(
+              'arduino.closeSerialMonitor', null, false);
+        } catch (ignore) {
+        }
 
         // Set selected connection string to device
         let res: boolean;

@@ -20,7 +20,7 @@ export class UsbDetector {
   private static _vscexpress: VSCExpress|undefined;
   // tslint:disable-next-line: no-any
   private static _usbDetector: any =
-      require('../../vendor/node-usb-native').detector;
+      require('../vendor/node-usb-native').detector;
 
   constructor(
       private context: vscode.ExtensionContext,

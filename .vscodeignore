@@ -11,3 +11,9 @@ docs/**
 .gitignore
 tsconfig.json
 cache/**
+node_modules/**
+webpack.config.js
+genAiKey.js
+gts.cmd
+vendor/**
+copyVendor.js
