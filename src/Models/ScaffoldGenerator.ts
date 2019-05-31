@@ -3,43 +3,17 @@
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import {FileNames} from '../constants';
-import * as sdk from 'vscode-iot-device-cube-sdk';
-import * as utils from '../utils';
+import {FileUtility} from '../FileUtility';
 
 export class ScaffoldGenerator {
   private exists:((localPath: string) => Promise<boolean>) | undefined;
   private writeFile: ((filePath: string, data: string | Buffer) => Promise<void>) | undefined;
   private mkdirRecursively: ((dirPath: string) => Promise<void>) | undefined;
 
-  static async existsInWorkspace(localPath: string): Promise<boolean> {
-    return new Promise((resolve: (exist: boolean) => void) => {
-      fs.stat(localPath, (error: Error | null) => {
-        if (error) {
-          resolve(false);
-          return;
-        }
-        resolve(true);
-        return;
-      });
-    });
-  }
-
-  static async writeFileInWorkspace(filePath: string, data: string | Buffer): Promise<void> {
-    return new Promise(async (resolve: (value?: void) => void, reject) => {
-      await fs.writeFile(filePath, data, (err) => {
-        if (err) {
-          reject(err);
-        }
-        return;
-      });
-      resolve();
-    });
-  }
-
   // Generate files in local from remote side
   private async generateCommonFiles(projectFolder: string, vscodeFolderPath: string, devcontainerFolderPath: string): Promise<boolean> {
     if (this.exists === undefined || this.writeFile === undefined || this.mkdirRecursively === undefined) {
-      throw new Error(`private function is not correctly set.`);
+      throw new Error(`File-related function is not correctly set.`);
     }
 
     if (!await this.exists(projectFolder)) {
@@ -79,7 +53,7 @@ export class ScaffoldGenerator {
    */
   private async generateCppPropertiesFile(vscodeFolderPath: string, boardFolderPath: string, boardId: string): Promise<boolean> {
     if (this.exists === undefined || this.writeFile === undefined || this.mkdirRecursively === undefined) {
-      throw new Error(`private function is not correctly set.`);
+      throw new Error(`File-related function is not correctly set.`);
     }
 
     const cppPropertiesFilePath =
@@ -110,7 +84,7 @@ export class ScaffoldGenerator {
    */
   private async generateDockerRelatedFiles(devcontainerFolderPath: string, boardFolderPath: string, boardId: string): Promise<boolean> {
     if (this.exists === undefined || this.writeFile === undefined || this.mkdirRecursively === undefined) {
-      throw new Error(`private function is not correctly set.`);
+      throw new Error(`File-related function is not correctly set.`);
     }
 
     // Dockerfile
@@ -156,9 +130,9 @@ export class ScaffoldGenerator {
   // Scaffold common iot project files to the current workspace path
   async scaffolIoTProjectdFilesInWorkspace(projectFolder: string, vscodeFolderPath: string, boardFolderPath: string, devcontainerFolderPath: string, boardId: string) {
     try {
-      this.exists = ScaffoldGenerator.existsInWorkspace;
-      this.writeFile = ScaffoldGenerator.writeFileInWorkspace;
-      this.mkdirRecursively = utils.mkdirRecursivelyInWorkspace;
+      this.exists = FileUtility.existsInWorkspace;
+      this.writeFile = FileUtility.writeFileInWorkspace;
+      this.mkdirRecursively = FileUtility.mkdirRecursivelyInWorkspace;
       await this.generateCommonFiles(projectFolder, vscodeFolderPath, devcontainerFolderPath);
       await this.generateCppPropertiesFile(vscodeFolderPath, boardFolderPath, boardId);
       await this.generateDockerRelatedFiles(devcontainerFolderPath, boardFolderPath, boardId);
@@ -171,9 +145,9 @@ export class ScaffoldGenerator {
   // Scaffold common iot project files to a certain local path
   async scaffolIoTProjectdFilesInLocal(projectFolder: string, vscodeFolderPath: string, boardFolderPath: string, devcontainerFolderPath: string, boardId: string) {
     try {
-      this.exists = sdk.FileSystem.exists;
-      this.writeFile = sdk.FileSystem.writeFile;
-      this.mkdirRecursively = utils.mkdirRecursively;
+      this.exists = FileUtility.existsInLocal;
+      this.writeFile = FileUtility.writeFileInLocal;
+      this.mkdirRecursively = FileUtility.mkdirRecursivelyInLocal;
       await this.generateCommonFiles(projectFolder, vscodeFolderPath, devcontainerFolderPath);
       await this.generateCppPropertiesFile(vscodeFolderPath, boardFolderPath, boardId);
       await this.generateDockerRelatedFiles(devcontainerFolderPath, boardFolderPath, boardId);

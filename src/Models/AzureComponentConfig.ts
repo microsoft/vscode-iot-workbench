@@ -2,9 +2,9 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 
 import {AzureComponentsStorage} from '../constants';
-
 import {Component} from './Interfaces/Component';
 import {ComponentType} from './Interfaces/Component';
+import {FileUtility} from '../FileUtility';
 
 // TODO: need to check what value should be included here
 export interface ComponentInfo { values: {[key: string]: string}; }
@@ -40,6 +40,10 @@ export class AzureConfigFileHandler {
   private projectRootPath: string;
   private configFilePath: string;
 
+  private exists:((localPath: string) => Promise<boolean>) | undefined;
+  private writeFile: ((filePath: string, data: string | Buffer) => Promise<void>) | undefined;
+  private mkdirRecursively: ((dirPath: string) => Promise<void>) | undefined;
+
   constructor(projectRoot: string) {
     this.projectRootPath = projectRoot;
     this.configFilePath = path.join(
@@ -47,13 +51,33 @@ export class AzureConfigFileHandler {
         AzureComponentsStorage.fileName);
   }
 
-  createIfNotExists() {
+
+  async createIfNotExistsInWorkspace() {
+    this.exists = FileUtility.existsInWorkspace;
+    this.writeFile = FileUtility.writeFileInWorkspace;
+    this.mkdirRecursively = FileUtility.mkdirRecursivelyInWorkspace;
+
+    await this.createIfNotExistsCore();
+  }
+
+  async createIfNotExistsInLocal() {
+    this.exists = FileUtility.existsInLocal;
+    this.writeFile = FileUtility.writeFileInLocal;
+    this.mkdirRecursively = FileUtility.mkdirRecursivelyInLocal;
+
+    await this.createIfNotExistsCore();
+  }
+
+  async createIfNotExistsCore() {
+    if (this.exists === undefined || this.writeFile === undefined || this.mkdirRecursively === undefined) {
+      throw new Error(`File-related function is not correctly set.`);
+    }
     const azureConfigs: AzureConfigs = {componentConfigs: []};
     const azureConfigFolderPath =
         path.join(this.projectRootPath, AzureComponentsStorage.folderName);
-    if (!fs.existsSync(azureConfigFolderPath)) {
+    if (!await this.exists(azureConfigFolderPath)) {
       try {
-        fs.mkdirSync(azureConfigFolderPath);
+        await this.mkdirRecursively(azureConfigFolderPath);
       } catch (error) {
         throw new Error(`Failed to create azure config folder. Error message: ${error.message}`);
       }
@@ -61,9 +85,8 @@ export class AzureConfigFileHandler {
     const azureConfigFilePath =
         path.join(azureConfigFolderPath, AzureComponentsStorage.fileName);
 
-    if (!fs.existsSync(azureConfigFilePath)) {
-      fs.writeFileSync(
-          azureConfigFilePath, JSON.stringify(azureConfigs, null, 4));
+    if (!await this.exists(azureConfigFilePath)) {
+      await this.writeFile(azureConfigFilePath, JSON.stringify(azureConfigs, null, 4));
     }
   }
 

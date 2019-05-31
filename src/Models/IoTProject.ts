@@ -23,7 +23,7 @@ import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
 import {Workspace} from './Interfaces/Workspace';
 import {RemoteExtension} from './RemoteExtension';
-import * as sdk from 'vscode-iot-device-cube-sdk';
+import {FileUtility} from '../FileUtility';
 
 type Dependency = import('./AzureComponentConfig').Dependency;
 type TelemetryContext = import('../telemetry').TelemetryContext;
@@ -136,7 +136,7 @@ export class IoTProject {
     const azureConfigFileHandler =
         new azureComponentConfigModule.AzureConfigFileHandler(
             this.projectRootPath);
-    azureConfigFileHandler.createIfNotExists();
+    azureConfigFileHandler.createIfNotExistsInWorkspace();
 
     if (this.projectRootPath !== undefined) {
       const boardId = projectConfigJson[`${ConfigKey.boardId}`];
@@ -424,7 +424,7 @@ export class IoTProject {
       rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
       projectType: ProjectTemplateType, boardId: string,
       openInNewWindow: boolean): Promise<boolean> {
-    const rootFolderPathExists = await sdk.FileSystem.exists(rootFolderPath);
+    const rootFolderPathExists = await FileUtility.existsInLocal(rootFolderPath);
     if (!rootFolderPathExists) {
       throw new Error(
           'Unable to find the root path, please open the folder and initialize project again.');
@@ -436,7 +436,7 @@ export class IoTProject {
     const azureConfigFileHandler =
         new azureComponentConfigModule.AzureConfigFileHandler(
             this.projectRootPath);
-    azureConfigFileHandler.createIfNotExists();
+    azureConfigFileHandler.createIfNotExistsInLocal();
 
     const projectConfig :{[key: string]: string} = {};
     
@@ -484,8 +484,8 @@ export class IoTProject {
 
         const functionDir = path.join(this.projectRootPath, constants.functionDefaultFolderName);
 
-        if (!await sdk.FileSystem.exists(functionDir)) {
-          await sdk.FileSystem.mkDir(functionDir);
+        if (!await FileUtility.existsInLocal(functionDir)) {
+          await FileUtility.mkdirRecursivelyInLocal(functionDir);
         }
 
         const azureFunctions = new azureFunctionsModule.AzureFunctions(
@@ -525,8 +525,8 @@ export class IoTProject {
 
         const asaDir = path.join(this.projectRootPath, constants.asaFolderName);
 
-        if (!await sdk.FileSystem.exists(asaDir)) {
-          await sdk.FileSystem.mkDir(asaDir);
+        if (!await FileUtility.existsInLocal(asaDir)) {
+          await FileUtility.mkdirRecursivelyInLocal(asaDir);
         }
 
         const asaFilePath = this.extensionContext.asAbsolutePath(
@@ -536,7 +536,7 @@ export class IoTProject {
             fs.readFileSync(asaFilePath, 'utf8')
                 .replace(/\[input\]/, `"iothub-${iothub.id}"`)
                 .replace(/\[output\]/, `"cosmosdb-${cosmosDB.id}"`);
-        await sdk.FileSystem.writeFile(queryPath, asaQueryContent);
+        await FileUtility.writeFileInLocal(queryPath, asaQueryContent);
 
         const asa = new streamAnalyticsJobModule.StreamAnalyticsJob(
             queryPath, this.extensionContext, this.projectRootPath,
@@ -588,13 +588,13 @@ export class IoTProject {
     }
 
     const vscodeFolderPath = path.join(this.projectRootPath, FileNames.vscodeSettingsFolderName);
-    if (!await sdk.FileSystem.exists(vscodeFolderPath)) {
-      utils.mkdirRecursively(vscodeFolderPath);
+    if (!await FileUtility.existsInLocal(vscodeFolderPath)) {
+      await FileUtility.mkdirRecursivelyInLocal(vscodeFolderPath);
     }
     const projectConfigFile = path.join(vscodeFolderPath, constants.projectConfigFileName);
-    if (!await sdk.FileSystem.exists(projectConfigFile)) {
+    if (!await FileUtility.existsInLocal(projectConfigFile)) {
       const indentationSpace = 4;
-      sdk.FileSystem.writeFile(projectConfigFile, JSON.stringify(projectConfig, null, indentationSpace));
+      FileUtility.writeFileInLocal(projectConfigFile, JSON.stringify(projectConfig, null, indentationSpace));
     }
 
     if (!openInNewWindow) {

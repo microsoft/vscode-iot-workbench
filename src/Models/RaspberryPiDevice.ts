@@ -17,6 +17,7 @@ import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
 import {ScaffoldGenerator} from './ScaffoldGenerator';
 import {RemoteExtension} from './RemoteExtension';
+import {FileUtility} from '../FileUtility';
 
 class RaspberryPiUploadConfig {
   static host = 'raspberrypi';
@@ -117,7 +118,7 @@ export class RaspberryPiDevice implements Device {
     for (const fileInfo of templateFilesInfo) {
       const targetFolderPath = path.join(this.projectFolder, fileInfo.targetPath);
       if (!await sdk.FileSystem.exists(targetFolderPath)) {
-        await utils.mkdirRecursively(targetFolderPath);
+        await FileUtility.mkdirRecursivelyInLocal(targetFolderPath);
       }
 
       const targetFilePath = path.join(targetFolderPath, fileInfo.fileName);

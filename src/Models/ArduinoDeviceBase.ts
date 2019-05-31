@@ -12,6 +12,7 @@ import {ConfigHandler} from '../configHandler';
 import {FileNames, PlatformType, OperationType} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 import * as utils from '../utils';
+import {FileUtility} from '../FileUtility';
 
 import {Board} from './Interfaces/Board';
 import {ComponentType} from './Interfaces/Component';
@@ -19,7 +20,7 @@ import {Device, DeviceType} from './Interfaces/Device';
 import {LibraryManageable} from './Interfaces/LibraryManageable';
 import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {OTA} from './OTA';
-import * as sdk from 'vscode-iot-device-cube-sdk';
+// import * as sdk from 'vscode-iot-device-cube-sdk';
 import { RemoteExtension } from './RemoteExtension';
 
 const constants = {
@@ -143,8 +144,8 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
     for (const fileInfo of templateFilesInfo) {
       let targetFilePath = '';
       const targetFolderPath = path.join(this.projectFolder, fileInfo.targetPath);
-      if (!await sdk.FileSystem.exists(targetFolderPath)) {
-        await utils.mkdirRecursively(targetFolderPath);
+      if (!await FileUtility.existsInLocal(targetFolderPath)) {
+        await FileUtility.mkdirRecursivelyInLocal(targetFolderPath);
       }
 
       if (fileInfo.fileName.endsWith('.ino')) {
@@ -154,7 +155,7 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
       }
       if (fileInfo.fileContent) {
         try {
-          await sdk.FileSystem.writeFile(targetFilePath, fileInfo.fileContent);
+          await FileUtility.writeFileInLocal(targetFilePath, fileInfo.fileContent);
         } catch (error) {
           throw new Error(
               `Create arduino sketch file failed: ${error.message}`);

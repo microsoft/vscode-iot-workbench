@@ -14,8 +14,7 @@ import {TelemetryContext} from './telemetry';
 import {FileNames, PlatformType} from './constants';
 import {BoardProvider} from './boardProvider';
 import {IoTWorkbenchSettings} from './IoTSettings';
-import {RemoteExtension} from './Models/RemoteExtension';
-import * as sdk from 'vscode-iot-device-cube-sdk';
+import {FileUtility} from './FileUtility';
 
 const impor = require('impor')(__dirname);
 const azureFunctionsModule = impor('./Models/AzureFunctions') as
@@ -107,7 +106,9 @@ export class ProjectInitializer {
               throw new Error('Unable to load project template.');
             }
 
-            if (result.type === 'AzureFunctions') {
+            const projectTemplateType: ProjectTemplateType = (ProjectTemplateType)[result.type as keyof typeof ProjectTemplateType];
+
+            if (projectTemplateType === ProjectTemplateType.AzureFunctions) {
               const isFunctionsExtensionAvailable =
                   await azureFunctionsModule.AzureFunctions.isAvailable();
               if (!isFunctionsExtensionAvailable) {
@@ -128,11 +129,9 @@ export class ProjectInitializer {
               });
             });
 
-            // const projectTemplateType: ProjectTemplateType = result.type;
-            const projectTemplateType: ProjectTemplateType = (ProjectTemplateType)[result.type as keyof typeof ProjectTemplateType];
 
             if (projectPath) {
-              await utils.mkdirRecursively(projectPath);
+              await FileUtility.mkdirRecursivelyInLocal(projectPath);
             }
             const project = new ioTProjectModule.IoTProject(
                 context, channel, telemetryContext);
@@ -223,28 +222,23 @@ export class ProjectInitializer {
     // Get default workbench path.
     const settings: IoTWorkbenchSettings = await IoTWorkbenchSettings.createAsync();
     const workbench = await settings.workbenchPath();
-    
+
     const projectRootPath = path.join(workbench, 'projects');
-    if (!await sdk.FileSystem.exists(workbench)) {
-      utils.mkdirRecursively(workbench);
+    if (!await FileUtility.existsInLocal(projectRootPath)) {
+      await FileUtility.mkdirRecursivelyInLocal(projectRootPath);
     }
-    const projectRootPathExists = await sdk.FileSystem.exists(projectRootPath);
-    if (!projectRootPathExists) {
-      await utils.mkdirRecursively(projectRootPath);
-    }
-    
 
     let counter = 0;
     const name = constants.defaultProjectName;
     let candidateName = name;
     while (true) {
       const projectPath = path.join(projectRootPath, candidateName);
-      const projectPathExists = await utils.fileExists(projectPath);
-      const projectDirectoryExists = await utils.directoryExists(projectPath);
+      const projectPathExists = await FileUtility.fileExistsInLocal(projectPath);
+      const projectDirectoryExists = await FileUtility.directoryExistsInLocal(projectPath);
       if (!projectPathExists && !projectDirectoryExists) {
         break;
       }
-      
+
       counter++;
       candidateName = `${name}_${counter}`;
     }
@@ -260,8 +254,8 @@ export class ProjectInitializer {
         }
 
         const projectPath = path.join(projectRootPath, projectName);
-        const projectPathExists = await utils.fileExists(projectPath);
-        const projectDirectoryExists = await utils.directoryExists(projectPath);        
+        const projectPathExists = await FileUtility.fileExistsInLocal(projectPath);
+        const projectDirectoryExists = await FileUtility.directoryExistsInLocal(projectPath);
         if (!projectPathExists && !projectDirectoryExists) {
           return;
         } else {

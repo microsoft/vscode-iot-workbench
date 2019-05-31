@@ -25,19 +25,6 @@
                     "targetPath" : "./device"
                 }
             ]
-        },
-        {
-            "description": "",
-            "detail": "Create project that processes device data from IoT Hub in Stream Analytics and store the result in Cosmos DB.",
-            "label": "With Stream Analytics and Cosmos DB",
-            "type": "StreamAnalytics",
-            "templateFilesInfo": [
-                {
-                    "fileName": "simple_iothub.ino",
-                    "sourcePath" : ".",
-                    "targetPath" : "./device"
-                }
-            ]
         }
     ]
 }

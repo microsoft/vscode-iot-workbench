@@ -15,7 +15,7 @@ import {FileNames, PlatformType} from './constants';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 import {VSCExpress} from 'vscode-express';
-import * as sdk from 'vscode-iot-device-cube-sdk';
+import {FileUtility} from './FileUtility';
 
 type OptionsWithUri = import('request-promise').OptionsWithUri;
 
@@ -101,21 +101,18 @@ export class ExampleExplorer {
     const settings: IoTWorkbenchSettings = await IoTWorkbenchSettings.createAsync();
     const workbench = await settings.workbenchPath();
 
-    if (!await utils.directoryExists(workbench)) {
-      await utils.mkdirRecursively(workbench);
-    }
-
     const name = path.join(workbench, 'examples', exampleName);
-    if (!await utils.fileExists(name) && !await utils.directoryExists(name)) {
-      await utils.mkdirRecursively(name);
+    if (!await FileUtility.fileExistsInLocal(name) && !await FileUtility.directoryExistsInLocal(name)) {
+      await FileUtility.mkdirRecursivelyInLocal(name);
       return name;
     }
 
+    // TODO: Here may be blocked. fs.listSync should be replaced to FileUtility.listInLocal
     const workspaceFiles =
         fs.listSync(name, [FileNames.workspaceExtensionName]);
     if (workspaceFiles && workspaceFiles.length > 0) {
       const workspaceFile = workspaceFiles[0];  // just pick the first one
-      if (await sdk.FileSystem.exists(workspaceFile)) {
+      if (await FileUtility.existsInLocal(workspaceFile)) {
         const selection = await vscode.window.showQuickPick(
             [
               {
@@ -154,7 +151,7 @@ export class ExampleExplorer {
           return;
         }
         const name = path.join(workbench, 'examples', exampleName);
-        if (! await utils.fileExists(name) && !await utils.directoryExists(name)) {
+        if (! await FileUtility.fileExistsInLocal(name) && !await FileUtility.directoryExistsInLocal(name)) {
           if (!/^([a-z0-9_]|[a-z0-9_][-a-z0-9_.]*[a-z0-9_])$/i.test(
                   exampleName)) {
             return 'Folder name can only contain letters, numbers, "-" and ".", and cannot start or end with "-" or ".".';
@@ -175,9 +172,9 @@ export class ExampleExplorer {
     }
 
     const customizedPath = path.join(workbench, 'examples', customizedName);
-    if (!await utils.fileExists(customizedPath) &&
-        !await utils.directoryExists(customizedPath)) {
-      await utils.mkdirRecursively(customizedPath);
+    if (!await FileUtility.fileExistsInLocal(customizedPath) &&
+        !await FileUtility.directoryExistsInLocal(customizedPath)) {
+      await FileUtility.mkdirRecursivelyInLocal(customizedPath);
     }
 
     return customizedPath;
