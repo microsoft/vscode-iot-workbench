@@ -192,6 +192,64 @@ export class IoTProject {
 
           break;
         }
+        case 'AzureFunctions': {
+          if (this.projectConfigFile === undefined) {
+            throw new Error(`${this.projectConfigFile} not found.`);
+          }
+          const projectConfigJson = require(this.projectConfigFile);
+          const functionPath = projectConfigJson[`${ConfigKey.functionPath}`];
+          if (!functionPath) {
+            return false;
+          }
+          const functionLocation = path.join(
+              vscode.workspace.workspaceFolders[0].uri.fsPath, '..',
+              functionPath);
+          if (functionLocation) {
+            const functionApp = new azureFunctionsModule.AzureFunctions(
+                functionLocation, functionPath, this.channel);
+            await functionApp.load();
+            components[functionApp.id] = functionApp;
+            this.componentList.push(functionApp);
+          }
+          break;
+        }
+        case 'StreamAnalyticsJob': {
+          const dependencies: Dependency[] = [];
+          for (const dependent of componentConfig.dependencies) {
+            const component = components[dependent.id];
+            if (!component) {
+              throw new Error(`Cannot find component with id ${dependent}.`);
+            }
+            dependencies.push({component, type: dependent.type});
+          }
+          const queryPath = path.join(
+              vscode.workspace.workspaceFolders[0].uri.fsPath, '..',
+              constants.asaFolderName, 'query.asaql');
+          const asa = new streamAnalyticsJobModule.StreamAnalyticsJob(
+              queryPath, this.extensionContext, this.projectRootPath,
+              this.channel, dependencies);
+          await asa.load();
+          components[asa.id] = asa;
+          this.componentList.push(asa);
+          break;
+        }
+        case 'CosmosDB': {
+          const dependencies: Dependency[] = [];
+          for (const dependent of componentConfig.dependencies) {
+            const component = components[dependent.id];
+            if (!component) {
+              throw new Error(`Cannot find component with id ${dependent}.`);
+            }
+            dependencies.push({component, type: dependent.type});
+          }
+          const cosmosDB = new cosmosDBModule.CosmosDB(
+              this.extensionContext, this.projectRootPath, this.channel,
+              dependencies);
+          await cosmosDB.load();
+          components[cosmosDB.id] = cosmosDB;
+          this.componentList.push(cosmosDB);
+          break;
+        }
         default: {
           throw new Error(
               `Component not supported with type of ${componentConfig.type}.`);
@@ -500,7 +558,7 @@ export class IoTProject {
           return false;
         }
 
-        projectConfig[`IoTWorkbench.${ConfigKey.functionPath}`] =
+        projectConfig[`${ConfigKey.functionPath}`] =
             constants.functionDefaultFolderName;
 
         this.componentList.push(iothub);
