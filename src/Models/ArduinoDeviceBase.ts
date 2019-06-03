@@ -20,7 +20,6 @@ import {Device, DeviceType} from './Interfaces/Device';
 import {LibraryManageable} from './Interfaces/LibraryManageable';
 import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {OTA} from './OTA';
-// import * as sdk from 'vscode-iot-device-cube-sdk';
 import { RemoteExtension } from './RemoteExtension';
 
 const constants = {

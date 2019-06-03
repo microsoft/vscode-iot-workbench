@@ -10,12 +10,12 @@ import * as sdk from 'vscode-iot-device-cube-sdk';
 import { Module } from 'azure-iothub';
 
 export class IoTWorkbenchSettings {
-  private _workbenchPath: string = '';
+  private _workbenchPath = '';
 
   private constructor() {
   }
 
-  public static async createAsync() {
+  static async createAsync() {
     const iotWorkbenchSettings = new IoTWorkbenchSettings();
 
     iotWorkbenchSettings._workbenchPath = await IoTWorkbenchSettings.getWorkbenchPath();
