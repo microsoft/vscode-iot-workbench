@@ -73,7 +73,7 @@ export class IoTHub implements Component, Provisionable {
 
 
   async create(): Promise<boolean> {
-    this.updateConfigSettings();
+    await this.updateConfigSettings();
     return true;
   }
 
@@ -177,15 +177,15 @@ export class IoTHub implements Component, Provisionable {
     }
   }
 
-  updateConfigSettings(componentInfo?: ComponentInfo): void {
+  async updateConfigSettings(componentInfo?: ComponentInfo): Promise<void> {
     const iotHubComponentIndex =
-        this.azureConfigFileHandler.getComponentIndexById(this.id);
+        await this.azureConfigFileHandler.getComponentIndexById(this.id);
 
     if (iotHubComponentIndex > -1) {
       if (!componentInfo) {
         return;
       }
-      this.azureConfigFileHandler.updateComponent(
+      await this.azureConfigFileHandler.updateComponent(
           iotHubComponentIndex, componentInfo);
     } else {
       const newIoTHubConfig: AzureComponentConfig = {
@@ -196,7 +196,7 @@ export class IoTHub implements Component, Provisionable {
         type: ComponentType[this.componentType],
         componentInfo
       };
-      this.azureConfigFileHandler.appendComponent(newIoTHubConfig);
+      await this.azureConfigFileHandler.appendComponent(newIoTHubConfig);
     }
   }
 }

@@ -90,11 +90,10 @@ export class AzureConfigFileHandler {
     }
   }
 
-  getSortedComponents() {
+  async getSortedComponents() {
     try {
-      const azureConfigs =
-          JSON.parse(fs.readFileSync(this.configFilePath, 'utf8')) as
-          AzureConfigs;
+      const azureConfigContent = await FileUtility.readFileInWorkspace(this.configFilePath, 'utf8');
+      const azureConfigs = JSON.parse(azureConfigContent) as AzureConfigs;
       const components: AzureComponentConfig[] = [];
       const componentConfigs = azureConfigs.componentConfigs;
       const sortedComponentIds: string[] = [];
@@ -130,11 +129,10 @@ export class AzureConfigFileHandler {
     }
   }
 
-  getComponentIndexById(id: string) {
+  async getComponentIndexById(id: string) {
     try {
-      const azureConfigs =
-          JSON.parse(fs.readFileSync(this.configFilePath, 'utf8')) as
-          AzureConfigs;
+      const azureConfigContent = await FileUtility.readFileInLocal(this.configFilePath, 'utf8');
+      const azureConfigs = JSON.parse(azureConfigContent) as AzureConfigs;
       const componentIndex =
           azureConfigs.componentConfigs.findIndex(config => config.id === (id));
       return componentIndex;
@@ -143,11 +141,10 @@ export class AzureConfigFileHandler {
     }
   }
 
-  getComponentById(id: string) {
+  async getComponentById(id: string) {
     try {
-      const azureConfigs =
-          JSON.parse(fs.readFileSync(this.configFilePath, 'utf8')) as
-          AzureConfigs;
+      const azureConfigContent = await FileUtility.readFileInWorkspace(this.configFilePath, 'utf8');
+      const azureConfigs = JSON.parse(azureConfigContent) as AzureConfigs;
       const componentConfig =
           azureConfigs.componentConfigs.find(config => config.id === (id));
       return componentConfig;
@@ -156,11 +153,10 @@ export class AzureConfigFileHandler {
     }
   }
 
-  getComponentByType(type: ComponentType|string) {
+  async getComponentByType(type: ComponentType|string) {
     try {
-      const azureConfigs =
-          JSON.parse(fs.readFileSync(this.configFilePath, 'utf8')) as
-          AzureConfigs;
+      const azureConfigContent = await FileUtility.readFileInWorkspace(this.configFilePath, 'utf8');
+      const azureConfigs = JSON.parse(azureConfigContent) as AzureConfigs;
       const componentConfig = azureConfigs.componentConfigs.find(
           config => config.type ===
               (typeof type === 'string' ? type : ComponentType[type]));
@@ -170,11 +166,10 @@ export class AzureConfigFileHandler {
     }
   }
 
-  getComponentsByType(type: ComponentType|string) {
+  async getComponentsByType(type: ComponentType|string) {
     try {
-      const azureConfigs =
-          JSON.parse(fs.readFileSync(this.configFilePath, 'utf8')) as
-          AzureConfigs;
+      const azureConfigContent = await FileUtility.readFileInWorkspace(this.configFilePath, 'utf8');
+      const azureConfigs = JSON.parse(azureConfigContent) as AzureConfigs;
       const componentConfig = azureConfigs.componentConfigs.filter(
           config => config.type ===
               (typeof type === 'string' ? type : ComponentType[type]));
@@ -184,13 +179,12 @@ export class AzureConfigFileHandler {
     }
   }
 
-  appendComponent(component: AzureComponentConfig) {
+  async appendComponent(component: AzureComponentConfig) {
     try {
-      const azureConfigs =
-          JSON.parse(fs.readFileSync(this.configFilePath, 'utf8')) as
-          AzureConfigs;
+      const azureConfigContent = await FileUtility.readFileInLocal(this.configFilePath, 'utf8');
+      const azureConfigs = JSON.parse(azureConfigContent) as AzureConfigs;
       azureConfigs.componentConfigs.push(component);
-      fs.writeFileSync(
+      await FileUtility.writeFileInLocal(
           this.configFilePath, JSON.stringify(azureConfigs, null, 4));
       return azureConfigs;
     } catch (error) {
@@ -198,17 +192,16 @@ export class AzureConfigFileHandler {
     }
   }
 
-  updateComponent(index: number, componentInfo: ComponentInfo) {
+  async updateComponent(index: number, componentInfo: ComponentInfo) {
     try {
-      const azureConfigs =
-          JSON.parse(fs.readFileSync(this.configFilePath, 'utf8')) as
-          AzureConfigs;
+      const azureConfigContent = await FileUtility.readFileInLocal(this.configFilePath, 'utf8');
+      const azureConfigs = JSON.parse(azureConfigContent) as AzureConfigs;
       const component = azureConfigs.componentConfigs[index];
       if (!component) {
         throw new Error('Invalid index of componet list.');
       }
       component.componentInfo = componentInfo;
-      fs.writeFileSync(
+      await FileUtility.writeFileInLocal(
           this.configFilePath, JSON.stringify(azureConfigs, null, 4));
       return azureConfigs;
     } catch (error) {

@@ -81,18 +81,18 @@ export class CosmosDB implements Component, Provisionable {
   }
 
   async create(): Promise<boolean> {
-    this.updateConfigSettings();
+    await this.updateConfigSettings();
     return true;
   }
 
-  updateConfigSettings(componentInfo?: ComponentInfo): void {
+  async updateConfigSettings(componentInfo?: ComponentInfo): Promise<void> {
     const cosmosDBComponentIndex =
-        this.azureConfigHandler.getComponentIndexById(this.id);
+        await this.azureConfigHandler.getComponentIndexById(this.id);
     if (cosmosDBComponentIndex > -1) {
       if (!componentInfo) {
         return;
       }
-      this.azureConfigHandler.updateComponent(
+      await this.azureConfigHandler.updateComponent(
           cosmosDBComponentIndex, componentInfo);
     } else {
       const newCosmosDBConfig: AzureComponentConfig = {
@@ -102,7 +102,7 @@ export class CosmosDB implements Component, Provisionable {
         dependencies: this.dependencies,
         type: ComponentType[this.componentType]
       };
-      this.azureConfigHandler.appendComponent(newCosmosDBConfig);
+      await this.azureConfigHandler.appendComponent(newCosmosDBConfig);
     }
   }
 
@@ -140,7 +140,7 @@ export class CosmosDB implements Component, Provisionable {
 
       for (const dependency of this.dependencies) {
         const componentConfig =
-            this.azureConfigHandler.getComponentById(dependency.id);
+            await this.azureConfigHandler.getComponentById(dependency.id);
         if (!componentConfig) {
           throw new Error(`Cannot find component with id ${dependency.id}.`);
         }
@@ -246,7 +246,7 @@ export class CosmosDB implements Component, Provisionable {
       collection = collectionChoose.label;
     }
 
-    this.updateConfigSettings({
+    await this.updateConfigSettings({
       values: {
         subscriptionId: AzureUtility.subscriptionId as string,
         resourceGroup: AzureUtility.resourceGroup as string,

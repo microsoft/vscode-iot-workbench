@@ -23,6 +23,7 @@ import {getExtension} from './Apis';
 import {extensionName} from './Interfaces/Api';
 import {Guid} from 'guid-typescript';
 import {AzureComponentConfig, AzureConfigs, ComponentInfo, DependencyConfig, Dependency} from './AzureComponentConfig';
+import { FileUtility } from '../FileUtility';
 
 const impor = require('impor')(__dirname);
 const azureUtilityModule =
@@ -150,7 +151,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     const azureFunctionsPath = this.azureFunctionsPath;
     console.log(azureFunctionsPath);
 
-    if (!fs.existsSync(azureFunctionsPath)) {
+    if (!FileUtility.existsInLocal(azureFunctionsPath)) {
       throw new Error(
           'Unable to find the Azure Functions folder inside the project.');
     }
@@ -205,7 +206,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
             });
       }
 
-      this.updateConfigSettings(
+      await this.updateConfigSettings(
           {values: {functionLanguage: this.functionLanguage}});
       return true;
     } catch (error) {
@@ -338,7 +339,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     }
   }
 
-  updateConfigSettings(componentInfo?: ComponentInfo): void {
+  async updateConfigSettings(componentInfo?: ComponentInfo): Promise<void> {
     const azureConfigFilePath = path.join(
         this.azureFunctionsPath, '..', AzureComponentsStorage.folderName,
         AzureComponentsStorage.fileName);
@@ -346,7 +347,8 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     let azureConfigs: AzureConfigs = {componentConfigs: []};
 
     try {
-      azureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, 'utf8'));
+      const azureConfigContent = await FileUtility.readFileInLocal(azureConfigFilePath, 'utf8');
+      azureConfigs = JSON.parse(azureConfigContent) as AzureConfigs;
     } catch (error) {
       const e = new Error('Invalid azure components config file.');
       throw e;

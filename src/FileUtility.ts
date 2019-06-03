@@ -63,9 +63,8 @@ export class FileUtility {
     }
   }
 
-  static async readFileInWorkspace(filePath:string): Promise<string> {
-    // TODO
-    return '';
+  static async readFileInWorkspace(filePath: string, encoding: string): Promise<string> {
+    return fs.readFileSync(filePath, encoding);
   }
 
   // File-related functions to help create files on a local path
@@ -107,5 +106,9 @@ export class FileUtility {
     }
     const isFile = await sdk.FileSystem.isFile(filePath);
     return isFile;
+  }
+
+  static async readFileInLocal(filePath: string, encoding: string): Promise<string> {
+    return await sdk.FileSystem.readFile(filePath, encoding) as string;
   }
 }
