@@ -613,7 +613,7 @@ export class IoTProject {
           return false;
         }
 
-        projectConfig[`IoTWorkbench.${ConfigKey.asaPath}`] =
+        projectConfig[`${ConfigKey.asaPath}`] =
             constants.asaFolderName;
 
         this.componentList.push(iothub);
