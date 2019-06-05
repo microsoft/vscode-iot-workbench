@@ -113,7 +113,7 @@ function editDigitalTwinFiles() {
 }
 
 function createDigitalTwinFile() {
-  const commandName = this.type.value === 'Interface' ? 'iotworkbench.digitalTwinCreateInterface' : 'iotworkbench.digitalTwinCreateCapabilityModel';
+  const commandName = this.type.value === 'Interface' ? 'iotworkbench.iotPnPCreateInterface' : 'iotworkbench.iotPnPCreateCapabilityModel';
   command(commandName);
 }
 

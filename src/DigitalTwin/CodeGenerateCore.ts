@@ -119,13 +119,6 @@ export class CodeGenerateCore {
       return false;
     }
 
-    const matchItems =
-        fileSelection.label.match(/^(.*?)\.(capabilitymodel)\.json$/);
-    if (!matchItems || !matchItems[1]) {
-      return false;
-    }
-    const fileCoreName = matchItems[1];
-
     const selectedFilePath =
         path.join(fileSelection.description as string, fileSelection.label);
 
@@ -314,7 +307,14 @@ export class CodeGenerateCore {
       return false;
     }
 
-    const fileCoreName = path.basename(codeGenExecutionInfo.filePath);
+    const fileName = path.basename(codeGenExecutionInfo.filePath);
+    const matchItems = fileName.match(/^(.*?)\.(capabilitymodel)\.json$/);
+
+    if (!matchItems || !matchItems[1]) {
+      return false;
+    }
+    const fileCoreName = matchItems[1];
+
     await vscode.window.withProgress(
         {
           location: vscode.ProgressLocation.Notification,
@@ -326,7 +326,7 @@ export class CodeGenerateCore {
               fileCoreName, codeGenExecutionInfo.repoConnectionString);
           if (result) {
             vscode.window.showInformationMessage(
-                `Generate code stub for ${fileCoreName} completed`);
+                `Generate code stub for ${fileName} completed`);
           }
         });
     return true;
