@@ -9,7 +9,7 @@ import * as sdk from 'vscode-iot-device-cube-sdk';
 import * as utils from '../utils';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, FileNames, PlatformType, OperationType} from '../constants';
+import {ConfigKey, FileNames, PlatformType, OperationType, ScaffoldType} from '../constants';
 import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {runCommand} from '../utils';
 
@@ -88,7 +88,7 @@ export class RaspberryPiDevice implements Device {
     }
 
     const scaffoldGenerator = new ScaffoldGenerator();
-    await scaffoldGenerator.scaffolIoTProjectdFilesInWorkspace(this.projectFolder, this.vscodeFolderPath,
+    await scaffoldGenerator.scaffoldIoTProjectdFiles(ScaffoldType.workspace, this.projectFolder, this.vscodeFolderPath,
       this.boardFolderPath, this.devcontainerFolderPath, RaspberryPiDevice.boardId);
 
     return true;
@@ -100,7 +100,7 @@ export class RaspberryPiDevice implements Device {
     }
     
     const scaffoldGenerator = new ScaffoldGenerator();
-    await scaffoldGenerator.scaffolIoTProjectdFilesInLocal(this.projectFolder, this.vscodeFolderPath,
+    await scaffoldGenerator.scaffoldIoTProjectdFiles(ScaffoldType.local, this.projectFolder, this.vscodeFolderPath,
       this.boardFolderPath, this.devcontainerFolderPath, RaspberryPiDevice.boardId);
     await this.generateSketchFile(this.templateFilesInfo);
 
@@ -118,7 +118,7 @@ export class RaspberryPiDevice implements Device {
     for (const fileInfo of templateFilesInfo) {
       const targetFolderPath = path.join(this.projectFolder, fileInfo.targetPath);
       if (!await sdk.FileSystem.exists(targetFolderPath)) {
-        await FileUtility.mkdirRecursivelyInLocal(targetFolderPath);
+        await FileUtility.mkdirRecursively(ScaffoldType.local,targetFolderPath);
       }
 
       const targetFilePath = path.join(targetFolderPath, fileInfo.fileName);

@@ -11,10 +11,11 @@ import {ProjectTemplate, ProjectTemplateType, TemplateFileInfo} from './Models/I
 import * as utils from './utils';
 import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {TelemetryContext} from './telemetry';
-import {FileNames, PlatformType} from './constants';
+import {FileNames, PlatformType, ScaffoldType} from './constants';
 import {BoardProvider} from './boardProvider';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import {FileUtility} from './FileUtility';
+import { ScaffoldGenerator } from './Models/ScaffoldGenerator';
 
 const impor = require('impor')(__dirname);
 const azureFunctionsModule = impor('./Models/AzureFunctions') as
@@ -131,7 +132,7 @@ export class ProjectInitializer {
 
 
             if (projectPath) {
-              await FileUtility.mkdirRecursivelyInLocal(projectPath);
+              await FileUtility.mkdirRecursively(ScaffoldType.local, projectPath);
             }
             const project = new ioTProjectModule.IoTProject(
                 context, channel, telemetryContext);
@@ -224,8 +225,8 @@ export class ProjectInitializer {
     const workbench = await settings.workbenchPath();
 
     const projectRootPath = path.join(workbench, 'projects');
-    if (!await FileUtility.existsInLocal(projectRootPath)) {
-      await FileUtility.mkdirRecursivelyInLocal(projectRootPath);
+    if (!await FileUtility.exists(ScaffoldType.local, projectRootPath)) {
+      await FileUtility.mkdirRecursively(ScaffoldType.local, projectRootPath);
     }
 
     let counter = 0;
@@ -233,8 +234,8 @@ export class ProjectInitializer {
     let candidateName = name;
     while (true) {
       const projectPath = path.join(projectRootPath, candidateName);
-      const projectPathExists = await FileUtility.fileExistsInLocal(projectPath);
-      const projectDirectoryExists = await FileUtility.directoryExistsInLocal(projectPath);
+      const projectPathExists = await FileUtility.fileExists(ScaffoldType.local, projectPath);
+      const projectDirectoryExists = await FileUtility.directoryExists(ScaffoldType.local, projectPath);
       if (!projectPathExists && !projectDirectoryExists) {
         break;
       }
@@ -254,8 +255,8 @@ export class ProjectInitializer {
         }
 
         const projectPath = path.join(projectRootPath, projectName);
-        const projectPathExists = await FileUtility.fileExistsInLocal(projectPath);
-        const projectDirectoryExists = await FileUtility.directoryExistsInLocal(projectPath);
+        const projectPathExists = await FileUtility.fileExists(ScaffoldType.local, projectPath);
+        const projectDirectoryExists = await FileUtility.directoryExists(ScaffoldType.local, projectPath);
         if (!projectPathExists && !projectDirectoryExists) {
           return;
         } else {

@@ -9,7 +9,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {FileNames, PlatformType, OperationType} from '../constants';
+import {FileNames, PlatformType, OperationType, ScaffoldType} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 import * as utils from '../utils';
 import {FileUtility} from '../FileUtility';
@@ -143,8 +143,8 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
     for (const fileInfo of templateFilesInfo) {
       let targetFilePath = '';
       const targetFolderPath = path.join(this.projectFolder, fileInfo.targetPath);
-      if (!await FileUtility.existsInLocal(targetFolderPath)) {
-        await FileUtility.mkdirRecursivelyInLocal(targetFolderPath);
+      if (!await FileUtility.exists(ScaffoldType.local, targetFolderPath)) {
+        await FileUtility.mkdirRecursively(ScaffoldType.local, targetFolderPath);
       }
 
       if (fileInfo.fileName.endsWith('.ino')) {
@@ -154,7 +154,7 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
       }
       if (fileInfo.fileContent) {
         try {
-          await FileUtility.writeFileInLocal(targetFilePath, fileInfo.fileContent);
+          await FileUtility.writeFile(ScaffoldType.local, targetFilePath, fileInfo.fileContent);
         } catch (error) {
           throw new Error(
               `Create arduino sketch file failed: ${error.message}`);

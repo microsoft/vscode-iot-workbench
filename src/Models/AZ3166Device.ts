@@ -14,7 +14,7 @@ import * as utils from '../utils';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey} from '../constants';
+import {ConfigKey, ScaffoldType} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 
 import {ScaffoldGenerator} from './ScaffoldGenerator';
@@ -207,7 +207,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
     }
 
     const scaffoldGenerator = new ScaffoldGenerator();
-    await scaffoldGenerator.scaffolIoTProjectdFilesInWorkspace(this.projectFolder, this.vscodeFolderPath,
+    await scaffoldGenerator.scaffoldIoTProjectdFiles(ScaffoldType.workspace, this.projectFolder, this.vscodeFolderPath,
       this.boardFolderPath, this.devcontainerFolderPath, this.board.id);
 
     return true;
@@ -220,7 +220,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
     try {
       const scaffoldGenerator = new ScaffoldGenerator();
-      await scaffoldGenerator.scaffolIoTProjectdFilesInLocal(this.projectFolder, this.vscodeFolderPath,
+      await scaffoldGenerator.scaffoldIoTProjectdFiles(ScaffoldType.local, this.projectFolder, this.vscodeFolderPath,
         this.boardFolderPath, this.devcontainerFolderPath, this.board.id);
       await this.generateSketchFile(this.templateFilesInfo);
     } catch (error) {

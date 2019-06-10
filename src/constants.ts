@@ -57,6 +57,11 @@ export enum OperationType {
   upload = 'Upload device code'
 }
 
+export enum ScaffoldType {
+  local = 'local',
+  workspace = 'workspace'
+}
+
 export enum AzureFunctionsLanguage {
   CSharpScript = 'C#Script',
   JavaScript = 'JavaScript',

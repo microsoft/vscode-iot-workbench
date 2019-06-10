@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import * as utils from '../utils';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, FileNames} from '../constants';
+import {ConfigKey, FileNames, ScaffoldType} from '../constants';
 import {EventNames, DependentExtensions} from '../constants';
 import {TelemetryProperties, TelemetryWorker} from '../telemetry';
 import {askAndNewProject} from '../utils';
@@ -136,7 +136,7 @@ export class IoTProject {
     const azureConfigFileHandler =
         new azureComponentConfigModule.AzureConfigFileHandler(
             this.projectRootPath);
-    azureConfigFileHandler.createIfNotExistsInWorkspace();
+    azureConfigFileHandler.createIfNotExists(ScaffoldType.workspace);
 
     if (this.projectRootPath !== undefined) {
       const boardId = projectConfigJson[`${ConfigKey.boardId}`];
@@ -482,7 +482,7 @@ export class IoTProject {
       rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
       projectType: ProjectTemplateType, boardId: string,
       openInNewWindow: boolean): Promise<boolean> {
-    const rootFolderPathExists = await FileUtility.existsInLocal(rootFolderPath);
+    const rootFolderPathExists = await FileUtility.exists(ScaffoldType.local, rootFolderPath);
     if (!rootFolderPathExists) {
       throw new Error(
           'Unable to find the root path, please open the folder and initialize project again.');
@@ -494,7 +494,7 @@ export class IoTProject {
     const azureConfigFileHandler =
         new azureComponentConfigModule.AzureConfigFileHandler(
             this.projectRootPath);
-    azureConfigFileHandler.createIfNotExistsInLocal();
+    azureConfigFileHandler.createIfNotExists(ScaffoldType.local);
 
     const projectConfig :{[key: string]: string} = {};
     
@@ -542,8 +542,8 @@ export class IoTProject {
 
         const functionDir = path.join(this.projectRootPath, constants.functionDefaultFolderName);
 
-        if (!await FileUtility.existsInLocal(functionDir)) {
-          await FileUtility.mkdirRecursivelyInLocal(functionDir);
+        if (!await FileUtility.exists(ScaffoldType.local, functionDir)) {
+          await FileUtility.mkdirRecursively(ScaffoldType.local, functionDir);
         }
 
         const azureFunctions = new azureFunctionsModule.AzureFunctions(
@@ -583,8 +583,8 @@ export class IoTProject {
 
         const asaDir = path.join(this.projectRootPath, constants.asaFolderName);
 
-        if (!await FileUtility.existsInLocal(asaDir)) {
-          await FileUtility.mkdirRecursivelyInLocal(asaDir);
+        if (!await FileUtility.exists(ScaffoldType.local, asaDir)) {
+          await FileUtility.mkdirRecursively(ScaffoldType.local, asaDir);
         }
 
         const asaFilePath = this.extensionContext.asAbsolutePath(
@@ -594,7 +594,7 @@ export class IoTProject {
             fs.readFileSync(asaFilePath, 'utf8')
                 .replace(/\[input\]/, `"iothub-${iothub.id}"`)
                 .replace(/\[output\]/, `"cosmosdb-${cosmosDB.id}"`);
-        await FileUtility.writeFileInLocal(queryPath, asaQueryContent);
+        await FileUtility.writeFile(ScaffoldType.local, queryPath, asaQueryContent);
 
         const asa = new streamAnalyticsJobModule.StreamAnalyticsJob(
             queryPath, this.extensionContext, this.projectRootPath,
@@ -646,13 +646,13 @@ export class IoTProject {
     }
 
     const vscodeFolderPath = path.join(this.projectRootPath, FileNames.vscodeSettingsFolderName);
-    if (!await FileUtility.existsInLocal(vscodeFolderPath)) {
-      await FileUtility.mkdirRecursivelyInLocal(vscodeFolderPath);
+    if (!await FileUtility.exists(ScaffoldType.local, vscodeFolderPath)) {
+      await FileUtility.mkdirRecursively(ScaffoldType.local, vscodeFolderPath);
     }
     const projectConfigFile = path.join(vscodeFolderPath, constants.projectConfigFileName);
-    if (!await FileUtility.existsInLocal(projectConfigFile)) {
+    if (!await FileUtility.exists(ScaffoldType.local, projectConfigFile)) {
       const indentationSpace = 4;
-      FileUtility.writeFileInLocal(projectConfigFile, JSON.stringify(projectConfig, null, indentationSpace));
+      FileUtility.writeFile(ScaffoldType.local, projectConfigFile, JSON.stringify(projectConfig, null, indentationSpace));
     }
 
     if (!openInNewWindow) {

@@ -2,44 +2,39 @@
 
 import * as fs from 'fs-plus';
 import * as path from 'path';
-import {FileNames} from '../constants';
+import {FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 
 export class ScaffoldGenerator {
-  private exists:((localPath: string) => Promise<boolean>) | undefined;
-  private writeFile: ((filePath: string, data: string | Buffer) => Promise<void>) | undefined;
-  private mkdirRecursively: ((dirPath: string) => Promise<void>) | undefined;
-
-  // Generate files in local from remote side
-  private async generateCommonFiles(projectFolder: string, vscodeFolderPath: string, devcontainerFolderPath: string): Promise<boolean> {
-    if (this.exists === undefined || this.writeFile === undefined || this.mkdirRecursively === undefined) {
-      throw new Error(`File-related function is not correctly set.`);
-    }
-
-    if (!await this.exists(projectFolder)) {
+  /**
+   * Generate common files like .iotworkbenchproject file, .vscode folder, .devcontainer folder
+   * @param type Scaffold type. 'local' - scaffold files with local path; 'workspace' - scaffold files with workspace path
+   */
+  private async generateCommonFiles(type: ScaffoldType, projectFolder: string, vscodeFolderPath: string, devcontainerFolderPath: string): Promise<boolean> {
+    if (!await FileUtility.exists(type, projectFolder)) {
       throw new Error('Unable to find the project folder.');
     }
 
     try {
       const iotworkbenchprojectFilePath =
           path.join(projectFolder, FileNames.iotworkbenchprojectFileName);
-      await this.writeFile(iotworkbenchprojectFilePath, ' ');
+      await FileUtility.writeFile(type, iotworkbenchprojectFilePath, ' ');
     } catch (error) {
       throw new Error(
           `Create ${FileNames.iotworkbenchprojectFileName} file failed: ${error.message}`);
     }
 
-    if (!await this.exists(vscodeFolderPath)) {
+    if (!await FileUtility.exists(type, vscodeFolderPath)) {
       try {
-        await this.mkdirRecursively(vscodeFolderPath);
+        await FileUtility.mkdirRecursively(type, vscodeFolderPath);
       } catch (error) {
         throw new Error(`Failed to create folder ${vscodeFolderPath}. Error message: ${error.message}`);
       }
     }
 
-    if (! await this.exists(devcontainerFolderPath)) {
+    if (!await FileUtility.exists(type, devcontainerFolderPath)) {
       try {
-        await this.mkdirRecursively(devcontainerFolderPath);
+        await FileUtility.mkdirRecursively(type, devcontainerFolderPath);
       } catch (error) {
         throw new Error(`Failed to create folder ${devcontainerFolderPath}. Error message: ${error.message}`);
       }
@@ -51,15 +46,12 @@ export class ScaffoldGenerator {
   /**
    * Create c_cpp_properties.json file
    */
-  private async generateCppPropertiesFile(vscodeFolderPath: string, boardFolderPath: string, boardId: string): Promise<boolean> {
-    if (this.exists === undefined || this.writeFile === undefined || this.mkdirRecursively === undefined) {
-      throw new Error(`File-related function is not correctly set.`);
-    }
+  private async generateCppPropertiesFile(type: ScaffoldType, vscodeFolderPath: string, boardFolderPath: string, boardId: string): Promise<boolean> {
 
     const cppPropertiesFilePath =
         path.join(vscodeFolderPath, FileNames.cppPropertiesFileName);
 
-    if (await this.exists(cppPropertiesFilePath)) {
+    if (await FileUtility.exists(type, cppPropertiesFilePath)) {
       return true;
     }
 
@@ -68,10 +60,10 @@ export class ScaffoldGenerator {
         boardFolderPath, boardId, FileNames.cppPropertiesFileName);
       const propertiesContent =
           fs.readFileSync(propertiesSourceFile).toString();
-      if (!await this.exists(vscodeFolderPath)) {
-        await this.mkdirRecursively(vscodeFolderPath);
+      if (!await FileUtility.exists(type, vscodeFolderPath)) {
+        await FileUtility.mkdirRecursively(type, vscodeFolderPath);
       }
-      await this.writeFile(cppPropertiesFilePath, propertiesContent);
+      await FileUtility.writeFile(type, cppPropertiesFilePath, propertiesContent);
     } catch (error) {
       throw new Error(`Create ${FileNames.cppPropertiesFileName} failed: ${error.message}`);
     }
@@ -82,19 +74,15 @@ export class ScaffoldGenerator {
   /**
    * Create Dockerfile & devcontainer.json
    */
-  private async generateDockerRelatedFiles(devcontainerFolderPath: string, boardFolderPath: string, boardId: string): Promise<boolean> {
-    if (this.exists === undefined || this.writeFile === undefined || this.mkdirRecursively === undefined) {
-      throw new Error(`File-related function is not correctly set.`);
-    }
-
+  private async generateDockerRelatedFiles(type: ScaffoldType, devcontainerFolderPath: string, boardFolderPath: string, boardId: string): Promise<boolean> {
     // Dockerfile
     const dockerfileTargetPath = path.join(
       devcontainerFolderPath, FileNames.dockerfileName);
-    if (!await this.exists(devcontainerFolderPath)) {
-      await this.mkdirRecursively(devcontainerFolderPath);
+    if (!await FileUtility.exists(type, devcontainerFolderPath)) {
+      await FileUtility.mkdirRecursively(type, devcontainerFolderPath);
     }
 
-    if (await this.exists(dockerfileTargetPath)) {
+    if (await FileUtility.exists(type, dockerfileTargetPath)) {
       return true;
     }
 
@@ -102,7 +90,7 @@ export class ScaffoldGenerator {
       const dockerfileSourcePath = path.join(
         boardFolderPath, boardId, FileNames.dockerfileName);
       const dockerfileContent = fs.readFileSync(dockerfileSourcePath, 'utf8');
-      await this.writeFile(dockerfileTargetPath, dockerfileContent);
+      await FileUtility.writeFile(type, dockerfileTargetPath, dockerfileContent);
     } catch (error) {
       throw new Error(`Create ${FileNames.dockerfileName} failed: ${error.message}`);
     }
@@ -111,7 +99,7 @@ export class ScaffoldGenerator {
     const devcontainerJsonFileTargetPath = path.join(
       devcontainerFolderPath, FileNames.devcontainerJsonFileName);
 
-    if (await this.exists(devcontainerJsonFileTargetPath)) {
+    if (await FileUtility.exists(type, devcontainerJsonFileTargetPath)) {
       return true;
     }
 
@@ -119,7 +107,7 @@ export class ScaffoldGenerator {
       const devcontainerJsonFileSourcePath = path.join(
         boardFolderPath, boardId, FileNames.devcontainerJsonFileName);
       const devcontainerJSONContent = fs.readFileSync(devcontainerJsonFileSourcePath, 'utf8');
-      await this.writeFile(devcontainerJsonFileTargetPath, devcontainerJSONContent);
+      await FileUtility.writeFile(type, devcontainerJsonFileTargetPath, devcontainerJSONContent);
     } catch (error) {
       throw new Error(`Create ${FileNames.devcontainerJsonFileName} file failed: ${error.message}`);
     }
@@ -127,30 +115,11 @@ export class ScaffoldGenerator {
     return true;
   }
 
-  // Scaffold common iot project files to the current workspace path
-  async scaffolIoTProjectdFilesInWorkspace(projectFolder: string, vscodeFolderPath: string, boardFolderPath: string, devcontainerFolderPath: string, boardId: string) {
+  async scaffoldIoTProjectdFiles(type: ScaffoldType, projectFolder: string, vscodeFolderPath: string, boardFolderPath: string, devcontainerFolderPath: string, boardId: string) {
     try {
-      this.exists = FileUtility.existsInWorkspace;
-      this.writeFile = FileUtility.writeFileInWorkspace;
-      this.mkdirRecursively = FileUtility.mkdirRecursivelyInWorkspace;
-      await this.generateCommonFiles(projectFolder, vscodeFolderPath, devcontainerFolderPath);
-      await this.generateCppPropertiesFile(vscodeFolderPath, boardFolderPath, boardId);
-      await this.generateDockerRelatedFiles(devcontainerFolderPath, boardFolderPath, boardId);
-    } catch (error) {
-      throw new Error(`Scaffold files for IoT Project failed. ${error.message}`);
-    }
-  }
-
-  // Used when creating a new iot project.
-  // Scaffold common iot project files to a certain local path
-  async scaffolIoTProjectdFilesInLocal(projectFolder: string, vscodeFolderPath: string, boardFolderPath: string, devcontainerFolderPath: string, boardId: string) {
-    try {
-      this.exists = FileUtility.existsInLocal;
-      this.writeFile = FileUtility.writeFileInLocal;
-      this.mkdirRecursively = FileUtility.mkdirRecursivelyInLocal;
-      await this.generateCommonFiles(projectFolder, vscodeFolderPath, devcontainerFolderPath);
-      await this.generateCppPropertiesFile(vscodeFolderPath, boardFolderPath, boardId);
-      await this.generateDockerRelatedFiles(devcontainerFolderPath, boardFolderPath, boardId);
+      await this.generateCommonFiles(type, projectFolder, vscodeFolderPath, devcontainerFolderPath);
+      await this.generateCppPropertiesFile(type, vscodeFolderPath, boardFolderPath, boardId);
+      await this.generateDockerRelatedFiles(type, devcontainerFolderPath, boardFolderPath, boardId);
     } catch (error) {
       throw new Error(`Scaffold files for IoT Project failed. ${error.message}`);
     }

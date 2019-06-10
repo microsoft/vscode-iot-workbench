@@ -14,7 +14,7 @@ import {Provisionable} from './Interfaces/Provisionable';
 import {Deployable} from './Interfaces/Deployable';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, AzureFunctionsLanguage, AzureComponentsStorage, DependentExtensions} from '../constants';
+import {ConfigKey, AzureFunctionsLanguage, AzureComponentsStorage, DependentExtensions, ScaffoldType} from '../constants';
 
 import {ServiceClientCredentials} from 'ms-rest';
 import {AzureAccount, AzureResourceFilter} from '../azure-account.api';
@@ -151,7 +151,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     const azureFunctionsPath = this.azureFunctionsPath;
     console.log(azureFunctionsPath);
 
-    if (!FileUtility.existsInLocal(azureFunctionsPath)) {
+    if (!FileUtility.exists(ScaffoldType.local, azureFunctionsPath)) {
       throw new Error(
           'Unable to find the Azure Functions folder inside the project.');
     }
@@ -347,7 +347,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     let azureConfigs: AzureConfigs = {componentConfigs: []};
 
     try {
-      const azureConfigContent = await FileUtility.readFileInLocal(azureConfigFilePath, 'utf8');
+      const azureConfigContent = await FileUtility.readFile(ScaffoldType.local, azureConfigFilePath, 'utf8');
       azureConfigs = JSON.parse(azureConfigContent) as AzureConfigs;
     } catch (error) {
       const e = new Error('Invalid azure components config file.');
