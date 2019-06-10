@@ -115,7 +115,7 @@ export class ScaffoldGenerator {
     return true;
   }
 
-  async scaffoldIoTProjectdFiles(type: ScaffoldType, projectFolder: string, vscodeFolderPath: string, boardFolderPath: string, devcontainerFolderPath: string, boardId: string) {
+  async scaffoldIoTProjectFiles(type: ScaffoldType, projectFolder: string, vscodeFolderPath: string, boardFolderPath: string, devcontainerFolderPath: string, boardId: string): Promise<void> {
     try {
       await this.generateCommonFiles(type, projectFolder, vscodeFolderPath, devcontainerFolderPath);
       await this.generateCppPropertiesFile(type, vscodeFolderPath, boardFolderPath, boardId);

@@ -88,7 +88,7 @@ export class RaspberryPiDevice implements Device {
     }
 
     const scaffoldGenerator = new ScaffoldGenerator();
-    await scaffoldGenerator.scaffoldIoTProjectdFiles(ScaffoldType.workspace, this.projectFolder, this.vscodeFolderPath,
+    await scaffoldGenerator.scaffoldIoTProjectFiles(ScaffoldType.workspace, this.projectFolder, this.vscodeFolderPath,
       this.boardFolderPath, this.devcontainerFolderPath, RaspberryPiDevice.boardId);
 
     return true;
@@ -100,7 +100,7 @@ export class RaspberryPiDevice implements Device {
     }
     
     const scaffoldGenerator = new ScaffoldGenerator();
-    await scaffoldGenerator.scaffoldIoTProjectdFiles(ScaffoldType.local, this.projectFolder, this.vscodeFolderPath,
+    await scaffoldGenerator.scaffoldIoTProjectFiles(ScaffoldType.local, this.projectFolder, this.vscodeFolderPath,
       this.boardFolderPath, this.devcontainerFolderPath, RaspberryPiDevice.boardId);
     await this.generateSketchFile(this.templateFilesInfo);
 
