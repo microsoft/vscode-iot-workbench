@@ -10,7 +10,7 @@ import * as utils from '../utils';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames, PlatformType, OperationType, ScaffoldType} from '../constants';
-import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
+import {TemplateFileInfo, ProjectTemplateType} from './Interfaces/ProjectTemplate';
 import {runCommand} from '../utils';
 
 import {ComponentType} from './Interfaces/Component';
@@ -39,11 +39,13 @@ export class RaspberryPiDevice implements Device {
   private channel: vscode.OutputChannel;
   private static _boardId = 'raspberrypi';
   private extensionContext: vscode.ExtensionContext;
+  private projectType: ProjectTemplateType;
 
-  protected devcontainerFolderPath: string;
-  protected vscodeFolderPath: string;
-  protected boardFolderPath: string;
-  protected outputPath: string;
+  private devcontainerFolderPath: string;
+  private vscodeFolderPath: string;
+  private boardFolderPath: string;
+  private outputPath: string;
+  private templateFolderPath: string;
 
   static get boardId() {
     return RaspberryPiDevice._boardId;
@@ -51,9 +53,10 @@ export class RaspberryPiDevice implements Device {
 
   constructor(
       context: vscode.ExtensionContext, projectPath: string,
-      channel: vscode.OutputChannel, private templateFilesInfo: TemplateFileInfo[] = []) {
+      channel: vscode.OutputChannel, projectTemplateType: ProjectTemplateType, private templateFilesInfo: TemplateFileInfo[] = []) {
     this.deviceType = DeviceType.Raspberry_Pi;
     this.componentType = ComponentType.Device;
+    this.projectType = projectTemplateType;
     this.projectFolder = projectPath;
     this.channel = channel;
     this.componentId = Guid.create().toString();
@@ -64,8 +67,10 @@ export class RaspberryPiDevice implements Device {
         path.join(this.projectFolder, FileNames.vscodeSettingsFolderName);
     this.boardFolderPath = context.asAbsolutePath(
         path.join(FileNames.resourcesFolderName, PlatformType.LINUX));
-    this.outputPath = 
+    this.outputPath =
         path.join(this.projectFolder, FileNames.outputPathName);
+    this.templateFolderPath =
+        path.join(this.boardFolderPath, RaspberryPiDevice.boardId);
   }
 
   name = 'RaspberryPi';
@@ -89,7 +94,7 @@ export class RaspberryPiDevice implements Device {
 
     const scaffoldGenerator = new ScaffoldGenerator();
     await scaffoldGenerator.scaffoldIoTProjectFiles(ScaffoldType.workspace, this.projectFolder, this.vscodeFolderPath,
-      this.boardFolderPath, this.devcontainerFolderPath, RaspberryPiDevice.boardId);
+      this.devcontainerFolderPath, this.templateFolderPath, this.projectType);
 
     return true;
   }
@@ -101,7 +106,7 @@ export class RaspberryPiDevice implements Device {
     
     const scaffoldGenerator = new ScaffoldGenerator();
     await scaffoldGenerator.scaffoldIoTProjectFiles(ScaffoldType.local, this.projectFolder, this.vscodeFolderPath,
-      this.boardFolderPath, this.devcontainerFolderPath, RaspberryPiDevice.boardId);
+      this.devcontainerFolderPath, this.templateFolderPath, this.projectType);
     await this.generateSketchFile(this.templateFilesInfo);
 
     return true;

@@ -57,25 +57,33 @@ export class FileUtility {
     }
   }
 
+  static async mkdir(type: ScaffoldType, dirPath: string): Promise<void> {
+    if (type === ScaffoldType.local) {
+      await sdk.FileSystem.mkDir(dirPath);
+    } else {
+      fs.mkdirSync(dirPath);
+    }
+  }
+
   static async mkdirRecursively(type: ScaffoldType, dirPath: string): Promise<void> {
     if (await FileUtility.directoryExists(type, dirPath)) {
       return;
     }
     const dirname = path.dirname(dirPath);
     if (path.normalize(dirname) === path.normalize(dirPath)) {
-      fs.mkdirSync(dirPath);
+      await FileUtility.mkdirRecursively(type, dirname);
     } else if (await FileUtility.directoryExists(type, dirname)) {
-      fs.mkdirSync(dirPath);
+      await FileUtility.mkdir(type, dirPath);
     } else {
       await FileUtility.mkdirRecursively(type, dirname);
-      fs.mkdirSync(dirPath);
+      await FileUtility.mkdir(type, dirPath);
     }
   }
 
   static async fileExists(type: ScaffoldType, filePath: string): Promise<boolean> {
     if (type === ScaffoldType.local) {
       const directoryExists = await sdk.FileSystem.exists(filePath);
-      if (!directoryExists) {
+      if (!directoryExists) {5
         return false;
       }
       const isFile = await sdk.FileSystem.isFile(filePath);

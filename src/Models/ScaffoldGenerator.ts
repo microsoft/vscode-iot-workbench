@@ -4,6 +4,7 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import {FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
+import { ProjectTemplateType } from './Interfaces/ProjectTemplate';
 
 export class ScaffoldGenerator {
   /**
@@ -46,7 +47,7 @@ export class ScaffoldGenerator {
   /**
    * Create c_cpp_properties.json file
    */
-  private async generateCppPropertiesFile(type: ScaffoldType, vscodeFolderPath: string, boardFolderPath: string, boardId: string): Promise<boolean> {
+  private async generateCppPropertiesFile(type: ScaffoldType, vscodeFolderPath: string, templateFolderPath: string): Promise<boolean> {
 
     const cppPropertiesFilePath =
         path.join(vscodeFolderPath, FileNames.cppPropertiesFileName);
@@ -57,7 +58,7 @@ export class ScaffoldGenerator {
 
     try {
       const propertiesSourceFile = path.join(
-        boardFolderPath, boardId, FileNames.cppPropertiesFileName);
+        templateFolderPath, FileNames.cppPropertiesFileName);
       const propertiesContent =
           fs.readFileSync(propertiesSourceFile).toString();
       if (!await FileUtility.exists(type, vscodeFolderPath)) {
@@ -74,52 +75,48 @@ export class ScaffoldGenerator {
   /**
    * Create Dockerfile & devcontainer.json
    */
-  private async generateDockerRelatedFiles(type: ScaffoldType, devcontainerFolderPath: string, boardFolderPath: string, boardId: string): Promise<boolean> {
+  private async generateDockerRelatedFiles(type: ScaffoldType, devcontainerFolderPath: string, templateFolderPath: string, projectTemplateType: ProjectTemplateType): Promise<boolean> {
     // Dockerfile
     const dockerfileTargetPath = path.join(
       devcontainerFolderPath, FileNames.dockerfileName);
-    if (!await FileUtility.exists(type, devcontainerFolderPath)) {
-      await FileUtility.mkdirRecursively(type, devcontainerFolderPath);
-    }
+    if (!await FileUtility.exists(type, dockerfileTargetPath)) {
+      if (!await FileUtility.exists(type, devcontainerFolderPath)) {
+        await FileUtility.mkdirRecursively(type, devcontainerFolderPath);
+      }
 
-    if (await FileUtility.exists(type, dockerfileTargetPath)) {
-      return true;
-    }
-
-    try {
-      const dockerfileSourcePath = path.join(
-        boardFolderPath, boardId, FileNames.dockerfileName);
-      const dockerfileContent = fs.readFileSync(dockerfileSourcePath, 'utf8');
-      await FileUtility.writeFile(type, dockerfileTargetPath, dockerfileContent);
-    } catch (error) {
-      throw new Error(`Create ${FileNames.dockerfileName} failed: ${error.message}`);
+      try {
+        const dockerfileSourcePath = path.join(
+          templateFolderPath, FileNames.dockerfileName);
+        const dockerfileContent = fs.readFileSync(dockerfileSourcePath, 'utf8');
+        await FileUtility.writeFile(type, dockerfileTargetPath, dockerfileContent);
+      } catch (error) {
+        throw new Error(`Create ${FileNames.dockerfileName} failed: ${error.message}`);
+      }
     }
 
     // devcontainer.json
     const devcontainerJsonFileTargetPath = path.join(
       devcontainerFolderPath, FileNames.devcontainerJsonFileName);
 
-    if (await FileUtility.exists(type, devcontainerJsonFileTargetPath)) {
-      return true;
-    }
-
-    try {
-      const devcontainerJsonFileSourcePath = path.join(
-        boardFolderPath, boardId, FileNames.devcontainerJsonFileName);
-      const devcontainerJSONContent = fs.readFileSync(devcontainerJsonFileSourcePath, 'utf8');
-      await FileUtility.writeFile(type, devcontainerJsonFileTargetPath, devcontainerJSONContent);
-    } catch (error) {
-      throw new Error(`Create ${FileNames.devcontainerJsonFileName} file failed: ${error.message}`);
+    if (!await FileUtility.exists(type, devcontainerJsonFileTargetPath)) {
+      try {
+        const devcontainerJsonFileSourcePath = path.join(
+          templateFolderPath, projectTemplateType, FileNames.devcontainerJsonFileName);
+        const devcontainerJSONContent = fs.readFileSync(devcontainerJsonFileSourcePath, 'utf8');
+        await FileUtility.writeFile(type, devcontainerJsonFileTargetPath, devcontainerJSONContent);
+      } catch (error) {
+        throw new Error(`Create ${FileNames.devcontainerJsonFileName} file failed: ${error.message}`);
+      }
     }
 
     return true;
   }
 
-  async scaffoldIoTProjectFiles(type: ScaffoldType, projectFolder: string, vscodeFolderPath: string, boardFolderPath: string, devcontainerFolderPath: string, boardId: string): Promise<void> {
+  async scaffoldIoTProjectFiles(type: ScaffoldType, projectFolder: string, vscodeFolderPath: string, devcontainerFolderPath: string, templateFolderPath: string, projectTemplateType: ProjectTemplateType): Promise<void> {
     try {
       await this.generateCommonFiles(type, projectFolder, vscodeFolderPath, devcontainerFolderPath);
-      await this.generateCppPropertiesFile(type, vscodeFolderPath, boardFolderPath, boardId);
-      await this.generateDockerRelatedFiles(type, devcontainerFolderPath, boardFolderPath, boardId);
+      await this.generateCppPropertiesFile(type, vscodeFolderPath, templateFolderPath);
+      await this.generateDockerRelatedFiles(type, devcontainerFolderPath, templateFolderPath, projectTemplateType);
     } catch (error) {
       throw new Error(`Scaffold files for IoT Project failed. ${error.message}`);
     }

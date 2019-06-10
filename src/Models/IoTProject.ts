@@ -7,8 +7,7 @@ import * as vscode from 'vscode';
 import * as utils from '../utils';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, FileNames, ScaffoldType} from '../constants';
-import {EventNames, DependentExtensions} from '../constants';
+import {ConfigKey, FileNames, ScaffoldType, EventNames, DependentExtensions} from '../constants';
 import {TelemetryProperties, TelemetryWorker} from '../telemetry';
 import {askAndNewProject} from '../utils';
 
@@ -144,13 +143,17 @@ export class IoTProject {
         return false;
       }
       let device = null;
+      const projectType = projectConfigJson[`${ConfigKey.projectType}`] as ProjectTemplateType;
+      if (!projectType) {
+        return false;
+      }
       if (boardId === az3166DeviceModule.AZ3166Device.boardId) {
         device = new az3166DeviceModule.AZ3166Device(
-            this.extensionContext, this.channel, this.projectRootPath);
+            this.extensionContext, this.channel, this.projectRootPath, projectType);
       } else if (
         boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
       device = new raspberryPiDeviceModule.RaspberryPiDevice(
-          this.extensionContext, this.projectRootPath, this.channel);
+          this.extensionContext, this.projectRootPath, this.channel, projectType);
     }
       if (device) {
         this.componentList.push(device);
@@ -501,11 +504,11 @@ export class IoTProject {
     let device: Component;
     if (boardId === az3166DeviceModule.AZ3166Device.boardId) {
       device = new az3166DeviceModule.AZ3166Device(
-          this.extensionContext, this.channel, this.projectRootPath, templateFilesInfo);
+          this.extensionContext, this.channel, this.projectRootPath, projectType, templateFilesInfo);
       } else if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
         device = new raspberryPiDeviceModule.RaspberryPiDevice(
             this.extensionContext, this.projectRootPath, this.channel,
-            templateFilesInfo);
+            projectType, templateFilesInfo);
     } else {
       throw new Error('The specified board is not supported.');
     }
@@ -518,6 +521,7 @@ export class IoTProject {
     projectConfig[`${ConfigKey.boardId}`] = boardId;
     this.componentList.push(device);
 
+    projectConfig[`${ConfigKey.projectType}`] = projectType;
     switch (projectType) {
       case ProjectTemplateType.Basic:
         // Save data to configFile
@@ -525,20 +529,20 @@ export class IoTProject {
       case ProjectTemplateType.IotHub: {
         const iothub =
             new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
-        const isPrerequisitesAchieved = await iothub.checkPrerequisites();
-        if (!isPrerequisitesAchieved) {
-          return false;
-        }
+        // const isPrerequisitesAchieved = await iothub.checkPrerequisites();
+        // if (!isPrerequisitesAchieved) {
+        //   return false;
+        // }
         this.componentList.push(iothub);
         break;
       }
       case ProjectTemplateType.AzureFunctions: {
         const iothub =
             new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
-        const isIotHubPrerequisitesAchieved = await iothub.checkPrerequisites();
-        if (!isIotHubPrerequisitesAchieved) {
-          return false;
-        }
+        // const isIotHubPrerequisitesAchieved = await iothub.checkPrerequisites();
+        // if (!isIotHubPrerequisitesAchieved) {
+        //   return false;
+        // }
 
         const functionDir = path.join(this.projectRootPath, constants.functionDefaultFolderName);
 
@@ -555,6 +559,8 @@ export class IoTProject {
         const isFunctionsPrerequisitesAchieved =
             await azureFunctions.checkPrerequisites();
         if (!isFunctionsPrerequisitesAchieved) {
+          const message = `Azure Functions extension is required to create an Azure Functions type IoT Project. Please install it from marketplace first.`;
+          vscode.window.showWarningMessage(message);
           return false;
         }
 
@@ -568,18 +574,18 @@ export class IoTProject {
       case ProjectTemplateType.StreamAnalytics: {
         const iothub =
             new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
-        const isIotHubPrerequisitesAchieved = await iothub.checkPrerequisites();
-        if (!isIotHubPrerequisitesAchieved) {
-          return false;
-        }
+        // const isIotHubPrerequisitesAchieved = await iothub.checkPrerequisites();
+        // if (!isIotHubPrerequisitesAchieved) {
+        //   return false;
+        // }
 
         const cosmosDB = new cosmosDBModule.CosmosDB(
             this.extensionContext, this.projectRootPath, this.channel);
-        const isCosmosDBPrerequisitesAchieved =
-            await cosmosDB.checkPrerequisites();
-        if (!isCosmosDBPrerequisitesAchieved) {
-          return false;
-        }
+        // const isCosmosDBPrerequisitesAchieved =
+        //     await cosmosDB.checkPrerequisites();
+        // if (!isCosmosDBPrerequisitesAchieved) {
+        //   return false;
+        // }
 
         const asaDir = path.join(this.projectRootPath, constants.asaFolderName);
 

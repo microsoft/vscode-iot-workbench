@@ -18,7 +18,7 @@ import {Board} from './Interfaces/Board';
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
 import {LibraryManageable} from './Interfaces/LibraryManageable';
-import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
+import {TemplateFileInfo, ProjectTemplateType} from './Interfaces/ProjectTemplate';
 import {OTA} from './OTA';
 import { RemoteExtension } from './RemoteExtension';
 
@@ -39,6 +39,7 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
   protected extensionContext: vscode.ExtensionContext;
   protected channel: vscode.OutputChannel;
   protected componentId: string;
+  protected projectType: ProjectTemplateType;
 
   abstract name: string;
   abstract id: string;
@@ -46,9 +47,10 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
 
   constructor(
       context: vscode.ExtensionContext, projectPath: string,
-      channel: vscode.OutputChannel, deviceType: DeviceType) {
+      channel: vscode.OutputChannel, deviceType: DeviceType, projectTemplateType: ProjectTemplateType) {
     this.deviceType = deviceType;
     this.componentType = ComponentType.Device;
+    this.projectType = projectTemplateType;
     this.projectFolder = projectPath;
     this.extensionContext = context;
     this.channel = channel;

@@ -109,14 +109,6 @@ export class ProjectInitializer {
 
             const projectTemplateType: ProjectTemplateType = (ProjectTemplateType)[result.type as keyof typeof ProjectTemplateType];
 
-            if (projectTemplateType === ProjectTemplateType.AzureFunctions) {
-              const isFunctionsExtensionAvailable =
-                  await azureFunctionsModule.AzureFunctions.isAvailable();
-              if (!isFunctionsExtensionAvailable) {
-                return false;
-              }
-            }
-
             // Update telemetry
             const templateFilesInfo: TemplateFileInfo[] = [];
             result.templateFilesInfo.forEach((fileInfo: TemplateFileInfo) => {
