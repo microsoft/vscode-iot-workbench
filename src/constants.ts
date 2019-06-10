@@ -40,6 +40,21 @@ export class EventNames {
   static readonly scaffoldDeviceStubEvent = 'IoTWorkbench.ScaffoldDeviceStub';
   static readonly regenerateDeviceStubEvent =
       'IoTWorkbench.RegenerateDeviceStub';
+  static readonly pnpGetInterfacesEvent = 'IoTWorkbench.IoTPnPGetInterfaces';
+  static readonly pnpGetCapabilityModelsEvent =
+      'IoTWorkbench.IoTPnPGetCapabilityModels';
+  static readonly pnpDeleteModelsEvent = 'IoTWorkbench.IoTPnPDeleteModels';
+  static readonly pnpEditModelsEvent = 'IoTWorkbench.IoTPnPEditModels';
+  static readonly pnpConnectModelRepoEvent =
+      'IoTWorkbench.IoTPnPConnectModelRepo';
+  static readonly pnpDisconnectModelRepoEvent =
+      'IoTWorkbench.IoTPnPDisconnectModelRepo';
+  static readonly pnpCreateInterfaceEvent =
+      'IoTWorkbench.IoTPnPCreateInterface';
+  static readonly pnpCreateCapabilityModelEvent =
+      'IoTWorkbench.IoTPnPCreateCapabilityModel';
+  static readonly pnpSubmitMetaModelFilesEvent =
+      'IoTWorkbench.IoTPnPSubmitMetaModelFiles';
 }
 
 export class FileNames {

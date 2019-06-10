@@ -19,6 +19,7 @@ import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
 import {DigitalTwinConnectionStringBuilder} from './DigitalTwinApi/DigitalTwinConnectionStringBuilder';
 import {DigitalTwinModel, DigitalTwinModelBase} from './DigitalTwinApi/DataContracts/DigitalTwinModel';
+import {TelemetryContext} from '../telemetry';
 
 const constants = {
   storedFilesInfoKeyName: 'StoredFilesInfo',
@@ -86,7 +87,8 @@ export class DeviceModelOperator {
   }
 
   async CreateInterface(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext) {
     let rootPath: string|null = null;
     rootPath = await this.InitializeFolder();
     if (!rootPath) {
@@ -162,7 +164,8 @@ export class DeviceModelOperator {
   }
 
   async CreateCapabilityModel(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext) {
     let rootPath: string|null = null;
     rootPath = await this.InitializeFolder();
     if (!rootPath) {
@@ -242,8 +245,8 @@ export class DeviceModelOperator {
   }
 
   async ConnectModelRepository(
-      context: vscode.ExtensionContext,
-      channel: vscode.OutputChannel): Promise<boolean> {
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext): Promise<boolean> {
     const repoItems = [
       {label: 'Open Public Model Repository', description: ''},
       {label: 'Open Organizational Model Repository', description: ''}
@@ -307,7 +310,9 @@ export class DeviceModelOperator {
     return false;
   }
 
-  async Disconnect() {
+  async Disconnect(
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext) {
     await ConfigHandler.update(
         ConfigKey.modelRepositoryKeyName, '',
         vscode.ConfigurationTarget.Global);
@@ -321,7 +326,8 @@ export class DeviceModelOperator {
 
 
   async GetInterfaces(
-      context: vscode.ExtensionContext, usePublicRepository: boolean,
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext, usePublicRepository: boolean,
       searchString = '', pageSize = 50, continueToken: string|null = null) {
     if (usePublicRepository) {
       const dtMetamodelRepositoryClient =
@@ -351,7 +357,8 @@ export class DeviceModelOperator {
   }
 
   async GetCapabilityModels(
-      context: vscode.ExtensionContext, usePublicRepository: boolean,
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext, usePublicRepository: boolean,
       searchString = '', pageSize = 50, continueToken: string|null = null) {
     if (usePublicRepository) {
       const dtMetamodelRepositoryClient =
@@ -382,8 +389,9 @@ export class DeviceModelOperator {
   }
 
   async DeleteMetamodelFiles(
-      fileIds: string[], metaModelValue: string,
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext, fileIds: string[],
+      metaModelValue: string) {
     channel.show();
     if (!fileIds || fileIds.length === 0) {
       channel.appendLine(`Please select the ${metaModelValue} to delete.`);
@@ -430,8 +438,9 @@ export class DeviceModelOperator {
   }
 
   async DownloadAndEditMetamodelFiles(
-      fileIds: string[], metaModelValue: string, usePublicRepository: boolean,
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext, fileIds: string[],
+      metaModelValue: string, usePublicRepository: boolean) {
     channel.show();
     if (!fileIds || fileIds.length === 0) {
       channel.appendLine(`${DigitalTwinConstants.dtPrefix} No ${
@@ -530,8 +539,8 @@ export class DeviceModelOperator {
   }
 
   async SubmitMetaModelFiles(
-      context: vscode.ExtensionContext,
-      channel: vscode.OutputChannel): Promise<boolean> {
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext): Promise<boolean> {
     if (!vscode.workspace.workspaceFolders ||
         !vscode.workspace.workspaceFolders[0].uri.fsPath) {
       vscode.window.showWarningMessage(

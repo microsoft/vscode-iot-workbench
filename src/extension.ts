@@ -369,6 +369,18 @@ export async function activate(context: vscode.ExtensionContext) {
   const codeRegeneratorBinder =
       codeGenerator.RegenerateDeviceCodeStub.bind(codeGenerator);
 
+  const pnpEditModelsBinder =
+      deviceModelOperator.DownloadAndEditMetamodelFiles.bind(
+          deviceModelOperator);
+
+  const pnpCreateInterfaceBinder =
+      deviceModelOperator.CreateInterface.bind(deviceModelOperator);
+
+  const pnpCreateCapabilityModelBinder =
+      deviceModelOperator.CreateCapabilityModel.bind(deviceModelOperator);
+
+  const pnpSubmitModelFilesBinder =
+      deviceModelOperator.SubmitMetaModelFiles.bind(deviceModelOperator);
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with  registerCommand
   // The commandId parameter must match the command field in package.json
@@ -483,14 +495,6 @@ export async function activate(context: vscode.ExtensionContext) {
     telemetryModule.callWithTelemetry(
         EventNames.loadExampleEvent, outputChannel, true, context,
         initializeExampleBinder, {}, name, url, boardId);
-  };
-
-  const deviceModelCreateInterfaceProvider = async () => {
-    deviceModelOperator.CreateInterface(context, outputChannel);
-  };
-
-  const deviceModelCreateCapabilityModelProvider = async () => {
-    deviceModelOperator.CreateCapabilityModel(context, outputChannel);
   };
 
   const projectInit = vscode.commands.registerCommand(
@@ -622,13 +626,22 @@ export async function activate(context: vscode.ExtensionContext) {
         ConfigKey.shownHelpPage, true, vscode.ConfigurationTarget.Global);
   }
 
+  // IoT Plug and Play commands
   vscode.commands.registerCommand(
       'iotworkbench.getInterfaces',
       async (
           searchString?: string, publicRepository = false, pageSize?: number,
           continueToken?: string) => {
-        return await deviceModelOperator.GetInterfaces(
-            context, publicRepository, searchString, pageSize, continueToken);
+        // Initialize Telemetry
+        if (!telemetryWorkerInitialized) {
+          telemetryModule.TelemetryWorker.Initialize(context);
+          telemetryWorkerInitialized = true;
+        }
+
+        return telemetryModule.callWithTelemetry(
+            EventNames.pnpGetInterfacesEvent, outputChannel, true, context,
+            deviceModelOperator.GetInterfaces, {}, publicRepository,
+            searchString, pageSize, continueToken);
       });
 
   vscode.commands.registerCommand(
@@ -636,15 +649,31 @@ export async function activate(context: vscode.ExtensionContext) {
       async (
           searchString?: string, publicRepository = false, pageSize?: number,
           continueToken?: string) => {
-        return await deviceModelOperator.GetCapabilityModels(
-            context, publicRepository, searchString, pageSize, continueToken);
+        // Initialize Telemetry
+        if (!telemetryWorkerInitialized) {
+          telemetryModule.TelemetryWorker.Initialize(context);
+          telemetryWorkerInitialized = true;
+        }
+
+        return telemetryModule.callWithTelemetry(
+            EventNames.pnpGetCapabilityModelsEvent, outputChannel, true,
+            context, deviceModelOperator.GetCapabilityModels, {},
+            publicRepository, searchString, pageSize, continueToken);
       });
 
   vscode.commands.registerCommand(
       'iotworkbench.deleteMetamodelFiles',
       async (interfaceIds: string[], metaModelValue: string) => {
-        await deviceModelOperator.DeleteMetamodelFiles(
-            interfaceIds, metaModelValue, context, outputChannel);
+        // Initialize Telemetry
+        if (!telemetryWorkerInitialized) {
+          telemetryModule.TelemetryWorker.Initialize(context);
+          telemetryWorkerInitialized = true;
+        }
+
+        telemetryModule.callWithTelemetry(
+            EventNames.pnpDeleteModelsEvent, outputChannel, true, context,
+            deviceModelOperator.DeleteMetamodelFiles, {}, interfaceIds,
+            metaModelValue);
       });
 
   vscode.commands.registerCommand(
@@ -652,30 +681,77 @@ export async function activate(context: vscode.ExtensionContext) {
       async (
           fileIds: string[], metaModelValue: string,
           publicRepository = false) => {
-        await deviceModelOperator.DownloadAndEditMetamodelFiles(
-            fileIds, metaModelValue, publicRepository, context, outputChannel);
+        // Initialize Telemetry
+        if (!telemetryWorkerInitialized) {
+          telemetryModule.TelemetryWorker.Initialize(context);
+          telemetryWorkerInitialized = true;
+        }
+
+        telemetryModule.callWithTelemetry(
+            EventNames.pnpEditModelsEvent, outputChannel, true, context,
+            pnpEditModelsBinder, {}, fileIds, metaModelValue, publicRepository);
       });
 
   context.subscriptions.push(vscode.commands.registerCommand(
       'iotworkbench.iotPnPOpenRepository', async () => {
-        deviceModelOperator.ConnectModelRepository(context, outputChannel);
+        // Initialize Telemetry
+        if (!telemetryWorkerInitialized) {
+          telemetryModule.TelemetryWorker.Initialize(context);
+          telemetryWorkerInitialized = true;
+        }
+        telemetryModule.callWithTelemetry(
+            EventNames.pnpConnectModelRepoEvent, outputChannel, true, context,
+            deviceModelOperator.ConnectModelRepository);
       }));
+
   context.subscriptions.push(vscode.commands.registerCommand(
       'iotworkbench.iotPnPSignOutRepository', async () => {
-        deviceModelOperator.Disconnect();
+        // Initialize Telemetry
+        if (!telemetryWorkerInitialized) {
+          telemetryModule.TelemetryWorker.Initialize(context);
+          telemetryWorkerInitialized = true;
+        }
+        telemetryModule.callWithTelemetry(
+            EventNames.pnpConnectModelRepoEvent, outputChannel, true, context,
+            deviceModelOperator.Disconnect);
       }));
+
   context.subscriptions.push(vscode.commands.registerCommand(
       'iotworkbench.iotPnPCreateInterface', async () => {
-        deviceModelOperator.CreateInterface(context, outputChannel);
+        // Initialize Telemetry
+        if (!telemetryWorkerInitialized) {
+          telemetryModule.TelemetryWorker.Initialize(context);
+          telemetryWorkerInitialized = true;
+        }
+        telemetryModule.callWithTelemetry(
+            EventNames.pnpCreateInterfaceEvent, outputChannel, true, context,
+            pnpCreateInterfaceBinder);
       }));
+
   context.subscriptions.push(vscode.commands.registerCommand(
       'iotworkbench.iotPnPCreateCapabilityModel', async () => {
-        deviceModelOperator.CreateCapabilityModel(context, outputChannel);
+        // Initialize Telemetry
+        if (!telemetryWorkerInitialized) {
+          telemetryModule.TelemetryWorker.Initialize(context);
+          telemetryWorkerInitialized = true;
+        }
+        telemetryModule.callWithTelemetry(
+            EventNames.pnpCreateCapabilityModelEvent, outputChannel, true,
+            context, pnpCreateCapabilityModelBinder);
       }));
+
   context.subscriptions.push(vscode.commands.registerCommand(
       'iotworkbench.iotPnPSubmitFile', async () => {
-        deviceModelOperator.SubmitMetaModelFiles(context, outputChannel);
+        // Initialize Telemetry
+        if (!telemetryWorkerInitialized) {
+          telemetryModule.TelemetryWorker.Initialize(context);
+          telemetryWorkerInitialized = true;
+        }
+        telemetryModule.callWithTelemetry(
+            EventNames.pnpSubmitMetaModelFilesEvent, outputChannel, true,
+            context, pnpSubmitModelFilesBinder);
       }));
+
   context.subscriptions.push(vscode.commands.registerCommand(
       'iotworkbench.iotPnPGenerateCode', async () => {
         // Initialize Telemetry
@@ -687,6 +763,7 @@ export async function activate(context: vscode.ExtensionContext) {
             EventNames.scaffoldDeviceStubEvent, outputChannel, true, context,
             codeGeneratorBinder);
       }));
+
   context.subscriptions.push(vscode.commands.registerCommand(
       'iotworkbench.iotPnPRegenerateCode', async () => {
         // Initialize Telemetry
