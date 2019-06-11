@@ -6,24 +6,6 @@ import * as sdk from 'vscode-iot-device-cube-sdk';
 import {ScaffoldType} from './constants';
 
 export class FileUtility {
-
-  static async exists(type: ScaffoldType, path: string): Promise<boolean> {
-    if (type === ScaffoldType.local) {
-      return await sdk.FileSystem.exists(path);
-    } else {
-      return new Promise((resolve: (exist: boolean) => void) => {
-        fs.stat(path, (error: Error | null) => {
-          if (error) {
-            resolve(false);
-            return;
-          }
-          resolve(true);
-          return;
-        });
-      });
-    }
-  }
-
   static async writeFile(type: ScaffoldType, filePath: string, data: string | Buffer): Promise<void> {
     if (type === ScaffoldType.local) {
       return await sdk.FileSystem.writeFile(filePath, data);
