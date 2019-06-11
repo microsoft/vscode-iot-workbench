@@ -10,9 +10,15 @@ var example = new Vue({
     officialExamples: [],
     communityExamples: [],
     blogs: [],
-    boardId: ''
+    boardId: '',
+    disableAutoPopupLandingPage: {
+      value: false
+    }
   },
   created: function() {
+    command('iotworkbench.getDisableAutoPopupLandingPage', function(disableAutoPopupLandingPage) {
+      Vue.set(example.disableAutoPopupLandingPage, 'value', disableAutoPopupLandingPage.result);
+    });
     const query = parseQuery(_location ? _location.href : location.href);
     const url = query.url ||
         'https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/gallery/workbench-example-devkit-v2.json';
@@ -69,7 +75,11 @@ var example = new Vue({
       }
       command('iotworkbench.exampleInitialize', name, url, boardId);
     },
-    openLink: openLink
+    openLink: openLink,
+    updateDisableAutoPopupLandingPage: function() {
+      console.log('changed')
+      command('iotworkbench.setDisableAutoPopupLandingPage', this.disableAutoPopupLandingPage.value);
+    }
   }
 });
 

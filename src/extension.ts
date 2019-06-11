@@ -280,6 +280,19 @@ export async function activate(context: vscode.ExtensionContext) {
         return;
       });
 
+  const getDisableAutoPopupLandingPage = vscode.commands.registerCommand(
+      'iotworkbench.getDisableAutoPopupLandingPage', () => {
+        return ConfigHandler.get<boolean>('disableAutoPopupLandingPage');
+      });
+
+  const setDisableAutoPopupLandingPage = vscode.commands.registerCommand(
+      'iotworkbench.setDisableAutoPopupLandingPage',
+      async (disableAutoPopupLandingPage: boolean) => {
+        return ConfigHandler.update(
+            'disableAutoPopupLandingPage', disableAutoPopupLandingPage,
+            vscode.ConfigurationTarget.Global);
+      });
+
   context.subscriptions.push(projectInit);
   context.subscriptions.push(examples);
   context.subscriptions.push(exampleInitialize);
@@ -294,6 +307,8 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(sendTelemetry);
   context.subscriptions.push(openUri);
   context.subscriptions.push(httpRequest);
+  context.subscriptions.push(getDisableAutoPopupLandingPage);
+  context.subscriptions.push(setDisableAutoPopupLandingPage);
 
   const shownHelpPage = ConfigHandler.get<boolean>(ConfigKey.shownHelpPage);
   if (!shownHelpPage) {
