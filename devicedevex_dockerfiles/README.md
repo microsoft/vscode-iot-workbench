@@ -2,7 +2,9 @@
 
 ## For devkit
 
-naming convention:<iot-device-cube>:<iot-device-cube-version>-arduino-<pkg>-<pkg-version>
+naming convention:
+
+`[iot-device-cube]:[iot-device-cube-version]-arduino-[pkg]-[pkg-version]`
 
 * internal/iot-device-cube:1.0.0-arduino-base-0.3.6-alpha.preview
 
@@ -10,7 +12,9 @@ naming convention:<iot-device-cube>:<iot-device-cube-version>-arduino-<pkg>-<pkg
 
 ## For RPI
 
-<iot-device-cube>:<iot-device-cube-version>-azure-<language>-<sdk/app>-<azure-sdk-version>-<OS>-<platform>
+naming convention:
+
+`[iot-device-cube]:[iot-device-cube-version]-azure-[language]-[sdk/app]-[azure-sdk-version]-[OS]-[platform]`
 
 * internal/iot-device-cube:1.0.0-ubuntu-arm64
 * internal/iot-device-cube:1.0.0-alpine-arm64
