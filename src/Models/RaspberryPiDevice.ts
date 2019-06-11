@@ -93,7 +93,7 @@ export class RaspberryPiDevice implements Device {
     }
 
     const scaffoldGenerator = new ScaffoldGenerator();
-    await scaffoldGenerator.scaffoldIoTProjectFiles(ScaffoldType.workspace, this.projectFolder, this.vscodeFolderPath,
+    await scaffoldGenerator.scaffoldIoTProjectFiles(ScaffoldType.Workspace, this.projectFolder, this.vscodeFolderPath,
       this.devcontainerFolderPath, this.templateFolderPath, this.projectType);
 
     return true;
@@ -105,7 +105,7 @@ export class RaspberryPiDevice implements Device {
     }
     
     const scaffoldGenerator = new ScaffoldGenerator();
-    await scaffoldGenerator.scaffoldIoTProjectFiles(ScaffoldType.local, this.projectFolder, this.vscodeFolderPath,
+    await scaffoldGenerator.scaffoldIoTProjectFiles(ScaffoldType.Local, this.projectFolder, this.vscodeFolderPath,
       this.devcontainerFolderPath, this.templateFolderPath, this.projectType);
     await this.generateSketchFile(this.templateFilesInfo);
 
@@ -123,7 +123,7 @@ export class RaspberryPiDevice implements Device {
     for (const fileInfo of templateFilesInfo) {
       const targetFolderPath = path.join(this.projectFolder, fileInfo.targetPath);
       if (!await sdk.FileSystem.exists(targetFolderPath)) {
-        await FileUtility.mkdirRecursively(ScaffoldType.local,targetFolderPath);
+        await FileUtility.mkdirRecursively(ScaffoldType.Local,targetFolderPath);
       }
 
       const targetFilePath = path.join(targetFolderPath, fileInfo.fileName);
@@ -143,7 +143,7 @@ export class RaspberryPiDevice implements Device {
   async compile(): Promise<boolean> {
     const isRemote = RemoteExtension.isRemote(this.extensionContext);
     if (!isRemote) {
-      const res = await utils.askAndOpenInRemote(OperationType.compile, this.channel);
+      const res = await utils.askAndOpenInRemote(OperationType.Compile, this.channel);
       if (!res) {
         return false;
       }
@@ -190,7 +190,7 @@ export class RaspberryPiDevice implements Device {
   async upload(): Promise<boolean> {
     const isRemote = RemoteExtension.isRemote(this.extensionContext);
     if (!isRemote) {
-      const res = await utils.askAndOpenInRemote(OperationType.upload, this.channel);
+      const res = await utils.askAndOpenInRemote(OperationType.Upload, this.channel);
       if (!res) {
         return false;
       }

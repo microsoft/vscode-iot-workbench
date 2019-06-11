@@ -80,7 +80,7 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
   async compile(): Promise<boolean> {
     const isRemote = RemoteExtension.isRemote(this.extensionContext);
     if (!isRemote) {
-      const res = await utils.askAndOpenInRemote(OperationType.compile, this.channel);
+      const res = await utils.askAndOpenInRemote(OperationType.Compile, this.channel);
       if (!res) {
         return false;
       }
@@ -115,7 +115,7 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
   async upload(): Promise<boolean> {
     const isRemote = RemoteExtension.isRemote(this.extensionContext);
     if (!isRemote) {
-      const res = await utils.askAndOpenInRemote(OperationType.upload, this.channel);
+      const res = await utils.askAndOpenInRemote(OperationType.Upload, this.channel);
       if (!res) {
         return false;
       }
@@ -145,8 +145,8 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
     for (const fileInfo of templateFilesInfo) {
       let targetFilePath = '';
       const targetFolderPath = path.join(this.projectFolder, fileInfo.targetPath);
-      if (!await FileUtility.directoryExists(ScaffoldType.local, targetFolderPath)) {
-        await FileUtility.mkdir(ScaffoldType.local, targetFolderPath);
+      if (!await FileUtility.directoryExists(ScaffoldType.Local, targetFolderPath)) {
+        await FileUtility.mkdir(ScaffoldType.Local, targetFolderPath);
       }
 
       if (fileInfo.fileName.endsWith('.ino')) {
@@ -156,7 +156,7 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
       }
       if (fileInfo.fileContent) {
         try {
-          await FileUtility.writeFile(ScaffoldType.local, targetFilePath, fileInfo.fileContent);
+          await FileUtility.writeFile(ScaffoldType.Local, targetFilePath, fileInfo.fileContent);
         } catch (error) {
           throw new Error(
               `Create arduino sketch file failed: ${error.message}`);

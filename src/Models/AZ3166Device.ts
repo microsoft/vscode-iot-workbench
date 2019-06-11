@@ -212,7 +212,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
     try {
       const scaffoldGenerator = new ScaffoldGenerator();
-      await scaffoldGenerator.scaffoldIoTProjectFiles(ScaffoldType.workspace, this.projectFolder, this.vscodeFolderPath,
+      await scaffoldGenerator.scaffoldIoTProjectFiles(ScaffoldType.Workspace, this.projectFolder, this.vscodeFolderPath,
         this.devcontainerFolderPath, this.templateFolderPath, this.projectType);
     } catch(error) {
       throw new Error(`Failed to scaffold IoT Project files when loading AZ3166 device project. Error message: ${error}`);
@@ -228,7 +228,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
     try {
       const scaffoldGenerator = new ScaffoldGenerator();
-      await scaffoldGenerator.scaffoldIoTProjectFiles(ScaffoldType.local, this.projectFolder, this.vscodeFolderPath,
+      await scaffoldGenerator.scaffoldIoTProjectFiles(ScaffoldType.Local, this.projectFolder, this.vscodeFolderPath,
         this.devcontainerFolderPath, this.templateFolderPath, this.projectType);
       await this.generateSketchFile(this.templateFilesInfo);
     } catch (error) {

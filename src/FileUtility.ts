@@ -7,7 +7,7 @@ import {ScaffoldType} from './constants';
 
 export class FileUtility {
   static async directoryExists(type: ScaffoldType, dirPath: string): Promise<boolean> {
-    if (type === ScaffoldType.local) {
+    if (type === ScaffoldType.Local) {
       if (!await sdk.FileSystem.exists(dirPath)) {
         return false;
       }
@@ -28,7 +28,7 @@ export class FileUtility {
   }
 
   static async fileExists(type: ScaffoldType, filePath: string): Promise<boolean> {
-    if (type === ScaffoldType.local) {
+    if (type === ScaffoldType.Local) {
       const directoryExists = await sdk.FileSystem.exists(filePath);
       if (!directoryExists) {
         return false;
@@ -50,7 +50,7 @@ export class FileUtility {
   }
 
   static async mkdir(type: ScaffoldType, dirPath: string): Promise<void> {
-    if (type === ScaffoldType.local) {
+    if (type === ScaffoldType.Local) {
       return await sdk.FileSystem.mkDir(dirPath);
     } else {
       return new Promise(async (resolve: (value?: void) => void, reject) => {
@@ -82,7 +82,7 @@ export class FileUtility {
   }
 
   static async writeFile(type: ScaffoldType, filePath: string, data: string | Buffer): Promise<void> {
-    if (type === ScaffoldType.local) {
+    if (type === ScaffoldType.Local) {
       return await sdk.FileSystem.writeFile(filePath, data);
     } else {
       return new Promise(async (resolve: (value?: void) => void, reject) => {
@@ -98,12 +98,12 @@ export class FileUtility {
     }
   }
 
-  static async readFile(type: ScaffoldType, filePath: string, encoding: string): Promise<string> {
-    if (type === ScaffoldType.local) {
-      return await sdk.FileSystem.readFile(filePath, encoding) as string;
+  static async readFile(type: ScaffoldType, filePath: string, encoding?: string): Promise<string | Buffer> {
+    if (type === ScaffoldType.Local) {
+      return await sdk.FileSystem.readFile(filePath, encoding);
     } else {
-      return new Promise(async (resolve: (data: string) => void, reject) => {
-        await fs.readFile(filePath, 'utf8', (err, data) => {
+      return new Promise(async (resolve: (data: string | Buffer) => void, reject) => {
+        await fs.readFile(filePath, encoding, (err, data) => {
           if (err) {
             reject(err);
             return;
@@ -111,7 +111,7 @@ export class FileUtility {
           resolve(data);
           return;
         });
-      });
+      })
     }
   }
 }

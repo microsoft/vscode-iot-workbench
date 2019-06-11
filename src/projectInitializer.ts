@@ -124,7 +124,7 @@ export class ProjectInitializer {
 
 
             if (projectPath) {
-              await FileUtility.mkdirRecursively(ScaffoldType.local, projectPath);
+              await FileUtility.mkdirRecursively(ScaffoldType.Local, projectPath);
             }
             const project = new ioTProjectModule.IoTProject(
                 context, channel, telemetryContext);
@@ -217,8 +217,8 @@ export class ProjectInitializer {
     const workbench = await settings.workbenchPath();
 
     const projectRootPath = path.join(workbench, 'projects');
-    if (!await FileUtility.directoryExists(ScaffoldType.local, projectRootPath)) {
-      await FileUtility.mkdirRecursively(ScaffoldType.local, projectRootPath);
+    if (!await FileUtility.directoryExists(ScaffoldType.Local, projectRootPath)) {
+      await FileUtility.mkdirRecursively(ScaffoldType.Local, projectRootPath);
     }
 
     let counter = 0;
@@ -226,8 +226,8 @@ export class ProjectInitializer {
     let candidateName = name;
     while (true) {
       const projectPath = path.join(projectRootPath, candidateName);
-      const projectPathExists = await FileUtility.fileExists(ScaffoldType.local, projectPath);
-      const projectDirectoryExists = await FileUtility.directoryExists(ScaffoldType.local, projectPath);
+      const projectPathExists = await FileUtility.fileExists(ScaffoldType.Local, projectPath);
+      const projectDirectoryExists = await FileUtility.directoryExists(ScaffoldType.Local, projectPath);
       if (!projectPathExists && !projectDirectoryExists) {
         break;
       }
@@ -247,8 +247,8 @@ export class ProjectInitializer {
         }
 
         const projectPath = path.join(projectRootPath, projectName);
-        const projectPathExists = await FileUtility.fileExists(ScaffoldType.local, projectPath);
-        const projectDirectoryExists = await FileUtility.directoryExists(ScaffoldType.local, projectPath);
+        const projectPathExists = await FileUtility.fileExists(ScaffoldType.Local, projectPath);
+        const projectDirectoryExists = await FileUtility.directoryExists(ScaffoldType.Local, projectPath);
         if (!projectPathExists && !projectDirectoryExists) {
           return;
         } else {

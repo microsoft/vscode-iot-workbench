@@ -135,7 +135,7 @@ export class IoTProject {
     const azureConfigFileHandler =
         new azureComponentConfigModule.AzureConfigFileHandler(
             this.projectRootPath);
-    azureConfigFileHandler.createIfNotExists(ScaffoldType.workspace);
+    azureConfigFileHandler.createIfNotExists(ScaffoldType.Workspace);
 
     if (this.projectRootPath !== undefined) {
       const boardId = projectConfigJson[`${ConfigKey.boardId}`];
@@ -485,7 +485,7 @@ export class IoTProject {
       rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
       projectType: ProjectTemplateType, boardId: string,
       openInNewWindow: boolean): Promise<boolean> {
-    const rootFolderPathExists = await FileUtility.directoryExists(ScaffoldType.local, rootFolderPath);
+    const rootFolderPathExists = await FileUtility.directoryExists(ScaffoldType.Local, rootFolderPath);
     if (!rootFolderPathExists) {
       throw new Error(
           'Unable to find the root path, please open the folder and initialize project again.');
@@ -497,7 +497,7 @@ export class IoTProject {
     const azureConfigFileHandler =
         new azureComponentConfigModule.AzureConfigFileHandler(
             this.projectRootPath);
-    azureConfigFileHandler.createIfNotExists(ScaffoldType.local);
+    azureConfigFileHandler.createIfNotExists(ScaffoldType.Local);
 
     const projectConfig :{[key: string]: string} = {};
     
@@ -546,8 +546,8 @@ export class IoTProject {
 
         const functionDir = path.join(this.projectRootPath, constants.functionDefaultFolderName);
 
-        if (!await FileUtility.directoryExists(ScaffoldType.local, functionDir)) {
-          await FileUtility.mkdirRecursively(ScaffoldType.local, functionDir);
+        if (!await FileUtility.directoryExists(ScaffoldType.Local, functionDir)) {
+          await FileUtility.mkdirRecursively(ScaffoldType.Local, functionDir);
         }
 
         const azureFunctions = new azureFunctionsModule.AzureFunctions(
@@ -589,8 +589,8 @@ export class IoTProject {
 
         const asaDir = path.join(this.projectRootPath, constants.asaFolderName);
 
-        if (!await FileUtility.directoryExists(ScaffoldType.local, asaDir)) {
-          await FileUtility.mkdirRecursively(ScaffoldType.local, asaDir);
+        if (!await FileUtility.directoryExists(ScaffoldType.Local, asaDir)) {
+          await FileUtility.mkdirRecursively(ScaffoldType.Local, asaDir);
         }
 
         const asaFilePath = this.extensionContext.asAbsolutePath(
@@ -600,7 +600,7 @@ export class IoTProject {
             fs.readFileSync(asaFilePath, 'utf8')
                 .replace(/\[input\]/, `"iothub-${iothub.id}"`)
                 .replace(/\[output\]/, `"cosmosdb-${cosmosDB.id}"`);
-        await FileUtility.writeFile(ScaffoldType.local, queryPath, asaQueryContent);
+        await FileUtility.writeFile(ScaffoldType.Local, queryPath, asaQueryContent);
 
         const asa = new streamAnalyticsJobModule.StreamAnalyticsJob(
             queryPath, this.extensionContext, this.projectRootPath,
@@ -652,13 +652,13 @@ export class IoTProject {
     }
 
     const vscodeFolderPath = path.join(this.projectRootPath, FileNames.vscodeSettingsFolderName);
-    if (!await FileUtility.directoryExists(ScaffoldType.local, vscodeFolderPath)) {
-      await FileUtility.mkdirRecursively(ScaffoldType.local, vscodeFolderPath);
+    if (!await FileUtility.directoryExists(ScaffoldType.Local, vscodeFolderPath)) {
+      await FileUtility.mkdirRecursively(ScaffoldType.Local, vscodeFolderPath);
     }
     const projectConfigFile = path.join(vscodeFolderPath, constants.projectConfigFileName);
-    if (!await FileUtility.fileExists(ScaffoldType.local, projectConfigFile)) {
+    if (!await FileUtility.fileExists(ScaffoldType.Local, projectConfigFile)) {
       const indentationSpace = 4;
-      FileUtility.writeFile(ScaffoldType.local, projectConfigFile, JSON.stringify(projectConfig, null, indentationSpace));
+      FileUtility.writeFile(ScaffoldType.Local, projectConfigFile, JSON.stringify(projectConfig, null, indentationSpace));
     }
 
     if (!openInNewWindow) {

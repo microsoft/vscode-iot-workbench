@@ -54,13 +54,13 @@ export class FileNames {
 }
 
 export enum OperationType {
-  compile = 'Compile device code',
-  upload = 'Upload device code'
+  Compile = 'Compile device code',
+  Upload = 'Upload device code'
 }
 
 export enum ScaffoldType {
-  local = 'local',
-  workspace = 'workspace'
+  Local = 'local',
+  Workspace = 'workspace'
 }
 
 export enum AzureFunctionsLanguage {

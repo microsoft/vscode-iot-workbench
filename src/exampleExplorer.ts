@@ -102,8 +102,8 @@ export class ExampleExplorer {
     const workbench = await settings.workbenchPath();
 
     const name = path.join(workbench, 'examples', exampleName);
-    if (!await FileUtility.fileExists(ScaffoldType.local, name) && !await FileUtility.directoryExists(ScaffoldType.local, name)) {
-      await FileUtility.mkdirRecursively(ScaffoldType.local, name);
+    if (!await FileUtility.fileExists(ScaffoldType.Local, name) && !await FileUtility.directoryExists(ScaffoldType.Local, name)) {
+      await FileUtility.mkdirRecursively(ScaffoldType.Local, name);
       return name;
     }
 
@@ -112,7 +112,7 @@ export class ExampleExplorer {
         fs.listSync(name, [FileNames.workspaceExtensionName]);
     if (workspaceFiles && workspaceFiles.length > 0) {
       const workspaceFile = workspaceFiles[0];  // just pick the first one
-      if (await FileUtility.fileExists(ScaffoldType.local, workspaceFile)) {
+      if (await FileUtility.fileExists(ScaffoldType.Local, workspaceFile)) {
         const selection = await vscode.window.showQuickPick(
             [
               {
@@ -151,7 +151,7 @@ export class ExampleExplorer {
           return;
         }
         const name = path.join(workbench, 'examples', exampleName);
-        if (! await FileUtility.fileExists(ScaffoldType.local, name) && !await FileUtility.directoryExists(ScaffoldType.local, name)) {
+        if (! await FileUtility.fileExists(ScaffoldType.Local, name) && !await FileUtility.directoryExists(ScaffoldType.Local, name)) {
           if (!/^([a-z0-9_]|[a-z0-9_][-a-z0-9_.]*[a-z0-9_])$/i.test(
                   exampleName)) {
             return 'Folder name can only contain letters, numbers, "-" and ".", and cannot start or end with "-" or ".".';
@@ -172,9 +172,9 @@ export class ExampleExplorer {
     }
 
     const customizedPath = path.join(workbench, 'examples', customizedName);
-    if (!await FileUtility.fileExists(ScaffoldType.local, customizedPath) &&
-        !await FileUtility.directoryExists(ScaffoldType.local, customizedPath)) {
-      await FileUtility.mkdirRecursively(ScaffoldType.local, customizedPath);
+    if (!await FileUtility.fileExists(ScaffoldType.Local, customizedPath) &&
+        !await FileUtility.directoryExists(ScaffoldType.Local, customizedPath)) {
+      await FileUtility.mkdirRecursively(ScaffoldType.Local, customizedPath);
     }
 
     return customizedPath;
