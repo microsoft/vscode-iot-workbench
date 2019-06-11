@@ -77,7 +77,6 @@ var example = new Vue({
     },
     openLink: openLink,
     updateDisableAutoPopupLandingPage: function() {
-      console.log('changed')
       command('iotworkbench.setDisableAutoPopupLandingPage', this.disableAutoPopupLandingPage.value);
     }
   }
