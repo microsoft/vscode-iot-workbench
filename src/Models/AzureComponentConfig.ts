@@ -51,7 +51,7 @@ export class AzureConfigFileHandler {
     const azureConfigs: AzureConfigs = {componentConfigs: []};
     const azureConfigFolderPath =
         path.join(this.projectRootPath, AzureComponentsStorage.folderName);
-    if (!await FileUtility.exists(type, azureConfigFolderPath)) {
+    if (!await FileUtility.directoryExists(type, azureConfigFolderPath)) {
       try {
         await FileUtility.mkdirRecursively(type, azureConfigFolderPath);
       } catch (error) {
@@ -61,7 +61,7 @@ export class AzureConfigFileHandler {
     const azureConfigFilePath =
         path.join(azureConfigFolderPath, AzureComponentsStorage.fileName);
 
-    if (!await FileUtility.exists(type, azureConfigFilePath)) {
+    if (!await FileUtility.fileExists(type, azureConfigFilePath)) {
       await FileUtility.writeFile(type, azureConfigFilePath, JSON.stringify(azureConfigs, null, 4));
     }
   }

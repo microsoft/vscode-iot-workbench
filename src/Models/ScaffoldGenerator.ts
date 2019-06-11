@@ -12,7 +12,7 @@ export class ScaffoldGenerator {
    * @param type Scaffold type. 'local' - scaffold files with local path; 'workspace' - scaffold files with workspace path
    */
   private async generateCommonFiles(type: ScaffoldType, projectFolder: string, vscodeFolderPath: string, devcontainerFolderPath: string): Promise<boolean> {
-    if (!await FileUtility.exists(type, projectFolder)) {
+    if (!await FileUtility.directoryExists(type, projectFolder)) {
       throw new Error('Unable to find the project folder.');
     }
 
@@ -25,7 +25,7 @@ export class ScaffoldGenerator {
           `Create ${FileNames.iotworkbenchprojectFileName} file failed: ${error.message}`);
     }
 
-    if (!await FileUtility.exists(type, vscodeFolderPath)) {
+    if (!await FileUtility.directoryExists(type, vscodeFolderPath)) {
       try {
         await FileUtility.mkdirRecursively(type, vscodeFolderPath);
       } catch (error) {
@@ -33,7 +33,7 @@ export class ScaffoldGenerator {
       }
     }
 
-    if (!await FileUtility.exists(type, devcontainerFolderPath)) {
+    if (!await FileUtility.directoryExists(type, devcontainerFolderPath)) {
       try {
         await FileUtility.mkdirRecursively(type, devcontainerFolderPath);
       } catch (error) {
@@ -52,7 +52,7 @@ export class ScaffoldGenerator {
     const cppPropertiesFilePath =
         path.join(vscodeFolderPath, FileNames.cppPropertiesFileName);
 
-    if (await FileUtility.exists(type, cppPropertiesFilePath)) {
+    if (await FileUtility.fileExists(type, cppPropertiesFilePath)) {
       return true;
     }
 
@@ -61,7 +61,7 @@ export class ScaffoldGenerator {
         templateFolderPath, FileNames.cppPropertiesFileName);
       const propertiesContent =
           fs.readFileSync(propertiesSourceFile).toString();
-      if (!await FileUtility.exists(type, vscodeFolderPath)) {
+      if (!await FileUtility.directoryExists(type, vscodeFolderPath)) {
         await FileUtility.mkdirRecursively(type, vscodeFolderPath);
       }
       await FileUtility.writeFile(type, cppPropertiesFilePath, propertiesContent);
@@ -79,8 +79,8 @@ export class ScaffoldGenerator {
     // Dockerfile
     const dockerfileTargetPath = path.join(
       devcontainerFolderPath, FileNames.dockerfileName);
-    if (!await FileUtility.exists(type, dockerfileTargetPath)) {
-      if (!await FileUtility.exists(type, devcontainerFolderPath)) {
+    if (!await FileUtility.fileExists(type, dockerfileTargetPath)) {
+      if (!await FileUtility.directoryExists(type, devcontainerFolderPath)) {
         await FileUtility.mkdirRecursively(type, devcontainerFolderPath);
       }
 
@@ -98,7 +98,7 @@ export class ScaffoldGenerator {
     const devcontainerJsonFileTargetPath = path.join(
       devcontainerFolderPath, FileNames.devcontainerJsonFileName);
 
-    if (!await FileUtility.exists(type, devcontainerJsonFileTargetPath)) {
+    if (!await FileUtility.fileExists(type, devcontainerJsonFileTargetPath)) {
       try {
         const devcontainerJsonFileSourcePath = path.join(
           templateFolderPath, projectTemplateType, FileNames.devcontainerJsonFileName);

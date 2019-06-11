@@ -485,7 +485,7 @@ export class IoTProject {
       rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
       projectType: ProjectTemplateType, boardId: string,
       openInNewWindow: boolean): Promise<boolean> {
-    const rootFolderPathExists = await FileUtility.exists(ScaffoldType.local, rootFolderPath);
+    const rootFolderPathExists = await FileUtility.directoryExists(ScaffoldType.local, rootFolderPath);
     if (!rootFolderPathExists) {
       throw new Error(
           'Unable to find the root path, please open the folder and initialize project again.');
@@ -546,7 +546,7 @@ export class IoTProject {
 
         const functionDir = path.join(this.projectRootPath, constants.functionDefaultFolderName);
 
-        if (!await FileUtility.exists(ScaffoldType.local, functionDir)) {
+        if (!await FileUtility.directoryExists(ScaffoldType.local, functionDir)) {
           await FileUtility.mkdirRecursively(ScaffoldType.local, functionDir);
         }
 
@@ -589,7 +589,7 @@ export class IoTProject {
 
         const asaDir = path.join(this.projectRootPath, constants.asaFolderName);
 
-        if (!await FileUtility.exists(ScaffoldType.local, asaDir)) {
+        if (!await FileUtility.directoryExists(ScaffoldType.local, asaDir)) {
           await FileUtility.mkdirRecursively(ScaffoldType.local, asaDir);
         }
 
@@ -652,11 +652,11 @@ export class IoTProject {
     }
 
     const vscodeFolderPath = path.join(this.projectRootPath, FileNames.vscodeSettingsFolderName);
-    if (!await FileUtility.exists(ScaffoldType.local, vscodeFolderPath)) {
+    if (!await FileUtility.directoryExists(ScaffoldType.local, vscodeFolderPath)) {
       await FileUtility.mkdirRecursively(ScaffoldType.local, vscodeFolderPath);
     }
     const projectConfigFile = path.join(vscodeFolderPath, constants.projectConfigFileName);
-    if (!await FileUtility.exists(ScaffoldType.local, projectConfigFile)) {
+    if (!await FileUtility.fileExists(ScaffoldType.local, projectConfigFile)) {
       const indentationSpace = 4;
       FileUtility.writeFile(ScaffoldType.local, projectConfigFile, JSON.stringify(projectConfig, null, indentationSpace));
     }

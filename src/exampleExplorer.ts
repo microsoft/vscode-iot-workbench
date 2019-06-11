@@ -112,7 +112,7 @@ export class ExampleExplorer {
         fs.listSync(name, [FileNames.workspaceExtensionName]);
     if (workspaceFiles && workspaceFiles.length > 0) {
       const workspaceFile = workspaceFiles[0];  // just pick the first one
-      if (await FileUtility.exists(ScaffoldType.local, workspaceFile)) {
+      if (await FileUtility.fileExists(ScaffoldType.local, workspaceFile)) {
         const selection = await vscode.window.showQuickPick(
             [
               {

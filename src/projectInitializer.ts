@@ -217,7 +217,7 @@ export class ProjectInitializer {
     const workbench = await settings.workbenchPath();
 
     const projectRootPath = path.join(workbench, 'projects');
-    if (!await FileUtility.exists(ScaffoldType.local, projectRootPath)) {
+    if (!await FileUtility.directoryExists(ScaffoldType.local, projectRootPath)) {
       await FileUtility.mkdirRecursively(ScaffoldType.local, projectRootPath);
     }
 

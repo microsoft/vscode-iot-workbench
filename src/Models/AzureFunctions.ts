@@ -151,7 +151,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     const azureFunctionsPath = this.azureFunctionsPath;
     console.log(azureFunctionsPath);
 
-    if (!FileUtility.exists(ScaffoldType.local, azureFunctionsPath)) {
+    if (!FileUtility.directoryExists(ScaffoldType.local, azureFunctionsPath)) {
       throw new Error(
           'Unable to find the Azure Functions folder inside the project.');
     }
