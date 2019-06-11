@@ -6,23 +6,6 @@ import * as sdk from 'vscode-iot-device-cube-sdk';
 import {ScaffoldType} from './constants';
 
 export class FileUtility {
-  static async writeFile(type: ScaffoldType, filePath: string, data: string | Buffer): Promise<void> {
-    if (type === ScaffoldType.local) {
-      return await sdk.FileSystem.writeFile(filePath, data);
-    } else {
-      return new Promise(async (resolve: (value?: void) => void, reject) => {
-        await fs.writeFile(filePath, data, (err) => {
-          if (err) {
-            reject(err);
-          }
-          return;
-        });
-        resolve();
-      });
-    }
-    
-  }
-
   static async directoryExists(type: ScaffoldType, dirPath: string): Promise<boolean> {
     if (type === ScaffoldType.local) {
       if (!await sdk.FileSystem.exists(dirPath)) {
@@ -31,20 +14,56 @@ export class FileUtility {
       const isDirectory = await sdk.FileSystem.isDirectory(dirPath);
       return isDirectory;
     } else {
-      try {
-        return fs.statSync(dirPath).isDirectory();
-      } catch (e) {
+      return new Promise((resolve: (exist: boolean) => void) => {
+        fs.stat(dirPath, (error: Error | null, stats) => {
+          if (error) {
+            resolve(false);
+            return;
+          }
+          resolve(stats.isDirectory());
+          return;
+        });
+      });
+    }
+  }
+
+  static async fileExists(type: ScaffoldType, filePath: string): Promise<boolean> {
+    if (type === ScaffoldType.local) {
+      const directoryExists = await sdk.FileSystem.exists(filePath);
+      if (!directoryExists) {
         return false;
       }
+      const isFile = await sdk.FileSystem.isFile(filePath);
+      return isFile;
+    } else {
+      return new Promise((resolve: (exist: boolean) => void) => {
+        fs.stat(filePath, (error: Error | null, stats) => {
+          if (error) {
+            resolve(false);
+            return;
+          }
+          resolve(stats.isFile());
+          return;
+        });
+      });
     }
   }
 
   static async mkdir(type: ScaffoldType, dirPath: string): Promise<void> {
     if (type === ScaffoldType.local) {
-      await sdk.FileSystem.mkDir(dirPath);
+      return await sdk.FileSystem.mkDir(dirPath);
     } else {
-      fs.mkdirSync(dirPath);
-    }
+      return new Promise(async (resolve: (value?: void) => void, reject) => {
+        fs.mkdir(dirPath, { recursive: true }, (error) => {
+          if (error) {
+            reject(error);
+            return;
+          }
+          resolve();
+          return;
+        });
+      });
+      }
   }
 
   static async mkdirRecursively(type: ScaffoldType, dirPath: string): Promise<void> {
@@ -62,20 +81,20 @@ export class FileUtility {
     }
   }
 
-  static async fileExists(type: ScaffoldType, filePath: string): Promise<boolean> {
+  static async writeFile(type: ScaffoldType, filePath: string, data: string | Buffer): Promise<void> {
     if (type === ScaffoldType.local) {
-      const directoryExists = await sdk.FileSystem.exists(filePath);
-      if (!directoryExists) {5
-        return false;
-      }
-      const isFile = await sdk.FileSystem.isFile(filePath);
-      return isFile;
+      return await sdk.FileSystem.writeFile(filePath, data);
     } else {
-      try {
-        return fs.statSync(filePath).isFile();
-      } catch (e) {
-        return false;
-      }
+      return new Promise(async (resolve: (value?: void) => void, reject) => {
+        await fs.writeFile(filePath, data, (err) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve();
+          return;
+        });
+      });
     }
   }
 
@@ -83,7 +102,16 @@ export class FileUtility {
     if (type === ScaffoldType.local) {
       return await sdk.FileSystem.readFile(filePath, encoding) as string;
     } else {
-      return fs.readFileSync(filePath, encoding);
+      return new Promise(async (resolve: (data: string) => void, reject) => {
+        await fs.readFile(filePath, 'utf8', (err, data) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve(data);
+          return;
+        });
+      });
     }
   }
 }

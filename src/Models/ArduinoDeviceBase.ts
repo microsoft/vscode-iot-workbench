@@ -146,7 +146,7 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
       let targetFilePath = '';
       const targetFolderPath = path.join(this.projectFolder, fileInfo.targetPath);
       if (!await FileUtility.directoryExists(ScaffoldType.local, targetFolderPath)) {
-        await FileUtility.mkdirRecursively(ScaffoldType.local, targetFolderPath);
+        await FileUtility.mkdir(ScaffoldType.local, targetFolderPath);
       }
 
       if (fileInfo.fileName.endsWith('.ino')) {
