@@ -206,7 +206,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
             });
       }
 
-      await this.updateConfigSettings(
+      await this.updateConfigSettings(ScaffoldType.Local,
           {values: {functionLanguage: this.functionLanguage}});
       return true;
     } catch (error) {
@@ -339,7 +339,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     }
   }
 
-  async updateConfigSettings(componentInfo?: ComponentInfo): Promise<void> {
+  async updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo): Promise<void> {
     const azureConfigFilePath = path.join(
         this.azureFunctionsPath, '..', AzureComponentsStorage.folderName,
         AzureComponentsStorage.fileName);
@@ -347,7 +347,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     let azureConfigs: AzureConfigs = {componentConfigs: []};
 
     try {
-      const azureConfigContent = await FileUtility.readFile(ScaffoldType.Local, azureConfigFilePath, 'utf8');
+      const azureConfigContent = await FileUtility.readFile(type, azureConfigFilePath, 'utf8');
       azureConfigs = JSON.parse(azureConfigContent as string) as AzureConfigs;
     } catch (error) {
       const e = new Error('Invalid azure components config file.');

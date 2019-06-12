@@ -7,7 +7,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {AzureComponentsStorage, ConfigKey} from '../constants';
+import {AzureComponentsStorage, ConfigKey, ScaffoldType} from '../constants';
 
 import {getExtension} from './Apis';
 import {AzureComponentConfig, AzureConfigFileHandler, AzureConfigs, ComponentInfo, DependencyConfig} from './AzureComponentConfig';
@@ -73,7 +73,7 @@ export class IoTHub implements Component, Provisionable {
 
 
   async create(): Promise<boolean> {
-    await this.updateConfigSettings();
+    await this.updateConfigSettings(ScaffoldType.Local);
     return true;
   }
 
@@ -156,7 +156,7 @@ export class IoTHub implements Component, Provisionable {
       await ConfigHandler.update(
           ConfigKey.eventHubConnectionPath, eventHubConnectionPath);
 
-      this.updateConfigSettings({
+      this.updateConfigSettings(ScaffoldType.Workspace, {
         values: {
           iotHubConnectionString: iothub.iotHubConnectionString,
           eventHubConnectionString,
@@ -177,9 +177,9 @@ export class IoTHub implements Component, Provisionable {
     }
   }
 
-  async updateConfigSettings(componentInfo?: ComponentInfo): Promise<void> {
+  async updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo): Promise<void> {
     const iotHubComponentIndex =
-        await this.azureConfigFileHandler.getComponentIndexById(this.id);
+        await this.azureConfigFileHandler.getComponentIndexById(type, this.id);
 
     if (iotHubComponentIndex > -1) {
       if (!componentInfo) {
@@ -196,7 +196,7 @@ export class IoTHub implements Component, Provisionable {
         type: ComponentType[this.componentType],
         componentInfo
       };
-      await this.azureConfigFileHandler.appendComponent(newIoTHubConfig);
+      await this.azureConfigFileHandler.appendComponent(type, newIoTHubConfig);
     }
   }
 }

@@ -7,12 +7,13 @@ import * as vscode from 'vscode';
 import request = require('request-promise');
 import rq = require('request');
 
-import {AzureComponentsStorage, FileNames} from '../constants';
+import {AzureComponentsStorage, FileNames, ScaffoldType} from '../constants';
 
 import {AzureComponentConfig, AzureConfigFileHandler, AzureConfigs, ComponentInfo, Dependency, DependencyConfig, DependencyType} from './AzureComponentConfig';
 import {ARMTemplate, AzureUtility} from './AzureUtility';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
+import { ScaffoldGenerator } from './ScaffoldGenerator';
 
 export class CosmosDB implements Component, Provisionable {
   dependencies: DependencyConfig[] = [];
@@ -81,13 +82,13 @@ export class CosmosDB implements Component, Provisionable {
   }
 
   async create(): Promise<boolean> {
-    await this.updateConfigSettings();
+    await this.updateConfigSettings(ScaffoldType.Local);
     return true;
   }
 
-  async updateConfigSettings(componentInfo?: ComponentInfo): Promise<void> {
+  async updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo): Promise<void> {
     const cosmosDBComponentIndex =
-        await this.azureConfigHandler.getComponentIndexById(this.id);
+        await this.azureConfigHandler.getComponentIndexById(type, this.id);
     if (cosmosDBComponentIndex > -1) {
       if (!componentInfo) {
         return;
@@ -102,7 +103,7 @@ export class CosmosDB implements Component, Provisionable {
         dependencies: this.dependencies,
         type: ComponentType[this.componentType]
       };
-      await this.azureConfigHandler.appendComponent(newCosmosDBConfig);
+      await this.azureConfigHandler.appendComponent(type, newCosmosDBConfig);
     }
   }
 
@@ -140,7 +141,7 @@ export class CosmosDB implements Component, Provisionable {
 
       for (const dependency of this.dependencies) {
         const componentConfig =
-            await this.azureConfigHandler.getComponentById(dependency.id);
+            await this.azureConfigHandler.getComponentById(ScaffoldType.Workspace, dependency.id);
         if (!componentConfig) {
           throw new Error(`Cannot find component with id ${dependency.id}.`);
         }
@@ -246,7 +247,7 @@ export class CosmosDB implements Component, Provisionable {
       collection = collectionChoose.label;
     }
 
-    await this.updateConfigSettings({
+    await this.updateConfigSettings(ScaffoldType.Workspace, {
       values: {
         subscriptionId: AzureUtility.subscriptionId as string,
         resourceGroup: AzureUtility.resourceGroup as string,

@@ -161,12 +161,12 @@ export class IoTProject {
       }
     }
 
-    const componentConfigs = await azureConfigFileHandler.getSortedComponents();
+    const componentConfigs = await azureConfigFileHandler.getSortedComponents(ScaffoldType.Workspace);
     if (!componentConfigs || componentConfigs.length === 0) {
       // Support backward compact
       const iotHub =
           new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
-      await iotHub.updateConfigSettings();
+      await iotHub.updateConfigSettings(ScaffoldType.Workspace);
       await iotHub.load();
       this.componentList.push(iotHub);
       const device = new ioTHubDeviceModule.IoTHubDevice(this.channel);

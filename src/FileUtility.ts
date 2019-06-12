@@ -111,7 +111,7 @@ export class FileUtility {
           resolve(data);
           return;
         });
-      })
+      });
     }
   }
 }

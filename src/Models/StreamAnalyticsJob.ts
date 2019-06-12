@@ -4,7 +4,7 @@ import {Guid} from 'guid-typescript';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {AzureComponentsStorage, FileNames} from '../constants';
+import {AzureComponentsStorage, FileNames, ScaffoldType} from '../constants';
 
 import {AzureComponentConfig, AzureConfigFileHandler, AzureConfigs, ComponentInfo, Dependency, DependencyConfig, DependencyType} from './AzureComponentConfig';
 import {ARMTemplate, AzureUtility} from './AzureUtility';
@@ -39,7 +39,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
       return this.azureClient;
     }
 
-    const componentConfig = await this.azureConfigHandler.getComponentById(this.id);
+    const componentConfig = await this.azureConfigHandler.getComponentById(ScaffoldType.Workspace, this.id);
     if (!componentConfig) {
       throw new Error(
           `Cannot find Azure Stream Analytics component with id ${this.id}.`);
@@ -174,13 +174,13 @@ export class StreamAnalyticsJob implements Component, Provisionable,
   }
 
   async create(): Promise<boolean> {
-    await this.updateConfigSettings();
+    await this.updateConfigSettings(ScaffoldType.Local);
     return true;
   }
 
-  async updateConfigSettings(componentInfo?: ComponentInfo): Promise<void> {
+  async updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo): Promise<void> {
     const asaComponentIndex =
-        await this.azureConfigHandler.getComponentIndexById(this.id);
+        await this.azureConfigHandler.getComponentIndexById(type, this.id);
     if (asaComponentIndex > -1) {
       if (!componentInfo) {
         return;
@@ -194,7 +194,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
         dependencies: this.dependencies,
         type: ComponentType[this.componentType]
       };
-      await this.azureConfigHandler.appendComponent(newAsaConfig);
+      await this.azureConfigHandler.appendComponent(type, newAsaConfig);
     }
   }
 
@@ -245,7 +245,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
 
     for (const dependency of this.dependencies) {
       const componentConfig =
-          await this.azureConfigHandler.getComponentById(dependency.id);
+          await this.azureConfigHandler.getComponentById(ScaffoldType.Workspace, dependency.id);
       if (!componentConfig) {
         throw new Error(`Cannot find component with id ${dependency.id}.`);
       }
@@ -356,7 +356,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
       }
     }
 
-    await this.updateConfigSettings({
+    await this.updateConfigSettings(ScaffoldType.Workspace, {
       values: {
         subscriptionId: AzureUtility.subscriptionId as string,
         resourceGroup: AzureUtility.resourceGroup as string,

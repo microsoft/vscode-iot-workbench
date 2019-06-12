@@ -66,9 +66,9 @@ export class AzureConfigFileHandler {
     }
   }
 
-  async getSortedComponents() {
+  async getSortedComponents(type: ScaffoldType) {
     try {
-      const azureConfigContent = await FileUtility.readFile(ScaffoldType.Workspace, this.configFilePath, 'utf8');
+      const azureConfigContent = await FileUtility.readFile(type, this.configFilePath, 'utf8');
       const azureConfigs = JSON.parse(azureConfigContent as string) as AzureConfigs;
       const components: AzureComponentConfig[] = [];
       const componentConfigs = azureConfigs.componentConfigs;
@@ -105,9 +105,9 @@ export class AzureConfigFileHandler {
     }
   }
 
-  async getComponentIndexById(id: string) {
+  async getComponentIndexById(type: ScaffoldType, id: string) {
     try {
-      const azureConfigContent = await FileUtility.readFile(ScaffoldType.Local, this.configFilePath, 'utf8');
+      const azureConfigContent = await FileUtility.readFile(type, this.configFilePath, 'utf8');
       const azureConfigs = JSON.parse(azureConfigContent as string) as AzureConfigs;
       const componentIndex =
           azureConfigs.componentConfigs.findIndex(config => config.id === (id));
@@ -117,9 +117,9 @@ export class AzureConfigFileHandler {
     }
   }
 
-  async getComponentById(id: string) {
+  async getComponentById(type: ScaffoldType, id: string) {
     try {
-      const azureConfigContent = await FileUtility.readFile(ScaffoldType.Workspace, this.configFilePath, 'utf8');
+      const azureConfigContent = await FileUtility.readFile(type, this.configFilePath, 'utf8');
       const azureConfigs = JSON.parse(azureConfigContent as string) as AzureConfigs;
       const componentConfig =
           azureConfigs.componentConfigs.find(config => config.id === (id));
@@ -129,9 +129,9 @@ export class AzureConfigFileHandler {
     }
   }
 
-  async getComponentByType(type: ComponentType|string) {
+  async getComponentByType(scaffoldType: ScaffoldType, type: ComponentType|string) {
     try {
-      const azureConfigContent = await FileUtility.readFile(ScaffoldType.Workspace, this.configFilePath, 'utf8');
+      const azureConfigContent = await FileUtility.readFile(scaffoldType, this.configFilePath, 'utf8');
       const azureConfigs = JSON.parse(azureConfigContent as string) as AzureConfigs;
       const componentConfig = azureConfigs.componentConfigs.find(
           config => config.type ===
@@ -142,9 +142,9 @@ export class AzureConfigFileHandler {
     }
   }
 
-  async getComponentsByType(type: ComponentType|string) {
+  async getComponentsByType(scaffoldType: ScaffoldType, type: ComponentType|string) {
     try {
-      const azureConfigContent = await FileUtility.readFile(ScaffoldType.Workspace, this.configFilePath, 'utf8');
+      const azureConfigContent = await FileUtility.readFile(scaffoldType, this.configFilePath, 'utf8');
       const azureConfigs = JSON.parse(azureConfigContent as string) as AzureConfigs;
       const componentConfig = azureConfigs.componentConfigs.filter(
           config => config.type ===
@@ -155,9 +155,9 @@ export class AzureConfigFileHandler {
     }
   }
 
-  async appendComponent(component: AzureComponentConfig) {
+  async appendComponent(type: ScaffoldType, component: AzureComponentConfig) {
     try {
-      const azureConfigContent = await FileUtility.readFile(ScaffoldType.Local, this.configFilePath, 'utf8');
+      const azureConfigContent = await FileUtility.readFile(type, this.configFilePath, 'utf8');
       const azureConfigs = JSON.parse(azureConfigContent as string) as AzureConfigs;
       azureConfigs.componentConfigs.push(component);
       await FileUtility.writeFile(ScaffoldType.Local,
