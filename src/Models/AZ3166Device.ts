@@ -14,13 +14,13 @@ import * as utils from '../utils';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey} from '../constants';
+import {ConfigKey, ScaffoldType} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 
 import {ScaffoldGenerator} from './ScaffoldGenerator';
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 import {DeviceType} from './Interfaces/Device';
-import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
+import {TemplateFileInfo, ProjectTemplateType} from './Interfaces/ProjectTemplate';
 
 const impor = require('impor')(__dirname);
 const forEach = impor('lodash.foreach') as typeof import('lodash.foreach');
@@ -62,10 +62,14 @@ export class AZ3166Device extends ArduinoDeviceBase {
   // tslint:disable-next-line: no-any
   private static _serialport: any;
 
+  private templateFolderPath: string;
+
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      projectPath: string, private templateFilesInfo: TemplateFileInfo[] = []) {
-    super(context, projectPath, channel, DeviceType.MXChip_AZ3166);
+      projectPath: string, projectTemplateType: ProjectTemplateType, private templateFilesInfo: TemplateFileInfo[] = []) {
+    super(context, projectPath, channel, DeviceType.MXChip_AZ3166, projectTemplateType);
+    this.templateFolderPath =
+        path.join(this.boardFolderPath, AZ3166Device.boardId);
   }
 
   // tslint:disable-next-line: no-any
@@ -206,8 +210,13 @@ export class AZ3166Device extends ArduinoDeviceBase {
       throw new Error('Unable to find the board in the config file.');
     }
 
-    // await ScaffoldGenerator.scaffolIoTProjectdFiles(this.projectFolder, this.vscodeFolderPath, 
-    //   this.boardFolderPath, this.devcontainerFolderPath, this.board.id);
+    try {
+      const scaffoldGenerator = new ScaffoldGenerator();
+      await scaffoldGenerator.scaffoldIoTProjectFiles(ScaffoldType.Workspace, this.projectFolder, this.vscodeFolderPath,
+        this.devcontainerFolderPath, this.templateFolderPath, this.projectType);
+    } catch(error) {
+      throw new Error(`Failed to scaffold IoT Project files when loading AZ3166 device project. Error message: ${error}`);
+    }
 
     return true;
   }
@@ -218,11 +227,12 @@ export class AZ3166Device extends ArduinoDeviceBase {
     }
 
     try {
-      await ScaffoldGenerator.scaffolIoTProjectdFiles(this.projectFolder, this.vscodeFolderPath, 
-        this.boardFolderPath, this.devcontainerFolderPath, this.board.id);
+      const scaffoldGenerator = new ScaffoldGenerator();
+      await scaffoldGenerator.scaffoldIoTProjectFiles(ScaffoldType.Local, this.projectFolder, this.vscodeFolderPath,
+        this.devcontainerFolderPath, this.templateFolderPath, this.projectType);
       await this.generateSketchFile(this.templateFilesInfo);
     } catch (error) {
-      throw error;
+      throw new Error(`Failed to scaffold IoT Project files when creating AZ3166 device. Error message: ${error}`);
     }
     return true;
   }

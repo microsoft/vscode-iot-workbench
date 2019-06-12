@@ -9,17 +9,17 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {FileNames, PlatformType, OperationType} from '../constants';
+import {FileNames, PlatformType, OperationType, ScaffoldType} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 import * as utils from '../utils';
+import {FileUtility} from '../FileUtility';
 
 import {Board} from './Interfaces/Board';
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
 import {LibraryManageable} from './Interfaces/LibraryManageable';
-import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
+import {TemplateFileInfo, ProjectTemplateType} from './Interfaces/ProjectTemplate';
 import {OTA} from './OTA';
-import * as sdk from 'vscode-iot-device-cube-sdk';
 import { RemoteExtension } from './RemoteExtension';
 
 const constants = {
@@ -39,6 +39,7 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
   protected extensionContext: vscode.ExtensionContext;
   protected channel: vscode.OutputChannel;
   protected componentId: string;
+  protected projectType: ProjectTemplateType;
 
   abstract name: string;
   abstract id: string;
@@ -46,9 +47,10 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
 
   constructor(
       context: vscode.ExtensionContext, projectPath: string,
-      channel: vscode.OutputChannel, deviceType: DeviceType) {
+      channel: vscode.OutputChannel, deviceType: DeviceType, projectTemplateType: ProjectTemplateType) {
     this.deviceType = deviceType;
     this.componentType = ComponentType.Device;
+    this.projectType = projectTemplateType;
     this.projectFolder = projectPath;
     this.extensionContext = context;
     this.channel = channel;
@@ -78,7 +80,7 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
   async compile(): Promise<boolean> {
     const isRemote = RemoteExtension.isRemote(this.extensionContext);
     if (!isRemote) {
-      const res = await utils.askAndOpenInRemote(OperationType.compile, this.channel);
+      const res = await utils.askAndOpenInRemote(OperationType.Compile, this.channel);
       if (!res) {
         return false;
       }
@@ -113,7 +115,7 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
   async upload(): Promise<boolean> {
     const isRemote = RemoteExtension.isRemote(this.extensionContext);
     if (!isRemote) {
-      const res = await utils.askAndOpenInRemote(OperationType.upload, this.channel);
+      const res = await utils.askAndOpenInRemote(OperationType.Upload, this.channel);
       if (!res) {
         return false;
       }
@@ -143,8 +145,8 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
     for (const fileInfo of templateFilesInfo) {
       let targetFilePath = '';
       const targetFolderPath = path.join(this.projectFolder, fileInfo.targetPath);
-      if (!await sdk.FileSystem.exists(targetFolderPath)) {
-        await utils.mkdirRecursively(targetFolderPath);
+      if (!await FileUtility.directoryExists(ScaffoldType.Local, targetFolderPath)) {
+        await FileUtility.mkdir(ScaffoldType.Local, targetFolderPath);
       }
 
       if (fileInfo.fileName.endsWith('.ino')) {
@@ -154,7 +156,7 @@ export abstract class ArduinoDeviceBase implements Device, LibraryManageable {
       }
       if (fileInfo.fileContent) {
         try {
-          await sdk.FileSystem.writeFile(targetFilePath, fileInfo.fileContent);
+          await FileUtility.writeFile(ScaffoldType.Local, targetFilePath, fileInfo.fileContent);
         } catch (error) {
           throw new Error(
               `Create arduino sketch file failed: ${error.message}`);

@@ -2,143 +2,40 @@
 
 import * as fs from 'fs-plus';
 import * as path from 'path';
-import {FileNames} from '../constants';
-import * as sdk from 'vscode-iot-device-cube-sdk';
-import * as utils from '../utils';
+import {FileNames, ScaffoldType} from '../constants';
+import {FileUtility} from '../FileUtility';
+import { ProjectTemplateType } from './Interfaces/ProjectTemplate';
 
 export class ScaffoldGenerator {
-
-  // /**
-  //  * Generate common files: 1. iot workbench project file; 2. .vscode folder; 3. .devcontainer folder
-  //  * @param projectFolder 
-  //  * @param vscodeFolderPath 
-  //  * @param devcontainerFolderPath 
-  //  */
-  // static async generateCommonFiles(projectFolder: string, vscodeFolderPath: string, devcontainerFolderPath: string): Promise<boolean> {
-  //   if (!fs.existsSync(projectFolder)) {
-  //     throw new Error('Unable to find the project folder.');
-  //   }
-
-  //   try {
-  //     const iotworkbenchprojectFilePath =
-  //         path.join(projectFolder, FileNames.iotworkbenchprojectFileName);
-  //     fs.writeFileSync(iotworkbenchprojectFilePath, ' ');
-  //   } catch (error) {
-  //     throw new Error(
-  //         `Create ${FileNames.iotworkbenchprojectFileName} file failed: ${error.message}`);
-  //   }
-
-  //   if (!fs.existsSync(vscodeFolderPath)) {
-  //     try {
-  //       fs.mkdirSync(vscodeFolderPath);
-  //     } catch (error) {
-  //       throw new Error(`Failed to create folder ${vscodeFolderPath}. Error message: ${error.message}`);
-  //     }
-  //   }
-
-  //   if (!fs.existsSync(devcontainerFolderPath)) {
-  //     try {
-  //       fs.mkdirSync(devcontainerFolderPath);
-  //     } catch (error) {
-  //       throw new Error(`Failed to create folder ${devcontainerFolderPath}. Error message: ${error.message}`);
-  //     }
-  //   }
-
-  //   return true;
-  // }
-
-  // /**
-  //  * Create c_cpp_properties.json file
-  //  */
-  // static async generateCppPropertiesFile(vscodeFolderPath: string, boardFolderPath: string, boardId: string): Promise<boolean> { 
-  //   const cppPropertiesFilePath =
-  //       path.join(vscodeFolderPath, FileNames.cppPropertiesFileName);
-
-  //   if (fs.existsSync(cppPropertiesFilePath)) {
-  //     return true;
-  //   }
-
-  //   try {
-  //     const propertiesSourceFile = path.join(
-  //       boardFolderPath, boardId, FileNames.cppPropertiesFileName);
-  //     const propertiesContent =
-  //         fs.readFileSync(propertiesSourceFile).toString();
-  //     fs.writeFileSync(cppPropertiesFilePath, propertiesContent);
-  //   } catch (error) {
-  //     throw new Error(`Create ${FileNames.cppPropertiesFileName} failed: ${error.message}`);
-  //   }
-
-  //   return true;
-  // }
-
-  // /**
-  //  * Create Dockerfile & devcontainer.json
-  //  */
-  // static async generateDockerRelatedFiles(devcontainerFolderPath: string, boardFolderPath: string, boardId: string): Promise<boolean> {
-  //   // Dockerfile
-  //   const dockerfileTargetPath = path.join(
-  //     devcontainerFolderPath, FileNames.dockerfileName);
-
-  //   if (fs.existsSync(dockerfileTargetPath)) {
-  //     return true;
-  //   }
-
-  //   try {
-  //     const dockerfileSourcePath = path.join(
-  //       boardFolderPath, boardId, FileNames.dockerfileName);
-  //     const dockerfileContent = fs.readFileSync(dockerfileSourcePath, 'utf8');
-  //     fs.writeFileSync(dockerfileTargetPath, dockerfileContent);
-  //   } catch (error) {
-  //     throw new Error(`Create ${FileNames.dockerfileName} failed: ${error.message}`);
-  //   }
-
-  //   // devcontainer.json
-  //   const devcontainerJsonFileTargetPath = path.join(
-  //     devcontainerFolderPath, FileNames.devcontainerJsonFileName);
-
-  //   if (fs.existsSync(devcontainerJsonFileTargetPath)) {
-  //     return true;
-  //   }
-
-  //   try {
-  //     const devcontainerJsonFileSourcePath = path.join(
-  //       boardFolderPath, boardId, FileNames.devcontainerJsonFileName);
-  //     const devcontainerJSONContent = fs.readFileSync(devcontainerJsonFileSourcePath, 'utf8');
-  //     fs.writeFileSync(devcontainerJsonFileTargetPath, devcontainerJSONContent);
-  //   } catch (error) {
-  //     throw new Error(`Create ${FileNames.devcontainerJsonFileName} file failed: ${error.message}`);
-  //   }
-
-  //   return true;
-  // }
-
-  
-  // Generate files in local from remote side
-  static async generateCommonFiles(projectFolder: string, vscodeFolderPath: string, devcontainerFolderPath: string): Promise<boolean> {
-    if (!await sdk.FileSystem.exists(projectFolder)) {
+  /**
+   * Generate common files like .iotworkbenchproject file, .vscode folder, .devcontainer folder
+   * @param type Scaffold type. 'local' - scaffold files with local path; 'workspace' - scaffold files with workspace path
+   */
+  private async generateCommonFiles(type: ScaffoldType, projectFolder: string, vscodeFolderPath: string, devcontainerFolderPath: string): Promise<boolean> {
+    if (!await FileUtility.directoryExists(type, projectFolder)) {
       throw new Error('Unable to find the project folder.');
     }
 
     try {
       const iotworkbenchprojectFilePath =
           path.join(projectFolder, FileNames.iotworkbenchprojectFileName);
-      await sdk.FileSystem.writeFile(iotworkbenchprojectFilePath, ' ');
+      await FileUtility.writeFile(type, iotworkbenchprojectFilePath, ' ');
     } catch (error) {
       throw new Error(
           `Create ${FileNames.iotworkbenchprojectFileName} file failed: ${error.message}`);
     }
 
-    if (!await sdk.FileSystem.exists(vscodeFolderPath)) {
+    if (!await FileUtility.directoryExists(type, vscodeFolderPath)) {
       try {
-        await utils.mkdirRecursively(vscodeFolderPath);
+        await FileUtility.mkdirRecursively(type, vscodeFolderPath);
       } catch (error) {
         throw new Error(`Failed to create folder ${vscodeFolderPath}. Error message: ${error.message}`);
       }
     }
 
-    if (! await sdk.FileSystem.exists(devcontainerFolderPath)) {
+    if (!await FileUtility.directoryExists(type, devcontainerFolderPath)) {
       try {
-        await utils.mkdirRecursively(devcontainerFolderPath);
+        await FileUtility.mkdirRecursively(type, devcontainerFolderPath);
       } catch (error) {
         throw new Error(`Failed to create folder ${devcontainerFolderPath}. Error message: ${error.message}`);
       }
@@ -150,23 +47,24 @@ export class ScaffoldGenerator {
   /**
    * Create c_cpp_properties.json file
    */
-  static async generateCppPropertiesFile(vscodeFolderPath: string, boardFolderPath: string, boardId: string): Promise<boolean> { 
+  private async generateCppPropertiesFile(type: ScaffoldType, vscodeFolderPath: string, templateFolderPath: string): Promise<boolean> {
+
     const cppPropertiesFilePath =
         path.join(vscodeFolderPath, FileNames.cppPropertiesFileName);
 
-    if (await sdk.FileSystem.exists(cppPropertiesFilePath)) {
+    if (await FileUtility.fileExists(type, cppPropertiesFilePath)) {
       return true;
     }
 
     try {
       const propertiesSourceFile = path.join(
-        boardFolderPath, boardId, FileNames.cppPropertiesFileName);
+        templateFolderPath, FileNames.cppPropertiesFileName);
       const propertiesContent =
           fs.readFileSync(propertiesSourceFile).toString();
-      if (!await sdk.FileSystem.exists(vscodeFolderPath)) {
-        await utils.mkdirRecursively(vscodeFolderPath);
+      if (!await FileUtility.directoryExists(type, vscodeFolderPath)) {
+        await FileUtility.mkdirRecursively(type, vscodeFolderPath);
       }
-      await sdk.FileSystem.writeFile(cppPropertiesFilePath, propertiesContent);
+      await FileUtility.writeFile(type, cppPropertiesFilePath, propertiesContent);
     } catch (error) {
       throw new Error(`Create ${FileNames.cppPropertiesFileName} failed: ${error.message}`);
     }
@@ -177,54 +75,48 @@ export class ScaffoldGenerator {
   /**
    * Create Dockerfile & devcontainer.json
    */
-  static async generateDockerRelatedFiles(devcontainerFolderPath: string, boardFolderPath: string, boardId: string): Promise<boolean> {
+  private async generateDockerRelatedFiles(type: ScaffoldType, devcontainerFolderPath: string, templateFolderPath: string, projectTemplateType: ProjectTemplateType): Promise<boolean> {
     // Dockerfile
     const dockerfileTargetPath = path.join(
       devcontainerFolderPath, FileNames.dockerfileName);
-    if (!await sdk.FileSystem.exists(devcontainerFolderPath)) {
-      await utils.mkdirRecursively(devcontainerFolderPath);
-    }
+    if (!await FileUtility.fileExists(type, dockerfileTargetPath)) {
+      if (!await FileUtility.directoryExists(type, devcontainerFolderPath)) {
+        await FileUtility.mkdirRecursively(type, devcontainerFolderPath);
+      }
 
-    if (await sdk.FileSystem.exists(dockerfileTargetPath)) {
-      return true;
-    }
-
-    try {
-      const dockerfileSourcePath = path.join(
-        boardFolderPath, boardId, FileNames.dockerfileName);
-      const dockerfileContent = fs.readFileSync(dockerfileSourcePath, 'utf8');
-      await sdk.FileSystem.writeFile(dockerfileTargetPath, dockerfileContent);
-    } catch (error) {
-      throw new Error(`Create ${FileNames.dockerfileName} failed: ${error.message}`);
+      try {
+        const dockerfileSourcePath = path.join(
+          templateFolderPath, FileNames.dockerfileName);
+        const dockerfileContent = fs.readFileSync(dockerfileSourcePath, 'utf8');
+        await FileUtility.writeFile(type, dockerfileTargetPath, dockerfileContent);
+      } catch (error) {
+        throw new Error(`Create ${FileNames.dockerfileName} failed: ${error.message}`);
+      }
     }
 
     // devcontainer.json
     const devcontainerJsonFileTargetPath = path.join(
       devcontainerFolderPath, FileNames.devcontainerJsonFileName);
 
-    if (await sdk.FileSystem.exists(devcontainerJsonFileTargetPath)) {
-      return true;
-    }
-
-    try {
-      const devcontainerJsonFileSourcePath = path.join(
-        boardFolderPath, boardId, FileNames.devcontainerJsonFileName);
-      const devcontainerJSONContent = fs.readFileSync(devcontainerJsonFileSourcePath, 'utf8');
-      await sdk.FileSystem.writeFile(devcontainerJsonFileTargetPath, devcontainerJSONContent);
-    } catch (error) {
-      throw new Error(`Create ${FileNames.devcontainerJsonFileName} file failed: ${error.message}`);
+    if (!await FileUtility.fileExists(type, devcontainerJsonFileTargetPath)) {
+      try {
+        const devcontainerJsonFileSourcePath = path.join(
+          templateFolderPath, projectTemplateType, FileNames.devcontainerJsonFileName);
+        const devcontainerJSONContent = fs.readFileSync(devcontainerJsonFileSourcePath, 'utf8');
+        await FileUtility.writeFile(type, devcontainerJsonFileTargetPath, devcontainerJSONContent);
+      } catch (error) {
+        throw new Error(`Create ${FileNames.devcontainerJsonFileName} file failed: ${error.message}`);
+      }
     }
 
     return true;
   }
-  /**
-   * Create Dockerfile & devcontainer.json
-   */
-  static async scaffolIoTProjectdFiles(projectFolder: string, vscodeFolderPath: string, boardFolderPath: string, devcontainerFolderPath: string, boardId: string) {
+
+  async scaffoldIoTProjectFiles(type: ScaffoldType, projectFolder: string, vscodeFolderPath: string, devcontainerFolderPath: string, templateFolderPath: string, projectTemplateType: ProjectTemplateType): Promise<void> {
     try {
-      await ScaffoldGenerator.generateCommonFiles(projectFolder, vscodeFolderPath, devcontainerFolderPath);
-      await ScaffoldGenerator.generateCppPropertiesFile(vscodeFolderPath, boardFolderPath, boardId);
-      await ScaffoldGenerator.generateDockerRelatedFiles(devcontainerFolderPath, boardFolderPath, boardId);
+      await this.generateCommonFiles(type, projectFolder, vscodeFolderPath, devcontainerFolderPath);
+      await this.generateCppPropertiesFile(type, vscodeFolderPath, templateFolderPath);
+      await this.generateDockerRelatedFiles(type, devcontainerFolderPath, templateFolderPath, projectTemplateType);
     } catch (error) {
       throw new Error(`Scaffold files for IoT Project failed. ${error.message}`);
     }

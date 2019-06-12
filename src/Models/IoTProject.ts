@@ -7,8 +7,7 @@ import * as vscode from 'vscode';
 import * as utils from '../utils';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, FileNames} from '../constants';
-import {EventNames, DependentExtensions} from '../constants';
+import {ConfigKey, FileNames, ScaffoldType, EventNames, DependentExtensions} from '../constants';
 import {TelemetryProperties, TelemetryWorker} from '../telemetry';
 import {askAndNewProject} from '../utils';
 
@@ -23,7 +22,7 @@ import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
 import {Workspace} from './Interfaces/Workspace';
 import {RemoteExtension} from './RemoteExtension';
-import * as sdk from 'vscode-iot-device-cube-sdk';
+import {FileUtility} from '../FileUtility';
 
 type Dependency = import('./AzureComponentConfig').Dependency;
 type TelemetryContext = import('../telemetry').TelemetryContext;
@@ -53,6 +52,7 @@ const telemetryModule = impor('../telemetry') as typeof import('../telemetry');
 
 const constants = {
   asaFolderName: 'StreamAnalytics',
+  functionDefaultFolderName: 'Functions',
   workspaceConfigExtension: '.code-workspace',
   projectConfigFileName: 'projectConfig.json' // Use this file to store boardId since we currently use folder instead of workspace as a workaround
 };
@@ -135,7 +135,7 @@ export class IoTProject {
     const azureConfigFileHandler =
         new azureComponentConfigModule.AzureConfigFileHandler(
             this.projectRootPath);
-    azureConfigFileHandler.createIfNotExists();
+    azureConfigFileHandler.createIfNotExists(ScaffoldType.Workspace);
 
     if (this.projectRootPath !== undefined) {
       const boardId = projectConfigJson[`${ConfigKey.boardId}`];
@@ -143,13 +143,17 @@ export class IoTProject {
         return false;
       }
       let device = null;
+      const projectType = projectConfigJson[`${ConfigKey.projectType}`] as ProjectTemplateType;
+      if (!projectType) {
+        return false;
+      }
       if (boardId === az3166DeviceModule.AZ3166Device.boardId) {
         device = new az3166DeviceModule.AZ3166Device(
-            this.extensionContext, this.channel, this.projectRootPath);
+            this.extensionContext, this.channel, this.projectRootPath, projectType);
       } else if (
         boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
       device = new raspberryPiDeviceModule.RaspberryPiDevice(
-          this.extensionContext, this.projectRootPath, this.channel);
+          this.extensionContext, this.projectRootPath, this.channel, projectType);
     }
       if (device) {
         this.componentList.push(device);
@@ -157,12 +161,12 @@ export class IoTProject {
       }
     }
 
-    const componentConfigs = azureConfigFileHandler.getSortedComponents();
+    const componentConfigs = await azureConfigFileHandler.getSortedComponents(ScaffoldType.Workspace);
     if (!componentConfigs || componentConfigs.length === 0) {
       // Support backward compact
       const iotHub =
           new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
-      await iotHub.updateConfigSettings();
+      await iotHub.updateConfigSettings(ScaffoldType.Workspace);
       await iotHub.load();
       this.componentList.push(iotHub);
       const device = new ioTHubDeviceModule.IoTHubDevice(this.channel);
@@ -189,6 +193,64 @@ export class IoTProject {
           const device = new ioTHubDeviceModule.IoTHubDevice(this.channel);
           this.componentList.push(device);
 
+          break;
+        }
+        case 'AzureFunctions': {
+          if (this.projectConfigFile === undefined) {
+            throw new Error(`${this.projectConfigFile} not found.`);
+          }
+          const projectConfigJson = require(this.projectConfigFile);
+          const functionPath = projectConfigJson[`${ConfigKey.functionPath}`];
+          if (!functionPath) {
+            return false;
+          }
+          const functionLocation = path.join(
+              vscode.workspace.workspaceFolders[0].uri.fsPath, '..',
+              functionPath);
+          if (functionLocation) {
+            const functionApp = new azureFunctionsModule.AzureFunctions(
+                functionLocation, functionPath, this.channel);
+            await functionApp.load();
+            components[functionApp.id] = functionApp;
+            this.componentList.push(functionApp);
+          }
+          break;
+        }
+        case 'StreamAnalyticsJob': {
+          const dependencies: Dependency[] = [];
+          for (const dependent of componentConfig.dependencies) {
+            const component = components[dependent.id];
+            if (!component) {
+              throw new Error(`Cannot find component with id ${dependent}.`);
+            }
+            dependencies.push({component, type: dependent.type});
+          }
+          const queryPath = path.join(
+              vscode.workspace.workspaceFolders[0].uri.fsPath, '..',
+              constants.asaFolderName, 'query.asaql');
+          const asa = new streamAnalyticsJobModule.StreamAnalyticsJob(
+              queryPath, this.extensionContext, this.projectRootPath,
+              this.channel, dependencies);
+          await asa.load();
+          components[asa.id] = asa;
+          this.componentList.push(asa);
+          break;
+        }
+        case 'CosmosDB': {
+          const dependencies: Dependency[] = [];
+          for (const dependent of componentConfig.dependencies) {
+            const component = components[dependent.id];
+            if (!component) {
+              throw new Error(`Cannot find component with id ${dependent}.`);
+            }
+            dependencies.push({component, type: dependent.type});
+          }
+          const cosmosDB = new cosmosDBModule.CosmosDB(
+              this.extensionContext, this.projectRootPath, this.channel,
+              dependencies);
+          await cosmosDB.load();
+          components[cosmosDB.id] = cosmosDB;
+          this.componentList.push(cosmosDB);
           break;
         }
         default: {
@@ -293,12 +355,6 @@ export class IoTProject {
   }
 
   async provision(): Promise<boolean> {
-    const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
-    if (!devicePath) {
-      throw new Error(
-          'Cannot run IoT Device Workbench command in a non-IoTWorkbench project. Please initialize an IoT Device Workbench project first.');
-    }
-
     const provisionItemList: string[] = [];
     for (const item of this.componentList) {
       if (this.canProvision(item)) {
@@ -429,7 +485,7 @@ export class IoTProject {
       rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
       projectType: ProjectTemplateType, boardId: string,
       openInNewWindow: boolean): Promise<boolean> {
-    const rootFolderPathExists = await sdk.FileSystem.exists(rootFolderPath);
+    const rootFolderPathExists = await FileUtility.directoryExists(ScaffoldType.Local, rootFolderPath);
     if (!rootFolderPathExists) {
       throw new Error(
           'Unable to find the root path, please open the folder and initialize project again.');
@@ -437,15 +493,22 @@ export class IoTProject {
 
     this.projectRootPath = rootFolderPath;
 
+    // initialize the storage for azure component settings
+    const azureConfigFileHandler =
+        new azureComponentConfigModule.AzureConfigFileHandler(
+            this.projectRootPath);
+    azureConfigFileHandler.createIfNotExists(ScaffoldType.Local);
+
     const projectConfig :{[key: string]: string} = {};
+    
     let device: Component;
     if (boardId === az3166DeviceModule.AZ3166Device.boardId) {
       device = new az3166DeviceModule.AZ3166Device(
-          this.extensionContext, this.channel, this.projectRootPath, templateFilesInfo);
+          this.extensionContext, this.channel, this.projectRootPath, projectType, templateFilesInfo);
       } else if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
         device = new raspberryPiDeviceModule.RaspberryPiDevice(
             this.extensionContext, this.projectRootPath, this.channel,
-            templateFilesInfo);
+            projectType, templateFilesInfo);
     } else {
       throw new Error('The specified board is not supported.');
     }
@@ -458,119 +521,112 @@ export class IoTProject {
     projectConfig[`${ConfigKey.boardId}`] = boardId;
     this.componentList.push(device);
 
-    const type: ProjectTemplateType = projectType;
-
-    switch (type) {
+    projectConfig[`${ConfigKey.projectType}`] = projectType;
+    switch (projectType) {
       case ProjectTemplateType.Basic:
         // Save data to configFile
         break;
       case ProjectTemplateType.IotHub: {
         const iothub =
             new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
-        const isPrerequisitesAchieved = await iothub.checkPrerequisites();
-        if (!isPrerequisitesAchieved) {
-          return false;
-        }
+        // const isPrerequisitesAchieved = await iothub.checkPrerequisites();
+        // if (!isPrerequisitesAchieved) {
+        //   return false;
+        // }
         this.componentList.push(iothub);
         break;
       }
-      // case ProjectTemplateType.AzureFunctions: {
-      //   const iothub =
-      //       new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
-      //   const isIotHubPrerequisitesAchieved = await iothub.checkPrerequisites();
-      //   if (!isIotHubPrerequisitesAchieved) {
-      //     return false;
-      //   }
+      case ProjectTemplateType.AzureFunctions: {
+        const iothub =
+            new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
+        // const isIotHubPrerequisitesAchieved = await iothub.checkPrerequisites();
+        // if (!isIotHubPrerequisitesAchieved) {
+        //   return false;
+        // }
 
-      //   const functionDir = path.join(
-      //       this.projectRootPath, constants.functionDefaultFolderName);
+        const functionDir = path.join(this.projectRootPath, constants.functionDefaultFolderName);
 
-      //   if (!fs.existsSync(functionDir)) {
-      //     fs.mkdirSync(functionDir);
-      //   }
+        if (!await FileUtility.directoryExists(ScaffoldType.Local, functionDir)) {
+          await FileUtility.mkdirRecursively(ScaffoldType.Local, functionDir);
+        }
 
-      //   workspace.folders.push({path: constants.functionDefaultFolderName});
+        const azureFunctions = new azureFunctionsModule.AzureFunctions(
+            functionDir, constants.functionDefaultFolderName, this.channel,
+            null, [{
+              component: iothub,
+              type: azureComponentConfigModule.DependencyType.Input
+            }] /*Dependencies*/);
+        const isFunctionsPrerequisitesAchieved =
+            await azureFunctions.checkPrerequisites();
+        if (!isFunctionsPrerequisitesAchieved) {
+          const message = `Azure Functions extension is required to create an Azure Functions type IoT Project. Please install it from marketplace first.`;
+          vscode.window.showWarningMessage(message);
+          return false;
+        }
 
-      //   const azureFunctions = new azureFunctionsModule.AzureFunctions(
-      //       functionDir, constants.functionDefaultFolderName, this.channel,
-      //       null, [{
-      //         component: iothub,
-      //         type: azureComponentConfigModule.DependencyType.Input
-      //       }] /*Dependencies*/);
-      //   const isFunctionsPrerequisitesAchieved =
-      //       await azureFunctions.checkPrerequisites();
-      //   if (!isFunctionsPrerequisitesAchieved) {
-      //     return false;
-      //   }
-      //   settings.projectsettings.push({
-      //     name: ConfigKey.functionPath,
-      //     value: constants.functionDefaultFolderName
-      //   });
+        projectConfig[`${ConfigKey.functionPath}`] =
+            constants.functionDefaultFolderName;
 
-      //   workspace.settings[`IoTWorkbench.${ConfigKey.functionPath}`] =
-      //       constants.functionDefaultFolderName;
+        this.componentList.push(iothub);
+        this.componentList.push(azureFunctions);
+        break;
+      }
+      case ProjectTemplateType.StreamAnalytics: {
+        const iothub =
+            new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
+        // const isIotHubPrerequisitesAchieved = await iothub.checkPrerequisites();
+        // if (!isIotHubPrerequisitesAchieved) {
+        //   return false;
+        // }
 
-      //   this.componentList.push(iothub);
-      //   this.componentList.push(azureFunctions);
-      //   break;
-      // }
-      // case ProjectTemplateType.StreamAnalytics: {
-      //   const iothub =
-      //       new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
-      //   const isIotHubPrerequisitesAchieved = await iothub.checkPrerequisites();
-      //   if (!isIotHubPrerequisitesAchieved) {
-      //     return false;
-      //   }
+        const cosmosDB = new cosmosDBModule.CosmosDB(
+            this.extensionContext, this.projectRootPath, this.channel);
+        // const isCosmosDBPrerequisitesAchieved =
+        //     await cosmosDB.checkPrerequisites();
+        // if (!isCosmosDBPrerequisitesAchieved) {
+        //   return false;
+        // }
 
-      //   const cosmosDB = new cosmosDBModule.CosmosDB(
-      //       this.extensionContext, this.projectRootPath, this.channel);
-      //   const isCosmosDBPrerequisitesAchieved =
-      //       await cosmosDB.checkPrerequisites();
-      //   if (!isCosmosDBPrerequisitesAchieved) {
-      //     return false;
-      //   }
+        const asaDir = path.join(this.projectRootPath, constants.asaFolderName);
 
-      //   const asaDir = path.join(this.projectRootPath, constants.asaFolderName);
+        if (!await FileUtility.directoryExists(ScaffoldType.Local, asaDir)) {
+          await FileUtility.mkdirRecursively(ScaffoldType.Local, asaDir);
+        }
 
-      //   if (!fs.existsSync(asaDir)) {
-      //     fs.mkdirSync(asaDir);
-      //   }
+        const asaFilePath = this.extensionContext.asAbsolutePath(
+            path.join(FileNames.resourcesFolderName, 'asaql', 'query.asaql'));
+        const queryPath = path.join(asaDir, 'query.asaql');
+        const asaQueryContent =
+            fs.readFileSync(asaFilePath, 'utf8')
+                .replace(/\[input\]/, `"iothub-${iothub.id}"`)
+                .replace(/\[output\]/, `"cosmosdb-${cosmosDB.id}"`);
+        await FileUtility.writeFile(ScaffoldType.Local, queryPath, asaQueryContent);
 
-      //   const asaFilePath = this.extensionContext.asAbsolutePath(
-      //       path.join(FileNames.resourcesFolderName, 'asaql', 'query.asaql'));
-      //   const queryPath = path.join(asaDir, 'query.asaql');
-      //   const asaQueryContent =
-      //       fs.readFileSync(asaFilePath, 'utf8')
-      //           .replace(/\[input\]/, `"iothub-${iothub.id}"`)
-      //           .replace(/\[output\]/, `"cosmosdb-${cosmosDB.id}"`);
-      //   fs.writeFileSync(queryPath, asaQueryContent);
+        const asa = new streamAnalyticsJobModule.StreamAnalyticsJob(
+            queryPath, this.extensionContext, this.projectRootPath,
+            this.channel, [
+              {
+                component: iothub,
+                type: azureComponentConfigModule.DependencyType.Input
+              },
+              {
+                component: cosmosDB,
+                type: azureComponentConfigModule.DependencyType.Other
+              }
+            ]);
+        const isAsaPrerequisitesAchieved = await asa.checkPrerequisites();
+        if (!isAsaPrerequisitesAchieved) {
+          return false;
+        }
 
-      //   const asa = new streamAnalyticsJobModule.StreamAnalyticsJob(
-      //       queryPath, this.extensionContext, this.projectRootPath,
-      //       this.channel, [
-      //         {
-      //           component: iothub,
-      //           type: azureComponentConfigModule.DependencyType.Input
-      //         },
-      //         {
-      //           component: cosmosDB,
-      //           type: azureComponentConfigModule.DependencyType.Other
-      //         }
-      //       ]);
-      //   const isAsaPrerequisitesAchieved = await asa.checkPrerequisites();
-      //   if (!isAsaPrerequisitesAchieved) {
-      //     return false;
-      //   }
+        projectConfig[`${ConfigKey.asaPath}`] =
+            constants.asaFolderName;
 
-      //   workspace.folders.push({path: constants.asaFolderName});
-      //   workspace.settings[`IoTWorkbench.${ConfigKey.asaPath}`] =
-      //       constants.asaFolderName;
-
-      //   this.componentList.push(iothub);
-      //   this.componentList.push(cosmosDB);
-      //   this.componentList.push(asa);
-      //   break;
-      // }
+        this.componentList.push(iothub);
+        this.componentList.push(cosmosDB);
+        this.componentList.push(asa);
+        break;
+      }
       default:
         break;
     }
@@ -596,21 +652,14 @@ export class IoTProject {
     }
 
     const vscodeFolderPath = path.join(this.projectRootPath, FileNames.vscodeSettingsFolderName);
-    if (!await sdk.FileSystem.exists(vscodeFolderPath)) {
-      utils.mkdirRecursively(vscodeFolderPath);
+    if (!await FileUtility.directoryExists(ScaffoldType.Local, vscodeFolderPath)) {
+      await FileUtility.mkdirRecursively(ScaffoldType.Local, vscodeFolderPath);
     }
     const projectConfigFile = path.join(vscodeFolderPath, constants.projectConfigFileName);
-    if (!await sdk.FileSystem.exists(projectConfigFile)) {
+    if (!await FileUtility.fileExists(ScaffoldType.Local, projectConfigFile)) {
       const indentationSpace = 4;
-      sdk.FileSystem.writeFile(projectConfigFile, JSON.stringify(projectConfig, null, indentationSpace));
+      FileUtility.writeFile(ScaffoldType.Local, projectConfigFile, JSON.stringify(projectConfig, null, indentationSpace));
     }
-    // const workspaceConfigFilePath = path.join(
-    //     this.projectRootPath,
-    //     `${path.basename(this.projectRootPath)}${
-    //         constants.workspaceConfigExtension}`);
-
-    // fs.writeFileSync(
-    //     workspaceConfigFilePath, JSON.stringify(workspace, null, 4));
 
     if (!openInNewWindow) {
       // Need to add telemetry here otherwise, after restart VSCode, no

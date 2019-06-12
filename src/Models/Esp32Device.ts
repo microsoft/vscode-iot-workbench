@@ -13,7 +13,7 @@ import {ConfigKey} from '../constants';
 
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 import {DeviceType} from './Interfaces/Device';
-import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
+import {TemplateFileInfo, ProjectTemplateType} from './Interfaces/ProjectTemplate';
 
 const constants = {
   defaultBoardInfo: 'esp32:esp32:m5stack-core-esp32',
@@ -67,8 +67,8 @@ export class Esp32Device extends ArduinoDeviceBase {
 
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      devicePath: string, private templateFilesInfo: TemplateFileInfo[] = []) {
-    super(context, devicePath, channel, DeviceType.IoT_Button);
+      devicePath: string, projectTemplateType: ProjectTemplateType, private templateFilesInfo: TemplateFileInfo[] = []) {
+    super(context, devicePath, channel, DeviceType.IoT_Button, projectTemplateType);
   }
 
   async checkPrerequisites(): Promise<boolean> {

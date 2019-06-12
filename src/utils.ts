@@ -2,12 +2,10 @@
 // Licensed under the MIT License.
 
 import * as cp from 'child_process';
-import * as fs from 'fs-plus';
 import * as path from 'path';
 import {setTimeout} from 'timers';
 import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
-import * as sdk from 'vscode-iot-device-cube-sdk';
 
 import {AzureFunctionsLanguage, GlobalConstants, OperationType, DependentExtensions} from './constants';
 import {DialogResponses} from './DialogResponses';
@@ -49,38 +47,6 @@ export function getRegistryValues(
           return reject(ex);
         }
       });
-}
-
-export async function directoryExists(dirPath: string): Promise<boolean> {
-    if (!await sdk.FileSystem.exists(dirPath)) {
-      return false;
-    }
-    const isDirectory = await sdk.FileSystem.isDirectory(dirPath);
-    return isDirectory;
-}
-
-export async function mkdirRecursively(dirPath: string): Promise<void> {
-  if (await directoryExists(dirPath)) {
-    return;
-  }
-  const dirname = path.dirname(dirPath);
-  if (path.normalize(dirname) === path.normalize(dirPath)) {
-    await sdk.FileSystem.mkDir(dirPath);
-  } else if (await directoryExists(dirname)) {
-    await sdk.FileSystem.mkDir(dirPath);
-  } else {
-    await mkdirRecursively(dirname);
-    await sdk.FileSystem.mkDir(dirPath);
-  }
-}
-
-export async function fileExists(filePath: string): Promise<boolean> {
-  const directoryExists = await sdk.FileSystem.exists(filePath);
-  if (!directoryExists) {
-    return false;
-  }
-  const isFile = await sdk.FileSystem.isFile(filePath);
-  return isFile;
 }
 
 export function getScriptTemplateNameFromLanguage(language: string): string|

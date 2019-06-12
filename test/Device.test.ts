@@ -7,6 +7,7 @@ import {AZ3166Device} from '../src/Models/AZ3166Device';
 import {ComponentType} from '../src/Models/Interfaces/Component';
 import {Device, DeviceType} from '../src/Models/Interfaces/Device';
 import {TelemetryContext} from '../src/telemetry';
+import {ProjectTemplateType} from '../src/Models/Interfaces/ProjectTemplate';
 
 import {TestExtensionContext} from './stub';
 
@@ -15,7 +16,7 @@ suite('IoT Device Workbench: Device', () => {
   test('property of device should be set correctly', function(done) {
     const context = new TestExtensionContext();
     const channel = vscode.window.createOutputChannel('IoT workbench test');
-    const device = new AZ3166Device(context, channel, '', [
+    const device = new AZ3166Device(context, channel, '', ProjectTemplateType.IotHub, [
       {'fileName': 'emptySketch.ino', 'sourcePath': '.', 'targetPath': '.'}
     ]);
     assert.equal(device.getDeviceType(), DeviceType.MXChip_AZ3166);

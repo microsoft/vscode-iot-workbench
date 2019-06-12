@@ -9,14 +9,15 @@ import * as sdk from 'vscode-iot-device-cube-sdk';
 import * as utils from '../utils';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, FileNames, PlatformType, OperationType} from '../constants';
-import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
+import {ConfigKey, FileNames, PlatformType, OperationType, ScaffoldType} from '../constants';
+import {TemplateFileInfo, ProjectTemplateType} from './Interfaces/ProjectTemplate';
 import {runCommand} from '../utils';
 
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
 import {ScaffoldGenerator} from './ScaffoldGenerator';
 import {RemoteExtension} from './RemoteExtension';
+import {FileUtility} from '../FileUtility';
 
 class RaspberryPiUploadConfig {
   static host = 'raspberrypi';
@@ -38,11 +39,13 @@ export class RaspberryPiDevice implements Device {
   private channel: vscode.OutputChannel;
   private static _boardId = 'raspberrypi';
   private extensionContext: vscode.ExtensionContext;
+  private projectType: ProjectTemplateType;
 
-  protected devcontainerFolderPath: string;
-  protected vscodeFolderPath: string;
-  protected boardFolderPath: string;
-  protected outputPath: string;
+  private devcontainerFolderPath: string;
+  private vscodeFolderPath: string;
+  private boardFolderPath: string;
+  private outputPath: string;
+  private templateFolderPath: string;
 
   static get boardId() {
     return RaspberryPiDevice._boardId;
@@ -50,9 +53,10 @@ export class RaspberryPiDevice implements Device {
 
   constructor(
       context: vscode.ExtensionContext, projectPath: string,
-      channel: vscode.OutputChannel, private templateFilesInfo: TemplateFileInfo[] = []) {
+      channel: vscode.OutputChannel, projectTemplateType: ProjectTemplateType, private templateFilesInfo: TemplateFileInfo[] = []) {
     this.deviceType = DeviceType.Raspberry_Pi;
     this.componentType = ComponentType.Device;
+    this.projectType = projectTemplateType;
     this.projectFolder = projectPath;
     this.channel = channel;
     this.componentId = Guid.create().toString();
@@ -63,8 +67,10 @@ export class RaspberryPiDevice implements Device {
         path.join(this.projectFolder, FileNames.vscodeSettingsFolderName);
     this.boardFolderPath = context.asAbsolutePath(
         path.join(FileNames.resourcesFolderName, PlatformType.LINUX));
-    this.outputPath = 
+    this.outputPath =
         path.join(this.projectFolder, FileNames.outputPathName);
+    this.templateFolderPath =
+        path.join(this.boardFolderPath, RaspberryPiDevice.boardId);
   }
 
   name = 'RaspberryPi';
@@ -86,8 +92,9 @@ export class RaspberryPiDevice implements Device {
       throw new Error('Unable to find the project folder.');
     }
 
-    // await ScaffoldGenerator.scaffolIoTProjectdFiles(this.projectFolder, this.vscodeFolderPath, 
-    //   this.boardFolderPath, this.devcontainerFolderPath, RaspberryPiDevice.boardId);
+    const scaffoldGenerator = new ScaffoldGenerator();
+    await scaffoldGenerator.scaffoldIoTProjectFiles(ScaffoldType.Workspace, this.projectFolder, this.vscodeFolderPath,
+      this.devcontainerFolderPath, this.templateFolderPath, this.projectType);
 
     return true;
   }
@@ -97,8 +104,9 @@ export class RaspberryPiDevice implements Device {
       throw new Error('Unable to find the project folder.');
     }
     
-    await ScaffoldGenerator.scaffolIoTProjectdFiles(this.projectFolder, this.vscodeFolderPath, 
-      this.boardFolderPath, this.devcontainerFolderPath, RaspberryPiDevice.boardId);
+    const scaffoldGenerator = new ScaffoldGenerator();
+    await scaffoldGenerator.scaffoldIoTProjectFiles(ScaffoldType.Local, this.projectFolder, this.vscodeFolderPath,
+      this.devcontainerFolderPath, this.templateFolderPath, this.projectType);
     await this.generateSketchFile(this.templateFilesInfo);
 
     return true;
@@ -115,7 +123,7 @@ export class RaspberryPiDevice implements Device {
     for (const fileInfo of templateFilesInfo) {
       const targetFolderPath = path.join(this.projectFolder, fileInfo.targetPath);
       if (!await sdk.FileSystem.exists(targetFolderPath)) {
-        await utils.mkdirRecursively(targetFolderPath);
+        await FileUtility.mkdirRecursively(ScaffoldType.Local,targetFolderPath);
       }
 
       const targetFilePath = path.join(targetFolderPath, fileInfo.fileName);
@@ -135,7 +143,7 @@ export class RaspberryPiDevice implements Device {
   async compile(): Promise<boolean> {
     const isRemote = RemoteExtension.isRemote(this.extensionContext);
     if (!isRemote) {
-      const res = await utils.askAndOpenInRemote(OperationType.compile, this.channel);
+      const res = await utils.askAndOpenInRemote(OperationType.Compile, this.channel);
       if (!res) {
         return false;
       }
@@ -182,12 +190,12 @@ export class RaspberryPiDevice implements Device {
   async upload(): Promise<boolean> {
     const isRemote = RemoteExtension.isRemote(this.extensionContext);
     if (!isRemote) {
-      const res = await utils.askAndOpenInRemote(OperationType.upload, this.channel);
+      const res = await utils.askAndOpenInRemote(OperationType.Upload, this.channel);
       if (!res) {
         return false;
       }
     }
-    
+
     try {
       const binFilePath = path.join(this.outputPath, 'iot_application/azure_exe');
       if (!fs.existsSync(binFilePath)) {
@@ -279,6 +287,17 @@ export class RaspberryPiDevice implements Device {
         description: deviceInfo.host || '<Unknown>'
       });
     });
+
+    sshDevicePickItems.push(
+      {
+        label: '$(sync) Discover again',
+        detail: 'Auto discover SSH enabled device in LAN'
+      },
+      {
+        label: '$(gear) Manual setup',
+        detail: 'Setup device SSH configuration manually'
+      });
+
     return sshDevicePickItems;
   }
 
@@ -310,8 +329,9 @@ export class RaspberryPiDevice implements Device {
     if (sshDiscoverOrInputChoice.label === '$(search) Auto discover') {
       let selectDeviceChoice: vscode.QuickPickItem|undefined;
       do {
+        const selectDeviceItems = this._autoDiscoverDeviceIp();
         selectDeviceChoice =
-            await vscode.window.showQuickPick(this._autoDiscoverDeviceIp(), {
+            await vscode.window.showQuickPick(selectDeviceItems, {
               ignoreFocusOut: true,
               matchOnDescription: true,
               matchOnDetail: true,

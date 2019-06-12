@@ -1,0 +1,10 @@
+{
+  "image": "devkit_app",
+  "name": "devkit_app_container",
+  "dockerFile": "Dockerfile",
+  "extensions": [
+    "ms-vscode.cpptools",
+    "vsciot-vscode.vscode-iot-workbench",
+    "ms-azuretools.vscode-azurefunctions"
+  ]
+}

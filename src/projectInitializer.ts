@@ -11,11 +11,11 @@ import {ProjectTemplate, ProjectTemplateType, TemplateFileInfo} from './Models/I
 import * as utils from './utils';
 import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {TelemetryContext} from './telemetry';
-import {FileNames, PlatformType} from './constants';
+import {FileNames, PlatformType, ScaffoldType} from './constants';
 import {BoardProvider} from './boardProvider';
 import {IoTWorkbenchSettings} from './IoTSettings';
-import {RemoteExtension} from './Models/RemoteExtension';
-import * as sdk from 'vscode-iot-device-cube-sdk';
+import {FileUtility} from './FileUtility';
+import { ScaffoldGenerator } from './Models/ScaffoldGenerator';
 
 const impor = require('impor')(__dirname);
 const azureFunctionsModule = impor('./Models/AzureFunctions') as
@@ -107,13 +107,7 @@ export class ProjectInitializer {
               throw new Error('Unable to load project template.');
             }
 
-            if (result.type === 'AzureFunctions') {
-              const isFunctionsExtensionAvailable =
-                  await azureFunctionsModule.AzureFunctions.isAvailable();
-              if (!isFunctionsExtensionAvailable) {
-                return false;
-              }
-            }
+            const projectTemplateType: ProjectTemplateType = (ProjectTemplateType)[result.type as keyof typeof ProjectTemplateType];
 
             // Update telemetry
             const templateFilesInfo: TemplateFileInfo[] = [];
@@ -128,10 +122,9 @@ export class ProjectInitializer {
               });
             });
 
-            const projectTemplateType: ProjectTemplateType = result.type;
 
             if (projectPath) {
-              await utils.mkdirRecursively(projectPath);
+              await FileUtility.mkdirRecursively(ScaffoldType.Local, projectPath);
             }
             const project = new ioTProjectModule.IoTProject(
                 context, channel, telemetryContext);
@@ -222,28 +215,23 @@ export class ProjectInitializer {
     // Get default workbench path.
     const settings: IoTWorkbenchSettings = await IoTWorkbenchSettings.createAsync();
     const workbench = await settings.workbenchPath();
-    
+
     const projectRootPath = path.join(workbench, 'projects');
-    if (!await sdk.FileSystem.exists(workbench)) {
-      utils.mkdirRecursively(workbench);
+    if (!await FileUtility.directoryExists(ScaffoldType.Local, projectRootPath)) {
+      await FileUtility.mkdirRecursively(ScaffoldType.Local, projectRootPath);
     }
-    const projectRootPathExists = await sdk.FileSystem.exists(projectRootPath);
-    if (!projectRootPathExists) {
-      await utils.mkdirRecursively(projectRootPath);
-    }
-    
 
     let counter = 0;
     const name = constants.defaultProjectName;
     let candidateName = name;
     while (true) {
       const projectPath = path.join(projectRootPath, candidateName);
-      const projectPathExists = await utils.fileExists(projectPath);
-      const projectDirectoryExists = await utils.directoryExists(projectPath);
+      const projectPathExists = await FileUtility.fileExists(ScaffoldType.Local, projectPath);
+      const projectDirectoryExists = await FileUtility.directoryExists(ScaffoldType.Local, projectPath);
       if (!projectPathExists && !projectDirectoryExists) {
         break;
       }
-      
+
       counter++;
       candidateName = `${name}_${counter}`;
     }
@@ -259,8 +247,8 @@ export class ProjectInitializer {
         }
 
         const projectPath = path.join(projectRootPath, projectName);
-        const projectPathExists = await utils.fileExists(projectPath);
-        const projectDirectoryExists = await utils.directoryExists(projectPath);        
+        const projectPathExists = await FileUtility.fileExists(ScaffoldType.Local, projectPath);
+        const projectDirectoryExists = await FileUtility.directoryExists(ScaffoldType.Local, projectPath);
         if (!projectPathExists && !projectDirectoryExists) {
           return;
         } else {

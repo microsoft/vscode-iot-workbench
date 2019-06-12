@@ -12,6 +12,7 @@ export class ConfigKey {
   static readonly boardId = 'BoardId';
   static readonly asaPath = 'StreamAnalyticsPath';
   static readonly shownHelpPage = 'ShownHelpPage';
+  static readonly projectType = 'ProjectType';
 }
 
 export class EventNames {
@@ -53,8 +54,13 @@ export class FileNames {
 }
 
 export enum OperationType {
-  compile = 'Compile device code',
-  upload = 'Upload device code'
+  Compile = 'Compile device code',
+  Upload = 'Upload device code'
+}
+
+export enum ScaffoldType {
+  Local = 'local',
+  Workspace = 'workspace'
 }
 
 export enum AzureFunctionsLanguage {
