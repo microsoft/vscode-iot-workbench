@@ -167,12 +167,12 @@ export async function selectWorkspaceItem(
 }
 
 export function runCommand(
-    command: string, workingDir: string,
+    command: string, args: string[], workingDir: string,
     outputChannel: vscode.OutputChannel): Thenable<object> {
   return new Promise((resolve, reject) => {
     const stdout = '';
     const stderr = '';
-    const process = cp.spawn(command, [], {cwd: workingDir, shell: true});
+    const process = cp.spawn(command, args, {cwd: workingDir, shell: true});
     process.stdout.on('data', (data: string) => {
       console.log(data);
       outputChannel.appendLine(data);

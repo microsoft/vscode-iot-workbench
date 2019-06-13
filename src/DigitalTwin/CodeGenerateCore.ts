@@ -14,7 +14,7 @@ import {FileNames, ConfigKey} from '../constants';
 import {TelemetryContext} from '../telemetry';
 import {DigitalTwinConnector} from './DigitalTwinConnector';
 import {DigitalTwinConstants, CodeGenConstants} from './DigitalTwinConstants';
-import {CodeGenDeviceType, DeviceConnectionType} from './DigitalTwinCodeGen/Interfaces/CodeGenerator';
+import {CodeGenProjectType, DeviceConnectionType} from './DigitalTwinCodeGen/Interfaces/CodeGenerator';
 import {AnsiCCodeGeneratorFactory} from './DigitalTwinCodeGen/AnsiCCodeGeneratorFactory';
 import {ConfigHandler} from '../configHandler';
 import {DialogResponses} from '../DialogResponses';
@@ -54,7 +54,7 @@ interface CodeGenExecutionInfo {
   repoConnectionString: string;
   targetFolder: string;
   languageLabel: string;
-  codeGenDeviceType: CodeGenDeviceType;
+  codeGenProjectType: CodeGenProjectType;
   deviceConnectionType: DeviceConnectionType;
 }
 
@@ -164,12 +164,17 @@ export class CodeGenerateCore {
     if (languageSelection.label === 'ANSI C') {
       targetItems = [
         {
-          label: 'Standard',
+          label: 'CMake Project',
           detail:
               'Generate device agnostic standard ANSI C code to integrate into existing device project.'
         },
         {
-          label: 'MXChip IoT DevKit',
+          label: 'Visual Studio Project',
+          detail:
+              'Generate device agnostic standard ANSI C code for Visual Studio project.'
+        },
+        {
+          label: 'MXChip IoT DevKit Project',
           detail: 'Generate Arduino project for MXChip IoT DevKit'
         }
       ];
@@ -187,9 +192,11 @@ export class CodeGenerateCore {
       return false;
     }
 
-    let codeGenDeviceType = CodeGenDeviceType.General;
-    if (targetSelection.label === 'MXChip IoT DevKit') {
-      codeGenDeviceType = CodeGenDeviceType.IoTDevKit;
+    let codeGenProjectType = CodeGenProjectType.CMake;
+    if (targetSelection.label === 'MXChip IoT DevKit Project') {
+      codeGenProjectType = CodeGenProjectType.IoTDevKit;
+    } else if (targetSelection.label === 'Visual Studio Project') {
+      codeGenProjectType = CodeGenProjectType.VisualStudio;
     }
 
     let connectionType = DeviceConnectionType.DeviceConnectionString;
@@ -236,7 +243,7 @@ export class CodeGenerateCore {
       repoConnectionString: connectionString,
       targetFolder: folderPath,
       languageLabel: 'ANSI C',
-      codeGenDeviceType,
+      codeGenProjectType,
       deviceConnectionType: connectionType
     };
 
@@ -301,7 +308,7 @@ export class CodeGenerateCore {
         new AnsiCCodeGeneratorFactory(context, channel, telemetryContext);
 
     const codeGenerator = codeGenFactory.CreateCodeGeneratorImpl(
-        codeGenExecutionInfo.codeGenDeviceType,
+        codeGenExecutionInfo.codeGenProjectType,
         codeGenExecutionInfo.deviceConnectionType);
     if (!codeGenerator) {
       return false;

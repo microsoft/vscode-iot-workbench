@@ -36,7 +36,7 @@ export abstract class AnsiCCodeGeneratorBase implements CodeGenerator {
 
     this.channel.show();
     this.channel.appendLine('IoT Workbench: scaffold code stub.');
-    await utils.runCommand(command, cmdPath, this.channel);
+    await utils.runCommand(command, [], cmdPath, this.channel);
     this.channel.appendLine('IoT Workbench: scaffold code stub completed.');
     return true;
   }

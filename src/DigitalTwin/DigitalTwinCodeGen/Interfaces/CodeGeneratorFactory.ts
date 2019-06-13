@@ -1,8 +1,8 @@
-import {CodeGenDeviceType, CodeGenerator, DeviceConnectionType} from './CodeGenerator';
+import {CodeGenerator, CodeGenProjectType, DeviceConnectionType} from './CodeGenerator';
 
 
 export interface CodeGeneratorFactory {
   CreateCodeGeneratorImpl(
-      deviceType: CodeGenDeviceType,
+      deviceType: CodeGenProjectType,
       connectionType: DeviceConnectionType): CodeGenerator|null;
 }

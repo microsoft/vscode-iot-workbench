@@ -9,8 +9,9 @@ import {AnsiCCodeGeneratorBase} from './Interfaces/AnsiCCodeGeneratorBase';
 import {DeviceConnectionType} from './Interfaces/CodeGenerator';
 
 const ansiConstants = {
-  languageName: 'ansi',
-  digitalTwin: 'digitaltwin'
+  languageName: 'ansic',
+  digitalTwin: 'digitaltwin',
+  projectType: 'cmake'
 };
 
 const templateFileNames = ['Readme.md', 'main.c.sample', 'CMakeLists.txt'];
@@ -44,7 +45,7 @@ export class AnsiCCodeGenGeneralImpl extends AnsiCCodeGeneratorBase {
 
     const resouceFolder = this.context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, ansiConstants.digitalTwin,
-        ansiConstants.languageName, folderName));
+        ansiConstants.languageName, ansiConstants.projectType, folderName));
 
     const projectName = path.basename(targetPath);
 

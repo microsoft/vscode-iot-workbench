@@ -1,7 +1,8 @@
 
-export enum CodeGenDeviceType {
-  General = 1,
-  IoTDevKit = 2
+export enum CodeGenProjectType {
+  CMake = 1,
+  VisualStudio = 2,
+  IoTDevKit = 3
 }
 
 export enum DeviceConnectionType {
