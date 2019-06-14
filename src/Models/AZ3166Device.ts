@@ -144,7 +144,6 @@ export class AZ3166Device extends ArduinoDeviceBase {
     }
 
     const az3166Disk = hostVolumes.find(volume => volume.name === "AZ3166");
-
     if (!az3166Disk) {
       const message = 'No AZ3166 device found. Please plug in a devkit board.';
       vscode.window.showWarningMessage(message);
@@ -192,7 +191,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
         const fileContent = bootBin + '\xFF'.repeat(0xc000-bootBin.length) + appbin;
 
         fs.writeFileSync(binFilePath, fileContent, 'binary');
-        fs.writeFileSync(binFilePath.replace(`${constants.binFileExt}`, `${constants.otaBinFileExt}`), appbin);
+        fs.writeFileSync(binFilePath.replace(`${constants.binFileExt}`, `${constants.otaBinFileExt}`), appbin, 'binary');
       } catch (error) {
         throw new Error(`Failed to generate ${constants.binFileExt} file and ${constants.otaBinFileExt} file. Error message: ${error.message}`);
       }
