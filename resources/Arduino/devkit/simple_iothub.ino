@@ -1,27 +1,34 @@
-#include "AZ3166WiFi.h"
+#include "IoT_DevKit_HW.h"
 #include "DevKitMQTTClient.h"
 
 static bool hasWifi = false;
 static bool hasIoTHub = false;
+static int msgCount = 0;
+static int errCount = 0;
 
 void setup() {
-  // put your setup code here, to run once:
-  if (WiFi.begin() == WL_CONNECTED)
+  // init the board
+  int init = initIoTDevKit(1);
+  if (init == 0)
   {
     hasWifi = true;
-    Screen.print(1, "Running...");
+    Screen.clean();
+    Screen.print(0, "IoT DevKit");
+    Screen.print(1, "Connecting...");
 
     if (!DevKitMQTTClient_Init())
     {
-      hasIoTHub = false;
+      Screen.print(1, "No IoT Hub");
       return;
     }
+    Screen.print(1, "Running...");
     hasIoTHub = true;
   }
   else
   {
-    hasWifi = false;
-    Screen.print(1, "No Wi-Fi");
+    char buff[32];
+    snprintf(buff, sizeof(buff), "Init failed (%d)", init);
+    Screen.print(buff);
   }
 }
 
@@ -29,19 +36,19 @@ void loop() {
   // put your main code here, to run repeatedly:
   if (hasIoTHub && hasWifi)
   {
-    char buff[128];
+    char buff[64];
 
     // replace the following line with your data sent to Azure IoTHub
-    snprintf(buff, 128, "{\"topic\":\"iot\"}");
-    
-    if (DevKitMQTTClient_SendEvent(buff))
+    snprintf(buff, sizeof(buff), "{\"topic\":\"iot\"}");
+
+    if (!DevKitMQTTClient_SendEvent(buff))
     {
-      Screen.print(1, "Sending...");
+      errCount++;
     }
-    else
-    {
-      Screen.print(1, "Failure...");
-    }
+    msgCount++;
+
+    snprintf(buff, sizeof(buff), " Sent:%d\r\n Failed:%d", msgCount - errCount, errCount);
+    Screen.print(2, buff);
     delay(2000);
   }
 }

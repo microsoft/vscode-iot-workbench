@@ -181,8 +181,10 @@ export class RaspberryPiDevice implements Device {
       return false;
     }
 
+    const message = 'Successfully compile Raspberry Pi device code.';
     this.channel.show();
-    this.channel.appendLine('Successfully compile Raspberry Pi device code.');
+    this.channel.appendLine(message);
+    vscode.window.showInformationMessage(message);
 
     return true;
   }
@@ -221,8 +223,11 @@ export class RaspberryPiDevice implements Device {
       }
 
       await ssh.close();
+
+      const message = `Successfully deploy bin file to Raspberry Pi board.`;
       this.channel.show();
-      this.channel.appendLine('Successfully deploy binary file to Raspberry Pi board.');
+      this.channel.appendLine(message);
+      vscode.window.showInformationMessage(message);
     } catch (error) {
       throw new Error(`Upload device code failed. ${error.message}`);
     }
