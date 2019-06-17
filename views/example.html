@@ -416,6 +416,16 @@ ul.example-list > li > .body > .author > .avatar {
   margin-right: 5px;
 }
 
+.disable-auto-popup-landing-page {
+  clear: both;
+  margin-top: 20px;
+  font-size: 12px;
+}
+
+.disable-auto-popup-landing-page input[type=checkbox] {
+  vertical-align: middle;
+}
+
 @media (min-width: 4096px) {
   body:after {
     content: "There's more to the picture than meets the eye.";
@@ -570,6 +580,11 @@ body.vscode-dark .tutorial {
       </div>
     </li>
   </ul>
+  
+  <div class="disable-auto-popup-landing-page">
+    <input id="disableAutoPopup" type="checkbox" v-model="disableAutoPopupLandingPage.value" v-on:change="updateDisableAutoPopupLandingPage">
+    <label for="disableAutoPopup">Disable auto popup landing page</label>
+  </div>
 </div>
 <aside id="aside"></aside>
 </div>
