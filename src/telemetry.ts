@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import TelemetryReporter from 'vscode-extension-telemetry';
 import {ExceptionHelper} from './exceptionHelper';
 import {NSAT} from './nsat';
-import {InternalConfig} from './utils'
+import {InternalConfig} from './utils';
 
 interface PackageInfo {
   name: string;
@@ -103,7 +103,8 @@ export async function callWithTelemetry(
     }
   }
 
-  properties['isInternal'] = InternalConfig.IsInternal === true ? 'true' : 'false';
+  properties['isInternal'] =
+      InternalConfig.isInternal === true ? 'true' : 'false';
 
   const telemetryContext:
       TelemetryContext = {properties, measurements: {duration: 0}};

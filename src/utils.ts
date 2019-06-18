@@ -231,10 +231,12 @@ export async function TakeNoDeviceSurvey(telemetryContext: TelemetryContext) {
 }
 
 export class InternalConfig {
-  public static IsInternal: boolean = InternalConfig.isInternalUser();
+  static isInternal: boolean = InternalConfig.isInternalUser();
 
   private static isInternalUser(): boolean {
-    const userDomain = process.env.USERDNSDOMAIN ? process.env.USERDNSDOMAIN.toLowerCase() : "";
-    return userDomain.endsWith("microsoft.com");
+    const userDomain = process.env.USERDNSDOMAIN ?
+        process.env.USERDNSDOMAIN.toLowerCase() :
+        '';
+    return userDomain.endsWith('microsoft.com');
   }
 }
