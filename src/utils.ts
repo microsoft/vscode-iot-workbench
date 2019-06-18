@@ -229,3 +229,12 @@ export async function TakeNoDeviceSurvey(telemetryContext: TelemetryContext) {
   }
   return;
 }
+
+export class InternalConfig {
+  public static IsInternal: boolean = InternalConfig.isInternalUser();
+
+  private static isInternalUser(): boolean {
+    const userDomain = process.env.USERDNSDOMAIN ? process.env.USERDNSDOMAIN.toLowerCase() : "";
+    return userDomain.endsWith("microsoft.com");
+  }
+}
