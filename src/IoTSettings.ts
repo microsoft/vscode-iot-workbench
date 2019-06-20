@@ -32,8 +32,14 @@ export class IoTWorkbenchSettings {
       return userWorkbenchPath;
     } else {
       // Use the default value for workbenchPath.
-      await ConfigHandler.update(
-          'workbench', this._workbenchPath, vscode.ConfigurationTarget.Global);
+      try {
+        await ConfigHandler.update(
+            'workbench', this._workbenchPath,
+            vscode.ConfigurationTarget.Global);
+      } catch (error) {
+        console.log(`Unable to update usersetting. Error: ${error}`);
+      }
+
       return this._workbenchPath;
     }
   }
