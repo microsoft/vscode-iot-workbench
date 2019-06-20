@@ -1,6 +1,15 @@
 # Change Log
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
 
+## Version 0.2.9
+- Release date: Jun. 21, 2019
+
+### Added
+- Provide the option to disable auto popup landing page.
+
+### Fixed
+- Improve the error handling of loading example.
+
 ## Version 0.2.8
 - Release date: May 31, 2019
 
