@@ -1,29 +1,48 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import {ConfigHandler} from './configHandler';
 import {PickWithData} from './Models/Interfaces/UI';
+import * as sdk from 'vscode-iot-device-cube-sdk';
+
 
 export class IoTWorkbenchSettings {
-  private _workbenchPath: string;
+  private _workbenchPath = '';
 
-  constructor() {
-    const homeDir = os.homedir();
-    const platform = os.platform();
+  private constructor() {
+  }
+
+  static async createAsync() {
+    const iotWorkbenchSettings = new IoTWorkbenchSettings();
+
+    iotWorkbenchSettings._workbenchPath = await IoTWorkbenchSettings.getWorkbenchPath();
+
+    return iotWorkbenchSettings;
+  }
+
+  static async getWorkbenchPath(): Promise<string> {
+    const localOs = sdk.Utility.require("os") as typeof import("os");
+    const getHomeDir = await localOs.homedir;
+    const homeDir = await getHomeDir();
+    const getPlatform = await localOs.platform;
+    const platform = await getPlatform();
+
+    let _workbenchPath = '';
     if (platform === 'win32') {
-      this._workbenchPath =
+      _workbenchPath =
           path.join(homeDir, 'Documents', 'IoTWorkbenchProjects');
     } else if (platform === 'linux') {
-      this._workbenchPath = path.join(homeDir, 'IoTWorkbenchProjects');
+      _workbenchPath = path.join(homeDir, 'IoTWorkbenchProjects');
     } else if (platform === 'darwin') {
-      this._workbenchPath =
+      _workbenchPath =
           path.join(homeDir, 'Documents', 'IoTWorkbenchProjects');
     } else {
-      this._workbenchPath = '/IoTWorkbenchProjects';
+      _workbenchPath = '/IoTWorkbenchProjects';
     }
+
+    return _workbenchPath;
   }
 
   async workbenchPath() {
@@ -32,14 +51,8 @@ export class IoTWorkbenchSettings {
       return userWorkbenchPath;
     } else {
       // Use the default value for workbenchPath.
-      try {
-        await ConfigHandler.update(
-            'workbench', this._workbenchPath,
-            vscode.ConfigurationTarget.Global);
-      } catch (error) {
-        console.log(`Unable to update usersetting. Error: ${error}`);
-      }
-
+      await ConfigHandler.update(
+          'workbench', this._workbenchPath, vscode.ConfigurationTarget.Global);
       return this._workbenchPath;
     }
   }

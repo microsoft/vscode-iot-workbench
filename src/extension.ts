@@ -5,6 +5,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import * as path from 'path';
 import {VSCExpress} from 'vscode-express';
 import {BoardProvider} from './boardProvider';
 import {ProjectInitializer} from './projectInitializer';
@@ -12,7 +13,7 @@ import {DeviceOperator} from './DeviceOperator';
 import {AzureOperator} from './AzureOperator';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import {ConfigHandler} from './configHandler';
-import {ConfigKey, EventNames} from './constants';
+import {ConfigKey, EventNames, PlatformType, FileNames, platformFolderMap} from './constants';
 import {TelemetryContext, TelemetryProperties} from './telemetry';
 
 const impor = require('impor')(__dirname);
@@ -254,7 +255,13 @@ export async function activate(context: vscode.ExtensionContext) {
         const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
 
         if (boardId) {
-          const boardProvider = new BoardProvider(context);
+          const platformFolder = platformFolderMap.get(PlatformType.ARDUINO);
+          if (platformFolder === undefined) {
+            throw new Error(`Platform ${PlatformType.ARDUINO}'s  resource folder does not exist.`);
+          }
+          const boardFolderPath = context.asAbsolutePath(
+              path.join(FileNames.resourcesFolderName, platformFolder));
+          const boardProvider = new BoardProvider(boardFolderPath);
           const board = boardProvider.find({id: boardId});
 
           if (board && board.helpUrl) {
@@ -275,7 +282,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const workbenchPath =
       vscode.commands.registerCommand('iotworkbench.workbench', async () => {
-        const settings = new IoTWorkbenchSettings();
+        const settings: IoTWorkbenchSettings = await IoTWorkbenchSettings.createAsync();
         await settings.setWorkbenchPath();
         return;
       });

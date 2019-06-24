@@ -37,7 +37,7 @@ export class Esp32Device extends ArduinoDeviceBase {
   }
 
   get board() {
-    const boardProvider = new BoardProvider(this.extensionContext);
+    const boardProvider = new BoardProvider(this.boardFolderPath);
     const esp32 = boardProvider.find({id: Esp32Device._boardId});
     return esp32;
   }

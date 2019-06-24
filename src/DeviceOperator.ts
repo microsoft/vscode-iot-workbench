@@ -5,10 +5,13 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import * as path from 'path';
+
 import {TelemetryContext} from './telemetry';
 import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
+import {FileNames, PlatformType, platformFolderMap} from './constants';
 
 const impor = require('impor')(__dirname);
 const ioTProjectModule =
@@ -57,7 +60,13 @@ export class DeviceOperator {
   async downloadPackage(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    const boardProvider = new BoardProvider(context);
+    const platformFolder = platformFolderMap.get(PlatformType.EMBEDDEDLINUX);
+    if (platformFolder === undefined) {
+      throw new Error(`Platform ${PlatformType.EMBEDDEDLINUX}'s  resource folder does not exist.`);
+    }
+    const boardFolderPath = context.asAbsolutePath(
+        path.join(FileNames.resourcesFolderName, platformFolder));
+    const boardProvider = new BoardProvider(boardFolderPath);
     const boardItemList: BoardQuickPickItem[] = [];
     const boards = boardProvider.list.filter(board => board.installation);
     boards.forEach((board: Board) => {

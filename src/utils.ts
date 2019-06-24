@@ -2,14 +2,16 @@
 // Licensed under the MIT License.
 
 import * as fs from 'fs-plus';
+import * as cp from 'child_process';
 import * as path from 'path';
 import {setTimeout} from 'timers';
 import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
 
-import {AzureFunctionsLanguage, GlobalConstants} from './constants';
+import {AzureFunctionsLanguage, GlobalConstants, OperationType, DependentExtensions} from './constants';
 import {DialogResponses} from './DialogResponses';
 import {TelemetryContext} from './telemetry';
+import {RemoteExtension} from './Models/RemoteExtension';
 
 export function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -201,6 +203,30 @@ export async function askAndOpenProject(
   }
 }
 
+export async function askAndOpenInRemote(operation: OperationType, channel: vscode.OutputChannel): Promise<boolean> {
+  const message =
+      `${operation} can only be executed in remote container. Do you want to reopen the IoT project in container?`;
+  const result: vscode.MessageItem|undefined =
+      await vscode.window.showInformationMessage(
+          message, DialogResponses.yes, DialogResponses.no);
+
+  if (result === DialogResponses.yes) {
+    const res = await RemoteExtension.checkRemoteExtension();
+    if (!res) {
+      const message = `Remote extension is not available. Please install ${DependentExtensions.remote} first.`;
+      channel.show();
+      channel.appendLine(message);
+      return false;
+    }
+    await vscode.commands.executeCommand('openindocker.reopenInContainer');
+  } else {
+    const message = `${operation} can only be executed in remote container.`;
+    channel.show();
+    channel.appendLine(message);
+  }
+
+  return false;
+}
 const noDeviceSurveyUrl = 'https://www.surveymonkey.com/r/C7NY7KJ';
 
 export async function TakeNoDeviceSurvey(telemetryContext: TelemetryContext) {
@@ -239,4 +265,29 @@ export class InternalConfig {
         '';
     return userDomain.endsWith('microsoft.com');
   }
+}
+
+
+export function runCommand(
+  command: string, workingDir: string,
+  outputChannel: vscode.OutputChannel): Thenable<object> {
+  return new Promise((resolve, reject) => {
+    const stdout = '';
+    const stderr = '';
+    const process = cp.spawn(command, [], {cwd: workingDir, shell: true});
+    process.stdout.on('data', (data: string) => {
+      outputChannel.appendLine(data);
+    });
+    process.stderr.on('data', (data: string) => {
+      outputChannel.appendLine(data);
+    });
+    process.on('error', (error) => reject({error, stderr, stdout}));
+    process.on('close', (status) => {
+      if (status === 0) {
+        resolve({status, stdout, stderr});
+      } else {
+        reject({status, stdout, stderr});
+      }
+    });
+  });
 }

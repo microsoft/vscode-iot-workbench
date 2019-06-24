@@ -6,13 +6,17 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as path from 'path';
-import {ProjectTemplate} from './Models/Interfaces/ProjectTemplate';
+import * as fs from 'fs-plus';
 import * as utils from './utils';
+
 import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {TelemetryContext} from './telemetry';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
-import {FileNames} from './constants';
+import {FileNames, ScaffoldType, PlatformType, platformFolderMap} from './constants';
 import {BoardProvider} from './boardProvider';
+import {IoTWorkbenchSettings} from './IoTSettings';
+import {FileUtility} from './FileUtility';
+import {ProjectTemplate, ProjectTemplateType, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
 
 const impor = require('impor')(__dirname);
 const azureFunctionsModule = impor('./Models/AzureFunctions') as
@@ -28,8 +32,7 @@ export class ProjectInitializer {
   async InitializeProject(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    let rootPath: string;
-    let openInNewWindow = false;
+      let openInNewWindow = false;
     // If current window contains other project, open the created project in new
     // window.
     if (vscode.workspace.workspaceFolders &&
@@ -39,165 +42,212 @@ export class ProjectInitializer {
 
     // Initial project
     await vscode.window.withProgress(
-        {
-          title: 'Project initialization',
-          location: vscode.ProgressLocation.Window,
-        },
-        async (progress) => {
-          progress.report({
-            message: 'Updating a list of available template',
+      {
+        title: 'Project initialization',
+        location: vscode.ProgressLocation.Window,
+      },
+      async (progress) => {
+        progress.report({
+          message: 'Updating a list of available template',
+        });
+
+        try {
+          // Step 1: Get project name
+          const projectPath = await this.GenerateProjectFolder();
+          if (!projectPath) {
+            telemetryContext.properties.errorMessage =
+                'Project name input canceled.';
+            telemetryContext.properties.result = 'Canceled';
+            return;
+          } else {
+            telemetryContext.properties.projectPath = projectPath;
+          }
+
+          // Step 2: Select platform
+          const platformSelection = await this.SelectPlatform();
+          if (!platformSelection) {
+            telemetryContext.properties.errorMessage =
+                'Platform selection canceled.';
+            telemetryContext.properties.result = 'Canceled';
+            return;
+          } else {
+            telemetryContext.properties.platform = platformSelection.label;
+          }
+
+          // Step 3: Select board
+          const platformFolder = platformFolderMap.get(platformSelection.label);
+          if (platformFolder === undefined) {
+            telemetryContext.properties.errorMessage =
+                `Platform ${platformSelection.label}'s  resource folder does not exist.`;
+            telemetryContext.properties.result = 'Canceled';
+            return;
+          }
+          const boardFolderPath = context.asAbsolutePath(path.join(
+              FileNames.resourcesFolderName, platformFolder));
+          const boardSelection = await this.SelectBoard(boardFolderPath);
+          if (!boardSelection) {
+            telemetryContext.properties.errorMessage =
+                'Board selection canceled.';
+            telemetryContext.properties.result = 'Canceled';
+            return;
+          } else if (boardSelection.id === 'no_device') {
+            await utils.TakeNoDeviceSurvey(telemetryContext);
+            return;
+          } else {
+            telemetryContext.properties.board = boardSelection.label;
+          }
+
+          // Step 4: Select template
+          const templateFolderPath =
+              path.join(boardFolderPath, boardSelection.id);
+          const templateSelection =
+              await this.SelectTemplate(templateFolderPath);
+          if (!templateSelection) {
+            telemetryContext.properties.errorMessage =
+                'Project template selection canceled.';
+            telemetryContext.properties.result = 'Canceled';
+            return;
+          } else {
+            telemetryContext.properties.template = templateSelection.label;
+          }
+
+          // Step 5: Load project template
+          const templateJson = require(
+              path.join(templateFolderPath, FileNames.templateFileName));
+          const result =
+              templateJson.templates.find((template: ProjectTemplate) => {
+                return template.label === templateSelection.label;
+              });
+
+          if (!result) {
+            throw new Error('Unable to load project template.');
+          }
+
+          const projectTemplateType: ProjectTemplateType = (ProjectTemplateType)[result.type as keyof typeof ProjectTemplateType];
+
+          // Update telemetry
+          const templateFilesInfo: TemplateFileInfo[] = [];
+          result.templateFilesInfo.forEach((fileInfo: TemplateFileInfo) => {
+            const filePath = path.join(templateFolderPath, fileInfo.fileName);
+            const fileContent = fs.readFileSync(filePath, 'utf8');
+            templateFilesInfo.push({
+              fileName: fileInfo.fileName,
+              sourcePath: fileInfo.sourcePath,
+              targetPath: fileInfo.targetPath,
+              fileContent
+            });
           });
 
-          try {
-            // Select board
-            const boardProvider = new BoardProvider(context);
-            const boardItemList: BoardQuickPickItem[] = [];
 
-            const boards = boardProvider.list;
-            boards.forEach((board: Board) => {
-              boardItemList.push({
-                name: board.name,
-                id: board.id,
-                detailInfo: board.detailInfo,
-                label: board.name,
-                description: board.detailInfo,
-              });
-            });
-
-            // add the selection of 'device not in the list'
-            boardItemList.push({
-              name: '',
-              id: 'no_device',
-              detailInfo: '',
-              label: '$(issue-opened) My device is not in the list...',
-              description: '',
-            });
-
-            const boardSelection =
-                await vscode.window.showQuickPick(boardItemList, {
-                  ignoreFocusOut: true,
-                  matchOnDescription: true,
-                  matchOnDetail: true,
-                  placeHolder: 'Select a board',
-                });
-
-            if (!boardSelection) {
-              telemetryContext.properties.errorMessage =
-                  'Board selection canceled.';
-              telemetryContext.properties.result = 'Canceled';
-              return;
-            } else if (boardSelection.id === 'no_device') {
-              await utils.TakeNoDeviceSurvey(telemetryContext);
-              return;
-            } else {
-              telemetryContext.properties.board = boardSelection.label;
-              const board = boardProvider.find({id: boardSelection.id});
-
-              if (board) {
-                await ArduinoPackageManager.installBoard(board);
-              }
-            }
-
-            // Template select
-            const template = context.asAbsolutePath(path.join(
-                FileNames.resourcesFolderName, boardSelection.id,
-                FileNames.templateFileName));
-            const templateJson = require(template);
-
-            const projectTemplateList: vscode.QuickPickItem[] = [];
-
-            templateJson.templates.forEach((element: ProjectTemplate) => {
-              projectTemplateList.push({
-                label: element.label,
-                description: element.description,
-                detail: element.detail
-              });
-            });
-
-            const selection =
-                await vscode.window.showQuickPick(projectTemplateList, {
-                  ignoreFocusOut: true,
-                  matchOnDescription: true,
-                  matchOnDetail: true,
-                  placeHolder: 'Select a project template',
-                });
-
-            if (!selection) {
-              telemetryContext.properties.errorMessage =
-                  'Project template selection canceled.';
-              telemetryContext.properties.result = 'Canceled';
-              return;
-            } else {
-              telemetryContext.properties.template = selection.label;
-            }
-
-            const result =
-                templateJson.templates.find((template: ProjectTemplate) => {
-                  return template.label === selection.label;
-                });
-
-            if (!result) {
-              throw new Error('Unable to load project template.');
-            }
-
-            if (result.type === 'AzureFunctions') {
-              const isFunctionsExtensionAvailable =
-                  await azureFunctionsModule.AzureFunctions.isAvailable();
-              if (!isFunctionsExtensionAvailable) {
-                return false;
-              }
-            }
-
-            try {
-              rootPath = await utils.selectWorkspaceItem(
-                  'Please select a folder to contain your IoT Project:', {
-                    canSelectFiles: false,
-                    canSelectFolders: true,
-                    canSelectMany: false,
-                    defaultUri: vscode.workspace.workspaceFolders &&
-                            vscode.workspace.workspaceFolders.length > 0 ?
-                        vscode.workspace.workspaceFolders[0].uri :
-                        undefined,
-                    openLabel: 'Select'
-                  });
-
-              if (!rootPath) {
-                throw new Error('User cancelled folder selection.');
-              }
-
-              const projectFolder = await this.GenerateProjectFolder(rootPath);
-              if (!projectFolder) {
-                throw new Error('Generate Project Folder canceled');
-              }
-              rootPath = projectFolder;
-            } catch (error) {
-              telemetryContext.properties.errorMessage =
-                  `Folder selection canceled. ${error}`;
-              telemetryContext.properties.result = 'Canceled';
-              return;
-            }
-
-            const project = new ioTProjectModule.IoTProject(
-                context, channel, telemetryContext);
-            return await project.create(
-                rootPath, result, boardSelection.id, openInNewWindow);
-          } catch (error) {
-            throw error;
+          if (projectPath) {
+            await FileUtility.mkdirRecursively(ScaffoldType.Local, projectPath);
           }
+          const project = new ioTProjectModule.IoTProject(
+              context, channel, telemetryContext);
+          return await project.create(
+              projectPath, templateFilesInfo, projectTemplateType,
+              boardSelection.id, openInNewWindow);
+        } catch (error) {
+          throw error;
+        }
+      });
+    }
+
+  private async SelectTemplate(templateFolderPath: string) {
+    const templateJson =
+        require(path.join(templateFolderPath, FileNames.templateFileName));
+
+    const projectTemplateList: vscode.QuickPickItem[] = [];
+
+    templateJson.templates.forEach((element: ProjectTemplate) => {
+      projectTemplateList.push({
+        label: element.label,
+        description: element.description,
+        detail: element.detail
+      });
+    });
+
+    const templateSelection =
+        await vscode.window.showQuickPick(projectTemplateList, {
+          ignoreFocusOut: true,
+          matchOnDescription: true,
+          matchOnDetail: true,
+          placeHolder: 'Select a project template',
         });
+
+    return templateSelection;
   }
 
+  private async SelectBoard(boardFolderPath: string) {
+    const boardProvider = new BoardProvider(boardFolderPath);
+    const boardItemList: BoardQuickPickItem[] = [];
 
-  private async GenerateProjectFolder(rootPath: string) {
+    const boards = boardProvider.list;
+    boards.forEach((board: Board) => {
+      boardItemList.push({
+        name: board.name,
+        model: board.model,
+        id: board.id,
+        detailInfo: board.detailInfo,
+        label: board.name,
+        description: board.detailInfo,
+      });
+    });
+
+    const boardSelection = await vscode.window.showQuickPick(boardItemList, {
+      ignoreFocusOut: true,
+      matchOnDescription: true,
+      matchOnDetail: true,
+      placeHolder: 'Select a board',
+    });
+
+    return boardSelection;
+  }
+
+  private async SelectPlatform() {
+    const platformList: vscode.QuickPickItem[] = [
+      {
+        'label': PlatformType.ARDUINO,
+        'description': 'Project based on Arduino Platform.'
+      },
+      {
+        'label': PlatformType.EMBEDDEDLINUX,
+        'description':
+            'Project based on Linux(Yocto/Ubuntu/Debian/...) Platform.'
+      }
+    ];
+
+    const platformSelection = await vscode.window.showQuickPick(platformList, {
+      ignoreFocusOut: true,
+      matchOnDescription: true,
+      matchOnDetail: true,
+      placeHolder: 'Select a platform',
+    });
+
+    return platformSelection;
+  }
+
+  private async GenerateProjectFolder() {
+    // Get default workbench path.
+    const settings: IoTWorkbenchSettings = await IoTWorkbenchSettings.createAsync();
+    const workbench = await settings.workbenchPath();
+
+    const projectRootPath = path.join(workbench, 'projects');
+    if (!await FileUtility.directoryExists(ScaffoldType.Local, projectRootPath)) {
+      await FileUtility.mkdirRecursively(ScaffoldType.Local, projectRootPath);
+    }
+
     let counter = 0;
     const name = constants.defaultProjectName;
     let candidateName = name;
     while (true) {
-      const projectPath = path.join(rootPath, candidateName);
-      if (!utils.fileExistsSync(projectPath) &&
-          !utils.directoryExistsSync(projectPath)) {
+      const projectPath = path.join(projectRootPath, candidateName);
+      const projectPathExists = await FileUtility.fileExists(ScaffoldType.Local, projectPath);
+      const projectDirectoryExists = await FileUtility.directoryExists(ScaffoldType.Local, projectPath);
+      if (!projectPathExists && !projectDirectoryExists) {
         break;
       }
+
       counter++;
       candidateName = `${name}_${counter}`;
     }
@@ -206,14 +256,16 @@ export class ProjectInitializer {
       value: candidateName,
       prompt: 'Input project name.',
       ignoreFocusOut: true,
-      validateInput: (projectName: string) => {
+      validateInput: async (projectName: string) => {
         if (!/^([a-z0-9_]|[a-z0-9_][-a-z0-9_.]*[a-z0-9_])(\.ino)?$/i.test(
                 projectName)) {
           return 'Project name can only contain letters, numbers, "-" and ".", and cannot start or end with "-" or ".".';
         }
-        const projectPath = path.join(rootPath, projectName);
-        if (!utils.fileExistsSync(projectPath) &&
-            !utils.directoryExistsSync(projectPath)) {
+
+        const projectPath = path.join(projectRootPath, projectName);
+        const projectPathExists = await FileUtility.fileExists(ScaffoldType.Local, projectPath);
+        const projectDirectoryExists = await FileUtility.directoryExists(ScaffoldType.Local, projectPath);
+        if (!projectPathExists && !projectDirectoryExists) {
           return;
         } else {
           return `${projectPath} exists, please choose another name.`;
@@ -222,10 +274,10 @@ export class ProjectInitializer {
     });
 
     const projectPath =
-        projectName ? path.join(rootPath, projectName) : undefined;
-    if (projectPath) {
-      utils.mkdirRecursivelySync(projectPath);
-    }
+        projectName ? path.join(projectRootPath, projectName) : undefined;
+
+    // We don't create the projectpath here in case user may cancel their
+    // initialization in following steps Just generate a valid path for project
     return projectPath;
   }
 }

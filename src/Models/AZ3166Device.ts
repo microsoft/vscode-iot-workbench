@@ -95,7 +95,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
   name = 'AZ3166';
 
   get board() {
-    const boardProvider = new BoardProvider(this.extensionContext);
+    const boardProvider = new BoardProvider(this.boardFolderPath);
     const az3166 = boardProvider.find({id: AZ3166Device._boardId});
     return az3166;
   }

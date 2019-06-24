@@ -11,7 +11,7 @@ import {IoTWorkbenchSettings} from './IoTSettings';
 import * as utils from './utils';
 import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {TelemetryContext} from './telemetry';
-import {FileNames} from './constants';
+import {FileNames, PlatformType, ScaffoldType, platformFolderMap} from './constants';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 import {VSCExpress} from 'vscode-express';
@@ -97,7 +97,7 @@ export class ExampleExplorer {
   }
 
   private async GenerateExampleFolder(exampleName: string) {
-    const settings: IoTWorkbenchSettings = new IoTWorkbenchSettings();
+    const settings: IoTWorkbenchSettings = await IoTWorkbenchSettings.createAsync();
     const workbench = await settings.workbenchPath();
 
     if (!utils.directoryExistsSync(workbench)) {
@@ -185,7 +185,13 @@ export class ExampleExplorer {
   async selectBoard(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    const boardProvider = new BoardProvider(context);
+    const platformFolder = platformFolderMap.get(PlatformType.ARDUINO);
+    if (platformFolder === undefined) {
+      throw new Error(`Platform ${PlatformType.ARDUINO}'s  resource folder does not exist.`);
+    }
+    const boardFolderPath = context.asAbsolutePath(
+        path.join(FileNames.resourcesFolderName, platformFolder));
+    const boardProvider = new BoardProvider(boardFolderPath);
     const boardItemList: BoardQuickPickItem[] = [];
     const boards = boardProvider.list.filter(board => board.exampleUrl);
     boards.forEach((board: Board) => {

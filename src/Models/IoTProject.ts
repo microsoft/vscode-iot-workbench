@@ -6,20 +6,22 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, FileNames} from '../constants';
+import {ConfigKey, FileNames, ScaffoldType, DependentExtensions} from '../constants';
 import {EventNames} from '../constants';
 import {TelemetryProperties, TelemetryWorker} from '../telemetry';
 import {askAndNewProject, askAndOpenProject} from '../utils';
+import {RemoteExtension} from './RemoteExtension';
 
 import {checkAzureLogin} from './Apis';
 import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Deployable} from './Interfaces/Deployable';
 import {Device} from './Interfaces/Device';
-import {ProjectTemplate, ProjectTemplateType} from './Interfaces/ProjectTemplate';
+import {ProjectTemplate, ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
 import {Workspace} from './Interfaces/Workspace';
+import {FileUtility} from '../FileUtility';
 
 type Dependency = import('./AzureComponentConfig').Dependency;
 type TelemetryContext = import('../telemetry').TelemetryContext;
@@ -51,7 +53,8 @@ const constants = {
   deviceDefaultFolderName: 'Device',
   functionDefaultFolderName: 'Functions',
   asaFolderName: 'StreamAnalytics',
-  workspaceConfigExtension: '.code-workspace'
+  workspaceConfigExtension: '.code-workspace',
+  projectConfigFileName: 'projectConfig.json' // Use this file to store boardId since we currently use folder instead of workspace as a workaround
 };
 
 interface ProjectSetting {
@@ -65,6 +68,7 @@ export class IoTProject {
   private extensionContext: vscode.ExtensionContext;
   private channel: vscode.OutputChannel;
   private telemetryContext: TelemetryContext;
+  private projectConfigFile = '';
 
   private canProvision(comp: {}): comp is Provisionable {
     return (comp as Provisionable).provision !== undefined;
@@ -113,6 +117,13 @@ export class IoTProject {
       return false;
     }
 
+    this.projectConfigFile = path.join(this.projectRootPath,
+      FileNames.vscodeSettingsFolderName, constants.projectConfigFileName);
+    if (!fs.existsSync(this.projectConfigFile)) {
+      return false;
+    }
+    const projectConfigJson = require(this.projectConfigFile);
+
     // only send telemetry when the IoT project is load when VS Code opens
     if (initLoad) {
       const properties: TelemetryProperties = {
@@ -134,7 +145,7 @@ export class IoTProject {
     const azureConfigFileHandler =
         new azureComponentConfigModule.AzureConfigFileHandler(
             this.projectRootPath);
-    azureConfigFileHandler.createIfNotExists();
+    azureConfigFileHandler.createIfNotExists(ScaffoldType.Workspace);
 
     if (deviceLocation !== undefined) {
       const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
@@ -142,6 +153,10 @@ export class IoTProject {
         return false;
       }
       let device = null;
+      const projectType = projectConfigJson[`${ConfigKey.projectType}`] as ProjectTemplateType;
+      if (!projectType) {
+        return false;
+      }
       if (boardId === az3166DeviceModule.AZ3166Device.boardId) {
         device = new az3166DeviceModule.AZ3166Device(
             this.extensionContext, this.channel, deviceLocation);
@@ -151,10 +166,9 @@ export class IoTProject {
       } else if (boardId === esp32DeviceModule.Esp32Device.boardId) {
         device = new esp32DeviceModule.Esp32Device(
             this.extensionContext, this.channel, deviceLocation);
-      } else if (
-          boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
+      } else if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
         device = new raspberryPiDeviceModule.RaspberryPiDevice(
-            this.extensionContext, deviceLocation, this.channel);
+            this.extensionContext, this.projectRootPath, this.channel, projectType);
       }
       if (device) {
         this.componentList.push(device);
@@ -162,12 +176,12 @@ export class IoTProject {
       }
     }
 
-    const componentConfigs = azureConfigFileHandler.getSortedComponents();
+    const componentConfigs = await azureConfigFileHandler.getSortedComponents(ScaffoldType.Workspace);
     if (!componentConfigs || componentConfigs.length === 0) {
       // Support backward compact
       const iotHub =
           new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
-      await iotHub.updateConfigSettings();
+      await iotHub.updateConfigSettings(ScaffoldType.Workspace);
       await iotHub.load();
       this.componentList.push(iotHub);
       const device = new ioTHubDeviceModule.IoTHubDevice(this.channel);
@@ -183,7 +197,7 @@ export class IoTProject {
               component: iotHub,
               type: azureComponentConfigModule.DependencyType.Input
             }]);
-        await functionApp.updateConfigSettings();
+        await functionApp.updateConfigSettings(ScaffoldType.Workspace);
         await functionApp.load();
         this.componentList.push(functionApp);
       }
@@ -475,14 +489,24 @@ export class IoTProject {
   }
 
   async create(
-      rootFolderPath: string, projectTemplateItem: ProjectTemplate,
-      boardId: string, openInNewWindow: boolean): Promise<boolean> {
-    if (!fs.existsSync(rootFolderPath)) {
+    rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
+    projectType: ProjectTemplateType, boardId: string,
+    openInNewWindow: boolean): Promise<boolean> {
+    const rootFolderPathExists = await FileUtility.directoryExists(ScaffoldType.Local, rootFolderPath);
+    if (!rootFolderPathExists) {
       throw new Error(
           'Unable to find the root path, please open the folder and initialize project again.');
     }
 
     this.projectRootPath = rootFolderPath;
+
+    // initialize the storage for azure component settings
+    const azureConfigFileHandler =
+        new azureComponentConfigModule.AzureConfigFileHandler(
+            this.projectRootPath);
+    azureConfigFileHandler.createIfNotExists(ScaffoldType.Local);
+
+    const projectConfig :{[key: string]: string} = {};
 
     const workspace: Workspace = {folders: [], settings: {}};
 
@@ -494,29 +518,24 @@ export class IoTProject {
       fs.mkdirSync(deviceDir);
     }
 
-    // initialize the storage for azure component settings
-    const azureConfigFileHandler =
-        new azureComponentConfigModule.AzureConfigFileHandler(
-            this.projectRootPath);
-    azureConfigFileHandler.createIfNotExists();
-
     workspace.folders.push({path: constants.deviceDefaultFolderName});
     let device: Component;
-    if (boardId === az3166DeviceModule.AZ3166Device.boardId) {
-      device = new az3166DeviceModule.AZ3166Device(
-          this.extensionContext, this.channel, deviceDir,
-          projectTemplateItem.sketch);
-    } else if (boardId === ioTButtonDeviceModule.IoTButtonDevice.boardId) {
-      device = new ioTButtonDeviceModule.IoTButtonDevice(
-          this.extensionContext, deviceDir, projectTemplateItem.sketch);
-    } else if (boardId === esp32DeviceModule.Esp32Device.boardId) {
-      device = new esp32DeviceModule.Esp32Device(
-          this.extensionContext, this.channel, deviceDir,
-          projectTemplateItem.sketch);
-    } else if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
+    // if (boardId === az3166DeviceModule.AZ3166Device.boardId) {
+      // device = new az3166DeviceModule.AZ3166Device(
+      //     this.extensionContext, this.channel, deviceDir,
+      //     projectTemplateItem.sketch);
+    // } else if (boardId === ioTButtonDeviceModule.IoTButtonDevice.boardId) {
+      // device = new ioTButtonDeviceModule.IoTButtonDevice(
+      //     this.extensionContext, deviceDir, projectTemplateItem.sketch);
+    // } else if (boardId === esp32DeviceModule.Esp32Device.boardId) {
+      // device = new esp32DeviceModule.Esp32Device(
+      //     this.extensionContext, this.channel, deviceDir,
+      //     projectTemplateItem.sketch);
+    // } else if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
+    if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
       device = new raspberryPiDeviceModule.RaspberryPiDevice(
-          this.extensionContext, deviceDir, this.channel,
-          projectTemplateItem.sketch);
+          this.extensionContext, this.projectRootPath, this.channel,
+          projectType, templateFilesInfo);
     } else {
       throw new Error('The specified board is not supported.');
     }
@@ -526,21 +545,20 @@ export class IoTProject {
       return false;
     }
 
+    // Config through workspace
     workspace.settings[`IoTWorkbench.${ConfigKey.boardId}`] = boardId;
     this.componentList.push(device);
-
-    // TODO: Consider naming for project level settings.
-    const settings = {projectsettings: [] as ProjectSetting[]};
-    settings.projectsettings.push(
-        {name: ConfigKey.devicePath, value: constants.deviceDefaultFolderName});
 
     workspace.settings[`IoTWorkbench.${ConfigKey.devicePath}`] =
         constants.deviceDefaultFolderName;
 
-    const type: ProjectTemplateType = (ProjectTemplateType)
-        [projectTemplateItem.type as keyof typeof ProjectTemplateType];
+    // Config through projectConfig.json file
+    projectConfig[`${ConfigKey.boardId}`] = boardId;
+    this.componentList.push(device);
 
-    switch (type) {
+    projectConfig[`${ConfigKey.projectType}`] = projectType;
+
+    switch (projectType) {
       case ProjectTemplateType.Basic:
         // Save data to configFile
         break;
@@ -582,13 +600,12 @@ export class IoTProject {
         if (!isFunctionsPrerequisitesAchieved) {
           return false;
         }
-        settings.projectsettings.push({
-          name: ConfigKey.functionPath,
-          value: constants.functionDefaultFolderName
-        });
 
         workspace.settings[`IoTWorkbench.${ConfigKey.functionPath}`] =
             constants.functionDefaultFolderName;
+
+        projectConfig[`${ConfigKey.functionPath}`] =
+        constants.functionDefaultFolderName;
 
         this.componentList.push(iothub);
         this.componentList.push(azureFunctions);
@@ -646,6 +663,9 @@ export class IoTProject {
         workspace.settings[`IoTWorkbench.${ConfigKey.asaPath}`] =
             constants.asaFolderName;
 
+        projectConfig[`${ConfigKey.asaPath}`] =
+        constants.asaFolderName;
+
         this.componentList.push(iothub);
         this.componentList.push(cosmosDB);
         this.componentList.push(asa);
@@ -683,6 +703,16 @@ export class IoTProject {
     fs.writeFileSync(
         workspaceConfigFilePath, JSON.stringify(workspace, null, 4));
 
+    const vscodeFolderPath = path.join(this.projectRootPath, FileNames.vscodeSettingsFolderName);
+    if (!await FileUtility.directoryExists(ScaffoldType.Local, vscodeFolderPath)) {
+      await FileUtility.mkdirRecursively(ScaffoldType.Local, vscodeFolderPath);
+    }
+    const projectConfigFile = path.join(vscodeFolderPath, constants.projectConfigFileName);
+    if (!await FileUtility.fileExists(ScaffoldType.Local, projectConfigFile)) {
+      const indentationSpace = 4;
+      FileUtility.writeFile(ScaffoldType.Local, projectConfigFile, JSON.stringify(projectConfig, null, indentationSpace));
+    }
+
     if (!openInNewWindow) {
       // Need to add telemetry here otherwise, after restart VSCode, no
       // telemetry data will be sent.
@@ -695,11 +725,31 @@ export class IoTProject {
     }
 
     try {
+      // TODO: Use project type variable to choose one of the two ways to create project
+      // Old way to create project
+      // setTimeout(
+      //     () => vscode.commands.executeCommand(
+      //         'vscode.openFolder', vscode.Uri.file(workspaceConfigFilePath),
+      //         openInNewWindow),
+      //     1000);
+      // return true;
+
+      // Containerized way to create project
+      if (!RemoteExtension.isRemote(this.extensionContext)) {
+          const res = await RemoteExtension.checkRemoteExtension();
+          if (!res) {
+            const message = `Remote extension is not available. Please install ${DependentExtensions.remote} first.`;
+            this.channel.show();
+            this.channel.appendLine(message);
+            return false;
+        }
+      }
       setTimeout(
-          () => vscode.commands.executeCommand(
-              'vscode.openFolder', vscode.Uri.file(workspaceConfigFilePath),
-              openInNewWindow),
-          1000);
+        // TODO: better implement this through VS Remote API.
+        // Currently implemented in helper extension iotcube.
+          () => vscode.commands.executeCommand('iotcube.openInContainer', this.projectRootPath),
+          500); // TODO: Remove this magic number
+
       return true;
     } catch (error) {
       throw error;

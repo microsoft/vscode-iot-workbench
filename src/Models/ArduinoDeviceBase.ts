@@ -7,7 +7,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, DependentExtensions, FileNames} from '../constants';
+import {ConfigKey, DependentExtensions, FileNames, PlatformType, platformFolderMap} from '../constants';
 
 import {Board} from './Interfaces/Board';
 import {ComponentType} from './Interfaces/Component';
@@ -30,6 +30,7 @@ export abstract class ArduinoDeviceBase implements Device {
   protected deviceFolder: string;
   protected vscodeFolderPath: string;
   protected extensionContext: vscode.ExtensionContext;
+  protected boardFolderPath: string;
 
   abstract name: string;
   abstract id: string;
@@ -43,6 +44,13 @@ export abstract class ArduinoDeviceBase implements Device {
     this.extensionContext = context;
     this.vscodeFolderPath =
         path.join(this.deviceFolder, FileNames.vscodeSettingsFolderName);
+
+    const platformFolder = platformFolderMap.get(PlatformType.ARDUINO);
+    if (platformFolder === undefined) {
+      throw new Error(`Platform ${PlatformType.ARDUINO}'s  resource folder does not exist.`);
+    }
+    this.boardFolderPath = context.asAbsolutePath(
+        path.join(FileNames.resourcesFolderName, platformFolder));
   }
 
   getDeviceType(): DeviceType {
