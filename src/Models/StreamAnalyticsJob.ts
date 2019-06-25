@@ -39,7 +39,8 @@ export class StreamAnalyticsJob implements Component, Provisionable,
       return this.azureClient;
     }
 
-    const componentConfig = await this.azureConfigHandler.getComponentById(ScaffoldType.Workspace, this.id);
+    const componentConfig = await this.azureConfigHandler.getComponentById(
+        ScaffoldType.Workspace, this.id);
     if (!componentConfig) {
       throw new Error(
           `Cannot find Azure Stream Analytics component with id ${this.id}.`);
@@ -178,14 +179,16 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     return true;
   }
 
-  async updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo): Promise<void> {
+  async updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo):
+      Promise<void> {
     const asaComponentIndex =
         await this.azureConfigHandler.getComponentIndexById(type, this.id);
     if (asaComponentIndex > -1) {
       if (!componentInfo) {
         return;
       }
-      await this.azureConfigHandler.updateComponent(asaComponentIndex, componentInfo);
+      await this.azureConfigHandler.updateComponent(
+          asaComponentIndex, componentInfo);
     } else {
       const newAsaConfig: AzureComponentConfig = {
         id: this.id,
@@ -244,8 +247,8 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     }
 
     for (const dependency of this.dependencies) {
-      const componentConfig =
-          await this.azureConfigHandler.getComponentById(ScaffoldType.Workspace, dependency.id);
+      const componentConfig = await this.azureConfigHandler.getComponentById(
+          ScaffoldType.Workspace, dependency.id);
       if (!componentConfig) {
         throw new Error(`Cannot find component with id ${dependency.id}.`);
       }

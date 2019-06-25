@@ -6,12 +6,16 @@ import * as vscode from 'vscode';
 import {DependentExtensions} from '../constants';
 
 export class RemoteExtension {
-  // [TODO] A rough version provided by Chuck. Will be removed when service API is ready.
-  // Check whether the iot-workbench extension is currently in remote container or local
+  // [TODO] A rough version provided by Chuck. Will be removed when service API
+  // is ready. Check whether the iot-workbench extension is currently in remote
+  // container or local
   static isRemote(context: vscode.ExtensionContext) {
-    if (((vscode as any).ExtensionExecutionContext && (context as any).executionContext ===(vscode as any).ExtensionExecutionContext.Remote) ||
+    // tslint:disable-next-line: no-any
+    if (((vscode as any).ExtensionExecutionContext &&
+         (context as any).executionContext ===
+             (vscode as any).ExtensionExecutionContext.Remote) ||
         (process.argv[0].indexOf(`${path.sep}.vscode-remote${path.sep}`) > 0)) {
-        return true;
+      return true;
     }
     return false;
   }
@@ -24,8 +28,7 @@ export class RemoteExtension {
       if (choice === 'Yes') {
         vscode.commands.executeCommand(
             'vscode.open',
-            vscode.Uri.parse(
-                'vscode:extension/' + DependentExtensions.remote));
+            vscode.Uri.parse('vscode:extension/' + DependentExtensions.remote));
       }
       return false;
     }
@@ -35,5 +38,4 @@ export class RemoteExtension {
   static async checkRemoteExtension(): Promise<boolean> {
     return await RemoteExtension.isAvailable();
   }
-
 }

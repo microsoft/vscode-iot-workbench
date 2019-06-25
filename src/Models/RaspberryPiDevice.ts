@@ -6,18 +6,18 @@ import {Guid} from 'guid-typescript';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as sdk from 'vscode-iot-device-cube-sdk';
-import * as utils from '../utils';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, FileNames, PlatformType, OperationType, ScaffoldType, platformFolderMap} from '../constants';
-import {TemplateFileInfo, ProjectTemplateType} from './Interfaces/ProjectTemplate';
+import {ConfigKey, FileNames, OperationType, platformFolderMap, PlatformType, ScaffoldType} from '../constants';
+import {FileUtility} from '../FileUtility';
+import * as utils from '../utils';
 import {runCommand} from '../utils';
 
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
-import {ScaffoldGenerator} from './ScaffoldGenerator';
+import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {RemoteExtension} from './RemoteExtension';
-import {FileUtility} from '../FileUtility';
+import {ScaffoldGenerator} from './ScaffoldGenerator';
 
 class RaspberryPiUploadConfig {
   static host = 'raspberrypi';
@@ -53,7 +53,8 @@ export class RaspberryPiDevice implements Device {
 
   constructor(
       context: vscode.ExtensionContext, projectPath: string,
-      channel: vscode.OutputChannel, projectTemplateType: ProjectTemplateType, private templateFilesInfo: TemplateFileInfo[] = []) {
+      channel: vscode.OutputChannel, projectTemplateType: ProjectTemplateType,
+      private templateFilesInfo: TemplateFileInfo[] = []) {
     this.deviceType = DeviceType.Raspberry_Pi;
     this.componentType = ComponentType.Device;
     this.projectType = projectTemplateType;
@@ -68,12 +69,12 @@ export class RaspberryPiDevice implements Device {
 
     const platformFolder = platformFolderMap.get(PlatformType.EMBEDDEDLINUX);
     if (platformFolder === undefined) {
-      throw new Error(`Platform ${PlatformType.EMBEDDEDLINUX}'s  resource folder does not exist.`);
+      throw new Error(`Platform ${
+          PlatformType.EMBEDDEDLINUX}'s  resource folder does not exist.`);
     }
     this.boardFolderPath = context.asAbsolutePath(
         path.join(FileNames.resourcesFolderName, platformFolder));
-    this.outputPath =
-        path.join(this.projectFolder, FileNames.outputPathName);
+    this.outputPath = path.join(this.projectFolder, FileNames.outputPathName);
     this.templateFolderPath =
         path.join(this.boardFolderPath, RaspberryPiDevice.boardId);
   }
@@ -98,8 +99,9 @@ export class RaspberryPiDevice implements Device {
     }
 
     const scaffoldGenerator = new ScaffoldGenerator();
-    await scaffoldGenerator.scaffoldIoTProjectFiles(ScaffoldType.Workspace, this.projectFolder, this.vscodeFolderPath,
-      this.devcontainerFolderPath, this.templateFolderPath, this.projectType);
+    await scaffoldGenerator.scaffoldIoTProjectFiles(
+        ScaffoldType.Workspace, this.projectFolder, this.vscodeFolderPath,
+        this.devcontainerFolderPath, this.templateFolderPath, this.projectType);
 
     return true;
   }
@@ -110,14 +112,16 @@ export class RaspberryPiDevice implements Device {
     }
 
     const scaffoldGenerator = new ScaffoldGenerator();
-    await scaffoldGenerator.scaffoldIoTProjectFiles(ScaffoldType.Local, this.projectFolder, this.vscodeFolderPath,
-      this.devcontainerFolderPath, this.templateFolderPath, this.projectType);
+    await scaffoldGenerator.scaffoldIoTProjectFiles(
+        ScaffoldType.Local, this.projectFolder, this.vscodeFolderPath,
+        this.devcontainerFolderPath, this.templateFolderPath, this.projectType);
     await this.generateSketchFile(this.templateFilesInfo);
 
     return true;
   }
 
-  async generateSketchFile(templateFilesInfo: TemplateFileInfo[]): Promise<boolean> {
+  async generateSketchFile(templateFilesInfo: TemplateFileInfo[]):
+      Promise<boolean> {
     // Generate sketch file
     if (!templateFilesInfo) {
       throw new Error('No sketch file found.');
@@ -125,9 +129,11 @@ export class RaspberryPiDevice implements Device {
 
     // Cannot use forEach here since it's async
     for (const fileInfo of templateFilesInfo) {
-      const targetFolderPath = path.join(this.projectFolder, fileInfo.targetPath);
+      const targetFolderPath =
+          path.join(this.projectFolder, fileInfo.targetPath);
       if (!await sdk.FileSystem.exists(targetFolderPath)) {
-        await FileUtility.mkdirRecursively(ScaffoldType.Local,targetFolderPath);
+        await FileUtility.mkdirRecursively(
+            ScaffoldType.Local, targetFolderPath);
       }
 
       const targetFilePath = path.join(targetFolderPath, fileInfo.fileName);
@@ -135,8 +141,8 @@ export class RaspberryPiDevice implements Device {
         try {
           await sdk.FileSystem.writeFile(targetFilePath, fileInfo.fileContent);
         } catch (error) {
-          throw new Error(
-              `Failed to create sketch file for Raspberry Pi: ${error.message}`);
+          throw new Error(`Failed to create sketch file for Raspberry Pi: ${
+              error.message}`);
         }
       }
     }
@@ -147,7 +153,8 @@ export class RaspberryPiDevice implements Device {
   async compile(): Promise<boolean> {
     const isRemote = RemoteExtension.isRemote(this.extensionContext);
     if (!isRemote) {
-      const res = await utils.askAndOpenInRemote(OperationType.Compile, this.channel);
+      const res =
+          await utils.askAndOpenInRemote(OperationType.Compile, this.channel);
       if (!res) {
         return false;
       }
@@ -157,31 +164,38 @@ export class RaspberryPiDevice implements Device {
       try {
         fs.mkdirSync(this.outputPath);
       } catch (error) {
-        throw new Error(`Failed to create output path ${this.outputPath}. Error message: ${error.message}`);
+        throw new Error(`Failed to create output path ${
+            this.outputPath}. Error message: ${error.message}`);
       }
     }
 
     this.channel.show();
     this.channel.appendLine('Compiling Raspberry Pi device code...');
-    const compileBashFile = "/work/compile_app.sh";
+    const compileBashFile = '/work/compile_app.sh';
     try {
-      await runCommand(`bash ${compileBashFile} ${this.projectFolder}/src`, '', this.channel);
+      await runCommand(
+          `bash ${compileBashFile} ${this.projectFolder}/src`, '',
+          this.channel);
     } catch (error) {
-      throw new Error(`Failed to compile Raspberry Pi device code. Error message: ${error.message}`);
+      throw new Error(
+          `Failed to compile Raspberry Pi device code. Error message: ${
+              error.message}`);
     }
 
     // If successfully compiled, copy compiled files to user workspace
-    const binFilePath = "/work/azure-iot-sdk-c/cmake/iot_application";
+    const binFilePath = '/work/azure-iot-sdk-c/cmake/iot_application';
     if (fs.existsSync(binFilePath)) {
       const getOutputFileCmd = `cp -rf ${binFilePath} ${this.outputPath}`;
       try {
         await runCommand(getOutputFileCmd, '', this.channel);
       } catch (error) {
-        throw new Error(`Failed to copy compiled files to output folder ${this.outputPath}. Error message: ${error.message}`);
+        throw new Error(`Failed to copy compiled files to output folder ${
+            this.outputPath}. Error message: ${error.message}`);
       }
     } else {
       this.channel.show();
-      this.channel.appendLine('Bin files not found. Compilation may have failed.');
+      this.channel.appendLine(
+          'Bin files not found. Compilation may have failed.');
       return false;
     }
 
@@ -196,16 +210,19 @@ export class RaspberryPiDevice implements Device {
   async upload(): Promise<boolean> {
     const isRemote = RemoteExtension.isRemote(this.extensionContext);
     if (!isRemote) {
-      const res = await utils.askAndOpenInRemote(OperationType.Upload, this.channel);
+      const res =
+          await utils.askAndOpenInRemote(OperationType.Upload, this.channel);
       if (!res) {
         return false;
       }
     }
 
     try {
-      const binFilePath = path.join(this.outputPath, 'iot_application/azure_exe');
+      const binFilePath =
+          path.join(this.outputPath, 'iot_application/azure_exe');
       if (!fs.existsSync(binFilePath)) {
-        const message = `Binary file does not exist. Please compile device code first.`;
+        const message =
+            `Binary file does not exist. Please compile device code first.`;
         await vscode.window.showWarningMessage(message);
         return false;
       }
@@ -219,11 +236,15 @@ export class RaspberryPiDevice implements Device {
       }
 
       const ssh = new sdk.SSH();
-      await ssh.open(RaspberryPiUploadConfig.host, RaspberryPiUploadConfig.port, RaspberryPiUploadConfig.user, RaspberryPiUploadConfig.password);
+      await ssh.open(
+          RaspberryPiUploadConfig.host, RaspberryPiUploadConfig.port,
+          RaspberryPiUploadConfig.user, RaspberryPiUploadConfig.password);
       try {
         await ssh.uploadFile(binFilePath, RaspberryPiUploadConfig.projectPath);
       } catch (error) {
-        throw new Error(`Deploy binary file to device ${RaspberryPiUploadConfig.user}@${RaspberryPiUploadConfig.host} failed. ${error.message}`);
+        throw new Error(
+            `Deploy binary file to device ${RaspberryPiUploadConfig.user}@${
+                RaspberryPiUploadConfig.host} failed. ${error.message}`);
       }
 
       await ssh.close();
@@ -298,14 +319,14 @@ export class RaspberryPiDevice implements Device {
     });
 
     sshDevicePickItems.push(
-      {
-        label: '$(sync) Discover again',
-        detail: 'Auto discover SSH enabled device in LAN'
-      },
-      {
-        label: '$(gear) Manual setup',
-        detail: 'Setup device SSH configuration manually'
-      });
+        {
+          label: '$(sync) Discover again',
+          detail: 'Auto discover SSH enabled device in LAN'
+        },
+        {
+          label: '$(gear) Manual setup',
+          detail: 'Setup device SSH configuration manually'
+        });
 
     return sshDevicePickItems;
   }

@@ -107,7 +107,8 @@ export class IoTHubDevice implements Component, Provisionable {
     }
   }
 
-  updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo): void {}
+  updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo):
+      void {}
 }
 
 async function getProvisionIothubDeviceSelection(

@@ -7,7 +7,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, DependentExtensions, FileNames, PlatformType, platformFolderMap} from '../constants';
+import {ConfigKey, DependentExtensions, FileNames, platformFolderMap, PlatformType} from '../constants';
 
 import {Board} from './Interfaces/Board';
 import {ComponentType} from './Interfaces/Component';
@@ -47,7 +47,8 @@ export abstract class ArduinoDeviceBase implements Device {
 
     const platformFolder = platformFolderMap.get(PlatformType.ARDUINO);
     if (platformFolder === undefined) {
-      throw new Error(`Platform ${PlatformType.ARDUINO}'s  resource folder does not exist.`);
+      throw new Error(`Platform ${
+          PlatformType.ARDUINO}'s  resource folder does not exist.`);
     }
     this.boardFolderPath = context.asAbsolutePath(
         path.join(FileNames.resourcesFolderName, platformFolder));

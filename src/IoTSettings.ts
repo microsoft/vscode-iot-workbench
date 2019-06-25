@@ -3,27 +3,28 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
+import * as sdk from 'vscode-iot-device-cube-sdk';
+
 import {ConfigHandler} from './configHandler';
 import {PickWithData} from './Models/Interfaces/UI';
-import * as sdk from 'vscode-iot-device-cube-sdk';
 
 
 export class IoTWorkbenchSettings {
   private _workbenchPath = '';
 
-  private constructor() {
-  }
+  private constructor() {}
 
   static async createAsync() {
     const iotWorkbenchSettings = new IoTWorkbenchSettings();
 
-    iotWorkbenchSettings._workbenchPath = await IoTWorkbenchSettings.getWorkbenchPath();
+    iotWorkbenchSettings._workbenchPath =
+        await IoTWorkbenchSettings.getWorkbenchPath();
 
     return iotWorkbenchSettings;
   }
 
   static async getWorkbenchPath(): Promise<string> {
-    const localOs = sdk.Utility.require("os") as typeof import("os");
+    const localOs = sdk.Utility.require('os') as typeof import('os');
     const getHomeDir = await localOs.homedir;
     const homeDir = await getHomeDir();
     const getPlatform = await localOs.platform;
@@ -31,13 +32,11 @@ export class IoTWorkbenchSettings {
 
     let _workbenchPath = '';
     if (platform === 'win32') {
-      _workbenchPath =
-          path.join(homeDir, 'Documents', 'IoTWorkbenchProjects');
+      _workbenchPath = path.join(homeDir, 'Documents', 'IoTWorkbenchProjects');
     } else if (platform === 'linux') {
       _workbenchPath = path.join(homeDir, 'IoTWorkbenchProjects');
     } else if (platform === 'darwin') {
-      _workbenchPath =
-          path.join(homeDir, 'Documents', 'IoTWorkbenchProjects');
+      _workbenchPath = path.join(homeDir, 'Documents', 'IoTWorkbenchProjects');
     } else {
       _workbenchPath = '/IoTWorkbenchProjects';
     }

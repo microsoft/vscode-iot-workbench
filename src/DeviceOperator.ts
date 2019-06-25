@@ -62,7 +62,8 @@ export class DeviceOperator {
       telemetryContext: TelemetryContext) {
     const platformFolder = platformFolderMap.get(PlatformType.EMBEDDEDLINUX);
     if (platformFolder === undefined) {
-      throw new Error(`Platform ${PlatformType.EMBEDDEDLINUX}'s  resource folder does not exist.`);
+      throw new Error(`Platform ${
+          PlatformType.EMBEDDEDLINUX}'s  resource folder does not exist.`);
     }
     const boardFolderPath = context.asAbsolutePath(
         path.join(FileNames.resourcesFolderName, platformFolder));

@@ -177,7 +177,8 @@ export class IoTHub implements Component, Provisionable {
     }
   }
 
-  async updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo): Promise<void> {
+  async updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo):
+      Promise<void> {
     const iotHubComponentIndex =
         await this.azureConfigFileHandler.getComponentIndexById(type, this.id);
 

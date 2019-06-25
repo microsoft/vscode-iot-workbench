@@ -1,17 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as fs from 'fs-plus';
 import * as cp from 'child_process';
+import * as fs from 'fs-plus';
 import * as path from 'path';
 import {setTimeout} from 'timers';
 import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
 
-import {AzureFunctionsLanguage, GlobalConstants, OperationType, DependentExtensions} from './constants';
+import {AzureFunctionsLanguage, DependentExtensions, GlobalConstants, OperationType} from './constants';
 import {DialogResponses} from './DialogResponses';
-import {TelemetryContext} from './telemetry';
 import {RemoteExtension} from './Models/RemoteExtension';
+import {TelemetryContext} from './telemetry';
 
 export function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -203,9 +203,10 @@ export async function askAndOpenProject(
   }
 }
 
-export async function askAndOpenInRemote(operation: OperationType, channel: vscode.OutputChannel): Promise<boolean> {
-  const message =
-      `${operation} can only be executed in remote container. Do you want to reopen the IoT project in container?`;
+export async function askAndOpenInRemote(
+    operation: OperationType, channel: vscode.OutputChannel): Promise<boolean> {
+  const message = `${
+      operation} can only be executed in remote container. Do you want to reopen the IoT project in container?`;
   const result: vscode.MessageItem|undefined =
       await vscode.window.showInformationMessage(
           message, DialogResponses.yes, DialogResponses.no);
@@ -213,7 +214,8 @@ export async function askAndOpenInRemote(operation: OperationType, channel: vsco
   if (result === DialogResponses.yes) {
     const res = await RemoteExtension.checkRemoteExtension();
     if (!res) {
-      const message = `Remote extension is not available. Please install ${DependentExtensions.remote} first.`;
+      const message = `Remote extension is not available. Please install ${
+          DependentExtensions.remote} first.`;
       channel.show();
       channel.appendLine(message);
       return false;
@@ -269,8 +271,8 @@ export class InternalConfig {
 
 
 export function runCommand(
-  command: string, workingDir: string,
-  outputChannel: vscode.OutputChannel): Thenable<object> {
+    command: string, workingDir: string,
+    outputChannel: vscode.OutputChannel): Thenable<object> {
   return new Promise((resolve, reject) => {
     const stdout = '';
     const stderr = '';

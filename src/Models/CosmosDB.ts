@@ -13,7 +13,7 @@ import {AzureComponentConfig, AzureConfigFileHandler, AzureConfigs, ComponentInf
 import {ARMTemplate, AzureUtility} from './AzureUtility';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
-import { ScaffoldGenerator } from './ScaffoldGenerator';
+import {ScaffoldGenerator} from './ScaffoldGenerator';
 
 export class CosmosDB implements Component, Provisionable {
   dependencies: DependencyConfig[] = [];
@@ -86,7 +86,8 @@ export class CosmosDB implements Component, Provisionable {
     return true;
   }
 
-  async updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo): Promise<void> {
+  async updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo):
+      Promise<void> {
     const cosmosDBComponentIndex =
         await this.azureConfigHandler.getComponentIndexById(type, this.id);
     if (cosmosDBComponentIndex > -1) {
@@ -140,8 +141,8 @@ export class CosmosDB implements Component, Provisionable {
       this.channel.appendLine(JSON.stringify(cosmosDBDeploy, null, 4));
 
       for (const dependency of this.dependencies) {
-        const componentConfig =
-            await this.azureConfigHandler.getComponentById(ScaffoldType.Workspace, dependency.id);
+        const componentConfig = await this.azureConfigHandler.getComponentById(
+            ScaffoldType.Workspace, dependency.id);
         if (!componentConfig) {
           throw new Error(`Cannot find component with id ${dependency.id}.`);
         }

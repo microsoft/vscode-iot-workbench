@@ -6,7 +6,8 @@ import * as sdk from 'vscode-iot-device-cube-sdk';
 import {ScaffoldType} from './constants';
 
 export class FileUtility {
-  static async directoryExists(type: ScaffoldType, dirPath: string): Promise<boolean> {
+  static async directoryExists(type: ScaffoldType, dirPath: string):
+      Promise<boolean> {
     if (type === ScaffoldType.Local) {
       if (!await sdk.FileSystem.exists(dirPath)) {
         return false;
@@ -15,7 +16,7 @@ export class FileUtility {
       return isDirectory;
     } else {
       return new Promise((resolve: (exist: boolean) => void) => {
-        fs.stat(dirPath, (error: Error | null, stats) => {
+        fs.stat(dirPath, (error: Error|null, stats) => {
           if (error) {
             resolve(false);
             return;
@@ -27,7 +28,8 @@ export class FileUtility {
     }
   }
 
-  static async fileExists(type: ScaffoldType, filePath: string): Promise<boolean> {
+  static async fileExists(type: ScaffoldType, filePath: string):
+      Promise<boolean> {
     if (type === ScaffoldType.Local) {
       const directoryExists = await sdk.FileSystem.exists(filePath);
       if (!directoryExists) {
@@ -37,7 +39,7 @@ export class FileUtility {
       return isFile;
     } else {
       return new Promise((resolve: (exist: boolean) => void) => {
-        fs.stat(filePath, (error: Error | null, stats) => {
+        fs.stat(filePath, (error: Error|null, stats) => {
           if (error) {
             resolve(false);
             return;
@@ -63,10 +65,11 @@ export class FileUtility {
           return;
         });
       });
-      }
+    }
   }
 
-  static async mkdirRecursively(type: ScaffoldType, dirPath: string): Promise<void> {
+  static async mkdirRecursively(type: ScaffoldType, dirPath: string):
+      Promise<void> {
     if (await FileUtility.directoryExists(type, dirPath)) {
       return;
     }
@@ -81,7 +84,9 @@ export class FileUtility {
     }
   }
 
-  static async writeFile(type: ScaffoldType, filePath: string, data: string | Buffer): Promise<void> {
+  static async writeFile(
+      type: ScaffoldType, filePath: string,
+      data: string|Buffer): Promise<void> {
     if (type === ScaffoldType.Local) {
       return await sdk.FileSystem.writeFile(filePath, data);
     } else {
@@ -98,20 +103,23 @@ export class FileUtility {
     }
   }
 
-  static async readFile(type: ScaffoldType, filePath: string, encoding?: string): Promise<string | Buffer> {
+  static async readFile(
+      type: ScaffoldType, filePath: string,
+      encoding?: string): Promise<string|Buffer> {
     if (type === ScaffoldType.Local) {
       return await sdk.FileSystem.readFile(filePath, encoding);
     } else {
-      return new Promise(async (resolve: (data: string | Buffer) => void, reject) => {
-        await fs.readFile(filePath, encoding, (err, data) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-          resolve(data);
-          return;
-        });
-      });
+      return new Promise(
+          async (resolve: (data: string|Buffer) => void, reject) => {
+            await fs.readFile(filePath, encoding, (err, data) => {
+              if (err) {
+                reject(err);
+                return;
+              }
+              resolve(data);
+              return;
+            });
+          });
     }
   }
 }

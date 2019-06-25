@@ -97,7 +97,8 @@ export class ExampleExplorer {
   }
 
   private async GenerateExampleFolder(exampleName: string) {
-    const settings: IoTWorkbenchSettings = await IoTWorkbenchSettings.createAsync();
+    const settings: IoTWorkbenchSettings =
+        await IoTWorkbenchSettings.createAsync();
     const workbench = await settings.workbenchPath();
 
     if (!utils.directoryExistsSync(workbench)) {
@@ -187,7 +188,8 @@ export class ExampleExplorer {
       telemetryContext: TelemetryContext) {
     const platformFolder = platformFolderMap.get(PlatformType.ARDUINO);
     if (platformFolder === undefined) {
-      throw new Error(`Platform ${PlatformType.ARDUINO}'s  resource folder does not exist.`);
+      throw new Error(`Platform ${
+          PlatformType.ARDUINO}'s  resource folder does not exist.`);
     }
     const boardFolderPath = context.asAbsolutePath(
         path.join(FileNames.resourcesFolderName, platformFolder));

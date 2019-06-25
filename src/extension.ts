@@ -257,7 +257,8 @@ export async function activate(context: vscode.ExtensionContext) {
         if (boardId) {
           const platformFolder = platformFolderMap.get(PlatformType.ARDUINO);
           if (platformFolder === undefined) {
-            throw new Error(`Platform ${PlatformType.ARDUINO}'s  resource folder does not exist.`);
+            throw new Error(`Platform ${
+                PlatformType.ARDUINO}'s  resource folder does not exist.`);
           }
           const boardFolderPath = context.asAbsolutePath(
               path.join(FileNames.resourcesFolderName, platformFolder));
@@ -282,7 +283,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const workbenchPath =
       vscode.commands.registerCommand('iotworkbench.workbench', async () => {
-        const settings: IoTWorkbenchSettings = await IoTWorkbenchSettings.createAsync();
+        const settings: IoTWorkbenchSettings =
+            await IoTWorkbenchSettings.createAsync();
         await settings.setWorkbenchPath();
         return;
       });
