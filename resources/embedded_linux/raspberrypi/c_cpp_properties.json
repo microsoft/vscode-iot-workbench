@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${CROSS_ROOT}/**",
+                "/work/azure-iot-sdk-c/**",
+                "${workspaceFolder}/**"
+            ],
+            "forcedInclude": [
+                "/root/.arduino15/packages/AZ3166/hardware/stm32f4/1.6.2/cores/arduino/Arduino.h"
+            ],
+            "defines": [],
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x64"
+        }
+    ],
+    "version": 4
+}
