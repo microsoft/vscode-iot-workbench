@@ -3,42 +3,42 @@
 
 import * as vscode from 'vscode';
 
-import { IoTWorkbenchProjectBase } from './IoTWorkbenchProjectBase';
-import { TelemetryContext } from '../telemetry';
-import { ProjectTemplate } from './Interfaces/ProjectTemplate';
+import {TelemetryContext} from '../telemetry';
+
+import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
+import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
 
 export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
-
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    super(context, channel, telemetryContext)
+    super(context, channel, telemetryContext);
   }
 
   async load(initLoad = false): Promise<boolean> {
     return false;
   }
 
-  async compile(): Promise<boolean>{
+  async compile(): Promise<boolean> {
     return false;
   }
 
-  async upload(): Promise<boolean>{
+  async upload(): Promise<boolean> {
     return false;
   }
 
-  async provision(): Promise<boolean>{
+  async provision(): Promise<boolean> {
     return false;
   }
 
-  async deploy(): Promise<boolean>{
+  async deploy(): Promise<boolean> {
     return false;
   }
 
   async create(
-    rootFolderPath: string, projectTemplateItem: ProjectTemplate,
-    boardId: string, openInNewWindow: boolean): Promise<boolean>{
-      return false;
-    }
-
+      rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
+      projectType: ProjectTemplateType, boardId: string,
+      openInNewWindow: boolean): Promise<boolean> {
+    return false;
+  }
 }

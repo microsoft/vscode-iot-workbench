@@ -21,8 +21,8 @@ import {ProjectTemplate, ProjectTemplateType, TemplateFileInfo} from './Interfac
 import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
 import {Workspace} from './Interfaces/Workspace';
+import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
 import {RemoteExtension} from './RemoteExtension';
-import { IoTWorkbenchProjectBase } from './IoTWorkbenchProjectBase';
 
 type Dependency = import('./AzureComponentConfig').Dependency;
 type TelemetryContext = import('../telemetry').TelemetryContext;
@@ -66,21 +66,12 @@ interface ProjectSetting {
 }
 
 export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
-  private componentList: Component[];
-  private projectRootPath = '';
-  private extensionContext: vscode.ExtensionContext;
-  private channel: vscode.OutputChannel;
-  private telemetryContext: TelemetryContext;
   private projectConfigFile = '';
-
-  private canProvision(comp: {}): comp is Provisionable {
-    return (comp as Provisionable).provision !== undefined;
-  }
 
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    super(context, channel, telemetryContext)
+    super(context, channel, telemetryContext);
   }
 
   async load(initLoad = false): Promise<boolean> {

@@ -4,14 +4,16 @@
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { Component } from './Interfaces/Component';
-import { TelemetryContext } from '../telemetry';
-import { Provisionable } from './Interfaces/Provisionable';
-import { Deployable } from './Interfaces/Deployable';
-import { Compilable } from './Interfaces/Compilable';
-import { Uploadable } from './Interfaces/Uploadable';
-import { ProjectTemplate } from './Interfaces/ProjectTemplate';
-import { ProjectType } from './Interfaces/ProjectType';
+
+import {TelemetryContext} from '../telemetry';
+
+import {Compilable} from './Interfaces/Compilable';
+import {Component} from './Interfaces/Component';
+import {Deployable} from './Interfaces/Deployable';
+import {ProjectHostType} from './Interfaces/ProjectHostType';
+import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
+import {Provisionable} from './Interfaces/Provisionable';
+import {Uploadable} from './Interfaces/Uploadable';
 
 export abstract class IoTWorkbenchProjectBase {
   protected componentList: Component[];
@@ -20,8 +22,9 @@ export abstract class IoTWorkbenchProjectBase {
   protected channel: vscode.OutputChannel;
   protected telemetryContext: TelemetryContext;
 
-  static GetProjectType(root: string): ProjectType{
-    return ProjectType.Workspace;
+  static GetProjectType(root: string): ProjectHostType {
+    // Add detailed logic to decide the project host type
+    return ProjectHostType.Workspace;
   }
 
   canProvision(comp: {}): comp is Provisionable {
@@ -41,8 +44,8 @@ export abstract class IoTWorkbenchProjectBase {
   }
 
   constructor(
-    context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-    telemetryContext: TelemetryContext) {
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext) {
     this.componentList = [];
     this.extensionContext = context;
     this.channel = channel;
@@ -60,6 +63,7 @@ export abstract class IoTWorkbenchProjectBase {
   abstract async deploy(): Promise<boolean>;
 
   abstract async create(
-    rootFolderPath: string, projectTemplateItem: ProjectTemplate,
-    boardId: string, openInNewWindow: boolean): Promise<boolean>;
+      rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
+      projectType: ProjectTemplateType, boardId: string,
+      openInNewWindow: boolean): Promise<boolean>;
 }
