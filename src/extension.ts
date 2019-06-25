@@ -19,7 +19,7 @@ const impor = require('impor')(__dirname);
 const exampleExplorerModule =
     impor('./exampleExplorer') as typeof import('./exampleExplorer');
 const ioTProjectModule =
-    impor('./Models/IoTProject') as typeof import('./Models/IoTProject');
+    impor('./Models/IoTWorkspaceProject') as typeof import('./Models/IoTWorkspaceProject');
 const telemetryModule = impor('./telemetry') as typeof import('./telemetry');
 const request = impor('request-promise') as typeof import('request-promise');
 const usbDetectorModule =
@@ -50,7 +50,7 @@ export async function activate(context: vscode.ExtensionContext) {
         telemetryModule.TelemetryWorker.Initialize(context);
         telemetryWorkerInitialized = true;
       }
-      const iotProject = new ioTProjectModule.IoTProject(
+      const iotProject = new ioTProjectModule.IoTWorkspaceProject(
           context, outputChannel, telemetryContext);
       await iotProject.load(true);
     } catch (error) {

@@ -13,12 +13,13 @@ import {TelemetryContext} from './telemetry';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {FileNames} from './constants';
 import {BoardProvider} from './boardProvider';
+import { IoTWorkbenchProjectBase } from './Models/IoTWorkbenchProjectBase';
 
 const impor = require('impor')(__dirname);
 const azureFunctionsModule = impor('./Models/AzureFunctions') as
     typeof import('./Models/AzureFunctions');
 const ioTProjectModule =
-    impor('./Models/IoTProject') as typeof import('./Models/IoTProject');
+    impor('./Models/IoTWorkspaceProject') as typeof import('./Models/IoTWorkspaceProject');
 
 const constants = {
   defaultProjectName: 'IoTproject'
@@ -177,7 +178,7 @@ export class ProjectInitializer {
               return;
             }
 
-            const project = new ioTProjectModule.IoTProject(
+            const project = new ioTProjectModule.IoTWorkspaceProject(
                 context, channel, telemetryContext);
             return await project.create(
                 rootPath, result, boardSelection.id, openInNewWindow);

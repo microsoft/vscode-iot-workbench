@@ -9,14 +9,14 @@ import {TelemetryContext} from './telemetry';
 
 const impor = require('impor')(__dirname);
 const ioTProjectModule =
-    impor('./Models/IoTProject') as typeof import('./Models/IoTProject');
+    impor('./Models/IoTWorkspaceProject') as typeof import('./Models/IoTWorkspaceProject');
 
 export class AzureOperator {
   async Provision(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     const project =
-        new ioTProjectModule.IoTProject(context, channel, telemetryContext);
+        new ioTProjectModule.IoTWorkspaceProject(context, channel, telemetryContext);
     const result = await project.load();
     if (!result) {
       await project.handleLoadFailure();
@@ -35,7 +35,7 @@ export class AzureOperator {
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     const project =
-        new ioTProjectModule.IoTProject(context, channel, telemetryContext);
+        new ioTProjectModule.IoTWorkspaceProject(context, channel, telemetryContext);
     const result = await project.load();
     if (!result) {
       await project.handleLoadFailure();
