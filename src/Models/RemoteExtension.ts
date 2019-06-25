@@ -12,7 +12,9 @@ export class RemoteExtension {
   static isRemote(context: vscode.ExtensionContext) {
     // tslint:disable-next-line: no-any
     if (((vscode as any).ExtensionExecutionContext &&
+         // tslint:disable-next-line: no-any
          (context as any).executionContext ===
+             // tslint:disable-next-line: no-any
              (vscode as any).ExtensionExecutionContext.Remote) ||
         (process.argv[0].indexOf(`${path.sep}.vscode-remote${path.sep}`) > 0)) {
       return true;
