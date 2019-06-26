@@ -17,12 +17,13 @@ import {BoardProvider} from './boardProvider';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import {FileUtility} from './FileUtility';
 import {ProjectTemplate, ProjectTemplateType, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
+import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
 
 const impor = require('impor')(__dirname);
 const azureFunctionsModule = impor('./Models/AzureFunctions') as
     typeof import('./Models/AzureFunctions');
-const ioTProjectModule =
-    impor('./Models/IoTProject') as typeof import('./Models/IoTProject');
+const ioTProjectModule = impor('./Models/IoTWorkspaceProject') as
+    typeof import('./Models/IoTWorkspaceProject');
 
 const constants = {
   defaultProjectName: 'IoTproject'
@@ -146,7 +147,8 @@ export class ProjectInitializer {
               await FileUtility.mkdirRecursively(
                   ScaffoldType.Local, projectPath);
             }
-            const project = new ioTProjectModule.IoTProject(
+
+            const project = new ioTProjectModule.IoTWorkspaceProject(
                 context, channel, telemetryContext);
             return await project.create(
                 projectPath, templateFilesInfo, projectTemplateType,

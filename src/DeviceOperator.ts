@@ -14,15 +14,15 @@ import {BoardProvider} from './boardProvider';
 import {FileNames, PlatformType, platformFolderMap} from './constants';
 
 const impor = require('impor')(__dirname);
-const ioTProjectModule =
-    impor('./Models/IoTProject') as typeof import('./Models/IoTProject');
+const ioTProjectModule = impor('./Models/IoTWorkspaceProject') as
+    typeof import('./Models/IoTWorkspaceProject');
 
 export class DeviceOperator {
   async compile(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    const project =
-        new ioTProjectModule.IoTProject(context, channel, telemetryContext);
+    const project = new ioTProjectModule.IoTWorkspaceProject(
+        context, channel, telemetryContext);
     const result = await project.load();
     if (!result) {
       await project.handleLoadFailure();
@@ -34,8 +34,8 @@ export class DeviceOperator {
   async upload(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    const project =
-        new ioTProjectModule.IoTProject(context, channel, telemetryContext);
+    const project = new ioTProjectModule.IoTWorkspaceProject(
+        context, channel, telemetryContext);
     const result = await project.load();
     if (!result) {
       await project.handleLoadFailure();
@@ -47,8 +47,8 @@ export class DeviceOperator {
   async configDeviceSettings(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    const project =
-        new ioTProjectModule.IoTProject(context, channel, telemetryContext);
+    const project = new ioTProjectModule.IoTWorkspaceProject(
+        context, channel, telemetryContext);
     const result = await project.load();
     if (!result) {
       await project.handleLoadFailure();

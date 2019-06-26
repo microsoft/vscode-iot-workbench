@@ -21,6 +21,7 @@ import {ProjectTemplate, ProjectTemplateType, TemplateFileInfo} from './Interfac
 import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
 import {Workspace} from './Interfaces/Workspace';
+import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
 import {RemoteExtension} from './RemoteExtension';
 
 type Dependency = import('./AzureComponentConfig').Dependency;
@@ -64,37 +65,13 @@ interface ProjectSetting {
   value: string;
 }
 
-export class IoTProject {
-  private componentList: Component[];
-  private projectRootPath = '';
-  private extensionContext: vscode.ExtensionContext;
-  private channel: vscode.OutputChannel;
-  private telemetryContext: TelemetryContext;
+export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
   private projectConfigFile = '';
-
-  private canProvision(comp: {}): comp is Provisionable {
-    return (comp as Provisionable).provision !== undefined;
-  }
-
-  private canDeploy(comp: {}): comp is Deployable {
-    return (comp as Deployable).deploy !== undefined;
-  }
-
-  private canCompile(comp: {}): comp is Compilable {
-    return (comp as Compilable).compile !== undefined;
-  }
-
-  private canUpload(comp: {}): comp is Uploadable {
-    return (comp as Uploadable).upload !== undefined;
-  }
 
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    this.componentList = [];
-    this.extensionContext = context;
-    this.channel = channel;
-    this.telemetryContext = telemetryContext;
+    super(context, channel, telemetryContext);
   }
 
   async load(initLoad = false): Promise<boolean> {
