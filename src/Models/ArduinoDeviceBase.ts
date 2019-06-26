@@ -136,7 +136,7 @@ export abstract class ArduinoDeviceBase implements Device {
 
     try {
       const iotworkbenchprojectFilePath =
-          path.join(deviceFolderPath, FileNames.iotworkbenchprojectFileName);
+          path.join(deviceFolderPath, FileNames.iotworkspaceProjectFileName);
       fs.writeFileSync(iotworkbenchprojectFilePath, ' ');
     } catch (error) {
       throw new Error(

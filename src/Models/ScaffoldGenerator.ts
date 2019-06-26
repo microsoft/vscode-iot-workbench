@@ -22,11 +22,11 @@ export class ScaffoldGenerator {
 
     try {
       const iotworkbenchprojectFilePath =
-          path.join(projectFolder, FileNames.iotworkbenchprojectFileName);
+          path.join(projectFolder, FileNames.iotContainerizedProjectFileName);
       await FileUtility.writeFile(type, iotworkbenchprojectFilePath, ' ');
     } catch (error) {
       throw new Error(
-          `Create ${FileNames.iotworkbenchprojectFileName} file failed: ${
+          `Create ${FileNames.iotContainerizedProjectFileName} file failed: ${
               error.message}`);
     }
 
