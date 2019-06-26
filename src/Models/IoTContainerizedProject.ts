@@ -55,7 +55,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     // Check if it is an iot project workspace
     this.projectRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
     const iotWorkbenchProjectFile = path.join(
-        this.projectRootPath, FileNames.iotContainerizedProjectFileName);
+        this.projectRootPath, FileNames.iotworkbenchprojectFileName);
 
     if (!fs.existsSync(iotWorkbenchProjectFile)) {
       return false;
@@ -231,7 +231,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
     const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
     const workbenchFileName =
-        path.join(rootPath, FileNames.iotContainerizedProjectFileName);
+        path.join(rootPath, FileNames.iotworkbenchprojectFileName);
 
     if (!fs.existsSync(workbenchFileName)) {
       await askAndNewProject(this.telemetryContext);

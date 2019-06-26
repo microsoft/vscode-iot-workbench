@@ -31,23 +31,13 @@ export abstract class IoTWorkbenchProjectBase {
   protected telemetryContext: TelemetryContext;
 
   static GetProjectType(root: string): ProjectHostType {
-    const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
-    if (!devicePath) {
-      throw new Error(`Cannot find device path in config key`);
-    }
-    const iotworkspaceProjectFile =
-        path.join(root, devicePath, FileNames.iotWorkspaceProjectFileName);
-    if (fs.existsSync(iotworkspaceProjectFile)) {
+    const devcontainerFolderPath =
+        path.join(root, FileNames.devcontainerFolderName);
+    if (fs.existsSync(devcontainerFolderPath)) {
+      return ProjectHostType.Container;
+    } else {
       return ProjectHostType.Workspace;
     }
-
-    const iotContainerizedProjectFile =
-        path.join(root, FileNames.iotContainerizedProjectFileName);
-    if (fs.existsSync(iotContainerizedProjectFile)) {
-      return ProjectHostType.Container;
-    }
-
-    throw new Error(`Not supported project type.`);
   }
 
   canProvision(comp: {}): comp is Provisionable {
