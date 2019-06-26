@@ -1,23 +1,23 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as vscode from 'vscode';
-import * as path from 'path';
 import * as fs from 'fs-plus';
-
-import {TelemetryContext} from '../telemetry';
+import * as path from 'path';
+import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
+import {ConfigKey, FileNames} from '../constants';
+import {TelemetryContext} from '../telemetry';
+
+import {checkAzureLogin} from './Apis';
 import {Compilable} from './Interfaces/Compilable';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Deployable} from './Interfaces/Deployable';
+import {Device} from './Interfaces/Device';
 import {ProjectHostType} from './Interfaces/ProjectHostType';
 import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
-import {checkAzureLogin} from './Apis';
-import {Device} from './Interfaces/Device';
-import {ConfigKey, FileNames} from '../constants';
 
 const impor = require('impor')(__dirname);
 const azureUtilityModule =
@@ -119,7 +119,9 @@ export abstract class IoTWorkbenchProjectBase {
     // const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
     // if (!devicePath) {
     //   throw new Error(
-    //       'Cannot run IoT Device Workbench command in a non-IoTWorkbench project. Please initialize an IoT Device Workbench project first.');
+    //       'Cannot run IoT Device Workbench command in a non-IoTWorkbench
+    //       project. Please initialize an IoT Device Workbench project
+    //       first.');
     // }
 
     const provisionItemList: string[] = [];

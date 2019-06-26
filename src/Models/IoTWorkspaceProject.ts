@@ -6,16 +6,16 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, FileNames, ScaffoldType, EventNames} from '../constants';
+import {ConfigKey, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
-import {TelemetryProperties, TelemetryWorker, TelemetryContext} from '../telemetry';
+import {TelemetryContext, TelemetryProperties, TelemetryWorker} from '../telemetry';
 import {askAndNewProject, askAndOpenProject} from '../utils';
 
+import {Dependency} from './AzureComponentConfig';
 import {Component} from './Interfaces/Component';
 import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {Workspace} from './Interfaces/Workspace';
 import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
-import {Dependency} from './AzureComponentConfig';
 
 const impor = require('impor')(__dirname);
 const az3166DeviceModule =
@@ -296,9 +296,11 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     workspace.folders.push({path: constants.deviceDefaultFolderName});
     let device: Component;
 
-    // TODO: Reserve only Workspace type device creation(AZ3166device/iotButton/esd32)
-    // if (boardId === az3166DeviceModule.AZ3166Device.boardId) {
-    // device = new az3166DeviceModule.AZ3166Device(
+    // TODO: Reserve only Workspace type device
+    // creation(AZ3166device/iotButton/esd32)
+    // if (boardId ===
+    // az3166DeviceModule.AZ3166Device.boardId) { device = new
+    // az3166DeviceModule.AZ3166Device(
     //     this.extensionContext, this.channel, deviceDir,
     //     projectTemplateItem.sketch);
     // } else if (boardId === ioTButtonDeviceModule.IoTButtonDevice.boardId) {
@@ -498,5 +500,4 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
       throw error;
     }
   }
-
 }

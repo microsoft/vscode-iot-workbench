@@ -24,7 +24,8 @@ const azureFunctionsModule = impor('./Models/AzureFunctions') as
     typeof import('./Models/AzureFunctions');
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
     typeof import('./Models/IoTWorkspaceProject');
-const ioTContainerizedProjectModule = impor('./Models/IoTContainerizedProject') as
+const ioTContainerizedProjectModule =
+    impor('./Models/IoTContainerizedProject') as
     typeof import('./Models/IoTContainerizedProject');
 
 const constants = {
@@ -150,9 +151,11 @@ export class ProjectInitializer {
                   ScaffoldType.Local, projectPath);
             }
 
-            const project = new ioTContainerizedProjectModule.IoTContainerizedProject(
-                context, channel, telemetryContext);
-            // const project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
+            const project =
+                new ioTContainerizedProjectModule.IoTContainerizedProject(
+                    context, channel, telemetryContext);
+            // const project = new
+            // ioTWorkspaceProjectModule.IoTWorkspaceProject(
             //   context, channel, telemetryContext);
             return await project.create(
                 projectPath, templateFilesInfo, projectTemplateType,
