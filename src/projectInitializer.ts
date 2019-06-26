@@ -18,7 +18,7 @@ import {IoTWorkbenchSettings} from './IoTSettings';
 import {FileUtility} from './FileUtility';
 import {ProjectTemplate, ProjectTemplateType, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
 import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
-import {Platform} from './Models/Interfaces/Platfrom';
+import {Platform} from './Models/Interfaces/Platform';
 
 const impor = require('impor')(__dirname);
 const azureFunctionsModule = impor('./Models/AzureFunctions') as
@@ -226,9 +226,9 @@ export class ProjectInitializer {
 
     const platformList: vscode.QuickPickItem[] = [];
 
-    platformListJson.platforms.forEach((platfrom: Platform) => {
+    platformListJson.platforms.forEach((platform: Platform) => {
       platformList.push(
-          {label: platfrom.name, description: platfrom.description});
+          {label: platform.name, description: platform.description});
     });
 
     const platformSelection = await vscode.window.showQuickPick(platformList, {

@@ -2,7 +2,7 @@
     "templates": [
         {
             "platform": "Embedded Linux",
-            "name": "RaspBerry Pi with iothub",
+            "name": "Raspberry Pi with iothub",
             "description": "",
             "detail": "Create project that connects to Azure IoT Hub, such as sending sensor data to cloud.",
             "path": "rpi_iothub",
