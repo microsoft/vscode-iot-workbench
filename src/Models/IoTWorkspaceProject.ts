@@ -42,7 +42,6 @@ const constants = {
   deviceDefaultFolderName: 'Device',
   functionDefaultFolderName: 'Functions',
   asaFolderName: 'StreamAnalytics',
-  workspaceConfigExtension: '.code-workspace'
 };
 
 
@@ -466,7 +465,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     const workspaceConfigFilePath = path.join(
         this.projectRootPath,
         `${path.basename(this.projectRootPath)}${
-            constants.workspaceConfigExtension}`);
+            FileNames.workspaceExtensionName}`);
 
     fs.writeFileSync(
         workspaceConfigFilePath, JSON.stringify(workspace, null, 4));

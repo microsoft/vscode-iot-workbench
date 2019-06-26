@@ -9,6 +9,21 @@
         "fileName": "iothub_sample.c",
         "sourcePath" : ".",
         "targetPath" : "./src"
+    },
+    {
+        "fileName": "Dockerfile",
+        "sourcePath" : ".",
+        "targetPath" : "./.devcontainer"
+    },
+    {
+        "fileName": "devcontainer.json",
+        "sourcePath" : ".",
+        "targetPath" : "./.devcontainer"
+    },
+    {
+        "fileName": "c_cpp_properties.json",
+        "sourcePath" : ".",
+        "targetPath" : "./.vscode"
     }
   ]
 }

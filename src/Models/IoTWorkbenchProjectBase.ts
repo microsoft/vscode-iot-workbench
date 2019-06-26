@@ -5,8 +5,8 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {ConfigHandler} from '../configHandler';
-import {ConfigKey, FileNames} from '../constants';
+import {FileNames, ScaffoldType} from '../constants';
+import {FileUtility} from '../FileUtility';
 import {TelemetryContext} from '../telemetry';
 
 import {checkAzureLogin} from './Apis';
@@ -260,4 +260,21 @@ export abstract class IoTWorkbenchProjectBase {
   }
 
   abstract async handleLoadFailure(): Promise<boolean>;
+
+  static async generateIotWorkbenchProjectFile(
+      type: ScaffoldType, projectFolder: string): Promise<void> {
+    if (!await FileUtility.directoryExists(type, projectFolder)) {
+      throw new Error('Unable to find the project folder.');
+    }
+
+    try {
+      const iotworkbenchprojectFilePath =
+          path.join(projectFolder, FileNames.iotworkbenchprojectFileName);
+      await FileUtility.writeFile(type, iotworkbenchprojectFilePath, ' ');
+    } catch (error) {
+      throw new Error(
+          `Create ${FileNames.iotworkbenchprojectFileName} file failed: ${
+              error.message}`);
+    }
+  }
 }

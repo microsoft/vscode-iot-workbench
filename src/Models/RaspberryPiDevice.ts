@@ -8,7 +8,7 @@ import * as vscode from 'vscode';
 import * as sdk from 'vscode-iot-device-cube-sdk';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, FileNames, OperationType, platformFolderMap, PlatformType, ScaffoldType} from '../constants';
+import {ConfigKey, FileNames, OperationType, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import * as utils from '../utils';
 import {runCommand} from '../utils';
@@ -16,8 +16,8 @@ import {runCommand} from '../utils';
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
 import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
+import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
 import {RemoteExtension} from './RemoteExtension';
-import {ScaffoldGenerator} from './ScaffoldGenerator';
 
 class RaspberryPiUploadConfig {
   static host = 'raspberrypi';
@@ -39,13 +39,8 @@ export class RaspberryPiDevice implements Device {
   private channel: vscode.OutputChannel;
   private static _boardId = 'raspberrypi';
   private extensionContext: vscode.ExtensionContext;
-  private projectType: ProjectTemplateType;
 
-  private devcontainerFolderPath: string;
-  private vscodeFolderPath: string;
-  private boardFolderPath: string;
   private outputPath: string;
-  private templateFolderPath: string;
 
   static get boardId() {
     return RaspberryPiDevice._boardId;
@@ -57,26 +52,11 @@ export class RaspberryPiDevice implements Device {
       private templateFilesInfo: TemplateFileInfo[] = []) {
     this.deviceType = DeviceType.Raspberry_Pi;
     this.componentType = ComponentType.Device;
-    this.projectType = projectTemplateType;
-    this.projectFolder = projectPath;
     this.channel = channel;
     this.componentId = Guid.create().toString();
     this.extensionContext = context;
-    this.devcontainerFolderPath =
-        path.join(this.projectFolder, FileNames.devcontainerFolderName);
-    this.vscodeFolderPath =
-        path.join(this.projectFolder, FileNames.vscodeSettingsFolderName);
-
-    const platformFolder = platformFolderMap.get(PlatformType.EMBEDDEDLINUX);
-    if (platformFolder === undefined) {
-      throw new Error(`Platform ${
-          PlatformType.EMBEDDEDLINUX}'s  resource folder does not exist.`);
-    }
-    this.boardFolderPath = context.asAbsolutePath(
-        path.join(FileNames.resourcesFolderName, platformFolder));
+    this.projectFolder = projectPath;
     this.outputPath = path.join(this.projectFolder, FileNames.outputPathName);
-    this.templateFolderPath =
-        path.join(this.boardFolderPath, RaspberryPiDevice.boardId);
   }
 
   name = 'RaspberryPi';
@@ -94,35 +74,35 @@ export class RaspberryPiDevice implements Device {
   }
 
   async load(): Promise<boolean> {
-    if (!fs.existsSync(this.projectFolder)) {
+    // ScaffoldType is Workspace when loading a project
+    const scaffoldType = ScaffoldType.Workspace;
+    if (!await FileUtility.directoryExists(scaffoldType, this.projectFolder)) {
       throw new Error('Unable to find the project folder.');
     }
 
-    const scaffoldGenerator = new ScaffoldGenerator();
-    await scaffoldGenerator.scaffoldIoTProjectFiles(
-        ScaffoldType.Workspace, this.projectFolder, this.vscodeFolderPath,
-        this.devcontainerFolderPath, this.templateFolderPath, this.projectType);
+    await IoTWorkbenchProjectBase.generateIotWorkbenchProjectFile(
+        scaffoldType, this.projectFolder);
 
     return true;
   }
 
   async create(): Promise<boolean> {
-    if (!await sdk.FileSystem.exists(this.projectFolder)) {
+    // ScaffoldType is local when creating a project
+    const scaffoldType = ScaffoldType.Local;
+    if (!await FileUtility.directoryExists(scaffoldType, this.projectFolder)) {
       throw new Error('Unable to find the project folder.');
     }
 
-    const scaffoldGenerator = new ScaffoldGenerator();
-    await scaffoldGenerator.scaffoldIoTProjectFiles(
-        ScaffoldType.Local, this.projectFolder, this.vscodeFolderPath,
-        this.devcontainerFolderPath, this.templateFolderPath, this.projectType);
-    await this.generateSketchFile(this.templateFilesInfo);
+    await IoTWorkbenchProjectBase.generateIotWorkbenchProjectFile(
+        scaffoldType, this.projectFolder);
+    await this.generateSketchFile(scaffoldType, this.templateFilesInfo);
 
     return true;
   }
 
-  async generateSketchFile(templateFilesInfo: TemplateFileInfo[]):
-      Promise<boolean> {
-    // Generate sketch file
+  async generateSketchFile(
+      type: ScaffoldType,
+      templateFilesInfo: TemplateFileInfo[]): Promise<boolean> {
     if (!templateFilesInfo) {
       throw new Error('No sketch file found.');
     }
@@ -131,18 +111,18 @@ export class RaspberryPiDevice implements Device {
     for (const fileInfo of templateFilesInfo) {
       const targetFolderPath =
           path.join(this.projectFolder, fileInfo.targetPath);
-      if (!await sdk.FileSystem.exists(targetFolderPath)) {
-        await FileUtility.mkdirRecursively(
-            ScaffoldType.Local, targetFolderPath);
+      if (!await FileUtility.directoryExists(type, targetFolderPath)) {
+        await FileUtility.mkdirRecursively(type, targetFolderPath);
       }
 
       const targetFilePath = path.join(targetFolderPath, fileInfo.fileName);
       if (fileInfo.fileContent) {
         try {
-          await sdk.FileSystem.writeFile(targetFilePath, fileInfo.fileContent);
+          await FileUtility.writeFile(
+              type, targetFilePath, fileInfo.fileContent);
         } catch (error) {
-          throw new Error(`Failed to create sketch file for Raspberry Pi: ${
-              error.message}`);
+          throw new Error(`Failed to create sketch file ${
+              fileInfo.fileName} for Raspberry Pi: ${error.message}`);
         }
       }
     }

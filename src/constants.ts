@@ -46,9 +46,6 @@ export class FileNames {
   static readonly devcontainerFolderName = '.devcontainer';
   static readonly vscodeSettingsFolderName = '.vscode';
   static readonly workspaceExtensionName = '.code-workspace';
-  static readonly dockerfileName = 'Dockerfile';
-  static readonly devcontainerJsonFileName = 'devcontainer.json';
-  static readonly cppPropertiesFileName = 'c_cpp_properties.json';
   static readonly outputPathName = '.build';
   static readonly templatesFolderName = 'templates';
   static readonly templateFiles = 'templatefiles.json';

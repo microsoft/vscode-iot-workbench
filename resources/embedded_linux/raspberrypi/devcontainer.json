@@ -1,9 +1,0 @@
-{
-  "image": "rpi_app",
-  "name": "rpi_app_container",
-  "dockerFile": "Dockerfile",
-  "extensions": [
-    "ms-vscode.cpptools",
-    "twxs.cmake"
-  ]
-}

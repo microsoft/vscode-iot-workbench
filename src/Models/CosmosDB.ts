@@ -13,7 +13,6 @@ import {AzureComponentConfig, AzureConfigFileHandler, AzureConfigs, ComponentInf
 import {ARMTemplate, AzureUtility} from './AzureUtility';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
-import {ScaffoldGenerator} from './ScaffoldGenerator';
 
 export class CosmosDB implements Component, Provisionable {
   dependencies: DependencyConfig[] = [];
