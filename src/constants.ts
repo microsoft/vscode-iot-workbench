@@ -37,7 +37,7 @@ export class EventNames {
 }
 
 export class FileNames {
-  static readonly templateFileName = 'template.json';
+  static readonly templateFileName = 'templates.json';
   static readonly boardListFileName = 'boardlist.json';
   static readonly platformListFileName = 'platformList.json';
   static readonly resourcesFolderName = 'resources';
@@ -50,6 +50,8 @@ export class FileNames {
   static readonly devcontainerJsonFileName = 'devcontainer.json';
   static readonly cppPropertiesFileName = 'c_cpp_properties.json';
   static readonly outputPathName = '.build';
+  static readonly templatesFolderName = 'templates';
+  static readonly templateFiles = 'templatefiles.json';
 }
 
 export enum OperationType {

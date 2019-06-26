@@ -1,0 +1,14 @@
+{
+  "templateFiles": [
+    {
+        "fileName": "CMakeLists.txt",
+        "sourcePath" : ".",
+        "targetPath" : "./src"
+    },
+    {
+        "fileName": "iothub_sample.c",
+        "sourcePath" : ".",
+        "targetPath" : "./src"
+    }
+  ]
+}
