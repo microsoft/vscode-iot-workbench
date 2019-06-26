@@ -5,15 +5,23 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+import {ConfigHandler} from '../configHandler';
+import {ConfigKey, FileNames} from '../constants';
 import {TelemetryContext} from '../telemetry';
 
+import {checkAzureLogin} from './Apis';
 import {Compilable} from './Interfaces/Compilable';
-import {Component} from './Interfaces/Component';
+import {Component, ComponentType} from './Interfaces/Component';
 import {Deployable} from './Interfaces/Deployable';
+import {Device} from './Interfaces/Device';
 import {ProjectHostType} from './Interfaces/ProjectHostType';
 import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
+
+const impor = require('impor')(__dirname);
+const azureUtilityModule =
+    impor('./AzureUtility') as typeof import('./AzureUtility');
 
 export abstract class IoTWorkbenchProjectBase {
   protected componentList: Component[];
@@ -23,8 +31,23 @@ export abstract class IoTWorkbenchProjectBase {
   protected telemetryContext: TelemetryContext;
 
   static GetProjectType(root: string): ProjectHostType {
-    // Add detailed logic to decide the project host type
-    return ProjectHostType.Workspace;
+    const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
+    if (!devicePath) {
+      throw new Error(`Cannot find device path in config key`);
+    }
+    const iotworkspaceProjectFile =
+        path.join(root, devicePath, FileNames.iotWorkspaceProjectFileName);
+    if (fs.existsSync(iotworkspaceProjectFile)) {
+      return ProjectHostType.Workspace;
+    }
+
+    const iotContainerizedProjectFile =
+        path.join(root, FileNames.iotContainerizedProjectFileName);
+    if (fs.existsSync(iotContainerizedProjectFile)) {
+      return ProjectHostType.Container;
+    }
+
+    throw new Error(`Not supported project type.`);
   }
 
   canProvision(comp: {}): comp is Provisionable {
@@ -54,16 +77,197 @@ export abstract class IoTWorkbenchProjectBase {
 
   abstract async load(initLoad: boolean): Promise<boolean>;
 
-  abstract async compile(): Promise<boolean>;
+  async compile(): Promise<boolean> {
+    for (const item of this.componentList) {
+      if (this.canCompile(item)) {
+        const isPrerequisitesAchieved = await item.checkPrerequisites();
+        if (!isPrerequisitesAchieved) {
+          return false;
+        }
 
-  abstract async upload(): Promise<boolean>;
+        const res = await item.compile();
+        if (res === false) {
+          const error = new Error(
+              'Unable to compile the device code, please check output window for detail.');
+          throw error;
+        }
+      }
+    }
+    return true;
+  }
 
-  abstract async provision(): Promise<boolean>;
+  async upload(): Promise<boolean> {
+    for (const item of this.componentList) {
+      if (this.canUpload(item)) {
+        const isPrerequisitesAchieved = await item.checkPrerequisites();
+        if (!isPrerequisitesAchieved) {
+          return false;
+        }
 
-  abstract async deploy(): Promise<boolean>;
+        const res = await item.upload();
+        if (res === false) {
+          const error = new Error(
+              'Unable to upload the sketch, please check output window for detail.');
+          throw error;
+        }
+      }
+    }
+    return true;
+  }
+
+  async provision(): Promise<boolean> {
+    // const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
+    // if (!devicePath) {
+    //   throw new Error(
+    //       'Cannot run IoT Device Workbench command in a non-IoTWorkbench
+    //       project. Please initialize an IoT Device Workbench project
+    //       first.');
+    // }
+
+    const provisionItemList: string[] = [];
+    for (const item of this.componentList) {
+      if (this.canProvision(item)) {
+        const isPrerequisitesAchieved = await item.checkPrerequisites();
+        if (!isPrerequisitesAchieved) {
+          return false;
+        }
+
+        provisionItemList.push(item.name);
+      }
+    }
+
+    if (provisionItemList.length === 0) {
+      // nothing to provision:
+      vscode.window.showInformationMessage(
+          'Congratulations! There is no Azure service to provision in this project.');
+      return false;
+    }
+
+    // Ensure azure login before component provision
+    let subscriptionId: string|undefined = '';
+    let resourceGroup: string|undefined = '';
+    if (provisionItemList.length > 0) {
+      await checkAzureLogin();
+      azureUtilityModule.AzureUtility.init(this.extensionContext, this.channel);
+      resourceGroup = await azureUtilityModule.AzureUtility.getResourceGroup();
+      subscriptionId = azureUtilityModule.AzureUtility.subscriptionId;
+      if (!resourceGroup || !subscriptionId) {
+        return false;
+      }
+    } else {
+      return false;
+    }
+
+    for (const item of this.componentList) {
+      const _provisionItemList: string[] = [];
+      if (this.canProvision(item)) {
+        for (let i = 0; i < provisionItemList.length; i++) {
+          if (provisionItemList[i] === item.name) {
+            _provisionItemList[i] = `>> ${i + 1}. ${provisionItemList[i]}`;
+          } else {
+            _provisionItemList[i] = `${i + 1}. ${provisionItemList[i]}`;
+          }
+        }
+        const selection = await vscode.window.showQuickPick(
+            [{
+              label: _provisionItemList.join('   -   '),
+              description: '',
+              detail: 'Click to continue'
+            }],
+            {ignoreFocusOut: true, placeHolder: 'Provision process'});
+
+        if (!selection) {
+          return false;
+        }
+
+        const res = await item.provision();
+        if (res === false) {
+          vscode.window.showWarningMessage('Provision canceled.');
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  async deploy(): Promise<boolean> {
+    let azureLoggedIn = false;
+
+    const deployItemList: string[] = [];
+    for (const item of this.componentList) {
+      if (this.canDeploy(item)) {
+        const isPrerequisitesAchieved = await item.checkPrerequisites();
+        if (!isPrerequisitesAchieved) {
+          return false;
+        }
+
+        deployItemList.push(item.name);
+      }
+    }
+
+    if (deployItemList && deployItemList.length <= 0) {
+      await vscode.window.showInformationMessage(
+          'Congratulations! The project does not contain any Azure components to be deployed.');
+      return false;
+    }
+
+    if (!azureLoggedIn) {
+      azureLoggedIn = await checkAzureLogin();
+    }
+
+    for (const item of this.componentList) {
+      const _deployItemList: string[] = [];
+      if (this.canDeploy(item)) {
+        for (let i = 0; i < deployItemList.length; i++) {
+          if (deployItemList[i] === item.name) {
+            _deployItemList[i] = `>> ${i + 1}. ${deployItemList[i]}`;
+          } else {
+            _deployItemList[i] = `${i + 1}. ${deployItemList[i]}`;
+          }
+        }
+        const selection = await vscode.window.showQuickPick(
+            [{
+              label: _deployItemList.join('   -   '),
+              description: '',
+              detail: 'Click to continue'
+            }],
+            {ignoreFocusOut: true, placeHolder: 'Deploy process'});
+
+        if (!selection) {
+          return false;
+        }
+
+        const res = await item.deploy();
+        if (res === false) {
+          const error = new Error(`The deployment of ${item.name} failed.`);
+          throw error;
+        }
+      }
+    }
+
+    vscode.window.showInformationMessage('Azure deploy succeeded.');
+
+    return true;
+  }
 
   abstract async create(
       rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
       projectType: ProjectTemplateType, boardId: string,
       openInNewWindow: boolean): Promise<boolean>;
+
+  async configDeviceSettings(): Promise<boolean> {
+    for (const component of this.componentList) {
+      if (component.getComponentType() === ComponentType.Device) {
+        const device = component as Device;
+        try {
+          await device.configDeviceSettings();
+        } catch (error) {
+          throw error;
+        }
+      }
+    }
+    return true;
+  }
+
+  abstract async handleLoadFailure(): Promise<boolean>;
 }

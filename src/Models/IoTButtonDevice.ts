@@ -87,7 +87,7 @@ export class IoTButtonDevice implements Device {
 
     try {
       const iotworkbenchprojectFilePath =
-          path.join(deviceFolderPath, FileNames.iotworkbenchprojectFileName);
+          path.join(deviceFolderPath, FileNames.iotWorkspaceProjectFileName);
       fs.writeFileSync(iotworkbenchprojectFilePath, ' ');
     } catch (error) {
       throw new Error(
