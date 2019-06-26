@@ -18,6 +18,7 @@ import {IoTWorkbenchSettings} from './IoTSettings';
 import {FileUtility} from './FileUtility';
 import {ProjectTemplate, ProjectTemplateType, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
 import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
+import {Platform} from './Models/Interfaces/Platform';
 
 const impor = require('impor')(__dirname);
 const azureFunctionsModule = impor('./Models/AzureFunctions') as
@@ -68,7 +69,7 @@ export class ProjectInitializer {
             }
 
             // Step 2: Select platform
-            const platformSelection = await this.SelectPlatform();
+            const platformSelection = await this.SelectPlatform(context);
             if (!platformSelection) {
               telemetryContext.properties.errorMessage =
                   'Platform selection canceled.';
@@ -78,72 +79,54 @@ export class ProjectInitializer {
               telemetryContext.properties.platform = platformSelection.label;
             }
 
-            // Step 3: Select board
-            const platformFolder =
-                platformFolderMap.get(platformSelection.label);
-            if (platformFolder === undefined) {
-              telemetryContext.properties.errorMessage = `Platform ${
-                  platformSelection.label}'s  resource folder does not exist.`;
-              telemetryContext.properties.result = 'Canceled';
-              return;
-            }
-            const boardFolderPath = context.asAbsolutePath(
-                path.join(FileNames.resourcesFolderName, platformFolder));
-            const boardSelection = await this.SelectBoard(boardFolderPath);
-            if (!boardSelection) {
-              telemetryContext.properties.errorMessage =
-                  'Board selection canceled.';
-              telemetryContext.properties.result = 'Canceled';
-              return;
-            } else if (boardSelection.id === 'no_device') {
+            if (platformSelection.label === 'no_device') {
               await utils.TakeNoDeviceSurvey(telemetryContext);
               return;
-            } else {
-              telemetryContext.properties.board = boardSelection.label;
             }
 
+            // Step 3: load board information
+            const resourceRootPath = context.asAbsolutePath(path.join(
+                FileNames.resourcesFolderName, FileNames.templatesFolderName));
+            const boardProvider = new BoardProvider(resourceRootPath);
+            const boards = boardProvider.list;
+
             // Step 4: Select template
-            const templateFolderPath =
-                path.join(boardFolderPath, boardSelection.id);
-            const templateSelection =
-                await this.SelectTemplate(templateFolderPath);
-            if (!templateSelection) {
+            const template = await this.SelectTemplate(
+                resourceRootPath, platformSelection.label);
+
+            if (!template) {
               telemetryContext.properties.errorMessage =
                   'Project template selection canceled.';
               telemetryContext.properties.result = 'Canceled';
               return;
             } else {
-              telemetryContext.properties.template = templateSelection.label;
+              telemetryContext.properties.template = template.name;
             }
 
-            // Step 5: Load project template
-            const templateJson = require(
-                path.join(templateFolderPath, FileNames.templateFileName));
-            const result =
-                templateJson.templates.find((template: ProjectTemplate) => {
-                  return template.label === templateSelection.label;
-                });
-
-            if (!result) {
-              throw new Error('Unable to load project template.');
-            }
-
+            // Step 5: Load the list of template files
             const projectTemplateType: ProjectTemplateType =
                 (ProjectTemplateType)
-                    [result.type as keyof typeof ProjectTemplateType];
+                    [template.type as keyof typeof ProjectTemplateType];
 
-            // Update telemetry
+            const templateFolder = context.asAbsolutePath(path.join(
+                FileNames.resourcesFolderName, FileNames.templatesFolderName,
+                template.path));
+
+            const templateFiles =
+                require(path.join(templateFolder, FileNames.templateFiles));
+
             const templateFilesInfo: TemplateFileInfo[] = [];
-            result.templateFilesInfo.forEach((fileInfo: TemplateFileInfo) => {
-              const filePath = path.join(templateFolderPath, fileInfo.fileName);
-              const fileContent = fs.readFileSync(filePath, 'utf8');
-              templateFilesInfo.push({
-                fileName: fileInfo.fileName,
-                sourcePath: fileInfo.sourcePath,
-                targetPath: fileInfo.targetPath,
-                fileContent
-              });
-            });
+            templateFiles.templateFiles.forEach(
+                (fileInfo: TemplateFileInfo) => {
+                  const filePath = path.join(templateFolder, fileInfo.fileName);
+                  const fileContent = fs.readFileSync(filePath, 'utf8');
+                  templateFilesInfo.push({
+                    fileName: fileInfo.fileName,
+                    sourcePath: fileInfo.sourcePath,
+                    targetPath: fileInfo.targetPath,
+                    fileContent
+                  });
+                });
 
 
             if (projectPath) {
@@ -159,22 +142,28 @@ export class ProjectInitializer {
             //   context, channel, telemetryContext);
             return await project.create(
                 projectPath, templateFilesInfo, projectTemplateType,
-                boardSelection.id, openInNewWindow);
+                template.boardId, openInNewWindow);
           } catch (error) {
             throw error;
           }
         });
   }
 
-  private async SelectTemplate(templateFolderPath: string) {
+  private async SelectTemplate(templateFolderPath: string, platform: string):
+      Promise<ProjectTemplate|undefined> {
     const templateJson =
         require(path.join(templateFolderPath, FileNames.templateFileName));
 
+    const result =
+        templateJson.templates.filter((template: ProjectTemplate) => {
+          return template.platform === platform;
+        });
+
     const projectTemplateList: vscode.QuickPickItem[] = [];
 
-    templateJson.templates.forEach((element: ProjectTemplate) => {
+    result.forEach((element: ProjectTemplate) => {
       projectTemplateList.push({
-        label: element.label,
+        label: element.name,
         description: element.description,
         detail: element.detail
       });
@@ -185,10 +174,17 @@ export class ProjectInitializer {
           ignoreFocusOut: true,
           matchOnDescription: true,
           matchOnDetail: true,
-          placeHolder: 'Select a project template',
+          placeHolder: 'Select a project template'
         });
 
-    return templateSelection;
+    if (!templateSelection) {
+      return;
+    }
+
+    return templateJson.templates.find((template: ProjectTemplate) => {
+      return template.platform === platform &&
+          template.name === templateSelection.label;
+    });
   }
 
   private async SelectBoard(boardFolderPath: string) {
@@ -217,18 +213,23 @@ export class ProjectInitializer {
     return boardSelection;
   }
 
-  private async SelectPlatform() {
-    const platformList: vscode.QuickPickItem[] = [
-      {
-        'label': PlatformType.ARDUINO,
-        'description': 'Project based on Arduino Platform.'
-      },
-      {
-        'label': PlatformType.EMBEDDEDLINUX,
-        'description':
-            'Project based on Linux(Yocto/Ubuntu/Debian/...) Platform.'
-      }
-    ];
+  private async SelectPlatform(context: vscode.ExtensionContext) {
+    const platformListPath = context.asAbsolutePath(path.join(
+        FileNames.resourcesFolderName, FileNames.templatesFolderName,
+        FileNames.platformListFileName));
+
+    const platformListJson = require(platformListPath);
+
+    if (!platformListJson) {
+      throw new Error('Unable to load platform list.');
+    }
+
+    const platformList: vscode.QuickPickItem[] = [];
+
+    platformListJson.platforms.forEach((platform: Platform) => {
+      platformList.push(
+          {label: platform.name, description: platform.description});
+    });
 
     const platformSelection = await vscode.window.showQuickPick(platformList, {
       ignoreFocusOut: true,

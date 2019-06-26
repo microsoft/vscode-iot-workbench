@@ -15,9 +15,12 @@ export interface TemplateFileInfo {
   fileContent?: string;
 }
 export interface ProjectTemplate {
-  label: string;
+  platform: string;
+  name: string;
   detail: string;
   description: string;
+  path: string;
+  projectHostType: string;
+  boardId: string;
   type: string;
-  sketch: string;
 }
