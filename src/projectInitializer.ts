@@ -23,8 +23,11 @@ import { Platform } from './Models/Interfaces/Platfrom';
 const impor = require('impor')(__dirname);
 const azureFunctionsModule = impor('./Models/AzureFunctions') as
     typeof import('./Models/AzureFunctions');
-const ioTProjectModule = impor('./Models/IoTWorkspaceProject') as
+const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
     typeof import('./Models/IoTWorkspaceProject');
+const ioTContainerizedProjectModule =
+    impor('./Models/IoTContainerizedProject') as
+    typeof import('./Models/IoTContainerizedProject');
 
 const constants = {
   defaultProjectName: 'IoTproject'
@@ -128,8 +131,12 @@ export class ProjectInitializer {
                   ScaffoldType.Local, projectPath);
             }
 
-            const project = new ioTProjectModule.IoTWorkspaceProject(
-                context, channel, telemetryContext);
+            const project =
+                new ioTContainerizedProjectModule.IoTContainerizedProject(
+                    context, channel, telemetryContext);
+            // const project = new
+            // ioTWorkspaceProjectModule.IoTWorkspaceProject(
+            //   context, channel, telemetryContext);
             return await project.create(
                 projectPath, templateFilesInfo, projectTemplateType,
                 template.boardId, openInNewWindow);
