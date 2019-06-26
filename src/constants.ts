@@ -41,7 +41,7 @@ export class FileNames {
   static readonly boardListFileName = 'boardlist.json';
   static readonly platformListFileName = 'platformList.json';
   static readonly resourcesFolderName = 'resources';
-  static readonly iotworkspaceProjectFileName = '.iotworkspacehproject';
+  static readonly iotWorkspaceProjectFileName = '.iotworkspacehproject';
   static readonly iotContainerizedProjectFileName = '.iotcontainerizedproject';
   static readonly settingsJsonFileName = 'settings.json';
   static readonly devcontainerFolderName = '.devcontainer';

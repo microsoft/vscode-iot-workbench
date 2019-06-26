@@ -70,7 +70,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
         vscode.workspace.workspaceFolders[0].uri.fsPath, '..', devicePath);
 
     const iotWorkbenchProjectFile =
-        path.join(deviceLocation, FileNames.iotworkspaceProjectFileName);
+        path.join(deviceLocation, FileNames.iotWorkspaceProjectFileName);
     if (!fs.existsSync(iotWorkbenchProjectFile)) {
       return false;
     }
@@ -249,7 +249,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
 
     const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
     const workbenchFileName =
-        path.join(rootPath, 'Device', FileNames.iotworkspaceProjectFileName);
+        path.join(rootPath, 'Device', FileNames.iotWorkspaceProjectFileName);
 
     const workspaceFiles = fs.readdirSync(rootPath).filter(
         file => path.extname(file).endsWith(FileNames.workspaceExtensionName));
