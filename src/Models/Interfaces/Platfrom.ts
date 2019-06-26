@@ -4,5 +4,5 @@
 export interface Platform {
   name: string;
   id: string;
-  description: string
+  description: string;
 }

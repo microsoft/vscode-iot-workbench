@@ -18,7 +18,7 @@ import {IoTWorkbenchSettings} from './IoTSettings';
 import {FileUtility} from './FileUtility';
 import {ProjectTemplate, ProjectTemplateType, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
 import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
-import { Platform } from './Models/Interfaces/Platfrom';
+import {Platform} from './Models/Interfaces/Platfrom';
 
 const impor = require('impor')(__dirname);
 const azureFunctionsModule = impor('./Models/AzureFunctions') as
@@ -82,18 +82,18 @@ export class ProjectInitializer {
             if (platformSelection.label === 'no_device') {
               await utils.TakeNoDeviceSurvey(telemetryContext);
               return;
-            } 
+            }
 
             // Step 3: load board information
-            const resourceRootPath = context.asAbsolutePath(
-                path.join(FileNames.resourcesFolderName, FileNames.templatesFolderName));
+            const resourceRootPath = context.asAbsolutePath(path.join(
+                FileNames.resourcesFolderName, FileNames.templatesFolderName));
             const boardProvider = new BoardProvider(resourceRootPath);
             const boards = boardProvider.list;
-            
+
             // Step 4: Select template
-            const template =
-                await this.SelectTemplate(resourceRootPath, platformSelection.label);
-            
+            const template = await this.SelectTemplate(
+                resourceRootPath, platformSelection.label);
+
             if (!template) {
               telemetryContext.properties.errorMessage =
                   'Project template selection canceled.';
@@ -108,22 +108,25 @@ export class ProjectInitializer {
                 (ProjectTemplateType)
                     [template.type as keyof typeof ProjectTemplateType];
 
-            const templateFolder = context.asAbsolutePath(
-              path.join(FileNames.resourcesFolderName, FileNames.templatesFolderName, template.path));
+            const templateFolder = context.asAbsolutePath(path.join(
+                FileNames.resourcesFolderName, FileNames.templatesFolderName,
+                template.path));
 
-            const templateFiles = require(path.join(templateFolder, FileNames.templateFiles));
+            const templateFiles =
+                require(path.join(templateFolder, FileNames.templateFiles));
 
             const templateFilesInfo: TemplateFileInfo[] = [];
-            templateFiles.templateFiles.forEach((fileInfo: TemplateFileInfo) => {
-              const filePath = path.join(templateFolder, fileInfo.fileName);
-              const fileContent = fs.readFileSync(filePath, 'utf8');
-              templateFilesInfo.push({
-                fileName: fileInfo.fileName,
-                sourcePath: fileInfo.sourcePath,
-                targetPath: fileInfo.targetPath,
-                fileContent
-              });
-            });
+            templateFiles.templateFiles.forEach(
+                (fileInfo: TemplateFileInfo) => {
+                  const filePath = path.join(templateFolder, fileInfo.fileName);
+                  const fileContent = fs.readFileSync(filePath, 'utf8');
+                  templateFilesInfo.push({
+                    fileName: fileInfo.fileName,
+                    sourcePath: fileInfo.sourcePath,
+                    targetPath: fileInfo.targetPath,
+                    fileContent
+                  });
+                });
 
 
             if (projectPath) {
@@ -146,7 +149,8 @@ export class ProjectInitializer {
         });
   }
 
-  private async SelectTemplate(templateFolderPath: string, platform: string): Promise<ProjectTemplate|undefined> {
+  private async SelectTemplate(templateFolderPath: string, platform: string):
+      Promise<ProjectTemplate|undefined> {
     const templateJson =
         require(path.join(templateFolderPath, FileNames.templateFileName));
 
@@ -172,13 +176,14 @@ export class ProjectInitializer {
           matchOnDetail: true,
           placeHolder: 'Select a project template'
         });
-    
-    if(!templateSelection){
+
+    if (!templateSelection) {
       return;
     }
 
     return templateJson.templates.find((template: ProjectTemplate) => {
-      return template.platform === platform && template.name === templateSelection.label;
+      return template.platform === platform &&
+          template.name === templateSelection.label;
     });
   }
 
@@ -209,23 +214,21 @@ export class ProjectInitializer {
   }
 
   private async SelectPlatform(context: vscode.ExtensionContext) {
+    const platformListPath = context.asAbsolutePath(path.join(
+        FileNames.resourcesFolderName, FileNames.templatesFolderName,
+        FileNames.platformListFileName));
 
-    const platformListPath = context.asAbsolutePath(
-      path.join(FileNames.resourcesFolderName, FileNames.templatesFolderName, FileNames.platformListFileName));
-    
     const platformListJson = require(platformListPath);
 
     if (!platformListJson) {
       throw new Error('Unable to load platform list.');
     }
-        
+
     const platformList: vscode.QuickPickItem[] = [];
 
     platformListJson.platforms.forEach((platfrom: Platform) => {
-      platformList.push({
-        label: platfrom.name,
-        description: platfrom.description
-      });
+      platformList.push(
+          {label: platfrom.name, description: platfrom.description});
     });
 
     const platformSelection = await vscode.window.showQuickPick(platformList, {
