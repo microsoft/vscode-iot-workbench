@@ -12,6 +12,7 @@ import {askAndNewProject} from '../utils';
 
 import {Dependency} from './AzureComponentConfig';
 import {Component} from './Interfaces/Component';
+import {ProjectHostType} from './Interfaces/ProjectHostType';
 import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
 import {RemoteExtension} from './RemoteExtension';
@@ -52,12 +53,10 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       return false;
     }
 
-    // Check if it is an iot project workspace
     this.projectRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    const iotWorkbenchProjectFile = path.join(
-        this.projectRootPath, FileNames.iotContainerizedProjectFileName);
-
-    if (!fs.existsSync(iotWorkbenchProjectFile)) {
+    const projectHostType: ProjectHostType =
+        IoTWorkbenchProjectBase.GetProjectType(this.projectRootPath);
+    if (projectHostType !== ProjectHostType.Container) {
       return false;
     }
 
@@ -231,7 +230,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
     const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
     const workbenchFileName =
-        path.join(rootPath, FileNames.iotContainerizedProjectFileName);
+        path.join(rootPath, FileNames.iotworkbenchprojectFileName);
 
     if (!fs.existsSync(workbenchFileName)) {
       await askAndNewProject(this.telemetryContext);

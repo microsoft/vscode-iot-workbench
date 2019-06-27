@@ -41,15 +41,11 @@ export class FileNames {
   static readonly boardListFileName = 'boardlist.json';
   static readonly platformListFileName = 'platformList.json';
   static readonly resourcesFolderName = 'resources';
-  static readonly iotWorkspaceProjectFileName = '.iotworkspacehproject';
-  static readonly iotContainerizedProjectFileName = '.iotcontainerizedproject';
+  static readonly iotworkbenchprojectFileName = '.iotworkbenchproject';
   static readonly settingsJsonFileName = 'settings.json';
   static readonly devcontainerFolderName = '.devcontainer';
   static readonly vscodeSettingsFolderName = '.vscode';
   static readonly workspaceExtensionName = '.code-workspace';
-  static readonly dockerfileName = 'Dockerfile';
-  static readonly devcontainerJsonFileName = 'devcontainer.json';
-  static readonly cppPropertiesFileName = 'c_cpp_properties.json';
   static readonly outputPathName = '.build';
   static readonly templatesFolderName = 'templates';
   static readonly templateFiles = 'templatefiles.json';

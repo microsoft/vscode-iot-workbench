@@ -13,6 +13,7 @@ import {askAndNewProject, askAndOpenProject} from '../utils';
 
 import {Dependency} from './AzureComponentConfig';
 import {Component} from './Interfaces/Component';
+import {ProjectHostType} from './Interfaces/ProjectHostType';
 import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {Workspace} from './Interfaces/Workspace';
 import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
@@ -41,8 +42,7 @@ const telemetryModule = impor('../telemetry') as typeof import('../telemetry');
 const constants = {
   deviceDefaultFolderName: 'Device',
   functionDefaultFolderName: 'Functions',
-  asaFolderName: 'StreamAnalytics',
-  workspaceConfigExtension: '.code-workspace'
+  asaFolderName: 'StreamAnalytics'
 };
 
 
@@ -66,12 +66,11 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     this.projectRootPath =
         path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, '..');
 
-    const deviceLocation = path.join(
-        vscode.workspace.workspaceFolders[0].uri.fsPath, '..', devicePath);
+    const deviceLocation = path.join(this.projectRootPath, devicePath);
 
-    const iotWorkbenchProjectFile =
-        path.join(deviceLocation, FileNames.iotWorkspaceProjectFileName);
-    if (!fs.existsSync(iotWorkbenchProjectFile)) {
+    const projectHostType: ProjectHostType =
+        IoTWorkbenchProjectBase.GetProjectType(this.projectRootPath);
+    if (projectHostType !== ProjectHostType.Workspace) {
       return false;
     }
 
@@ -249,7 +248,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
 
     const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
     const workbenchFileName =
-        path.join(rootPath, 'Device', FileNames.iotWorkspaceProjectFileName);
+        path.join(rootPath, 'Device', FileNames.iotworkbenchprojectFileName);
 
     const workspaceFiles = fs.readdirSync(rootPath).filter(
         file => path.extname(file).endsWith(FileNames.workspaceExtensionName));
@@ -466,7 +465,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     const workspaceConfigFilePath = path.join(
         this.projectRootPath,
         `${path.basename(this.projectRootPath)}${
-            constants.workspaceConfigExtension}`);
+            FileNames.workspaceExtensionName}`);
 
     fs.writeFileSync(
         workspaceConfigFilePath, JSON.stringify(workspace, null, 4));

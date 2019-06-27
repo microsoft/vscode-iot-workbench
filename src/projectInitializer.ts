@@ -11,18 +11,14 @@ import * as utils from './utils';
 
 import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {TelemetryContext} from './telemetry';
-import {ArduinoPackageManager} from './ArduinoPackageManager';
-import {FileNames, ScaffoldType, PlatformType, platformFolderMap} from './constants';
+import {FileNames, ScaffoldType} from './constants';
 import {BoardProvider} from './boardProvider';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import {FileUtility} from './FileUtility';
 import {ProjectTemplate, ProjectTemplateType, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
-import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
 import {Platform} from './Models/Interfaces/Platform';
 
 const impor = require('impor')(__dirname);
-const azureFunctionsModule = impor('./Models/AzureFunctions') as
-    typeof import('./Models/AzureFunctions');
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
     typeof import('./Models/IoTWorkspaceProject');
 const ioTContainerizedProjectModule =
@@ -79,18 +75,14 @@ export class ProjectInitializer {
               telemetryContext.properties.platform = platformSelection.label;
             }
 
-            if (platformSelection.label === 'no_device') {
+            if (platformSelection.label === 'no_platform') {
               await utils.TakeNoDeviceSurvey(telemetryContext);
               return;
             }
 
-            // Step 3: load board information
+            // Step 4: Select template
             const resourceRootPath = context.asAbsolutePath(path.join(
                 FileNames.resourcesFolderName, FileNames.templatesFolderName));
-            const boardProvider = new BoardProvider(resourceRootPath);
-            const boards = boardProvider.list;
-
-            // Step 4: Select template
             const template = await this.SelectTemplate(
                 resourceRootPath, platformSelection.label);
 
@@ -108,9 +100,7 @@ export class ProjectInitializer {
                 (ProjectTemplateType)
                     [template.type as keyof typeof ProjectTemplateType];
 
-            const templateFolder = context.asAbsolutePath(path.join(
-                FileNames.resourcesFolderName, FileNames.templatesFolderName,
-                template.path));
+            const templateFolder = path.join(resourceRootPath, template.path);
 
             const templateFiles =
                 require(path.join(templateFolder, FileNames.templateFiles));

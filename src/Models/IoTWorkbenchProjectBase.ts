@@ -1,12 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import {RetryOperation} from 'azure-iot-common';
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, FileNames} from '../constants';
+import {ConfigKey, FileNames, ScaffoldType} from '../constants';
+import {FileUtility} from '../FileUtility';
 import {TelemetryContext} from '../telemetry';
 
 import {checkAzureLogin} from './Apis';
@@ -35,19 +37,21 @@ export abstract class IoTWorkbenchProjectBase {
     if (!devicePath) {
       throw new Error(`Cannot find device path in config key`);
     }
-    const iotworkspaceProjectFile =
-        path.join(root, devicePath, FileNames.iotWorkspaceProjectFileName);
-    if (fs.existsSync(iotworkspaceProjectFile)) {
-      return ProjectHostType.Workspace;
-    }
 
-    const iotContainerizedProjectFile =
-        path.join(root, FileNames.iotContainerizedProjectFileName);
-    if (fs.existsSync(iotContainerizedProjectFile)) {
+    const iotWorkbenchWorkspaceProjectFile =
+        path.join(root, devicePath, FileNames.iotworkbenchprojectFileName);
+    const iotWorkbenchContainerProjectFile =
+        path.join(root, FileNames.iotworkbenchprojectFileName);
+    const devcontainerFolderPath =
+        path.join(root, FileNames.devcontainerFolderName);
+    if (fs.existsSync(iotWorkbenchContainerProjectFile) &&
+        fs.existsSync(devcontainerFolderPath)) {
       return ProjectHostType.Container;
+    } else if (fs.existsSync(iotWorkbenchWorkspaceProjectFile)) {
+      return ProjectHostType.Workspace;
+    } else {
+      return ProjectHostType.Unknown;
     }
-
-    throw new Error(`Not supported project type.`);
   }
 
   canProvision(comp: {}): comp is Provisionable {
@@ -270,4 +274,21 @@ export abstract class IoTWorkbenchProjectBase {
   }
 
   abstract async handleLoadFailure(): Promise<boolean>;
+
+  static async generateIotWorkbenchProjectFile(
+      type: ScaffoldType, projectFolder: string): Promise<void> {
+    if (!await FileUtility.directoryExists(type, projectFolder)) {
+      throw new Error('Unable to find the project folder.');
+    }
+
+    try {
+      const iotworkbenchprojectFilePath =
+          path.join(projectFolder, FileNames.iotworkbenchprojectFileName);
+      await FileUtility.writeFile(type, iotworkbenchprojectFilePath, ' ');
+    } catch (error) {
+      throw new Error(
+          `Create ${FileNames.iotworkbenchprojectFileName} file failed: ${
+              error.message}`);
+    }
+  }
 }
