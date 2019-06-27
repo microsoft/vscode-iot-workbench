@@ -13,6 +13,7 @@ import {askAndNewProject, askAndOpenProject} from '../utils';
 
 import {Dependency} from './AzureComponentConfig';
 import {Component} from './Interfaces/Component';
+import {ProjectHostType} from './Interfaces/ProjectHostType';
 import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {Workspace} from './Interfaces/Workspace';
 import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
@@ -41,7 +42,7 @@ const telemetryModule = impor('../telemetry') as typeof import('../telemetry');
 const constants = {
   deviceDefaultFolderName: 'Device',
   functionDefaultFolderName: 'Functions',
-  asaFolderName: 'StreamAnalytics',
+  asaFolderName: 'StreamAnalytics'
 };
 
 
@@ -65,12 +66,11 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     this.projectRootPath =
         path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, '..');
 
-    const deviceLocation = path.join(
-        vscode.workspace.workspaceFolders[0].uri.fsPath, '..', devicePath);
+    const deviceLocation = path.join(this.projectRootPath, devicePath);
 
-    const iotWorkbenchProjectFile =
-        path.join(deviceLocation, FileNames.iotworkbenchprojectFileName);
-    if (!fs.existsSync(iotWorkbenchProjectFile)) {
+    const projectHostType: ProjectHostType =
+        IoTWorkbenchProjectBase.GetProjectType(this.projectRootPath);
+    if (projectHostType !== ProjectHostType.Workspace) {
       return false;
     }
 

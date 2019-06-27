@@ -1,11 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import {RetryOperation} from 'azure-iot-common';
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {FileNames, ScaffoldType} from '../constants';
+import {ConfigHandler} from '../configHandler';
+import {ConfigKey, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext} from '../telemetry';
 
@@ -31,12 +33,24 @@ export abstract class IoTWorkbenchProjectBase {
   protected telemetryContext: TelemetryContext;
 
   static GetProjectType(root: string): ProjectHostType {
+    const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
+    if (!devicePath) {
+      throw new Error(`Cannot find device path in config key`);
+    }
+
+    const iotWorkbenchWorkspaceProjectFile =
+        path.join(root, devicePath, FileNames.iotworkbenchprojectFileName);
+    const iotWorkbenchContainerProjectFile =
+        path.join(root, FileNames.iotworkbenchprojectFileName);
     const devcontainerFolderPath =
         path.join(root, FileNames.devcontainerFolderName);
-    if (fs.existsSync(devcontainerFolderPath)) {
+    if (fs.existsSync(iotWorkbenchContainerProjectFile) &&
+        fs.existsSync(devcontainerFolderPath)) {
       return ProjectHostType.Container;
-    } else {
+    } else if (fs.existsSync(iotWorkbenchWorkspaceProjectFile)) {
       return ProjectHostType.Workspace;
+    } else {
+      return ProjectHostType.Unknown;
     }
   }
 

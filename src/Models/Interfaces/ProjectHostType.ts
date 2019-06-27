@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 export enum ProjectHostType {
-  Workspace = 1,
+  Unknown = 0,
+  Workspace,
   Container
 }
