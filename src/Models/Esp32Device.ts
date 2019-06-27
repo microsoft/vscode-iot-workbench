@@ -15,6 +15,7 @@ import {ConfigKey} from '../constants';
 
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 import {DeviceType} from './Interfaces/Device';
+import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 
 const constants = {
   defaultBoardInfo: 'esp32:esp32:m5stack-core-esp32',
@@ -23,7 +24,7 @@ const constants = {
 };
 
 export class Esp32Device extends ArduinoDeviceBase {
-  private sketchFileTemplateName = '';
+  private templateFiles: TemplateFileInfo[] = [];
   private static _boardId = 'esp32';
   private channel: vscode.OutputChannel;
 
@@ -70,12 +71,12 @@ export class Esp32Device extends ArduinoDeviceBase {
 
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      devicePath: string, sketchFileTemplateName?: string) {
+      devicePath: string, templateFiles?: TemplateFileInfo[]) {
     super(context, devicePath, DeviceType.IoT_Button);
     this.channel = channel;
     this.componentId = Guid.create().toString();
-    if (sketchFileTemplateName) {
-      this.sketchFileTemplateName = sketchFileTemplateName;
+    if (templateFiles) {
+      this.templateFiles = templateFiles;
     }
   }
 
@@ -94,14 +95,10 @@ export class Esp32Device extends ArduinoDeviceBase {
       throw new Error('Unable to find the board in the config file.');
     }
 
-    this.generateCppPropertiesFile(this.board);
     return true;
   }
 
   async create(): Promise<boolean> {
-    if (!this.sketchFileTemplateName) {
-      throw new Error('No sketch file found.');
-    }
     const deviceFolderPath = this.deviceFolder;
 
     if (!fs.existsSync(deviceFolderPath)) {
@@ -111,11 +108,23 @@ export class Esp32Device extends ArduinoDeviceBase {
       throw new Error('Unable to find the board in the config file.');
     }
 
+    const plat = os.platform();
     this.generateCommonFiles();
-    this.generateCppPropertiesFile(this.board);
-    await this.generateSketchFile(
-        this.sketchFileTemplateName, this.board, constants.defaultBoardInfo,
-        constants.defaultBoardConfig);
+
+    for (const fileInfo of this.templateFiles) {
+      if (fileInfo.fileName.endsWith('.ino')) {
+        await this.generateSketchFile(
+            fileInfo, this.board, constants.defaultBoardInfo,
+            constants.defaultBoardConfig);
+      } else if (
+          fileInfo.fileName.endsWith('macos.json') && (plat === 'darwin')) {
+        this.generateCppPropertiesFile(this.board, fileInfo);
+      } else if (
+          fileInfo.fileName.endsWith('win32.json') && (plat === 'win32')) {
+        this.generateCppPropertiesFile(this.board, fileInfo);
+      }
+    }
+
     return true;
   }
 

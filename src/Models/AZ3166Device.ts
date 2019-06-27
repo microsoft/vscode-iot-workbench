@@ -21,6 +21,7 @@ import {delay, getRegistryValues} from '../utils';
 
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 import {DeviceType} from './Interfaces/Device';
+import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 
 const impor = require('impor')(__dirname);
 const forEach = impor('lodash.foreach') as typeof import('lodash.foreach');
@@ -74,7 +75,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
     return this.componentId;
   }
 
-  private sketchName = '';
+  private templateFiles: TemplateFileInfo[] = [];
   private static _boardId = 'devkit';
 
   static get boardId() {
@@ -83,12 +84,12 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      devicePath: string, sketchName?: string) {
+      devicePath: string, templateFiles?: TemplateFileInfo[]) {
     super(context, devicePath, DeviceType.MXChip_AZ3166);
     this.channel = channel;
     this.componentId = Guid.create().toString();
-    if (sketchName) {
-      this.sketchName = sketchName;
+    if (templateFiles) {
+      this.templateFiles = templateFiles;
     }
   }
 
@@ -129,15 +130,10 @@ export class AZ3166Device extends ArduinoDeviceBase {
       throw new Error('Unable to find the board in the config file.');
     }
 
-    this.generateCppPropertiesFile(this.board);
-
     return true;
   }
 
   async create(): Promise<boolean> {
-    if (!this.sketchName) {
-      throw new Error('No sketch file found.');
-    }
     const deviceFolderPath = this.deviceFolder;
 
     if (!fs.existsSync(deviceFolderPath)) {
@@ -147,11 +143,22 @@ export class AZ3166Device extends ArduinoDeviceBase {
       throw new Error('Unable to find the board in the config file.');
     }
 
+    const plat = os.platform();
+
     this.generateCommonFiles();
-    this.generateCppPropertiesFile(this.board);
-    await this.generateSketchFile(
-        this.sketchName, this.board, constants.boardInfo,
-        constants.uploadMethod);
+
+    for (const fileInfo of this.templateFiles) {
+      if (fileInfo.fileName.endsWith('.ino')) {
+        await this.generateSketchFile(
+            fileInfo, this.board, constants.boardInfo, constants.uploadMethod);
+      } else if (
+          fileInfo.fileName.endsWith('macos.json') && (plat === 'darwin')) {
+        this.generateCppPropertiesFile(this.board, fileInfo);
+      } else if (
+          fileInfo.fileName.endsWith('win32.json') && (plat === 'win32')) {
+        this.generateCppPropertiesFile(this.board, fileInfo);
+      }
+    }
     return true;
   }
 

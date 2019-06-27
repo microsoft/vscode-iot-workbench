@@ -295,26 +295,15 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     workspace.folders.push({path: constants.deviceDefaultFolderName});
     let device: Component;
 
-    // TODO: Reserve only Workspace type device
-    // creation(AZ3166device/iotButton/esd32)
-    // if (boardId ===
-    // az3166DeviceModule.AZ3166Device.boardId) { device = new
-    // az3166DeviceModule.AZ3166Device(
-    //     this.extensionContext, this.channel, deviceDir,
-    //     projectTemplateItem.sketch);
-    // } else if (boardId === ioTButtonDeviceModule.IoTButtonDevice.boardId) {
-    // device = new ioTButtonDeviceModule.IoTButtonDevice(
-    //     this.extensionContext, deviceDir, projectTemplateItem.sketch);
-    // } else if (boardId === esp32DeviceModule.Esp32Device.boardId) {
-    // device = new esp32DeviceModule.Esp32Device(
-    //     this.extensionContext, this.channel, deviceDir,
-    //     projectTemplateItem.sketch);
-    // } else if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId)
-    // {
-    if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
-      device = new raspberryPiDeviceModule.RaspberryPiDevice(
-          this.extensionContext, this.projectRootPath, this.channel,
-          projectType, templateFilesInfo);
+    if (boardId === az3166DeviceModule.AZ3166Device.boardId) {
+      device = new az3166DeviceModule.AZ3166Device(
+          this.extensionContext, this.channel, deviceDir, templateFilesInfo);
+    } else if (boardId === ioTButtonDeviceModule.IoTButtonDevice.boardId) {
+      device = new ioTButtonDeviceModule.IoTButtonDevice(
+          this.extensionContext, deviceDir);
+    } else if (boardId === esp32DeviceModule.Esp32Device.boardId) {
+      device = new esp32DeviceModule.Esp32Device(
+          this.extensionContext, this.channel, deviceDir, templateFilesInfo);
     } else {
       throw new Error('The specified board is not supported.');
     }
