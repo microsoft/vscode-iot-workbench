@@ -33,13 +33,6 @@ export abstract class IoTWorkbenchProjectBase {
   protected telemetryContext: TelemetryContext;
 
   static GetProjectType(root: string): ProjectHostType {
-    const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
-    if (!devicePath) {
-      throw new Error(`Cannot find device path in config key`);
-    }
-
-    const iotWorkbenchWorkspaceProjectFile =
-        path.join(root, devicePath, FileNames.iotworkbenchprojectFileName);
     const iotWorkbenchContainerProjectFile =
         path.join(root, FileNames.iotworkbenchprojectFileName);
     const devcontainerFolderPath =
@@ -47,11 +40,18 @@ export abstract class IoTWorkbenchProjectBase {
     if (fs.existsSync(iotWorkbenchContainerProjectFile) &&
         fs.existsSync(devcontainerFolderPath)) {
       return ProjectHostType.Container;
-    } else if (fs.existsSync(iotWorkbenchWorkspaceProjectFile)) {
-      return ProjectHostType.Workspace;
-    } else {
-      return ProjectHostType.Unknown;
     }
+
+    const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
+    if (!devicePath) {
+      throw new Error(`Cannot find device path in config key`);
+    }
+    const iotWorkbenchWorkspaceProjectFile =
+        path.join(root, devicePath, FileNames.iotworkbenchprojectFileName);
+    if (fs.existsSync(iotWorkbenchWorkspaceProjectFile)) {
+      return ProjectHostType.Workspace;
+    }
+    return ProjectHostType.Unknown;
   }
 
   canProvision(comp: {}): comp is Provisionable {
