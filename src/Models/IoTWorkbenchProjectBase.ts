@@ -43,14 +43,14 @@ export abstract class IoTWorkbenchProjectBase {
     }
 
     const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
-    if (!devicePath) {
-      throw new Error(`Cannot find device path in config key`);
-    }
-    const iotWorkbenchWorkspaceProjectFile =
+    if (devicePath) {
+      const iotWorkbenchWorkspaceProjectFile =
         path.join(root, devicePath, FileNames.iotworkbenchprojectFileName);
-    if (fs.existsSync(iotWorkbenchWorkspaceProjectFile)) {
-      return ProjectHostType.Workspace;
+      if (fs.existsSync(iotWorkbenchWorkspaceProjectFile)) {
+        return ProjectHostType.Workspace;
+      }
     }
+
     return ProjectHostType.Unknown;
   }
 
