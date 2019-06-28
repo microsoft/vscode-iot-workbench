@@ -45,7 +45,7 @@ export abstract class IoTWorkbenchProjectBase {
     const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
     if (devicePath) {
       const iotWorkbenchWorkspaceProjectFile =
-        path.join(root, devicePath, FileNames.iotworkbenchprojectFileName);
+          path.join(root, devicePath, FileNames.iotworkbenchprojectFileName);
       if (fs.existsSync(iotWorkbenchWorkspaceProjectFile)) {
         return ProjectHostType.Workspace;
       }

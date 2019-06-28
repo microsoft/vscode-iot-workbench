@@ -280,7 +280,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     const azureConfigFileHandler =
         new azureComponentConfigModule.AzureConfigFileHandler(
             this.projectRootPath);
-    azureConfigFileHandler.createIfNotExists(ScaffoldType.Local);
+    await azureConfigFileHandler.createIfNotExists(ScaffoldType.Local);
 
     const workspace: Workspace = {folders: [], settings: {}};
 

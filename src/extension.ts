@@ -15,16 +15,22 @@ import {IoTWorkbenchSettings} from './IoTSettings';
 import {ConfigHandler} from './configHandler';
 import {ConfigKey, EventNames, PlatformType, FileNames, platformFolderMap} from './constants';
 import {TelemetryContext, TelemetryProperties} from './telemetry';
+import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 
 const impor = require('impor')(__dirname);
 const exampleExplorerModule =
     impor('./exampleExplorer') as typeof import('./exampleExplorer');
-const ioTProjectModule = impor('./Models/IoTWorkspaceProject') as
+
+import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
+const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
     typeof import('./Models/IoTWorkspaceProject');
+const ioTContainerizedProjectModule =
+    impor('./Models/IoTContainerizedProject') as
+    typeof import('./Models/IoTContainerizedProject');
 const telemetryModule = impor('./telemetry') as typeof import('./telemetry');
 const request = impor('request-promise') as typeof import('request-promise');
-const usbDetectorModule =
-    impor('./usbDetector') as typeof import('./usbDetector');
+// const usbDetectorModule =
+//     impor('./usbDetector') as typeof import('./usbDetector');
 
 let telemetryWorkerInitialized = false;
 // this method is called when your extension is activated
@@ -44,6 +50,7 @@ export async function activate(context: vscode.ExtensionContext) {
     measurements: {duration: 0}
   };
 
+  let projectHostType: ProjectHostType = ProjectHostType.Unknown;
   if (vscode.workspace.workspaceFolders) {
     try {
       // Initialize Telemetry
@@ -51,9 +58,20 @@ export async function activate(context: vscode.ExtensionContext) {
         telemetryModule.TelemetryWorker.Initialize(context);
         telemetryWorkerInitialized = true;
       }
-      const iotProject = new ioTProjectModule.IoTWorkspaceProject(
-          context, outputChannel, telemetryContext);
-      await iotProject.load(true);
+
+      const projectRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+      projectHostType = IoTWorkbenchProjectBase.GetProjectType(projectRootPath);
+      if (projectHostType === ProjectHostType.Container) {
+        const iotContainerProject =
+            new ioTContainerizedProjectModule.IoTContainerizedProject(
+                context, outputChannel, telemetryContext);
+        await iotContainerProject.load(true);
+      } else if (projectHostType === ProjectHostType.Workspace) {
+        const iotWorkspaceProject =
+            new ioTWorkspaceProjectModule.IoTWorkspaceProject(
+                context, outputChannel, telemetryContext);
+        await iotWorkspaceProject.load(true);
+      }
     } catch (error) {
       // do nothing as we are not sure whether the project is initialized.
     }
@@ -337,12 +355,12 @@ export async function activate(context: vscode.ExtensionContext) {
         ConfigKey.shownHelpPage, true, vscode.ConfigurationTarget.Global);
   }
 
-  setTimeout(() => {
-    // delay to detect usb
-    const usbDetector =
-        new usbDetectorModule.UsbDetector(context, outputChannel);
-    usbDetector.startListening();
-  }, 200);
+  // setTimeout(() => {
+  //   // delay to detect usb
+  //   const usbDetector =
+  //       new usbDetectorModule.UsbDetector(context, outputChannel);
+  //   usbDetector.startListening();
+  // }, 200);
 }
 
 // this method is called when your extension is deactivated
