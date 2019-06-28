@@ -19,6 +19,16 @@
             "projectHostType": "workspace",
             "boardId": "esp32",
             "type": "Basic"
+        },
+        {
+            "platform": "Arduino",
+            "name": "Esp32 with with Azure IoT Hub",
+            "description": "",
+            "detail": "Create project that connects to Azure IoT Hub, such as sending sensor data to cloud.",
+            "path": "esp32_iothub",
+            "projectHostType": "workspace",
+            "boardId": "esp32",
+            "type": "IotHub"
         }
     ]
   }
