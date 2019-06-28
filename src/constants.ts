@@ -39,7 +39,7 @@ export class EventNames {
 export class FileNames {
   static readonly templateFileName = 'templates.json';
   static readonly boardListFileName = 'boardlist.json';
-  static readonly platformListFileName = 'platformList.json';
+  static readonly platformListFileName = 'platformlist.json';
   static readonly resourcesFolderName = 'resources';
   static readonly iotworkbenchprojectFileName = '.iotworkbenchproject';
   static readonly settingsJsonFileName = 'settings.json';

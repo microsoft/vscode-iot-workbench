@@ -223,18 +223,20 @@ export class RaspberryPiDevice implements Device {
         await ssh.uploadFile(binFilePath, RaspberryPiUploadConfig.projectPath);
         const enableExecPriorityCommand =
             `cd ${RaspberryPiUploadConfig.projectPath} && chmod -R 755 .\/`;
-        const result = await ssh.exec(enableExecPriorityCommand);
-
-        const message = `result: ${result}.`;
         this.channel.show();
-        this.channel.appendLine(message);
+        const command = ssh.spawn(enableExecPriorityCommand);
+        command.on('close', async () => {
+          this.channel.appendLine('DONE');
+          await ssh.close();
+        });
+		    command.on('error', this.channel.appendLine);
       } catch (error) {
         throw new Error(
             `Deploy binary file to device ${RaspberryPiUploadConfig.user}@${
                 RaspberryPiUploadConfig.host} failed. ${error.message}`);
       }
 
-      await ssh.close();
+      // await ssh.close();
 
       const message = `Successfully deploy bin file to Raspberry Pi board.`;
       this.channel.show();
