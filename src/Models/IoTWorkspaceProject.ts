@@ -69,7 +69,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     const deviceLocation = path.join(this.projectRootPath, devicePath);
 
     const projectHostType: ProjectHostType =
-        IoTWorkbenchProjectBase.GetProjectType(this.projectRootPath);
+        IoTWorkbenchProjectBase.GetProjectType(deviceLocation);
     if (projectHostType !== ProjectHostType.Workspace) {
       return false;
     }

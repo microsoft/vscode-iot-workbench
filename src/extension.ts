@@ -59,8 +59,10 @@ export async function activate(context: vscode.ExtensionContext) {
         telemetryWorkerInitialized = true;
       }
 
-      const projectRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-      projectHostType = IoTWorkbenchProjectBase.GetProjectType(projectRootPath);
+      const projectFileRootPath =
+          vscode.workspace.workspaceFolders[0].uri.fsPath;
+      projectHostType =
+          IoTWorkbenchProjectBase.GetProjectType(projectFileRootPath);
       if (projectHostType === ProjectHostType.Container) {
         const iotContainerProject =
             new ioTContainerizedProjectModule.IoTContainerizedProject(

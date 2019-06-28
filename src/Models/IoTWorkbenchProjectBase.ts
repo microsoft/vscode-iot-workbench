@@ -32,26 +32,18 @@ export abstract class IoTWorkbenchProjectBase {
   protected channel: vscode.OutputChannel;
   protected telemetryContext: TelemetryContext;
 
-  static GetProjectType(root: string): ProjectHostType {
-    const iotWorkbenchContainerProjectFile =
-        path.join(root, FileNames.iotworkbenchprojectFileName);
+  static GetProjectType(projectFileRootPath: string): ProjectHostType {
+    const iotWorkbenchProjectFile =
+        path.join(projectFileRootPath, FileNames.iotworkbenchprojectFileName);
     const devcontainerFolderPath =
-        path.join(root, FileNames.devcontainerFolderName);
-    if (fs.existsSync(iotWorkbenchContainerProjectFile) &&
-        fs.existsSync(devcontainerFolderPath)) {
+        path.join(projectFileRootPath, FileNames.devcontainerFolderName);
+    if (!fs.existsSync(iotWorkbenchProjectFile)) {
+      return ProjectHostType.Unknown;
+    } else if (fs.existsSync(devcontainerFolderPath)) {
       return ProjectHostType.Container;
+    } else {
+      return ProjectHostType.Workspace;
     }
-
-    const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
-    if (devicePath) {
-      const iotWorkbenchWorkspaceProjectFile =
-          path.join(root, devicePath, FileNames.iotworkbenchprojectFileName);
-      if (fs.existsSync(iotWorkbenchWorkspaceProjectFile)) {
-        return ProjectHostType.Workspace;
-      }
-    }
-
-    return ProjectHostType.Unknown;
   }
 
   canProvision(comp: {}): comp is Provisionable {
