@@ -9,6 +9,16 @@
             "projectHostType": "container",
             "boardId": "raspberrypi",
             "type": "IotHub"
+        },
+        {
+            "platform": "Arduino",
+            "name": "Esp32 with device only code",
+            "description": "",
+            "detail": "Create project with device only code.",
+            "path": "esp32_device",
+            "projectHostType": "workspace",
+            "boardId": "esp32",
+            "type": "Basic"
         }
     ]
   }

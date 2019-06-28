@@ -11,7 +11,7 @@ import * as utils from './utils';
 
 import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {TelemetryContext} from './telemetry';
-import {FileNames, ScaffoldType} from './constants';
+import {FileNames, ScaffoldType, PlatformType} from './constants';
 import {BoardProvider} from './boardProvider';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import {FileUtility} from './FileUtility';
@@ -124,15 +124,22 @@ export class ProjectInitializer {
                   ScaffoldType.Local, projectPath);
             }
 
-            const project =
-                new ioTContainerizedProjectModule.IoTContainerizedProject(
-                    context, channel, telemetryContext);
-            // const project = new
-            // ioTWorkspaceProjectModule.IoTWorkspaceProject(
-            //   context, channel, telemetryContext);
-            return await project.create(
-                projectPath, templateFilesInfo, projectTemplateType,
-                template.boardId, openInNewWindow);
+            if (template.platform === PlatformType.EMBEDDEDLINUX) {
+              const project =
+                  new ioTContainerizedProjectModule.IoTContainerizedProject(
+                      context, channel, telemetryContext);
+              return await project.create(
+                  projectPath, templateFilesInfo, projectTemplateType,
+                  template.boardId, openInNewWindow);
+            } else if (template.platform === PlatformType.ARDUINO) {
+              const project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
+                  context, channel, telemetryContext);
+              return await project.create(
+                  projectPath, templateFilesInfo, projectTemplateType,
+                  template.boardId, openInNewWindow);
+            } else {
+              throw new Error('unsupported platform');
+            }
           } catch (error) {
             throw error;
           }

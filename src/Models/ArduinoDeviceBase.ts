@@ -12,6 +12,7 @@ import {ConfigKey, DependentExtensions, FileNames, platformFolderMap, PlatformTy
 import {Board} from './Interfaces/Board';
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
+import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {OTA} from './OTA';
 
 const constants = {
@@ -148,7 +149,7 @@ export abstract class ArduinoDeviceBase implements Device {
     }
   }
 
-  generateCppPropertiesFile(board: Board): void {
+  generateCppPropertiesFile(board: Board, fileInfo: TemplateFileInfo): void {
     // Create c_cpp_properties.json file
     const cppPropertiesFilePath =
         path.join(this.vscodeFolderPath, constants.cppPropertiesFileName);
@@ -161,18 +162,12 @@ export abstract class ArduinoDeviceBase implements Device {
       const plat = os.platform();
 
       if (plat === 'win32') {
-        const propertiesFilePathWin32 =
-            this.extensionContext.asAbsolutePath(path.join(
-                FileNames.resourcesFolderName, board.id,
-                constants.cppPropertiesFileNameWin));
-        const propertiesContentWin32 =
-            fs.readFileSync(propertiesFilePathWin32).toString();
         const rootPathPattern = /{ROOTPATH}/g;
         const versionPattern = /{VERSION}/g;
         const homeDir = os.homedir();
         const localAppData: string = path.join(homeDir, 'AppData', 'Local');
         const replaceStr =
-            propertiesContentWin32
+            (fileInfo.fileContent as string)
                 .replace(rootPathPattern, localAppData.replace(/\\/g, '\\\\'))
                 .replace(versionPattern, this.version);
         fs.writeFileSync(cppPropertiesFilePath, replaceStr);
@@ -194,7 +189,7 @@ export abstract class ArduinoDeviceBase implements Device {
   }
 
   async generateSketchFile(
-      sketchTemplateFileName: string, board: Board, boardInfo: string,
+      fileInfo: TemplateFileInfo, board: Board, boardInfo: string,
       boardConfig: string): Promise<boolean> {
     // Create arduino.json config file
     const arduinoJSONFilePath =
@@ -229,16 +224,13 @@ export abstract class ArduinoDeviceBase implements Device {
           `Device: create arduino config file failed: ${error.message}`);
     }
 
-    // Create an empty arduino sketch
-    const sketchTemplateFilePath =
-        this.extensionContext.asAbsolutePath(path.join(
-            FileNames.resourcesFolderName, board.id, sketchTemplateFileName));
-    const newSketchFilePath =
-        path.join(this.deviceFolder, constants.defaultSketchFileName);
+    // Create arduino sketch;
+    const newSketchFilePath = path.join(this.deviceFolder, fileInfo.fileName);
 
     try {
-      const content = fs.readFileSync(sketchTemplateFilePath).toString();
-      fs.writeFileSync(newSketchFilePath, content);
+      if (fileInfo.fileContent) {
+        fs.writeFileSync(newSketchFilePath, fileInfo.fileContent);
+      }
     } catch (error) {
       throw new Error(`Create arduino sketch file failed: ${error.message}`);
     }
