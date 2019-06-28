@@ -221,6 +221,13 @@ export class RaspberryPiDevice implements Device {
           RaspberryPiUploadConfig.user, RaspberryPiUploadConfig.password);
       try {
         await ssh.uploadFile(binFilePath, RaspberryPiUploadConfig.projectPath);
+        const enableExecPriorityCommand =
+            `cd ${RaspberryPiUploadConfig.projectPath} && chmod -R 755 .\/`;
+        const result = await ssh.exec(enableExecPriorityCommand);
+
+        const message = `result: ${result}.`;
+        this.channel.show();
+        this.channel.appendLine(message);
       } catch (error) {
         throw new Error(
             `Deploy binary file to device ${RaspberryPiUploadConfig.user}@${

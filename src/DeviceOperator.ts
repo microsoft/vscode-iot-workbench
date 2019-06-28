@@ -12,49 +12,97 @@ import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 import {FileNames, PlatformType, platformFolderMap} from './constants';
+import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 
 const impor = require('impor')(__dirname);
-const ioTProjectModule = impor('./Models/IoTWorkspaceProject') as
+const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
     typeof import('./Models/IoTWorkspaceProject');
+const ioTContainerizedProjectModule =
+    impor('./Models/IoTContainerizedProject') as
+    typeof import('./Models/IoTContainerizedProject');
 
 export class DeviceOperator {
+  private projectHostType: ProjectHostType;
+  constructor(projectHostType: ProjectHostType) {
+    this.projectHostType = projectHostType;
+  }
+
   async compile(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    const project = new ioTProjectModule.IoTWorkspaceProject(
-        context, channel, telemetryContext);
-    const result = await project.load();
-    if (!result) {
-      await project.handleLoadFailure();
-      return;
+    if (this.projectHostType === ProjectHostType.Container) {
+      const iotContainerProject =
+          new ioTContainerizedProjectModule.IoTContainerizedProject(
+              context, channel, telemetryContext);
+      const result = await iotContainerProject.load();
+      if (!result) {
+        await iotContainerProject.handleLoadFailure();
+        return;
+      }
+      await iotContainerProject.compile();
+    } else if (this.projectHostType === ProjectHostType.Workspace) {
+      const iotWorkspaceProject =
+          new ioTWorkspaceProjectModule.IoTWorkspaceProject(
+              context, channel, telemetryContext);
+      const result = await iotWorkspaceProject.load();
+      if (!result) {
+        await iotWorkspaceProject.handleLoadFailure();
+        return;
+      }
+      await iotWorkspaceProject.compile();
     }
-    await project.compile();
   }
 
   async upload(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    const project = new ioTProjectModule.IoTWorkspaceProject(
-        context, channel, telemetryContext);
-    const result = await project.load();
-    if (!result) {
-      await project.handleLoadFailure();
-      return;
+    if (this.projectHostType === ProjectHostType.Container) {
+      const iotContainerProject =
+          new ioTContainerizedProjectModule.IoTContainerizedProject(
+              context, channel, telemetryContext);
+      const result = await iotContainerProject.load();
+      if (!result) {
+        await iotContainerProject.handleLoadFailure();
+        return;
+      }
+      await iotContainerProject.upload();
+    } else if (this.projectHostType === ProjectHostType.Workspace) {
+      const iotWorkspaceProject =
+          new ioTWorkspaceProjectModule.IoTWorkspaceProject(
+              context, channel, telemetryContext);
+      const result = await iotWorkspaceProject.load();
+      if (!result) {
+        await iotWorkspaceProject.handleLoadFailure();
+        return;
+      }
+      await iotWorkspaceProject.upload();
     }
-    await project.upload();
   }
 
   async configDeviceSettings(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    const project = new ioTProjectModule.IoTWorkspaceProject(
-        context, channel, telemetryContext);
-    const result = await project.load();
-    if (!result) {
-      await project.handleLoadFailure();
-      return;
+    if (this.projectHostType === ProjectHostType.Container) {
+      const iotContainerProject =
+          new ioTContainerizedProjectModule.IoTContainerizedProject(
+              context, channel, telemetryContext);
+      const result = await iotContainerProject.load();
+      if (!result) {
+        await iotContainerProject.handleLoadFailure();
+        return;
+      }
+      await iotContainerProject.configDeviceSettings();
+    } else if (this.projectHostType === ProjectHostType.Workspace) {
+      const iotWorkspaceProject =
+          new ioTWorkspaceProjectModule.IoTWorkspaceProject(
+              context, channel, telemetryContext);
+      const result = await iotWorkspaceProject.load();
+      if (!result) {
+        await iotWorkspaceProject.handleLoadFailure();
+        return;
+      }
+      await iotWorkspaceProject.configDeviceSettings();
     }
-    await project.configDeviceSettings();
   }
 
   async downloadPackage(

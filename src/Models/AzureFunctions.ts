@@ -148,10 +148,11 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
   }
 
   async create(): Promise<boolean> {
+    const scaffoldType = ScaffoldType.Local;
     const azureFunctionsPath = this.azureFunctionsPath;
     console.log(azureFunctionsPath);
 
-    if (!FileUtility.directoryExists(ScaffoldType.Local, azureFunctionsPath)) {
+    if (!await FileUtility.directoryExists(scaffoldType, azureFunctionsPath)) {
       throw new Error(
           'Unable to find the Azure Functions folder inside the project.');
     }
@@ -207,8 +208,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
       }
 
       await this.updateConfigSettings(
-          ScaffoldType.Local,
-          {values: {functionLanguage: this.functionLanguage}});
+          scaffoldType, {values: {functionLanguage: this.functionLanguage}});
       return true;
     } catch (error) {
       throw error;

@@ -84,6 +84,7 @@ export class FileUtility {
     }
   }
 
+  // Make sure filepath's parent directory exists
   static async writeFile(
       type: ScaffoldType, filePath: string,
       data: string|Buffer): Promise<void> {

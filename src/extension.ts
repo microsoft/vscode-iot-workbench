@@ -77,8 +77,8 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   }
 
-  const deviceOperator = new DeviceOperator();
-  const azureOperator = new AzureOperator();
+  const deviceOperator = new DeviceOperator(projectHostType);
+  const azureOperator = new AzureOperator(projectHostType);
 
   const exampleExplorer = new exampleExplorerModule.ExampleExplorer();
   const exampleSelectBoardBinder =
@@ -112,9 +112,10 @@ export async function activate(context: vscode.ExtensionContext) {
       telemetryWorkerInitialized = true;
     }
 
+    const azureProvisionBinder = azureOperator.Provision.bind(azureOperator);
     telemetryModule.callWithTelemetry(
         EventNames.azureProvisionEvent, outputChannel, true, context,
-        azureOperator.Provision);
+        azureProvisionBinder);
   };
 
   const azureDeployProvider = async () => {
@@ -124,9 +125,10 @@ export async function activate(context: vscode.ExtensionContext) {
       telemetryWorkerInitialized = true;
     }
 
+    const azureDeployBinder = azureOperator.Deploy.bind(azureOperator);
     telemetryModule.callWithTelemetry(
         EventNames.azureDeployEvent, outputChannel, true, context,
-        azureOperator.Deploy);
+        azureDeployBinder);
   };
 
   const deviceCompileProvider = async () => {
@@ -136,9 +138,10 @@ export async function activate(context: vscode.ExtensionContext) {
       telemetryWorkerInitialized = true;
     }
 
+    const deviceCompileBinder = deviceOperator.compile.bind(deviceOperator);
     telemetryModule.callWithTelemetry(
         EventNames.deviceCompileEvent, outputChannel, true, context,
-        deviceOperator.compile);
+        deviceCompileBinder);
   };
 
   const deviceUploadProvider = async () => {
@@ -148,9 +151,10 @@ export async function activate(context: vscode.ExtensionContext) {
       telemetryWorkerInitialized = true;
     }
 
+    const deviceUploadBinder = deviceOperator.upload.bind(deviceOperator);
     telemetryModule.callWithTelemetry(
         EventNames.deviceUploadEvent, outputChannel, true, context,
-        deviceOperator.upload);
+        deviceUploadBinder);
   };
 
   const devicePackageManager = async () => {
@@ -160,9 +164,11 @@ export async function activate(context: vscode.ExtensionContext) {
       telemetryWorkerInitialized = true;
     }
 
+    const deviceDownloadPackageBinder =
+        deviceOperator.downloadPackage.bind(deviceOperator);
     telemetryModule.callWithTelemetry(
         EventNames.devicePackageEvent, outputChannel, true, context,
-        deviceOperator.downloadPackage);
+        deviceDownloadPackageBinder);
   };
 
   const deviceSettingsConfigProvider = async () => {
@@ -172,9 +178,11 @@ export async function activate(context: vscode.ExtensionContext) {
       telemetryWorkerInitialized = true;
     }
 
+    const deviceConfigBinder =
+        deviceOperator.configDeviceSettings.bind(deviceOperator);
     telemetryModule.callWithTelemetry(
         EventNames.configDeviceSettingsEvent, outputChannel, true, context,
-        deviceOperator.configDeviceSettings);
+        deviceConfigBinder);
   };
 
   const examplesProvider = async () => {
