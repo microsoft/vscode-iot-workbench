@@ -223,12 +223,13 @@ export class RaspberryPiDevice implements Device {
         await ssh.uploadFile(binFilePath, RaspberryPiUploadConfig.projectPath);
         const binFileName = path.basename(binFilePath);
         const enableExecPriorityCommand = `cd ${
-            RaspberryPiUploadConfig.projectPath} && chmod -R 755 .\/ && .\/${
+            RaspberryPiUploadConfig
+                .projectPath} && chmod -R 755 .\/ && killall -9 azure_exe 2>\/dev\/null || .\/${
             binFileName}`;
         this.channel.show();
         const command = ssh.spawn(enableExecPriorityCommand);
         command.on('data', async (data) => {
-          this.channel.appendLine(data);
+          this.channel.append(data);
         });
         command.on('close', async () => {
           this.channel.appendLine('DONE');
