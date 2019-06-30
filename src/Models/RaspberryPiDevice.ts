@@ -229,7 +229,7 @@ export class RaspberryPiDevice implements Device {
           this.channel.appendLine('DONE');
           await ssh.close();
         });
-		    command.on('error', this.channel.appendLine);
+        command.on('error', this.channel.appendLine);
       } catch (error) {
         throw new Error(
             `Deploy binary file to device ${RaspberryPiUploadConfig.user}@${

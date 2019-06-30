@@ -16,6 +16,7 @@ import {ConfigHandler} from './configHandler';
 import {ConfigKey, EventNames, PlatformType, FileNames, platformFolderMap} from './constants';
 import {TelemetryContext, TelemetryProperties} from './telemetry';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
+import {RemoteExtension} from './Models/RemoteExtension';
 
 const impor = require('impor')(__dirname);
 const exampleExplorerModule =
@@ -29,8 +30,6 @@ const ioTContainerizedProjectModule =
     typeof import('./Models/IoTContainerizedProject');
 const telemetryModule = impor('./telemetry') as typeof import('./telemetry');
 const request = impor('request-promise') as typeof import('request-promise');
-// const usbDetectorModule =
-//     impor('./usbDetector') as typeof import('./usbDetector');
 
 let telemetryWorkerInitialized = false;
 // this method is called when your extension is activated
@@ -365,12 +364,18 @@ export async function activate(context: vscode.ExtensionContext) {
         ConfigKey.shownHelpPage, true, vscode.ConfigurationTarget.Global);
   }
 
-  // setTimeout(() => {
-  //   // delay to detect usb
-  //   const usbDetector =
-  //       new usbDetectorModule.UsbDetector(context, outputChannel);
-  //   usbDetector.startListening();
-  // }, 200);
+  setTimeout(() => {
+    if (RemoteExtension.isRemote(context)) {
+      return;
+    }
+    // delay to detect usb
+    const usbDetectorModule =
+        impor('./usbDetector') as typeof import('./usbDetector');
+
+    const usbDetector =
+        new usbDetectorModule.UsbDetector(context, outputChannel);
+    usbDetector.startListening();
+  }, 200);
 }
 
 // this method is called when your extension is deactivated
