@@ -5,6 +5,6 @@
   "extensions": [
     "ms-vscode.cpptools",
     "twxs.cmake",
-    "dilin.iot-cargo-vessel2"
+    "vsciot-vscode.vscode-iot-workbench"
   ]
 }
