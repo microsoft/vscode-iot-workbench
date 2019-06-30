@@ -71,7 +71,7 @@ export abstract class IoTWorkbenchProjectBase {
     this.telemetryContext = telemetryContext;
   }
 
-  abstract async load(initLoad: boolean): Promise<boolean>;
+  abstract async load(initLoad?: boolean): Promise<boolean>;
 
   async compile(): Promise<boolean> {
     for (const item of this.componentList) {

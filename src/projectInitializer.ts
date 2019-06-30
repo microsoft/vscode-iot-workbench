@@ -124,22 +124,20 @@ export class ProjectInitializer {
                   ScaffoldType.Local, projectPath);
             }
 
+            let project;
             if (template.platform === PlatformType.EMBEDDEDLINUX) {
-              const project =
+              project =
                   new ioTContainerizedProjectModule.IoTContainerizedProject(
                       context, channel, telemetryContext);
-              return await project.create(
-                  projectPath, templateFilesInfo, projectTemplateType,
-                  template.boardId, openInNewWindow);
             } else if (template.platform === PlatformType.ARDUINO) {
-              const project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
+              project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
                   context, channel, telemetryContext);
-              return await project.create(
-                  projectPath, templateFilesInfo, projectTemplateType,
-                  template.boardId, openInNewWindow);
             } else {
               throw new Error('unsupported platform');
             }
+            return await project.create(
+                projectPath, templateFilesInfo, projectTemplateType,
+                template.boardId, openInNewWindow);
           } catch (error) {
             throw error;
           }

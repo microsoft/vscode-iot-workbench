@@ -62,16 +62,16 @@ export async function activate(context: vscode.ExtensionContext) {
           vscode.workspace.workspaceFolders[0].uri.fsPath;
       projectHostType =
           IoTWorkbenchProjectBase.GetProjectType(projectFileRootPath);
+      let iotProject;
       if (projectHostType === ProjectHostType.Container) {
-        const iotContainerProject =
-            new ioTContainerizedProjectModule.IoTContainerizedProject(
-                context, outputChannel, telemetryContext);
-        await iotContainerProject.load(true);
+        iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
+            context, outputChannel, telemetryContext);
       } else if (projectHostType === ProjectHostType.Workspace) {
-        const iotWorkspaceProject =
-            new ioTWorkspaceProjectModule.IoTWorkspaceProject(
-                context, outputChannel, telemetryContext);
-        await iotWorkspaceProject.load(true);
+        iotProject = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
+            context, outputChannel, telemetryContext);
+      }
+      if (iotProject !== undefined) {
+        await iotProject.load(true);
       }
     } catch (error) {
       // do nothing as we are not sure whether the project is initialized.

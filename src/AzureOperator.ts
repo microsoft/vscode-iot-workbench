@@ -26,28 +26,24 @@ export class AzureOperator {
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     let status = false;
+    let iotProject;
     if (this.projectHostType === ProjectHostType.Container) {
-      const iotContainerProject =
-          new ioTContainerizedProjectModule.IoTContainerizedProject(
-              context, channel, telemetryContext);
-      const result = await iotContainerProject.load();
-      if (!result) {
-        await iotContainerProject.handleLoadFailure();
-        return;
-      }
-      status = await iotContainerProject.provision();
+      iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
+          context, channel, telemetryContext);
     } else if (this.projectHostType === ProjectHostType.Workspace) {
-      const iotWorkspaceProject =
-          new ioTWorkspaceProjectModule.IoTWorkspaceProject(
-              context, channel, telemetryContext);
-      const result = await iotWorkspaceProject.load();
-      if (!result) {
-        await iotWorkspaceProject.handleLoadFailure();
-        return;
-      }
-      status = await iotWorkspaceProject.provision();
+      iotProject = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
+          context, channel, telemetryContext);
+    }
+    if (iotProject === undefined) {
+      return;
     }
 
+    const result = await iotProject.load();
+    if (!result) {
+      await iotProject.handleLoadFailure();
+      return;
+    }
+    status = await iotProject.provision();
     if (status) {
       vscode.window.showInformationMessage('Azure provision succeeded.');
     }
@@ -58,26 +54,23 @@ export class AzureOperator {
   async Deploy(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
+    let iotProject;
     if (this.projectHostType === ProjectHostType.Container) {
-      const iotContainerProject =
-          new ioTContainerizedProjectModule.IoTContainerizedProject(
-              context, channel, telemetryContext);
-      const result = await iotContainerProject.load();
-      if (!result) {
-        await iotContainerProject.handleLoadFailure();
-        return;
-      }
-      await iotContainerProject.deploy();
+      iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
+          context, channel, telemetryContext);
     } else if (this.projectHostType === ProjectHostType.Workspace) {
-      const iotWorkspaceProject =
-          new ioTWorkspaceProjectModule.IoTWorkspaceProject(
-              context, channel, telemetryContext);
-      const result = await iotWorkspaceProject.load();
-      if (!result) {
-        await iotWorkspaceProject.handleLoadFailure();
-        return;
-      }
-      await iotWorkspaceProject.deploy();
+      iotProject = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
+          context, channel, telemetryContext);
     }
+    if (iotProject === undefined) {
+      return;
+    }
+
+    const result = await iotProject.load();
+    if (!result) {
+      await iotProject.handleLoadFailure();
+      return;
+    }
+    await iotProject.deploy();
   }
 }
