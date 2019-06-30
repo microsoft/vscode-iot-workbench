@@ -10,7 +10,7 @@ import * as vscode from 'vscode';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, ScaffoldType} from '../constants';
+import {ConfigKey, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {IoTWorkbenchSettings} from '../IoTSettings';
 
@@ -89,7 +89,8 @@ export class Esp32Device extends ArduinoDeviceBase {
   async load(): Promise<boolean> {
     const deviceFolderPath = this.deviceFolder;
 
-    if (!fs.existsSync(deviceFolderPath)) {
+    if (!await FileUtility.directoryExists(
+            ScaffoldType.Workspace, deviceFolderPath)) {
       throw new Error('Unable to find the device folder inside the project.');
     }
 
@@ -117,21 +118,32 @@ export class Esp32Device extends ArduinoDeviceBase {
         scaffoldType, this.deviceFolder);
 
     for (const fileInfo of this.templateFiles) {
-      if (fileInfo.fileName.endsWith('.ino')) {
-        await this.generateSketchFile(
-            scaffoldType, fileInfo, this.board, constants.defaultBoardInfo,
-            constants.defaultBoardConfig);
-      } else if (
-          fileInfo.fileName.endsWith('macos.json') && (plat === 'darwin')) {
-        await this.generateCppPropertiesFile(
-            scaffoldType, this.board, fileInfo);
-      } else if (
-          fileInfo.fileName.endsWith('win32.json') && (plat === 'win32')) {
-        await this.generateCppPropertiesFile(
-            scaffoldType, this.board, fileInfo);
+      if ((fileInfo.fileName.endsWith('macos.json') ||
+           fileInfo.fileName.endsWith('win32.json'))) {
+        if (fileInfo.fileName.endsWith('macos.json') && (plat === 'darwin')) {
+          await this.generateCppPropertiesFile(
+              scaffoldType, this.board, fileInfo);
+        } else if (
+            fileInfo.fileName.endsWith('win32.json') && (plat === 'win32')) {
+          await this.generateCppPropertiesFile(
+              scaffoldType, this.board, fileInfo);
+        }
+      } else {
+        // Copy file directly
+        const targetFolder = path.join(this.deviceFolder, fileInfo.targetPath);
+        if (!await FileUtility.directoryExists(scaffoldType, targetFolder)) {
+          await FileUtility.mkdirRecursively(scaffoldType, targetFolder);
+        }
+        try {
+          await FileUtility.writeFile(
+              scaffoldType, path.join(targetFolder, fileInfo.fileName),
+              fileInfo.fileContent as string);
+        } catch (error) {
+          throw new Error(
+              `Device: create ${fileInfo.fileName} failed: ${error.message}`);
+        }
       }
     }
-
     return true;
   }
 
