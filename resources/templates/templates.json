@@ -82,7 +82,7 @@
         },
         {
             "platform": "Arduino",
-            "name": "IoT button With Azure IoT Hub",
+            "name": "IoT Button With Azure IoT Hub",
             "description": "",
             "detail": "Create project that connects to Azure IoT Hub, such as sending sensor data to cloud.",
             "path": "iotbutton_iothub",
@@ -92,7 +92,7 @@
         },
         {
             "platform": "Arduino",
-            "name": "IoT button With Azure Functions",
+            "name": "IoT Button With Azure Functions",
             "description": "",
             "detail": "Create project that connects to Azure IoT Hub and processes device data further in Azure Functions.",
             "path": "iotbutton_azurefunctions",
@@ -102,7 +102,7 @@
         },
         {
             "platform": "Arduino",
-            "name": "IoT button With Azure IoT Hub",
+            "name": "IoT Button With Azure IoT Hub",
             "description": "",
             "detail": "Create project that processes device data from IoT Hub in Stream Analytics and store the result in Cosmos DB.",
             "path": "iotbutton_streamanalytics",

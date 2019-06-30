@@ -1,10 +1,10 @@
 {
-  "image": "rpi_app",
-  "name": "rpi_app_container",
+  "image": "rpi64_iothub",
+  "name": "rpi64_iothub_container",
   "dockerFile": "Dockerfile",
   "extensions": [
     "ms-vscode.cpptools",
     "twxs.cmake",
-    "dilin.iot-cargo-vessel2"
+    "vsciot-vscode.vscode-iot-workbench"
   ]
 }
