@@ -199,7 +199,7 @@ export class RaspberryPiDevice implements Device {
 
     try {
       const binFilePath =
-          path.join(this.outputPath, 'iot_application/azure_exe');
+          path.join(this.outputPath, 'iot_application/azure_iot_app');
       if (!fs.existsSync(binFilePath)) {
         const message =
             `Binary file does not exist. Please compile device code first.`;

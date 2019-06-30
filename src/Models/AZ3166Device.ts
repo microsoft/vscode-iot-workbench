@@ -15,22 +15,19 @@ import * as WinReg from 'winreg';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, ScaffoldType} from '../constants';
+import {ConfigKey} from '../constants';
 import {DialogResponses} from '../DialogResponses';
-import {FileUtility} from '../FileUtility';
-import {IoTWorkbenchSettings} from '../IoTSettings';
 import {delay, getRegistryValues} from '../utils';
 
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 import {DeviceType} from './Interfaces/Device';
 import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
-import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
 
 const impor = require('impor')(__dirname);
 const forEach = impor('lodash.foreach') as typeof import('lodash.foreach');
 const trimStart =
     impor('lodash.trimstart') as typeof import('lodash.trimstart');
-const filter = impor('lodash.filter') as typeof import('lodash.filter');
+// const filter = impor('lodash.filter') as typeof import('lodash.filter');
 
 interface SerialPortInfo {
   comName: string;
@@ -40,8 +37,6 @@ interface SerialPortInfo {
 }
 
 const constants = {
-  boardInfo: 'AZ3166:stm32f4:MXCHIP_AZ3166',
-  uploadMethod: 'upload_method=OpenOCDMethod',
   outputPath: './.build',
   platformLocalFileName: 'platform.local.txt',
   cExtraFlag: 'compiler.c.extra_flags=-DCORRELATIONID="',
@@ -53,10 +48,6 @@ const constants = {
 enum configDeviceOptions {
   ConnectionString,
   UDS
-}
-
-async function cmd(command: string) {
-  exec(command, Promise.resolve);
 }
 
 export class AZ3166Device extends ArduinoDeviceBase {
@@ -137,37 +128,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
   }
 
   async create(): Promise<boolean> {
-    const deviceFolderPath = this.deviceFolder;
-
-    const scaffoldType = ScaffoldType.Local;
-    if (!await FileUtility.directoryExists(scaffoldType, deviceFolderPath)) {
-      throw new Error('Unable to find the device folder inside the project.');
-    }
-    if (!this.board) {
-      throw new Error('Unable to find the board in the config file.');
-    }
-
-    const plat = await IoTWorkbenchSettings.getPlatform();
-
-    await IoTWorkbenchProjectBase.generateIotWorkbenchProjectFile(
-        scaffoldType, this.deviceFolder);
-
-    for (const fileInfo of this.templateFiles) {
-      if (fileInfo.fileName.endsWith('.ino')) {
-        await this.generateSketchFile(
-            scaffoldType, fileInfo, this.board, constants.boardInfo,
-            constants.uploadMethod);
-      } else if (
-          fileInfo.fileName.endsWith('macos.json') && (plat === 'darwin')) {
-        await this.generateCppPropertiesFile(
-            scaffoldType, this.board, fileInfo);
-      } else if (
-          fileInfo.fileName.endsWith('win32.json') && (plat === 'win32')) {
-        await this.generateCppPropertiesFile(
-            scaffoldType, this.board, fileInfo);
-      }
-    }
-    return true;
+    return this.createCore(this.board, this.templateFiles);
   }
 
   async preCompileAction(): Promise<boolean> {

@@ -2,8 +2,18 @@
     "templates": [
         {
             "platform": "Embedded Linux",
-            "name": "Raspberry Pi with iothub",
-            "description": "",
+            "name": "Linaro cross-toolchain for 64-bit Armv8 Cortex-A GCC 7.4.1",
+            "description": "Dev container for Raspberry Pi 3 / 4 board with Yocto 64-bit, CMake and Azure IoT Device C SDK.",
+            "detail": "Create project that connects to Azure IoT Hub, such as sending sensor data to cloud.",
+            "path": "rpi_iothub",
+            "projectHostType": "container",
+            "boardId": "raspberrypi",
+            "type": "IotHub"
+        },
+        {
+            "platform": "Embedded Linux",
+            "name": "Linaro cross-toolchain for 32-bit Armv7 Cortex-A GCC 7.4.1",
+            "description": "Dev container for Raspberry Pi series board with Raspbian, CMake and Azure IoT Device C SDK.",
             "detail": "Create project that connects to Azure IoT Hub, such as sending sensor data to cloud.",
             "path": "rpi_iothub",
             "projectHostType": "container",
@@ -12,9 +22,9 @@
         },
         {
             "platform": "Arduino",
-            "name": "Esp32 with device only code",
+            "name": "Esp32",
             "description": "",
-            "detail": "Create project with device only code.",
+            "detail": "Create project with only device code.",
             "path": "esp32_device",
             "projectHostType": "workspace",
             "boardId": "esp32",
@@ -22,13 +32,53 @@
         },
         {
             "platform": "Arduino",
-            "name": "Esp32 with with Azure IoT Hub",
+            "name": "Esp32 with Azure IoT Hub",
             "description": "",
             "detail": "Create project that connects to Azure IoT Hub, such as sending sensor data to cloud.",
             "path": "esp32_iothub",
             "projectHostType": "workspace",
             "boardId": "esp32",
             "type": "IotHub"
+        },
+        {
+            "platform": "Arduino",
+            "name": "IoT DevKit",
+            "description": "",
+            "detail": "Create project with only device code.",
+            "path": "devkit_device",
+            "projectHostType": "workspace",
+            "boardId": "devkit",
+            "type": "Basic"
+        },
+        {
+            "platform": "Arduino",
+            "name": "IoT DevKit with Azure IoT Hub",
+            "description": "",
+            "detail": "Create project that connects to Azure IoT Hub, such as sending sensor data to cloud.",
+            "path": "devkit_iothub",
+            "projectHostType": "workspace",
+            "boardId": "devkit",
+            "type": "IotHub"
+        },
+        {
+            "platform": "Arduino",
+            "name": "IoT DevKit With Azure Functions",
+            "description": "",
+            "detail": "Create project that connects to Azure IoT Hub and processes device data further in Azure Functions.",
+            "path": "devkit_azurefunctions",
+            "projectHostType": "workspace",
+            "boardId": "devkit",
+            "type": "AzureFunctions"
+        },
+        {
+            "platform": "Arduino",
+            "name": "IoT DevKit With Stream Analytics and Cosmos DB",
+            "description": "",
+            "detail": "Create project that processes device data from IoT Hub in Stream Analytics and store the result in Cosmos DB.",
+            "path": "devkit_streamanalytics",
+            "projectHostType": "workspace",
+            "boardId": "devkit",
+            "type": "StreamAnalytics"
         }
     ]
   }
