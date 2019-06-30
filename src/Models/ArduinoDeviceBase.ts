@@ -132,9 +132,14 @@ export abstract class ArduinoDeviceBase implements Device {
   async generateCppPropertiesFile(
       type: ScaffoldType, board: Board,
       fileInfo: TemplateFileInfo): Promise<void> {
+    const targetFolder = path.join(this.deviceFolder, fileInfo.targetPath);
+    if (!await FileUtility.directoryExists(type, targetFolder)) {
+      await FileUtility.mkdirRecursively(type, targetFolder);
+    }
+
     // Create c_cpp_properties.json file
     const cppPropertiesFilePath =
-        path.join(this.vscodeFolderPath, constants.cppPropertiesFileName);
+        path.join(targetFolder, constants.cppPropertiesFileName);
 
     if (await FileUtility.directoryExists(type, cppPropertiesFilePath)) {
       return;
@@ -174,42 +179,6 @@ export abstract class ArduinoDeviceBase implements Device {
   async generateSketchFile(
       type: ScaffoldType, fileInfo: TemplateFileInfo, board: Board,
       boardInfo: string, boardConfig: string): Promise<boolean> {
-    // Create arduino.json config file
-    if (!await FileUtility.directoryExists(type, this.vscodeFolderPath)) {
-      await FileUtility.mkdirRecursively(type, this.vscodeFolderPath);
-    }
-    const arduinoJSONFilePath =
-        path.join(this.vscodeFolderPath, constants.arduinoJsonFileName);
-    const arduinoJSONObj = {
-      'board': boardInfo,
-      'sketch': constants.defaultSketchFileName,
-      'configuration': boardConfig,
-      'output': constants.outputPath
-    };
-
-    try {
-      await FileUtility.writeFile(
-          type, arduinoJSONFilePath, JSON.stringify(arduinoJSONObj, null, 4));
-    } catch (error) {
-      throw new Error(
-          `Device: create arduino config file failed: ${error.message}`);
-    }
-
-    // Create settings.json config file
-    const settingsJSONFilePath =
-        path.join(this.vscodeFolderPath, FileNames.settingsJsonFileName);
-    const settingsJSONObj = {
-      'files.exclude': {'.build': true, '.iotworkbenchproject': true}
-    };
-
-    try {
-      await FileUtility.writeFile(
-          type, settingsJSONFilePath, JSON.stringify(settingsJSONObj, null, 4));
-    } catch (error) {
-      throw new Error(
-          `Device: create arduino config file failed: ${error.message}`);
-    }
-
     // Create arduino sketch;
     const newSketchFilePath = path.join(this.deviceFolder, fileInfo.fileName);
 
