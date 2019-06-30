@@ -224,8 +224,8 @@ export class RaspberryPiDevice implements Device {
         const binFileName = path.basename(binFilePath);
         const enableExecPriorityCommand = `cd ${
             RaspberryPiUploadConfig
-                .projectPath} && chmod -R 755 .\/ && killall -9 azure_exe 2>\/dev\/null || .\/${
-            binFileName}`;
+                .projectPath} && chmod -R 755 .\/ && killall -9 ${
+            binFileName} 2>\/dev\/null || .\/${binFileName}`;
         this.channel.show();
         const command = ssh.spawn(enableExecPriorityCommand);
         command.on('data', async (data) => {
