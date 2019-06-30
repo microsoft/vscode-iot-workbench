@@ -476,6 +476,8 @@ export class RaspberryPiDevice implements Device {
             'Unable to get the device connection string, please invoke the command of Azure Provision first.');
       }
       await sdk.Clipboard.copy(deviceConnectionString);
+      vscode.window.showInformationMessage(
+          'Device connection string has been copied.');
       return true;
     } catch (error) {
       throw error;
