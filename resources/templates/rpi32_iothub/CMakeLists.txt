@@ -14,7 +14,7 @@ include_directories(../deps/parson)
 include_directories(${SHARED_UTIL_INC_FOLDER})
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 
-add_executable(azure_exe ${iothub_c_files})
+add_executable(azure_iot_app ${iothub_c_files})
 
 # List the libraries required by the link step
-target_link_libraries(azure_exe iothub_client)
+target_link_libraries(azure_iot_app iothub_client)

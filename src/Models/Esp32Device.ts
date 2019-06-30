@@ -19,12 +19,6 @@ import {DeviceType} from './Interfaces/Device';
 import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
 
-const constants = {
-  defaultBoardInfo: 'esp32:esp32:m5stack-core-esp32',
-  defaultBoardConfig:
-      'FlashMode=qio,FlashFreq=80,UploadSpeed=921600,DebugLevel=none'
-};
-
 export class Esp32Device extends ArduinoDeviceBase {
   private templateFiles: TemplateFileInfo[] = [];
   private static _boardId = 'esp32';
@@ -102,51 +96,8 @@ export class Esp32Device extends ArduinoDeviceBase {
   }
 
   async create(): Promise<boolean> {
-    const deviceFolderPath = this.deviceFolder;
-
-    const scaffoldType = ScaffoldType.Local;
-    if (!await FileUtility.directoryExists(scaffoldType, deviceFolderPath)) {
-      throw new Error('Unable to find the device folder inside the project.');
-    }
-    if (!this.board) {
-      throw new Error('Unable to find the board in the config file.');
-    }
-
-    const plat = await IoTWorkbenchSettings.getPlatform();
-
-    await IoTWorkbenchProjectBase.generateIotWorkbenchProjectFile(
-        scaffoldType, this.deviceFolder);
-
-    for (const fileInfo of this.templateFiles) {
-      if ((fileInfo.fileName.endsWith('macos.json') ||
-           fileInfo.fileName.endsWith('win32.json'))) {
-        if (fileInfo.fileName.endsWith('macos.json') && (plat === 'darwin')) {
-          await this.generateCppPropertiesFile(
-              scaffoldType, this.board, fileInfo);
-        } else if (
-            fileInfo.fileName.endsWith('win32.json') && (plat === 'win32')) {
-          await this.generateCppPropertiesFile(
-              scaffoldType, this.board, fileInfo);
-        }
-      } else {
-        // Copy file directly
-        const targetFolder = path.join(this.deviceFolder, fileInfo.targetPath);
-        if (!await FileUtility.directoryExists(scaffoldType, targetFolder)) {
-          await FileUtility.mkdirRecursively(scaffoldType, targetFolder);
-        }
-        try {
-          await FileUtility.writeFile(
-              scaffoldType, path.join(targetFolder, fileInfo.fileName),
-              fileInfo.fileContent as string);
-        } catch (error) {
-          throw new Error(
-              `Device: create ${fileInfo.fileName} failed: ${error.message}`);
-        }
-      }
-    }
-    return true;
+    return this.createCore(this.board, this.templateFiles);
   }
-
 
   async configDeviceSettings(): Promise<boolean> {
     const configSelectionItems: vscode.QuickPickItem[] = [

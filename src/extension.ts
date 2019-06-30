@@ -13,7 +13,7 @@ import {DeviceOperator} from './DeviceOperator';
 import {AzureOperator} from './AzureOperator';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import {ConfigHandler} from './configHandler';
-import {ConfigKey, EventNames, PlatformType, FileNames, platformFolderMap} from './constants';
+import {ConfigKey, EventNames, FileNames} from './constants';
 import {TelemetryContext, TelemetryProperties} from './telemetry';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 import {RemoteExtension} from './Models/RemoteExtension';
@@ -282,14 +282,9 @@ export async function activate(context: vscode.ExtensionContext) {
         const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
 
         if (boardId) {
-          const platformFolder = platformFolderMap.get(PlatformType.ARDUINO);
-          if (platformFolder === undefined) {
-            throw new Error(`Platform ${
-                PlatformType.ARDUINO}'s  resource folder does not exist.`);
-          }
-          const boardFolderPath = context.asAbsolutePath(
-              path.join(FileNames.resourcesFolderName, platformFolder));
-          const boardProvider = new BoardProvider(boardFolderPath);
+          const boardListFolderPath = context.asAbsolutePath(path.join(
+              FileNames.resourcesFolderName, FileNames.templatesFolderName));
+          const boardProvider = new BoardProvider(boardListFolderPath);
           const board = boardProvider.find({id: boardId});
 
           if (board && board.helpUrl) {

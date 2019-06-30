@@ -9,7 +9,7 @@ import {VSCExpress} from 'vscode-express';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 import {ConfigHandler} from './configHandler';
-import {EventNames, FileNames, platformFolderMap, PlatformType} from './constants';
+import {EventNames, FileNames} from './constants';
 import {callWithTelemetry} from './telemetry';
 
 export interface DeviceInfo {
@@ -29,13 +29,8 @@ export class UsbDetector {
 
   getBoardFromDeviceInfo(device: DeviceInfo) {
     if (device.vendorId && device.productId) {
-      const platformFolder = platformFolderMap.get(PlatformType.ARDUINO);
-      if (platformFolder === undefined) {
-        throw new Error(`Platform ${
-            PlatformType.ARDUINO}'s  resource folder does not exist.`);
-      }
-      const boardFolderPath = this.context.asAbsolutePath(
-          path.join(FileNames.resourcesFolderName, platformFolder));
+      const boardFolderPath = this.context.asAbsolutePath(path.join(
+          FileNames.resourcesFolderName, FileNames.templatesFolderName));
       const boardProvider = new BoardProvider(boardFolderPath);
       const board = boardProvider.find(
           {vendorId: device.vendorId, productId: device.productId});

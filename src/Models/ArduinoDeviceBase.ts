@@ -7,7 +7,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, DependentExtensions, FileNames, platformFolderMap, PlatformType, ScaffoldType} from '../constants';
+import {ConfigKey, DependentExtensions, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {IoTWorkbenchSettings} from '../IoTSettings';
 
@@ -15,6 +15,7 @@ import {Board} from './Interfaces/Board';
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
 import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
+import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
 import {OTA} from './OTA';
 
 const constants = {
@@ -47,14 +48,8 @@ export abstract class ArduinoDeviceBase implements Device {
     this.extensionContext = context;
     this.vscodeFolderPath =
         path.join(this.deviceFolder, FileNames.vscodeSettingsFolderName);
-
-    const platformFolder = platformFolderMap.get(PlatformType.ARDUINO);
-    if (platformFolder === undefined) {
-      throw new Error(`Platform ${
-          PlatformType.ARDUINO}'s  resource folder does not exist.`);
-    }
-    this.boardFolderPath = context.asAbsolutePath(
-        path.join(FileNames.resourcesFolderName, platformFolder));
+    this.boardFolderPath = context.asAbsolutePath(path.join(
+        FileNames.resourcesFolderName, FileNames.templatesFolderName));
   }
 
   getDeviceType(): DeviceType {
@@ -121,8 +116,49 @@ export abstract class ArduinoDeviceBase implements Device {
   abstract async configDeviceSettings(): Promise<boolean>;
 
   abstract async load(): Promise<boolean>;
+
+
   abstract async create(): Promise<boolean>;
 
+  async createCore(board: Board|undefined, templateFiles: TemplateFileInfo[]):
+      Promise<boolean> {
+    const deviceFolderPath = this.deviceFolder;
+
+    const scaffoldType = ScaffoldType.Local;
+    if (!await FileUtility.directoryExists(scaffoldType, deviceFolderPath)) {
+      throw new Error(`Internal error: Couldn't find the template folder.`);
+    }
+    if (!board) {
+      throw new Error(`Invalid / unsupported target platform`);
+    }
+
+    const plat = await IoTWorkbenchSettings.getPlatform();
+
+    await IoTWorkbenchProjectBase.generateIotWorkbenchProjectFile(
+        scaffoldType, this.deviceFolder);
+
+    for (const fileInfo of templateFiles) {
+      if (fileInfo.fileName.endsWith('macos.json') && (plat === 'darwin') ||
+          (fileInfo.fileName.endsWith('win32.json') && (plat === 'darwin'))) {
+        await this.generateCppPropertiesFile(scaffoldType, board, fileInfo);
+      } else {
+        // Copy file directly
+        const targetFolder = path.join(this.deviceFolder, fileInfo.targetPath);
+        if (!await FileUtility.directoryExists(scaffoldType, targetFolder)) {
+          await FileUtility.mkdirRecursively(scaffoldType, targetFolder);
+        }
+        try {
+          await FileUtility.writeFile(
+              scaffoldType, path.join(targetFolder, fileInfo.fileName),
+              fileInfo.fileContent as string);
+        } catch (error) {
+          throw new Error(
+              `Device: create ${fileInfo.fileName} failed: ${error.message}`);
+        }
+      }
+    }
+    return true;
+  }
   abstract async preCompileAction(): Promise<boolean>;
 
   abstract async preUploadAction(): Promise<boolean>;
@@ -174,23 +210,6 @@ export abstract class ArduinoDeviceBase implements Device {
     } catch (error) {
       throw new Error(`Create cpp properties file failed: ${error.message}`);
     }
-  }
-
-  async generateSketchFile(
-      type: ScaffoldType, fileInfo: TemplateFileInfo, board: Board,
-      boardInfo: string, boardConfig: string): Promise<boolean> {
-    // Create arduino sketch;
-    const newSketchFilePath = path.join(this.deviceFolder, fileInfo.fileName);
-
-    try {
-      if (fileInfo.fileContent) {
-        await FileUtility.writeFile(
-            type, newSketchFilePath, fileInfo.fileContent);
-      }
-    } catch (error) {
-      throw new Error(`Create arduino sketch file failed: ${error.message}`);
-    }
-    return true;
   }
 
   async generateCrc(
