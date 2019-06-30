@@ -10,12 +10,14 @@ import * as vscode from 'vscode';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey} from '../constants';
-
+import {ConfigKey, ScaffoldType} from '../constants';
+import {FileUtility} from '../FileUtility';
+import {IoTWorkbenchSettings} from '../IoTSettings';
 
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 import {DeviceType} from './Interfaces/Device';
 import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
+import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
 
 const constants = {
   defaultBoardInfo: 'esp32:esp32:m5stack-core-esp32',
@@ -101,27 +103,32 @@ export class Esp32Device extends ArduinoDeviceBase {
   async create(): Promise<boolean> {
     const deviceFolderPath = this.deviceFolder;
 
-    if (!fs.existsSync(deviceFolderPath)) {
+    const scaffoldType = ScaffoldType.Local;
+    if (!await FileUtility.directoryExists(scaffoldType, deviceFolderPath)) {
       throw new Error('Unable to find the device folder inside the project.');
     }
     if (!this.board) {
       throw new Error('Unable to find the board in the config file.');
     }
 
-    const plat = os.platform();
-    this.generateCommonFiles();
+    const plat = await IoTWorkbenchSettings.getPlatform();
+
+    await IoTWorkbenchProjectBase.generateIotWorkbenchProjectFile(
+        scaffoldType, this.deviceFolder);
 
     for (const fileInfo of this.templateFiles) {
       if (fileInfo.fileName.endsWith('.ino')) {
         await this.generateSketchFile(
-            fileInfo, this.board, constants.defaultBoardInfo,
+            scaffoldType, fileInfo, this.board, constants.defaultBoardInfo,
             constants.defaultBoardConfig);
       } else if (
           fileInfo.fileName.endsWith('macos.json') && (plat === 'darwin')) {
-        this.generateCppPropertiesFile(this.board, fileInfo);
+        await this.generateCppPropertiesFile(
+            scaffoldType, this.board, fileInfo);
       } else if (
           fileInfo.fileName.endsWith('win32.json') && (plat === 'win32')) {
-        this.generateCppPropertiesFile(this.board, fileInfo);
+        await this.generateCppPropertiesFile(
+            scaffoldType, this.board, fileInfo);
       }
     }
 

@@ -15,13 +15,16 @@ import * as WinReg from 'winreg';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey} from '../constants';
+import {ConfigKey, ScaffoldType} from '../constants';
 import {DialogResponses} from '../DialogResponses';
+import {FileUtility} from '../FileUtility';
+import {IoTWorkbenchSettings} from '../IoTSettings';
 import {delay, getRegistryValues} from '../utils';
 
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 import {DeviceType} from './Interfaces/Device';
 import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
+import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
 
 const impor = require('impor')(__dirname);
 const forEach = impor('lodash.foreach') as typeof import('lodash.foreach');
@@ -136,27 +139,32 @@ export class AZ3166Device extends ArduinoDeviceBase {
   async create(): Promise<boolean> {
     const deviceFolderPath = this.deviceFolder;
 
-    if (!fs.existsSync(deviceFolderPath)) {
+    const scaffoldType = ScaffoldType.Local;
+    if (!await FileUtility.directoryExists(scaffoldType, deviceFolderPath)) {
       throw new Error('Unable to find the device folder inside the project.');
     }
     if (!this.board) {
       throw new Error('Unable to find the board in the config file.');
     }
 
-    const plat = os.platform();
+    const plat = await IoTWorkbenchSettings.getPlatform();
 
-    this.generateCommonFiles();
+    await IoTWorkbenchProjectBase.generateIotWorkbenchProjectFile(
+        scaffoldType, this.deviceFolder);
 
     for (const fileInfo of this.templateFiles) {
       if (fileInfo.fileName.endsWith('.ino')) {
         await this.generateSketchFile(
-            fileInfo, this.board, constants.boardInfo, constants.uploadMethod);
+            scaffoldType, fileInfo, this.board, constants.boardInfo,
+            constants.uploadMethod);
       } else if (
           fileInfo.fileName.endsWith('macos.json') && (plat === 'darwin')) {
-        this.generateCppPropertiesFile(this.board, fileInfo);
+        await this.generateCppPropertiesFile(
+            scaffoldType, this.board, fileInfo);
       } else if (
           fileInfo.fileName.endsWith('win32.json') && (plat === 'win32')) {
-        this.generateCppPropertiesFile(this.board, fileInfo);
+        await this.generateCppPropertiesFile(
+            scaffoldType, this.board, fileInfo);
       }
     }
     return true;

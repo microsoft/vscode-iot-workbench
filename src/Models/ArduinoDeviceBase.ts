@@ -7,7 +7,9 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, DependentExtensions, FileNames, platformFolderMap, PlatformType} from '../constants';
+import {ConfigKey, DependentExtensions, FileNames, platformFolderMap, PlatformType, ScaffoldType} from '../constants';
+import {FileUtility} from '../FileUtility';
+import {IoTWorkbenchSettings} from '../IoTSettings';
 
 import {Board} from './Interfaces/Board';
 import {ComponentType} from './Interfaces/Component';
@@ -127,50 +129,30 @@ export abstract class ArduinoDeviceBase implements Device {
 
   abstract get version(): string;
 
-  // Helper functions:
-  generateCommonFiles(): void {
-    const deviceFolderPath = this.deviceFolder;
-
-    if (!fs.existsSync(deviceFolderPath)) {
-      throw new Error('Unable to find the device folder inside the project.');
-    }
-
-    try {
-      const iotworkbenchprojectFilePath =
-          path.join(deviceFolderPath, FileNames.iotworkbenchprojectFileName);
-      fs.writeFileSync(iotworkbenchprojectFilePath, ' ');
-    } catch (error) {
-      throw new Error(
-          `Device: create iotworkbenchproject file failed: ${error.message}`);
-    }
-
-    if (!fs.existsSync(this.vscodeFolderPath)) {
-      fs.mkdirSync(this.vscodeFolderPath);
-    }
-  }
-
-  generateCppPropertiesFile(board: Board, fileInfo: TemplateFileInfo): void {
+  async generateCppPropertiesFile(
+      type: ScaffoldType, board: Board,
+      fileInfo: TemplateFileInfo): Promise<void> {
     // Create c_cpp_properties.json file
     const cppPropertiesFilePath =
         path.join(this.vscodeFolderPath, constants.cppPropertiesFileName);
 
-    if (fs.existsSync(cppPropertiesFilePath)) {
+    if (await FileUtility.directoryExists(type, cppPropertiesFilePath)) {
       return;
     }
 
     try {
-      const plat = os.platform();
+      const plat = await IoTWorkbenchSettings.getPlatform();
 
       if (plat === 'win32') {
         const rootPathPattern = /{ROOTPATH}/g;
         const versionPattern = /{VERSION}/g;
-        const homeDir = os.homedir();
+        const homeDir = await IoTWorkbenchSettings.getOs();
         const localAppData: string = path.join(homeDir, 'AppData', 'Local');
         const replaceStr =
             (fileInfo.fileContent as string)
                 .replace(rootPathPattern, localAppData.replace(/\\/g, '\\\\'))
                 .replace(versionPattern, this.version);
-        fs.writeFileSync(cppPropertiesFilePath, replaceStr);
+        await FileUtility.writeFile(type, cppPropertiesFilePath, replaceStr);
       }
       // TODO: Let's use the same file for Linux and MacOS for now. Need to
       // revisit this part.
@@ -180,8 +162,9 @@ export abstract class ArduinoDeviceBase implements Device {
                 FileNames.resourcesFolderName, board.id,
                 constants.cppPropertiesFileNameMac));
         const propertiesContentMac =
-            fs.readFileSync(propertiesFilePathMac).toString();
-        fs.writeFileSync(cppPropertiesFilePath, propertiesContentMac);
+            await FileUtility.readFile(type, propertiesFilePathMac).toString();
+        await FileUtility.writeFile(
+            type, cppPropertiesFilePath, propertiesContentMac);
       }
     } catch (error) {
       throw new Error(`Create cpp properties file failed: ${error.message}`);
@@ -189,9 +172,12 @@ export abstract class ArduinoDeviceBase implements Device {
   }
 
   async generateSketchFile(
-      fileInfo: TemplateFileInfo, board: Board, boardInfo: string,
-      boardConfig: string): Promise<boolean> {
+      type: ScaffoldType, fileInfo: TemplateFileInfo, board: Board,
+      boardInfo: string, boardConfig: string): Promise<boolean> {
     // Create arduino.json config file
+    if (!await FileUtility.directoryExists(type, this.vscodeFolderPath)) {
+      await FileUtility.mkdirRecursively(type, this.vscodeFolderPath);
+    }
     const arduinoJSONFilePath =
         path.join(this.vscodeFolderPath, constants.arduinoJsonFileName);
     const arduinoJSONObj = {
@@ -202,8 +188,8 @@ export abstract class ArduinoDeviceBase implements Device {
     };
 
     try {
-      fs.writeFileSync(
-          arduinoJSONFilePath, JSON.stringify(arduinoJSONObj, null, 4));
+      await FileUtility.writeFile(
+          type, arduinoJSONFilePath, JSON.stringify(arduinoJSONObj, null, 4));
     } catch (error) {
       throw new Error(
           `Device: create arduino config file failed: ${error.message}`);
@@ -217,8 +203,8 @@ export abstract class ArduinoDeviceBase implements Device {
     };
 
     try {
-      fs.writeFileSync(
-          settingsJSONFilePath, JSON.stringify(settingsJSONObj, null, 4));
+      await FileUtility.writeFile(
+          type, settingsJSONFilePath, JSON.stringify(settingsJSONObj, null, 4));
     } catch (error) {
       throw new Error(
           `Device: create arduino config file failed: ${error.message}`);
@@ -229,7 +215,8 @@ export abstract class ArduinoDeviceBase implements Device {
 
     try {
       if (fileInfo.fileContent) {
-        fs.writeFileSync(newSketchFilePath, fileInfo.fileContent);
+        await FileUtility.writeFile(
+            type, newSketchFilePath, fileInfo.fileContent);
       }
     } catch (error) {
       throw new Error(`Create arduino sketch file failed: ${error.message}`);

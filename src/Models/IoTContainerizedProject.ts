@@ -256,8 +256,9 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
       projectType: ProjectTemplateType, boardId: string,
       openInNewWindow: boolean): Promise<boolean> {
+    const scaffoldType = ScaffoldType.Local;
     const rootFolderPathExists =
-        await FileUtility.directoryExists(ScaffoldType.Local, rootFolderPath);
+        await FileUtility.directoryExists(scaffoldType, rootFolderPath);
     if (!rootFolderPathExists) {
       throw new Error(
           'Unable to find the root path, please open the folder and initialize project again.');
@@ -269,7 +270,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     const azureConfigFileHandler =
         new azureComponentConfigModule.AzureConfigFileHandler(
             this.projectRootPath);
-    azureConfigFileHandler.createIfNotExists(ScaffoldType.Local);
+    azureConfigFileHandler.createIfNotExists(scaffoldType);
 
     const projectConfig: {[key: string]: string} = {};
 
@@ -282,10 +283,10 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       throw new Error('The specified board is not supported.');
     }
 
-    const isPrerequisitesAchieved = await device.checkPrerequisites();
-    if (!isPrerequisitesAchieved) {
-      return false;
-    }
+    // const isPrerequisitesAchieved = await device.checkPrerequisites();
+    // if (!isPrerequisitesAchieved) {
+    //   return false;
+    // }
 
     projectConfig[`${ConfigKey.boardId}`] = boardId;
     this.componentList.push(device);
@@ -298,27 +299,26 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       case ProjectTemplateType.IotHub: {
         const iothub =
             new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
-        const isPrerequisitesAchieved = await iothub.checkPrerequisites();
-        if (!isPrerequisitesAchieved) {
-          return false;
-        }
+        // const isPrerequisitesAchieved = await iothub.checkPrerequisites();
+        // if (!isPrerequisitesAchieved) {
+        //   return false;
+        // }
         this.componentList.push(iothub);
         break;
       }
       case ProjectTemplateType.AzureFunctions: {
         const iothub =
             new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
-        const isIotHubPrerequisitesAchieved = await iothub.checkPrerequisites();
-        if (!isIotHubPrerequisitesAchieved) {
-          return false;
-        }
+        // const isIotHubPrerequisitesAchieved = await
+        // iothub.checkPrerequisites(); if (!isIotHubPrerequisitesAchieved) {
+        //   return false;
+        // }
 
         const functionDir = path.join(
             this.projectRootPath, constants.functionDefaultFolderName);
 
-        if (!await FileUtility.directoryExists(
-                ScaffoldType.Local, functionDir)) {
-          await FileUtility.mkdirRecursively(ScaffoldType.Local, functionDir);
+        if (!await FileUtility.directoryExists(scaffoldType, functionDir)) {
+          await FileUtility.mkdirRecursively(scaffoldType, functionDir);
         }
 
         const azureFunctions = new azureFunctionsModule.AzureFunctions(
@@ -346,23 +346,23 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       case ProjectTemplateType.StreamAnalytics: {
         const iothub =
             new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
-        const isIotHubPrerequisitesAchieved = await iothub.checkPrerequisites();
-        if (!isIotHubPrerequisitesAchieved) {
-          return false;
-        }
+        // const isIotHubPrerequisitesAchieved = await
+        // iothub.checkPrerequisites(); if (!isIotHubPrerequisitesAchieved) {
+        //   return false;
+        // }
 
         const cosmosDB = new cosmosDBModule.CosmosDB(
             this.extensionContext, this.projectRootPath, this.channel);
-        const isCosmosDBPrerequisitesAchieved =
-            await cosmosDB.checkPrerequisites();
-        if (!isCosmosDBPrerequisitesAchieved) {
-          return false;
-        }
+        // const isCosmosDBPrerequisitesAchieved =
+        //     await cosmosDB.checkPrerequisites();
+        // if (!isCosmosDBPrerequisitesAchieved) {
+        //   return false;
+        // }
 
         const asaDir = path.join(this.projectRootPath, constants.asaFolderName);
 
-        if (!await FileUtility.directoryExists(ScaffoldType.Local, asaDir)) {
-          await FileUtility.mkdirRecursively(ScaffoldType.Local, asaDir);
+        if (!await FileUtility.directoryExists(scaffoldType, asaDir)) {
+          await FileUtility.mkdirRecursively(scaffoldType, asaDir);
         }
 
         const asaFilePath = this.extensionContext.asAbsolutePath(
@@ -372,8 +372,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
             fs.readFileSync(asaFilePath, 'utf8')
                 .replace(/\[input\]/, `"iothub-${iothub.id}"`)
                 .replace(/\[output\]/, `"cosmosdb-${cosmosDB.id}"`);
-        await FileUtility.writeFile(
-            ScaffoldType.Local, queryPath, asaQueryContent);
+        await FileUtility.writeFile(scaffoldType, queryPath, asaQueryContent);
 
         const asa = new streamAnalyticsJobModule.StreamAnalyticsJob(
             queryPath, this.extensionContext, this.projectRootPath,
@@ -387,10 +386,10 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
                 type: azureComponentConfigModule.DependencyType.Other
               }
             ]);
-        const isAsaPrerequisitesAchieved = await asa.checkPrerequisites();
-        if (!isAsaPrerequisitesAchieved) {
-          return false;
-        }
+        // const isAsaPrerequisitesAchieved = await asa.checkPrerequisites();
+        // if (!isAsaPrerequisitesAchieved) {
+        //   return false;
+        // }
 
         projectConfig[`${ConfigKey.asaPath}`] = constants.asaFolderName;
 
@@ -414,6 +413,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       for (let i = 0; i < this.componentList.length; i++) {
         const res = await this.componentList[i].create();
         if (res === false) {
+          // TODO: Remove this function and implement with sdk in FileUtility
           fs.removeSync(this.projectRootPath);
           vscode.window.showWarningMessage('Project initialize canceled.');
           return false;
@@ -425,16 +425,15 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
     const vscodeFolderPath =
         path.join(this.projectRootPath, FileNames.vscodeSettingsFolderName);
-    if (!await FileUtility.directoryExists(
-            ScaffoldType.Local, vscodeFolderPath)) {
-      await FileUtility.mkdirRecursively(ScaffoldType.Local, vscodeFolderPath);
+    if (!await FileUtility.directoryExists(scaffoldType, vscodeFolderPath)) {
+      await FileUtility.mkdirRecursively(scaffoldType, vscodeFolderPath);
     }
     const projectConfigFile =
         path.join(vscodeFolderPath, constants.projectConfigFileName);
-    if (!await FileUtility.fileExists(ScaffoldType.Local, projectConfigFile)) {
+    if (!await FileUtility.fileExists(scaffoldType, projectConfigFile)) {
       const indentationSpace = 4;
       FileUtility.writeFile(
-          ScaffoldType.Local, projectConfigFile,
+          scaffoldType, projectConfigFile,
           JSON.stringify(projectConfig, null, indentationSpace));
     }
 

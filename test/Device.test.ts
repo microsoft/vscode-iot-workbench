@@ -6,6 +6,7 @@ import {DeviceOperator} from '../src/DeviceOperator';
 import {AZ3166Device} from '../src/Models/AZ3166Device';
 import {ComponentType} from '../src/Models/Interfaces/Component';
 import {Device, DeviceType} from '../src/Models/Interfaces/Device';
+import {ProjectHostType} from '../src/Models/Interfaces/ProjectHostType';
 import {TelemetryContext} from '../src/telemetry';
 
 import {TestExtensionContext} from './stub';
@@ -24,7 +25,7 @@ suite('IoT Device Workbench: Device', () => {
   test('should be able to run device compile', function(done) {
     this.timeout(10 * 60 * 1000);
     try {
-      const deviceOperator = new DeviceOperator();
+      const deviceOperator = new DeviceOperator(ProjectHostType.Workspace);
       const contextMock = new TestExtensionContext();
 
       const telemetryContext: TelemetryContext = {

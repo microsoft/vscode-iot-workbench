@@ -32,25 +32,17 @@ export abstract class IoTWorkbenchProjectBase {
   protected channel: vscode.OutputChannel;
   protected telemetryContext: TelemetryContext;
 
-  static GetProjectType(root: string): ProjectHostType {
-    const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
-    if (!devicePath) {
-      throw new Error(`Cannot find device path in config key`);
-    }
-
-    const iotWorkbenchWorkspaceProjectFile =
-        path.join(root, devicePath, FileNames.iotworkbenchprojectFileName);
-    const iotWorkbenchContainerProjectFile =
-        path.join(root, FileNames.iotworkbenchprojectFileName);
+  static GetProjectType(projectFileRootPath: string): ProjectHostType {
+    const iotWorkbenchProjectFile =
+        path.join(projectFileRootPath, FileNames.iotworkbenchprojectFileName);
     const devcontainerFolderPath =
-        path.join(root, FileNames.devcontainerFolderName);
-    if (fs.existsSync(iotWorkbenchContainerProjectFile) &&
-        fs.existsSync(devcontainerFolderPath)) {
-      return ProjectHostType.Container;
-    } else if (fs.existsSync(iotWorkbenchWorkspaceProjectFile)) {
-      return ProjectHostType.Workspace;
-    } else {
+        path.join(projectFileRootPath, FileNames.devcontainerFolderName);
+    if (!fs.existsSync(iotWorkbenchProjectFile)) {
       return ProjectHostType.Unknown;
+    } else if (fs.existsSync(devcontainerFolderPath)) {
+      return ProjectHostType.Container;
+    } else {
+      return ProjectHostType.Workspace;
     }
   }
 
@@ -79,7 +71,7 @@ export abstract class IoTWorkbenchProjectBase {
     this.telemetryContext = telemetryContext;
   }
 
-  abstract async load(initLoad: boolean): Promise<boolean>;
+  abstract async load(initLoad?: boolean): Promise<boolean>;
 
   async compile(): Promise<boolean> {
     for (const item of this.componentList) {

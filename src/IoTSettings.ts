@@ -23,6 +23,20 @@ export class IoTWorkbenchSettings {
     return iotWorkbenchSettings;
   }
 
+  static async getPlatform(): Promise<string> {
+    const localOs = sdk.Utility.require('os') as typeof import('os');
+    const getPlatform = await localOs.platform;
+    const platform = await getPlatform();
+    return platform;
+  }
+
+  static async getOs(): Promise<string> {
+    const localOs = sdk.Utility.require('os') as typeof import('os');
+    const getHomeDir = await localOs.homedir;
+    const homeDir = await getHomeDir();
+    return homeDir;
+  }
+
   static async getWorkbenchPath(): Promise<string> {
     const localOs = sdk.Utility.require('os') as typeof import('os');
     const getHomeDir = await localOs.homedir;
