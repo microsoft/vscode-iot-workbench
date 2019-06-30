@@ -86,8 +86,3 @@ export enum PlatformType {
   ARDUINO = 'Arduino',
   EMBEDDEDLINUX = 'Embedded Linux'
 }
-
-export const platformFolderMap = new Map<string, string>([
-  [PlatformType.ARDUINO, 'arduino'],
-  [PlatformType.EMBEDDEDLINUX, 'embedded_linux']
-]);

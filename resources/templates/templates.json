@@ -5,7 +5,7 @@
             "name": "Linaro cross-toolchain for 64-bit Armv8 Cortex-A GCC 7.4.1",
             "description": "Dev container for Raspberry Pi 3 / 4 board with Yocto 64-bit, CMake and Azure IoT Device C SDK.",
             "detail": "Create project that connects to Azure IoT Hub, such as sending sensor data to cloud.",
-            "path": "rpi_iothub",
+            "path": "rpi64_iothub",
             "projectHostType": "container",
             "boardId": "raspberrypi",
             "type": "IotHub"
@@ -15,7 +15,7 @@
             "name": "Linaro cross-toolchain for 32-bit Armv7 Cortex-A GCC 7.4.1",
             "description": "Dev container for Raspberry Pi series board with Raspbian, CMake and Azure IoT Device C SDK.",
             "detail": "Create project that connects to Azure IoT Hub, such as sending sensor data to cloud.",
-            "path": "rpi_iothub",
+            "path": "rpi32_iothub",
             "projectHostType": "container",
             "boardId": "raspberrypi",
             "type": "IotHub"

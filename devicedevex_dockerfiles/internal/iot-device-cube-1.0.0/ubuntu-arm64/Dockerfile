@@ -1,12 +1,13 @@
 # devicedevex.azurecr.io/internal/iot-device-cube:1.0.0-ubuntu-arm64
 FROM ubuntu:18.04
+ARG linaro_package_uri=https://releases.linaro.org/components/toolchain/binaries/latest-7/aarch64-linux-gnu/gcc-linaro-7.4.1-2019.02-x86_64_aarch64-linux-gnu.tar.xz
 
 # Download toolchain
 RUN mkdir -p /usr/xcc
 WORKDIR /usr/xcc
 RUN apt-get update && \
     apt-get install -y --no-install-recommends wget ca-certificates xz-utils && \
-    wget https://releases.linaro.org/components/toolchain/binaries/latest-7/aarch64-linux-gnu/gcc-linaro-7.4.1-2019.02-x86_64_aarch64-linux-gnu.tar.xz && \
+    wget ${linaro_package_uri} && \
     tar -xf gcc-linaro-7.4.1-2019.02-x86_64_aarch64-linux-gnu.tar.xz && \
     mv gcc-linaro-7.4.1-2019.02-x86_64_aarch64-linux-gnu aarch64-linux-gnu && \
     rm gcc-linaro-7.4.1-2019.02-x86_64_aarch64-linux-gnu.tar.xz && \

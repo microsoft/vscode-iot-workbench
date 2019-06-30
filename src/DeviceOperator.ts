@@ -11,7 +11,7 @@ import {TelemetryContext} from './telemetry';
 import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
-import {FileNames, PlatformType, platformFolderMap} from './constants';
+import {FileNames} from './constants';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 
 const impor = require('impor')(__dirname);
@@ -99,14 +99,9 @@ export class DeviceOperator {
   async downloadPackage(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    const platformFolder = platformFolderMap.get(PlatformType.EMBEDDEDLINUX);
-    if (platformFolder === undefined) {
-      throw new Error(`Platform ${
-          PlatformType.EMBEDDEDLINUX}'s  resource folder does not exist.`);
-    }
-    const boardFolderPath = context.asAbsolutePath(
-        path.join(FileNames.resourcesFolderName, platformFolder));
-    const boardProvider = new BoardProvider(boardFolderPath);
+    const boardListFolderPath = context.asAbsolutePath(path.join(
+        FileNames.resourcesFolderName, FileNames.templatesFolderName));
+    const boardProvider = new BoardProvider(boardListFolderPath);
     const boardItemList: BoardQuickPickItem[] = [];
     const boards = boardProvider.list.filter(board => board.installation);
     boards.forEach((board: Board) => {

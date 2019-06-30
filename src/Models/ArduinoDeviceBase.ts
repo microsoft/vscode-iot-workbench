@@ -7,7 +7,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, DependentExtensions, FileNames, platformFolderMap, PlatformType, ScaffoldType} from '../constants';
+import {ConfigKey, DependentExtensions, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {IoTWorkbenchSettings} from '../IoTSettings';
 
@@ -48,14 +48,8 @@ export abstract class ArduinoDeviceBase implements Device {
     this.extensionContext = context;
     this.vscodeFolderPath =
         path.join(this.deviceFolder, FileNames.vscodeSettingsFolderName);
-
-    const platformFolder = platformFolderMap.get(PlatformType.ARDUINO);
-    if (platformFolder === undefined) {
-      throw new Error(`Platform ${
-          PlatformType.ARDUINO}'s  resource folder does not exist.`);
-    }
-    this.boardFolderPath = context.asAbsolutePath(
-        path.join(FileNames.resourcesFolderName, platformFolder));
+    this.boardFolderPath = context.asAbsolutePath(path.join(
+        FileNames.resourcesFolderName, FileNames.templatesFolderName));
   }
 
   getDeviceType(): DeviceType {
@@ -132,10 +126,10 @@ export abstract class ArduinoDeviceBase implements Device {
 
     const scaffoldType = ScaffoldType.Local;
     if (!await FileUtility.directoryExists(scaffoldType, deviceFolderPath)) {
-      throw new Error('Unable to find the device folder inside the project.');
+      throw new Error(`Internal error: Couldn't find the template folder.`);
     }
     if (!board) {
-      throw new Error('Unable to find the board in the config file.');
+      throw new Error(`Invalid / unsupported target platform`);
     }
 
     const plat = await IoTWorkbenchSettings.getPlatform();
@@ -144,14 +138,9 @@ export abstract class ArduinoDeviceBase implements Device {
         scaffoldType, this.deviceFolder);
 
     for (const fileInfo of templateFiles) {
-      if ((fileInfo.fileName.endsWith('macos.json') ||
-           fileInfo.fileName.endsWith('win32.json'))) {
-        if (fileInfo.fileName.endsWith('macos.json') && (plat === 'darwin')) {
-          await this.generateCppPropertiesFile(scaffoldType, board, fileInfo);
-        } else if (
-            fileInfo.fileName.endsWith('win32.json') && (plat === 'win32')) {
-          await this.generateCppPropertiesFile(scaffoldType, board, fileInfo);
-        }
+      if (fileInfo.fileName.endsWith('macos.json') && (plat === 'darwin') ||
+          (fileInfo.fileName.endsWith('win32.json') && (plat === 'darwin'))) {
+        await this.generateCppPropertiesFile(scaffoldType, board, fileInfo);
       } else {
         // Copy file directly
         const targetFolder = path.join(this.deviceFolder, fileInfo.targetPath);
