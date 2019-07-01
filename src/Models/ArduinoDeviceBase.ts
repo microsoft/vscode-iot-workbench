@@ -138,9 +138,12 @@ export abstract class ArduinoDeviceBase implements Device {
         scaffoldType, this.deviceFolder);
 
     for (const fileInfo of templateFiles) {
-      if (fileInfo.fileName.endsWith('macos.json') && (plat === 'darwin') ||
-          (fileInfo.fileName.endsWith('win32.json') && (plat === 'darwin'))) {
-        await this.generateCppPropertiesFile(scaffoldType, board, fileInfo);
+      if (fileInfo.fileName.endsWith('macos.json') ||
+          fileInfo.fileName.endsWith('win32.json')) {
+        if ((fileInfo.fileName.endsWith('macos.json') && plat === 'darwin') ||
+            (fileInfo.fileName.endsWith('win32.json') && plat === 'win32')) {
+          await this.generateCppPropertiesFile(scaffoldType, board, fileInfo);
+        }
       } else {
         // Copy file directly
         const targetFolder = path.join(this.deviceFolder, fileInfo.targetPath);
@@ -159,6 +162,7 @@ export abstract class ArduinoDeviceBase implements Device {
     }
     return true;
   }
+
   abstract async preCompileAction(): Promise<boolean>;
 
   abstract async preUploadAction(): Promise<boolean>;
