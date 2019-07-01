@@ -239,30 +239,6 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     return true;
   }
 
-  async handleLoadFailure(): Promise<boolean> {
-    if (!vscode.workspace.workspaceFolders ||
-        !vscode.workspace.workspaceFolders[0]) {
-      await askAndNewProject(this.telemetryContext);
-      return true;
-    }
-
-    const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    const workbenchFileName =
-        path.join(rootPath, 'Device', FileNames.iotworkbenchprojectFileName);
-
-    const workspaceFiles = fs.readdirSync(rootPath).filter(
-        file => path.extname(file).endsWith(FileNames.workspaceExtensionName));
-
-    if (fs.existsSync(workbenchFileName) && workspaceFiles &&
-        workspaceFiles[0]) {
-      await askAndOpenProject(
-          rootPath, workspaceFiles[0], this.telemetryContext);
-    } else {
-      await askAndNewProject(this.telemetryContext);
-    }
-    return true;
-  }
-
   async create(
       rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
       projectType: ProjectTemplateType, boardId: string,
@@ -360,12 +336,11 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
               type: azureComponentConfigModule.DependencyType.Input
             }] /*Dependencies*/);
 
-        // Delay pre-requisite to compile / upload / deploy time instead of
-        // creataion time. const isFunctionsPrerequisitesAchieved =
-        //     await azureFunctions.checkPrerequisites();
-        // if (!isFunctionsPrerequisitesAchieved) {
-        //   return false;
-        // }
+        const isFunctionsPrerequisitesAchieved =
+            await azureFunctions.checkPrerequisites();
+        if (!isFunctionsPrerequisitesAchieved) {
+          return false;
+        }
 
         workspace.settings[`IoTWorkbench.${ConfigKey.functionPath}`] =
             constants.functionDefaultFolderName;
@@ -491,5 +466,32 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     } catch (error) {
       throw error;
     }
+  }
+
+  /**
+   * If current folder is an IoT Workspace Project but not open correctly, ask
+   * and open the IoT Workspace Project. Return true. otherwise return false.
+   */
+  static async handleIoTWorkspaceProjectFolder(
+      telemetryContext: TelemetryContext): Promise<boolean> {
+    if (!vscode.workspace.workspaceFolders ||
+        !vscode.workspace.workspaceFolders[0]) {
+      return false;
+    }
+
+    const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+    const workbenchFileName =
+        path.join(rootPath, 'Device', FileNames.iotworkbenchprojectFileName);
+
+    const workspaceFiles = fs.readdirSync(rootPath).filter(
+        file => path.extname(file).endsWith(FileNames.workspaceExtensionName));
+
+    if (fs.existsSync(workbenchFileName) && workspaceFiles &&
+        workspaceFiles[0]) {
+      await askAndOpenProject(rootPath, workspaceFiles[0], telemetryContext);
+      return true;
+    }
+
+    return false;
   }
 }

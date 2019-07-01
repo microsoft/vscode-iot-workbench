@@ -36,13 +36,18 @@ export class AzureOperator {
           context, channel, telemetryContext);
     }
     if (iotProject === undefined) {
-      await askAndNewProject(telemetryContext);
+      const canBeIoTWorspaceProject =
+          await ioTWorkspaceProjectModule.IoTWorkspaceProject
+              .handleIoTWorkspaceProjectFolder(telemetryContext);
+      if (!canBeIoTWorspaceProject) {
+        await askAndNewProject(telemetryContext);
+      }
       return;
     }
 
     const result = await iotProject.load();
     if (!result) {
-      await iotProject.handleLoadFailure();
+      await askAndNewProject(telemetryContext);
       return;
     }
     status = await iotProject.provision();
@@ -65,13 +70,18 @@ export class AzureOperator {
           context, channel, telemetryContext);
     }
     if (iotProject === undefined) {
-      await askAndNewProject(telemetryContext);
+      const canBeIoTWorspaceProject =
+          await ioTWorkspaceProjectModule.IoTWorkspaceProject
+              .handleIoTWorkspaceProjectFolder(telemetryContext);
+      if (!canBeIoTWorspaceProject) {
+        await askAndNewProject(telemetryContext);
+      }
       return;
     }
 
     const result = await iotProject.load();
     if (!result) {
-      await iotProject.handleLoadFailure();
+      await askAndNewProject(telemetryContext);
       return;
     }
     await iotProject.deploy();

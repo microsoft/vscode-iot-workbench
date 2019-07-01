@@ -220,38 +220,6 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     return true;
   }
 
-  async handleLoadFailure(): Promise<boolean> {
-    if (!vscode.workspace.workspaceFolders ||
-        !vscode.workspace.workspaceFolders[0] ||
-        !fs.existsSync(this.projectConfigFile)) {
-      await askAndNewProject(this.telemetryContext);
-      return true;
-    }
-
-    const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    const workbenchFileName =
-        path.join(rootPath, FileNames.iotworkbenchprojectFileName);
-
-    if (!fs.existsSync(workbenchFileName)) {
-      await askAndNewProject(this.telemetryContext);
-      return true;
-    }
-
-    const projectConfigJson = require(this.projectConfigFile);
-    const boardId = projectConfigJson[`${ConfigKey.boardId}`];
-    if (!boardId) {
-      // Handles situation when boardId in project config file is wrongly
-      // modified by user.
-      const message = `Board Id cannot be found in ${
-          this.projectConfigFile}. File may have been wrongly modified.`;
-      this.channel.show();
-      this.channel.appendLine(message);
-      throw new Error(message);
-    }
-
-    throw new Error(`unknown load failure`);
-  }
-
   async create(
       rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
       projectType: ProjectTemplateType, boardId: string,

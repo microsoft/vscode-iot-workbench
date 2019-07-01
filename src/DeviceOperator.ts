@@ -40,13 +40,18 @@ export class DeviceOperator {
           context, channel, telemetryContext);
     }
     if (iotProject === undefined) {
-      await askAndNewProject(telemetryContext);
+      const canBeIoTWorspaceProject =
+          await ioTWorkspaceProjectModule.IoTWorkspaceProject
+              .handleIoTWorkspaceProjectFolder(telemetryContext);
+      if (!canBeIoTWorspaceProject) {
+        await askAndNewProject(telemetryContext);
+      }
       return;
     }
 
     const result = await iotProject.load();
     if (!result) {
-      await iotProject.handleLoadFailure();
+      await askAndNewProject(telemetryContext);
       return;
     }
     await iotProject.compile();
@@ -64,13 +69,18 @@ export class DeviceOperator {
           context, channel, telemetryContext);
     }
     if (iotProject === undefined) {
-      await askAndNewProject(telemetryContext);
+      const canBeIoTWorspaceProject =
+          await ioTWorkspaceProjectModule.IoTWorkspaceProject
+              .handleIoTWorkspaceProjectFolder(telemetryContext);
+      if (!canBeIoTWorspaceProject) {
+        await askAndNewProject(telemetryContext);
+      }
       return;
     }
 
     const result = await iotProject.load();
     if (!result) {
-      await iotProject.handleLoadFailure();
+      await askAndNewProject(telemetryContext);
       return;
     }
     await iotProject.upload();
@@ -88,13 +98,18 @@ export class DeviceOperator {
           context, channel, telemetryContext);
     }
     if (iotProject === undefined) {
-      await askAndNewProject(telemetryContext);
+      const canBeIoTWorspaceProject =
+          await ioTWorkspaceProjectModule.IoTWorkspaceProject
+              .handleIoTWorkspaceProjectFolder(telemetryContext);
+      if (!canBeIoTWorspaceProject) {
+        await askAndNewProject(telemetryContext);
+      }
       return;
     }
 
     const result = await iotProject.load();
     if (!result) {
-      await iotProject.handleLoadFailure();
+      await askAndNewProject(telemetryContext);
       return;
     }
     await iotProject.configDeviceSettings();
