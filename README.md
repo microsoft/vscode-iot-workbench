@@ -41,12 +41,15 @@ You will need Docker Desktop and Visual Studio Code version with [VS Code Remote
 ### Install extensions
 
 1. Launch VS Code, in the Extension tab, find and install **"Remote Development"** extension pack. This will enable the VS Code Remote Development.
-    ![Extension install](https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/docs/images/remote-dev.png)
+    ![Extension install Remote Development](./images/remote-dev.png)
 
 2. Then, in the same Extension tab, find and install **"Azure IoT Device Workbench"**.
-    ![Extension install](https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/docs/images/device-workbench.png)
+    ![Extension install Device Workbench](./images/device-workbench.png)
 
-Reload the window and make sure all the dependency extensions are correctly installed.
+3. Reload the window and make sure all the dependency extensions are correctly installed.
+
+4. Open Docker settings page, enable "Shared Device" so that local environment can access the folders in container.
+    ![Shared driver](./images/remote-dev.png)
 
 ## Usage
 
