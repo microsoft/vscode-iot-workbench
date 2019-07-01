@@ -3,82 +3,98 @@
 [![Gitter](https://img.shields.io/badge/chat-on%20gitter-blue.svg)](https://gitter.im/Microsoft/vscode-iot-workbench)
 [![Travis CI](https://travis-ci.org/Microsoft/vscode-iot-workbench.svg?branch=master)](https://travis-ci.org/Microsoft/vscode-iot-workbench)
 
-Welcome to **Azure IoT Device Workbench** <sup>preview</sup> for Visual Studio Code! The Azure IoT Device Workbench extension makes it easy to code, build, deploy and debug your IoT project with multiple Azure services and popular IoT development boards .
+![Logo](https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/docs/images/logo.png)
 
-## Prerequisites
+The **Azure IoT Device Workbench** <sup>preview</sup> is an extension in Visual Studio Code that provides an integrated environment to code, build, deploy and debug your IoT device project with multiple Azure services supported.
 
-Azure IoT Device Workbench aims to support multiple popular IoT development boards and kits. It currently supports following IoT hardware:
+## Device platforms and languages supported
+
+Azure IoT Device Workbench aims to support multiple device platforms and its devices. Currently the following device platforms and languages are supported :
+
+### Embedded Linux
+
+Languages supported: `C / C++`
+
+Devices supported: [Cortex-A series](https://developer.arm.com/ip-products/processors/cortex-a) devices (e.g. Raspberry Pi, NXP i.MX6) that are running Embedded Linux such as Debian, Ubuntu or Yocto Linux.
+
+### Arduino
+
+Languages supported: `Arduino C`
+
+Devices supported:
 
 - [MXChip IoT DevKit](https://aka.ms/iot-devkit)
-- [teXXmo IoT button](https://aka.ms/button)
-- [Raspberry Pi](https://www.raspberrypi.org/)
 - [ESP32](https://www.espressif.com/en/products/hardware/esp-wroom-32/overview)
+- [teXXmo IoT button](https://aka.ms/button)
 
-Please find the [Setup Guide](#setup-guide) section below to configure your hardware.
-
-We will support more devices in Azure IoT Device Workbench. Please help to take the [survey](https://www.surveymonkey.com/r/C7NY7KJ) to let us know your opinion of the device.
+Please help to take the [survey](https://www.surveymonkey.com/r/C7NY7KJ) to let us know extra device platforms and languages you want to have for Device Workbench.
 
 ## Installation
-Open VS Code and press `F1` or `Ctrl + Shift + P` to open command palette, select **Install Extension** and type `iot-workbench`.
 
-Or launch VS Code Quick Open (`Ctrl + P`), paste the following command, and press enter.
-```bash
-ext install vscode-iot-workbench
-```
+### Prerequisite
 
-After installation, please reload the window and make sure all the dependency extensions are correctly installed.
+- [Visual Studio Code](https://code.visualstudio.com/), with version >= 1.35.1.
+- [Docker Desktop](https://www.docker.com/products/docker-desktop) (Docker CE)
 
-## Supported Operating Systems
-Currently this extension supports the following operatings systems:
+You will need Docker Desktop and Visual Studio Code version with [VS Code Remote Development](https://aka.ms/vscode-remote) to compile the device code in the [containerized device toolchain](#).
 
-- Windows 7 and later (32-bit and 64-bit)
-- macOS 10.10 and later
+### Install extensions
 
-## Setup Guide
+1. Launch VS Code, in the Extension tab, find and install **"Remote Development"** extension pack. This will enable the VS Code Remote Development.
+    ![Extension install](https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/docs/images/remote-dev.png)
 
-### MXChip IoT DevKit
+2. Then, in the same Extension tab, find and install **"Azure IoT Device Workbench"**.
+    ![Extension install](https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/docs/images/device-workbench.png)
 
-Please follow the [guide](docs/iot-devkit.md) to setup IoT DevKit.
+Reload the window and make sure all the dependency extensions are correctly installed.
 
-Here are a set of tutorials that will help you get started:
+## Usage
 
-* [Get Started](./docs/iot-devkit/devkit-get-started.md)
-* [Shake, Shake for a Tweet](./docs/iot-devkit/devkit-shakeshake.md)
-* [Remote Monitoring](./docs/iot-devkit/devkit_remote_monitoringv2.md)
-* [DevKit Translator](./docs/iot-devkit/devkit-translator.md)
-* [MQTT Client](./docs/iot-devkit/devkit-mqtt-client.md)
-* [DevKit State](./docs/iot-devkit/devkit-state.md)
-* [Door Monitor](./docs/iot-devkit/devkit_door_monitor.md)
-* [DevKit DPS](./docs/iot-devkit/devkit_dps.md)
-* [DevKit OTA](./docs/iot-devkit/devkit-ota.md)
-* [Stream Analytics and Cosmos DB](./docs/iot-devkit/devkit-stream-analytics-cosmos-db.md)
+Depending on the device platform you choose, follow the resources below to develop on it.
 
-### teXXmo IoT button
+### Embedded Linux
+
+To simplify the cross compiling toolchain, Azure IoT Device SDK and dependencies setup and configuration, Device Workbench put all these components in the container. All cross-compiling works happen in it. Here is the quick start of using it to develop and compile a simple device app written in C and running on Raspberry Pi to send telemetry data to Azure IoT Hub.
+
+*[TBD]*
+
+### Arduino
+
+#### MXChip IoT DevKit
+
+Follow the [setup guide](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-arduino-iot-devkit-az3166-get-started#prepare-the-development-environment) to setup the environment including the Arduino extension.
 
 Here are a set of tutorials that will help you get started:
 
-* [Get Started](./docs/iot-button/teXXmo_IoT_button_get_started.md)
+- [Get Started](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-arduino-iot-devkit-az3166-get-started)
+- [Use Azure IoT Hub Device Provisioning Service auto-provisioning device with IoT Hub](https://docs.microsoft.com/en-us/azure/iot-dps/how-to-connect-mxchip-iot-devkit)
+- [Connect to the Remote Monitoring solution accelerator](https://docs.microsoft.com/en-us/azure/iot-accelerators/iot-accelerators-arduino-iot-devkit-az3166-devkit-remote-monitoring-v2)
+- [Translate voice message with Azure Cognitive Services](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-arduino-iot-devkit-az3166-translator)
+- [Retrieve a Twitter message with Azure Functions](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-arduino-iot-devkit-az3166-retrieve-twitter-message)
+- [Send messages to an MQTT server using Eclipse Paho APIs](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-arduino-iot-devkit-az3166-mqtt-helloworld)
+- [DevKit State](./docs/iot-devkit/devkit-state.md)
+- [Door Monitor](./docs/iot-devkit/devkit_door_monitor.md)
+- [DevKit OTA](./docs/iot-devkit/devkit-ota.md)
+- [Stream Analytics and Cosmos DB](./docs/iot-devkit/devkit-stream-analytics-cosmos-db.md)
 
-### Raspberry Pi
+#### ESP32
+
+Follow the [setup guide](docs/esp32.md) to setup ESP32 device including the Arduino extension.
 
 Here are a set of tutorials that will help you get started:
 
-* [Get Started](./docs/raspberry-pi/raspi-get-started.md)
-* [Simple LED](./docs/raspberry-pi/raspi-simple-led.md)
-* [Face Recognition Access Control](./docs/raspberry-pi/raspi-face-recognition-access-control.md)
+- [Get Started](./docs/esp32/esp32-get-started.md)
+- [Stream Analytics and Cosmos DB](./docs/esp32/esp32-stream-analytics-cosmos-db.md)
+- [ESP32 State](./docs/esp32/esp32-state.md)
+- [M5Stack Email Receiver](./docs/esp32/m5stack-email-receiver.md)
 
-### ESP32
+#### teXXmo IoT button
 
-Please follow the [guide](docs/esp32.md) to setup ESP32 device.
-
-Here are a set of tutorials that will help you get started:
-
-* [Get Started](./docs/esp32/esp32-get-started.md)
-* [Stream Analytics and Cosmos DB](./docs/esp32/esp32-stream-analytics-cosmos-db.md)
-* [ESP32 State](./docs/esp32/esp32-state.md)
-* [M5Stack Email Receiver](./docs/esp32/m5stack-email-receiver.md)
+- [Get Started](./docs/iot-button/teXXmo_IoT_button_get_started.md)
 
 ## Commands
+
+*[TBD]*
 
 | Command | Description |
 | --- | --- |
