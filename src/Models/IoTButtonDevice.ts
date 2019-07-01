@@ -29,7 +29,6 @@ export class IoTButtonDevice implements Device {
   private componentType: ComponentType;
   private deviceFolder: string;
   private extensionContext: vscode.ExtensionContext;
-  private inputFileName = '';
 
   private componentId: string;
   get id() {
