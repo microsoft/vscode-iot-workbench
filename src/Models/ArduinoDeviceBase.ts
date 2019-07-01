@@ -10,6 +10,7 @@ import {ConfigHandler} from '../configHandler';
 import {ConfigKey, DependentExtensions, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {IoTWorkbenchSettings} from '../IoTSettings';
+import * as utils from '../utils';
 
 import {Board} from './Interfaces/Board';
 import {ComponentType} from './Interfaces/Component';
@@ -122,10 +123,8 @@ export abstract class ArduinoDeviceBase implements Device {
 
   async createCore(board: Board|undefined, templateFiles: TemplateFileInfo[]):
       Promise<boolean> {
-    const deviceFolderPath = this.deviceFolder;
-
     const scaffoldType = ScaffoldType.Local;
-    if (!await FileUtility.directoryExists(scaffoldType, deviceFolderPath)) {
+    if (!await FileUtility.directoryExists(scaffoldType, this.deviceFolder)) {
       throw new Error(`Internal error: Couldn't find the template folder.`);
     }
     if (!board) {
@@ -146,18 +145,8 @@ export abstract class ArduinoDeviceBase implements Device {
         }
       } else {
         // Copy file directly
-        const targetFolder = path.join(this.deviceFolder, fileInfo.targetPath);
-        if (!await FileUtility.directoryExists(scaffoldType, targetFolder)) {
-          await FileUtility.mkdirRecursively(scaffoldType, targetFolder);
-        }
-        try {
-          await FileUtility.writeFile(
-              scaffoldType, path.join(targetFolder, fileInfo.fileName),
-              fileInfo.fileContent as string);
-        } catch (error) {
-          throw new Error(
-              `Device: create ${fileInfo.fileName} failed: ${error.message}`);
-        }
+        await utils.generateSketchFile(
+            this.deviceFolder, scaffoldType, fileInfo);
       }
     }
     return true;

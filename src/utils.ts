@@ -8,8 +8,10 @@ import {setTimeout} from 'timers';
 import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
 
-import {AzureFunctionsLanguage, DependentExtensions, GlobalConstants, OperationType} from './constants';
+import {AzureFunctionsLanguage, DependentExtensions, GlobalConstants, OperationType, ScaffoldType} from './constants';
 import {DialogResponses} from './DialogResponses';
+import {FileUtility} from './FileUtility';
+import {TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
 import {RemoteExtension} from './Models/RemoteExtension';
 import {TelemetryContext} from './telemetry';
 
@@ -292,4 +294,24 @@ export function runCommand(
       }
     });
   });
+}
+
+export async function generateSketchFile(
+    root: string, type: ScaffoldType,
+    fileInfo: TemplateFileInfo): Promise<boolean> {
+  const targetFolderPath = path.join(root, fileInfo.targetPath);
+  if (!await FileUtility.directoryExists(type, targetFolderPath)) {
+    await FileUtility.mkdirRecursively(type, targetFolderPath);
+  }
+
+  const targetFilePath = path.join(targetFolderPath, fileInfo.fileName);
+  if (fileInfo.fileContent) {
+    try {
+      await FileUtility.writeFile(type, targetFilePath, fileInfo.fileContent);
+    } catch (error) {
+      throw new Error(`Failed to create sketch file ${fileInfo.fileName}: ${
+          error.message}`);
+    }
+  }
+  return true;
 }

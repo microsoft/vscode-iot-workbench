@@ -277,7 +277,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
           this.extensionContext, this.channel, deviceDir, templateFilesInfo);
     } else if (boardId === ioTButtonDeviceModule.IoTButtonDevice.boardId) {
       device = new ioTButtonDeviceModule.IoTButtonDevice(
-          this.extensionContext, deviceDir);
+          this.extensionContext, deviceDir, templateFilesInfo);
     } else if (boardId === esp32DeviceModule.Esp32Device.boardId) {
       device = new esp32DeviceModule.Esp32Device(
           this.extensionContext, this.channel, deviceDir, templateFilesInfo);
