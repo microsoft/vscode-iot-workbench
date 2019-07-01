@@ -41,15 +41,15 @@ You will need Docker Desktop and Visual Studio Code version with [VS Code Remote
 ### Install extensions
 
 1. Launch VS Code, in the Extension tab, find and install **"Remote Development"** extension pack. This will enable the VS Code Remote Development.
-    ![Extension install Remote Development](./images/remote-dev.png)
+    ![Extension install Remote Development](./docs/images/remote-dev.png)
 
 2. Then, in the same Extension tab, find and install **"Azure IoT Device Workbench"**.
-    ![Extension install Device Workbench](./images/device-workbench.png)
+    ![Extension install Device Workbench](./docs/images/device-workbench.png)
 
 3. Reload the window and make sure all the dependency extensions are correctly installed.
 
 4. Open Docker settings page, enable "Shared Device" so that local environment can access the folders in container.
-    ![Shared driver](./images/remote-dev.png)
+    ![Shared driver](./docs/images/remote-dev.png)
 
 ## Usage
 
@@ -114,15 +114,15 @@ Here are a set of tutorials that will help you get started:
 
 ### Create Project
 
-<img width="760" src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/new.gif">
+![New project](./docs/images/new.gif)
 
 ### Provision Azure Services
 
-<img width="760" src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/provision.gif">
+![Provision Azure services](./docs/images/provision.gif)
 
 ### Open Examples
 
-<img width="760" src="https://raw.githubusercontent.com/Microsoft/vscode-iot-workbench/master/gif/example.gif">
+![Open samples](./docs/images/example.gif)
 
 #### Note: 
 -  When invoking the **Azure IoT Device Workbench: Provision Azure Services...** command with Azure IoT Hub and Azure Functions, by default, Azure Functions would use the IoT Hub consumer group of `$Default`. To switch to another consumer group, please follow the [guide](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-create-through-portal) to create a new consumer group in Azure Portal. Then in IoT project, modify the following setting in **function.json**:
