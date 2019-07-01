@@ -197,7 +197,7 @@ export async function askAndOpenProject(
         'Operation failed and user open project from folder.';
     const workspaceFilePath = path.join(rootPath, workspaceFile);
     await vscode.commands.executeCommand(
-        'vscode.openFolder', vscode.Uri.file(workspaceFilePath), false);
+        'iotcube.openLocally', workspaceFilePath, false);
   } else {
     telemetryContext.properties.errorMessage = 'Operation failed.';
   }

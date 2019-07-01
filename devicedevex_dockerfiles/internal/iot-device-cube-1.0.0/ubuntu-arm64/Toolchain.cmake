@@ -1,8 +1,8 @@
 set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_VERSION 1)
-set(CMAKE_SYSTEM_PROCESSOR aarch64)
+set(CMAKE_SYSTEM_PROCESSOR $ENV{CMAKE_SYSTEM_PROCESSOR})
 
-set(cross_triple "aarch64-linux-gnu")
+set(cross_triple $ENV{CROSS_TRIPLE})
 set(cross_root /usr/xcc/${cross_triple})
 
 set(CMAKE_C_COMPILER $ENV{CC})

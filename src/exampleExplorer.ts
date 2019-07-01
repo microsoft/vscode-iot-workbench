@@ -306,7 +306,7 @@ export class ExampleExplorer {
     const items = fs.listSync(fsPath, [FileNames.workspaceExtensionName]);
     if (items.length !== 0) {
       await vscode.commands.executeCommand(
-          'vscode.openFolder', vscode.Uri.file(items[0]), true);
+          'iotcube.openLocally', items[0], true);
       return true;
     }
 
@@ -320,7 +320,7 @@ export class ExampleExplorer {
           fs.listSync(fsPath, [FileNames.workspaceExtensionName]);
       if (workspaceFiles && workspaceFiles.length > 0) {
         await vscode.commands.executeCommand(
-            'vscode.openFolder', vscode.Uri.file(workspaceFiles[0]), true);
+            'iotcube.openLocally', workspaceFiles[0], true);
         return true;
       } else {
         // TODO: Add buttom to submit issue to iot-workbench repo.
