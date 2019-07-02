@@ -111,7 +111,6 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     if (!isFunctionsExtensionAvailable) {
       return false;
     }
-
     return true;
   }
 

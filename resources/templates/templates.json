@@ -2,9 +2,9 @@
     "templates": [
         {
             "platform": "Embedded Linux",
-            "name": "Linaro cross-toolchain for 64-bit Armv8 Cortex-A GCC 7.4.1",
+            "name": "64-bit Armv8 Cortex-A",
             "description": "",
-            "detail": "Dev container for Raspberry Pi 3 / 4 board with Yocto 64-bit, CMake and Azure IoT Device C SDK.",
+            "detail": "Generic dev container with Linaro cross-toolchain for GCC, Azure IoT Device C SDK",
             "path": "rpi64_iothub",
             "projectHostType": "container",
             "boardId": "raspberrypi",
@@ -12,9 +12,9 @@
         },
         {
             "platform": "Embedded Linux",
-            "name": "Linaro cross-toolchain for 32-bit Armv7 Cortex-A GCC 7.4.1",
+            "name": "32-bit Armv7 Cortex-A",
             "description": "",
-            "detail": "Dev container for Raspberry Pi series board with Raspbian, CMake and Azure IoT Device C SDK.",
+            "detail": "Generic dev container with Linaro cross-toolchain for GCC, Azure IoT Device C SDK",
             "path": "rpi32_iothub",
             "projectHostType": "container",
             "boardId": "raspberrypi",

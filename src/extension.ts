@@ -6,6 +6,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as fs from 'fs-plus';
 import {VSCExpress} from 'vscode-express';
 import {BoardProvider} from './boardProvider';
 import {ProjectInitializer} from './projectInitializer';
@@ -13,16 +14,18 @@ import {DeviceOperator} from './DeviceOperator';
 import {AzureOperator} from './AzureOperator';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import {ConfigHandler} from './configHandler';
-import {ConfigKey, EventNames, FileNames} from './constants';
+import {ConfigKey, EventNames, FileNames, ScaffoldType} from './constants';
 import {TelemetryContext, TelemetryProperties} from './telemetry';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 import {RemoteExtension} from './Models/RemoteExtension';
+import {askAndNewProject, askAndOpenProject} from './utils';
 
 const impor = require('impor')(__dirname);
 const exampleExplorerModule =
     impor('./exampleExplorer') as typeof import('./exampleExplorer');
 
 import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
+import {FileUtility} from './FileUtility';
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
     typeof import('./Models/IoTWorkspaceProject');
 const ioTContainerizedProjectModule =
