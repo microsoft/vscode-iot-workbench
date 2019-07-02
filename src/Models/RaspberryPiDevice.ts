@@ -10,8 +10,7 @@ import * as sdk from 'vscode-iot-device-cube-sdk';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames, OperationType, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
-import * as utils from '../utils';
-import {runCommand} from '../utils';
+import {askAndOpenInRemote, generateTemplateFile, runCommand} from '../utils';
 
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
@@ -121,32 +120,15 @@ export class RaspberryPiDevice implements Device {
 
     // Cannot use forEach here since it's async
     for (const fileInfo of templateFilesInfo) {
-      const targetFolderPath =
-          path.join(this.projectFolder, fileInfo.targetPath);
-      if (!await FileUtility.directoryExists(type, targetFolderPath)) {
-        await FileUtility.mkdirRecursively(type, targetFolderPath);
-      }
-
-      const targetFilePath = path.join(targetFolderPath, fileInfo.fileName);
-      if (fileInfo.fileContent) {
-        try {
-          await FileUtility.writeFile(
-              type, targetFilePath, fileInfo.fileContent);
-        } catch (error) {
-          throw new Error(`Failed to create from template file ${
-              fileInfo.fileName} for Raspberry Pi: ${error.message}`);
-        }
-      }
+      await generateTemplateFile(this.projectFolder, type, fileInfo);
     }
-
     return true;
   }
 
   async compile(): Promise<boolean> {
     const isRemote = RemoteExtension.isRemote(this.extensionContext);
     if (!isRemote) {
-      const res =
-          await utils.askAndOpenInRemote(OperationType.Compile, this.channel);
+      const res = await askAndOpenInRemote(OperationType.Compile, this.channel);
       if (!res) {
         return false;
       }
@@ -216,8 +198,7 @@ export class RaspberryPiDevice implements Device {
   async upload(): Promise<boolean> {
     const isRemote = RemoteExtension.isRemote(this.extensionContext);
     if (!isRemote) {
-      const res =
-          await utils.askAndOpenInRemote(OperationType.Upload, this.channel);
+      const res = await askAndOpenInRemote(OperationType.Upload, this.channel);
       if (!res) {
         return false;
       }

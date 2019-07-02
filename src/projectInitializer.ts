@@ -182,32 +182,6 @@ export class ProjectInitializer {
     });
   }
 
-  private async SelectBoard(boardFolderPath: string) {
-    const boardProvider = new BoardProvider(boardFolderPath);
-    const boardItemList: BoardQuickPickItem[] = [];
-
-    const boards = boardProvider.list;
-    boards.forEach((board: Board) => {
-      boardItemList.push({
-        name: board.name,
-        model: board.model,
-        id: board.id,
-        detailInfo: board.detailInfo,
-        label: board.name,
-        description: board.detailInfo,
-      });
-    });
-
-    const boardSelection = await vscode.window.showQuickPick(boardItemList, {
-      ignoreFocusOut: true,
-      matchOnDescription: true,
-      matchOnDetail: true,
-      placeHolder: 'Select a board',
-    });
-
-    return boardSelection;
-  }
-
   private async SelectPlatform(context: vscode.ExtensionContext) {
     const platformListPath = context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,

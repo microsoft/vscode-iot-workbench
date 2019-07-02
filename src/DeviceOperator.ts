@@ -13,7 +13,7 @@ import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 import {FileNames} from './constants';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
-import {askAndNewProject} from './utils';
+import {askAndNewProject, handleIoTWorkspaceProjectFolder} from './utils';
 
 const impor = require('impor')(__dirname);
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
@@ -40,13 +40,13 @@ export class DeviceOperator {
           context, channel, telemetryContext);
     }
     if (iotProject === undefined) {
-      await askAndNewProject(telemetryContext);
+      await handleIoTWorkspaceProjectFolder(telemetryContext);
       return;
     }
 
     const result = await iotProject.load();
     if (!result) {
-      await iotProject.handleLoadFailure();
+      await askAndNewProject(telemetryContext);
       return;
     }
     await iotProject.compile();
@@ -64,13 +64,13 @@ export class DeviceOperator {
           context, channel, telemetryContext);
     }
     if (iotProject === undefined) {
-      await askAndNewProject(telemetryContext);
+      await handleIoTWorkspaceProjectFolder(telemetryContext);
       return;
     }
 
     const result = await iotProject.load();
     if (!result) {
-      await iotProject.handleLoadFailure();
+      await askAndNewProject(telemetryContext);
       return;
     }
     await iotProject.upload();
@@ -88,13 +88,13 @@ export class DeviceOperator {
           context, channel, telemetryContext);
     }
     if (iotProject === undefined) {
-      await askAndNewProject(telemetryContext);
+      await handleIoTWorkspaceProjectFolder(telemetryContext);
       return;
     }
 
     const result = await iotProject.load();
     if (!result) {
-      await iotProject.handleLoadFailure();
+      await askAndNewProject(telemetryContext);
       return;
     }
     await iotProject.configDeviceSettings();
