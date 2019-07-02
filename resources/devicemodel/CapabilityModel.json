@@ -1,6 +1,6 @@
 {
   "@context": {
-    "@vocab": "http://azureiot.com/v0/classes/",
+    "@vocab": "http://azureiot.com/v1/classes/",
     "@language": "en",
     "comment": "Entity/comment",
     "description": {
@@ -13,6 +13,14 @@
     },
     "implements": {
       "@id": "CapabilityModel/implements",
+      "@container": "@list"
+    },
+    "name": {
+      "@id": "NamedEntity/name",
+      "@language": null
+    },
+    "schema": {
+      "@id": "CapabilityModel/implements/schema",
       "@type": "@id"
     }
   }
