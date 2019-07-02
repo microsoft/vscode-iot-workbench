@@ -1,25 +1,25 @@
-# Azure IoT Device Workbench <sup>preview</sup> for Visual Studio Code
+# Azure IoT Device Workbench for Visual Studio Code
 
 [![Gitter](https://img.shields.io/badge/chat-on%20gitter-blue.svg)](https://gitter.im/Microsoft/vscode-iot-workbench)
 [![Travis CI](https://travis-ci.org/Microsoft/vscode-iot-workbench.svg?branch=master)](https://travis-ci.org/Microsoft/vscode-iot-workbench)
 
 ![Logo](./docs/images/logo.png =128x128)
 
-The **Azure IoT Device Workbench** <sup>preview</sup> is an extension in Visual Studio Code that provides an integrated environment to code, build, deploy and debug your IoT device project with multiple Azure services supported.
+The **Azure IoT Device Workbench** is an extension in Visual Studio Code that provides an integrated environment to code, build, deploy and debug your IoT device project with multiple Azure services supported.
 
 ## Device platforms and languages supported
 
 Azure IoT Device Workbench aims to support multiple device platforms and its devices. Currently the following device platforms and languages are supported :
 
-### Embedded Linux
+### Embedded Linux <sup>preview</sup>
 
-Languages supported: `C / C++`
+Languages supported: `C/C++`
 
 Devices supported: [Cortex-A series](https://developer.arm.com/ip-products/processors/cortex-a) devices (e.g. Raspberry Pi, NXP i.MX6) that are running Embedded Linux such as Debian, Ubuntu or Yocto Linux.
 
 ### Arduino
 
-Languages supported: `Arduino C`
+Languages supported: `Arduino C/C++`
 
 Devices supported:
 
@@ -31,25 +31,46 @@ Please help to take the [survey](https://www.surveymonkey.com/r/C7NY7KJ) to let 
 
 ## Installation
 
-### Prerequisite
+### Prerequisites
 
 - [Visual Studio Code](https://code.visualstudio.com/), with version >= 1.35.1.
-- [Docker Desktop](https://www.docker.com/products/docker-desktop) (Docker CE)
+- [Docker](https://www.docker.com/get-started).
 
-You will need Docker Desktop and Visual Studio Code version with [VS Code Remote Development](https://aka.ms/vscode-remote) to compile the device code in the [containerized device toolchain](#).
+   For embedded Linux developing, you will need Docker and Visual Studio Code version with [Visual Studio Code Remote Development](https://aka.ms/vscode-remote) to compile the device code in the [containerized device toolchain](#).
 
 ### Install extensions
 
-1. Launch VS Code, in the Extension tab, find and install **"Remote Development"** extension pack. This will enable the VS Code Remote Development.
-    ![Extension install Remote Development](./docs/images/remote-dev.png)
-
-2. Then, in the same Extension tab, find and install **"Azure IoT Device Workbench"**.
+1. Launch VS Code, in the Extension tab, find and install **"Azure IoT Device Workbench"**.
     ![Extension install Device Workbench](./docs/images/device-workbench.png)
+2. Reload the window and make sure all the dependency extensions are correctly installed:
 
-3. Reload the window and make sure all the dependency extensions are correctly installed.
+   - Azure Account
+   - Azure IoT Hub Toolkit
+   - C/C++
+   - IoT Device Cube
+   - Remote Development
 
-4. Open Docker settings page, enable "Shared Device" so that local environment can access the folders in container.
-    ![Shared driver](./docs/images/remote-dev.png)
+
+### Install Docker <sup>for embedded Linux </sup>
+
+[Visual Studio Code Remote Development](https://aka.ms/vscode-remote) has prerequisites for the specific host / container / WSL distribution you will be connecting to.
+
+- Install Docker Desktop for Windows
+
+  Please follow this [Installation Guide](https://docs.docker.com/docker-for-windows/install/) to install the Docker Desktop if you haven't installed it in your Windows machine, and  make sure enabling driver sharing:
+
+  1. Right click the **Docker** icon in the task try and select "Settings".
+  2. Click on the "Shared Drivers" section and choose the driver to be shared.
+
+     ![Shared driver](./docs/images/shared-drivers.png)
+
+- Install Docker Desktop for Mac
+
+  Please follow this [Installation Guide](https://docs.docker.com/docker-for-mac/install/) to install the Docker Desktop if you haven't installed it in your Mac.
+
+- Get Docker for Linux
+
+  Linux is a highly variable environment and the large number of server, container, and desktop distributions can make it difficult to know what is supported. Please check this [tutorial](https://code.visualstudio.com/docs/remote/linux) for Linux support.
 
 ## Usage
 
