@@ -13,7 +13,7 @@ import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 import {FileNames} from './constants';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
-import {askAndNewProject} from './utils';
+import {askAndNewProject, handleIoTWorkspaceProjectFolder} from './utils';
 
 const impor = require('impor')(__dirname);
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
@@ -40,12 +40,7 @@ export class DeviceOperator {
           context, channel, telemetryContext);
     }
     if (iotProject === undefined) {
-      const canBeIoTWorspaceProject =
-          await ioTWorkspaceProjectModule.IoTWorkspaceProject
-              .handleIoTWorkspaceProjectFolder(telemetryContext);
-      if (!canBeIoTWorspaceProject) {
-        await askAndNewProject(telemetryContext);
-      }
+      await handleIoTWorkspaceProjectFolder(telemetryContext);
       return;
     }
 
@@ -69,12 +64,7 @@ export class DeviceOperator {
           context, channel, telemetryContext);
     }
     if (iotProject === undefined) {
-      const canBeIoTWorspaceProject =
-          await ioTWorkspaceProjectModule.IoTWorkspaceProject
-              .handleIoTWorkspaceProjectFolder(telemetryContext);
-      if (!canBeIoTWorspaceProject) {
-        await askAndNewProject(telemetryContext);
-      }
+      await handleIoTWorkspaceProjectFolder(telemetryContext);
       return;
     }
 
@@ -98,12 +88,7 @@ export class DeviceOperator {
           context, channel, telemetryContext);
     }
     if (iotProject === undefined) {
-      const canBeIoTWorspaceProject =
-          await ioTWorkspaceProjectModule.IoTWorkspaceProject
-              .handleIoTWorkspaceProjectFolder(telemetryContext);
-      if (!canBeIoTWorspaceProject) {
-        await askAndNewProject(telemetryContext);
-      }
+      await handleIoTWorkspaceProjectFolder(telemetryContext);
       return;
     }
 

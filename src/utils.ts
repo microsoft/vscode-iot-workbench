@@ -8,7 +8,7 @@ import {setTimeout} from 'timers';
 import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
 
-import {AzureFunctionsLanguage, DependentExtensions, GlobalConstants, OperationType, ScaffoldType} from './constants';
+import {AzureFunctionsLanguage, DependentExtensions, FileNames, GlobalConstants, OperationType, ScaffoldType} from './constants';
 import {DialogResponses} from './DialogResponses';
 import {FileUtility} from './FileUtility';
 import {TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
@@ -296,7 +296,7 @@ export function runCommand(
   });
 }
 
-export async function generateSketchFile(
+export async function generateTemplateFile(
     root: string, type: ScaffoldType,
     fileInfo: TemplateFileInfo): Promise<boolean> {
   const targetFolderPath = path.join(root, fileInfo.targetPath);
@@ -313,5 +313,32 @@ export async function generateSketchFile(
           error.message}`);
     }
   }
+  return true;
+}
+
+/**
+ * If current folder is an IoT Workspace Project but not open correctly, ask
+ * and open the IoT Workspace Project. Otherwise ask and New IoT Project.
+ */
+export async function handleIoTWorkspaceProjectFolder(
+    telemetryContext: TelemetryContext): Promise<boolean> {
+  if (!vscode.workspace.workspaceFolders ||
+      !vscode.workspace.workspaceFolders[0]) {
+    return false;
+  }
+
+  const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+  const workbenchFileName =
+      path.join(rootPath, 'Device', FileNames.iotworkbenchprojectFileName);
+
+  const workspaceFiles = fs.readdirSync(rootPath).filter(
+      file => path.extname(file).endsWith(FileNames.workspaceExtensionName));
+
+  if (fs.existsSync(workbenchFileName) && workspaceFiles && workspaceFiles[0]) {
+    await askAndOpenProject(rootPath, workspaceFiles[0], telemetryContext);
+    return true;
+  }
+
+  await askAndNewProject(telemetryContext);
   return true;
 }

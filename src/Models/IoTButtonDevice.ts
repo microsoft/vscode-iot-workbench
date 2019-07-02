@@ -10,7 +10,7 @@ import * as vscode from 'vscode';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
-import {generateSketchFile} from '../utils';
+import {generateTemplateFile} from '../utils';
 
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
@@ -85,7 +85,7 @@ export class IoTButtonDevice implements Device {
         scaffoldType, this.deviceFolder);
 
     for (const fileInfo of this.templateFilesInfo) {
-      await generateSketchFile(this.deviceFolder, scaffoldType, fileInfo);
+      await generateTemplateFile(this.deviceFolder, scaffoldType, fileInfo);
     }
     return true;
   }

@@ -7,7 +7,8 @@
 import * as vscode from 'vscode';
 import {TelemetryContext} from './telemetry';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
-import {askAndNewProject} from './utils';
+import {handleIoTWorkspaceProjectFolder, askAndNewProject} from './utils';
+import {utils} from 'ssh2';
 
 const impor = require('impor')(__dirname);
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
@@ -36,12 +37,7 @@ export class AzureOperator {
           context, channel, telemetryContext);
     }
     if (iotProject === undefined) {
-      const canBeIoTWorspaceProject =
-          await ioTWorkspaceProjectModule.IoTWorkspaceProject
-              .handleIoTWorkspaceProjectFolder(telemetryContext);
-      if (!canBeIoTWorspaceProject) {
-        await askAndNewProject(telemetryContext);
-      }
+      await handleIoTWorkspaceProjectFolder(telemetryContext);
       return;
     }
 
@@ -70,12 +66,7 @@ export class AzureOperator {
           context, channel, telemetryContext);
     }
     if (iotProject === undefined) {
-      const canBeIoTWorspaceProject =
-          await ioTWorkspaceProjectModule.IoTWorkspaceProject
-              .handleIoTWorkspaceProjectFolder(telemetryContext);
-      if (!canBeIoTWorspaceProject) {
-        await askAndNewProject(telemetryContext);
-      }
+      await handleIoTWorkspaceProjectFolder(telemetryContext);
       return;
     }
 

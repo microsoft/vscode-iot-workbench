@@ -10,7 +10,7 @@ import * as sdk from 'vscode-iot-device-cube-sdk';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames, OperationType, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
-import {askAndOpenInRemote, generateSketchFile, runCommand} from '../utils';
+import {askAndOpenInRemote, generateTemplateFile, runCommand} from '../utils';
 
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
@@ -94,12 +94,12 @@ export class RaspberryPiDevice implements Device {
 
     await IoTWorkbenchProjectBase.generateIotWorkbenchProjectFile(
         scaffoldType, this.projectFolder);
-    await this.generateSketchFile(scaffoldType, this.templateFilesInfo);
+    await this.generateTemplateFiles(scaffoldType, this.templateFilesInfo);
 
     return true;
   }
 
-  async generateSketchFile(
+  async generateTemplateFiles(
       type: ScaffoldType,
       templateFilesInfo: TemplateFileInfo[]): Promise<boolean> {
     if (!templateFilesInfo) {
@@ -108,7 +108,7 @@ export class RaspberryPiDevice implements Device {
 
     // Cannot use forEach here since it's async
     for (const fileInfo of templateFilesInfo) {
-      await generateSketchFile(this.projectFolder, type, fileInfo);
+      await generateTemplateFile(this.projectFolder, type, fileInfo);
     }
     return true;
   }

@@ -145,7 +145,7 @@ export abstract class ArduinoDeviceBase implements Device {
         }
       } else {
         // Copy file directly
-        await utils.generateSketchFile(
+        await utils.generateTemplateFile(
             this.deviceFolder, scaffoldType, fileInfo);
       }
     }
