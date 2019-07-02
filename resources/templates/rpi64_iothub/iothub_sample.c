@@ -46,8 +46,7 @@ and removing calls to _DoWork will yield the same results. */
 #endif // SET_TRUSTED_CERT_IN_SAMPLES
 
 /* Paste in the your iothub connection string  */
-static const char* connectionString = "[device connection string]";
-#define MESSAGE_COUNT        5
+#define MESSAGE_COUNT        500
 static bool g_continueRunning = true;
 static size_t g_message_count_send_confirmations = 0;
 
@@ -74,12 +73,20 @@ static void connection_status_callback(IOTHUB_CLIENT_CONNECTION_STATUS result, I
     }
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
+    if (argc != 2)
+    {
+        (void)printf("Please provide the device connection string as the command input.\r\n");
+        return 1;
+    }
+
     IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;
     IOTHUB_MESSAGE_HANDLE message_handle;
     size_t messages_sent = 0;
     const char* telemetry_msg = "test_message";
+
+    const char* connectionString = argv[1];
 
     // Select the Protocol to use with the connection
 #ifdef SAMPLE_MQTT
@@ -170,7 +177,7 @@ int main(void)
             }
 
             IoTHubDeviceClient_LL_DoWork(device_ll_handle);
-            ThreadAPI_Sleep(1);
+            ThreadAPI_Sleep(2000);
 
         } while (g_continueRunning);
 

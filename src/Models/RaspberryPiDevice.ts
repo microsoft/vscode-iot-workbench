@@ -19,6 +19,18 @@ import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplat
 import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
 import {RemoteExtension} from './RemoteExtension';
 
+const constants = {
+  configFile: 'config.json',
+};
+
+interface Config {
+  applicationName: string;
+  buildCommand: string;
+  buildTarget: string;
+}
+
+
+
 class RaspberryPiUploadConfig {
   static host = 'raspberrypi';
   static port = 22;
@@ -95,16 +107,16 @@ export class RaspberryPiDevice implements Device {
 
     await IoTWorkbenchProjectBase.generateIotWorkbenchProjectFile(
         scaffoldType, this.projectFolder);
-    await this.generateSketchFile(scaffoldType, this.templateFilesInfo);
+    await this.generateTemplateFiles(scaffoldType, this.templateFilesInfo);
 
     return true;
   }
 
-  async generateSketchFile(
+  async generateTemplateFiles(
       type: ScaffoldType,
       templateFilesInfo: TemplateFileInfo[]): Promise<boolean> {
     if (!templateFilesInfo) {
-      throw new Error('No sketch file found.');
+      throw new Error('No template file provided.');
     }
 
     // Cannot use forEach here since it's async
@@ -121,7 +133,7 @@ export class RaspberryPiDevice implements Device {
           await FileUtility.writeFile(
               type, targetFilePath, fileInfo.fileContent);
         } catch (error) {
-          throw new Error(`Failed to create sketch file ${
+          throw new Error(`Failed to create from template file ${
               fileInfo.fileName} for Raspberry Pi: ${error.message}`);
         }
       }
@@ -140,22 +152,35 @@ export class RaspberryPiDevice implements Device {
       }
     }
 
-    if (!fs.existsSync(this.outputPath)) {
+    if (!await FileUtility.directoryExists(
+            ScaffoldType.Workspace, this.outputPath)) {
       try {
-        fs.mkdirSync(this.outputPath);
+        await FileUtility.mkdirRecursively(
+            ScaffoldType.Workspace, this.outputPath);
       } catch (error) {
         throw new Error(`Failed to create output path ${
             this.outputPath}. Error message: ${error.message}`);
       }
     }
 
+    // load project config
+    const configPath = path.join(
+        this.projectFolder, FileNames.vscodeSettingsFolderName,
+        constants.configFile);
+    if (!await FileUtility.fileExists(ScaffoldType.Workspace, configPath)) {
+      const message = `Config file does not exist. Please check your settings.`;
+      await vscode.window.showWarningMessage(message);
+      return false;
+    }
+
+    const fileContent =
+        await FileUtility.readFile(ScaffoldType.Workspace, configPath);
+    const config: Config = JSON.parse(fileContent as string);
+
     this.channel.show();
     this.channel.appendLine('Compiling Raspberry Pi device code...');
-    const compileBashFile = '/work/compile_app.sh';
     try {
-      await runCommand(
-          `bash ${compileBashFile} ${this.projectFolder}/src`, '',
-          this.channel);
+      await runCommand(config.buildCommand, this.projectFolder, this.channel);
     } catch (error) {
       throw new Error(
           `Failed to compile Raspberry Pi device code. Error message: ${
@@ -163,9 +188,10 @@ export class RaspberryPiDevice implements Device {
     }
 
     // If successfully compiled, copy compiled files to user workspace
-    const binFilePath = '/work/azure-iot-sdk-c/cmake/iot_application';
-    if (fs.existsSync(binFilePath)) {
-      const getOutputFileCmd = `cp -rf ${binFilePath} ${this.outputPath}`;
+    if (await FileUtility.directoryExists(
+            ScaffoldType.Workspace, config.buildTarget)) {
+      const getOutputFileCmd =
+          `cp -rf ${config.buildTarget} ${this.outputPath}`;
       try {
         await runCommand(getOutputFileCmd, '', this.channel);
       } catch (error) {
@@ -200,7 +226,8 @@ export class RaspberryPiDevice implements Device {
     try {
       const binFilePath =
           path.join(this.outputPath, 'iot_application/azure_iot_app');
-      if (!fs.existsSync(binFilePath)) {
+
+      if (!await FileUtility.fileExists(ScaffoldType.Workspace, binFilePath)) {
         const message =
             `Binary file does not exist. Please compile device code first.`;
         await vscode.window.showWarningMessage(message);
@@ -221,16 +248,11 @@ export class RaspberryPiDevice implements Device {
           RaspberryPiUploadConfig.user, RaspberryPiUploadConfig.password);
       try {
         await ssh.uploadFile(binFilePath, RaspberryPiUploadConfig.projectPath);
-        const binFileName = path.basename(binFilePath);
-        const enableExecPriorityCommand = `cd ${
-            RaspberryPiUploadConfig
-                .projectPath} && chmod -R 755 .\/ && killall -9 ${
-            binFileName} 2>\/dev\/null || .\/${binFileName}`;
+        const enableExecPriorityCommand =
+            `cd ${RaspberryPiUploadConfig.projectPath} && chmod -R 755 .\/`;
         this.channel.show();
         const command = ssh.spawn(enableExecPriorityCommand);
-        command.on('data', async (data) => {
-          this.channel.append(data);
-        });
+        command.on('data', async (data) => {});
         command.on('close', async () => {
           this.channel.appendLine('DONE');
           await ssh.close();
@@ -247,7 +269,7 @@ export class RaspberryPiDevice implements Device {
       const message = `Successfully deploy bin file to Raspberry Pi board.`;
       this.channel.show();
       this.channel.appendLine(message);
-      vscode.window.showInformationMessage(message);
+      await vscode.window.showInformationMessage(message);
     } catch (error) {
       throw new Error(`Upload device code failed. ${error.message}`);
     }
@@ -450,7 +472,8 @@ export class RaspberryPiDevice implements Device {
     try {
       const projectFolderPath = this.projectFolder;
 
-      if (!fs.existsSync(projectFolderPath)) {
+      if (!FileUtility.directoryExists(
+              ScaffoldType.Workspace, projectFolderPath)) {
         throw new Error('Unable to find the device folder inside the project.');
       }
 
