@@ -8,7 +8,6 @@ import * as vscode from 'vscode';
 import {TelemetryContext} from './telemetry';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 import {handleIoTWorkspaceProjectFolder, askAndNewProject} from './utils';
-import {utils} from 'ssh2';
 
 const impor = require('impor')(__dirname);
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
