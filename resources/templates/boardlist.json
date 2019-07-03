@@ -17,13 +17,6 @@
             "projectHostType": "workspace"
         },
         {
-            "name": "IoT button",
-            "id": "iotbutton",
-            "detailInfo": "teXXmo – Microsoft Azure IoT Developer Kit",
-            "helpUrl": "https://aka.ms/button",
-            "projectHostType": "workspace"
-        },
-        {
             "name": "ESP32 Arduino",
             "id": "esp32",
             "detailInfo": "ESP32",
