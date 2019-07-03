@@ -161,20 +161,6 @@ export async function activate(context: vscode.ExtensionContext) {
         deviceUploadBinder);
   };
 
-  const devicePackageManager = async () => {
-    // Initialize Telemetry
-    if (!telemetryWorkerInitialized) {
-      telemetryModule.TelemetryWorker.Initialize(context);
-      telemetryWorkerInitialized = true;
-    }
-
-    const deviceDownloadPackageBinder =
-        deviceOperator.downloadPackage.bind(deviceOperator);
-    telemetryModule.callWithTelemetry(
-        EventNames.devicePackageEvent, outputChannel, true, context,
-        deviceDownloadPackageBinder);
-  };
-
   const deviceSettingsConfigProvider = async () => {
     // Initialize Telemetry
     if (!telemetryWorkerInitialized) {
@@ -234,9 +220,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const azureDeploy = vscode.commands.registerCommand(
       'iotworkbench.azureDeploy', azureDeployProvider);
-
-  const deviceToolchain = vscode.commands.registerCommand(
-      'iotworkbench.installToolchain', devicePackageManager);
 
   const configureDevice = vscode.commands.registerCommand(
       'iotworkbench.configureDevice', deviceSettingsConfigProvider);
@@ -336,7 +319,6 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(deviceUpload);
   context.subscriptions.push(azureProvision);
   context.subscriptions.push(azureDeploy);
-  context.subscriptions.push(deviceToolchain);
   context.subscriptions.push(configureDevice);
   context.subscriptions.push(sendTelemetry);
   context.subscriptions.push(openUri);
