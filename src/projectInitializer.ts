@@ -162,9 +162,9 @@ export class ProjectInitializer {
 
     // add the selection of 'device not in the list'
     projectTemplateList.push({
-      label: 'No Device',
+      label: '$(issue-opened) My device is not in the list...',
       description: '',
-      detail: '$(issue-opened) My device is not in the list...'
+      detail: ''
     });
 
     const templateSelection =
@@ -177,7 +177,7 @@ export class ProjectInitializer {
 
     if (!templateSelection) {
       return;
-    } else if (templateSelection.label === 'No Device') {
+    } else if (templateSelection.label === '$(issue-opened) My device is not in the list...') {
       await utils.TakeNoDeviceSurvey(telemetryContext);
       return;
     }
