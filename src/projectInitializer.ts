@@ -75,16 +75,11 @@ export class ProjectInitializer {
               telemetryContext.properties.platform = platformSelection.label;
             }
 
-            if (platformSelection.label === 'no_platform') {
-              await utils.TakeNoDeviceSurvey(telemetryContext);
-              return;
-            }
-
             // Step 4: Select template
             const resourceRootPath = context.asAbsolutePath(path.join(
                 FileNames.resourcesFolderName, FileNames.templatesFolderName));
             const template = await this.SelectTemplate(
-                resourceRootPath, platformSelection.label);
+                telemetryContext, resourceRootPath, platformSelection.label);
 
             if (!template) {
               telemetryContext.properties.errorMessage =
@@ -144,8 +139,9 @@ export class ProjectInitializer {
         });
   }
 
-  private async SelectTemplate(templateFolderPath: string, platform: string):
-      Promise<ProjectTemplate|undefined> {
+  private async SelectTemplate(
+      telemetryContext: TelemetryContext, templateFolderPath: string,
+      platform: string): Promise<ProjectTemplate|undefined> {
     const templateJson =
         require(path.join(templateFolderPath, FileNames.templateFileName));
 
@@ -164,6 +160,13 @@ export class ProjectInitializer {
       });
     });
 
+    // add the selection of 'device not in the list'
+    projectTemplateList.push({
+      label: 'No Device',
+      description: '',
+      detail: '$(issue-opened) My device is not in the list...'
+    });
+
     const templateSelection =
         await vscode.window.showQuickPick(projectTemplateList, {
           ignoreFocusOut: true,
@@ -173,6 +176,9 @@ export class ProjectInitializer {
         });
 
     if (!templateSelection) {
+      return;
+    } else if (templateSelection.label === 'No Device') {
+      await utils.TakeNoDeviceSurvey(telemetryContext);
       return;
     }
 
