@@ -188,7 +188,7 @@ export class RaspberryPiDevice implements Device {
     }
 
     const message =
-        `Successfully compile Raspberry Pi device code. Now you can use the command 'Azure IoT Device Workbench: Upload Device Code' to upload your compiled executable file to your target device.`;
+        `Successfully compile Raspberry Pi device code. \rNow you can use the command 'Azure IoT Device Workbench: Upload Device Code' to upload your compiled executable file to your target device.`;
     this.channel.show();
     this.channel.appendLine(message);
     vscode.window.showInformationMessage(message);

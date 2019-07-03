@@ -9,14 +9,13 @@ import * as path from 'path';
 import * as fs from 'fs-plus';
 import * as utils from './utils';
 
-import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {TelemetryContext} from './telemetry';
 import {FileNames, ScaffoldType, PlatformType} from './constants';
-import {BoardProvider} from './boardProvider';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import {FileUtility} from './FileUtility';
 import {ProjectTemplate, ProjectTemplateType, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
 import {Platform} from './Models/Interfaces/Platform';
+import {RemoteExtension} from './Models/RemoteExtension';
 
 const impor = require('impor')(__dirname);
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
@@ -33,6 +32,13 @@ export class ProjectInitializer {
   async InitializeProject(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
+    if (RemoteExtension.isRemote(context)) {
+      const message =
+          `You are in a container now. You can create a new project in a new window(click 'File -> New Window').`;
+      vscode.window.showWarningMessage(message);
+      return;
+    }
+
     let openInNewWindow = false;
     // If current window contains other project, open the created project in new
     // window.
@@ -177,7 +183,9 @@ export class ProjectInitializer {
 
     if (!templateSelection) {
       return;
-    } else if (templateSelection.label === '$(issue-opened) My device is not in the list...') {
+    } else if (
+        templateSelection.label ===
+        '$(issue-opened) My device is not in the list...') {
       await utils.TakeNoDeviceSurvey(telemetryContext);
       return;
     }

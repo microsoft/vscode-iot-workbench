@@ -6,7 +6,6 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as path from 'path';
-import * as fs from 'fs-plus';
 import {VSCExpress} from 'vscode-express';
 import {BoardProvider} from './boardProvider';
 import {ProjectInitializer} from './projectInitializer';
@@ -14,11 +13,10 @@ import {DeviceOperator} from './DeviceOperator';
 import {AzureOperator} from './AzureOperator';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import {ConfigHandler} from './configHandler';
-import {ConfigKey, EventNames, FileNames, ScaffoldType} from './constants';
+import {ConfigKey, EventNames, FileNames} from './constants';
 import {TelemetryContext, TelemetryProperties} from './telemetry';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 import {RemoteExtension} from './Models/RemoteExtension';
-import {askAndNewProject, askAndOpenProject} from './utils';
 
 const impor = require('impor')(__dirname);
 const exampleExplorerModule =
@@ -291,6 +289,12 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const workbenchPath =
       vscode.commands.registerCommand('iotworkbench.workbench', async () => {
+        if (RemoteExtension.isRemote(context)) {
+          const message =
+              `You are in a container now. Setting project default path is currently not supported inside the container. You can do it in a new window(click 'File -> New Window').`;
+          vscode.window.showWarningMessage(message);
+          return;
+        }
         const settings: IoTWorkbenchSettings =
             await IoTWorkbenchSettings.createAsync();
         await settings.setWorkbenchPath();
