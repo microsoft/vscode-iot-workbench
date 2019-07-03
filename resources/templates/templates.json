@@ -109,6 +109,11 @@
             "projectHostType": "workspace",
             "boardId": "iotbutton",
             "type": "StreamAnalytics"
+        },
+        {
+            "name": "$(issue-opened) My device is not in the list...",
+            "id": "no_device",
+            "description": ""
         }
     ]
   }
