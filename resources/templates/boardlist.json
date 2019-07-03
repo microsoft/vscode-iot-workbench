@@ -1,7 +1,7 @@
 {
     "boards": [
         {
-            "name": "MX Chip IoT DevKit",
+            "name": "MXChip IoT DevKit ",
             "id": "devkit",
             "detailInfo": "MXChip - Microsoft Azure IoT Developer Kit",
             "defaultBaudRate": 115200,
@@ -17,7 +17,7 @@
             "projectHostType": "workspace"
         },
         {
-            "name": "ESP32 Arduino",
+            "name": "Generic ESP32 boards",
             "id": "esp32",
             "detailInfo": "ESP32",
             "defaultBaudRate": 115200,

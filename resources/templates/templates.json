@@ -22,9 +22,9 @@
         },
         {
             "platform": "Arduino",
-            "name": "ESP32 DevKit",
+            "name": "Generic ESP32 boards",
             "description": "",
-            "detail": "Use ESP32 DevKit (e.g. Azure IoT Kit, M5Stack) with only device code.",
+            "detail": "Use Generic ESP32 boards (e.g. Azure IoT Kit, M5Stack) with only device code.",
             "path": "esp32_device",
             "projectHostType": "workspace",
             "boardId": "esp32",
@@ -32,9 +32,9 @@
         },
         {
             "platform": "Arduino",
-            "name": "ESP32 DevKit with Azure IoT Hub",
+            "name": "Generic ESP32 boards with Azure IoT Hub",
             "description": "",
-            "detail": "Use ESP32 DevKit (e.g. Azure IoT Kit, M5Stack) with Azure IoT Hub, such as sending sensor data to cloud.",
+            "detail": "Use Generic ESP32 boards (e.g. Azure IoT Kit, M5Stack) with Azure IoT Hub, such as sending sensor data to cloud.",
             "path": "esp32_iothub",
             "projectHostType": "workspace",
             "boardId": "esp32",
