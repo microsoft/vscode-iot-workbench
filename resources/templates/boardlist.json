@@ -1,7 +1,7 @@
 {
     "boards": [
         {
-            "name": "IoT DevKit",
+            "name": "MXChip IoT DevKit",
             "id": "devkit",
             "detailInfo": "MXChip - Microsoft Azure IoT Developer Kit",
             "defaultBaudRate": 115200,
@@ -31,6 +31,20 @@
                 "architecture": "esp32"
             },
             "projectHostType": "workspace"
+        },
+        {
+            "name": "IoT button",
+            "id": "iotbutton",
+            "detailInfo": "teXXmo – Microsoft Azure IoT Developer Kit",
+            "helpUrl": "https://aka.ms/button",
+            "projectHostType": "workspace"
+        },
+        {
+            "name": "Raspberry Pi",
+            "id": "raspberrypi",
+            "detailInfo": "Raspberry Pi",
+            "helpUrl": "https://www.raspberrypi.org/",
+            "projectHostType": "container"
         }
     ]
 }

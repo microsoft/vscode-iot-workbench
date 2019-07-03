@@ -291,7 +291,7 @@ export async function activate(context: vscode.ExtensionContext) {
       vscode.commands.registerCommand('iotworkbench.workbench', async () => {
         if (RemoteExtension.isRemote(context)) {
           const message =
-              `You are in a container now. Setting project default path is currently not supported inside the container. You can do it in a new window(click 'File -> New Window').`;
+              `The project is open in Docker container now, Please open a new window and rerun this command.`;
           vscode.window.showWarningMessage(message);
           return;
         }

@@ -59,7 +59,7 @@ export class AzureOperator {
       telemetryContext: TelemetryContext) {
     if (RemoteExtension.isRemote(context)) {
       const message =
-          `You are in a container now. 'Azure IoT Device Workbench: Depoly to Azure...' command is currently not supported inside the container.`;
+          `The project is currently open in container now. 'Azure IoT Device Workbench: Depoly to Azure...' is not supported inside the container.`;
       vscode.window.showWarningMessage(message);
       return;
     }

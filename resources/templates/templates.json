@@ -42,7 +42,7 @@
         },
         {
             "platform": "Arduino",
-            "name": "IoT DevKit",
+            "name": "MXChip IoT DevKit",
             "description": "",
             "detail": "Create project with only device code.",
             "path": "devkit_device",
@@ -52,7 +52,7 @@
         },
         {
             "platform": "Arduino",
-            "name": "IoT DevKit with Azure IoT Hub",
+            "name": "MXChip IoT DevKit with Azure IoT Hub",
             "description": "",
             "detail": "Create project that connects to Azure IoT Hub, such as sending sensor data to cloud.",
             "path": "devkit_iothub",
@@ -62,7 +62,7 @@
         },
         {
             "platform": "Arduino",
-            "name": "IoT DevKit With Azure Functions",
+            "name": "MXChip IoT DevKit With Azure Functions",
             "description": "",
             "detail": "Create project that connects to Azure IoT Hub and processes device data further in Azure Functions.",
             "path": "devkit_azurefunctions",

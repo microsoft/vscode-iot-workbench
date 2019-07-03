@@ -189,7 +189,7 @@ export class ExampleExplorer {
       telemetryContext: TelemetryContext) {
     if (RemoteExtension.isRemote(context)) {
       const message =
-          `You are in a container now. You can open examples in a new window(click 'File -> New Window').`;
+          `The project is open in Docker container now, Please open a new window and rerun this command.`;
       vscode.window.showWarningMessage(message);
       return;
     }
