@@ -223,10 +223,14 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
       projectType: ProjectTemplateType, boardId: string,
       openInNewWindow: boolean): Promise<boolean> {
+    const result = await this.checkPrerequisites();
+    if (!result) {
+      return false;
+    }
     const scaffoldType = ScaffoldType.Local;
-    const rootFolderPathExists =
-        await FileUtility.directoryExists(scaffoldType, rootFolderPath);
-    if (!rootFolderPathExists) {
+    if (rootFolderPath !== undefined) {
+      await FileUtility.mkdirRecursively(scaffoldType, rootFolderPath);
+    } else {
       throw new Error(
           'Unable to find the root path, please open the folder and initialize project again.');
     }
@@ -416,16 +420,6 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     }
 
     try {
-      if (!RemoteExtension.isRemote(this.extensionContext)) {
-        const res = await RemoteExtension.checkRemoteExtension();
-        if (!res) {
-          const message = `Remote extension is not available. Please install ${
-              DependentExtensions.remote} first.`;
-          this.channel.show();
-          this.channel.appendLine(message);
-          return false;
-        }
-      }
       setTimeout(
           // TODO: better implement this through VS Remote API.
           // Currently implemented in helper extension iotcube.
@@ -437,5 +431,17 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     } catch (error) {
       throw error;
     }
+  }
+
+  async checkPrerequisites(): Promise<boolean> {
+    const res = await RemoteExtension.checkRemoteExtension();
+    if (!res) {
+      const message = `Remote extension is not available. Please install ${
+          DependentExtensions.remote} first.`;
+      this.channel.show();
+      this.channel.appendLine(message);
+      return false;
+    }
+    return true;
   }
 }

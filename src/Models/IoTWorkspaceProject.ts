@@ -243,9 +243,9 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
       projectType: ProjectTemplateType, boardId: string,
       openInNewWindow: boolean): Promise<boolean> {
     const scaffoldType = ScaffoldType.Local;
-    const rootFolderPathExists =
-        await FileUtility.directoryExists(scaffoldType, rootFolderPath);
-    if (!rootFolderPathExists) {
+    if (rootFolderPath !== undefined) {
+      await FileUtility.mkdirRecursively(scaffoldType, rootFolderPath);
+    } else {
       throw new Error(
           'Unable to find the root path, please open the folder and initialize project again.');
     }
