@@ -119,8 +119,8 @@ export class DigitalTwinDiagnostic {
     if (jsonKey === '@context') {
       caseInsensitive = true;
       const contextUri = this.dtInterface === dtContext ?
-          'http://azureiot.com/v0/contexts/Interface.json' :
-          'http://azureiot.com/v0/contexts/CapabilityModel.json';
+          'http://azureiot.com/v1/contexts/Interface.json' :
+          'http://azureiot.com/v1/contexts/CapabilityModel.json';
       values = [contextUri];
     } else if (jsonKey === '@id') {
       caseInsensitive = true;
