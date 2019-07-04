@@ -74,7 +74,7 @@ suite('IoT Workbench: PnPAPI', () => {
           await pnpMetamodelRepositoryClient.GetInterfaceAsync(
               sampleUri, undefined, true);
 
-      assert.equal((interfaceContext.contents as string).length > 0, true);
+      assert.equal(interfaceContext.content !== null, true);
     }
 
     const fakeModelId = 'urn:1223:123:mxchip:1234';
@@ -103,12 +103,12 @@ suite('IoT Workbench: PnPAPI', () => {
       const templateContext =
           await pnpMetamodelRepositoryClient.GetCapabilityModelAsync(
               sampleUri, builder.RepositoryIdValue, true);
-      assert.equal((templateContext.contents as string).length > 0, true);
+      assert.equal(templateContext.content !== null, true);
 
       const templateContext2 =
           await pnpMetamodelRepositoryClient.GetCapabilityModelAsync(
               sampleUri, builder.RepositoryIdValue, false);
-      assert.equal((templateContext2.contents as string).length > 0, true);
+      assert.equal(templateContext2.content !== null, true);
     }
   });
 

@@ -17,8 +17,10 @@ export interface DigitalTwinModelBase {
   lastUpdated: string;
 }
 
-export interface DigitalTwinModel extends DigitalTwinModelBase {
-  contents: string;
+export interface GetModelResult {
+  etag: string;
+  urnId: string;
+  content: {[key: string]: string};
 }
 
 export interface LocalizedData {

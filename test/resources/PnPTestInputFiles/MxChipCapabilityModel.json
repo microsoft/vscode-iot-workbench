@@ -3,7 +3,10 @@
   "@type": "CapabilityModel",
   "displayName": "MX Chip CapabilityModel",
   "implements": [
-      "http://example.com/MXChip/1.0.0"
+    {
+      "schema": "urn:vscsample:mxchip:1",
+      "name": "mxchip"
+    }
    ],
-  "@context": "http://azureiot.com/v0/contexts/CapabilityModel.json"
+  "@context": "http://azureiot.com/v1/contexts/CapabilityModel.json"
 }

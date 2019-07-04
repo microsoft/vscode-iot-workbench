@@ -10,7 +10,7 @@ import {MetaModelType, SearchOptions, MetaModelUpsertRequest} from './DataContra
 import {DigitalTwinConnectionStringBuilder} from './DigitalTwinConnectionStringBuilder';
 import {DigitalTwinSharedAccessKey} from './DigitalTwinSharedAccessKey';
 import {ConfigKey} from '../../constants';
-import {DigitalTwinModel} from './DataContracts/DigitalTwinModel';
+import {GetModelResult} from './DataContracts/DigitalTwinModel';
 import {ConfigHandler} from '../../configHandler';
 import {DigitalTwinConstants} from '../DigitalTwinConstants';
 
@@ -53,7 +53,7 @@ export class DigitalTwinMetamodelRepositoryClient {
 
   async GetInterfaceAsync(
       modelId: string, repositoryId?: string,
-      expand = false): Promise<DigitalTwinModel> {
+      expand = false): Promise<GetModelResult> {
     if (repositoryId && !this.dtSharedAccessKey) {
       throw new Error(
           'The repository connection string is required to get the interface.');
@@ -65,7 +65,7 @@ export class DigitalTwinMetamodelRepositoryClient {
 
   async GetCapabilityModelAsync(
       modelId: string, repositoryId?: string,
-      expand = false): Promise<DigitalTwinModel> {
+      expand = false): Promise<GetModelResult> {
     if (repositoryId && !this.dtSharedAccessKey) {
       throw new Error(
           'The repository connection string is required to get the capability model.');
@@ -224,7 +224,7 @@ export class DigitalTwinMetamodelRepositoryClient {
   private async MakeGetModelRequestAsync(
       metaModelType: MetaModelType, modelId: string, repositoryId?: string,
       expand = false,
-      apiVersion = DigitalTwinConstants.apiVersion): Promise<DigitalTwinModel> {
+      apiVersion = DigitalTwinConstants.apiVersion): Promise<GetModelResult> {
     const targetUri =
         this.GenerateFetchModelUri(modelId, apiVersion, repositoryId, expand);
 
@@ -243,11 +243,14 @@ export class DigitalTwinMetamodelRepositoryClient {
       resolveWithFullResponse: true
     };
 
-    return new Promise<DigitalTwinModel>((resolve, reject) => {
+    return new Promise<GetModelResult>((resolve, reject) => {
       request(options)
           .then(response => {
-            const result: DigitalTwinModel = response.body as DigitalTwinModel;
-            result.etag = response.headers['etag'];
+            const result: GetModelResult = {
+              content: response.body,
+              etag: response.headers['etag'],
+              urnId: response.headers['x-ms-model-id']
+            };
             return resolve(result);
           })
           .catch(err => {

@@ -1,5 +1,5 @@
 {
-  "@id": "urn:azureiot:deviceManagement:test:1",
+  "@id": "urn:vscsample:mxchip:1",
   "@type": "Interface",
   "displayName": "vscextensiontest",
   "contents": [

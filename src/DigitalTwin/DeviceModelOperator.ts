@@ -18,7 +18,7 @@ import {DialogResponses} from '../DialogResponses';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
 import {DigitalTwinConnectionStringBuilder} from './DigitalTwinApi/DigitalTwinConnectionStringBuilder';
-import {DigitalTwinModel, DigitalTwinModelBase} from './DigitalTwinApi/DataContracts/DigitalTwinModel';
+import {GetModelResult, DigitalTwinModelBase} from './DigitalTwinApi/DataContracts/DigitalTwinModel';
 import {TelemetryContext} from '../telemetry';
 
 const constants = {
@@ -482,7 +482,7 @@ export class DeviceModelOperator {
     for (const id of fileIds) {
       channel.appendLine(`${DigitalTwinConstants.dtPrefix} Start getting ${
           metaModelValue} with id ${id}.`);
-      let fileMetaData: DigitalTwinModel;
+      let fileMetaData: GetModelResult;
       try {
         if (metaModelType === MetaModelType.Interface) {
           fileMetaData = await dtMetamodelRepositoryClient.GetInterfaceAsync(
@@ -493,21 +493,18 @@ export class DeviceModelOperator {
                   id, repositoryId, true);
         }
         if (fileMetaData) {
-          const fileJson = JSON.parse(fileMetaData.contents as string);
-          const pathName = url.parse(fileJson[constants.idName]).pathname;
-          if (!pathName) {
-            throw new Error(`Unable to parse the id of the file. id: ${
-                fileJson[constants.idName]}`);
+          const modelId = fileMetaData.urnId;
+          if (!modelId) {
+            throw new Error(`Unable to get the model id of the file.`);
           }
 
-          const names: string[] = pathName.replace(/^\//, '').split('/');
-          // at least the path should contain name & version
-          if (names.length < 2) {
-            throw new Error(`The id of the file is not valid. id: ${
-                fileJson[constants.idName]}`);
+          const names: string[] = modelId.split(':');
+          // at least the path should contain urn, namespace, name & version
+          if (names.length < 4) {
+            throw new Error(`The id of the file is not valid. id: ${modelId}`);
           }
 
-          const displayName = names[names.length - 2];
+          const displayName = names.join('_');
           let counter = 0;
           let candidateName = displayName + suffix;
           while (true) {
@@ -521,7 +518,7 @@ export class DeviceModelOperator {
 
           fs.writeFileSync(
               path.join(rootPath, candidateName),
-              fileMetaData.contents as string);
+              JSON.stringify(fileMetaData.content, null, 4));
           await vscode.window.showTextDocument(
               vscode.Uri.file(path.join(rootPath, candidateName)));
           channel.appendLine(`${DigitalTwinConstants.dtPrefix} Downloading ${
