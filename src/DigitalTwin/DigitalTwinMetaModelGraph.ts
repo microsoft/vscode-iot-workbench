@@ -439,10 +439,21 @@ export class DigitalTwinMetaModelParser {
 
   getStringValuePattern(key: string) {
     switch (key) {
+      case '@id':
+        return /^urn:[a-zA-Z0-9_]+:[a-zA-Z0-9_]+:\d+$/;
       case 'name':
         return /^[a-zA-Z0-9_]+$/;
-      case 'implements':
-        return /^(http|https):\/\/.+\.interface\/.json$/;
+      // case 'implements':
+      //   return /^(http|https):\/\/.+\.interface\/.json$/;
+      default:
+        return null;
+    }
+  }
+
+  getStringValueLengthRange(key: string) {
+    switch (key) {
+      case '@id':
+        return [0, 256];
       default:
         return null;
     }
