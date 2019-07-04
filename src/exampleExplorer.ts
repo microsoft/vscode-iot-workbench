@@ -295,8 +295,9 @@ export class ExampleExplorer {
       return false;
     }
 
-    const boardList = context.asAbsolutePath(
-        path.join(FileNames.resourcesFolderName, FileNames.templatesFolderName, FileNames.boardListFileName));
+    const boardList = context.asAbsolutePath(path.join(
+        FileNames.resourcesFolderName, FileNames.templatesFolderName,
+        FileNames.boardListFileName));
     const boardsJson: {boards: Board[]} = require(boardList);
 
     telemetryContext.properties.Example = this._exampleName;
