@@ -122,6 +122,9 @@ export class DigitalTwinDiagnostic {
           'http://azureiot.com/v0/contexts/Interface.json' :
           'http://azureiot.com/v0/contexts/CapabilityModel.json';
       values = [contextUri];
+    } else if (jsonKey === '@id') {
+      caseInsensitive = true;
+      values = ['XMLSchema#string'];
     } else {
       values = this._dtParser.getStringValuesFromShortName(dtContext, jsonKey);
     }
@@ -149,6 +152,8 @@ export class DigitalTwinDiagnostic {
       document: vscode.TextDocument, jsonValue: Json.StringValue,
       jsonKey: string) {
     const pattern = this._dtParser.getStringValuePattern(jsonKey);
+    const lengthRange = this._dtParser.getStringValueLengthRange(jsonKey);
+    const issues: Issue[] = [];
     if (pattern) {
       if (!pattern.test(jsonValue.toFriendlyString())) {
         const startIndex = jsonValue.span.startIndex;
@@ -157,10 +162,21 @@ export class DigitalTwinDiagnostic {
             `Invalid value. Valid value must match this regular expression ${
                 pattern.toString()}`;
         const issue: Issue = {startIndex, endIndex, message};
-        return [issue];
+        issues.push(issue);
       }
     }
-    return [];
+    if (lengthRange) {
+      if (jsonValue.toFriendlyString().length < lengthRange[0] ||
+          jsonValue.toFriendlyString().length > lengthRange[1]) {
+        const startIndex = jsonValue.span.startIndex;
+        const endIndex = jsonValue.span.endIndex;
+        const message = `Invalid value. Valid value must has length between ${
+            lengthRange.join(' and ')}.`;
+        const issue: Issue = {startIndex, endIndex, message};
+        issues.push(issue);
+      }
+    }
+    return issues;
   }
 
   getArrayIssues(

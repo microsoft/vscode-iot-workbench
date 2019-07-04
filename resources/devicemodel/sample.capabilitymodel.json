@@ -1,5 +1,5 @@
 {
-  "@id": "urn:vscsample:/{CAPABILITYMODELNAME}/1",
+  "@id": "urn:vscsample:{CAPABILITYMODELNAME}:1",
   "@type": "CapabilityModel",
   "displayName": "{CAPABILITYMODELNAME}",
   "implements": [
