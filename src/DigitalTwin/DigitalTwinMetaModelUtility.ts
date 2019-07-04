@@ -111,8 +111,7 @@ export class DigitalTwinMetaModelUtility {
     this.capabilityModelUrl = extensionPackage.capabilityModelUrl;
   }
   async getGraph() {
-    const graphFileFromRemote =
-        null;  // await this.blobService.getFile(this.graphUrl);
+    const graphFileFromRemote = await this.blobService.getFile(this.graphUrl);
     const graphFilePath = this.context.asAbsolutePath(path.join(
         DigitalTwinFileNames.resourcesFolderName,
         DigitalTwinFileNames.deviceModelFolderName,
