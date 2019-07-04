@@ -33,15 +33,17 @@ Please help to take the [survey](https://www.surveymonkey.com/r/C7NY7KJ) to let 
 
 ### Prerequisites
 
-- [Visual Studio Code](https://code.visualstudio.com/), with version >= 1.35.1.
-- [Docker](https://www.docker.com/get-started).
+For developing on Embedded Linux device, you will need Docker and Visual Studio Code version with [Visual Studio Code Remote Development](https://aka.ms/vscode-remote) to compile the device code in the [containerized device toolchain](https://aka.ms/iot-device-cube).
 
-   For embedded Linux developing, you will need Docker and Visual Studio Code version with [Visual Studio Code Remote Development](https://aka.ms/vscode-remote) to compile the device code in the [containerized device toolchain](#).
+- [Visual Studio Code](https://code.visualstudio.com/), with version >= 1.35.1.
+- [Docker Desktop / CE](https://www.docker.com/get-started).
 
 ### Install extensions
 
 1. Launch VS Code, in the Extension tab, find and install **"Azure IoT Device Workbench"**.
+
     ![Extension install Device Workbench](./docs/images/device-workbench.png)
+
 2. Reload the window and make sure all the dependency extensions are correctly installed:
 
    - Azure Account
@@ -51,13 +53,13 @@ Please help to take the [survey](https://www.surveymonkey.com/r/C7NY7KJ) to let 
    - Remote Development
 
 
-### Install Docker <sup>for embedded Linux </sup>
+### Install Docker
 
-[Visual Studio Code Remote Development](https://aka.ms/vscode-remote) has prerequisites for the specific host / container / WSL distribution you will be connecting to.
+[VS Code Remote](https://aka.ms/vscode-remote) needs Docker runtime installed in order to use local containers, which is required for developing Embedded Linux devices in the Device Workbench.
 
 - Install Docker Desktop for Windows
 
-  Please follow this [Installation Guide](https://docs.docker.com/docker-for-windows/install/) to install the Docker Desktop if you haven't installed it in your Windows machine, and  make sure enabling driver sharing:
+  Follow the [installation guide](https://docs.docker.com/docker-for-windows/install/) and make sure to enable driver sharing for Docker to access your local folder:
 
   1. Right click the **Docker** icon in the task try and select "Settings".
   2. Click on the "Shared Drivers" section and choose the driver to be shared.
@@ -66,7 +68,8 @@ Please help to take the [survey](https://www.surveymonkey.com/r/C7NY7KJ) to let 
 
 - Install Docker Desktop for Mac
 
-  Please follow this [Installation Guide](https://docs.docker.com/docker-for-mac/install/) to install the Docker Desktop if you haven't installed it in your Mac.
+  Follow the [installation guide](https://docs.docker.com/docker-for-mac/install/) and make sure to enable driver sharing for Docker to access your local folder:
+    *[TBD for Mac]*
 
 - Get Docker for Linux
 
@@ -80,45 +83,45 @@ Depending on the device platform you choose, follow the resources below to devel
 
 To simplify the cross compiling toolchain, Azure IoT Device SDK and dependencies setup and configuration, Device Workbench put all these components in the container. All cross-compiling works happen in it. Here is the quick start of using it to develop and compile a simple device app written in C and running on Raspberry Pi to send telemetry data to Azure IoT Hub.
 
-1. Create a embedded Linux
+#### Create new project
 
-   - Click `F1` to open the command palette, then type and select **Azure IoT Device Workbench: Create Project...**.
+1. Within VS Code, press `F1` to open the command palette, then type and select **Azure IoT Device Workbench: Create Project...**.
 
-   - Select the working folder (only the first time) and type in the name of the project.
+2. Select the working folder (only for the first time) and enter the name of your project.
 
-   - There are 2 platforms showed up: **Arduino** and **Embedded Linux**, please select **Embedded Linux**.
+3. Select **Embedded Linux** from device platform list.
 
-   - Select the dev container according to your target device, e.g. choose **32-bit Armv7 Cortex-A** if you're using a Raspberry Pi 3 Model B+ running Raspbian.
+4. Select the dev container based on your target device, e.g. choose **32-bit Armv7 Cortex-A** if you're using a Raspberry Pi 3 Model B+ running Raspbian.
 
-   - It may take around 1min for preparing the dev container for the ew project, depends on your network speed. Can click the *detail* link in the notification UI for more details:
+5. For the first time, it takes around 1 to 3 mintues depending on your Internet speed to download and prepare the dev container. You can click the **details** link on the notification for the progress:
 
      ![Prepare Dev Container](./docs/images/prepare-dev-container.png)
 
-   - Once the Dev Container is ready Visual Studio Code UI will open the new project with the sample code `iothub_sample.c` under the `src` subfolder.
+6. Once the dev container is ready, VS Code will open a new window with project files the sample code.
 
-2. Compile the code
+#### Compile the code
 
-   Modify the code and add your functions, select **Azure IoT Device Workbench: Compile Device Code** from the command palette. It starts compile, the cross-compiling is happened in the Dev Container and pops up a notification once it's done.
+1. The `iothub_sample.c` under the `src` subfolder is the source file contains the logic. You can modify or add your own code in it.
 
-3. Upload to target device
+2. To compile the code, press `F1`, type and select **Azure IoT Device Workbench: Compile Device Code** from the command palette.
 
-   Before upload the executable binary file to the target device, please make sure:
+3. The cross-compiling of the code happens in the dev container. Once its done, it pops up the notification.
 
-   -  The running OS on  the device is correct (e.g. Raspbian is 32-bit whatever the Raspberry Pi is 32-bit or 64-bit).
-   - The SSH is enabled on the device.
-   - Your dev machine can access the target device via SSH.
+#### Upload to target device
 
-   Then execute the  **Azure IoT Device Workbench: Upload Device Code** from the command palette, here are 2 options: 
+1. Before upload the executable binary file to the target device, please make sure:
+
+   - The running OS on the device is correct (e.g. Raspbian running on Raspberry Pi 3B+).
+   - The SSH is enabled on the device. Follw this [instructions](https://itsfoss.com/ssh-into-raspberry/) to do so.
+   - Get the IP address of the device so that you can deploy the compiled binary to the device via SSH.
+
+2. In VS Code, press `F1`, type and select **Azure IoT Device Workbench: Upload Device Code** from the command palette, then select **Manual setup** and enter IP address, port, user name and password to deploy the compiled binary via SSH to Raspberry Pi.
 
    ![Prepare Dev Container](./docs/images/upload-options.png)
 
-   - **Auto discover** leverage the mDNS protocol to find out devices which the SSH port is opened within small networks.
+### Verify the result
 
-   - If **Auto discover** can't find your target device, you can manually input the IP address to connect the target device for uploading.
-
-   Select the right device and then input the port for SSH which the default setting is '22', then input the right user name and password for SSH login. Last step is the target folder on the  device for uploading.
-
-4. Run 
+1. To start running the deployed binary, SSH into your Raspberry Pi device. You can follow this [instruction](https://itsfoss.com/ssh-into-raspberry/) to do so.
 
 ### Arduino
 
