@@ -5,5 +5,5 @@
   "implements": [
       "http://example.com/MXChip/1.0.0"
    ],
-  "@context": "http://azureiot.com/v0/contexts/CapabilityModel.json"
+  "@context": "http://azureiot.com/v1/contexts/CapabilityModel.json"
 }
