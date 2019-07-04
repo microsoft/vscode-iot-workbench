@@ -15,6 +15,7 @@ import {FileNames} from './constants';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 import {VSCExpress} from 'vscode-express';
+import {RemoteExtension} from './Models/RemoteExtension';
 
 type OptionsWithUri = import('request-promise').OptionsWithUri;
 
@@ -186,6 +187,12 @@ export class ExampleExplorer {
   async selectBoard(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
+    if (RemoteExtension.isRemote(context)) {
+      const message =
+          `The project is open in Docker container now, Please open a new window and rerun this command.`;
+      vscode.window.showWarningMessage(message);
+      return;
+    }
     const boardFolderPath = context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName));
     const boardProvider = new BoardProvider(boardFolderPath);

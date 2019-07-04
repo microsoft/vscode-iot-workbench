@@ -6,7 +6,6 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as path from 'path';
-import * as fs from 'fs-plus';
 import {VSCExpress} from 'vscode-express';
 import {BoardProvider} from './boardProvider';
 import {ProjectInitializer} from './projectInitializer';
@@ -14,11 +13,10 @@ import {DeviceOperator} from './DeviceOperator';
 import {AzureOperator} from './AzureOperator';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import {ConfigHandler} from './configHandler';
-import {ConfigKey, EventNames, FileNames, ScaffoldType} from './constants';
+import {ConfigKey, EventNames, FileNames} from './constants';
 import {TelemetryContext, TelemetryProperties} from './telemetry';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 import {RemoteExtension} from './Models/RemoteExtension';
-import {askAndNewProject, askAndOpenProject} from './utils';
 
 const impor = require('impor')(__dirname);
 const exampleExplorerModule =
@@ -161,20 +159,6 @@ export async function activate(context: vscode.ExtensionContext) {
         deviceUploadBinder);
   };
 
-  const devicePackageManager = async () => {
-    // Initialize Telemetry
-    if (!telemetryWorkerInitialized) {
-      telemetryModule.TelemetryWorker.Initialize(context);
-      telemetryWorkerInitialized = true;
-    }
-
-    const deviceDownloadPackageBinder =
-        deviceOperator.downloadPackage.bind(deviceOperator);
-    telemetryModule.callWithTelemetry(
-        EventNames.devicePackageEvent, outputChannel, true, context,
-        deviceDownloadPackageBinder);
-  };
-
   const deviceSettingsConfigProvider = async () => {
     // Initialize Telemetry
     if (!telemetryWorkerInitialized) {
@@ -234,9 +218,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const azureDeploy = vscode.commands.registerCommand(
       'iotworkbench.azureDeploy', azureDeployProvider);
-
-  const deviceToolchain = vscode.commands.registerCommand(
-      'iotworkbench.installToolchain', devicePackageManager);
 
   const configureDevice = vscode.commands.registerCommand(
       'iotworkbench.configureDevice', deviceSettingsConfigProvider);
@@ -308,6 +289,12 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const workbenchPath =
       vscode.commands.registerCommand('iotworkbench.workbench', async () => {
+        if (RemoteExtension.isRemote(context)) {
+          const message =
+              `The project is open in Docker container now, Please open a new window and rerun this command.`;
+          vscode.window.showWarningMessage(message);
+          return;
+        }
         const settings: IoTWorkbenchSettings =
             await IoTWorkbenchSettings.createAsync();
         await settings.setWorkbenchPath();
@@ -336,7 +323,6 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(deviceUpload);
   context.subscriptions.push(azureProvision);
   context.subscriptions.push(azureDeploy);
-  context.subscriptions.push(deviceToolchain);
   context.subscriptions.push(configureDevice);
   context.subscriptions.push(sendTelemetry);
   context.subscriptions.push(openUri);
