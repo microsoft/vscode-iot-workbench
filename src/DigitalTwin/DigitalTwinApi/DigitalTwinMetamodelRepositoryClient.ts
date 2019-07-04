@@ -16,7 +16,7 @@ import {DigitalTwinConstants} from '../DigitalTwinConstants';
 
 const constants = {
   mediaType: 'application/json',
-  apiModel: '/models/ref:modelId',
+  apiModel: '/models',
   modelSearch: '/models/search'
 };
 
@@ -140,7 +140,12 @@ export class DigitalTwinMetamodelRepositoryClient {
   /// <summary>
   /// Deletes an interface for given modelId.
   /// </summary>
-  async DeleteInterfaceAsync(modelId: string, repositoryId?: string) {
+  async DeleteInterfaceAsync(modelId: string, repositoryId: string) {
+    if (!repositoryId) {
+      throw new Error(
+          'The repository id is required to delete capability model. Delete interface is not allowed for public repository.');
+    }
+
     if (repositoryId && !this.dtSharedAccessKey) {
       throw new Error(
           'The connection string is required to delete interface in organizational model repository.');
@@ -153,8 +158,13 @@ export class DigitalTwinMetamodelRepositoryClient {
   /// <summary>
   /// Deletes a capability model for given model id.
   /// </summary>
-  async DeleteCapabilityModelAsync(modelId: string, repositoryId?: string) {
-    if (repositoryId && !this.dtSharedAccessKey) {
+  async DeleteCapabilityModelAsync(modelId: string, repositoryId: string) {
+    if (!repositoryId) {
+      throw new Error(
+          'The repository id is required to delete capability model. Delete capability model is not allowed for public repository.');
+    }
+
+    if (!this.dtSharedAccessKey) {
       throw new Error(
           'The connection string is required to delete capability model in organizational model repository.');
     }
@@ -171,11 +181,12 @@ export class DigitalTwinMetamodelRepositoryClient {
     let targetUri = this.metaModelRepositoryHostName.toString();
 
     if (repositoryId) {
-      targetUri += `${constants.apiModel}?modelId=${modelId}&repositoryId=${
-          repositoryId}&api-version=${apiVersion}`;
-    } else {
       targetUri +=
-          `${constants.apiModel}?modelId=${modelId}&api-version=${apiVersion}`;
+          `${constants.apiModel}/${encodeURIComponent(modelId)}?repositoryId=${
+              repositoryId}&api-version=${apiVersion}`;
+    } else {
+      targetUri += `${constants.apiModel}/${
+          encodeURIComponent(modelId)}?api-version=${apiVersion}`;
     }
 
     let authenticationString = '';
@@ -184,7 +195,7 @@ export class DigitalTwinMetamodelRepositoryClient {
       authenticationString = this.dtSharedAccessKey.GenerateSASToken();
     }
 
-    const payload: MetaModelUpsertRequest = {contents};
+    const payload = JSON.parse(contents);
 
     const options: request.OptionsWithUri = {
       method: 'PUT',
@@ -305,10 +316,11 @@ export class DigitalTwinMetamodelRepositoryClient {
   private async MakeDeleteRequestAsync(
       metaModelType: MetaModelType, modelId: string, repositoryId?: string,
       apiVersion = DigitalTwinConstants.apiVersion) {
-    const queryString = repositoryId ? `&repositoryId=${repositoryId}` : '';
-    const resourceUrl = `${this.metaModelRepositoryHostName.toString()}${
-        constants.apiModel}?modelId=${modelId}${queryString}&api-version=${
-        apiVersion}`;
+    const queryString = `?repositoryId=${repositoryId}`;
+    const resourceUrl =
+        `${this.metaModelRepositoryHostName.toString()}${constants.apiModel}/${
+            encodeURIComponent(
+                modelId)}${queryString}&api-version=${apiVersion}`;
 
     let authenticationString = '';
 
@@ -341,9 +353,9 @@ export class DigitalTwinMetamodelRepositoryClient {
   private GenerateFetchModelUri(
       modelId: string, apiVersion: string, repositoryId?: string,
       expand = false) {
-    let result = `${this.metaModelRepositoryHostName.toString()}${
-        constants.apiModel}?modelId=${
-        encodeURIComponent(modelId)}&api-version=${apiVersion}`;
+    let result =
+        `${this.metaModelRepositoryHostName.toString()}${constants.apiModel}/${
+            encodeURIComponent(modelId)}?api-version=${apiVersion}`;
     const expandString = expand ? `&expand=true` : '';
     if (repositoryId) {
       result += `${expandString}&repositoryId=${repositoryId}`;

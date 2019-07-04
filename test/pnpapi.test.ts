@@ -68,7 +68,7 @@ suite('IoT Workbench: PnPAPI', () => {
             '', null, undefined, 50);
 
     if (searchResults.results.length > 0) {
-      const sampleUri = searchResults.results[0].id;
+      const sampleUri = searchResults.results[0].urnId;
       // get the interface by interfaceId.
       const interfaceContext =
           await pnpMetamodelRepositoryClient.GetInterfaceAsync(
@@ -77,7 +77,7 @@ suite('IoT Workbench: PnPAPI', () => {
       assert.equal((interfaceContext.contents as string).length > 0, true);
     }
 
-    const fakeModelId = 'http://1223.123/interfaces/mxchip/1.0.011122';
+    const fakeModelId = 'urn:1223:123:mxchip:1234';
     try {
       await pnpMetamodelRepositoryClient.GetInterfaceAsync(
           fakeModelId, undefined, false);
@@ -98,7 +98,7 @@ suite('IoT Workbench: PnPAPI', () => {
             '', null, builder.RepositoryIdValue, 50);
 
     if (searchResults.results.length > 0) {
-      const sampleUri = searchResults.results[0].id;
+      const sampleUri = searchResults.results[0].urnId;
       // get the interface.
       const templateContext =
           await pnpMetamodelRepositoryClient.GetCapabilityModelAsync(

@@ -6,12 +6,13 @@ export interface DigitalTwinModelBase {
   comment?: string;
   description?: string;
   displayName?: LocalizedData[];
-  id: string;
+  urnId: string;
   modelName: string;
-  version: string;
+  version: number;
   type: string;
   etag: string;
-  tenantId: string;
+  publisherId: string;
+  publisherName: string;
   createdOn: string;
   lastUpdated: string;
 }

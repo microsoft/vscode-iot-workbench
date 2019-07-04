@@ -1,5 +1,5 @@
 {
-  "@id": "http://vscextensiontest.com/testinterface/1.0.0",
+  "@id": "urn:azureiot:deviceManagement:test:1",
   "@type": "Interface",
   "displayName": "vscextensiontest",
   "contents": [
@@ -61,5 +61,5 @@
       }
     }
   ],
-  "@context": "http://azureiot.com/v0/contexts/Interface.json"
+  "@context": "http://azureiot.com/v1/contexts/Interface.json"
 }
