@@ -119,12 +119,6 @@ export class ProjectInitializer {
                   });
                 });
 
-
-            if (projectPath) {
-              await FileUtility.mkdirRecursively(
-                  ScaffoldType.Local, projectPath);
-            }
-
             let project;
             if (template.platform === PlatformType.EMBEDDEDLINUX) {
               project =
