@@ -1,9 +1,12 @@
 {
-  "@id": "http://vsc-iotpnp-sample.com/{CAPABILITYMODELNAME}/1.0.0",
+  "@id": "urn:vscsample:/{CAPABILITYMODELNAME}/1",
   "@type": "CapabilityModel",
   "displayName": "{CAPABILITYMODELNAME}",
   "implements": [
-    "http://azureiot.com/interfaces/DeviceInformation/1.0.0"
+    {
+      "schema": "urn:azureiot:DeviceManagement:DeviceInformation:1",
+      "name": "deviceinfo"
+    }
   ],
-  "@context": "http://azureiot.com/v0/contexts/CapabilityModel.json"
+  "@context": "http://azureiot.com/v1/contexts/CapabilityModel.json"
 }

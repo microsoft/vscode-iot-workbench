@@ -36,7 +36,7 @@
     },
     "Enum": "Schemas/Enum",
     "valueSchema": "Schemas/Enum/valueSchema",
-    "enumValue": "EnumValue/value",
+    "enumValue": "Schemas/EnumValue/value",
     "enumValues": {
       "@id": "Schemas/Enum/values",
       "@container": "@list"
@@ -50,6 +50,8 @@
       "@container": "@list"
     },
     "float": "Schemas/Float/float",
+    "geospatial": "Schemas/Geospatial",
+    "geospatialType": "Schemas/geospatialType",
     "integer": "Schemas/Integer/integer",
 
     "long": "Schemas/Long/long",
