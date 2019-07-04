@@ -76,11 +76,49 @@ Please help to take the [survey](https://www.surveymonkey.com/r/C7NY7KJ) to let 
 
 Depending on the device platform you choose, follow the resources below to develop on it.
 
-### Embedded Linux
+### Embedded Linux <sup>preview</sup>
 
 To simplify the cross compiling toolchain, Azure IoT Device SDK and dependencies setup and configuration, Device Workbench put all these components in the container. All cross-compiling works happen in it. Here is the quick start of using it to develop and compile a simple device app written in C and running on Raspberry Pi to send telemetry data to Azure IoT Hub.
 
-*[TBD]*
+1. Create a embedded Linux
+
+   - Click `F1` to open the command palette, then type and select **Azure IoT Device Workbench: Create Project...**.
+
+   - Select the working folder (only the first time) and type in the name of the project.
+
+   - There are 2 platforms showed up: **Arduino** and **Embedded Linux**, please select **Embedded Linux**.
+
+   - Select the dev container according to your target device, e.g. choose **32-bit Armv7 Cortex-A** if you're using a Raspberry Pi 3 Model B+ running Raspbian.
+
+   - It may take around 1min for preparing the dev container for the ew project, depends on your network speed. Can click the *detail* link in the notification UI for more details:
+
+     ![Prepare Dev Container](./docs/images/prepare-dev-container.png)
+
+   - Once the Dev Container is ready Visual Studio Code UI will open the new project with the sample code `iothub_sample.c` under the `src` subfolder.
+
+2. Compile the code
+
+   Modify the code and add your functions, select **Azure IoT Device Workbench: Compile Device Code** from the command palette. It starts compile, the cross-compiling is happened in the Dev Container and pops up a notification once it's done.
+
+3. Upload to target device
+
+   Before upload the executable binary file to the target device, please make sure:
+
+   -  The running OS on  the device is correct (e.g. Raspbian is 32-bit whatever the Raspberry Pi is 32-bit or 64-bit).
+   - The SSH is enabled on the device.
+   - Your dev machine can access the target device via SSH.
+
+   Then execute the  **Azure IoT Device Workbench: Upload Device Code** from the command palette, here are 2 options: 
+
+   ![Prepare Dev Container](./docs/images/upload-options.png)
+
+   - **Auto discover** leverage the mDNS protocol to find out devices which the SSH port is opened within small networks.
+
+   - If **Auto discover** can't find your target device, you can manually input the IP address to connect the target device for uploading.
+
+   Select the right device and then input the port for SSH which the default setting is '22', then input the right user name and password for SSH login. Last step is the target folder on the  device for uploading.
+
+4. Run 
 
 ### Arduino
 
