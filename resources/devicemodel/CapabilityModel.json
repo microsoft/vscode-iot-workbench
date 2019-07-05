@@ -20,7 +20,7 @@
       "@language": null
     },
     "schema": {
-      "@id": "CapabilityModel/implements/schema",
+      "@id": "InterfaceInstance/schema",
       "@type": "@id"
     }
   }
