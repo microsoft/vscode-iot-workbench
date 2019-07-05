@@ -219,6 +219,6 @@
   },
   "extensionDependencies": [
     "vsciot-vscode.azure-iot-toolkit",
-    "zlhe-test.vscode-iot-device-cube"
+    "vsciot-vscode.vscode-iot-device-cube"
   ]
 }
