@@ -214,8 +214,8 @@ export async function activate(context: vscode.ExtensionContext) {
             let values: string[] = [];
             if (jsonInfo.key === '@context') {
               const contextUri = contextType === 'Interface' ?
-                  'http://azureiot.com/v0/contexts/Interface.json' :
-                  'http://azureiot.com/v0/contexts/CapabilityModel.json';
+                  'http://azureiot.com/v1/contexts/Interface.json' :
+                  'http://azureiot.com/v1/contexts/CapabilityModel.json';
               values = [contextUri];
             } else if (jsonInfo.key === '@type') {
               if (jsonInfo.lastKey) {

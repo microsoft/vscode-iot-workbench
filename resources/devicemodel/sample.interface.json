@@ -1,5 +1,5 @@
 {
-  "@id": "urn:vscsample/interfaces/{INTERFACENAME}/1",
+  "@id": "urn:vscsample:{INTERFACENAME}:1",
   "@type": "Interface",
   "displayName": "{INTERFACENAME}",
   "contents": [
