@@ -338,10 +338,10 @@ export class DigitalTwinMetaModelParser {
 
   getStringValuesFromShortName(
       dtContext: DigitalTwinMetaModelContext, shortName: string) {
-    if (shortName === 'implements') {
-      return [];
-    }
     const id = this.getIdFromShortName(dtContext, shortName);
+    if (id === 'http://azureiot.com/v1/classes/InterfaceInstance/schema') {
+      return ['XMLSchema#string'];
+    }
     if (!id) {
       console.warn(`Cannot find ID for short name ${shortName}.`);
       return [];
