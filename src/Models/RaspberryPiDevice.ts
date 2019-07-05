@@ -260,13 +260,12 @@ export class RaspberryPiDevice implements Device {
   }
 
   async configDeviceSettings(): Promise<boolean> {
-    const configSelectionItems: vscode.QuickPickItem[] = [
-      {
-        label: 'Configure SSH to target device',
-        description: '',
-        detail: 'Configure SSH (IP, username and password) connection to target device for uploading compiled code'
-      }
-    ];
+    const configSelectionItems: vscode.QuickPickItem[] = [{
+      label: 'Configure SSH to target device',
+      description: '',
+      detail:
+          'Configure SSH (IP, username and password) connection to target device for uploading compiled code'
+    }];
 
     const configSelection =
         await vscode.window.showQuickPick(configSelectionItems, {
