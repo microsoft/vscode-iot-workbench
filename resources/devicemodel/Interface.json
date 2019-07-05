@@ -1,6 +1,6 @@
 {
   "@context": {
-    "@vocab": "http://azureiot.com/v0/classes/",
+    "@vocab": "http://azureiot.com/v1/classes/",
     "@language": "en",
     "Array": "Schemas/Array",
     "asynchronous": "ExecutionType/asynchronous",
@@ -10,7 +10,10 @@
       "@id": "Entity/comment",
       "@language": null
     },
-    "contents": "Interface/contents",
+    "contents": {
+      "@id": "Interface/contents",
+      "@container": "@set"
+    },
     "date": "Schemas/Date/date",
     "dateTime": "Schemas/DateTime/dateTime",
     "description": {
@@ -32,15 +35,25 @@
       "@type": "@vocab"
     },
     "Enum": "Schemas/Enum",
-    "enumValue": "EnumValue/value",
-    "enumValues": "Schemas/Enum/values",
+    "valueSchema": "Schemas/Enum/valueSchema",
+    "enumValue": "Schemas/EnumValue/value",
+    "enumValues": {
+      "@id": "Schemas/Enum/values",
+      "@container": "@list"
+    },
     "commandType": {
       "@id": "Command/executionType",
       "@type": "@vocab"
     },
-    "fields": "Schemas/Object/fields",
+    "fields": {
+      "@id": "Schemas/Object/fields",
+      "@container": "@list"
+    },
     "float": "Schemas/Float/float",
+    "geospatial": "Schemas/Geospatial",
+    "geospatialType": "Schemas/geospatialType",
     "integer": "Schemas/Integer/integer",
+
     "long": "Schemas/Long/long",
     "Map": "Schemas/Map",
     "mapKey": "Schemas/Map/mapKey",
@@ -60,7 +73,10 @@
       "@id": "SchemaField/schema",
       "@type": "@vocab"
     },
-    "schemas": "Interface/schemas",
+    "schemas": {
+      "@id": "Interface/schemas",
+      "@container": "@set"
+    },
     "string": "Schemas/String/string",
     "synchronous": "ExecutionType/synchronous",
     "time": "Schemas/Time/time",

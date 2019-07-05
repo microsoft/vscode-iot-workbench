@@ -438,11 +438,28 @@ export class DigitalTwinMetaModelParser {
   }
 
   getStringValuePattern(key: string) {
+    // urn:[namespace]:[name]:[version]
+    const urnPattern = /^urn:([a-zA-Z0-9_]+:)+[a-zA-Z0-9_]+:\d+$/;
     switch (key) {
+      case '@id':
+        return urnPattern;
       case 'name':
         return /^[a-zA-Z0-9_]+$/;
-      case 'implements':
-        return /^(http|https):\/\/.+\.interface\/.json$/;
+      case 'schema':
+        return urnPattern;
+      // case 'implements':
+      //   return /^(http|https):\/\/.+\.interface\/.json$/;
+      default:
+        return null;
+    }
+  }
+
+  getStringValueLengthRange(key: string) {
+    switch (key) {
+      case '@id':
+        return [0, 256];
+      case 'schema':
+        return [0, 256];
       default:
         return null;
     }
@@ -489,6 +506,8 @@ export class DigitalTwinMetaModelParser {
         return ['@type'];
       case 'CapabilityModel':
         return ['@id', '@type', '@context', 'implements'];
+      case 'InterfaceInstance':
+        return ['name', 'schema'];
       default:
         return [];
     }
