@@ -260,18 +260,12 @@ export class RaspberryPiDevice implements Device {
   }
 
   async configDeviceSettings(): Promise<boolean> {
-    const configSelectionItems: vscode.QuickPickItem[] = [
-      {
-        label: 'Config Raspberry Pi SSH',
-        description: 'Config Raspberry Pi SSH',
-        detail: 'Config SSH'
-      },
-      {
-        label: 'Config connection of IoT Hub Device',
-        description: 'Config connection of IoT Hub Device',
-        detail: 'Config IoT Hub Device'
-      }
-    ];
+    const configSelectionItems: vscode.QuickPickItem[] = [{
+      label: 'Configure SSH to target device',
+      description: '',
+      detail:
+          'Configure SSH (IP, username and password) connection to target device for uploading compiled code'
+    }];
 
     const configSelection =
         await vscode.window.showQuickPick(configSelectionItems, {
@@ -285,7 +279,7 @@ export class RaspberryPiDevice implements Device {
       return false;
     }
 
-    if (configSelection.detail === 'Config SSH') {
+    if (configSelection.label === 'Configure SSH to target device') {
       try {
         const res = await this.configSSH();
         if (res) {
