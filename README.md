@@ -52,7 +52,6 @@ For developing on Embedded Linux device, you will need Docker and Visual Studio 
    - IoT Device Cube
    - Remote Development
 
-
 ### Install Docker
 
 [VS Code Remote](https://aka.ms/vscode-remote) needs Docker runtime installed in order to use local containers, which is required for developing Embedded Linux devices in the Device Workbench.
@@ -81,7 +80,7 @@ Depending on the device platform you choose, follow the resources below to devel
 
 ### Embedded Linux <sup>preview</sup>
 
-To simplify the cross compiling toolchain, Azure IoT Device SDK and dependencies setup and configuration, Device Workbench put all these components in the container. All cross-compiling works happen in it. Here is the quick start of using it to develop and compile a simple device app written in C and running on Raspberry Pi to send telemetry data to Azure IoT Hub.
+To simplify the cross compiling toolchain, Azure IoT Device SDK and dependencies setup and configuration, Device Workbench put all these components in the container. All cross-compiling works happen in it. Here is the quick start of using it to develop and compile a simple device app written in C and running on [Raspberry Pi 3 Model B+](https://www.raspberrypi.org/products/raspberry-pi-3-model-b-plus/) to send telemetry data to Azure IoT Hub.
 
 #### Create new project
 
@@ -91,7 +90,7 @@ To simplify the cross compiling toolchain, Azure IoT Device SDK and dependencies
 
 3. Select **Embedded Linux** from device platform list.
 
-4. Select the dev container based on your target device, e.g. choose **32-bit Armv7 Cortex-A** if you're using a Raspberry Pi 3 Model B+ running Raspbian.
+4. Select the dev container based on your target device, in this sample, select **32-bit Armv7 Cortex-A** for Raspberry Pi 3 Model B+ running Raspbian.
 
 5. For the first time, it takes around 1 to 3 mintues depending on your Internet speed to download and prepare the dev container. You can click the **details** link on the notification for the progress:
 
@@ -103,15 +102,18 @@ To simplify the cross compiling toolchain, Azure IoT Device SDK and dependencies
 
 1. The `iothub_sample.c` under the `src` subfolder is the source file contains the logic. You can modify or add your own code in it.
 
+    ![iothub_sample.c](./docs/images/iothub_sample.png)
+
 2. To compile the code, press `F1`, type and select **Azure IoT Device Workbench: Compile Device Code** from the command palette.
 
 3. The cross-compiling of the code happens in the dev container. Once its done, it pops up the notification.
+    ![Compile success](./docs/images/compile-success.png)
 
 #### Upload to target device
 
 1. Before upload the executable binary file to the target device, please make sure:
 
-   - The running OS on the device is correct (e.g. Raspbian running on Raspberry Pi 3B+).
+   - The running OS on the device is correct (e.g. Raspbian running on Raspberry Pi 3 Model B+).
    - The SSH is enabled on the device. Follw this [instructions](https://itsfoss.com/ssh-into-raspberry/) to do so.
    - Get the IP address of the device so that you can deploy the compiled binary to the device via SSH.
 
@@ -119,11 +121,19 @@ To simplify the cross compiling toolchain, Azure IoT Device SDK and dependencies
 
    ![Prepare Dev Container](./docs/images/upload-options.png)
 
-### Verify the result
+#### Verify the result
 
 1. To start running the deployed binary, SSH into your Raspberry Pi device. You can follow this [instruction](https://itsfoss.com/ssh-into-raspberry/) to do so.
 
+2. You need to copy the device connection as the parameter to run the app, follow [this guide](./docs/create-iothub-device.md) to use Azure IoT Hub Toolkit to do so.
+
+3. Run the `azure_iot_app [connection string]` and you will see the Raspberry Pi start sending telemetry data to the Azure IoT Hub.
+
+4. To verify the receive of the data, 
+
 ### Arduino
+
+Currently, Device Workbench supports MXChip IoT DevKit, ESP32 DevKits and teXXmo IoT Button using Arduino. For generic Arduino device, we recommend to use [Arduino extension in VS Code](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-arduino).
 
 #### MXChip IoT DevKit
 
