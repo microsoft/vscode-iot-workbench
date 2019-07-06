@@ -108,6 +108,8 @@ To simplify the cross compiling toolchain, Azure IoT Device SDK and dependencies
 
 3. The cross-compiling of the code happens in the dev container. Once its done, it pops up the notification.
     ![Compile success](./docs/images/compile-success.png)
+    
+4. The compiled binary file is located in `.build` folder.
 
 #### Upload to target device
 
@@ -119,7 +121,7 @@ To simplify the cross compiling toolchain, Azure IoT Device SDK and dependencies
 
 2. In VS Code, press `F1`, type and select **Azure IoT Device Workbench: Upload Device Code** from the command palette, then select **Manual setup** and enter IP address, port, user name and password to deploy the compiled binary via SSH to Raspberry Pi.
 
-   ![Prepare Dev Container](./docs/images/upload-options.png)
+   <img src="./docs/images/upload-options.png" width=540 />
 
 #### Verify the result
 
