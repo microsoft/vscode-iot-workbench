@@ -3,7 +3,7 @@
 [![Gitter](https://img.shields.io/badge/chat-on%20gitter-blue.svg)](https://gitter.im/Microsoft/vscode-iot-workbench)
 [![Travis CI](https://travis-ci.org/Microsoft/vscode-iot-workbench.svg?branch=master)](https://travis-ci.org/Microsoft/vscode-iot-workbench)
 
-![Logo](./docs/images/logo.png =128x128)
+<img src="./docs/images/logo.png" width=128 />
 
 The **Azure IoT Device Workbench** is an extension in Visual Studio Code that provides an integrated environment to code, build, deploy and debug your IoT device project with multiple Azure services supported.
 
