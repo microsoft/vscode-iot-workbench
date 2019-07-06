@@ -131,7 +131,11 @@ To simplify the cross compiling toolchain, Azure IoT Device SDK and dependencies
 
 3. Run the `azure_iot_app [connection string]` and you will see the Raspberry Pi start sending telemetry data to the Azure IoT Hub.
 
-4. To verify the receive of the data, 
+   *[TBD Screenshot]*
+
+4. To verify the receive of the data, use Azure IoT Hub Toolkit, right click on the device and select **Start Monitoring Built-in Event Endpoint**. In the output window, you can see that IoT Hub receives telemetry data sent from Raspberry Pi.
+
+   *[TBD Screenshot]*
 
 ### Arduino
 
@@ -171,8 +175,6 @@ Here are a set of tutorials that will help you get started:
 
 ## Commands
 
-*[TBD]*
-
 | Command | Description |
 | --- | --- |
 | `Azure IoT Device Workbench: Create Project...`  | Create new IoT Device Workbench projects. |
@@ -182,7 +184,6 @@ Here are a set of tutorials that will help you get started:
 | `Azure IoT Device Workbench: Compile Device Code`  | Compile device code. |
 | `Azure IoT Device Workbench: Upload Device Code`  | Compile and upload device code. |
 | `Azure IoT Device Workbench: Configure Device Settings...`  | Manage the settings on the device. |
-| `Azure IoT Device Workbench: Install Device Compiler Toolchain...`  | Install device compiler toolchain. |
 | `Azure IoT Device Workbench: Set Workbench Path` | Set the default path for Azure IoT Device Workbench. |
 | `Azure IoT Device Workbench: Help` | Get help for Azure IoT Device Workbench. |
 
@@ -248,5 +249,3 @@ If you would like to help to build the best IoT experience with Azure IoT Device
 
 ## Telemetry
 VS Code collects usage data and sends it to Microsoft to help improve our products and services. Read our [privacy statement](https://go.microsoft.com/fwlink/?LinkID=528096&clcid=0x409) to learn more. If you don’t wish to send usage data to Microsoft, you can set the `telemetry.enableTelemetry` setting to `false`. Learn more in our [FAQ](https://code.visualstudio.com/docs/supporting/faq#_how-to-disable-telemetry-reporting).
-
-
