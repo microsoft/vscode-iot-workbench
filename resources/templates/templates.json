@@ -1,0 +1,79 @@
+{
+    "templates": [
+        {
+            "platform": "Embedded Linux",
+            "name": "64-bit Armv8 Cortex-A",
+            "description": "",
+            "detail": "Generic dev container with Linaro cross-toolchain for GCC, Azure IoT Device C SDK",
+            "path": "rpi64_iothub",
+            "projectHostType": "container",
+            "boardId": "raspberrypi",
+            "type": "IotHub"
+        },
+        {
+            "platform": "Embedded Linux",
+            "name": "32-bit Armv7 Cortex-A",
+            "description": "",
+            "detail": "Generic dev container with Linaro cross-toolchain for GCC, Azure IoT Device C SDK",
+            "path": "rpi32_iothub",
+            "projectHostType": "container",
+            "boardId": "raspberrypi",
+            "type": "IotHub"
+        },
+        {
+            "platform": "Arduino",
+            "name": "Generic ESP32 boards",
+            "description": "",
+            "detail": "Use Generic ESP32 boards (e.g. Azure IoT Kit, M5Stack) with only device code.",
+            "path": "esp32_device",
+            "projectHostType": "workspace",
+            "boardId": "esp32",
+            "type": "Basic"
+        },
+        {
+            "platform": "Arduino",
+            "name": "Generic ESP32 boards with Azure IoT Hub",
+            "description": "",
+            "detail": "Use Generic ESP32 boards (e.g. Azure IoT Kit, M5Stack) with Azure IoT Hub, such as sending sensor data to cloud.",
+            "path": "esp32_iothub",
+            "projectHostType": "workspace",
+            "boardId": "esp32",
+            "type": "IotHub"
+        },
+        {
+            "platform": "Arduino",
+            "name": "MXChip IoT DevKit",
+            "description": "",
+            "detail": "Use MXChip IoT DevKit with only device code.",
+            "path": "devkit_device",
+            "projectHostType": "workspace",
+            "boardId": "devkit",
+            "type": "Basic"
+        },
+        {
+            "platform": "Arduino",
+            "name": "MXChip IoT DevKit with Azure IoT Hub",
+            "description": "",
+            "detail": "Use MXChip IoT DevKit with Azure IoT Hub, such as sending sensor data to cloud.",
+            "path": "devkit_iothub",
+            "projectHostType": "workspace",
+            "boardId": "devkit",
+            "type": "IotHub"
+        },
+        {
+            "platform": "Arduino",
+            "name": "MXChip IoT DevKit With Azure Functions",
+            "description": "",
+            "detail": "Use MXChip IoT DevKit with Azure IoT Hub and processes device data further in Azure Functions.",
+            "path": "devkit_azurefunctions",
+            "projectHostType": "workspace",
+            "boardId": "devkit",
+            "type": "AzureFunctions"
+        },
+        {
+            "name": "$(issue-opened) My device is not in the list...",
+            "id": "no_device",
+            "description": ""
+        }
+    ]
+  }

@@ -4,7 +4,7 @@ import {Guid} from 'guid-typescript';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {AzureComponentsStorage, FileNames} from '../constants';
+import {AzureComponentsStorage, FileNames, ScaffoldType} from '../constants';
 
 import {AzureComponentConfig, AzureConfigFileHandler, AzureConfigs, ComponentInfo, Dependency, DependencyConfig, DependencyType} from './AzureComponentConfig';
 import {ARMTemplate, AzureUtility} from './AzureUtility';
@@ -33,13 +33,14 @@ export class StreamAnalyticsJob implements Component, Provisionable,
   private azureClient: ResourceManagementClient|null = null;
   private catchedStreamAnalyticsList: Array<{name: string}> = [];
 
-  private initAzureClient() {
+  private async initAzureClient() {
     if (this.subscriptionId && this.resourceGroup &&
         this.streamAnalyticsJobName && this.azureClient) {
       return this.azureClient;
     }
 
-    const componentConfig = this.azureConfigHandler.getComponentById(this.id);
+    const componentConfig = await this.azureConfigHandler.getComponentById(
+        ScaffoldType.Workspace, this.id);
     if (!componentConfig) {
       throw new Error(
           `Cannot find Azure Stream Analytics component with id ${this.id}.`);
@@ -174,18 +175,20 @@ export class StreamAnalyticsJob implements Component, Provisionable,
   }
 
   async create(): Promise<boolean> {
-    this.updateConfigSettings();
+    await this.updateConfigSettings(ScaffoldType.Local);
     return true;
   }
 
-  updateConfigSettings(componentInfo?: ComponentInfo): void {
+  async updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo):
+      Promise<void> {
     const asaComponentIndex =
-        this.azureConfigHandler.getComponentIndexById(this.id);
+        await this.azureConfigHandler.getComponentIndexById(type, this.id);
     if (asaComponentIndex > -1) {
       if (!componentInfo) {
         return;
       }
-      this.azureConfigHandler.updateComponent(asaComponentIndex, componentInfo);
+      await this.azureConfigHandler.updateComponent(
+          asaComponentIndex, componentInfo);
     } else {
       const newAsaConfig: AzureComponentConfig = {
         id: this.id,
@@ -194,7 +197,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
         dependencies: this.dependencies,
         type: ComponentType[this.componentType]
       };
-      this.azureConfigHandler.appendComponent(newAsaConfig);
+      await this.azureConfigHandler.appendComponent(type, newAsaConfig);
     }
   }
 
@@ -244,8 +247,8 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     }
 
     for (const dependency of this.dependencies) {
-      const componentConfig =
-          this.azureConfigHandler.getComponentById(dependency.id);
+      const componentConfig = await this.azureConfigHandler.getComponentById(
+          ScaffoldType.Workspace, dependency.id);
       if (!componentConfig) {
         throw new Error(`Cannot find component with id ${dependency.id}.`);
       }
@@ -356,7 +359,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
       }
     }
 
-    this.updateConfigSettings({
+    await this.updateConfigSettings(ScaffoldType.Workspace, {
       values: {
         subscriptionId: AzureUtility.subscriptionId as string,
         resourceGroup: AzureUtility.resourceGroup as string,
@@ -372,7 +375,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
   }
 
   async deploy(): Promise<boolean> {
-    const azureClient = this.azureClient || this.initAzureClient();
+    const azureClient = this.azureClient || await this.initAzureClient();
 
     // Stop Job
     let stopPending: NodeJS.Timer|null = null;
@@ -468,7 +471,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
   }
 
   async getState() {
-    const azureClient = this.azureClient || this.initAzureClient();
+    const azureClient = this.azureClient || await this.initAzureClient();
 
     const resourceId = `/subscriptions/${this.subscriptionId}/resourceGroups/${
         this.resourceGroup}/providers/Microsoft.StreamAnalytics/streamingjobs/${

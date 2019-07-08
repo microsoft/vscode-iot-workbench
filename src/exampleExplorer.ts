@@ -15,6 +15,7 @@ import {FileNames} from './constants';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 import {VSCExpress} from 'vscode-express';
+import {RemoteExtension} from './Models/RemoteExtension';
 
 type OptionsWithUri = import('request-promise').OptionsWithUri;
 
@@ -97,7 +98,8 @@ export class ExampleExplorer {
   }
 
   private async GenerateExampleFolder(exampleName: string) {
-    const settings: IoTWorkbenchSettings = new IoTWorkbenchSettings();
+    const settings: IoTWorkbenchSettings =
+        await IoTWorkbenchSettings.createAsync();
     const workbench = await settings.workbenchPath();
 
     if (!utils.directoryExistsSync(workbench)) {
@@ -185,7 +187,15 @@ export class ExampleExplorer {
   async selectBoard(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    const boardProvider = new BoardProvider(context);
+    if (RemoteExtension.isRemote(context)) {
+      const message =
+          `The project is open in Docker container now, Please open a new window and rerun this command.`;
+      vscode.window.showWarningMessage(message);
+      return;
+    }
+    const boardFolderPath = context.asAbsolutePath(path.join(
+        FileNames.resourcesFolderName, FileNames.templatesFolderName));
+    const boardProvider = new BoardProvider(boardFolderPath);
     const boardItemList: BoardQuickPickItem[] = [];
     const boards = boardProvider.list.filter(board => board.exampleUrl);
     boards.forEach((board: Board) => {
@@ -285,8 +295,9 @@ export class ExampleExplorer {
       return false;
     }
 
-    const boardList = context.asAbsolutePath(
-        path.join(FileNames.resourcesFolderName, FileNames.boardListFileName));
+    const boardList = context.asAbsolutePath(path.join(
+        FileNames.resourcesFolderName, FileNames.templatesFolderName,
+        FileNames.boardListFileName));
     const boardsJson: {boards: Board[]} = require(boardList);
 
     telemetryContext.properties.Example = this._exampleName;
@@ -303,7 +314,7 @@ export class ExampleExplorer {
     const items = fs.listSync(fsPath, [FileNames.workspaceExtensionName]);
     if (items.length !== 0) {
       await vscode.commands.executeCommand(
-          'vscode.openFolder', vscode.Uri.file(items[0]), true);
+          'iotcube.openLocally', items[0], true);
       return true;
     }
 
@@ -317,7 +328,7 @@ export class ExampleExplorer {
           fs.listSync(fsPath, [FileNames.workspaceExtensionName]);
       if (workspaceFiles && workspaceFiles.length > 0) {
         await vscode.commands.executeCommand(
-            'vscode.openFolder', vscode.Uri.file(workspaceFiles[0]), true);
+            'iotcube.openLocally', workspaceFiles[0], true);
         return true;
       } else {
         // TODO: Add buttom to submit issue to iot-workbench repo.

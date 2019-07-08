@@ -1,14 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import * as cp from 'child_process';
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import {setTimeout} from 'timers';
 import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
 
-import {AzureFunctionsLanguage, GlobalConstants} from './constants';
+import {AzureFunctionsLanguage, DependentExtensions, FileNames, GlobalConstants, OperationType, ScaffoldType} from './constants';
 import {DialogResponses} from './DialogResponses';
+import {FileUtility} from './FileUtility';
+import {TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
+import {RemoteExtension} from './Models/RemoteExtension';
 import {TelemetryContext} from './telemetry';
 
 export function delay(ms: number) {
@@ -195,12 +199,38 @@ export async function askAndOpenProject(
         'Operation failed and user open project from folder.';
     const workspaceFilePath = path.join(rootPath, workspaceFile);
     await vscode.commands.executeCommand(
-        'vscode.openFolder', vscode.Uri.file(workspaceFilePath), false);
+        'iotcube.openLocally', workspaceFilePath, false);
   } else {
     telemetryContext.properties.errorMessage = 'Operation failed.';
   }
 }
 
+export async function askAndOpenInRemote(
+    operation: OperationType, channel: vscode.OutputChannel): Promise<boolean> {
+  const message = `${
+      operation} can only be executed in remote container. Do you want to reopen the IoT project in container?`;
+  const result: vscode.MessageItem|undefined =
+      await vscode.window.showInformationMessage(
+          message, DialogResponses.yes, DialogResponses.no);
+
+  if (result === DialogResponses.yes) {
+    const res = await RemoteExtension.checkRemoteExtension();
+    if (!res) {
+      const message = `Remote extension is not available. Please install ${
+          DependentExtensions.remote} first.`;
+      channel.show();
+      channel.appendLine(message);
+      return false;
+    }
+    await vscode.commands.executeCommand('openindocker.reopenInContainer');
+  } else {
+    const message = `${operation} can only be executed in remote container.`;
+    channel.show();
+    channel.appendLine(message);
+  }
+
+  return false;
+}
 const noDeviceSurveyUrl = 'https://www.surveymonkey.com/r/C7NY7KJ';
 
 export async function TakeNoDeviceSurvey(telemetryContext: TelemetryContext) {
@@ -228,4 +258,87 @@ export async function TakeNoDeviceSurvey(telemetryContext: TelemetryContext) {
                 encodeURIComponent(extensionVersion)}`));
   }
   return;
+}
+
+export class InternalConfig {
+  static isInternal: boolean = InternalConfig.isInternalUser();
+
+  private static isInternalUser(): boolean {
+    const userDomain = process.env.USERDNSDOMAIN ?
+        process.env.USERDNSDOMAIN.toLowerCase() :
+        '';
+    return userDomain.endsWith('microsoft.com');
+  }
+}
+
+
+export function runCommand(
+    command: string, workingDir: string,
+    outputChannel: vscode.OutputChannel): Thenable<object> {
+  return new Promise((resolve, reject) => {
+    const stdout = '';
+    const stderr = '';
+    const process = cp.spawn(command, [], {cwd: workingDir, shell: true});
+    process.stdout.on('data', (data: string) => {
+      outputChannel.appendLine(data);
+    });
+    process.stderr.on('data', (data: string) => {
+      outputChannel.appendLine(data);
+    });
+    process.on('error', (error) => reject({error, stderr, stdout}));
+    process.on('close', (status) => {
+      if (status === 0) {
+        resolve({status, stdout, stderr});
+      } else {
+        reject({status, stdout, stderr});
+      }
+    });
+  });
+}
+
+export async function generateTemplateFile(
+    root: string, type: ScaffoldType,
+    fileInfo: TemplateFileInfo): Promise<boolean> {
+  const targetFolderPath = path.join(root, fileInfo.targetPath);
+  if (!await FileUtility.directoryExists(type, targetFolderPath)) {
+    await FileUtility.mkdirRecursively(type, targetFolderPath);
+  }
+
+  const targetFilePath = path.join(targetFolderPath, fileInfo.fileName);
+  if (fileInfo.fileContent) {
+    try {
+      await FileUtility.writeFile(type, targetFilePath, fileInfo.fileContent);
+    } catch (error) {
+      throw new Error(`Failed to create sketch file ${fileInfo.fileName}: ${
+          error.message}`);
+    }
+  }
+  return true;
+}
+
+/**
+ * If current folder is an IoT Workspace Project but not open correctly, ask
+ * and open the IoT Workspace Project. Otherwise ask and New IoT Project.
+ */
+export async function handleIoTWorkspaceProjectFolder(
+    telemetryContext: TelemetryContext): Promise<boolean> {
+  if (!vscode.workspace.workspaceFolders ||
+      !vscode.workspace.workspaceFolders[0]) {
+    return false;
+  }
+
+  const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+  const workbenchFileName =
+      path.join(rootPath, 'Device', FileNames.iotworkbenchprojectFileName);
+
+  const workspaceFiles = fs.readdirSync(rootPath).filter(
+      file => path.extname(file).endsWith(FileNames.workspaceExtensionName));
+
+  if (fs.existsSync(workbenchFileName) && workspaceFiles && workspaceFiles[0]) {
+    await askAndOpenProject(rootPath, workspaceFiles[0], telemetryContext);
+    return true;
+  }
+
+  await askAndNewProject(telemetryContext);
+  return true;
 }

@@ -10,7 +10,7 @@
     "url": "https://github.com/Microsoft/vscode-iot-workbench/issues"
   },
   "homepage": "https://github.com/Microsoft/vscode-iot-workbench/blob/master/README.md",
-  "version": "0.2.7",
+  "version": "0.2.9",
   "publisher": "vsciot-vscode",
   "icon": "logo.png",
   "aiKey": "5b869bc6-ca93-4f24-aa87-92871a3a616e",
@@ -142,7 +142,7 @@
             "type": "string"
           },
           "IoTWorkbench.disableAutoPopupLandingPage": {
-            "boolean": "boolean",
+            "type": "boolean",
             "default": false
           },
           "IoTWorkbench.BoardId": {
@@ -179,7 +179,7 @@
     "@types/lodash.foreach": "^4.5.6",
     "@types/lodash.trimstart": "^4.5.6",
     "@types/mocha": "^2.2.42",
-    "@types/node": "^7.0.43",
+    "@types/node": "^10.1.4",
     "@types/opn": "3.0.28",
     "@types/request-promise": "^4.1.39",
     "@types/ssh2": "^0.5.35",
@@ -214,9 +214,11 @@
     "ssh2": "^0.6.1",
     "vscode-express": "^1.0.1",
     "vscode-extension-telemetry": "^0.1.0",
+    "vscode-iot-device-cube-sdk": "^0.0.20",
     "winreg": "^1.2.3"
   },
   "extensionDependencies": [
-    "vsciot-vscode.azure-iot-toolkit"
+    "vsciot-vscode.azure-iot-toolkit",
+    "vsciot-vscode.vscode-iot-device-cube"
   ]
 }
