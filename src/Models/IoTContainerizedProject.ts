@@ -5,7 +5,7 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {ConfigKey, DependentExtensions, EventNames, FileNames, ScaffoldType} from '../constants';
+import {ConfigKey, DependentExtensions, DevelopEnvironment, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext, TelemetryProperties, TelemetryWorker} from '../telemetry';
 
@@ -74,6 +74,11 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
         error: '',
         errorMessage: ''
       };
+      properties.developEnvironment =
+          RemoteExtension.isRemote(this.extensionContext) ?
+          DevelopEnvironment.CONTAINER :
+          DevelopEnvironment.LOCAL_ENV;
+      properties.projectHostType = ProjectHostType[projectHostType];
       const telemetryContext:
           TelemetryContext = {properties, measurements: {duration: 0}};
 

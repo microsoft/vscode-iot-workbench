@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, EventNames, FileNames, ScaffoldType} from '../constants';
+import {ConfigKey, DevelopEnvironment, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext, TelemetryProperties, TelemetryWorker} from '../telemetry';
 
@@ -16,6 +16,7 @@ import {ProjectHostType} from './Interfaces/ProjectHostType';
 import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {Workspace} from './Interfaces/Workspace';
 import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
+import {RemoteExtension} from './RemoteExtension';
 
 const impor = require('impor')(__dirname);
 const az3166DeviceModule =
@@ -78,6 +79,11 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
         error: '',
         errorMessage: ''
       };
+      properties.developEnvironment =
+          RemoteExtension.isRemote(this.extensionContext) ?
+          DevelopEnvironment.CONTAINER :
+          DevelopEnvironment.LOCAL_ENV;
+      properties.projectHostType = ProjectHostType[projectHostType];
       const telemetryContext:
           TelemetryContext = {properties, measurements: {duration: 0}};
 
