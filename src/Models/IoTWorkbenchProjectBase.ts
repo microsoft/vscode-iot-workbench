@@ -10,6 +10,7 @@ import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext} from '../telemetry';
+import {askAndOpenProject} from '../utils';
 
 import {checkAzureLogin} from './Apis';
 import {Compilable} from './Interfaces/Compilable';
@@ -264,8 +265,6 @@ export abstract class IoTWorkbenchProjectBase {
     }
     return true;
   }
-
-  abstract async handleLoadFailure(): Promise<boolean>;
 
   static async generateIotWorkbenchProjectFile(
       type: ScaffoldType, projectFolder: string): Promise<void> {

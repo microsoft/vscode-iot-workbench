@@ -9,11 +9,6 @@
             "name": "Embedded Linux",
             "id": "linux",
             "description": "Project based on Linux(Yocto/Ubuntu/Debian/...) Platform."
-        },
-        {
-            "name": "$(issue-opened) My device is not in the list...",
-            "id": "no_device",
-            "description": ""
         }
     ]
 }

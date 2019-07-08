@@ -8,7 +8,6 @@ import * as vscode from 'vscode';
 import {ConfigKey, DependentExtensions, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext, TelemetryProperties, TelemetryWorker} from '../telemetry';
-import {askAndNewProject} from '../utils';
 
 import {Dependency} from './AzureComponentConfig';
 import {Component} from './Interfaces/Component';
@@ -220,46 +219,18 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     return true;
   }
 
-  async handleLoadFailure(): Promise<boolean> {
-    if (!vscode.workspace.workspaceFolders ||
-        !vscode.workspace.workspaceFolders[0] ||
-        !fs.existsSync(this.projectConfigFile)) {
-      await askAndNewProject(this.telemetryContext);
-      return true;
-    }
-
-    const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    const workbenchFileName =
-        path.join(rootPath, FileNames.iotworkbenchprojectFileName);
-
-    if (!fs.existsSync(workbenchFileName)) {
-      await askAndNewProject(this.telemetryContext);
-      return true;
-    }
-
-    const projectConfigJson = require(this.projectConfigFile);
-    const boardId = projectConfigJson[`${ConfigKey.boardId}`];
-    if (!boardId) {
-      // Handles situation when boardId in project config file is wrongly
-      // modified by user.
-      const message = `Board Id cannot be found in ${
-          this.projectConfigFile}. File may have been wrongly modified.`;
-      this.channel.show();
-      this.channel.appendLine(message);
-      throw new Error(message);
-    }
-
-    throw new Error(`unknown load failure`);
-  }
-
   async create(
       rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
       projectType: ProjectTemplateType, boardId: string,
       openInNewWindow: boolean): Promise<boolean> {
+    const result = await this.checkPrerequisites();
+    if (!result) {
+      return false;
+    }
     const scaffoldType = ScaffoldType.Local;
-    const rootFolderPathExists =
-        await FileUtility.directoryExists(scaffoldType, rootFolderPath);
-    if (!rootFolderPathExists) {
+    if (rootFolderPath !== undefined) {
+      await FileUtility.mkdirRecursively(scaffoldType, rootFolderPath);
+    } else {
       throw new Error(
           'Unable to find the root path, please open the folder and initialize project again.');
     }
@@ -449,16 +420,6 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     }
 
     try {
-      if (!RemoteExtension.isRemote(this.extensionContext)) {
-        const res = await RemoteExtension.checkRemoteExtension();
-        if (!res) {
-          const message = `Remote extension is not available. Please install ${
-              DependentExtensions.remote} first.`;
-          this.channel.show();
-          this.channel.appendLine(message);
-          return false;
-        }
-      }
       setTimeout(
           // TODO: better implement this through VS Remote API.
           // Currently implemented in helper extension iotcube.
@@ -470,5 +431,17 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     } catch (error) {
       throw error;
     }
+  }
+
+  async checkPrerequisites(): Promise<boolean> {
+    const res = await RemoteExtension.checkRemoteExtension();
+    if (!res) {
+      const message = `Remote extension is not available. Please install ${
+          DependentExtensions.remote} first.`;
+      this.channel.show();
+      this.channel.appendLine(message);
+      return false;
+    }
+    return true;
   }
 }

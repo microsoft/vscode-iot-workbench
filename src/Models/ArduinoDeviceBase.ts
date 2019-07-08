@@ -10,6 +10,7 @@ import {ConfigHandler} from '../configHandler';
 import {ConfigKey, DependentExtensions, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {IoTWorkbenchSettings} from '../IoTSettings';
+import * as utils from '../utils';
 
 import {Board} from './Interfaces/Board';
 import {ComponentType} from './Interfaces/Component';
@@ -122,10 +123,8 @@ export abstract class ArduinoDeviceBase implements Device {
 
   async createCore(board: Board|undefined, templateFiles: TemplateFileInfo[]):
       Promise<boolean> {
-    const deviceFolderPath = this.deviceFolder;
-
     const scaffoldType = ScaffoldType.Local;
-    if (!await FileUtility.directoryExists(scaffoldType, deviceFolderPath)) {
+    if (!await FileUtility.directoryExists(scaffoldType, this.deviceFolder)) {
       throw new Error(`Internal error: Couldn't find the template folder.`);
     }
     if (!board) {
@@ -138,27 +137,21 @@ export abstract class ArduinoDeviceBase implements Device {
         scaffoldType, this.deviceFolder);
 
     for (const fileInfo of templateFiles) {
-      if (fileInfo.fileName.endsWith('macos.json') && (plat === 'darwin') ||
-          (fileInfo.fileName.endsWith('win32.json') && (plat === 'darwin'))) {
-        await this.generateCppPropertiesFile(scaffoldType, board, fileInfo);
+      if (fileInfo.fileName.endsWith('macos.json') ||
+          fileInfo.fileName.endsWith('win32.json')) {
+        if ((fileInfo.fileName.endsWith('macos.json') && plat === 'darwin') ||
+            (fileInfo.fileName.endsWith('win32.json') && plat === 'win32')) {
+          await this.generateCppPropertiesFile(scaffoldType, board, fileInfo);
+        }
       } else {
         // Copy file directly
-        const targetFolder = path.join(this.deviceFolder, fileInfo.targetPath);
-        if (!await FileUtility.directoryExists(scaffoldType, targetFolder)) {
-          await FileUtility.mkdirRecursively(scaffoldType, targetFolder);
-        }
-        try {
-          await FileUtility.writeFile(
-              scaffoldType, path.join(targetFolder, fileInfo.fileName),
-              fileInfo.fileContent as string);
-        } catch (error) {
-          throw new Error(
-              `Device: create ${fileInfo.fileName} failed: ${error.message}`);
-        }
+        await utils.generateTemplateFile(
+            this.deviceFolder, scaffoldType, fileInfo);
       }
     }
     return true;
   }
+
   abstract async preCompileAction(): Promise<boolean>;
 
   abstract async preUploadAction(): Promise<boolean>;
