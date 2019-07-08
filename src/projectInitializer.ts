@@ -34,7 +34,7 @@ export class ProjectInitializer {
       telemetryContext: TelemetryContext) {
     if (RemoteExtension.isRemote(context)) {
       const message =
-          `The project is open in Docker container now, Please open a new window and rerun this command.`;
+          `The project is open in a Docker container now. Open a new window and run this command again.`;
       vscode.window.showWarningMessage(message);
       return;
     }
