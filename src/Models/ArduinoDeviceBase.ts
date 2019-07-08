@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 import * as fs from 'fs-plus';
-import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
@@ -123,8 +122,9 @@ export abstract class ArduinoDeviceBase implements Device {
 
   async createCore(board: Board|undefined, templateFiles: TemplateFileInfo[]):
       Promise<boolean> {
-    const scaffoldType = ScaffoldType.Local;
-    if (!await FileUtility.directoryExists(scaffoldType, this.deviceFolder)) {
+    const createTimeScaffoldType = ScaffoldType.Local;
+    if (!await FileUtility.directoryExists(
+            createTimeScaffoldType, this.deviceFolder)) {
       throw new Error(`Internal error: Couldn't find the template folder.`);
     }
     if (!board) {
@@ -134,19 +134,20 @@ export abstract class ArduinoDeviceBase implements Device {
     const plat = await IoTWorkbenchSettings.getPlatform();
 
     await IoTWorkbenchProjectBase.generateIotWorkbenchProjectFile(
-        scaffoldType, this.deviceFolder);
+        createTimeScaffoldType, this.deviceFolder);
 
     for (const fileInfo of templateFiles) {
       if (fileInfo.fileName.endsWith('macos.json') ||
           fileInfo.fileName.endsWith('win32.json')) {
         if ((fileInfo.fileName.endsWith('macos.json') && plat === 'darwin') ||
             (fileInfo.fileName.endsWith('win32.json') && plat === 'win32')) {
-          await this.generateCppPropertiesFile(scaffoldType, board, fileInfo);
+          await this.generateCppPropertiesFile(
+              createTimeScaffoldType, board, fileInfo);
         }
       } else {
         // Copy file directly
         await utils.generateTemplateFile(
-            this.deviceFolder, scaffoldType, fileInfo);
+            this.deviceFolder, createTimeScaffoldType, fileInfo);
       }
     }
     return true;

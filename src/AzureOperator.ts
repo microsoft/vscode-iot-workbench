@@ -29,6 +29,8 @@ export class AzureOperator {
       telemetryContext: TelemetryContext) {
     let status = false;
     let iotProject;
+    telemetryContext.properties.projectHostType =
+        ProjectHostType[this.projectHostType];
     if (this.projectHostType === ProjectHostType.Container) {
       iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
           context, channel, telemetryContext);
@@ -61,9 +63,14 @@ export class AzureOperator {
       const message =
           `The project is currently open in container now. 'Azure IoT Device Workbench: Depoly to Azure...' is not supported inside the container.`;
       vscode.window.showWarningMessage(message);
+
+      telemetryContext.properties.errorMessage = message;
       return;
     }
+
     let iotProject;
+    telemetryContext.properties.projectHostType =
+        ProjectHostType[this.projectHostType];
     if (this.projectHostType === ProjectHostType.Container) {
       iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
           context, channel, telemetryContext);

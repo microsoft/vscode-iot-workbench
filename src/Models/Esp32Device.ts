@@ -83,8 +83,9 @@ export class Esp32Device extends ArduinoDeviceBase {
   async load(): Promise<boolean> {
     const deviceFolderPath = this.deviceFolder;
 
+    const loadTimeScaffoldType = ScaffoldType.Workspace;
     if (!await FileUtility.directoryExists(
-            ScaffoldType.Workspace, deviceFolderPath)) {
+            loadTimeScaffoldType, deviceFolderPath)) {
       throw new Error('Unable to find the device folder inside the project.');
     }
 

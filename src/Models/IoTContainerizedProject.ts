@@ -5,7 +5,7 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {ConfigKey, DependentExtensions, EventNames, FileNames, ScaffoldType} from '../constants';
+import {ConfigKey, DependentExtensions, DevelopEnvironment, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext, TelemetryProperties, TelemetryWorker} from '../telemetry';
 
@@ -35,12 +35,9 @@ const telemetryModule = impor('../telemetry') as typeof import('../telemetry');
 const constants = {
   asaFolderName: 'StreamAnalytics',
   functionDefaultFolderName: 'Functions',
-  workspaceConfigExtension: '.code-workspace',
-  projectConfigFileName: 'projectConfig.json'
+  workspaceConfigExtension: '.code-workspace'
 };
 export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
-  private projectConfigFile = '';
-
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
@@ -48,6 +45,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
   }
 
   async load(initLoad = false): Promise<boolean> {
+    const loadTimeScaffoldType = ScaffoldType.Workspace;
     if (!vscode.workspace.workspaceFolders) {
       return false;
     }
@@ -59,13 +57,13 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       return false;
     }
 
-    this.projectConfigFile = path.join(
-        this.projectRootPath, FileNames.vscodeSettingsFolderName,
-        constants.projectConfigFileName);
-    if (!fs.existsSync(this.projectConfigFile)) {
+    const iotworkbenchprojectFile =
+        path.join(this.projectRootPath, FileNames.iotworkbenchprojectFileName);
+    if (!await FileUtility.fileExists(
+            loadTimeScaffoldType, iotworkbenchprojectFile)) {
       return false;
     }
-    const projectConfigJson = require(this.projectConfigFile);
+    const projectConfigJson = require(iotworkbenchprojectFile);
 
     // only send telemetry when the IoT project is load when VS Code opens
     if (initLoad) {
@@ -74,6 +72,11 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
         error: '',
         errorMessage: ''
       };
+      properties.developEnvironment =
+          RemoteExtension.isRemote(this.extensionContext) ?
+          DevelopEnvironment.CONTAINER :
+          DevelopEnvironment.LOCAL_ENV;
+      properties.projectHostType = ProjectHostType[projectHostType];
       const telemetryContext:
           TelemetryContext = {properties, measurements: {duration: 0}};
 
@@ -88,7 +91,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     const azureConfigFileHandler =
         new azureComponentConfigModule.AzureConfigFileHandler(
             this.projectRootPath);
-    azureConfigFileHandler.createIfNotExists(ScaffoldType.Workspace);
+    azureConfigFileHandler.createIfNotExists(loadTimeScaffoldType);
 
     if (this.projectRootPath !== undefined) {
       const boardId = projectConfigJson[`${ConfigKey.boardId}`];
@@ -104,7 +107,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
         device = new raspberryPiDeviceModule.RaspberryPiDevice(
             this.extensionContext, this.projectRootPath, this.channel,
-            projectType);
+            projectType, this.telemetryContext);
       }
       if (device) {
         this.componentList.push(device);
@@ -112,13 +115,13 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       }
     }
 
-    const componentConfigs = await azureConfigFileHandler.getSortedComponents(
-        ScaffoldType.Workspace);
+    const componentConfigs =
+        await azureConfigFileHandler.getSortedComponents(loadTimeScaffoldType);
     if (!componentConfigs || componentConfigs.length === 0) {
       // Support backward compact
       const iotHub =
           new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
-      await iotHub.updateConfigSettings(ScaffoldType.Workspace);
+      await iotHub.updateConfigSettings(loadTimeScaffoldType);
       await iotHub.load();
       this.componentList.push(iotHub);
       const device = new ioTHubDeviceModule.IoTHubDevice(this.channel);
@@ -148,10 +151,6 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
           break;
         }
         case 'AzureFunctions': {
-          if (this.projectConfigFile === undefined) {
-            throw new Error(`${this.projectConfigFile} not found.`);
-          }
-          const projectConfigJson = require(this.projectConfigFile);
           const functionPath = projectConfigJson[`${ConfigKey.functionPath}`];
           if (!functionPath) {
             return false;
@@ -227,9 +226,10 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     if (!result) {
       return false;
     }
-    const scaffoldType = ScaffoldType.Local;
+    const createTimeScaffoldType = ScaffoldType.Local;
     if (rootFolderPath !== undefined) {
-      await FileUtility.mkdirRecursively(scaffoldType, rootFolderPath);
+      await FileUtility.mkdirRecursively(
+          createTimeScaffoldType, rootFolderPath);
     } else {
       throw new Error(
           'Unable to find the root path, please open the folder and initialize project again.');
@@ -241,7 +241,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     const azureConfigFileHandler =
         new azureComponentConfigModule.AzureConfigFileHandler(
             this.projectRootPath);
-    azureConfigFileHandler.createIfNotExists(scaffoldType);
+    azureConfigFileHandler.createIfNotExists(createTimeScaffoldType);
 
     const projectConfig: {[key: string]: string} = {};
 
@@ -249,7 +249,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
       device = new raspberryPiDeviceModule.RaspberryPiDevice(
           this.extensionContext, this.projectRootPath, this.channel,
-          projectType, templateFilesInfo);
+          projectType, this.telemetryContext, templateFilesInfo);
     } else {
       throw new Error('The specified board is not supported.');
     }
@@ -288,8 +288,10 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
         const functionDir = path.join(
             this.projectRootPath, constants.functionDefaultFolderName);
 
-        if (!await FileUtility.directoryExists(scaffoldType, functionDir)) {
-          await FileUtility.mkdirRecursively(scaffoldType, functionDir);
+        if (!await FileUtility.directoryExists(
+                createTimeScaffoldType, functionDir)) {
+          await FileUtility.mkdirRecursively(
+              createTimeScaffoldType, functionDir);
         }
 
         const azureFunctions = new azureFunctionsModule.AzureFunctions(
@@ -332,8 +334,9 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
         const asaDir = path.join(this.projectRootPath, constants.asaFolderName);
 
-        if (!await FileUtility.directoryExists(scaffoldType, asaDir)) {
-          await FileUtility.mkdirRecursively(scaffoldType, asaDir);
+        if (!await FileUtility.directoryExists(
+                createTimeScaffoldType, asaDir)) {
+          await FileUtility.mkdirRecursively(createTimeScaffoldType, asaDir);
         }
 
         const asaFilePath = this.extensionContext.asAbsolutePath(
@@ -343,7 +346,8 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
             fs.readFileSync(asaFilePath, 'utf8')
                 .replace(/\[input\]/, `"iothub-${iothub.id}"`)
                 .replace(/\[output\]/, `"cosmosdb-${cosmosDB.id}"`);
-        await FileUtility.writeFile(scaffoldType, queryPath, asaQueryContent);
+        await FileUtility.writeFile(
+            createTimeScaffoldType, queryPath, asaQueryContent);
 
         const asa = new streamAnalyticsJobModule.StreamAnalyticsJob(
             queryPath, this.extensionContext, this.projectRootPath,
@@ -394,18 +398,17 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       throw error;
     }
 
-    const vscodeFolderPath =
-        path.join(this.projectRootPath, FileNames.vscodeSettingsFolderName);
-    if (!await FileUtility.directoryExists(scaffoldType, vscodeFolderPath)) {
-      await FileUtility.mkdirRecursively(scaffoldType, vscodeFolderPath);
-    }
-    const projectConfigFile =
-        path.join(vscodeFolderPath, constants.projectConfigFileName);
-    if (!await FileUtility.fileExists(scaffoldType, projectConfigFile)) {
+    const iotworkbenchprojectFile =
+        path.join(this.projectRootPath, FileNames.iotworkbenchprojectFileName);
+    if (await FileUtility.fileExists(
+            createTimeScaffoldType, iotworkbenchprojectFile)) {
       const indentationSpace = 4;
       FileUtility.writeFile(
-          scaffoldType, projectConfigFile,
+          createTimeScaffoldType, iotworkbenchprojectFile,
           JSON.stringify(projectConfig, null, indentationSpace));
+    } else {
+      throw new Error(
+          `Internal Error. Could not find iot workbench project file.`);
     }
 
     if (!openInNewWindow) {
