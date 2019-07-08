@@ -102,7 +102,6 @@ export class ProjectInitializer {
                     [template.type as keyof typeof ProjectTemplateType];
 
             const templateFolder = path.join(resourceRootPath, template.path);
-
             const templateFiles =
                 require(path.join(templateFolder, FileNames.templateFiles));
 
@@ -121,10 +120,12 @@ export class ProjectInitializer {
 
             let project;
             if (template.platform === PlatformType.EMBEDDEDLINUX) {
+              telemetryContext.properties.projectHostType = 'Container';
               project =
                   new ioTContainerizedProjectModule.IoTContainerizedProject(
                       context, channel, telemetryContext);
             } else if (template.platform === PlatformType.ARDUINO) {
+              telemetryContext.properties.projectHostType = 'Workspace';
               project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
                   context, channel, telemetryContext);
             } else {

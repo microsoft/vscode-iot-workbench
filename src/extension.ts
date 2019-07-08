@@ -23,7 +23,6 @@ const exampleExplorerModule =
     impor('./exampleExplorer') as typeof import('./exampleExplorer');
 
 import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
-import {FileUtility} from './FileUtility';
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
     typeof import('./Models/IoTWorkspaceProject');
 const ioTContainerizedProjectModule =
@@ -81,12 +80,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const deviceOperator = new DeviceOperator(projectHostType);
   const azureOperator = new AzureOperator(projectHostType);
-
   const exampleExplorer = new exampleExplorerModule.ExampleExplorer();
-  const exampleSelectBoardBinder =
-      exampleExplorer.selectBoard.bind(exampleExplorer);
-  const initializeExampleBinder =
-      exampleExplorer.initializeExample.bind(exampleExplorer);
 
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with  registerCommand
@@ -180,6 +174,8 @@ export async function activate(context: vscode.ExtensionContext) {
       telemetryWorkerInitialized = true;
     }
 
+    const exampleSelectBoardBinder =
+        exampleExplorer.selectBoard.bind(exampleExplorer);
     telemetryModule.callWithTelemetry(
         EventNames.openExamplePageEvent, outputChannel, true, context,
         exampleSelectBoardBinder);
@@ -193,6 +189,8 @@ export async function activate(context: vscode.ExtensionContext) {
       telemetryWorkerInitialized = true;
     }
 
+    const initializeExampleBinder =
+        exampleExplorer.initializeExample.bind(exampleExplorer);
     telemetryModule.callWithTelemetry(
         EventNames.loadExampleEvent, outputChannel, true, context,
         initializeExampleBinder, {}, name, url, boardId);
@@ -237,7 +235,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
         const telemetryContext:
             TelemetryContext = {properties, measurements: {duration: 0}};
-
 
         // Initialize Telemetry
         if (!telemetryWorkerInitialized) {

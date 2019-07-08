@@ -32,8 +32,6 @@ const ioTButtonDeviceModule =
 const ioTHubModule = impor('./IoTHub') as typeof import('./IoTHub');
 const ioTHubDeviceModule =
     impor('./IoTHubDevice') as typeof import('./IoTHubDevice');
-const raspberryPiDeviceModule =
-    impor('./RaspberryPiDevice') as typeof import('./RaspberryPiDevice');
 const streamAnalyticsJobModule =
     impor('./StreamAnalyticsJob') as typeof import('./StreamAnalyticsJob');
 const telemetryModule = impor('../telemetry') as typeof import('../telemetry');

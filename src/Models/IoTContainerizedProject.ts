@@ -104,7 +104,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
         device = new raspberryPiDeviceModule.RaspberryPiDevice(
             this.extensionContext, this.projectRootPath, this.channel,
-            projectType);
+            projectType, this.telemetryContext);
       }
       if (device) {
         this.componentList.push(device);
@@ -249,7 +249,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
       device = new raspberryPiDeviceModule.RaspberryPiDevice(
           this.extensionContext, this.projectRootPath, this.channel,
-          projectType, templateFilesInfo);
+          projectType, this.telemetryContext, templateFilesInfo);
     } else {
       throw new Error('The specified board is not supported.');
     }
