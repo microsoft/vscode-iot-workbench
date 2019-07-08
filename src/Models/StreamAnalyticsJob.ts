@@ -175,7 +175,9 @@ export class StreamAnalyticsJob implements Component, Provisionable,
   }
 
   async create(): Promise<boolean> {
-    await this.updateConfigSettings(ScaffoldType.Local);
+    const createTimeScaffoldType = ScaffoldType.Local;
+
+    await this.updateConfigSettings(createTimeScaffoldType);
     return true;
   }
 
@@ -202,6 +204,8 @@ export class StreamAnalyticsJob implements Component, Provisionable,
   }
 
   async provision(): Promise<boolean> {
+    const scaffoldType = ScaffoldType.Workspace;
+
     const asaList = this.getStreamAnalyticsInResourceGroup();
     const asaNameChoose = await vscode.window.showQuickPick(
         asaList,
@@ -248,10 +252,11 @@ export class StreamAnalyticsJob implements Component, Provisionable,
 
     for (const dependency of this.dependencies) {
       const componentConfig = await this.azureConfigHandler.getComponentById(
-          ScaffoldType.Workspace, dependency.id);
+          scaffoldType, dependency.id);
       if (!componentConfig) {
         throw new Error(`Cannot find component with id ${dependency.id}.`);
       }
+
       if (dependency.type === DependencyType.Input) {
         switch (componentConfig.type) {
           case 'IoTHub': {
@@ -359,7 +364,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
       }
     }
 
-    await this.updateConfigSettings(ScaffoldType.Workspace, {
+    await this.updateConfigSettings(scaffoldType, {
       values: {
         subscriptionId: AzureUtility.subscriptionId as string,
         resourceGroup: AzureUtility.resourceGroup as string,

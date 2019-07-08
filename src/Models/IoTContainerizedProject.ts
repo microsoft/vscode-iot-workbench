@@ -45,6 +45,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
   }
 
   async load(initLoad = false): Promise<boolean> {
+    const loadTimeScaffoldType = ScaffoldType.Workspace;
     if (!vscode.workspace.workspaceFolders) {
       return false;
     }
@@ -58,7 +59,8 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
     const iotworkbenchprojectFile =
         path.join(this.projectRootPath, FileNames.iotworkbenchprojectFileName);
-    if (!fs.existsSync(iotworkbenchprojectFile)) {
+    if (!await FileUtility.fileExists(
+            loadTimeScaffoldType, iotworkbenchprojectFile)) {
       return false;
     }
     const projectConfigJson = require(iotworkbenchprojectFile);
@@ -89,7 +91,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     const azureConfigFileHandler =
         new azureComponentConfigModule.AzureConfigFileHandler(
             this.projectRootPath);
-    azureConfigFileHandler.createIfNotExists(ScaffoldType.Workspace);
+    azureConfigFileHandler.createIfNotExists(loadTimeScaffoldType);
 
     if (this.projectRootPath !== undefined) {
       const boardId = projectConfigJson[`${ConfigKey.boardId}`];
@@ -113,13 +115,13 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       }
     }
 
-    const componentConfigs = await azureConfigFileHandler.getSortedComponents(
-        ScaffoldType.Workspace);
+    const componentConfigs =
+        await azureConfigFileHandler.getSortedComponents(loadTimeScaffoldType);
     if (!componentConfigs || componentConfigs.length === 0) {
       // Support backward compact
       const iotHub =
           new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
-      await iotHub.updateConfigSettings(ScaffoldType.Workspace);
+      await iotHub.updateConfigSettings(loadTimeScaffoldType);
       await iotHub.load();
       this.componentList.push(iotHub);
       const device = new ioTHubDeviceModule.IoTHubDevice(this.channel);
@@ -224,9 +226,10 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     if (!result) {
       return false;
     }
-    const scaffoldType = ScaffoldType.Local;
+    const createTimeScaffoldType = ScaffoldType.Local;
     if (rootFolderPath !== undefined) {
-      await FileUtility.mkdirRecursively(scaffoldType, rootFolderPath);
+      await FileUtility.mkdirRecursively(
+          createTimeScaffoldType, rootFolderPath);
     } else {
       throw new Error(
           'Unable to find the root path, please open the folder and initialize project again.');
@@ -238,7 +241,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     const azureConfigFileHandler =
         new azureComponentConfigModule.AzureConfigFileHandler(
             this.projectRootPath);
-    azureConfigFileHandler.createIfNotExists(scaffoldType);
+    azureConfigFileHandler.createIfNotExists(createTimeScaffoldType);
 
     const projectConfig: {[key: string]: string} = {};
 
@@ -285,8 +288,10 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
         const functionDir = path.join(
             this.projectRootPath, constants.functionDefaultFolderName);
 
-        if (!await FileUtility.directoryExists(scaffoldType, functionDir)) {
-          await FileUtility.mkdirRecursively(scaffoldType, functionDir);
+        if (!await FileUtility.directoryExists(
+                createTimeScaffoldType, functionDir)) {
+          await FileUtility.mkdirRecursively(
+              createTimeScaffoldType, functionDir);
         }
 
         const azureFunctions = new azureFunctionsModule.AzureFunctions(
@@ -329,8 +334,9 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
         const asaDir = path.join(this.projectRootPath, constants.asaFolderName);
 
-        if (!await FileUtility.directoryExists(scaffoldType, asaDir)) {
-          await FileUtility.mkdirRecursively(scaffoldType, asaDir);
+        if (!await FileUtility.directoryExists(
+                createTimeScaffoldType, asaDir)) {
+          await FileUtility.mkdirRecursively(createTimeScaffoldType, asaDir);
         }
 
         const asaFilePath = this.extensionContext.asAbsolutePath(
@@ -340,7 +346,8 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
             fs.readFileSync(asaFilePath, 'utf8')
                 .replace(/\[input\]/, `"iothub-${iothub.id}"`)
                 .replace(/\[output\]/, `"cosmosdb-${cosmosDB.id}"`);
-        await FileUtility.writeFile(scaffoldType, queryPath, asaQueryContent);
+        await FileUtility.writeFile(
+            createTimeScaffoldType, queryPath, asaQueryContent);
 
         const asa = new streamAnalyticsJobModule.StreamAnalyticsJob(
             queryPath, this.extensionContext, this.projectRootPath,
@@ -393,10 +400,11 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
     const iotworkbenchprojectFile =
         path.join(this.projectRootPath, FileNames.iotworkbenchprojectFileName);
-    if (await FileUtility.fileExists(scaffoldType, iotworkbenchprojectFile)) {
+    if (await FileUtility.fileExists(
+            createTimeScaffoldType, iotworkbenchprojectFile)) {
       const indentationSpace = 4;
       FileUtility.writeFile(
-          scaffoldType, iotworkbenchprojectFile,
+          createTimeScaffoldType, iotworkbenchprojectFile,
           JSON.stringify(projectConfig, null, indentationSpace));
     } else {
       throw new Error(

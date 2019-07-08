@@ -225,10 +225,10 @@ export class ProjectInitializer {
         await IoTWorkbenchSettings.createAsync();
     const workbench = await settings.workbenchPath();
 
+    const scaffoldType = ScaffoldType.Local;
     const projectRootPath = path.join(workbench, 'projects');
-    if (!await FileUtility.directoryExists(
-            ScaffoldType.Local, projectRootPath)) {
-      await FileUtility.mkdirRecursively(ScaffoldType.Local, projectRootPath);
+    if (!await FileUtility.directoryExists(scaffoldType, projectRootPath)) {
+      await FileUtility.mkdirRecursively(scaffoldType, projectRootPath);
     }
 
     let counter = 0;
@@ -237,9 +237,9 @@ export class ProjectInitializer {
     while (true) {
       const projectPath = path.join(projectRootPath, candidateName);
       const projectPathExists =
-          await FileUtility.fileExists(ScaffoldType.Local, projectPath);
+          await FileUtility.fileExists(scaffoldType, projectPath);
       const projectDirectoryExists =
-          await FileUtility.directoryExists(ScaffoldType.Local, projectPath);
+          await FileUtility.directoryExists(scaffoldType, projectPath);
       if (!projectPathExists && !projectDirectoryExists) {
         break;
       }
@@ -260,9 +260,9 @@ export class ProjectInitializer {
 
         const projectPath = path.join(projectRootPath, projectName);
         const projectPathExists =
-            await FileUtility.fileExists(ScaffoldType.Local, projectPath);
+            await FileUtility.fileExists(scaffoldType, projectPath);
         const projectDirectoryExists =
-            await FileUtility.directoryExists(ScaffoldType.Local, projectPath);
+            await FileUtility.directoryExists(scaffoldType, projectPath);
         if (!projectPathExists && !projectDirectoryExists) {
           return;
         } else {
