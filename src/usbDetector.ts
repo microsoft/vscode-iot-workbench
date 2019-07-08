@@ -2,13 +2,14 @@
 // Licensed under the MIT License.
 
 import * as os from 'os';
+import * as path from 'path';
 import * as vscode from 'vscode';
 import {VSCExpress} from 'vscode-express';
 
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 import {ConfigHandler} from './configHandler';
-import {EventNames} from './constants';
+import {EventNames, FileNames} from './constants';
 import {callWithTelemetry} from './telemetry';
 
 export interface DeviceInfo {
@@ -20,7 +21,7 @@ export class UsbDetector {
   private static _vscexpress: VSCExpress|undefined;
   // tslint:disable-next-line: no-any
   private static _usbDetector: any =
-      require('../../vendor/node-usb-native').detector;
+      require('../vendor/node-usb-native').detector;
 
   constructor(
       private context: vscode.ExtensionContext,
@@ -28,7 +29,9 @@ export class UsbDetector {
 
   getBoardFromDeviceInfo(device: DeviceInfo) {
     if (device.vendorId && device.productId) {
-      const boardProvider = new BoardProvider(this.context);
+      const boardFolderPath = this.context.asAbsolutePath(path.join(
+          FileNames.resourcesFolderName, FileNames.templatesFolderName));
+      const boardProvider = new BoardProvider(boardFolderPath);
       const board = boardProvider.find(
           {vendorId: device.vendorId, productId: device.productId});
 

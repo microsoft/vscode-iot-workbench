@@ -21,12 +21,12 @@ import {delay, getRegistryValues} from '../utils';
 
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 import {DeviceType} from './Interfaces/Device';
+import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 
 const impor = require('impor')(__dirname);
 const forEach = impor('lodash.foreach') as typeof import('lodash.foreach');
 const trimStart =
     impor('lodash.trimstart') as typeof import('lodash.trimstart');
-const filter = impor('lodash.filter') as typeof import('lodash.filter');
 
 interface SerialPortInfo {
   comName: string;
@@ -36,8 +36,6 @@ interface SerialPortInfo {
 }
 
 const constants = {
-  boardInfo: 'AZ3166:stm32f4:MXCHIP_AZ3166',
-  uploadMethod: 'upload_method=OpenOCDMethod',
   outputPath: './.build',
   platformLocalFileName: 'platform.local.txt',
   cExtraFlag: 'compiler.c.extra_flags=-DCORRELATIONID="',
@@ -51,16 +49,12 @@ enum configDeviceOptions {
   UDS
 }
 
-async function cmd(command: string) {
-  exec(command, Promise.resolve);
-}
-
 export class AZ3166Device extends ArduinoDeviceBase {
   // tslint:disable-next-line: no-any
   static get serialport(): any {
     if (!AZ3166Device._serialport) {
       AZ3166Device._serialport =
-          require('../../../vendor/node-usb-native').SerialPort;
+          require('../../vendor/node-usb-native').SerialPort;
     }
     return AZ3166Device._serialport;
   }
@@ -74,7 +68,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
     return this.componentId;
   }
 
-  private sketchName = '';
+  private templateFiles: TemplateFileInfo[] = [];
   private static _boardId = 'devkit';
 
   static get boardId() {
@@ -83,19 +77,19 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      devicePath: string, sketchName?: string) {
+      devicePath: string, templateFiles?: TemplateFileInfo[]) {
     super(context, devicePath, DeviceType.MXChip_AZ3166);
     this.channel = channel;
     this.componentId = Guid.create().toString();
-    if (sketchName) {
-      this.sketchName = sketchName;
+    if (templateFiles) {
+      this.templateFiles = templateFiles;
     }
   }
 
   name = 'AZ3166';
 
   get board() {
-    const boardProvider = new BoardProvider(this.extensionContext);
+    const boardProvider = new BoardProvider(this.boardFolderPath);
     const az3166 = boardProvider.find({id: AZ3166Device._boardId});
     return az3166;
   }
@@ -129,30 +123,11 @@ export class AZ3166Device extends ArduinoDeviceBase {
       throw new Error('Unable to find the board in the config file.');
     }
 
-    this.generateCppPropertiesFile(this.board);
-
     return true;
   }
 
   async create(): Promise<boolean> {
-    if (!this.sketchName) {
-      throw new Error('No sketch file found.');
-    }
-    const deviceFolderPath = this.deviceFolder;
-
-    if (!fs.existsSync(deviceFolderPath)) {
-      throw new Error('Unable to find the device folder inside the project.');
-    }
-    if (!this.board) {
-      throw new Error('Unable to find the board in the config file.');
-    }
-
-    this.generateCommonFiles();
-    this.generateCppPropertiesFile(this.board);
-    await this.generateSketchFile(
-        this.sketchName, this.board, constants.boardInfo,
-        constants.uploadMethod);
-    return true;
+    return this.createCore(this.board, this.templateFiles);
   }
 
   async preCompileAction(): Promise<boolean> {
@@ -312,6 +287,13 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
         console.log(deviceConnectionString);
 
+        // Try to close serial monitor
+        try {
+          await vscode.commands.executeCommand(
+              'arduino.closeSerialMonitor', null, false);
+        } catch (ignore) {
+        }
+
         // Set selected connection string to device
         let res: boolean;
         const plat = os.platform();
@@ -363,6 +345,13 @@ export class AZ3166Device extends ArduinoDeviceBase {
         }
 
         console.log(UDS);
+
+        // Try to close serial monitor
+        try {
+          await vscode.commands.executeCommand(
+              'arduino.closeSerialMonitor', null, false);
+        } catch (ignore) {
+        }
 
         // Set selected connection string to device
         let res: boolean;

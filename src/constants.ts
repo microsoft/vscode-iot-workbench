@@ -12,6 +12,7 @@ export class ConfigKey {
   static readonly boardId = 'BoardId';
   static readonly asaPath = 'StreamAnalyticsPath';
   static readonly shownHelpPage = 'ShownHelpPage';
+  static readonly projectType = 'ProjectType';
 }
 
 export class EventNames {
@@ -32,22 +33,38 @@ export class EventNames {
   static readonly nsatsurvery = 'IoTWorkbench.NSATSurvey';
   static readonly selectSubscription = 'IoTWorkbench.SelectSubscription';
   static readonly openTutorial = 'IoTWorkbench.OpenTutorial';
+  static readonly projectLoadEvent = 'IoTWorkbench.ProjectLoadEvent';
 }
 
 export class FileNames {
-  static readonly templateFileName = 'template.json';
+  static readonly templateFileName = 'templates.json';
   static readonly boardListFileName = 'boardlist.json';
+  static readonly platformListFileName = 'platformlist.json';
   static readonly resourcesFolderName = 'resources';
   static readonly iotworkbenchprojectFileName = '.iotworkbenchproject';
   static readonly settingsJsonFileName = 'settings.json';
+  static readonly devcontainerFolderName = '.devcontainer';
   static readonly vscodeSettingsFolderName = '.vscode';
   static readonly workspaceExtensionName = '.code-workspace';
+  static readonly outputPathName = '.build';
+  static readonly templatesFolderName = 'templates';
+  static readonly templateFiles = 'templatefiles.json';
+}
+
+export enum OperationType {
+  Compile = 'Compile device code',
+  Upload = 'Upload device code'
 }
 
 export enum AzureFunctionsLanguage {
   CSharpScript = 'C#Script',
   JavaScript = 'JavaScript',
   CSharpLibrary = 'C#'
+}
+
+export enum ScaffoldType {
+  Local = 'local',
+  Workspace = 'workspace'
 }
 
 export class AzureComponentsStorage {
@@ -62,4 +79,10 @@ export class GlobalConstants {
 export class DependentExtensions {
   static readonly azureFunctions = 'ms-azuretools.vscode-azurefunctions';
   static readonly arduino = 'vsciot-vscode.vscode-arduino';
+  static readonly remote = 'ms-vscode-remote.vscode-remote-extensionpack';
+}
+
+export enum PlatformType {
+  ARDUINO = 'Arduino',
+  EMBEDDEDLINUX = 'Embedded Linux'
 }

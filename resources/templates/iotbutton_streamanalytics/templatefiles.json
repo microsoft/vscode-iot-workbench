@@ -1,0 +1,14 @@
+{
+  "templateFiles": [
+    {
+        "fileName": "userdata.json",
+        "sourcePath" : ".",
+        "targetPath" : "./"
+    },
+    {
+      "fileName": "settings.json",
+      "sourcePath" : ".",
+      "targetPath" : "./.vscode"
+    }
+  ]
+}
