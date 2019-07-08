@@ -117,6 +117,7 @@ export class CosmosDB implements Component, Provisionable {
 
     let cosmosDbName = '';
     let cosmosDbKey = '';
+    const scaffoldType = ScaffoldType.Workspace;
 
     if (!cosmosDbNameChoose.description) {
       if (this.channel) {
@@ -141,7 +142,7 @@ export class CosmosDB implements Component, Provisionable {
 
       for (const dependency of this.dependencies) {
         const componentConfig = await this.azureConfigHandler.getComponentById(
-            ScaffoldType.Workspace, dependency.id);
+            scaffoldType, dependency.id);
         if (!componentConfig) {
           throw new Error(`Cannot find component with id ${dependency.id}.`);
         }
@@ -247,7 +248,7 @@ export class CosmosDB implements Component, Provisionable {
       collection = collectionChoose.label;
     }
 
-    await this.updateConfigSettings(ScaffoldType.Workspace, {
+    await this.updateConfigSettings(scaffoldType, {
       values: {
         subscriptionId: AzureUtility.subscriptionId as string,
         resourceGroup: AzureUtility.resourceGroup as string,

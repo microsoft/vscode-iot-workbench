@@ -73,7 +73,9 @@ export class IoTHub implements Component, Provisionable {
 
 
   async create(): Promise<boolean> {
-    await this.updateConfigSettings(ScaffoldType.Local);
+    const createTimeScaffoldType = ScaffoldType.Local;
+
+    await this.updateConfigSettings(createTimeScaffoldType);
     return true;
   }
 
@@ -156,7 +158,8 @@ export class IoTHub implements Component, Provisionable {
       await ConfigHandler.update(
           ConfigKey.eventHubConnectionPath, eventHubConnectionPath);
 
-      this.updateConfigSettings(ScaffoldType.Workspace, {
+      const scaffoldType = ScaffoldType.Workspace;
+      this.updateConfigSettings(scaffoldType, {
         values: {
           iotHubConnectionString: iothub.iotHubConnectionString,
           eventHubConnectionString,

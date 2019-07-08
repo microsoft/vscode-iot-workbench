@@ -52,6 +52,8 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
   }
 
   async load(initLoad = false): Promise<boolean> {
+    const loadTimeScaffoldType = ScaffoldType.Workspace;
+
     if (!vscode.workspace.workspaceFolders) {
       return false;
     }
@@ -98,7 +100,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     const azureConfigFileHandler =
         new azureComponentConfigModule.AzureConfigFileHandler(
             this.projectRootPath);
-    azureConfigFileHandler.createIfNotExists(ScaffoldType.Workspace);
+    azureConfigFileHandler.createIfNotExists(loadTimeScaffoldType);
 
     if (deviceLocation !== undefined) {
       const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
@@ -123,13 +125,13 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
       }
     }
 
-    const componentConfigs = await azureConfigFileHandler.getSortedComponents(
-        ScaffoldType.Workspace);
+    const componentConfigs =
+        await azureConfigFileHandler.getSortedComponents(loadTimeScaffoldType);
     if (!componentConfigs || componentConfigs.length === 0) {
       // Support backward compact
       const iotHub =
           new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
-      await iotHub.updateConfigSettings(ScaffoldType.Workspace);
+      await iotHub.updateConfigSettings(loadTimeScaffoldType);
       await iotHub.load();
       this.componentList.push(iotHub);
       const device = new ioTHubDeviceModule.IoTHubDevice(this.channel);
@@ -145,7 +147,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
               component: iotHub,
               type: azureComponentConfigModule.DependencyType.Input
             }]);
-        await functionApp.updateConfigSettings(ScaffoldType.Workspace);
+        await functionApp.updateConfigSettings(loadTimeScaffoldType);
         await functionApp.load();
         this.componentList.push(functionApp);
       }
@@ -246,9 +248,10 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
       rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
       projectType: ProjectTemplateType, boardId: string,
       openInNewWindow: boolean): Promise<boolean> {
-    const scaffoldType = ScaffoldType.Local;
+    const createTimeScaffoldType = ScaffoldType.Local;
     if (rootFolderPath !== undefined) {
-      await FileUtility.mkdirRecursively(scaffoldType, rootFolderPath);
+      await FileUtility.mkdirRecursively(
+          createTimeScaffoldType, rootFolderPath);
     } else {
       throw new Error(
           'Unable to find the root path, please open the folder and initialize project again.');
@@ -260,7 +263,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     const azureConfigFileHandler =
         new azureComponentConfigModule.AzureConfigFileHandler(
             this.projectRootPath);
-    await azureConfigFileHandler.createIfNotExists(ScaffoldType.Local);
+    await azureConfigFileHandler.createIfNotExists(createTimeScaffoldType);
 
     const workspace: Workspace = {folders: [], settings: {}};
 
@@ -268,8 +271,8 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     const deviceDir =
         path.join(this.projectRootPath, constants.deviceDefaultFolderName);
 
-    if (!await FileUtility.directoryExists(scaffoldType, deviceDir)) {
-      await FileUtility.mkdirRecursively(scaffoldType, deviceDir);
+    if (!await FileUtility.directoryExists(createTimeScaffoldType, deviceDir)) {
+      await FileUtility.mkdirRecursively(createTimeScaffoldType, deviceDir);
     }
 
     workspace.folders.push({path: constants.deviceDefaultFolderName});
@@ -326,8 +329,10 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
         const functionDir = path.join(
             this.projectRootPath, constants.functionDefaultFolderName);
 
-        if (!await FileUtility.directoryExists(scaffoldType, functionDir)) {
-          await FileUtility.mkdirRecursively(scaffoldType, functionDir);
+        if (!await FileUtility.directoryExists(
+                createTimeScaffoldType, functionDir)) {
+          await FileUtility.mkdirRecursively(
+              createTimeScaffoldType, functionDir);
         }
 
         workspace.folders.push({path: constants.functionDefaultFolderName});
@@ -370,8 +375,9 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
 
         const asaDir = path.join(this.projectRootPath, constants.asaFolderName);
 
-        if (!await FileUtility.directoryExists(scaffoldType, asaDir)) {
-          await FileUtility.mkdirRecursively(scaffoldType, asaDir);
+        if (!await FileUtility.directoryExists(
+                createTimeScaffoldType, asaDir)) {
+          await FileUtility.mkdirRecursively(createTimeScaffoldType, asaDir);
         }
 
         const asaFilePath = this.extensionContext.asAbsolutePath(
@@ -381,7 +387,8 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
             fs.readFileSync(asaFilePath, 'utf8')
                 .replace(/\[input\]/, `"iothub-${iothub.id}"`)
                 .replace(/\[output\]/, `"cosmosdb-${cosmosDB.id}"`);
-        await FileUtility.writeFile(scaffoldType, queryPath, asaQueryContent);
+        await FileUtility.writeFile(
+            createTimeScaffoldType, queryPath, asaQueryContent);
 
         const asa = new streamAnalyticsJobModule.StreamAnalyticsJob(
             queryPath, this.extensionContext, this.projectRootPath,
@@ -440,13 +447,15 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
             FileNames.workspaceExtensionName}`);
 
     await FileUtility.writeFile(
-        scaffoldType, workspaceConfigFilePath,
+        createTimeScaffoldType, workspaceConfigFilePath,
         JSON.stringify(workspace, null, 4));
 
     const vscodeFolderPath =
         path.join(this.projectRootPath, FileNames.vscodeSettingsFolderName);
-    if (!await FileUtility.directoryExists(scaffoldType, vscodeFolderPath)) {
-      await FileUtility.mkdirRecursively(scaffoldType, vscodeFolderPath);
+    if (!await FileUtility.directoryExists(
+            createTimeScaffoldType, vscodeFolderPath)) {
+      await FileUtility.mkdirRecursively(
+          createTimeScaffoldType, vscodeFolderPath);
     }
 
     if (!openInNewWindow) {
