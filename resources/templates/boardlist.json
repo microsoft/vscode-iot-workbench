@@ -1,7 +1,7 @@
 {
     "boards": [
         {
-            "name": "IoT DevKit",
+            "name": "MXChip IoT DevKit ",
             "id": "devkit",
             "detailInfo": "MXChip - Microsoft Azure IoT Developer Kit",
             "defaultBaudRate": 115200,
@@ -17,14 +17,7 @@
             "projectHostType": "workspace"
         },
         {
-            "name": "IoT button",
-            "id": "iotbutton",
-            "detailInfo": "teXXmo – Microsoft Azure IoT Developer Kit",
-            "helpUrl": "https://aka.ms/button",
-            "projectHostType": "workspace"
-        },
-        {
-            "name": "ESP32 Arduino",
+            "name": "Generic ESP32 boards",
             "id": "esp32",
             "detailInfo": "ESP32",
             "defaultBaudRate": 115200,
@@ -40,11 +33,17 @@
             "projectHostType": "workspace"
         },
         {
+            "name": "IoT button",
+            "id": "iotbutton",
+            "detailInfo": "teXXmo – Microsoft Azure IoT Developer Kit",
+            "helpUrl": "https://aka.ms/button",
+            "projectHostType": "workspace"
+        },
+        {
             "name": "Raspberry Pi",
             "id": "raspberrypi",
             "detailInfo": "Raspberry Pi",
             "helpUrl": "https://www.raspberrypi.org/",
-            "exampleUrl": "https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/gallery/workbench-example-raspi.json",
             "projectHostType": "container"
         }
     ]

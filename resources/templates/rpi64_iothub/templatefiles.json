@@ -24,6 +24,11 @@
         "fileName": "c_cpp_properties.json",
         "sourcePath" : ".",
         "targetPath" : "./.vscode"
+    },
+    {
+        "fileName": "config.json",
+        "sourcePath" : ".",
+        "targetPath" : "./.vscode"
     }
   ]
 }
