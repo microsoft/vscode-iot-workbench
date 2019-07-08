@@ -200,6 +200,10 @@ Here are a set of tutorials that will help you get started:
 
     -  Click **Open**.
 
+## Documentation
+
+- [FAQ](https://github.com/microsoft/vscode-iot-workbench/wiki/FAQ)
+
 ## Privacy Statement
 The [Microsft Enterprise and Developer Privacy Statement](https://www.microsoft.com/en-us/privacystatement/EnterpriseDev/default.aspx) describes the privacy statement of this software.
 
