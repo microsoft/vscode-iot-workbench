@@ -35,12 +35,9 @@ const telemetryModule = impor('../telemetry') as typeof import('../telemetry');
 const constants = {
   asaFolderName: 'StreamAnalytics',
   functionDefaultFolderName: 'Functions',
-  workspaceConfigExtension: '.code-workspace',
-  projectConfigFileName: 'projectConfig.json'
+  workspaceConfigExtension: '.code-workspace'
 };
 export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
-  private projectConfigFile = '';
-
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
@@ -59,13 +56,12 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       return false;
     }
 
-    this.projectConfigFile = path.join(
-        this.projectRootPath, FileNames.vscodeSettingsFolderName,
-        constants.projectConfigFileName);
-    if (!fs.existsSync(this.projectConfigFile)) {
+    const iotworkbenchprojectFile =
+        path.join(this.projectRootPath, FileNames.iotworkbenchprojectFileName);
+    if (!fs.existsSync(iotworkbenchprojectFile)) {
       return false;
     }
-    const projectConfigJson = require(this.projectConfigFile);
+    const projectConfigJson = require(iotworkbenchprojectFile);
 
     // only send telemetry when the IoT project is load when VS Code opens
     if (initLoad) {
@@ -153,10 +149,6 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
           break;
         }
         case 'AzureFunctions': {
-          if (this.projectConfigFile === undefined) {
-            throw new Error(`${this.projectConfigFile} not found.`);
-          }
-          const projectConfigJson = require(this.projectConfigFile);
           const functionPath = projectConfigJson[`${ConfigKey.functionPath}`];
           if (!functionPath) {
             return false;
@@ -399,18 +391,16 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       throw error;
     }
 
-    const vscodeFolderPath =
-        path.join(this.projectRootPath, FileNames.vscodeSettingsFolderName);
-    if (!await FileUtility.directoryExists(scaffoldType, vscodeFolderPath)) {
-      await FileUtility.mkdirRecursively(scaffoldType, vscodeFolderPath);
-    }
-    const projectConfigFile =
-        path.join(vscodeFolderPath, constants.projectConfigFileName);
-    if (!await FileUtility.fileExists(scaffoldType, projectConfigFile)) {
+    const iotworkbenchprojectFile =
+        path.join(this.projectRootPath, FileNames.iotworkbenchprojectFileName);
+    if (await FileUtility.fileExists(scaffoldType, iotworkbenchprojectFile)) {
       const indentationSpace = 4;
       FileUtility.writeFile(
-          scaffoldType, projectConfigFile,
+          scaffoldType, iotworkbenchprojectFile,
           JSON.stringify(projectConfig, null, indentationSpace));
+    } else {
+      throw new Error(
+          `Internal Error. Could not find iot workbench project file.`);
     }
 
     if (!openInNewWindow) {
