@@ -9,14 +9,13 @@ import * as path from 'path';
 import * as fs from 'fs-plus';
 import * as utils from './utils';
 
-import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
 import {TelemetryContext} from './telemetry';
 import {FileNames, ScaffoldType, PlatformType} from './constants';
-import {BoardProvider} from './boardProvider';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import {FileUtility} from './FileUtility';
 import {ProjectTemplate, ProjectTemplateType, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
 import {Platform} from './Models/Interfaces/Platform';
+import {RemoteExtension} from './Models/RemoteExtension';
 
 const impor = require('impor')(__dirname);
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
@@ -33,6 +32,13 @@ export class ProjectInitializer {
   async InitializeProject(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
+    if (RemoteExtension.isRemote(context)) {
+      const message =
+          `The project is open in Docker container now, Please open a new window and rerun this command.`;
+      vscode.window.showWarningMessage(message);
+      return;
+    }
+
     let openInNewWindow = false;
     // If current window contains other project, open the created project in new
     // window.
@@ -75,16 +81,11 @@ export class ProjectInitializer {
               telemetryContext.properties.platform = platformSelection.label;
             }
 
-            if (platformSelection.label === 'no_platform') {
-              await utils.TakeNoDeviceSurvey(telemetryContext);
-              return;
-            }
-
             // Step 4: Select template
             const resourceRootPath = context.asAbsolutePath(path.join(
                 FileNames.resourcesFolderName, FileNames.templatesFolderName));
             const template = await this.SelectTemplate(
-                resourceRootPath, platformSelection.label);
+                telemetryContext, resourceRootPath, platformSelection.label);
 
             if (!template) {
               telemetryContext.properties.errorMessage =
@@ -118,12 +119,6 @@ export class ProjectInitializer {
                   });
                 });
 
-
-            if (projectPath) {
-              await FileUtility.mkdirRecursively(
-                  ScaffoldType.Local, projectPath);
-            }
-
             let project;
             if (template.platform === PlatformType.EMBEDDEDLINUX) {
               project =
@@ -144,8 +139,9 @@ export class ProjectInitializer {
         });
   }
 
-  private async SelectTemplate(templateFolderPath: string, platform: string):
-      Promise<ProjectTemplate|undefined> {
+  private async SelectTemplate(
+      telemetryContext: TelemetryContext, templateFolderPath: string,
+      platform: string): Promise<ProjectTemplate|undefined> {
     const templateJson =
         require(path.join(templateFolderPath, FileNames.templateFileName));
 
@@ -164,6 +160,13 @@ export class ProjectInitializer {
       });
     });
 
+    // add the selection of 'device not in the list'
+    projectTemplateList.push({
+      label: '$(issue-opened) My device is not in the list...',
+      description: '',
+      detail: ''
+    });
+
     const templateSelection =
         await vscode.window.showQuickPick(projectTemplateList, {
           ignoreFocusOut: true,
@@ -174,38 +177,17 @@ export class ProjectInitializer {
 
     if (!templateSelection) {
       return;
+    } else if (
+        templateSelection.label ===
+        '$(issue-opened) My device is not in the list...') {
+      await utils.TakeNoDeviceSurvey(telemetryContext);
+      return;
     }
 
     return templateJson.templates.find((template: ProjectTemplate) => {
       return template.platform === platform &&
           template.name === templateSelection.label;
     });
-  }
-
-  private async SelectBoard(boardFolderPath: string) {
-    const boardProvider = new BoardProvider(boardFolderPath);
-    const boardItemList: BoardQuickPickItem[] = [];
-
-    const boards = boardProvider.list;
-    boards.forEach((board: Board) => {
-      boardItemList.push({
-        name: board.name,
-        model: board.model,
-        id: board.id,
-        detailInfo: board.detailInfo,
-        label: board.name,
-        description: board.detailInfo,
-      });
-    });
-
-    const boardSelection = await vscode.window.showQuickPick(boardItemList, {
-      ignoreFocusOut: true,
-      matchOnDescription: true,
-      matchOnDetail: true,
-      placeHolder: 'Select a board',
-    });
-
-    return boardSelection;
   }
 
   private async SelectPlatform(context: vscode.ExtensionContext) {

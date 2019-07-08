@@ -7,7 +7,8 @@
 import * as vscode from 'vscode';
 import {TelemetryContext} from './telemetry';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
-import {askAndNewProject} from './utils';
+import {handleIoTWorkspaceProjectFolder, askAndNewProject} from './utils';
+import {RemoteExtension} from './Models/RemoteExtension';
 
 const impor = require('impor')(__dirname);
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
@@ -36,13 +37,13 @@ export class AzureOperator {
           context, channel, telemetryContext);
     }
     if (iotProject === undefined) {
-      await askAndNewProject(telemetryContext);
+      await handleIoTWorkspaceProjectFolder(telemetryContext);
       return;
     }
 
     const result = await iotProject.load();
     if (!result) {
-      await iotProject.handleLoadFailure();
+      await askAndNewProject(telemetryContext);
       return;
     }
     status = await iotProject.provision();
@@ -56,6 +57,12 @@ export class AzureOperator {
   async Deploy(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
+    if (RemoteExtension.isRemote(context)) {
+      const message =
+          `The project is currently open in container now. 'Azure IoT Device Workbench: Depoly to Azure...' is not supported inside the container.`;
+      vscode.window.showWarningMessage(message);
+      return;
+    }
     let iotProject;
     if (this.projectHostType === ProjectHostType.Container) {
       iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
@@ -65,13 +72,13 @@ export class AzureOperator {
           context, channel, telemetryContext);
     }
     if (iotProject === undefined) {
-      await askAndNewProject(telemetryContext);
+      await handleIoTWorkspaceProjectFolder(telemetryContext);
       return;
     }
 
     const result = await iotProject.load();
     if (!result) {
-      await iotProject.handleLoadFailure();
+      await askAndNewProject(telemetryContext);
       return;
     }
     await iotProject.deploy();

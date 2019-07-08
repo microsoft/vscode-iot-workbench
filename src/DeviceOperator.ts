@@ -13,7 +13,7 @@ import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 import {FileNames} from './constants';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
-import {askAndNewProject} from './utils';
+import {askAndNewProject, handleIoTWorkspaceProjectFolder} from './utils';
 
 const impor = require('impor')(__dirname);
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
@@ -40,13 +40,13 @@ export class DeviceOperator {
           context, channel, telemetryContext);
     }
     if (iotProject === undefined) {
-      await askAndNewProject(telemetryContext);
+      await handleIoTWorkspaceProjectFolder(telemetryContext);
       return;
     }
 
     const result = await iotProject.load();
     if (!result) {
-      await iotProject.handleLoadFailure();
+      await askAndNewProject(telemetryContext);
       return;
     }
     await iotProject.compile();
@@ -64,13 +64,13 @@ export class DeviceOperator {
           context, channel, telemetryContext);
     }
     if (iotProject === undefined) {
-      await askAndNewProject(telemetryContext);
+      await handleIoTWorkspaceProjectFolder(telemetryContext);
       return;
     }
 
     const result = await iotProject.load();
     if (!result) {
-      await iotProject.handleLoadFailure();
+      await askAndNewProject(telemetryContext);
       return;
     }
     await iotProject.upload();
@@ -88,63 +88,15 @@ export class DeviceOperator {
           context, channel, telemetryContext);
     }
     if (iotProject === undefined) {
-      await askAndNewProject(telemetryContext);
+      await handleIoTWorkspaceProjectFolder(telemetryContext);
       return;
     }
 
     const result = await iotProject.load();
     if (!result) {
-      await iotProject.handleLoadFailure();
+      await askAndNewProject(telemetryContext);
       return;
     }
     await iotProject.configDeviceSettings();
-  }
-
-  async downloadPackage(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext) {
-    const boardListFolderPath = context.asAbsolutePath(path.join(
-        FileNames.resourcesFolderName, FileNames.templatesFolderName));
-    const boardProvider = new BoardProvider(boardListFolderPath);
-    const boardItemList: BoardQuickPickItem[] = [];
-    const boards = boardProvider.list.filter(board => board.installation);
-    boards.forEach((board: Board) => {
-      boardItemList.push({
-        name: board.name,
-        id: board.id,
-        detailInfo: board.detailInfo,
-        label: board.name,
-        description: board.detailInfo,
-      });
-    });
-
-    const boardSelection = await vscode.window.showQuickPick(boardItemList, {
-      ignoreFocusOut: true,
-      matchOnDescription: true,
-      matchOnDetail: true,
-      placeHolder: 'Select a board',
-    });
-
-    if (!boardSelection) {
-      telemetryContext.properties.errorMessage = 'Board selection canceled.';
-      telemetryContext.properties.result = 'Canceled';
-      return false;
-    } else {
-      telemetryContext.properties.board = boardSelection.label;
-      try {
-        const board = boardProvider.find({id: boardSelection.id});
-
-        if (board) {
-          await ArduinoPackageManager.installBoard(board);
-        }
-      } catch (error) {
-        throw new Error(`Device package for ${
-            boardSelection.label} installation failed: ${error.message}`);
-      }
-    }
-
-    vscode.window.showInformationMessage(
-        `Device package for ${boardSelection.label} has been installed.`);
-    return true;
   }
 }
