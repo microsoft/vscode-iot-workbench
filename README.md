@@ -40,7 +40,6 @@ For developing on Embedded Linux device, you will need Docker and Visual Studio 
 ### Install extensions
 
 1. Launch VS Code, in the Extension tab, find and install **"Azure IoT Device Workbench"**.
-
     <img src="https://github.com/microsoft/vscode-iot-workbench/blob/master/docs/images/device-workbench.png" />
 
 2. Reload the window and make sure all the dependency extensions are correctly installed:
@@ -66,8 +65,7 @@ For developing on Embedded Linux device, you will need Docker and Visual Studio 
 
 - Install Docker Desktop for Mac
 
-  Follow the [installation guide](https://docs.docker.com/docker-for-mac/install/) and make sure to enable driver sharing for Docker to access your local folder:
-    *[TBD for Mac]*
+  Follow the [installation guide](https://docs.docker.com/docker-for-mac/install/) and make sure to enable driver sharing for Docker to access your local folder, which is enabled by default.
 
 - Get Docker for Linux
 
@@ -129,8 +127,7 @@ To simplify the cross compiling toolchain, Azure IoT Device SDK and dependencies
     <img src="https://github.com/microsoft/vscode-iot-workbench/blob/master/docs/images/result.png" />
 
 4. To verify the reception of the data, use Azure IoT Hub Toolkit, right click on the device and select **Start Monitoring Built-in Event Endpoint**. In the output window, you can see that IoT Hub gets telemetry data sent from Raspberry Pi.
-
-   *[TBD Screenshot]*
+    <img src="https://github.com/microsoft/vscode-iot-workbench/blob/master/docs/images/iothub-d2c.png" />
 
 ### Arduino
 
@@ -234,10 +231,13 @@ There are a couple of ways you can contribute to this repo:
     | `Difficulty` | Difficulty of the example, easy, medium or difficult. |
 
 ## Code of Conduct
+
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct). For more information please see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/#howadopt) or contact opencode@microsoft.com with any additional questions or comments.
 
 ## Contact Us
+
 If you would like to help to build the best IoT experience with Azure IoT Device Workbench, you can reach us directly at [gitter chat room](https://gitter.im/Microsoft/vscode-iot-workbench).
 
 ## Telemetry
+
 VS Code collects usage data and sends it to Microsoft to help improve our products and services. Read our [privacy statement](https://go.microsoft.com/fwlink/?LinkID=528096&clcid=0x409) to learn more. If you don’t wish to send usage data to Microsoft, you can set the `telemetry.enableTelemetry` setting to `false`. Learn more in our [FAQ](https://code.visualstudio.com/docs/supporting/faq#_how-to-disable-telemetry-reporting).
