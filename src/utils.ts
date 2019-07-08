@@ -177,7 +177,7 @@ export async function askAndNewProject(telemetryContext: TelemetryContext) {
 
   if (result === DialogResponses.yes) {
     telemetryContext.properties.errorMessage =
-        'Operation failed and user create new project';
+        'Operation failed and user creates new project';
     await vscode.commands.executeCommand('iotworkbench.initializeProject');
   } else {
     telemetryContext.properties.errorMessage = 'Operation failed.';
@@ -196,7 +196,7 @@ export async function askAndOpenProject(
 
   if (result === DialogResponses.yes) {
     telemetryContext.properties.errorMessage =
-        'Operation failed and user open project from folder.';
+        'Operation failed and user opens project from folder.';
     const workspaceFilePath = path.join(rootPath, workspaceFile);
     await vscode.commands.executeCommand(
         'iotcube.openLocally', workspaceFilePath, false);
@@ -206,7 +206,8 @@ export async function askAndOpenProject(
 }
 
 export async function askAndOpenInRemote(
-    operation: OperationType, channel: vscode.OutputChannel): Promise<boolean> {
+    operation: OperationType, channel: vscode.OutputChannel,
+    telemetryContext: TelemetryContext): Promise<boolean> {
   const message = `${
       operation} can only be executed in remote container. Do you want to reopen the IoT project in container?`;
   const result: vscode.MessageItem|undefined =
@@ -214,8 +215,12 @@ export async function askAndOpenInRemote(
           message, DialogResponses.yes, DialogResponses.no);
 
   if (result === DialogResponses.yes) {
+    telemetryContext.properties.errorMessage =
+        `${operation} Operation failed and user opens project in container.`;
     const res = await RemoteExtension.checkRemoteExtension();
     if (!res) {
+      telemetryContext.properties.errorMessage = `${
+          operation} Operation failed and user fail to install Remote Extension.`;
       const message = `Remote extension is not available. Please install ${
           DependentExtensions.remote} first.`;
       channel.show();
@@ -227,6 +232,7 @@ export async function askAndOpenInRemote(
     const message = `${operation} can only be executed in remote container.`;
     channel.show();
     channel.appendLine(message);
+    telemetryContext.properties.errorMessage = 'Operation failed.';
   }
 
   return false;

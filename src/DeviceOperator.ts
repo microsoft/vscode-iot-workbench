@@ -5,15 +5,12 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import * as path from 'path';
 
 import {TelemetryContext} from './telemetry';
-import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
-import {ArduinoPackageManager} from './ArduinoPackageManager';
-import {BoardProvider} from './boardProvider';
-import {FileNames} from './constants';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 import {askAndNewProject, handleIoTWorkspaceProjectFolder} from './utils';
+import {RemoteExtension} from './Models/RemoteExtension';
+import {DevelopEnvironment} from './constants';
 
 const impor = require('impor')(__dirname);
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
@@ -32,6 +29,8 @@ export class DeviceOperator {
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     let iotProject;
+    telemetryContext.properties.projectHostType =
+        ProjectHostType[this.projectHostType];
     if (this.projectHostType === ProjectHostType.Container) {
       iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
           context, channel, telemetryContext);
@@ -56,6 +55,8 @@ export class DeviceOperator {
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     let iotProject;
+    telemetryContext.properties.projectHostType =
+        ProjectHostType[this.projectHostType];
     if (this.projectHostType === ProjectHostType.Container) {
       iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
           context, channel, telemetryContext);
@@ -80,6 +81,8 @@ export class DeviceOperator {
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     let iotProject;
+    telemetryContext.properties.projectHostType =
+        ProjectHostType[this.projectHostType];
     if (this.projectHostType === ProjectHostType.Container) {
       iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
           context, channel, telemetryContext);

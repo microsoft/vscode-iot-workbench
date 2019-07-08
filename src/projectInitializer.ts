@@ -34,7 +34,7 @@ export class ProjectInitializer {
       telemetryContext: TelemetryContext) {
     if (RemoteExtension.isRemote(context)) {
       const message =
-          `The project is open in Docker container now, Please open a new window and rerun this command.`;
+          `The project is open in a Docker container now. Open a new window and run this command again.`;
       vscode.window.showWarningMessage(message);
       return;
     }
@@ -102,7 +102,6 @@ export class ProjectInitializer {
                     [template.type as keyof typeof ProjectTemplateType];
 
             const templateFolder = path.join(resourceRootPath, template.path);
-
             const templateFiles =
                 require(path.join(templateFolder, FileNames.templateFiles));
 
@@ -121,10 +120,12 @@ export class ProjectInitializer {
 
             let project;
             if (template.platform === PlatformType.EMBEDDEDLINUX) {
+              telemetryContext.properties.projectHostType = 'Container';
               project =
                   new ioTContainerizedProjectModule.IoTContainerizedProject(
                       context, channel, telemetryContext);
             } else if (template.platform === PlatformType.ARDUINO) {
+              telemetryContext.properties.projectHostType = 'Workspace';
               project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
                   context, channel, telemetryContext);
             } else {

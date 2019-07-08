@@ -86,3 +86,8 @@ export enum PlatformType {
   ARDUINO = 'Arduino',
   EMBEDDEDLINUX = 'Embedded Linux'
 }
+
+export enum DevelopEnvironment {
+  CONTAINER = 'in container',
+  LOCAL_ENV = 'in local environment'
+}

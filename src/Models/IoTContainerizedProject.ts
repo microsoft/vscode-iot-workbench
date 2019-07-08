@@ -5,7 +5,7 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {ConfigKey, DependentExtensions, EventNames, FileNames, ScaffoldType} from '../constants';
+import {ConfigKey, DependentExtensions, DevelopEnvironment, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext, TelemetryProperties, TelemetryWorker} from '../telemetry';
 
@@ -74,6 +74,11 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
         error: '',
         errorMessage: ''
       };
+      properties.developEnvironment =
+          RemoteExtension.isRemote(this.extensionContext) ?
+          DevelopEnvironment.CONTAINER :
+          DevelopEnvironment.LOCAL_ENV;
+      properties.projectHostType = ProjectHostType[projectHostType];
       const telemetryContext:
           TelemetryContext = {properties, measurements: {duration: 0}};
 
@@ -104,7 +109,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
         device = new raspberryPiDeviceModule.RaspberryPiDevice(
             this.extensionContext, this.projectRootPath, this.channel,
-            projectType);
+            projectType, this.telemetryContext);
       }
       if (device) {
         this.componentList.push(device);
@@ -249,7 +254,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
       device = new raspberryPiDeviceModule.RaspberryPiDevice(
           this.extensionContext, this.projectRootPath, this.channel,
-          projectType, templateFilesInfo);
+          projectType, this.telemetryContext, templateFilesInfo);
     } else {
       throw new Error('The specified board is not supported.');
     }
