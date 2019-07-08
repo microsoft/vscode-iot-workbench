@@ -86,6 +86,7 @@ Please take a note of the device name you created. It will be used in next secti
   const string speechSubscriptionKey = "";
 
   // Region of the speech service, see https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/regions for more details.
+  // Use e.g. "West Europe" as region. Do not use "westeurope" or "https://westeurope.cris.ai".
   const string speechServiceRegion = "";
 
   // Device ID
