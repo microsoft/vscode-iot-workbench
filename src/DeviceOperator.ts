@@ -28,10 +28,6 @@ export class DeviceOperator {
   async compile(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    telemetryContext.properties.developEnvironment =
-        RemoteExtension.isRemote(context) ? DevelopEnvironment.CONTAINER :
-                                            DevelopEnvironment.LOCAL_ENV;
-
     let iotProject;
     telemetryContext.properties.projectHostType =
         ProjectHostType[this.projectHostType];
@@ -58,10 +54,6 @@ export class DeviceOperator {
   async upload(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    telemetryContext.properties.developEnvironment =
-        RemoteExtension.isRemote(context) ? DevelopEnvironment.CONTAINER :
-                                            DevelopEnvironment.LOCAL_ENV;
-
     let iotProject;
     telemetryContext.properties.projectHostType =
         ProjectHostType[this.projectHostType];
@@ -88,10 +80,6 @@ export class DeviceOperator {
   async configDeviceSettings(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    telemetryContext.properties.developEnvironment =
-        RemoteExtension.isRemote(context) ? DevelopEnvironment.CONTAINER :
-                                            DevelopEnvironment.LOCAL_ENV;
-
     let iotProject;
     telemetryContext.properties.projectHostType =
         ProjectHostType[this.projectHostType];

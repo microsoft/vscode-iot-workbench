@@ -9,7 +9,6 @@ import {TelemetryContext} from './telemetry';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 import {handleIoTWorkspaceProjectFolder, askAndNewProject} from './utils';
 import {RemoteExtension} from './Models/RemoteExtension';
-import {DevelopEnvironment} from './constants';
 
 const impor = require('impor')(__dirname);
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
@@ -28,10 +27,6 @@ export class AzureOperator {
   async Provision(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    telemetryContext.properties.developEnvironment =
-        RemoteExtension.isRemote(context) ? DevelopEnvironment.CONTAINER :
-                                            DevelopEnvironment.LOCAL_ENV;
-
     let status = false;
     let iotProject;
     telemetryContext.properties.projectHostType =
@@ -69,13 +64,9 @@ export class AzureOperator {
           `The project is currently open in container now. 'Azure IoT Device Workbench: Depoly to Azure...' is not supported inside the container.`;
       vscode.window.showWarningMessage(message);
 
-      telemetryContext.properties.developEnvironment =
-          DevelopEnvironment.CONTAINER;
       telemetryContext.properties.errorMessage = message;
       return;
     }
-    telemetryContext.properties.developEnvironment =
-        DevelopEnvironment.LOCAL_ENV;
 
     let iotProject;
     telemetryContext.properties.projectHostType =
