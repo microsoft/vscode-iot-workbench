@@ -272,7 +272,9 @@ export abstract class IoTWorkbenchProjectBase {
     try {
       const iotworkbenchprojectFilePath =
           path.join(projectFolder, FileNames.iotworkbenchprojectFileName);
-      await FileUtility.writeFile(type, iotworkbenchprojectFilePath, ' ');
+      if (!await FileUtility.fileExists(type, iotworkbenchprojectFilePath)) {
+        await FileUtility.writeFile(type, iotworkbenchprojectFilePath, '');
+      }
     } catch (error) {
       throw new Error(
           `Create ${FileNames.iotworkbenchprojectFileName} file failed: ${
