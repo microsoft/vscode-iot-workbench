@@ -1,16 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import {RetryOperation} from 'azure-iot-common';
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {ConfigHandler} from '../configHandler';
-import {ConfigKey, FileNames, ScaffoldType} from '../constants';
+import {FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext} from '../telemetry';
-import {askAndOpenProject} from '../utils';
 
 import {checkAzureLogin} from './Apis';
 import {Compilable} from './Interfaces/Compilable';
@@ -275,7 +272,9 @@ export abstract class IoTWorkbenchProjectBase {
     try {
       const iotworkbenchprojectFilePath =
           path.join(projectFolder, FileNames.iotworkbenchprojectFileName);
-      await FileUtility.writeFile(type, iotworkbenchprojectFilePath, ' ');
+      if (!await FileUtility.fileExists(type, iotworkbenchprojectFilePath)) {
+        await FileUtility.writeFile(type, iotworkbenchprojectFilePath, '');
+      }
     } catch (error) {
       throw new Error(
           `Create ${FileNames.iotworkbenchprojectFileName} file failed: ${

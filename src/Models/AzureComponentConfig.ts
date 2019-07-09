@@ -172,13 +172,14 @@ export class AzureConfigFileHandler {
 
   async appendComponent(type: ScaffoldType, component: AzureComponentConfig) {
     try {
+      const scaffoldType = ScaffoldType.Local;
       const azureConfigContent =
           await FileUtility.readFile(type, this.configFilePath, 'utf8');
       const azureConfigs =
           JSON.parse(azureConfigContent as string) as AzureConfigs;
       azureConfigs.componentConfigs.push(component);
       await FileUtility.writeFile(
-          ScaffoldType.Local, this.configFilePath,
+          scaffoldType, this.configFilePath,
           JSON.stringify(azureConfigs, null, 4));
       return azureConfigs;
     } catch (error) {
@@ -188,8 +189,10 @@ export class AzureConfigFileHandler {
 
   async updateComponent(index: number, componentInfo: ComponentInfo) {
     try {
-      const azureConfigContent = await FileUtility.readFile(
-          ScaffoldType.Local, this.configFilePath, 'utf8');
+      const scaffoldType = ScaffoldType.Local;
+
+      const azureConfigContent =
+          await FileUtility.readFile(scaffoldType, this.configFilePath, 'utf8');
       const azureConfigs =
           JSON.parse(azureConfigContent as string) as AzureConfigs;
       const component = azureConfigs.componentConfigs[index];
@@ -198,7 +201,7 @@ export class AzureConfigFileHandler {
       }
       component.componentInfo = componentInfo;
       await FileUtility.writeFile(
-          ScaffoldType.Local, this.configFilePath,
+          scaffoldType, this.configFilePath,
           JSON.stringify(azureConfigs, null, 4));
       return azureConfigs;
     } catch (error) {

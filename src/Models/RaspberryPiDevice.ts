@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as fs from 'fs-plus';
 import {Guid} from 'guid-typescript';
 import * as path from 'path';
 import * as vscode from 'vscode';
@@ -10,6 +9,7 @@ import * as sdk from 'vscode-iot-device-cube-sdk';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames, OperationType, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
+import {TelemetryContext} from '../telemetry';
 import {askAndOpenInRemote, generateTemplateFile, runCommand} from '../utils';
 
 import {ComponentType} from './Interfaces/Component';
@@ -50,6 +50,7 @@ export class RaspberryPiDevice implements Device {
   private channel: vscode.OutputChannel;
   private static _boardId = 'raspberrypi';
   private extensionContext: vscode.ExtensionContext;
+  private telemetryContext: TelemetryContext;
 
   private outputPath: string;
 
@@ -60,6 +61,7 @@ export class RaspberryPiDevice implements Device {
   constructor(
       context: vscode.ExtensionContext, projectPath: string,
       channel: vscode.OutputChannel, projectTemplateType: ProjectTemplateType,
+      telemetryContext: TelemetryContext,
       private templateFilesInfo: TemplateFileInfo[] = []) {
     this.deviceType = DeviceType.Raspberry_Pi;
     this.componentType = ComponentType.Device;
@@ -68,6 +70,7 @@ export class RaspberryPiDevice implements Device {
     this.extensionContext = context;
     this.projectFolder = projectPath;
     this.outputPath = path.join(this.projectFolder, FileNames.outputPathName);
+    this.telemetryContext = telemetryContext;
   }
 
   name = 'RaspberryPi';
@@ -128,7 +131,8 @@ export class RaspberryPiDevice implements Device {
   async compile(): Promise<boolean> {
     const isRemote = RemoteExtension.isRemote(this.extensionContext);
     if (!isRemote) {
-      const res = await askAndOpenInRemote(OperationType.Compile, this.channel);
+      const res = await askAndOpenInRemote(
+          OperationType.Compile, this.channel, this.telemetryContext);
       if (!res) {
         return false;
       }
@@ -199,7 +203,8 @@ export class RaspberryPiDevice implements Device {
   async upload(): Promise<boolean> {
     const isRemote = RemoteExtension.isRemote(this.extensionContext);
     if (!isRemote) {
-      const res = await askAndOpenInRemote(OperationType.Upload, this.channel);
+      const res = await askAndOpenInRemote(
+          OperationType.Upload, this.channel, this.telemetryContext);
       if (!res) {
         return false;
       }
@@ -260,18 +265,12 @@ export class RaspberryPiDevice implements Device {
   }
 
   async configDeviceSettings(): Promise<boolean> {
-    const configSelectionItems: vscode.QuickPickItem[] = [
-      {
-        label: 'Config Raspberry Pi SSH',
-        description: 'Config Raspberry Pi SSH',
-        detail: 'Config SSH'
-      },
-      {
-        label: 'Config connection of IoT Hub Device',
-        description: 'Config connection of IoT Hub Device',
-        detail: 'Config IoT Hub Device'
-      }
-    ];
+    const configSelectionItems: vscode.QuickPickItem[] = [{
+      label: 'Configure SSH to target device',
+      description: '',
+      detail:
+          'Configure SSH (IP, username and password) connection to target device for uploading compiled code'
+    }];
 
     const configSelection =
         await vscode.window.showQuickPick(configSelectionItems, {
@@ -285,7 +284,7 @@ export class RaspberryPiDevice implements Device {
       return false;
     }
 
-    if (configSelection.detail === 'Config SSH') {
+    if (configSelection.label === 'Configure SSH to target device') {
       try {
         const res = await this.configSSH();
         if (res) {

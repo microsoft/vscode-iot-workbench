@@ -1,6 +1,9 @@
 import * as vscode from 'vscode';
 import TelemetryReporter from 'vscode-extension-telemetry';
+
+import {DevelopEnvironment} from './constants';
 import {ExceptionHelper} from './exceptionHelper';
+import {RemoteExtension} from './Models/RemoteExtension';
 import {NSAT} from './nsat';
 import {InternalConfig} from './utils';
 
@@ -105,7 +108,9 @@ export async function callWithTelemetry(
 
   properties['isInternal'] =
       InternalConfig.isInternal === true ? 'true' : 'false';
-
+  properties['developEnvironment'] = RemoteExtension.isRemote(context) ?
+      DevelopEnvironment.CONTAINER :
+      DevelopEnvironment.LOCAL_ENV;
   const telemetryContext:
       TelemetryContext = {properties, measurements: {duration: 0}};
 

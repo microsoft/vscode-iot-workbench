@@ -76,16 +76,18 @@ export class IoTButtonDevice implements Device {
   }
 
   async create(): Promise<boolean> {
-    const scaffoldType = ScaffoldType.Local;
-    if (!await FileUtility.directoryExists(scaffoldType, this.deviceFolder)) {
+    const createTimeScaffoldType = ScaffoldType.Local;
+    if (!await FileUtility.directoryExists(
+            createTimeScaffoldType, this.deviceFolder)) {
       throw new Error(`Internal error: Couldn't find the template folder.`);
     }
 
     await IoTWorkbenchProjectBase.generateIotWorkbenchProjectFile(
-        scaffoldType, this.deviceFolder);
+        createTimeScaffoldType, this.deviceFolder);
 
     for (const fileInfo of this.templateFilesInfo) {
-      await generateTemplateFile(this.deviceFolder, scaffoldType, fileInfo);
+      await generateTemplateFile(
+          this.deviceFolder, createTimeScaffoldType, fileInfo);
     }
     return true;
   }
