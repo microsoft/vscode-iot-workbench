@@ -63,7 +63,10 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
             loadTimeScaffoldType, iotworkbenchprojectFile)) {
       return false;
     }
-    const projectConfigJson = require(iotworkbenchprojectFile);
+    const projectConfigContent =
+        await FileUtility.readFile(
+            loadTimeScaffoldType, iotworkbenchprojectFile, 'utf8') as string;
+    const projectConfigJson = JSON.parse(projectConfigContent);
 
     // only send telemetry when the IoT project is load when VS Code opens
     if (initLoad) {
