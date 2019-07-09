@@ -16,8 +16,8 @@ ARG c_sdk_version=2019-04-11
 COPY Toolchain.cmake ${CROSS_ROOT}/
 ENV CMAKE_TOOLCHAIN_FILE ${CROSS_ROOT}/Toolchain.cmake
 
-RUN mkdir -p /usr/work
-WORKDIR /usr/work
+RUN mkdir -p /work
+WORKDIR /work
 
 # Build openssl, curl, Linux utils and build Azure IoT C SDK
 RUN apt-get update && \
@@ -43,13 +43,13 @@ RUN apt-get update && \
     make && \
     make install && \
     cd .. && \
+    rm -rf /work/* && \
     git clone https://github.com/azure/azure-iot-sdk-c.git -b ${c_sdk_version} --recursive && \
     cd azure-iot-sdk-c && \
     mkdir cmake && \
     cd cmake && \
     cmake -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} -DCMAKE_INSTALL_PREFIX=${LIBC_PREFIX}/usr -Dhsm_type_symm_key:BOOL=ON -Duse_amqp:BOOL=OFF -Dbuild_service_client:BOOL=OFF -Dbuild_provisioning_service_client:BOOL=OFF -Dskip_samples:BOOL=ON .. && \
     make && \
-    rm -rf /usr/work/* && \
     apt-get remove -y wget ca-certificates xz-utils git && \
     apt-get clean  && \
     rm -rf /var/lib/apt/lists/*
