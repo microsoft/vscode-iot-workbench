@@ -84,7 +84,7 @@ export class DependentExtensions {
 
 export enum PlatformType {
   ARDUINO = 'Arduino',
-  EMBEDDEDLINUX = 'Embedded Linux'
+  EMBEDDEDLINUX = 'Embedded Linux (Preview)'
 }
 
 export enum DevelopEnvironment {
