@@ -10,14 +10,16 @@ ARG target_cross_triple=arm-linux-gnueabihf
 RUN mkdir -p /usr/xcc
 WORKDIR /usr/xcc
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends wget ca-certificates xz-utils
-
 # Prepare Linaro toolchain
-RUN wget ${linaro_package_uri} && \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends wget ca-certificates xz-utils && \
+    wget ${linaro_package_uri} && \
     tar -xf ${linaro_package_name}.tar.xz && \
     mv ${linaro_package_name} ${target_cross_triple} && \
-    rm ${linaro_package_name}.tar.xz
+    rm ${linaro_package_name}.tar.xz  && \
+    apt-get remove -y wget ca-certificates xz-utils && \
+    apt-get clean  && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set ENV
 ENV CROSS_TRIPLE=${target_cross_triple}
@@ -38,8 +40,3 @@ ENV NM=${CROSS_ROOT}/bin/${CROSS_TRIPLE}-nm
 ENV RANLIB=${CROSS_ROOT}/bin/${CROSS_TRIPLE}-ranlib
 ENV LDFLAGS="-L${LIBC_PREFIX}/usr/lib"
 ENV LIBS="-lssl -lcrypto -ldl -lpthread"
-
-# Cleanups
-RUN apt-get remove -y wget ca-certificates xz-utils && \
-    apt-get clean  && \
-    rm -rf /var/lib/apt/lists/*

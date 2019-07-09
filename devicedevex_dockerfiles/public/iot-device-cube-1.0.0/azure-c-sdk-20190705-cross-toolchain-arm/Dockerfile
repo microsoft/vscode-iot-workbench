@@ -12,9 +12,6 @@ ARG lib_util_uri=https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.3
 ARG lib_util_name=util-linux-2.32.1
 ARG c_sdk_version=2019-04-11
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends wget ca-certificates xz-utils cmake make git nano
-
 # CMake config for Azure C SDK
 COPY Toolchain.cmake ${CROSS_ROOT}/
 ENV CMAKE_TOOLCHAIN_FILE ${CROSS_ROOT}/Toolchain.cmake
@@ -22,45 +19,37 @@ ENV CMAKE_TOOLCHAIN_FILE ${CROSS_ROOT}/Toolchain.cmake
 RUN mkdir -p /usr/work
 WORKDIR /usr/work
 
-# Build openssl
-RUN wget ${lib_openssl_uri} && \
+# Build openssl, curl, Linux utils and build Azure IoT C SDK
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends wget ca-certificates xz-utils cmake make git nano && \
+    wget ${lib_openssl_uri} && \
     tar -xvf ${lib_openssl_name}.tar.gz && \
     cd ${lib_openssl_name} && \
     ./Configure linux-generic32 shared --prefix=${LIBC_PREFIX}/usr --openssldir=${LIBC_PREFIX}/usr && \
     make && \
     make install && \
-    cd ..
-
-# Build curl
-RUN wget ${lib_curl_uri} && \
+    cd .. && \
+    wget ${lib_curl_uri} && \
     tar -xvf ${lib_curl_name}.tar.gz && \
     cd ${lib_curl_name} && \
     ./configure --with-sysroot=${LIBC_PREFIX} --prefix=${LIBC_PREFIX}/usr --target=${CROSS_TRIPLE} --with-ssl --with-zlib --host=${CROSS_TRIPLE} --build=x86_64-pc-linux-uclibc && \
     make && \
     make install && \
-    cd ..
-
-# Build Linux Utils
-RUN wget ${lib_util_uri} && \
+    cd .. && \
+    wget ${lib_util_uri} && \
     tar -xvf ${lib_util_name}.tar.gz && \
     cd ${lib_util_name} && \
     ./configure --prefix=${LIBC_PREFIX}/usr --with-sysroot=${LIBC_PREFIX} --target=${CROSS_TRIPLE} --host=${CROSS_TRIPLE} --disable-all-programs  --disable-bash-completion --enable-libuuid && \
     make && \
     make install && \
-    cd ..
-
-# Cleanup all source code
-RUN rm -rf /usr/work
-
-# Build Azure IoT C SDK
-RUN git clone https://github.com/azure/azure-iot-sdk-c.git -b ${c_sdk_version} --recursive && \
+    cd .. && \
+    git clone https://github.com/azure/azure-iot-sdk-c.git -b ${c_sdk_version} --recursive && \
     cd azure-iot-sdk-c && \
     mkdir cmake && \
     cd cmake && \
     cmake -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} -DCMAKE_INSTALL_PREFIX=${LIBC_PREFIX}/usr -Dhsm_type_symm_key:BOOL=ON -Duse_amqp:BOOL=OFF -Dbuild_service_client:BOOL=OFF -Dbuild_provisioning_service_client:BOOL=OFF -Dskip_samples:BOOL=ON .. && \
-    make
-
-# Cleanups
-RUN apt-get remove -y wget ca-certificates xz-utils git && \
+    make && \
+    rm -rf /usr/work/* && \
+    apt-get remove -y wget ca-certificates xz-utils git && \
     apt-get clean  && \
     rm -rf /var/lib/apt/lists/*
