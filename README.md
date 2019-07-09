@@ -92,7 +92,8 @@ To simplify the cross compiling toolchain, Azure IoT Device SDK and dependencies
 5. For the first time, it takes around 1 to 3 minutes depending on your Internet speed to download and prepare the dev container. You can click the **details** link on the notification for the progress:
     <img src="https://github.com/microsoft/vscode-iot-workbench/blob/master/docs/images/prepare-dev-container.png" />
 
-6. Once the dev container is ready, VS Code will open a new window with project files.
+6. Once the dev container is ready, you can see the status in the status bar and output window.
+    <img src="https://github.com/microsoft/vscode-iot-workbench/blob/master/docs/images/dev-container-ready.png" />
 
 #### Compile the code
 
