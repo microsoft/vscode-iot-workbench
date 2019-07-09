@@ -115,6 +115,7 @@ To simplify the cross compiling toolchain, Azure IoT Device SDK and dependencies
    - Get the IP address of the device so that you can deploy the compiled binary to the device via SSH.
 
 2. In VS Code, press `F1`, type and select **Azure IoT Device Workbench: Upload Device Code** from the command palette, then select **Manual setup** and enter IP address, port, user name and password to deploy the compiled binary via SSH to Raspberry Pi.
+
    <img src="https://github.com/microsoft/vscode-iot-workbench/blob/master/docs/images/upload-options.png" width=540 />
 
 #### Verify the result

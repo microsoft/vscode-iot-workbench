@@ -2,20 +2,20 @@
     "templates": [
         {
             "platform": "Embedded Linux (Preview)",
-            "name": "64-bit Armv8 Cortex-A",
+            "name": "32-bit Armv7 Cortex-A",
             "description": "",
             "detail": "Generic dev container with Linaro cross-toolchain for GCC, Azure IoT Device C SDK",
-            "path": "rpi64_iothub",
+            "path": "rpi32_iothub",
             "projectHostType": "container",
             "boardId": "raspberrypi",
             "type": "IotHub"
         },
         {
             "platform": "Embedded Linux (Preview)",
-            "name": "32-bit Armv7 Cortex-A",
+            "name": "64-bit Armv8 Cortex-A",
             "description": "",
             "detail": "Generic dev container with Linaro cross-toolchain for GCC, Azure IoT Device C SDK",
-            "path": "rpi32_iothub",
+            "path": "rpi64_iothub",
             "projectHostType": "container",
             "boardId": "raspberrypi",
             "type": "IotHub"

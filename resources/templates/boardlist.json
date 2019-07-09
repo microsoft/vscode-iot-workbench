@@ -1,7 +1,7 @@
 {
     "boards": [
         {
-            "name": "MXChip IoT DevKit ",
+            "name": "MXChip IoT DevKit",
             "id": "devkit",
             "detailInfo": "MXChip - Microsoft Azure IoT Developer Kit",
             "defaultBaudRate": 115200,
