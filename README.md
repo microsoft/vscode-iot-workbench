@@ -175,17 +175,13 @@ Here are a set of tutorials that will help you get started:
 | `Azure IoT Device Workbench: Set Workbench Path` | Set the default path for Azure IoT Device Workbench. |
 | `Azure IoT Device Workbench: Help` | Get help for Azure IoT Device Workbench. |
 
-### Create Project
+### Open Examples
 
-<img src="https://github.com/microsoft/vscode-iot-workbench/blob/master/docs/images/new.gif" />
+<img src="https://github.com/microsoft/vscode-iot-workbench/blob/master/docs/images/open-examples.gif" />
 
 ### Provision Azure Services
 
 <img src="https://github.com/microsoft/vscode-iot-workbench/blob/master/docs/images/provision.gif" />
-
-### Open Examples
-
-<img src="https://github.com/microsoft/vscode-iot-workbench/blob/master/docs/images/example.gif" />
 
 #### Note: 
 -  When invoking the **Azure IoT Device Workbench: Provision Azure Services...** command with Azure IoT Hub and Azure Functions, by default, Azure Functions would use the IoT Hub consumer group of `$Default`. To switch to another consumer group, please follow the [guide](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-create-through-portal) to create a new consumer group in Azure Portal. Then in IoT project, modify the following setting in **function.json**:
@@ -203,6 +199,7 @@ Here are a set of tutorials that will help you get started:
 ## Documentation
 
 - [FAQ](https://github.com/microsoft/vscode-iot-workbench/wiki/FAQ)
+- [MXChip IoT DevKit](https://aka.ms/iot-devkit)
 
 ## Privacy Statement
 The [Microsft Enterprise and Developer Privacy Statement](https://www.microsoft.com/en-us/privacystatement/EnterpriseDev/default.aspx) describes the privacy statement of this software.
