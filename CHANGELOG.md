@@ -1,6 +1,19 @@
 # Change Log
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
 
+
+
+## Version 0.3.0
+- Release date: July 9, 2019
+
+### Added
+- We are excited to announce the preview of a new feature enabled in Azure IoT Device Workbench extension in VS Code to simplify the device cross-compiling toolchain acquisition effort for device developers working on embedded Linux devices (e.g. Debian, Ubuntu, Yocto Linux…) with Azure IoT by encapsulating the compilers, [device SDK](https://github.com/Azure/azure-iot-sdk-c) and essential libraries in [Containers](https://www.docker.com/resources/what-container). All you need is to install or upgrade the IoT Device Workbench and [get started](https://github.com/microsoft/vscode-iot-workbench/tree/containerized-toolchain-readme) developing within the container, just like today you are using a local environment.
+
+### Fixed
+- Fix the issue of "MXCHIP AZ3166 serial port button not work" [#661](https://github.com/microsoft/vscode-iot-workbench/issues/661) which started after update to VS Code 1.36.0.
+
+Special thanks to [br1pro](https://github.com/br1pro) and [Remco Ploeg](https://github.com/rploeg), thanks for your feedbacks.
+
 ## Version 0.2.9
 - Release date: Jun. 21, 2019
 
