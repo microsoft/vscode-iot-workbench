@@ -3,8 +3,6 @@
 [![Gitter](https://img.shields.io/badge/chat-on%20gitter-blue.svg)](https://gitter.im/Microsoft/vscode-iot-workbench)
 [![Travis CI](https://travis-ci.org/Microsoft/vscode-iot-workbench.svg?branch=master)](https://travis-ci.org/Microsoft/vscode-iot-workbench)
 
-<img src="https://github.com/microsoft/vscode-iot-workbench/blob/master/docs/images/logo.png" width=128 />
-
 The **Azure IoT Device Workbench** is an extension in Visual Studio Code that provides an integrated environment to code, build, deploy and debug your IoT device project with multiple Azure services supported.
 
 ## Device platforms and languages supported
@@ -40,7 +38,7 @@ For developing on Embedded Linux device, you will need Docker and Visual Studio 
 ### Install extensions
 
 1. Launch VS Code, in the Extension tab, find and install **"Azure IoT Device Workbench"**.
-    <img src="https://github.com/microsoft/vscode-iot-workbench/blob/master/docs/images/device-workbench.png" />
+    <img src="https://raw.githubusercontent.com/microsoft/vscode-iot-workbench/master/docs/images/device-workbench.png" />
 
 2. Reload the window and make sure all the dependency extensions are correctly installed:
 
@@ -61,7 +59,7 @@ For developing on Embedded Linux device, you will need Docker and Visual Studio 
   1. Right click the **Docker** icon in the task try and select "Settings".
   2. Click on the "Shared Drivers" section and choose the driver to be shared.
 
-    <img src="https://github.com/microsoft/vscode-iot-workbench/blob/master/docs/images/shared-drivers.png" />
+    <img src="https://raw.githubusercontent.com/microsoft/vscode-iot-workbench/master/docs/images/shared-drivers.png" />
 
 - Install Docker Desktop for Mac
 
@@ -90,19 +88,20 @@ To simplify the cross compiling toolchain, Azure IoT Device SDK and dependencies
 4. Select the dev container based on your target device, in this sample, select **32-bit Armv7 Cortex-A** for Raspberry Pi 3 Model B+ running [Raspbian](https://www.raspberrypi.org/downloads/raspbian/).
 
 5. For the first time, it takes around 1 to 3 minutes depending on your Internet speed to download and prepare the dev container. You can click the **details** link on the notification for the progress:
-    <img src="https://github.com/microsoft/vscode-iot-workbench/blob/master/docs/images/prepare-dev-container.png" />
+    <img src="https://raw.githubusercontent.com/microsoft/vscode-iot-workbench/master/docs/images/prepare-dev-container.png" />
 
-6. Once the dev container is ready, VS Code will open a new window with project files.
+6. Once the dev container is ready, you can see the status in the status bar and output window.
+    <img src="https://raw.githubusercontent.com/microsoft/vscode-iot-workbench/master/docs/images/dev-container-ready.png" />
 
 #### Compile the code
 
 1. The `iothub_sample.c` under the `src` subfolder is the source file contains the logic. You can modify or add your own code in it.
-    <img src="https://github.com/microsoft/vscode-iot-workbench/blob/master/docs/images/iothub-sample.png" />
+    <img src="https://raw.githubusercontent.com/microsoft/vscode-iot-workbench/master/docs/images/iothub-sample.png" />
 
 2. To compile the code, press `F1`, type and select **Azure IoT Device Workbench: Compile Device Code** from the command palette.
 
 3. The cross-compiling of the code happens in the dev container. Once it's done, it pops up the notification.
-    <img src="https://github.com/microsoft/vscode-iot-workbench/blob/master/docs/images/compile-success.png" />
+    <img src="https://raw.githubusercontent.com/microsoft/vscode-iot-workbench/master/docs/images/compile-success.png" />
 
 4. The compiled binary file is located in `.build` folder.
 
@@ -116,7 +115,7 @@ To simplify the cross compiling toolchain, Azure IoT Device SDK and dependencies
 
 2. In VS Code, press `F1`, type and select **Azure IoT Device Workbench: Upload Device Code** from the command palette, then select **Manual setup** and enter IP address, port, user name and password to deploy the compiled binary via SSH to Raspberry Pi.
 
-   <img src="https://github.com/microsoft/vscode-iot-workbench/blob/master/docs/images/upload-options.png" width=540 />
+   <img src="https://raw.githubusercontent.com/microsoft/vscode-iot-workbench/master/docs/images/upload-options.png" width=540 />
 
 #### Verify the result
 
@@ -125,10 +124,10 @@ To simplify the cross compiling toolchain, Azure IoT Device SDK and dependencies
 2. You need to copy the device connection as the parameter to run the app, follow [this guide](./docs/create-iothub-device.md) to use Azure IoT Hub Toolkit to do so.
 
 3. Run the `azure_iot_app [connection string]` and you will see the Raspberry Pi start sending telemetry data to the Azure IoT Hub.
-    <img src="https://github.com/microsoft/vscode-iot-workbench/blob/master/docs/images/result.png" />
+    <img src="https://raw.githubusercontent.com/microsoft/vscode-iot-workbench/master/docs/images/result.png" />
 
 4. To verify the reception of the data, use Azure IoT Hub Toolkit, right click on the device and select **Start Monitoring Built-in Event Endpoint**. In the output window, you can see that IoT Hub gets telemetry data sent from Raspberry Pi.
-    <img src="https://github.com/microsoft/vscode-iot-workbench/blob/master/docs/images/iothub-d2c.png" />
+    <img src="https://raw.githubusercontent.com/microsoft/vscode-iot-workbench/master/docs/images/iothub-d2c.png" />
 
 ### Arduino
 
@@ -168,7 +167,7 @@ Here are a set of tutorials that will help you get started:
 | --- | --- |
 | `Azure IoT Device Workbench: Create Project...`  | Create new IoT Device Workbench projects. |
 | `Azure IoT Device Workbench: Open Examples...` | Load existing examples of IoT Device Workbench project. |
-| `Azure IoT Device Workbench: Provision Azure Services...` | Provison Azure services for current project. |
+| `Azure IoT Device Workbench: Provision Azure Services...` | Provision Azure services for current project. |
 | `Azure IoT Device Workbench: Deploy to Azure...`  | Deploy the code of the Azure services. |
 | `Azure IoT Device Workbench: Compile Device Code`  | Compile device code. |
 | `Azure IoT Device Workbench: Upload Device Code`  | Compile and upload device code. |
@@ -178,11 +177,11 @@ Here are a set of tutorials that will help you get started:
 
 ### Open Examples
 
-<img src="https://github.com/microsoft/vscode-iot-workbench/blob/master/docs/images/open-examples.gif" />
+<img src="https://raw.githubusercontent.com/microsoft/vscode-iot-workbench/master/docs/images/open-examples.gif" />
 
 ### Provision Azure Services
 
-<img src="https://github.com/microsoft/vscode-iot-workbench/blob/master/docs/images/provision.gif" />
+<img src="https://raw.githubusercontent.com/microsoft/vscode-iot-workbench/master/docs/images/provision.gif" />
 
 #### Note: 
 -  When invoking the **Azure IoT Device Workbench: Provision Azure Services...** command with Azure IoT Hub and Azure Functions, by default, Azure Functions would use the IoT Hub consumer group of `$Default`. To switch to another consumer group, please follow the [guide](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-create-through-portal) to create a new consumer group in Azure Portal. Then in IoT project, modify the following setting in **function.json**:
@@ -193,7 +192,7 @@ Here are a set of tutorials that will help you get started:
     -  In the menu of **Visual Studio Code**, choose *File -> Open Workspace...* .
     -  In file selection panel, navigate to the folder that contains your project and select *{PROJECT_NAME}.code-project*.
 
-        <img src="https://github.com/microsoft/vscode-iot-workbench/blob/master/docs/pic/openexisting.png" />
+        <img src="https://raw.githubusercontent.com/microsoft/vscode-iot-workbench/master/docs/pic/openexisting.png" />
 
     -  Click **Open**.
 
@@ -238,7 +237,7 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 
 ## Contact Us
 
-If you would like to help to build the best IoT experience with Azure IoT Device Workbench, you can reach us directly at [gitter chat room](https://gitter.im/Microsoft/vscode-iot-workbench).
+If you would like to help to build the best IoT experience with Azure IoT Device Workbench, you can reach us directly at [Gitter](https://gitter.im/Microsoft/vscode-iot-workbench).
 
 ## Telemetry
 
