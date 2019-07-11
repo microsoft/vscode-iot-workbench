@@ -8,7 +8,7 @@ import {CodeGenConstants} from '../../DigitalTwinConstants';
 import {CodeGenerator} from './CodeGenerator';
 
 export abstract class AnsiCCodeGeneratorBase implements CodeGenerator {
-  async abstract GenerateCode(
+  abstract async GenerateCode(
       targetPath: string, filePath: string, fileCoreName: string,
       connectionString: string): Promise<boolean>;
 
@@ -18,7 +18,7 @@ export abstract class AnsiCCodeGeneratorBase implements CodeGenerator {
 
   async GenerateAnsiCCodeCore(
       targetPath: string, filePath: string,
-      connectionString: string): Promise<boolean> {
+      interfaceDir: string): Promise<boolean> {
     // Invoke DigitalTwinCodeGen toolset to generate the code
     const platform = os.platform();
     const homeDir = os.homedir();
@@ -30,9 +30,9 @@ export abstract class AnsiCCodeGeneratorBase implements CodeGenerator {
       codeGenCommand = './DigitalTwinCodeGen';
     }
 
-    const command = `${codeGenCommand} scaffold  --jsonldUri "${
-        filePath}" --language ansic --output "${
-        targetPath}" --connectionString "${connectionString}"`;
+    const command = `${codeGenCommand} scaffold  --dcm "${
+        filePath}" --language ansic --output "${targetPath}" --interfaceDir "${
+        interfaceDir}"`;
 
     this.channel.show();
     this.channel.appendLine('IoT Workbench: scaffold code stub.');

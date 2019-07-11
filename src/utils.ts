@@ -22,10 +22,7 @@ export function getRegistryValues(
       async (
           resolve: (value: string) => void, reject: (value: Error) => void) => {
         try {
-          const regKey = new WinReg({
-            hive,
-            key,
-          });
+          const regKey = new WinReg({hive, key});
 
           regKey.valueExists(name, (e, exists) => {
             if (e) {
@@ -181,8 +178,8 @@ export function runCommand(
       console.log(data);
       outputChannel.appendLine(data);
     });
-    process.on('error', (error) => reject({error, stderr, stdout}));
-    process.on('close', (status) => {
+    process.on('error', error => reject({error, stderr, stdout}));
+    process.on('close', status => {
       if (status === 0) {
         resolve({status, stdout, stderr});
       } else {
@@ -195,7 +192,7 @@ export function runCommand(
 export async function askAndNewProject(telemetryContext: TelemetryContext) {
   const message =
       'An IoT project is needed to process the operation, do you want to create an IoT project?';
-  const result: vscode.MessageItem|undefined =
+  const result:|vscode.MessageItem|undefined =
       await vscode.window.showInformationMessage(
           message, DialogResponses.yes, DialogResponses.no);
 
@@ -214,7 +211,7 @@ export async function askAndOpenProject(
   const message =
       `Operation failed because the IoT project is not opened. Current folder contains an IoT project '${
           workspaceFile}', do you want to open it?`;
-  const result: vscode.MessageItem|undefined =
+  const result:|vscode.MessageItem|undefined =
       await vscode.window.showInformationMessage(
           message, DialogResponses.yes, DialogResponses.no);
 
@@ -234,14 +231,13 @@ const noDeviceSurveyUrl = 'https://www.surveymonkey.com/r/C7NY7KJ';
 export async function TakeNoDeviceSurvey(telemetryContext: TelemetryContext) {
   const message =
       'Could you help to take a quick survey about what IoT development kit(s) you want Azure IoT Device Workbench to support?';
-  const result: vscode.MessageItem|undefined =
+  const result:|vscode.MessageItem|undefined =
       await vscode.window.showWarningMessage(
           message, DialogResponses.yes, DialogResponses.cancel);
   if (result === DialogResponses.yes) {
     // Open the survey page
     telemetryContext.properties.message = 'User takes no-device survey.';
     telemetryContext.properties.result = 'Succeeded';
-
 
     const extension =
         vscode.extensions.getExtension(GlobalConstants.extensionId);
@@ -256,4 +252,27 @@ export async function TakeNoDeviceSurvey(telemetryContext: TelemetryContext) {
                 encodeURIComponent(extensionVersion)}`));
   }
   return;
+}
+
+export function generateInterfaceFileNameFromUrnId(
+    urnId: string, targetPath: string) {
+  const suffix = '.interface.json';
+  const names: string[] = urnId.split(':');
+  // at least the path should contain urn, namespace, name & version
+  if (names.length < 4) {
+    throw new Error(`The id of the file is not valid. id: ${urnId}`);
+  }
+
+  const displayName = names.join('_');
+  let counter = 0;
+  let candidateName = displayName + suffix;
+  while (true) {
+    const filePath = path.join(targetPath, candidateName);
+    if (!fileExistsSync(filePath)) {
+      break;
+    }
+    counter++;
+    candidateName = `${displayName}_${counter}${suffix}`;
+  }
+  return candidateName;
 }

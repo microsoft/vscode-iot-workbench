@@ -38,8 +38,6 @@ export class EventNames {
   static readonly openTutorial = 'IoTWorkbench.OpenTutorial';
   static readonly projectLoadEvent = 'IoTWorkbench.ProjectLoadEvent';
   static readonly scaffoldDeviceStubEvent = 'IoTWorkbench.ScaffoldDeviceStub';
-  static readonly regenerateDeviceStubEvent =
-      'IoTWorkbench.RegenerateDeviceStub';
   static readonly pnpGetInterfacesEvent = 'IoTWorkbench.IoTPnPGetInterfaces';
   static readonly pnpGetCapabilityModelsEvent =
       'IoTWorkbench.IoTPnPGetCapabilityModels';

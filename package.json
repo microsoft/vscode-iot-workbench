@@ -122,11 +122,6 @@
         "command": "iotworkbench.iotPnPGenerateCode",
         "title": "Generate Device Code Stub...",
         "category": "IoT Plug and Play"
-      },
-      {
-        "command": "iotworkbench.iotPnPRegenerateCode",
-        "title": "Regenerate Device Code Stub...",
-        "category": "IoT Plug and Play"
       }
     ],
     "configuration": [

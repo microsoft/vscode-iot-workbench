@@ -17,10 +17,15 @@ import {DigitalTwinConstants, CodeGenConstants} from './DigitalTwinConstants';
 import {CodeGenProjectType, DeviceConnectionType} from './DigitalTwinCodeGen/Interfaces/CodeGenerator';
 import {AnsiCCodeGeneratorFactory} from './DigitalTwinCodeGen/AnsiCCodeGeneratorFactory';
 import {ConfigHandler} from '../configHandler';
-import {DialogResponses} from '../DialogResponses';
 import extractzip = require('extract-zip');
 import * as utils from '../utils';
+import {DigitalTwinMetamodelRepositoryClient} from './DigitalTwinApi/DigitalTwinMetamodelRepositoryClient';
+import {DigitalTwinConnectionStringBuilder} from './DigitalTwinApi/DigitalTwinConnectionStringBuilder';
 
+const constants = {
+  idName: '@id',
+  schemaFolderName: 'schema'
+};
 
 interface CodeGeneratorDownloadLocation {
   win32Md5: string;
@@ -29,6 +34,11 @@ interface CodeGeneratorDownloadLocation {
   macOSPackageUrl: string;
   ubuntuMd5: string;
   ubuntuPackageUrl: string;
+}
+
+interface InterfaceInfo {
+  urnId: string;
+  path: string;
 }
 
 const deviceConnectionConstants = {
@@ -50,14 +60,12 @@ interface CodeGeneratorConfig {
 }
 
 interface CodeGenExecutionInfo {
-  filePath: string;
-  repoConnectionString: string;
+  schemaFolder: string;
   targetFolder: string;
   languageLabel: string;
   codeGenProjectType: CodeGenProjectType;
   deviceConnectionType: DeviceConnectionType;
 }
-
 
 export class CodeGenerateCore {
   async GenerateDeviceCodeStub(
@@ -65,7 +73,7 @@ export class CodeGenerateCore {
       telemetryContext: TelemetryContext): Promise<boolean> {
     const upgradestate: boolean =
         await this.UpgradeCodeGenerator(context, channel);
-
+    channel.show();
     if (!upgradestate) {
       channel.appendLine(`${
           DigitalTwinConstants
@@ -86,6 +94,7 @@ export class CodeGenerateCore {
 
     // list all capability models from device model folder for selection.
     const metamodelItems: vscode.QuickPickItem[] = [];
+    const interfaceItems: InterfaceInfo[] = [];
 
     const fileList = fs.listTreeSync(rootPath);
     if (fileList && fileList.length > 0) {
@@ -95,6 +104,14 @@ export class CodeGenerateCore {
           if (fileName.endsWith(DigitalTwinConstants.capabilityModelSuffix)) {
             metamodelItems.push(
                 {label: fileName, description: path.dirname(filePath)});
+          } else if (fileName.endsWith(DigitalTwinConstants.interfaceSuffix)) {
+            let urnId;
+            try {
+              const fileJson = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+              urnId = fileJson[constants.idName];
+            } catch {
+            }
+            if (urnId) interfaceItems.push({path: filePath, urnId});
           }
         }
       });
@@ -112,40 +129,36 @@ export class CodeGenerateCore {
       matchOnDescription: true,
       matchOnDetail: true,
       placeHolder:
-          `Select a ${DigitalTwinConstants.productName} capability model file`,
+          `Select a ${DigitalTwinConstants.productName} capability model file`
     });
 
     if (!fileSelection) {
       return false;
     }
 
+    const capbilityModelFileName = fileSelection.label;
     const selectedFilePath =
-        path.join(fileSelection.description as string, fileSelection.label);
+        path.join(fileSelection.description as string, capbilityModelFileName);
 
-    // Get the connection string of the IoT Plug and Play repo
-    let connectionString =
-        ConfigHandler.get<string>(ConfigKey.modelRepositoryKeyName);
+    // select the folder for code gen
+    const folderPath = await utils.selectWorkspaceItem(
+        'Please select a folder to contain your generated code:', {
+          canSelectFiles: false,
+          canSelectFolders: true,
+          canSelectMany: false,
+          defaultUri: vscode.workspace.workspaceFolders &&
+                  vscode.workspace.workspaceFolders.length > 0 ?
+              vscode.workspace.workspaceFolders[0].uri :
+              undefined,
+          openLabel: 'Select'
+        });
 
-    if (!connectionString) {
-      const option: vscode.InputBoxOptions = {
-        value: DigitalTwinConstants.repoConnectionStringTemplate,
-        prompt:
-            `Please input the connection string to access the model repository.`,
-        ignoreFocusOut: true
-      };
-
-      connectionString = await vscode.window.showInputBox(option);
-
-      if (!connectionString) {
-        return false;
-      } else {
-        const result = await DigitalTwinConnector.ConnectMetamodelRepository(
-            connectionString);
-        if (!result) {
-          return false;
-        }
-      }
+    if (!folderPath) {
+      throw new Error('User cancelled folder selection.');
     }
+
+    channel.appendLine(`${DigitalTwinConstants.dtPrefix} Folder ${
+        folderPath} is selected for the generated code.`);
 
     // select the target of the code stub
     const languageItems: vscode.QuickPickItem[] =
@@ -157,7 +170,6 @@ export class CodeGenerateCore {
     if (!languageSelection) {
       return false;
     }
-
 
     let targetItems: vscode.QuickPickItem[]|null = null;
 
@@ -232,15 +244,48 @@ export class CodeGenerateCore {
       connectionType = DeviceConnectionType.IoTCSasKey;
     }
 
+    const schemaTargetFolder =
+        path.join(folderPath, constants.schemaFolderName);
 
-    const folderPath = await this.GetFolderForCodeGen();
-    if (!folderPath) {
-      return false;
+    utils.mkdirRecursivelySync(schemaTargetFolder);
+    fs.copyFileSync(
+        selectedFilePath,
+        path.join(schemaTargetFolder, capbilityModelFileName));
+
+    // Parse the cabability model
+    const capabilityModel =
+        JSON.parse(fs.readFileSync(selectedFilePath, 'utf8'));
+
+    const implementedInterfaces = capabilityModel['implements'];
+    for (const interfaceItem of implementedInterfaces) {
+      const schema = interfaceItem.schema;
+      if (typeof schema === 'string') {
+        // normal interface, check the interface file offline and online
+        const item = interfaceItems.find(item => item.urnId === schema);
+        if (item) {
+          // copy interface to the schema folder
+          const interfaceName = path.basename(item.path);
+          fs.copyFileSync(
+              item.path, path.join(schemaTargetFolder, interfaceName));
+          channel.appendLine(
+              `${DigitalTwinConstants.dtPrefix} Copy ${interfaceName} with id ${
+                  item.urnId} into ${schemaTargetFolder} completed.`);
+        } else {
+          const result = await this.DownloadInterfaceFile(
+              schema, schemaTargetFolder, channel);
+          if (!result) {
+            const message = `Unable to get the interface with Id ${
+                schema} online. Please make sure the file exists in server.`;
+            channel.appendLine(`${DigitalTwinConstants.dtPrefix} ${message}`);
+            vscode.window.showWarningMessage(message);
+            return false;
+          }
+        }
+      }
     }
 
     const codeGenExecutionInfo: CodeGenExecutionInfo = {
-      filePath: selectedFilePath,
-      repoConnectionString: connectionString,
+      schemaFolder: constants.schemaFolderName,
       targetFolder: folderPath,
       languageLabel: 'ANSI C',
       codeGenProjectType,
@@ -248,6 +293,7 @@ export class CodeGenerateCore {
     };
 
     const executionResult = await this.GenerateDeviceCodeCore(
+        path.join(schemaTargetFolder, capbilityModelFileName),
         codeGenExecutionInfo, context, channel, telemetryContext);
     await ConfigHandler.update(
         ConfigKey.codeGeneratorExecutionInfo,
@@ -256,50 +302,8 @@ export class CodeGenerateCore {
     return executionResult;
   }
 
-  async RegenerateDeviceCodeStub(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext): Promise<boolean> {
-    const upgradestate: boolean =
-        await this.UpgradeCodeGenerator(context, channel);
-    if (!upgradestate) {
-      channel.appendLine(`${
-          DigitalTwinConstants
-              .dtPrefix} Unable to upgrade the Code Generator to the latest version.\r\n Trying to use the existing version.`);
-    }
-
-    const executionInfo =
-        ConfigHandler.get<string>(ConfigKey.codeGeneratorExecutionInfo);
-
-    if (executionInfo) {
-      const codeGenExecutionInfo: CodeGenExecutionInfo =
-          JSON.parse(executionInfo as string);
-      if (codeGenExecutionInfo) {
-        // Does the source file exist?
-        if (fs.existsSync(codeGenExecutionInfo.filePath)) {
-          utils.mkdirRecursivelySync(codeGenExecutionInfo.targetFolder);
-          channel.appendLine(`${
-              DigitalTwinConstants.dtPrefix} Regenerate Device Code Stub for ${
-              codeGenExecutionInfo.filePath} into ${
-              codeGenExecutionInfo.targetFolder}. Language: ${
-              codeGenExecutionInfo.languageLabel}`);
-          const executionResult = await this.GenerateDeviceCodeCore(
-              codeGenExecutionInfo, context, channel, telemetryContext);
-          return executionResult;
-        }
-      }
-    }
-    const messge =
-        'Unable to regenerate device code due to configuration change, would you like to generate device code again?';
-    const choice = await vscode.window.showWarningMessage(
-        messge, DialogResponses.yes, DialogResponses.no);
-    if (choice === DialogResponses.yes) {
-      await vscode.commands.executeCommand('iotworkbench.iotPnPGenerateCode');
-      return true;
-    }
-    return false;
-  }
-
   async GenerateDeviceCodeCore(
+      capabilityModelFilePath: string,
       codeGenExecutionInfo: CodeGenExecutionInfo,
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext): Promise<boolean> {
@@ -314,7 +318,7 @@ export class CodeGenerateCore {
       return false;
     }
 
-    const fileName = path.basename(codeGenExecutionInfo.filePath);
+    const fileName = path.basename(capabilityModelFilePath);
     const matchItems = fileName.match(/^(.*?)\.(capabilitymodel)\.json$/);
 
     if (!matchItems || !matchItems[1]) {
@@ -329,8 +333,11 @@ export class CodeGenerateCore {
         },
         async () => {
           const result = await codeGenerator.GenerateCode(
-              codeGenExecutionInfo.targetFolder, codeGenExecutionInfo.filePath,
-              fileCoreName, codeGenExecutionInfo.repoConnectionString);
+              codeGenExecutionInfo.targetFolder, capabilityModelFilePath,
+              fileCoreName,
+              path.join(
+                  codeGenExecutionInfo.targetFolder,
+                  codeGenExecutionInfo.schemaFolder));
           if (result) {
             vscode.window.showInformationMessage(
                 `Generate code stub for ${fileName} completed`);
@@ -339,56 +346,77 @@ export class CodeGenerateCore {
     return true;
   }
 
-  async GetFolderForCodeGen(): Promise<string|null> {
-    // Ask user to select a folder to export
-    const options: vscode.OpenDialogOptions = {
-      canSelectMany: false,
-      openLabel: 'Select a folder',
-      canSelectFolders: true,
-      canSelectFiles: false
-    };
+  async DownloadInterfaceFile(
+      urnId: string, targetFolder: string,
+      channel: vscode.OutputChannel): Promise<boolean> {
+    const fileName =
+        utils.generateInterfaceFileNameFromUrnId(urnId, targetFolder);
+    // Get the connection string of the IoT Plug and Play repo
+    let connectionString =
+        ConfigHandler.get<string>(ConfigKey.modelRepositoryKeyName);
 
-    const folderUri = await vscode.window.showOpenDialog(options);
-    if (folderUri && folderUri[0]) {
-      console.log(`Selected folder: ${folderUri[0].fsPath}`);
-      const rootPath = folderUri[0].fsPath;
+    if (!connectionString) {
+      const option: vscode.InputBoxOptions = {
+        value: DigitalTwinConstants.repoConnectionStringTemplate,
+        prompt:
+            `Please input the connection string to access the model repository.`,
+        ignoreFocusOut: true
+      };
 
-      const name = 'iot_application';
-      const projectName = await vscode.window.showInputBox({
-        value: name,
-        prompt: 'Please input project name.',
-        ignoreFocusOut: true,
-        validateInput: (projectName: string) => {
-          if (!/^([a-z0-9_]|[a-z0-9_][-a-z0-9_.]*[a-z0-9_])(\.ino)?$/i.test(
-                  projectName)) {
-            return 'Project name can only contain letters, numbers, "-" and ".", and cannot start or end with "-" or ".".';
-          }
-          return;
+      connectionString = await vscode.window.showInputBox(option);
+    }
+    if (!connectionString) {
+      return false;
+    } else {
+      const result = await DigitalTwinConnector.ConnectMetamodelRepository(
+          connectionString);
+      if (!result) {
+        return false;
+      }
+      // Try to download interface file from private repo
+      const dtMetamodelRepositoryClient =
+          new DigitalTwinMetamodelRepositoryClient(connectionString);
+      const builder =
+          DigitalTwinConnectionStringBuilder.Create(connectionString);
+      const repositoryId = builder.RepositoryIdValue;
+
+      // Try to download interface file from private repo
+      try {
+        const fileMetaData =
+            await dtMetamodelRepositoryClient.GetInterfaceAsync(
+                urnId, repositoryId, true);
+        if (fileMetaData) {
+          fs.writeFileSync(
+              path.join(targetFolder, fileName),
+              JSON.stringify(fileMetaData.content, null, 4));
+          channel.appendLine(
+              `${DigitalTwinConstants.dtPrefix} Download interface with id ${
+                  urnId}, name: ${fileName} into ${targetFolder} completed.`);
+          return true;
         }
-      });
+      } catch (error) {
+        // Do nothing. Try to download the interface from global repo
+      }
 
-      const projectPath =
-          projectName ? path.join(rootPath, projectName) : undefined;
-      if (projectPath) {
-        utils.mkdirRecursivelySync(projectPath);
-        // if the selected folder is not empty, ask user to select another one.
-        const files = fs.readdirSync(projectPath);
-        if (files && files[0]) {
-          const message = `${
-              DigitalTwinConstants
-                  .productName} Code Generator would overwrite existing files in the folder ${
-              projectName}. Do you want to continue?`;
-
-          const choice = await vscode.window.showInformationMessage(
-              message, DialogResponses.yes, DialogResponses.cancel);
-          if (choice !== DialogResponses.yes) {
-            return null;
-          }
+      // Try to download interface file from public repo
+      try {
+        const fileMetaData =
+            await dtMetamodelRepositoryClient.GetInterfaceAsync(
+                urnId, undefined, true);
+        if (fileMetaData) {
+          fs.writeFileSync(
+              path.join(targetFolder, fileName),
+              JSON.stringify(fileMetaData.content, null, 4));
+          channel.appendLine(
+              `${DigitalTwinConstants.dtPrefix} Download interface with id ${
+                  urnId}, name: ${fileName} from global repository into ${
+                  targetFolder} completed.`);
+          return true;
         }
-        return projectPath;
+      } catch (error) {
       }
     }
-    return null;
+    return false;
   }
 
   async UpgradeCodeGenerator(
@@ -587,7 +615,7 @@ async function fileHash(filename: string, algorithm = 'md5') {
 
 async function extract(sourceZip: string, targetFoder: string) {
   return new Promise((resolve, reject) => {
-    extractzip(sourceZip, {dir: targetFoder}, (err) => {
+    extractzip(sourceZip, {dir: targetFoder}, err => {
       if (err) {
         return reject(err);
       } else {

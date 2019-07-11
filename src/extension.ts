@@ -84,7 +84,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   let waitingForUpdatingDiagnostic: NodeJS.Timer|null = null;
 
-  vscode.workspace.onDidOpenTextDocument((document) => {
+  vscode.workspace.onDidOpenTextDocument(document => {
     if (!/\.(interface|capabilitymodel)\.json$/.test(document.uri.fsPath)) {
       return;
     }
@@ -99,7 +99,7 @@ export async function activate(context: vscode.ExtensionContext) {
     }, 0);
   });
 
-  vscode.workspace.onDidChangeTextDocument((event) => {
+  vscode.workspace.onDidChangeTextDocument(event => {
     const document = event.document;
     if (!/\.(interface|capabilitymodel)\.json$/.test(document.uri.fsPath)) {
       return;
@@ -120,7 +120,7 @@ export async function activate(context: vscode.ExtensionContext) {
     }, 500);
   });
 
-  vscode.window.onDidChangeActiveTextEditor((editor) => {
+  vscode.window.onDidChangeActiveTextEditor(editor => {
     if (!editor) {
       return;
     }
@@ -138,7 +138,7 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  vscode.workspace.onDidCloseTextDocument((document) => {
+  vscode.workspace.onDidCloseTextDocument(document => {
     if (!/\.(interface|capabilitymodel)\.json$/.test(document.uri.fsPath)) {
       return;
     }
@@ -242,12 +242,20 @@ export async function activate(context: vscode.ExtensionContext) {
                     values, position, startPosition, endPosition);
             return new vscode.CompletionList(completionItems, false);
           } else {
-            let keyList:
-                Array<{label: string, required: boolean, type?: string}> = [];
-            const completionKeyList:
-                Array<{label: string, required: boolean, type?: string}> = [];
+            let keyList: Array < {
+              label: string;
+              required: boolean;
+              type?: string;
+            }
+            > = [];
+            const completionKeyList: Array < {
+              label: string;
+              required: boolean;
+              type?: string;
+            }
+            > = [];
             if (!jsonInfo.type ||
-                Array.isArray(jsonInfo.type) && jsonInfo.type.length === 0) {
+                (Array.isArray(jsonInfo.type) && jsonInfo.type.length === 0)) {
               const id =
                   dtParser.getIdFromShortName(dtContext, jsonInfo.lastKey);
               if (id) {
@@ -259,8 +267,8 @@ export async function activate(context: vscode.ExtensionContext) {
               }
             }
 
-            if (typeof jsonInfo.type === 'string' && jsonInfo.type !== '' ||
-                Array.isArray(jsonInfo.type) && jsonInfo.type.length > 0) {
+            if ((typeof jsonInfo.type === 'string' && jsonInfo.type !== '') ||
+                (Array.isArray(jsonInfo.type) && jsonInfo.type.length > 0)) {
               if ((jsonInfo.type === 'Interface' ||
                    jsonInfo.type === 'CapabilityModel') &&
                   jsonInfo.properties.indexOf('@context') === -1) {
@@ -272,12 +280,13 @@ export async function activate(context: vscode.ExtensionContext) {
                       dtContext, currentType));
                 }
                 const completionObject: {
-                  [key: string]: {required: boolean, type: string|undefined}
+                  [key: string]:
+                      {required: boolean; type: string | undefined};
                 } = {};
                 for (const keyObject of keyList) {
                   completionObject[keyObject.label] = {
-                    required: completionObject[keyObject.label] &&
-                            completionObject[keyObject.label].required ||
+                    required: (completionObject[keyObject.label] &&
+                               completionObject[keyObject.label].required) ||
                         keyObject.required,
                     type: completionObject[keyObject.label] ?
                         completionObject[keyObject.label].type :
@@ -365,9 +374,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const codeGeneratorBinder =
       codeGenerator.GenerateDeviceCodeStub.bind(codeGenerator);
-
-  const codeRegeneratorBinder =
-      codeGenerator.RegenerateDeviceCodeStub.bind(codeGenerator);
 
   const pnpEditModelsBinder =
       deviceModelOperator.DownloadAndEditMetamodelFiles.bind(
@@ -762,18 +768,6 @@ export async function activate(context: vscode.ExtensionContext) {
         telemetryModule.callWithTelemetry(
             EventNames.scaffoldDeviceStubEvent, outputChannel, true, context,
             codeGeneratorBinder);
-      }));
-
-  context.subscriptions.push(vscode.commands.registerCommand(
-      'iotworkbench.iotPnPRegenerateCode', async () => {
-        // Initialize Telemetry
-        if (!telemetryWorkerInitialized) {
-          telemetryModule.TelemetryWorker.Initialize(context);
-          telemetryWorkerInitialized = true;
-        }
-        telemetryModule.callWithTelemetry(
-            EventNames.regenerateDeviceStubEvent, outputChannel, true, context,
-            codeRegeneratorBinder);
       }));
 
   setTimeout(() => {
