@@ -30,7 +30,11 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    application_initialize(argv[1], NULL);
+    if(application_initialize(argv[1], NULL) != 0)
+    {
+        LogError("Failed to initialize the application.");
+        return 1;
+    }
     
     while (1)
     {

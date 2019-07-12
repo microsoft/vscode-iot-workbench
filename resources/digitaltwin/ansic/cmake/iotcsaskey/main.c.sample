@@ -187,7 +187,11 @@ static bool initializeIotHubViaProvisioning(bool traceOn)
         }
 
         LogInfo("IoT Hub Connection String: %s", connectionString);
-        application_initialize(connectionString, NULL);
+        if(application_initialize(connectionString, NULL) != 0)
+        {
+            LogError("Failed to initialize the application.");
+            return false;
+        }
     }
     else
     {
