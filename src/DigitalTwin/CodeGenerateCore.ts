@@ -24,7 +24,8 @@ import {DigitalTwinConnectionStringBuilder} from './DigitalTwinApi/DigitalTwinCo
 
 const constants = {
   idName: '@id',
-  schemaFolderName: 'schema'
+  schemaFolderName: 'schema',
+  CodeGenConfigFileName: '.codeGenConfig'
 };
 
 interface CodeGeneratorDownloadLocation {
@@ -61,7 +62,6 @@ interface CodeGeneratorConfig {
 
 interface CodeGenExecutionInfo {
   schemaFolder: string;
-  targetFolder: string;
   languageLabel: string;
   codeGenProjectType: CodeGenProjectType;
   deviceConnectionType: DeviceConnectionType;
@@ -160,15 +160,45 @@ export class CodeGenerateCore {
     channel.appendLine(`${DigitalTwinConstants.dtPrefix} Folder ${
         folderPath} is selected for the generated code.`);
 
+    const codeGenConfigPath =
+        path.join(folderPath, constants.CodeGenConfigFileName);
+
+    const schemaTargetFolder =
+        path.join(folderPath, constants.schemaFolderName);
+
+    const languageItems: vscode.QuickPickItem[] = [];
+    let exitingCodeGenInfo;
+    if (fs.existsSync(codeGenConfigPath)) {
+      exitingCodeGenInfo =
+          JSON.parse(fs.readFileSync(codeGenConfigPath, 'utf8'));
+      if (exitingCodeGenInfo) {
+        languageItems.push({
+          label: 'Use previous setting',
+          description:
+              'Use the config from the current folder to scaffold code.'
+        });
+      }
+    }
+
     // select the target of the code stub
-    const languageItems: vscode.QuickPickItem[] =
-        [{label: 'ANSI C', description: ''}];
+    languageItems.push({label: 'ANSI C', description: ''});
+
     const languageSelection = await vscode.window.showQuickPick(
         languageItems,
         {ignoreFocusOut: true, placeHolder: 'Please select a language:'});
 
     if (!languageSelection) {
       return false;
+    }
+
+    if (languageSelection.label === 'Use previous setting') {
+      fs.copyFileSync(
+          selectedFilePath,
+          path.join(schemaTargetFolder, capbilityModelFileName));
+      const executionResult = await this.GenerateDeviceCodeCore(
+          path.join(schemaTargetFolder, capbilityModelFileName), folderPath,
+          exitingCodeGenInfo, context, channel, telemetryContext);
+      return executionResult;
     }
 
     let targetItems: vscode.QuickPickItem[]|null = null;
@@ -244,9 +274,6 @@ export class CodeGenerateCore {
       connectionType = DeviceConnectionType.IoTCSasKey;
     }
 
-    const schemaTargetFolder =
-        path.join(folderPath, constants.schemaFolderName);
-
     utils.mkdirRecursivelySync(schemaTargetFolder);
     fs.copyFileSync(
         selectedFilePath,
@@ -286,24 +313,22 @@ export class CodeGenerateCore {
 
     const codeGenExecutionInfo: CodeGenExecutionInfo = {
       schemaFolder: constants.schemaFolderName,
-      targetFolder: folderPath,
       languageLabel: 'ANSI C',
       codeGenProjectType,
       deviceConnectionType: connectionType
     };
 
     const executionResult = await this.GenerateDeviceCodeCore(
-        path.join(schemaTargetFolder, capbilityModelFileName),
+        path.join(schemaTargetFolder, capbilityModelFileName), folderPath,
         codeGenExecutionInfo, context, channel, telemetryContext);
-    await ConfigHandler.update(
-        ConfigKey.codeGeneratorExecutionInfo,
-        JSON.stringify(codeGenExecutionInfo),
-        vscode.ConfigurationTarget.Workspace);
+
+    fs.writeFileSync(
+        codeGenConfigPath, JSON.stringify(codeGenExecutionInfo, null, 4));
     return executionResult;
   }
 
   async GenerateDeviceCodeCore(
-      capabilityModelFilePath: string,
+      capabilityModelFilePath: string, targetFolder: string,
       codeGenExecutionInfo: CodeGenExecutionInfo,
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext): Promise<boolean> {
@@ -333,11 +358,8 @@ export class CodeGenerateCore {
         },
         async () => {
           const result = await codeGenerator.GenerateCode(
-              codeGenExecutionInfo.targetFolder, capabilityModelFilePath,
-              fileCoreName,
-              path.join(
-                  codeGenExecutionInfo.targetFolder,
-                  codeGenExecutionInfo.schemaFolder));
+              targetFolder, capabilityModelFilePath, fileCoreName,
+              path.join(targetFolder, codeGenExecutionInfo.schemaFolder));
           if (result) {
             vscode.window.showInformationMessage(
                 `Generate code stub for ${fileName} completed`);
@@ -368,11 +390,10 @@ export class CodeGenerateCore {
     if (!connectionString) {
       return false;
     } else {
-      const result = await DigitalTwinConnector.ConnectMetamodelRepository(
-          connectionString);
-      if (!result) {
-        return false;
-      }
+      // Save connection string info
+      await ConfigHandler.update(
+          ConfigKey.modelRepositoryKeyName, connectionString,
+          vscode.ConfigurationTarget.Global);
       // Try to download interface file from private repo
       const dtMetamodelRepositoryClient =
           new DigitalTwinMetamodelRepositoryClient(connectionString);
@@ -396,6 +417,9 @@ export class CodeGenerateCore {
         }
       } catch (error) {
         // Do nothing. Try to download the interface from global repo
+        channel.appendLine(`${
+            DigitalTwinConstants.dtPrefix} Unable to get interface with id ${
+            urnId} from organizational Model Repository, try global repository instead.`);
       }
 
       // Try to download interface file from public repo
@@ -414,6 +438,9 @@ export class CodeGenerateCore {
           return true;
         }
       } catch (error) {
+        channel.appendLine(
+            `${DigitalTwinConstants.dtPrefix} Unable to get interface with id ${
+                urnId} from global Model Repository. errorcode: ${error.code}`);
       }
     }
     return false;

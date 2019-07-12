@@ -13,7 +13,6 @@ export class ConfigKey {
   static readonly asaPath = 'StreamAnalyticsPath';
   static readonly shownHelpPage = 'ShownHelpPage';
   static readonly codeGeneratorVersion = 'IoTPnPCodeGenVersion';
-  static readonly codeGeneratorExecutionInfo = 'IoTPnPCodeGenExecutionInfo';
   static readonly modelRepositoryKeyName = 'IoTPnPModelRepositoryKey';
   static readonly iotPnPRepositoryUrl = 'IoTPnPRepositoryUrl';
 }
