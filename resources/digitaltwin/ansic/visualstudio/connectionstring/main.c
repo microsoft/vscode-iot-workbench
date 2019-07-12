@@ -1,7 +1,7 @@
 #ifdef WIN32
 #include <windows.h>
 #elif _POSIX_C_SOURCE >= 199309L
-#include <time.h>   // for nanosleep
+#include <time.h> // for nanosleep
 #else
 #include <unistd.h> // for usleep
 #endif
@@ -30,8 +30,12 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    application_initialize(argv[1], NULL);
-    
+    if (application_initialize(argv[1], NULL) != 0)
+    {
+        LogError("Failed to initialize the application.");
+        return 1;
+    }
+
     while (1)
     {
         application_run();

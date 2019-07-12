@@ -5,7 +5,8 @@
 
 static bool networkConnected;
 
-void setup() {
+void setup()
+{
     char buff[128];
 
     // Initialize the board
@@ -25,13 +26,17 @@ void setup() {
     }
 
     // Initialize device model application
-    application_initialize(getIoTHubConnectionString(), certificates);
+    if (application_initialize(getIoTHubConnectionString(), certificates) != 0)
+    {
+        return;
+    }
     digitalWrite(LED_AZURE, 1);
     snprintf(buff, sizeof(buff), "%s\r\nPnP enabled\r\nRunning...\r\n", getDevKitName());
     Screen.print(1, buff);
 }
 
-void loop() {
+void loop()
+{
     // put your main code here, to run repeatedly:
     if (networkConnected)
     {

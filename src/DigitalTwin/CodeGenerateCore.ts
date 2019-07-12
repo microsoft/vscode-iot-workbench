@@ -24,7 +24,6 @@ import {DigitalTwinConnectionStringBuilder} from './DigitalTwinApi/DigitalTwinCo
 
 const constants = {
   idName: '@id',
-  schemaFolderName: 'schema',
   CodeGenConfigFileName: '.codeGenConfig'
 };
 
@@ -163,9 +162,6 @@ export class CodeGenerateCore {
     const codeGenConfigPath =
         path.join(folderPath, constants.CodeGenConfigFileName);
 
-    const schemaTargetFolder =
-        path.join(folderPath, constants.schemaFolderName);
-
     const languageItems: vscode.QuickPickItem[] = [];
     let exitingCodeGenInfo;
     if (fs.existsSync(codeGenConfigPath)) {
@@ -193,10 +189,9 @@ export class CodeGenerateCore {
 
     if (languageSelection.label === 'Use previous setting') {
       fs.copyFileSync(
-          selectedFilePath,
-          path.join(schemaTargetFolder, capbilityModelFileName));
+          selectedFilePath, path.join(folderPath, capbilityModelFileName));
       const executionResult = await this.GenerateDeviceCodeCore(
-          path.join(schemaTargetFolder, capbilityModelFileName), folderPath,
+          path.join(folderPath, capbilityModelFileName), folderPath,
           exitingCodeGenInfo, context, channel, telemetryContext);
       return executionResult;
     }
@@ -274,10 +269,8 @@ export class CodeGenerateCore {
       connectionType = DeviceConnectionType.IoTCSasKey;
     }
 
-    utils.mkdirRecursivelySync(schemaTargetFolder);
     fs.copyFileSync(
-        selectedFilePath,
-        path.join(schemaTargetFolder, capbilityModelFileName));
+        selectedFilePath, path.join(folderPath, capbilityModelFileName));
 
     // Parse the cabability model
     const capabilityModel =
@@ -292,14 +285,13 @@ export class CodeGenerateCore {
         if (item) {
           // copy interface to the schema folder
           const interfaceName = path.basename(item.path);
-          fs.copyFileSync(
-              item.path, path.join(schemaTargetFolder, interfaceName));
+          fs.copyFileSync(item.path, path.join(folderPath, interfaceName));
           channel.appendLine(
               `${DigitalTwinConstants.dtPrefix} Copy ${interfaceName} with id ${
-                  item.urnId} into ${schemaTargetFolder} completed.`);
+                  item.urnId} into ${folderPath} completed.`);
         } else {
-          const result = await this.DownloadInterfaceFile(
-              schema, schemaTargetFolder, channel);
+          const result =
+              await this.DownloadInterfaceFile(schema, folderPath, channel);
           if (!result) {
             const message = `Unable to get the interface with Id ${
                 schema} online. Please make sure the file exists in server.`;
@@ -312,14 +304,14 @@ export class CodeGenerateCore {
     }
 
     const codeGenExecutionInfo: CodeGenExecutionInfo = {
-      schemaFolder: constants.schemaFolderName,
+      schemaFolder: '',
       languageLabel: 'ANSI C',
       codeGenProjectType,
       deviceConnectionType: connectionType
     };
 
     const executionResult = await this.GenerateDeviceCodeCore(
-        path.join(schemaTargetFolder, capbilityModelFileName), folderPath,
+        path.join(folderPath, capbilityModelFileName), folderPath,
         codeGenExecutionInfo, context, channel, telemetryContext);
 
     fs.writeFileSync(

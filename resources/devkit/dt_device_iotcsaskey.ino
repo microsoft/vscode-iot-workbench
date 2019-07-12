@@ -9,7 +9,6 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "src/{PATHNAME}/application.h"
 
-
 // IoT Central requires DPS.  Include required header and constants
 #include "azure_prov_client/iothub_security_factory.h"
 #include "azure_prov_client/prov_device_ll_client.h"
@@ -27,33 +26,32 @@ typedef enum APP_DPS_REGISTRATION_STATUS_TAG
     APP_DPS_REGISTRATION_FAILED
 } APP_DPS_REGISTRATION_STATUS;
 
-
 const SECURE_DEVICE_TYPE secureDeviceTypeForProvisioning = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
 const IOTHUB_SECURITY_TYPE secureDeviceTypeForIotHub = IOTHUB_SECURITY_TYPE_SYMMETRIC_KEY;
 
 // Note: You cannot use an arbitrary DPS instance with the DigitalTwin IoT Central example.
-static const char* globalDpsEndpoint = "global.azure-devices-provisioning.net";
+static const char *globalDpsEndpoint = "global.azure-devices-provisioning.net";
 
-// TODO: Specify DPS scope ID if you intend on using IoT Central. 
-static const char* dpsIdScope = "[DPS Id Scope]";
+// TODO: Specify DPS scope ID if you intend on using IoT Central.
+static const char *dpsIdScope = "[DPS Id Scope]";
 
 // TODO: Specify synmmetric keys if you intend on using IoT Central and symmetric key based auth.
-static const char* sasKey = "[DPS symmetric key]";
+static const char *sasKey = "[DPS symmetric key]";
 
 // TODO: specify your device registration ID
-static const char* registrationId = "[registration Id]";
+static const char *registrationId = "[registration Id]";
 
 // TODO: Fill in DIGITALTWIN_DEVICE_CAPABILITY_MODEL_URI and DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_INLINE_DATA if you indend on using IoT Central.
 #define DIGITALTWIN_DEVICE_CAPABILITY_MODEL_URI "[your capabilityModel Id]"
 #define DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_INLINE_DATA "[To fill in with the inline contents of interfaces and capability model.]"
 
-static const char* digitalTwinSample_CustomProvisioningData = "{"
-                                                            "\"__iot:interfaces\":"
-                                                            "{"
-                                                            "\"CapabilityModelUri\": \"" DIGITALTWIN_DEVICE_CAPABILITY_MODEL_URI "\" ,"
-                                                            "\"CapabilityModel\": \"" DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_INLINE_DATA "\""
-                                                            "}"
-                                                      "}";
+static const char *digitalTwinSample_CustomProvisioningData = "{"
+                                                              "\"__iot:interfaces\":"
+                                                              "{"
+                                                              "\"CapabilityModelUri\": \"" DIGITALTWIN_DEVICE_CAPABILITY_MODEL_URI "\" ,"
+                                                              "\"CapabilityModel\": \"" DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_INLINE_DATA "\""
+                                                              "}"
+                                                              "}";
 
 // Amount to sleep between querying state from DPS registration loop
 static const int dpsRegistrationPollSleep = 1000;
@@ -71,12 +69,12 @@ typedef enum APP_DIGITALTWIN_REGISTRATION_STATUS_TAG
 
 #define IOT_HUB_CONN_STR_MAX_LEN 1024
 
-static char* dpsIotHubUri;
-static char* dpsDeviceId;
+static char *dpsIotHubUri;
+static char *dpsDeviceId;
 
-static void provisioningRegisterCallback(PROV_DEVICE_RESULT register_result, const char* iothub_uri, const char* device_id, void* user_context)
+static void provisioningRegisterCallback(PROV_DEVICE_RESULT register_result, const char *iothub_uri, const char *device_id, void *user_context)
 {
-    APP_DPS_REGISTRATION_STATUS* appDpsRegistrationStatus = (APP_DPS_REGISTRATION_STATUS*)user_context;
+    APP_DPS_REGISTRATION_STATUS *appDpsRegistrationStatus = (APP_DPS_REGISTRATION_STATUS *)user_context;
 
     if (register_result != PROV_DEVICE_RESULT_OK)
     {
@@ -179,26 +177,30 @@ static bool initializeIotHubViaProvisioning(bool traceOn)
 
     if (appDpsRegistrationStatus == APP_DPS_REGISTRATION_SUCCEEDED)
     {
-        char connectionString[IOT_HUB_CONN_STR_MAX_LEN] = { 0 };
+        char connectionString[IOT_HUB_CONN_STR_MAX_LEN] = {0};
 
         if (secureDeviceTypeForProvisioning == SECURE_DEVICE_TYPE_SYMMETRIC_KEY)
         {
             snprintf(connectionString, IOT_HUB_CONN_STR_MAX_LEN,
-                "HostName=%s;DeviceId=%s;SharedAccessKey=%s",
-                dpsIotHubUri,
-                dpsDeviceId,
-                sasKey);
+                     "HostName=%s;DeviceId=%s;SharedAccessKey=%s",
+                     dpsIotHubUri,
+                     dpsDeviceId,
+                     sasKey);
         }
         else if (secureDeviceTypeForProvisioning == SECURE_DEVICE_TYPE_X509)
         {
             snprintf(connectionString, IOT_HUB_CONN_STR_MAX_LEN,
-                "HostName=%s;DeviceId=%s;UseProvisioning=true",
-                dpsIotHubUri,
-                dpsDeviceId);
+                     "HostName=%s;DeviceId=%s;UseProvisioning=true",
+                     dpsIotHubUri,
+                     dpsDeviceId);
         }
 
         LogInfo("IoT Hub Connection String: %s", connectionString);
-        application_initialize(connectionString, certificates);
+        if (application_initialize(connectionString, certificates) != 0)
+        {
+            LogError("Failed to initialize the application.");
+            return false;
+        }
     }
     else
     {
@@ -214,7 +216,8 @@ static bool initializeIotHubViaProvisioning(bool traceOn)
     return true;
 }
 
-void setup() {
+void setup()
+{
     char buff[128];
 
     // Initialize the board
@@ -240,7 +243,8 @@ void setup() {
     Screen.print(1, buff);
 }
 
-void loop() {
+void loop()
+{
     // put your main code here, to run repeatedly:
     if (networkConnected && digitalTwinInitialized)
     {
