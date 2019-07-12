@@ -7,19 +7,22 @@
 import * as fs from 'fs-plus';
 import * as vscode from 'vscode';
 import * as path from 'path';
-import {ProjectTemplate, ProjectTemplateType} from './Models/Interfaces/ProjectTemplate';
 import * as utils from './utils';
-import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
+
 import {TelemetryContext} from './telemetry';
-import {ArduinoPackageManager} from './ArduinoPackageManager';
-import {FileNames} from './constants';
-import {BoardProvider} from './boardProvider';
+import {FileNames, ScaffoldType, PlatformType} from './constants';
+import {IoTWorkbenchSettings} from './IoTSettings';
+import {FileUtility} from './FileUtility';
+import {ProjectTemplate, ProjectTemplateType, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
+import {Platform} from './Models/Interfaces/Platform';
+import {RemoteExtension} from './Models/RemoteExtension';
 
 const impor = require('impor')(__dirname);
-const azureFunctionsModule = impor('./Models/AzureFunctions') as
-    typeof import('./Models/AzureFunctions');
-const ioTProjectModule =
-    impor('./Models/IoTProject') as typeof import('./Models/IoTProject');
+const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
+    typeof import('./Models/IoTWorkspaceProject');
+const ioTContainerizedProjectModule =
+    impor('./Models/IoTContainerizedProject') as
+    typeof import('./Models/IoTContainerizedProject');
 
 const constants = {
   defaultProjectName: 'IoTproject'
@@ -29,7 +32,13 @@ export class ProjectInitializer {
   async InitializeProject(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    let rootPath: string;
+    if (RemoteExtension.isRemote(context)) {
+      const message =
+          `The project is open in a Docker container now. Open a new window and run this command again.`;
+      vscode.window.showWarningMessage(message);
+      return;
+    }
+
     let openInNewWindow = false;
     // If current window contains other project, open the created project in new
     // window.
@@ -50,165 +59,192 @@ export class ProjectInitializer {
           });
 
           try {
-            // Select board
-            const boardProvider = new BoardProvider(context);
-            const boardItemList: BoardQuickPickItem[] = [];
-
-            const boards = boardProvider.list;
-            boards.forEach((board: Board) => {
-              boardItemList.push({
-                name: board.name,
-                id: board.id,
-                detailInfo: board.detailInfo,
-                label: board.name,
-                description: board.detailInfo,
-              });
-            });
-
-            // add the selection of 'device not in the list'
-            boardItemList.push({
-              name: '',
-              id: 'no_device',
-              detailInfo: '',
-              label: '$(issue-opened) My device is not in the list...',
-              description: '',
-            });
-
-            const boardSelection =
-                await vscode.window.showQuickPick(boardItemList, {
-                  ignoreFocusOut: true,
-                  matchOnDescription: true,
-                  matchOnDetail: true,
-                  placeHolder: 'Select a board',
-                });
-
-            if (!boardSelection) {
+            // Step 1: Get project name
+            const projectPath = await this.GenerateProjectFolder();
+            if (!projectPath) {
               telemetryContext.properties.errorMessage =
-                  'Board selection canceled.';
+                  'Project name input canceled.';
               telemetryContext.properties.result = 'Canceled';
               return;
-            } else if (boardSelection.id === 'no_device') {
-              await utils.TakeNoDeviceSurvey(telemetryContext);
-              return;
             } else {
-              telemetryContext.properties.board = boardSelection.label;
-              const board = boardProvider.find({id: boardSelection.id});
-
-              if (board) {
-                await ArduinoPackageManager.installBoard(board);
-              }
+              telemetryContext.properties.projectPath = projectPath;
             }
 
-            // Template select
-            const template = context.asAbsolutePath(path.join(
-                FileNames.resourcesFolderName, boardSelection.id,
-                FileNames.templateFileName));
-            const templateJson = require(template);
+            // Step 2: Select platform
+            const platformSelection = await this.SelectPlatform(context);
+            if (!platformSelection) {
+              telemetryContext.properties.errorMessage =
+                  'Platform selection canceled.';
+              telemetryContext.properties.result = 'Canceled';
+              return;
+            } else {
+              telemetryContext.properties.platform = platformSelection.label;
+            }
 
-            const projectTemplateList: vscode.QuickPickItem[] = [];
+            // Step 4: Select template
+            const resourceRootPath = context.asAbsolutePath(path.join(
+                FileNames.resourcesFolderName, FileNames.templatesFolderName));
+            const template = await this.SelectTemplate(
+                telemetryContext, resourceRootPath, platformSelection.label);
 
-            templateJson.templates.forEach((element: ProjectTemplate) => {
-              projectTemplateList.push({
-                label: element.label,
-                description: element.description,
-                detail: element.detail
-              });
-            });
-
-            const selection =
-                await vscode.window.showQuickPick(projectTemplateList, {
-                  ignoreFocusOut: true,
-                  matchOnDescription: true,
-                  matchOnDetail: true,
-                  placeHolder: 'Select a project template',
-                });
-
-            if (!selection) {
+            if (!template) {
               telemetryContext.properties.errorMessage =
                   'Project template selection canceled.';
               telemetryContext.properties.result = 'Canceled';
               return;
             } else {
-              telemetryContext.properties.template = selection.label;
+              telemetryContext.properties.template = template.name;
             }
 
-            const result: ProjectTemplate =
-                templateJson.templates.find((template: ProjectTemplate) => {
-                  return template.label === selection.label;
+            // Step 5: Load the list of template files
+            const projectTemplateType: ProjectTemplateType =
+                (ProjectTemplateType)
+                    [template.type as keyof typeof ProjectTemplateType];
+
+            const templateFolder = path.join(resourceRootPath, template.path);
+            const templateFiles =
+                require(path.join(templateFolder, FileNames.templateFiles));
+
+            const templateFilesInfo: TemplateFileInfo[] = [];
+            templateFiles.templateFiles.forEach(
+                (fileInfo: TemplateFileInfo) => {
+                  const filePath = path.join(
+                      templateFolder, fileInfo.sourcePath, fileInfo.fileName);
+                  const fileContent = fs.readFileSync(filePath, 'utf8');
+                  templateFilesInfo.push({
+                    fileName: fileInfo.fileName,
+                    sourcePath: fileInfo.sourcePath,
+                    targetPath: fileInfo.targetPath,
+                    fileContent
+                  });
                 });
 
-            if (!result) {
-              throw new Error('Unable to load project template.');
+            let project;
+            if (template.platform === PlatformType.EMBEDDEDLINUX) {
+              telemetryContext.properties.projectHostType = 'Container';
+              project =
+                  new ioTContainerizedProjectModule.IoTContainerizedProject(
+                      context, channel, telemetryContext);
+            } else if (template.platform === PlatformType.ARDUINO) {
+              telemetryContext.properties.projectHostType = 'Workspace';
+              project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
+                  context, channel, telemetryContext);
+            } else {
+              throw new Error('unsupported platform');
             }
-
-            if (result.type === 'AzureFunctions') {
-              const isFunctionsExtensionAvailable =
-                  await azureFunctionsModule.AzureFunctions.isAvailable();
-              if (!isFunctionsExtensionAvailable) {
-                return false;
-              }
-            }
-
-            try {
-              rootPath = await utils.selectWorkspaceItem(
-                  'Please select a folder to contain your IoT Project:', {
-                    canSelectFiles: false,
-                    canSelectFolders: true,
-                    canSelectMany: false,
-                    defaultUri: vscode.workspace.workspaceFolders &&
-                            vscode.workspace.workspaceFolders.length > 0 ?
-                        vscode.workspace.workspaceFolders[0].uri :
-                        undefined,
-                    openLabel: 'Select'
-                  });
-
-              if (!rootPath) {
-                throw new Error('User cancelled folder selection.');
-              }
-
-              const projectFolder = await this.GenerateProjectFolder(rootPath);
-              if (!projectFolder) {
-                throw new Error('Generate Project Folder canceled');
-              }
-              rootPath = projectFolder;
-            } catch (error) {
-              telemetryContext.properties.errorMessage =
-                  `Folder selection canceled. ${error}`;
-              telemetryContext.properties.result = 'Canceled';
-              return;
-            }
-
-            const project = new ioTProjectModule.IoTProject(
-                context, channel, telemetryContext);
-
-            const sketchTemplateFilePath = context.asAbsolutePath(path.join(
-                FileNames.resourcesFolderName, boardSelection.id,
-                result.sketch));
-            const content = fs.readFileSync(sketchTemplateFilePath, 'utf8');
-
-            // Convert the string based template type to enum.
-            const type: ProjectTemplateType = ProjectTemplateType
-                [result.type as keyof typeof ProjectTemplateType];
-
             return await project.create(
-                rootPath, content, type, boardSelection.id, openInNewWindow);
+                projectPath, templateFilesInfo, projectTemplateType,
+                template.boardId, openInNewWindow);
           } catch (error) {
             throw error;
           }
         });
   }
 
+  private async SelectTemplate(
+      telemetryContext: TelemetryContext, templateFolderPath: string,
+      platform: string): Promise<ProjectTemplate|undefined> {
+    const templateJson =
+        require(path.join(templateFolderPath, FileNames.templateFileName));
 
-  private async GenerateProjectFolder(rootPath: string) {
+    const result =
+        templateJson.templates.filter((template: ProjectTemplate) => {
+          return template.platform === platform;
+        });
+
+    const projectTemplateList: vscode.QuickPickItem[] = [];
+
+    result.forEach((element: ProjectTemplate) => {
+      projectTemplateList.push({
+        label: element.name,
+        description: element.description,
+        detail: element.detail
+      });
+    });
+
+    // add the selection of 'device not in the list'
+    projectTemplateList.push({
+      label: '$(issue-opened) My device is not in the list...',
+      description: '',
+      detail: ''
+    });
+
+    const templateSelection =
+        await vscode.window.showQuickPick(projectTemplateList, {
+          ignoreFocusOut: true,
+          matchOnDescription: true,
+          matchOnDetail: true,
+          placeHolder: 'Select a project template'
+        });
+
+    if (!templateSelection) {
+      return;
+    } else if (
+        templateSelection.label ===
+        '$(issue-opened) My device is not in the list...') {
+      await utils.TakeNoDeviceSurvey(telemetryContext);
+      return;
+    }
+
+    return templateJson.templates.find((template: ProjectTemplate) => {
+      return template.platform === platform &&
+          template.name === templateSelection.label;
+    });
+  }
+
+  private async SelectPlatform(context: vscode.ExtensionContext) {
+    const platformListPath = context.asAbsolutePath(path.join(
+        FileNames.resourcesFolderName, FileNames.templatesFolderName,
+        FileNames.platformListFileName));
+
+    const platformListJson = require(platformListPath);
+
+    if (!platformListJson) {
+      throw new Error('Unable to load platform list.');
+    }
+
+    const platformList: vscode.QuickPickItem[] = [];
+
+    platformListJson.platforms.forEach((platform: Platform) => {
+      platformList.push(
+          {label: platform.name, description: platform.description});
+    });
+
+    const platformSelection = await vscode.window.showQuickPick(platformList, {
+      ignoreFocusOut: true,
+      matchOnDescription: true,
+      matchOnDetail: true,
+      placeHolder: 'Select a platform',
+    });
+
+    return platformSelection;
+  }
+
+  private async GenerateProjectFolder() {
+    // Get default workbench path.
+    const settings: IoTWorkbenchSettings =
+        await IoTWorkbenchSettings.createAsync();
+    const workbench = await settings.workbenchPath();
+
+    const scaffoldType = ScaffoldType.Local;
+    const projectRootPath = path.join(workbench, 'projects');
+    if (!await FileUtility.directoryExists(scaffoldType, projectRootPath)) {
+      await FileUtility.mkdirRecursively(scaffoldType, projectRootPath);
+    }
+
     let counter = 0;
     const name = constants.defaultProjectName;
     let candidateName = name;
     while (true) {
-      const projectPath = path.join(rootPath, candidateName);
-      if (!utils.fileExistsSync(projectPath) &&
-          !utils.directoryExistsSync(projectPath)) {
+      const projectPath = path.join(projectRootPath, candidateName);
+      const projectPathExists =
+          await FileUtility.fileExists(scaffoldType, projectPath);
+      const projectDirectoryExists =
+          await FileUtility.directoryExists(scaffoldType, projectPath);
+      if (!projectPathExists && !projectDirectoryExists) {
         break;
       }
+
       counter++;
       candidateName = `${name}_${counter}`;
     }
@@ -217,14 +253,18 @@ export class ProjectInitializer {
       value: candidateName,
       prompt: 'Input project name.',
       ignoreFocusOut: true,
-      validateInput: (projectName: string) => {
+      validateInput: async (projectName: string) => {
         if (!/^([a-z0-9_]|[a-z0-9_][-a-z0-9_.]*[a-z0-9_])(\.ino)?$/i.test(
                 projectName)) {
           return 'Project name can only contain letters, numbers, "-" and ".", and cannot start or end with "-" or ".".';
         }
-        const projectPath = path.join(rootPath, projectName);
-        if (!utils.fileExistsSync(projectPath) &&
-            !utils.directoryExistsSync(projectPath)) {
+
+        const projectPath = path.join(projectRootPath, projectName);
+        const projectPathExists =
+            await FileUtility.fileExists(scaffoldType, projectPath);
+        const projectDirectoryExists =
+            await FileUtility.directoryExists(scaffoldType, projectPath);
+        if (!projectPathExists && !projectDirectoryExists) {
           return;
         } else {
           return `${projectPath} exists, please choose another name.`;
@@ -233,10 +273,10 @@ export class ProjectInitializer {
     });
 
     const projectPath =
-        projectName ? path.join(rootPath, projectName) : undefined;
-    if (projectPath) {
-      utils.mkdirRecursivelySync(projectPath);
-    }
+        projectName ? path.join(projectRootPath, projectName) : undefined;
+
+    // We don't create the projectpath here in case user may cancel their
+    // initialization in following steps Just generate a valid path for project
     return projectPath;
   }
 }

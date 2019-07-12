@@ -8,10 +8,14 @@ import * as request from 'request-promise';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, FileNames} from '../constants';
+import {ConfigKey, ScaffoldType} from '../constants';
+import {FileUtility} from '../FileUtility';
+import {generateTemplateFile} from '../utils';
 
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
+import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
+import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
 
 const constants = {
   timeout: 10000,
@@ -39,7 +43,7 @@ export class IoTButtonDevice implements Device {
 
   constructor(
       context: vscode.ExtensionContext, devicePath: string,
-      private fileContent = '') {
+      private templateFilesInfo: TemplateFileInfo[] = []) {
     this.deviceType = DeviceType.IoT_Button;
     this.componentType = ComponentType.Device;
     this.deviceFolder = devicePath;
@@ -72,54 +76,19 @@ export class IoTButtonDevice implements Device {
   }
 
   async create(): Promise<boolean> {
-    if (!this.fileContent) {
-      throw new Error('No user data file found.');
-    }
-    const deviceFolderPath = this.deviceFolder;
-
-    if (!fs.existsSync(deviceFolderPath)) {
-      throw new Error('Unable to find the device folder inside the project.');
+    const createTimeScaffoldType = ScaffoldType.Local;
+    if (!await FileUtility.directoryExists(
+            createTimeScaffoldType, this.deviceFolder)) {
+      throw new Error(`Internal error: Couldn't find the template folder.`);
     }
 
-    try {
-      const iotworkbenchprojectFilePath =
-          path.join(deviceFolderPath, FileNames.iotworkbenchprojectFileName);
-      fs.writeFileSync(iotworkbenchprojectFilePath, ' ');
-    } catch (error) {
-      throw new Error(
-          `Device: create iotworkbenchproject file failed: ${error.message}`);
+    await IoTWorkbenchProjectBase.generateIotWorkbenchProjectFile(
+        createTimeScaffoldType, this.deviceFolder);
+
+    for (const fileInfo of this.templateFilesInfo) {
+      await generateTemplateFile(
+          this.deviceFolder, createTimeScaffoldType, fileInfo);
     }
-
-    // Create an empty userdata.json
-    const newUserdataPath =
-        path.join(deviceFolderPath, constants.userjsonFilename);
-
-    try {
-      fs.writeFileSync(newUserdataPath, this.fileContent);
-    } catch (error) {
-      throw new Error(`Create userdata json file failed: ${error.message}`);
-    }
-
-    const vscodeFolderPath =
-        path.join(deviceFolderPath, FileNames.vscodeSettingsFolderName);
-    if (!fs.existsSync(vscodeFolderPath)) {
-      fs.mkdirSync(vscodeFolderPath);
-    }
-
-    // Create settings.json config file
-    const settingsJSONFilePath =
-        path.join(vscodeFolderPath, FileNames.settingsJsonFileName);
-    const settingsJSONObj = {
-      'files.exclude': {'.build': true, '.iotworkbenchproject': true}
-    };
-
-    try {
-      fs.writeFileSync(
-          settingsJSONFilePath, JSON.stringify(settingsJSONObj, null, 4));
-    } catch (error) {
-      throw new Error(`Device: create config file failed: ${error.message}`);
-    }
-
     return true;
   }
 

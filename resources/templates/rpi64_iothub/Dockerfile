@@ -1,0 +1,1 @@
+FROM mcr.microsoft.com/iot-device-cube:1.0.0-azure-c-app-20190411-ubuntu-arm64

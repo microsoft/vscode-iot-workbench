@@ -5,6 +5,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import * as path from 'path';
 import {VSCExpress} from 'vscode-express';
 import {BoardProvider} from './boardProvider';
 import {ProjectInitializer} from './projectInitializer';
@@ -12,9 +13,6 @@ import {DeviceOperator} from './DeviceOperator';
 import {AzureOperator} from './AzureOperator';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import {ConfigHandler} from './configHandler';
-import {ConfigKey, EventNames} from './constants';
-import {TelemetryContext, TelemetryProperties} from './telemetry';
-import {UsbDetector} from './usbDetector';
 import {CodeGenerateCore} from './DigitalTwin/CodeGenerateCore';
 import {DigitalTwinMetaModelUtility, DigitalTwinMetaModelContext} from './DigitalTwin/DigitalTwinMetaModelUtility';
 import {DigitalTwinMetaModelParser, DigitalTwinMetaModelGraph} from './DigitalTwin/DigitalTwinMetaModelGraph';
@@ -22,16 +20,23 @@ import {DeviceModelOperator} from './DigitalTwin/DeviceModelOperator';
 import {DigitalTwinMetaModelJsonParser} from './DigitalTwin/DigitalTwinMetaModelJsonParser';
 import {DigitalTwinDiagnostic} from './DigitalTwin/DigitalTwinDiagnostic';
 import {DigitalTwinConstants} from './DigitalTwin/DigitalTwinConstants';
+import {ConfigKey, EventNames, FileNames} from './constants';
+import {TelemetryContext, TelemetryProperties} from './telemetry';
+import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
+import {RemoteExtension} from './Models/RemoteExtension';
 
 const impor = require('impor')(__dirname);
 const exampleExplorerModule =
     impor('./exampleExplorer') as typeof import('./exampleExplorer');
-const ioTProjectModule =
-    impor('./Models/IoTProject') as typeof import('./Models/IoTProject');
+
+import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
+const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
+    typeof import('./Models/IoTWorkspaceProject');
+const ioTContainerizedProjectModule =
+    impor('./Models/IoTContainerizedProject') as
+    typeof import('./Models/IoTContainerizedProject');
 const telemetryModule = impor('./telemetry') as typeof import('./telemetry');
 const request = impor('request-promise') as typeof import('request-promise');
-const usbDetectorModule =
-    impor('./usbDetector') as typeof import('./usbDetector');
 
 function getDocumentType(document: vscode.TextDocument) {
   if (/\.interface\.json$/.test(document.uri.fsPath)) {
@@ -343,34 +348,38 @@ export async function activate(context: vscode.ExtensionContext) {
     measurements: {duration: 0}
   };
 
+  let projectHostType: ProjectHostType = ProjectHostType.Unknown;
   if (vscode.workspace.workspaceFolders) {
-    const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    const deviceModelResult =
-        await deviceModelOperator.Load(rootPath, context, outputChannel);
-    if (!deviceModelResult) {
-      try {
-        // Initialize Telemetry
-        if (!telemetryWorkerInitialized) {
-          telemetryModule.TelemetryWorker.Initialize(context);
-          telemetryWorkerInitialized = true;
-        }
-        const iotProject = new ioTProjectModule.IoTProject(
-            context, outputChannel, telemetryContext);
-        await iotProject.load(true);
-      } catch (error) {
-        // do nothing as we are not sure whether the project is initialized.
+    try {
+      // Initialize Telemetry
+      if (!telemetryWorkerInitialized) {
+        telemetryModule.TelemetryWorker.Initialize(context);
+        telemetryWorkerInitialized = true;
       }
+
+      const projectFileRootPath =
+          vscode.workspace.workspaceFolders[0].uri.fsPath;
+      projectHostType =
+          IoTWorkbenchProjectBase.GetProjectType(projectFileRootPath);
+      let iotProject;
+      if (projectHostType === ProjectHostType.Container) {
+        iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
+            context, outputChannel, telemetryContext);
+      } else if (projectHostType === ProjectHostType.Workspace) {
+        iotProject = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
+            context, outputChannel, telemetryContext);
+      }
+      if (iotProject !== undefined) {
+        await iotProject.load(true);
+      }
+    } catch (error) {
+      // do nothing as we are not sure whether the project is initialized.
     }
   }
 
-  const deviceOperator = new DeviceOperator();
-  const azureOperator = new AzureOperator();
-
+  const deviceOperator = new DeviceOperator(projectHostType);
+  const azureOperator = new AzureOperator(projectHostType);
   const exampleExplorer = new exampleExplorerModule.ExampleExplorer();
-  const exampleSelectBoardBinder =
-      exampleExplorer.selectBoard.bind(exampleExplorer);
-  const initializeExampleBinder =
-      exampleExplorer.initializeExample.bind(exampleExplorer);
 
   const codeGeneratorBinder =
       codeGenerator.GenerateDeviceCodeStub.bind(codeGenerator);
@@ -413,9 +422,10 @@ export async function activate(context: vscode.ExtensionContext) {
       telemetryWorkerInitialized = true;
     }
 
+    const azureProvisionBinder = azureOperator.Provision.bind(azureOperator);
     telemetryModule.callWithTelemetry(
         EventNames.azureProvisionEvent, outputChannel, true, context,
-        azureOperator.Provision);
+        azureProvisionBinder);
   };
 
   const azureDeployProvider = async () => {
@@ -425,9 +435,10 @@ export async function activate(context: vscode.ExtensionContext) {
       telemetryWorkerInitialized = true;
     }
 
+    const azureDeployBinder = azureOperator.Deploy.bind(azureOperator);
     telemetryModule.callWithTelemetry(
         EventNames.azureDeployEvent, outputChannel, true, context,
-        azureOperator.Deploy);
+        azureDeployBinder);
   };
 
   const deviceCompileProvider = async () => {
@@ -437,9 +448,10 @@ export async function activate(context: vscode.ExtensionContext) {
       telemetryWorkerInitialized = true;
     }
 
+    const deviceCompileBinder = deviceOperator.compile.bind(deviceOperator);
     telemetryModule.callWithTelemetry(
         EventNames.deviceCompileEvent, outputChannel, true, context,
-        deviceOperator.compile);
+        deviceCompileBinder);
   };
 
   const deviceUploadProvider = async () => {
@@ -449,21 +461,10 @@ export async function activate(context: vscode.ExtensionContext) {
       telemetryWorkerInitialized = true;
     }
 
+    const deviceUploadBinder = deviceOperator.upload.bind(deviceOperator);
     telemetryModule.callWithTelemetry(
         EventNames.deviceUploadEvent, outputChannel, true, context,
-        deviceOperator.upload);
-  };
-
-  const devicePackageManager = async () => {
-    // Initialize Telemetry
-    if (!telemetryWorkerInitialized) {
-      telemetryModule.TelemetryWorker.Initialize(context);
-      telemetryWorkerInitialized = true;
-    }
-
-    telemetryModule.callWithTelemetry(
-        EventNames.devicePackageEvent, outputChannel, true, context,
-        deviceOperator.downloadPackage);
+        deviceUploadBinder);
   };
 
   const deviceSettingsConfigProvider = async () => {
@@ -473,9 +474,11 @@ export async function activate(context: vscode.ExtensionContext) {
       telemetryWorkerInitialized = true;
     }
 
+    const deviceConfigBinder =
+        deviceOperator.configDeviceSettings.bind(deviceOperator);
     telemetryModule.callWithTelemetry(
         EventNames.configDeviceSettingsEvent, outputChannel, true, context,
-        deviceOperator.configDeviceSettings);
+        deviceConfigBinder);
   };
 
   const examplesProvider = async () => {
@@ -485,6 +488,8 @@ export async function activate(context: vscode.ExtensionContext) {
       telemetryWorkerInitialized = true;
     }
 
+    const exampleSelectBoardBinder =
+        exampleExplorer.selectBoard.bind(exampleExplorer);
     telemetryModule.callWithTelemetry(
         EventNames.openExamplePageEvent, outputChannel, true, context,
         exampleSelectBoardBinder);
@@ -498,6 +503,8 @@ export async function activate(context: vscode.ExtensionContext) {
       telemetryWorkerInitialized = true;
     }
 
+    const initializeExampleBinder =
+        exampleExplorer.initializeExample.bind(exampleExplorer);
     telemetryModule.callWithTelemetry(
         EventNames.loadExampleEvent, outputChannel, true, context,
         initializeExampleBinder, {}, name, url, boardId);
@@ -523,9 +530,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const azureDeploy = vscode.commands.registerCommand(
       'iotworkbench.azureDeploy', azureDeployProvider);
-
-  const deviceToolchain = vscode.commands.registerCommand(
-      'iotworkbench.installToolchain', devicePackageManager);
 
   const configureDevice = vscode.commands.registerCommand(
       'iotworkbench.configureDevice', deviceSettingsConfigProvider);
@@ -573,7 +577,9 @@ export async function activate(context: vscode.ExtensionContext) {
         const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
 
         if (boardId) {
-          const boardProvider = new BoardProvider(context);
+          const boardListFolderPath = context.asAbsolutePath(path.join(
+              FileNames.resourcesFolderName, FileNames.templatesFolderName));
+          const boardProvider = new BoardProvider(boardListFolderPath);
           const board = boardProvider.find({id: boardId});
 
           if (board && board.helpUrl) {
@@ -594,9 +600,29 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const workbenchPath =
       vscode.commands.registerCommand('iotworkbench.workbench', async () => {
-        const settings = new IoTWorkbenchSettings();
+        if (RemoteExtension.isRemote(context)) {
+          const message =
+              `The project is open in a Docker container now. Open a new window and run this command again.`;
+          vscode.window.showWarningMessage(message);
+          return;
+        }
+        const settings: IoTWorkbenchSettings =
+            await IoTWorkbenchSettings.createAsync();
         await settings.setWorkbenchPath();
         return;
+      });
+
+  const getDisableAutoPopupLandingPage = vscode.commands.registerCommand(
+      'iotworkbench.getDisableAutoPopupLandingPage', () => {
+        return ConfigHandler.get<boolean>('disableAutoPopupLandingPage');
+      });
+
+  const setDisableAutoPopupLandingPage = vscode.commands.registerCommand(
+      'iotworkbench.setDisableAutoPopupLandingPage',
+      async (disableAutoPopupLandingPage: boolean) => {
+        return ConfigHandler.update(
+            'disableAutoPopupLandingPage', disableAutoPopupLandingPage,
+            vscode.ConfigurationTarget.Global);
       });
 
   context.subscriptions.push(projectInit);
@@ -608,11 +634,12 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(deviceUpload);
   context.subscriptions.push(azureProvision);
   context.subscriptions.push(azureDeploy);
-  context.subscriptions.push(deviceToolchain);
   context.subscriptions.push(configureDevice);
   context.subscriptions.push(sendTelemetry);
   context.subscriptions.push(openUri);
   context.subscriptions.push(httpRequest);
+  context.subscriptions.push(getDisableAutoPopupLandingPage);
+  context.subscriptions.push(setDisableAutoPopupLandingPage);
 
   const shownHelpPage = ConfigHandler.get<boolean>(ConfigKey.shownHelpPage);
   if (!shownHelpPage) {
@@ -770,8 +797,15 @@ export async function activate(context: vscode.ExtensionContext) {
             codeGeneratorBinder);
       }));
 
+  // delay to detect usb
   setTimeout(() => {
+    if (RemoteExtension.isRemote(context)) {
+      return;
+    }
     // delay to detect usb
+    const usbDetectorModule =
+        impor('./usbDetector') as typeof import('./usbDetector');
+
     const usbDetector =
         new usbDetectorModule.UsbDetector(context, outputChannel);
     usbDetector.startListening();

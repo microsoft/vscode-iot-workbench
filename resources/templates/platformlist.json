@@ -1,0 +1,14 @@
+{
+    "platforms": [
+        {
+            "name": "Arduino",
+            "id": "arduino",
+            "description" : "Project based on Arduino Platform."
+        },
+        {
+            "name": "Embedded Linux (Preview)",
+            "id": "linux",
+            "description": "Project based on Linux(Yocto/Ubuntu/Debian/...) Platform."
+        }
+    ]
+}

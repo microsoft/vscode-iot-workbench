@@ -6,7 +6,7 @@ import {Guid} from 'guid-typescript';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey} from '../constants';
+import {ConfigKey, ScaffoldType} from '../constants';
 
 import {getExtension} from './Apis';
 import {ComponentInfo, DependencyConfig} from './AzureComponentConfig';
@@ -107,7 +107,8 @@ export class IoTHubDevice implements Component, Provisionable {
     }
   }
 
-  updateConfigSettings(componentInfo?: ComponentInfo): void {}
+  updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo):
+      void {}
 }
 
 async function getProvisionIothubDeviceSelection(

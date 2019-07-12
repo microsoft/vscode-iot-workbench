@@ -10,20 +10,15 @@ import * as vscode from 'vscode';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey} from '../constants';
-
+import {ConfigKey, ScaffoldType} from '../constants';
+import {FileUtility} from '../FileUtility';
 
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 import {DeviceType} from './Interfaces/Device';
-
-const constants = {
-  defaultBoardInfo: 'esp32:esp32:m5stack-core-esp32',
-  defaultBoardConfig:
-      'FlashMode=qio,FlashFreq=80,UploadSpeed=921600,DebugLevel=none'
-};
+import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 
 export class Esp32Device extends ArduinoDeviceBase {
-  private sketchFileContent = '';
+  private templateFiles: TemplateFileInfo[] = [];
   private static _boardId = 'esp32';
   private channel: vscode.OutputChannel;
 
@@ -37,7 +32,7 @@ export class Esp32Device extends ArduinoDeviceBase {
   }
 
   get board() {
-    const boardProvider = new BoardProvider(this.extensionContext);
+    const boardProvider = new BoardProvider(this.boardFolderPath);
     const esp32 = boardProvider.find({id: Esp32Device._boardId});
     return esp32;
   }
@@ -70,12 +65,12 @@ export class Esp32Device extends ArduinoDeviceBase {
 
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      devicePath: string, sketchFileContent?: string) {
+      devicePath: string, templateFiles?: TemplateFileInfo[]) {
     super(context, devicePath, DeviceType.IoT_Button);
     this.channel = channel;
     this.componentId = Guid.create().toString();
-    if (sketchFileContent) {
-      this.sketchFileContent = sketchFileContent;
+    if (templateFiles) {
+      this.templateFiles = templateFiles;
     }
   }
 
@@ -86,7 +81,9 @@ export class Esp32Device extends ArduinoDeviceBase {
   async load(): Promise<boolean> {
     const deviceFolderPath = this.deviceFolder;
 
-    if (!fs.existsSync(deviceFolderPath)) {
+    const loadTimeScaffoldType = ScaffoldType.Workspace;
+    if (!await FileUtility.directoryExists(
+            loadTimeScaffoldType, deviceFolderPath)) {
       throw new Error('Unable to find the device folder inside the project.');
     }
 
@@ -94,31 +91,12 @@ export class Esp32Device extends ArduinoDeviceBase {
       throw new Error('Unable to find the board in the config file.');
     }
 
-    this.generateCppPropertiesFile(this.board);
     return true;
   }
 
   async create(): Promise<boolean> {
-    if (!this.sketchFileContent) {
-      throw new Error('No sketch file found.');
-    }
-    const deviceFolderPath = this.deviceFolder;
-
-    if (!fs.existsSync(deviceFolderPath)) {
-      throw new Error('Unable to find the device folder inside the project.');
-    }
-    if (!this.board) {
-      throw new Error('Unable to find the board in the config file.');
-    }
-
-    this.generateCommonFiles();
-    this.generateCppPropertiesFile(this.board);
-    await this.generateSketchFile(
-        this.sketchFileContent, this.board, constants.defaultBoardInfo,
-        constants.defaultBoardConfig);
-    return true;
+    return this.createCore(this.board, this.templateFiles);
   }
-
 
   async configDeviceSettings(): Promise<boolean> {
     const configSelectionItems: vscode.QuickPickItem[] = [
