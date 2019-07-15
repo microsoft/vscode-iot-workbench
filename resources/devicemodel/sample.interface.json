@@ -1,7 +1,7 @@
 {
-  "@id": "urn:vscsample:{INTERFACENAME}:1",
+  "@id": "urn:vscsample:myinterface:1",
   "@type": "Interface",
-  "displayName": "{INTERFACENAME}",
+  "displayName": "myinterface",
   "contents": [
     {
       "@type": "Property",

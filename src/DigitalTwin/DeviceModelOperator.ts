@@ -139,14 +139,8 @@ export class DeviceModelOperator {
         DigitalTwinFileNames.sampleInterfaceName));
 
     try {
-      const interfaceNamePattern = /{INTERFACENAME}/g;
       const content = fs.readFileSync(interfaceTemplate, 'utf8');
-      const matchItems = interfaceFileName.match(/^(.*?)\.(interface)\.json$/);
-      if (!matchItems || !matchItems[1]) {
-        return false;
-      }
-      const replaceStr = content.replace(interfaceNamePattern, matchItems[1]);
-      fs.writeFileSync(targetInterface, replaceStr);
+      fs.writeFileSync(targetInterface, content);
     } catch (error) {
       throw new Error(
           `Creating ${DigitalTwinConstants.productName} interface failed: ${
@@ -217,15 +211,7 @@ export class DeviceModelOperator {
 
     try {
       const content = fs.readFileSync(capabilityModel, 'utf8');
-      const capabilityModelNamePattern = /{CAPABILITYMODELNAME}/g;
-      const matchItems =
-          capabilityModelFileName.match(/^(.*?)\.(capabilitymodel)\.json$/);
-      if (!matchItems || !matchItems[1]) {
-        return false;
-      }
-      const replaceStr =
-          content.replace(capabilityModelNamePattern, matchItems[1]);
-      fs.writeFileSync(targetCapabilityModel, replaceStr);
+      fs.writeFileSync(targetCapabilityModel, content);
     } catch (error) {
       throw new Error(`Creating ${
           DigitalTwinConstants.productName} capability model failed: ${

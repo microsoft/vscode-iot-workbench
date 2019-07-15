@@ -158,9 +158,18 @@ export class DigitalTwinDiagnostic {
       if (!pattern.test(jsonValue.toFriendlyString())) {
         const startIndex = jsonValue.span.startIndex;
         const endIndex = jsonValue.span.endIndex;
+        let ruleMessage;
+        if (jsonKey === '@id' || jsonKey === 'schema') {
+          ruleMessage =
+              `The id should be a simple URN which is a multipart string sparated by colons. It must start with the string "urn". Each segment may only contain the characters a-z, A-Z, 0-9, and underscore.`;
+        } else if (jsonKey === 'name') {
+          ruleMessage =
+              `The name should only contain the characters a-z, A-Z, 0-9, and underscore.`;
+        } else {
+          ruleMessage = pattern.toString();
+        }
         const message =
-            `Invalid value. Valid value must match this regular expression ${
-                pattern.toString()}`;
+            `Invalid value. Valid value must match this: ${ruleMessage}`;
         const issue: Issue = {startIndex, endIndex, message};
         issues.push(issue);
       }

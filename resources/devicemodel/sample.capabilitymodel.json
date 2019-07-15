@@ -1,7 +1,7 @@
 {
-  "@id": "urn:vscsample:{CAPABILITYMODELNAME}:1",
+  "@id": "urn:vscsample:mycapabilitymodel:1",
   "@type": "CapabilityModel",
-  "displayName": "{CAPABILITYMODELNAME}",
+  "displayName": "mycapabilitymodel",
   "implements": [
     {
       "schema": "urn:azureiot:DeviceManagement:DeviceInformation:1",
