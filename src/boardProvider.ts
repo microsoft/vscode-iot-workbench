@@ -21,11 +21,14 @@ export interface BoardOption {
 }
 
 export class BoardProvider {
-  constructor(private context: vscode.ExtensionContext) {}
+  private boardFolderPath: string;
+  constructor(boardFolderPath: string) {
+    this.boardFolderPath = boardFolderPath;
+  }
 
   get list() {
-    const boardList = this.context.asAbsolutePath(
-        path.join(FileNames.resourcesFolderName, FileNames.boardListFileName));
+    const boardList =
+        path.join(this.boardFolderPath, FileNames.boardListFileName);
     const boardsJson: BoardList = require(boardList);
     return boardsJson.boards;
   }

@@ -57,7 +57,7 @@ Find **MQTT Client** and click **Open Sample** button. A new VS Code window with
 
 ## Test the project
 
-Open [serial monitor](./devkit-get-started.md/#Serial_monitor_usage).
+Open [serial monitor](./devkit-get-started.md/#serial-monitor-usage).
 
 The sample application is running successfully when you see the Serial Monitor displays all the messages sent by the sample sketch.
 

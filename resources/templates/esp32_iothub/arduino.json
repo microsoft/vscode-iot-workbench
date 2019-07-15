@@ -1,0 +1,6 @@
+{
+    "board": "esp32:esp32:m5stack-core-esp32",
+    "sketch": "device.ino",
+    "configuration": "FlashMode=qio,FlashFreq=80,UploadSpeed=921600,DebugLevel=none",
+    "output": "./.build"
+}

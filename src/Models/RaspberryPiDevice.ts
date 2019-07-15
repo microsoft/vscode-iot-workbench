@@ -1,23 +1,34 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as cp from 'child_process';
-import * as fs from 'fs-plus';
 import {Guid} from 'guid-typescript';
-import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import * as sdk from 'vscode-iot-device-cube-sdk';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, FileNames} from '../constants';
+import {ConfigKey, FileNames, OperationType, ScaffoldType} from '../constants';
+import {FileUtility} from '../FileUtility';
+import {TelemetryContext} from '../telemetry';
+import {askAndOpenInRemote, generateTemplateFile, runCommand} from '../utils';
 
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
-import {SSH} from './SSH';
+import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
+import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
+import {RemoteExtension} from './RemoteExtension';
 
 const constants = {
-  defaultSketchFileName: 'app.js'
+  configFile: 'config.json',
 };
+
+interface Config {
+  applicationName: string;
+  buildCommand: string;
+  buildTarget: string;
+}
+
+
 
 class RaspberryPiUploadConfig {
   static host = 'raspberrypi';
@@ -35,24 +46,31 @@ export class RaspberryPiDevice implements Device {
   }
   private deviceType: DeviceType;
   private componentType: ComponentType;
-  private deviceFolder: string;
-  private extensionContext: vscode.ExtensionContext;
+  private projectFolder: string;
   private channel: vscode.OutputChannel;
   private static _boardId = 'raspberrypi';
+  private extensionContext: vscode.ExtensionContext;
+  private telemetryContext: TelemetryContext;
+
+  private outputPath: string;
 
   static get boardId() {
     return RaspberryPiDevice._boardId;
   }
 
   constructor(
-      context: vscode.ExtensionContext, devicePath: string,
-      channel: vscode.OutputChannel, private sketchContent = '') {
+      context: vscode.ExtensionContext, projectPath: string,
+      channel: vscode.OutputChannel, projectTemplateType: ProjectTemplateType,
+      telemetryContext: TelemetryContext,
+      private templateFilesInfo: TemplateFileInfo[] = []) {
     this.deviceType = DeviceType.Raspberry_Pi;
     this.componentType = ComponentType.Device;
-    this.deviceFolder = devicePath;
-    this.extensionContext = context;
     this.channel = channel;
     this.componentId = Guid.create().toString();
+    this.extensionContext = context;
+    this.projectFolder = projectPath;
+    this.outputPath = path.join(this.projectFolder, FileNames.outputPathName);
+    this.telemetryContext = telemetryContext;
   }
 
   name = 'RaspberryPi';
@@ -70,175 +88,190 @@ export class RaspberryPiDevice implements Device {
   }
 
   async load(): Promise<boolean> {
-    const deviceFolderPath = this.deviceFolder;
-
-    if (!fs.existsSync(deviceFolderPath)) {
-      throw new Error('Unable to find the device folder inside the project.');
+    // ScaffoldType is Workspace when loading a project
+    const scaffoldType = ScaffoldType.Workspace;
+    if (!await FileUtility.directoryExists(scaffoldType, this.projectFolder)) {
+      throw new Error('Unable to find the project folder.');
     }
 
-    if (!fs.existsSync(path.join(deviceFolderPath, 'node_modules'))) {
-      cp.exec('npm install', {cwd: deviceFolderPath});
-    }
+    await IoTWorkbenchProjectBase.generateIotWorkbenchProjectFile(
+        scaffoldType, this.projectFolder);
+
     return true;
   }
 
   async create(): Promise<boolean> {
-    const deviceFolderPath = this.deviceFolder;
-
-    if (!fs.existsSync(deviceFolderPath)) {
-      throw new Error('Unable to find the device folder inside the project.');
+    // ScaffoldType is local when creating a project
+    const scaffoldType = ScaffoldType.Local;
+    if (!await FileUtility.directoryExists(scaffoldType, this.projectFolder)) {
+      throw new Error('Unable to find the project folder.');
     }
 
-    try {
-      const iotworkbenchprojectFilePath =
-          path.join(deviceFolderPath, FileNames.iotworkbenchprojectFileName);
-      fs.writeFileSync(iotworkbenchprojectFilePath, ' ');
-    } catch (error) {
-      throw new Error(
-          `Device: create iotworkbenchproject file failed: ${error.message}`);
+    await IoTWorkbenchProjectBase.generateIotWorkbenchProjectFile(
+        scaffoldType, this.projectFolder);
+    await this.generateTemplateFiles(scaffoldType, this.templateFilesInfo);
+
+    return true;
+  }
+
+  async generateTemplateFiles(
+      type: ScaffoldType,
+      templateFilesInfo: TemplateFileInfo[]): Promise<boolean> {
+    if (!templateFilesInfo) {
+      throw new Error('No template file provided.');
     }
 
-    const vscodeFolderPath =
-        path.join(deviceFolderPath, FileNames.vscodeSettingsFolderName);
-    if (!fs.existsSync(vscodeFolderPath)) {
-      fs.mkdirSync(vscodeFolderPath);
+    // Cannot use forEach here since it's async
+    for (const fileInfo of templateFilesInfo) {
+      await generateTemplateFile(this.projectFolder, type, fileInfo);
     }
-
-    const option: vscode.InputBoxOptions = {
-      value: constants.defaultSketchFileName,
-      prompt: `Please input device sketch file name here.`,
-      ignoreFocusOut: true,
-      validateInput: (sketchFileName: string) => {
-        if (!sketchFileName ||
-            /^([a-z_]|[a-z_][-a-z0-9_.]*[a-z0-9_])(\.js)?$/i.test(
-                sketchFileName)) {
-          return '';
-        }
-        return 'Sketch file name can only contain alphanumeric and cannot start with number.';
-      }
-    };
-
-    let sketchFileName = await vscode.window.showInputBox(option);
-
-    if (sketchFileName === undefined) {
-      return false;
-    } else if (!sketchFileName) {
-      sketchFileName = constants.defaultSketchFileName;
-    } else {
-      sketchFileName = sketchFileName.trim();
-      if (!/\.js$/i.test(sketchFileName)) {
-        sketchFileName += '.js';
-      }
-    }
-
-    const newSketchFilePath = path.join(deviceFolderPath, sketchFileName);
-
-    try {
-      fs.writeFileSync(newSketchFilePath, this.sketchContent);
-    } catch (error) {
-      throw new Error(`Create ${sketchFileName} failed: ${error.message}`);
-    }
-
-    const packageTemplateFilePath =
-        this.extensionContext.asAbsolutePath(path.join(
-            FileNames.resourcesFolderName, RaspberryPiDevice.boardId,
-            'package.json'));
-    const newPackageFilePath = path.join(deviceFolderPath, 'package.json');
-
-    try {
-      const packageObj = require(packageTemplateFilePath);
-      packageObj.main = sketchFileName;
-      fs.writeFileSync(newPackageFilePath, JSON.stringify(packageObj, null, 2));
-    } catch (error) {
-      throw new Error(`Create package.json failed: ${error.message}`);
-    }
-
-    const settingsJSONFilePath =
-        path.join(vscodeFolderPath, FileNames.settingsJsonFileName);
-    const settingsJSONObj = {'files.exclude': {'.iotworkbenchproject': true}};
-
-    try {
-      fs.writeFileSync(
-          settingsJSONFilePath, JSON.stringify(settingsJSONObj, null, 4));
-    } catch (error) {
-      throw new Error(`Device: create config file failed: ${error.message}`);
-    }
-
-    cp.exec('npm install', {cwd: deviceFolderPath});
-
     return true;
   }
 
   async compile(): Promise<boolean> {
-    await vscode.window.showInformationMessage(
-        'Compiling device code for Raspberry Pi is not supported');
+    const isRemote = RemoteExtension.isRemote(this.extensionContext);
+    if (!isRemote) {
+      const res = await askAndOpenInRemote(
+          OperationType.Compile, this.channel, this.telemetryContext);
+      if (!res) {
+        return false;
+      }
+    }
+
+    if (!await FileUtility.directoryExists(
+            ScaffoldType.Workspace, this.outputPath)) {
+      try {
+        await FileUtility.mkdirRecursively(
+            ScaffoldType.Workspace, this.outputPath);
+      } catch (error) {
+        throw new Error(`Failed to create output path ${
+            this.outputPath}. Error message: ${error.message}`);
+      }
+    }
+
+    // load project config
+    const configPath = path.join(
+        this.projectFolder, FileNames.vscodeSettingsFolderName,
+        constants.configFile);
+    if (!await FileUtility.fileExists(ScaffoldType.Workspace, configPath)) {
+      const message = `Config file does not exist. Please check your settings.`;
+      await vscode.window.showWarningMessage(message);
+      return false;
+    }
+
+    const fileContent =
+        await FileUtility.readFile(ScaffoldType.Workspace, configPath);
+    const config: Config = JSON.parse(fileContent as string);
+
+    this.channel.show();
+    this.channel.appendLine('Compiling Raspberry Pi device code...');
+    try {
+      await runCommand(
+          config.buildCommand, [], this.projectFolder, this.channel);
+    } catch (error) {
+      throw new Error(
+          `Failed to compile Raspberry Pi device code. Error message: ${
+              error.message}`);
+    }
+
+    // If successfully compiled, copy compiled files to user workspace
+    if (await FileUtility.directoryExists(
+            ScaffoldType.Workspace, config.buildTarget)) {
+      const getOutputFileCmd =
+          `cp -rf ${config.buildTarget} ${this.outputPath}`;
+      try {
+        await runCommand(getOutputFileCmd, [], '', this.channel);
+      } catch (error) {
+        throw new Error(`Failed to copy compiled files to output folder ${
+            this.outputPath}. Error message: ${error.message}`);
+      }
+    } else {
+      this.channel.show();
+      this.channel.appendLine(
+          'Bin files not found. Compilation may have failed.');
+      return false;
+    }
+
+    const message =
+        `Successfully compile Raspberry Pi device code. \rNow you can use the command 'Azure IoT Device Workbench: Upload Device Code' to upload your compiled executable file to your target device.`;
+    this.channel.show();
+    this.channel.appendLine(message);
+    vscode.window.showInformationMessage(message);
+
     return true;
   }
 
   async upload(): Promise<boolean> {
-    if (!fs.existsSync(path.join(this.deviceFolder, 'config.json'))) {
-      const option = await vscode.window.showInformationMessage(
-          'No config file found. Have you configured device connection string?',
-          'Upload anyway', 'Cancel');
-      if (option === 'Cancel') {
-        return true;
-      }
-    }
-    if (!RaspberryPiUploadConfig.updated) {
-      const res = await this.configSSH();
+    const isRemote = RemoteExtension.isRemote(this.extensionContext);
+    if (!isRemote) {
+      const res = await askAndOpenInRemote(
+          OperationType.Upload, this.channel, this.telemetryContext);
       if (!res) {
-        vscode.window.showWarningMessage('Configure SSH cancelled.');
-        return true;
+        return false;
       }
     }
 
-    const ssh = new SSH(this.channel);
+    try {
+      const binFilePath =
+          path.join(this.outputPath, 'iot_application/azure_iot_app');
 
-    const sshConnected = await ssh.connect(
-        RaspberryPiUploadConfig.host, RaspberryPiUploadConfig.port,
-        RaspberryPiUploadConfig.user, RaspberryPiUploadConfig.password);
-    let sshUploaded: boolean;
-    if (sshConnected) {
-      sshUploaded = await ssh.upload(
-          this.deviceFolder, RaspberryPiUploadConfig.projectPath as string);
-    } else {
-      await ssh.close();
-      this.channel.appendLine('SSH connection failed.');
-      return false;
+      if (!await FileUtility.fileExists(ScaffoldType.Workspace, binFilePath)) {
+        const message =
+            `Binary file does not exist. Please compile device code first.`;
+        await vscode.window.showWarningMessage(message);
+        return false;
+      }
+
+      if (!RaspberryPiUploadConfig.updated) {
+        const res = await this.configSSH();
+        if (!res) {
+          vscode.window.showWarningMessage('Configure SSH cancelled.');
+          return true;
+        }
+      }
+
+      const ssh = new sdk.SSH();
+      await ssh.open(
+          RaspberryPiUploadConfig.host, RaspberryPiUploadConfig.port,
+          RaspberryPiUploadConfig.user, RaspberryPiUploadConfig.password);
+      try {
+        await ssh.uploadFile(binFilePath, RaspberryPiUploadConfig.projectPath);
+        const enableExecPriorityCommand =
+            `cd ${RaspberryPiUploadConfig.projectPath} && chmod -R 755 .\/`;
+        this.channel.show();
+        const command = ssh.spawn(enableExecPriorityCommand);
+        command.on('data', async (data) => {});
+        command.on('close', async () => {
+          this.channel.appendLine('DONE');
+          await ssh.close();
+        });
+        command.on('error', this.channel.appendLine);
+      } catch (error) {
+        throw new Error(
+            `Deploy binary file to device ${RaspberryPiUploadConfig.user}@${
+                RaspberryPiUploadConfig.host} failed. ${error.message}`);
+      }
+
+      // await ssh.close();
+
+      const message = `Successfully deploy bin file to Raspberry Pi board.`;
+      this.channel.show();
+      this.channel.appendLine(message);
+      await vscode.window.showInformationMessage(message);
+    } catch (error) {
+      throw new Error(`Upload device code failed. ${error.message}`);
     }
 
-    let sshNpmInstalled: boolean;
-    if (sshUploaded) {
-      sshNpmInstalled = await ssh.shell(
-          `cd ${RaspberryPiUploadConfig.projectPath} && npm install`);
-    } else {
-      await ssh.close();
-      this.channel.appendLine('SFTP upload failed.');
-      return false;
-    }
-
-    await ssh.close();
-    if (this.channel) {
-      this.channel.appendLine('Uploaded project to Raspberry Pi.');
-    }
-
-    vscode.window.showInformationMessage('Uploaded project to Raspberry Pi.');
     return true;
   }
 
   async configDeviceSettings(): Promise<boolean> {
-    const configSelectionItems: vscode.QuickPickItem[] = [
-      {
-        label: 'Config Raspberry Pi SSH',
-        description: 'Config Raspberry Pi SSH',
-        detail: 'Config SSH'
-      },
-      {
-        label: 'Config connection of IoT Hub Device',
-        description: 'Config connection of IoT Hub Device',
-        detail: 'Config IoT Hub Device'
-      }
-    ];
+    const configSelectionItems: vscode.QuickPickItem[] = [{
+      label: 'Configure SSH to target device',
+      description: '',
+      detail:
+          'Configure SSH (IP, username and password) connection to target device for uploading compiled code'
+    }];
 
     const configSelection =
         await vscode.window.showQuickPick(configSelectionItems, {
@@ -252,7 +285,7 @@ export class RaspberryPiDevice implements Device {
       return false;
     }
 
-    if (configSelection.detail === 'Config SSH') {
+    if (configSelection.label === 'Configure SSH to target device') {
       try {
         const res = await this.configSSH();
         if (res) {
@@ -274,16 +307,87 @@ export class RaspberryPiDevice implements Device {
     }
   }
 
+  async _autoDiscoverDeviceIp(): Promise<vscode.QuickPickItem[]> {
+    const sshDevicePickItems: vscode.QuickPickItem[] = [];
+    const deviceInfos = await sdk.SSH.discover();
+    deviceInfos.forEach((deviceInfo) => {
+      sshDevicePickItems.push({
+        label: deviceInfo.ip as string,
+        description: deviceInfo.host || '<Unknown>'
+      });
+    });
+
+    sshDevicePickItems.push(
+        {
+          label: '$(sync) Discover again',
+          detail: 'Auto discover SSH enabled device in LAN'
+        },
+        {
+          label: '$(gear) Manual setup',
+          detail: 'Setup device SSH configuration manually'
+        });
+
+    return sshDevicePickItems;
+  }
+
   async configSSH(): Promise<boolean> {
     // Raspberry Pi host
-    const raspiHostOption: vscode.InputBoxOptions = {
-      value: RaspberryPiUploadConfig.host,
-      prompt: `Please input Raspberry Pi ip or hostname here.`,
-      ignoreFocusOut: true
-    };
-    let raspiHost = await vscode.window.showInputBox(raspiHostOption);
-    if (raspiHost === undefined) {
+    const sshDiscoverOrInputItems: vscode.QuickPickItem[] = [
+      {
+        label: '$(search) Auto discover',
+        detail: 'Auto discover SSH enabled device in LAN'
+      },
+      {
+        label: '$(gear) Manual setup',
+        detail: 'Setup device SSH configuration manually'
+      }
+    ];
+    const sshDiscoverOrInputChoice =
+        await vscode.window.showQuickPick(sshDiscoverOrInputItems, {
+          ignoreFocusOut: true,
+          matchOnDescription: true,
+          matchOnDetail: true,
+          placeHolder: 'Select an option',
+        });
+    if (!sshDiscoverOrInputChoice) {
       return false;
+    }
+
+    let raspiHost: string|undefined;
+
+    if (sshDiscoverOrInputChoice.label === '$(search) Auto discover') {
+      let selectDeviceChoice: vscode.QuickPickItem|undefined;
+      do {
+        const selectDeviceItems = this._autoDiscoverDeviceIp();
+        selectDeviceChoice =
+            await vscode.window.showQuickPick(selectDeviceItems, {
+              ignoreFocusOut: true,
+              matchOnDescription: true,
+              matchOnDetail: true,
+              placeHolder: 'Select a device',
+            });
+      } while (selectDeviceChoice &&
+               selectDeviceChoice.label === '$(sync) Discover again');
+
+      if (!selectDeviceChoice) {
+        return false;
+      }
+
+      if (selectDeviceChoice.label !== '$(gear) Manual setup') {
+        raspiHost = selectDeviceChoice.label;
+      }
+    }
+
+    if (!raspiHost) {
+      const raspiHostOption: vscode.InputBoxOptions = {
+        value: RaspberryPiUploadConfig.host,
+        prompt: `Please input Raspberry Pi device ip or hostname here.`,
+        ignoreFocusOut: true
+      };
+      raspiHost = await vscode.window.showInputBox(raspiHostOption);
+      if (raspiHost === undefined) {
+        return false;
+      }
     }
     raspiHost = raspiHost || RaspberryPiUploadConfig.host;
 
@@ -348,101 +452,37 @@ export class RaspberryPiDevice implements Device {
 
   async configHub(): Promise<boolean> {
     try {
-      const deviceFolderPath = this.deviceFolder;
+      const projectFolderPath = this.projectFolder;
 
-      if (!fs.existsSync(deviceFolderPath)) {
+      if (!FileUtility.directoryExists(
+              ScaffoldType.Workspace, projectFolderPath)) {
         throw new Error('Unable to find the device folder inside the project.');
       }
 
-      // Get IoT Hub device connection string from config
-      let deviceConnectionString =
-          ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
-
-      let hostName = '';
-      let deviceId = '';
-      if (deviceConnectionString) {
-        const hostnameMatches =
-            deviceConnectionString.match(/HostName=(.*?)(;|$)/);
-        if (hostnameMatches) {
-          hostName = hostnameMatches[0];
-        }
-
-        const deviceIDMatches =
-            deviceConnectionString.match(/DeviceId=(.*?)(;|$)/);
-        if (deviceIDMatches) {
-          deviceId = deviceIDMatches[0];
-        }
-      }
-
-      let deviceConnectionStringSelection: vscode.QuickPickItem[] = [];
-      if (deviceId && hostName) {
-        deviceConnectionStringSelection = [
-          {
-            label: 'Select IoT Hub Device Connection String',
-            description: '',
-            detail: `Device Information: ${hostName} ${deviceId}`
-          },
-          {
-            label: 'Input IoT Hub Device Connection String',
-            description: '',
-            detail: 'Input another...'
-          }
-        ];
-      } else {
-        deviceConnectionStringSelection = [{
-          label: 'Input IoT Hub Device Connection String',
-          description: '',
-          detail: 'Input another...'
-        }];
-      }
-
+      const deviceConnectionStringSelection: vscode.QuickPickItem[] = [{
+        label: 'Copy device connection string',
+        description: 'Copy device connection string',
+        detail: 'Copy'
+      }];
       const selection =
           await vscode.window.showQuickPick(deviceConnectionStringSelection, {
             ignoreFocusOut: true,
-            placeHolder: 'Choose IoT Hub Device Connection String'
+            placeHolder: 'Copy IoT Hub Device Connection String'
           });
 
       if (!selection) {
         return false;
       }
 
-      if (selection.detail === 'Input another...') {
-        const option: vscode.InputBoxOptions = {
-          value:
-              'HostName=<Host Name>;DeviceId=<Device Name>;SharedAccessKey=<Device Key>',
-          prompt: `Please input device connection string here.`,
-          ignoreFocusOut: true
-        };
-
-        deviceConnectionString = await vscode.window.showInputBox(option);
-        if (!deviceConnectionString) {
-          return false;
-        }
-        if ((deviceConnectionString.indexOf('HostName') === -1) ||
-            (deviceConnectionString.indexOf('DeviceId') === -1) ||
-            (deviceConnectionString.indexOf('SharedAccessKey') === -1)) {
-          throw new Error(
-              'The format of the IoT Hub Device connection string is invalid. Please provide a valid Device connection string.');
-        }
-      }
-
+      const deviceConnectionString =
+          ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
       if (!deviceConnectionString) {
-        return false;
+        throw new Error(
+            'Unable to get the device connection string, please invoke the command of Azure Provision first.');
       }
-
-      console.log(deviceConnectionString);
-
-      // Set selected connection string to device
-      try {
-        const configFilePath = path.join(deviceFolderPath, 'config.json');
-        const config = {connectionString: deviceConnectionString};
-        fs.writeFileSync(configFilePath, JSON.stringify(config, null, 2));
-      } catch (error) {
-        throw new Error(`Device: create config file failed: ${error.message}`);
-      }
-
+      await sdk.Clipboard.copy(deviceConnectionString);
       vscode.window.showInformationMessage(
-          'Configure Device connection string successfully.');
+          'Device connection string has been copied.');
       return true;
     } catch (error) {
       throw error;

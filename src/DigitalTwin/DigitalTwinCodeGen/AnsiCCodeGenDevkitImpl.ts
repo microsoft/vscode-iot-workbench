@@ -4,8 +4,9 @@ import * as vscode from 'vscode';
 
 import {FileNames} from '../../constants';
 import {AZ3166Device} from '../../Models/AZ3166Device';
-import {ProjectTemplateType} from '../../Models/Interfaces/ProjectTemplate';
-import {IoTProject} from '../../Models/IoTProject';
+import {ProjectTemplateType, TemplateFileInfo} from '../../Models/Interfaces/ProjectTemplate';
+
+import {IoTWorkspaceProject} from '../../Models/IoTWorkspaceProject';
 import {TelemetryContext} from '../../telemetry';
 import {generateFoldersForIoTWorkbench} from '../Utilities';
 
@@ -44,8 +45,8 @@ export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
     }
 
     // TODO: update the telemetry
-    const project: IoTProject =
-        new IoTProject(this.context, this.channel, this.telemetryContext);
+    const project: IoTWorkspaceProject = new IoTWorkspaceProject(
+        this.context, this.channel, this.telemetryContext);
 
     // Generate device code for IoT DevKit according to the provision option.
     let sketchFileName;
@@ -67,9 +68,17 @@ export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
     const pathPattern = /{PATHNAME}/g;
     const replaceStr = originalContent.replace(pathPattern, fileCoreName);
 
+    const templateFilesInfo: TemplateFileInfo[] = [];
+    templateFilesInfo.push({
+      fileName: sketchFileName,
+      sourcePath: '',
+      targetPath: '.',
+      fileContent: replaceStr
+    });
+
     await project.create(
-        targetPath, replaceStr, ProjectTemplateType.Basic, AZ3166Device.boardId,
-        true);
+        targetPath, templateFilesInfo, ProjectTemplateType.Basic,
+        AZ3166Device.boardId, true);
     return true;
   }
 }
