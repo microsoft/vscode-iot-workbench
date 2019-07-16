@@ -271,12 +271,15 @@ export class CodeGenerateCore {
 
     fs.copyFileSync(
         selectedFilePath, path.join(folderPath, capbilityModelFileName));
+    channel.appendLine(
+      `${DigitalTwinConstants.dtPrefix} Copy ${capbilityModelFileName} into ${folderPath} completed.`);
 
     // Parse the cabability model
     const capabilityModel =
         JSON.parse(fs.readFileSync(selectedFilePath, 'utf8'));
 
     const implementedInterfaces = capabilityModel['implements'];
+
     for (const interfaceItem of implementedInterfaces) {
       const schema = interfaceItem.schema;
       if (typeof schema === 'string') {
@@ -335,26 +338,26 @@ export class CodeGenerateCore {
       return false;
     }
 
-    const fileName = path.basename(capabilityModelFilePath);
-    const matchItems = fileName.match(/^(.*?)\.(capabilitymodel)\.json$/);
+    // Pasre capabilityModel name from id
+    const capabilityModel = JSON.parse(fs.readFileSync(capabilityModelFilePath, 'utf8'));
 
-    if (!matchItems || !matchItems[1]) {
-      return false;
-    }
-    const fileCoreName = matchItems[1];
+    const capabilityModelId = capabilityModel['@id'];
+    const capabilityModelIdStrings = capabilityModelId.split(':');
+    const capabilityModelName =
+        capabilityModelIdStrings[capabilityModelIdStrings.length - 2];
 
     await vscode.window.withProgress(
         {
           location: vscode.ProgressLocation.Notification,
-          title: `Generate code stub for ${fileCoreName} ...`
+          title: `Generate code stub for ${capabilityModelName} ...`
         },
         async () => {
           const result = await codeGenerator.GenerateCode(
-              targetFolder, capabilityModelFilePath, fileCoreName,
+              targetFolder, capabilityModelFilePath, capabilityModelName,
               path.join(targetFolder, codeGenExecutionInfo.schemaFolder));
           if (result) {
             vscode.window.showInformationMessage(
-                `Generate code stub for ${fileName} completed`);
+                `Generate code stub for ${capabilityModelName} completed`);
           }
         });
     return true;

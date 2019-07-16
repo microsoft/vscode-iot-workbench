@@ -1,4 +1,4 @@
-#include "src/{PATHNAME}/application.h"
+#include "src/{PATHNAME}/pnp_device.h"
 #include "IoT_DevKit_HW.h"
 #include "AZ3166WiFi.h"
 #include "azureiotcerts.h"
@@ -26,7 +26,7 @@ void setup()
     }
 
     // Initialize device model application
-    if (application_initialize(getIoTHubConnectionString(), certificates) != 0)
+    if (pnp_device_initialize(getIoTHubConnectionString(), certificates) != 0)
     {
         return;
     }
@@ -40,7 +40,7 @@ void loop()
     // put your main code here, to run repeatedly:
     if (networkConnected)
     {
-        application_run();
+        pnp_device_run();
     }
 
     invokeDevKitPeripheral();

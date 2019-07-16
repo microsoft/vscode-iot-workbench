@@ -7,7 +7,7 @@
 #include "azureiotcerts.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/xlogging.h"
-#include "src/{PATHNAME}/application.h"
+#include "src/{PATHNAME}/pnp_device.h"
 
 // IoT Central requires DPS.  Include required header and constants
 #include "azure_prov_client/iothub_security_factory.h"
@@ -239,7 +239,7 @@ void loop()
     // put your main code here, to run repeatedly:
     if (networkConnected && digitalTwinInitialized)
     {
-        application_run();
+        pnp_device_run();
     }
 
     invokeDevKitPeripheral();
