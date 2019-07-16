@@ -15,8 +15,7 @@
 #include "azure_prov_client/prov_transport_mqtt_client.h"
 #include "azure_prov_client/prov_security_factory.h"
 
-static bool networkConnected;
-static bool digitalTwinInitialized;
+static bool iotHubConnected = false;
 
 // State of DPS registration process.  We cannot proceed with DPS until we get into the state APP_DPS_REGISTRATION_SUCCEEDED.
 typedef enum APP_DPS_REGISTRATION_STATUS_TAG
@@ -180,23 +179,20 @@ void setup()
     int ret = initIoTDevKit(1);
     if (ret != 0)
     {
-        networkConnected = false;
-        Screen.print(1, "Failed: %d", ret);
+        Screen.print(1, "Failed to \r\ninitialize the\r\nIoT DevKit.");
         return;
     }
     else
     {
-        networkConnected = true;
         IPAddress ip = WiFi.localIP();
         snprintf(buff, sizeof(buff), "%s\r\nWiFi Connected\r\n%s", WiFi.SSID(), ip.get_address());
         Screen.print(1, buff);
     }
 
     // Initialize device model application
-    digitalTwinInitialized = registerDevice(false);
-    if (digitalTwinInitialized)
+    if (registerDevice(false))
     {
-        Screen.print(1, "Connecting\r\n IoT Hub...\r\n ");
+        Screen.print(1, "Connecting\r\n IoT Hub...");
 
         buff[0] = 0;
         if (secureDeviceTypeForProvisioning == SECURE_DEVICE_TYPE_SYMMETRIC_KEY)
@@ -219,25 +215,27 @@ void setup()
         {
             digitalWrite(LED_AZURE, 0);
             Screen.print(1, "Init failed!\r\nCheck log for\r\n more detail.");
-            digitalTwinInitialized = false;
+            iotHubConnected = false;
         }
         else
         {
             digitalWrite(LED_AZURE, 1);
-            Screen.print(1, "PnP Enabled\r\nRunning...\r\n ");
+            Screen.print(1, "PnP Enabled\r\nRunning...");
+            iotHubConnected = true;
         }
     }
     else
     {
         digitalWrite(LED_AZURE, 0);
         Screen.print(1, "Init failed!\r\nCheck log for\r\n more detail.");
+        iotHubConnected = false;
     }
 }
 
 void loop()
 {
     // put your main code here, to run repeatedly:
-    if (networkConnected && digitalTwinInitialized)
+    if (iotHubConnected)
     {
         pnp_device_run();
     }

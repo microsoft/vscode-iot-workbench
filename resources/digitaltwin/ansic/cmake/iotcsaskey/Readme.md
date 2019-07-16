@@ -16,9 +16,9 @@ For more details about setting up development environment for compiling the C De
 
 1. Install [CMake](https://cmake.org/). Make sure it is in your PATH by typing `cmake -version` from a command prompt. CMake will be used to create Visual Studio projects to build libraries and samples.
 
-1. Clone the preview release of SDK to your local machine using the tag name `private-preview`
+1. Clone the preview release of SDK to your local machine using the tag name `public-preview-utopia`
     ```bash
-    git clone https://github.com/Azure/azure-iot-sdk-c-pnp --recursive -b private-preview
+    git clone https://github.com/Azure/azure-iot-sdk-c-pnp --recursive -b public-preview-utopia
     ```
     > The `--recursive` argument instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
 
@@ -56,7 +56,7 @@ For more details about setting up development environment for compiling the C De
 
 1. In the **cmake** folder just created, run CMake to build the entire folder of Device SDK including the generated code.
     ```bash
-    cmake .. -Duse_prov_client=ON -Dhsm_type_symm_key:BOOL=ON
+    cmake .. -Duse_prov_client=ON -Dhsm_type_symm_key:BOOL=ON -Dskip_samples:BOOL=ON
     cmake --build . -- /m /p:Configuration=Release
     ```
 
@@ -79,9 +79,9 @@ For more details about setting up development environment for compiling the C De
     gcc --version
     ```
 
-1. Clone the preview release of SDK to your local machine using the tag name `private-preview`
+1. Clone the preview release of SDK to your local machine using the tag name `public-preview-utopia`
     ```bash
-    git clone https://github.com/Azure/azure-iot-sdk-c-pnp --recursive -b private-preview
+    git clone https://github.com/Azure/azure-iot-sdk-c-pnp --recursive -b public-preview-utopia
     ```
     > The `--recursive` argument instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
 
@@ -118,7 +118,7 @@ For more details about setting up development environment for compiling the C De
 
 1. In the **cmake** folder just created, run CMake to build the entire folder of Device SDK including the generated code.
     ```bash
-    cmake ..
+    cmake .. -Duse_prov_client=ON -Dhsm_type_symm_key:BOOL=ON -Dskip_samples:BOOL=ON
     cmake --build .
     ```
 

@@ -12,7 +12,7 @@
 #include "azure_prov_client/prov_transport_mqtt_client.h"
 #include "azure_prov_client/prov_security_factory.h"
 
-static bool digitalTwinInitialized;
+static bool iotHubConnected = false;
 
 // State of DPS registration process.  We cannot proceed with DPS until we get into the state APP_DPS_REGISTRATION_SUCCEEDED.
 typedef enum APP_DPS_REGISTRATION_STATUS_TAG
@@ -171,10 +171,10 @@ static bool registerDevice(bool traceOn)
 static void setup()
 {
     char buff[IOT_HUB_CONN_STR_MAX_LEN];
+    iotHubConnected = false;
 
     // Initialize device model application
-    digitalTwinInitialized = registerDevice(false);
-    if (digitalTwinInitialized)
+    if (registerDevice(false))
     {
         buff[0] = 0;
         if (secureDeviceTypeForProvisioning == SECURE_DEVICE_TYPE_SYMMETRIC_KEY)
@@ -193,9 +193,10 @@ static void setup()
                      dpsDeviceId);
         }
         
-        if (pnp_device_initialize(buff, certificates) != 0)
+        if (pnp_device_initialize(buff, certificates) == 0)
         {
-            digitalTwinInitialized = false;
+            iotHubConnected = true;
+            LogInfo("PnP enabled, running...");
         }
     }
 }
@@ -205,9 +206,8 @@ int main()
 {
     setup();
     
-    if (initializeResult)
+    if (iotHubConnected)
     {
-        LogInfo("PnP enabled, running...");
         while (true)
         {
             pnp_device_run();

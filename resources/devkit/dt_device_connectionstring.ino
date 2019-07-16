@@ -3,7 +3,7 @@
 #include "AZ3166WiFi.h"
 #include "azureiotcerts.h"
 
-static bool networkConnected;
+static bool iotHubConnected = false;
 
 void setup()
 {
@@ -13,13 +13,11 @@ void setup()
     int ret = initIoTDevKit(1);
     if (ret != 0)
     {
-        networkConnected = false;
-        Screen.print(1, "Failed: %d", ret);
+        Screen.print(1, "Failed to \r\ninitialize the\r\nIoT DevKit.");
         return;
     }
     else
     {
-        networkConnected = true;
         IPAddress ip = WiFi.localIP();
         snprintf(buff, sizeof(buff), "%s\r\nWiFi Connected\r\n%s", WiFi.SSID(), ip.get_address());
         Screen.print(1, buff);
@@ -28,17 +26,22 @@ void setup()
     // Initialize device model application
     if (pnp_device_initialize(getIoTHubConnectionString(), certificates) != 0)
     {
-        return;
+        digitalWrite(LED_AZURE, 0);
+        Screen.print(1, "Connect failed\r\nCheck log for \r\n  more info");
+        iotHubConnected = false;
     }
-    digitalWrite(LED_AZURE, 1);
-    snprintf(buff, sizeof(buff), "%s\r\nPnP enabled\r\nRunning...\r\n", getDevKitName());
-    Screen.print(1, buff);
+    else
+    {
+        digitalWrite(LED_AZURE, 1);
+        Screen.print(1, "PnP enabled\r\nRunning...");
+        iotHubConnected = true;
+    }
 }
 
 void loop()
 {
     // put your main code here, to run repeatedly:
-    if (networkConnected)
+    if (iotHubConnected)
     {
         pnp_device_run();
     }
