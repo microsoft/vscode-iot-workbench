@@ -26,10 +26,10 @@ export class AnsiCCodeGenGeneralImpl extends AnsiCCodeGeneratorBase {
 
   async GenerateCode(
       targetPath: string, filePath: string, capabilityModelName: string,
-      connectionString: string): Promise<boolean> {
+      interfaceDir: string): Promise<boolean> {
     // Invoke DigitalTwinCodeGen toolset to generate the code
-    const retvalue = await this.GenerateAnsiCCodeCore(
-        targetPath, filePath, connectionString);
+    const retvalue =
+        await this.GenerateAnsiCCodeCore(targetPath, filePath, interfaceDir);
 
     let folderName;
     switch (this.provisionType) {

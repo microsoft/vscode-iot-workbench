@@ -13,10 +13,10 @@ export class AnciCCodeGenBoilerplateImpl extends AnsiCCodeGeneratorBase {
 
   async GenerateCode(
       targetPath: string, filePath: string, capabilityModelName: string,
-      connectionString: string): Promise<boolean> {
+      interfaceDir: string): Promise<boolean> {
     // Invoke toolset to generate the code
-    const retvalue = await this.GenerateAnsiCCodeCore(
-        targetPath, filePath, connectionString);
+    const retvalue =
+        await this.GenerateAnsiCCodeCore(targetPath, filePath, interfaceDir);
 
     if (retvalue) {
       await vscode.commands.executeCommand(

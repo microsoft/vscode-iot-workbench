@@ -29,7 +29,7 @@ export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
 
   async GenerateCode(
       targetPath: string, filePath: string, capabilityModelName: string,
-      connectionString: string): Promise<boolean> {
+      interfaceDir: string): Promise<boolean> {
     generateFoldersForIoTWorkbench(
         targetPath, constants.deviceDefaultFolderName, capabilityModelName);
 
@@ -38,7 +38,7 @@ export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
         targetPath, constants.deviceDefaultFolderName, 'src',
         capabilityModelName);
     const codeGenerateResult =
-        await this.GenerateAnsiCCodeCore(libPath, filePath, connectionString);
+        await this.GenerateAnsiCCodeCore(libPath, filePath, interfaceDir);
     if (!codeGenerateResult) {
       vscode.window.showErrorMessage(
           'Unable to generate code, please check output window for detail.');

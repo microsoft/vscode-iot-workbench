@@ -24,7 +24,8 @@ import {DigitalTwinConnectionStringBuilder} from './DigitalTwinApi/DigitalTwinCo
 
 const constants = {
   idName: '@id',
-  CodeGenConfigFileName: '.codeGenConfig'
+  CodeGenConfigFileName: '.codeGenConfigs',
+  defaultAppName: 'iot_application'
 };
 
 interface CodeGeneratorDownloadLocation {
@@ -59,11 +60,16 @@ interface CodeGeneratorConfig {
   codeGeneratorConfigItems: CodeGeneratorConfigItem[];
 }
 
-interface CodeGenExecutionInfo {
-  schemaFolder: string;
+interface CodeGenExecutionItem {
+  capabilityModelPath: string;  // relative path of the capability model file
+  projectName: string;
   languageLabel: string;
   codeGenProjectType: CodeGenProjectType;
   deviceConnectionType: DeviceConnectionType;
+}
+
+interface CodeGenExecutions {
+  codeGenExecutionItems: CodeGenExecutionItem[];
 }
 
 export class CodeGenerateCore {
@@ -138,44 +144,95 @@ export class CodeGenerateCore {
     const capbilityModelFileName = fileSelection.label;
     const selectedFilePath =
         path.join(fileSelection.description as string, capbilityModelFileName);
+    const relativePath = path.relative(rootPath, selectedFilePath);
 
-    // select the folder for code gen
-    const folderPath = await utils.selectWorkspaceItem(
-        'Please select a folder to contain your generated code:', {
-          canSelectFiles: false,
-          canSelectFolders: true,
-          canSelectMany: false,
-          defaultUri: vscode.workspace.workspaceFolders &&
-                  vscode.workspace.workspaceFolders.length > 0 ?
-              vscode.workspace.workspaceFolders[0].uri :
-              undefined,
-          openLabel: 'Select'
-        });
+    const codeGenConfigPath = path.join(
+        rootPath, FileNames.vscodeSettingsFolderName,
+        constants.CodeGenConfigFileName);
 
-    if (!folderPath) {
-      throw new Error('User cancelled folder selection.');
-    }
-
-    channel.appendLine(`${DigitalTwinConstants.dtPrefix} Folder ${
-        folderPath} is selected for the generated code.`);
-
-    const codeGenConfigPath =
-        path.join(folderPath, constants.CodeGenConfigFileName);
-
-    const languageItems: vscode.QuickPickItem[] = [];
-    let exitingCodeGenInfo;
+    let codeGenExecutionItem: CodeGenExecutionItem|undefined;
     if (fs.existsSync(codeGenConfigPath)) {
-      exitingCodeGenInfo =
-          JSON.parse(fs.readFileSync(codeGenConfigPath, 'utf8'));
-      if (exitingCodeGenInfo) {
-        languageItems.push({
-          label: 'Use previous setting',
-          description:
-              'Use the config from the current folder to scaffold code.'
-        });
+      try {
+        const codeGenExecutions: CodeGenExecutions =
+            JSON.parse(fs.readFileSync(codeGenConfigPath, 'utf8'));
+        if (codeGenExecutions) {
+          codeGenExecutionItem = codeGenExecutions.codeGenExecutionItems.find(
+              item => item.capabilityModelPath === relativePath);
+        }
+      } catch {
+        // just skip this if read file failed.
       }
     }
 
+    if (codeGenExecutionItem) {
+      const regenOptions: vscode.QuickPickItem[] = [];
+      // select the target of the code stub
+      regenOptions.push(
+          {
+            label: `Re-generate code for ${codeGenExecutionItem.projectName}`,
+            description: ''
+          },
+          {label: 'Create new project', description: ''});
+
+      const regenSelection = await vscode.window.showQuickPick(
+          regenOptions,
+          {ignoreFocusOut: true, placeHolder: 'Please select an option:'});
+
+      if (!regenSelection) {
+        return false;
+      }
+
+      if (regenSelection.label !== 'Create new project') {
+        // Regen code
+        const executionResult = await this.GenerateDeviceCodeCore(
+            rootPath, codeGenExecutionItem, context, channel, telemetryContext);
+        return executionResult;
+      }
+    }
+
+    let counter = 0;
+    const appName = constants.defaultAppName;
+    let candidateName = appName;
+    while (true) {
+      const appPath = path.join(rootPath, candidateName);
+      const appPathExists = fs.isDirectorySync(appPath);
+      if (!appPathExists) {
+        break;
+      }
+
+      counter++;
+      candidateName = `${appName}_${counter}`;
+    }
+
+    // select the application name for code gen
+    const codeGenProjectName = await vscode.window.showInputBox({
+      value: candidateName,
+      prompt: 'Please specify the project name.',
+      ignoreFocusOut: true,
+      validateInput: (applicationName: string) => {
+        if (!/^([a-z0-9_]|[a-z0-9_][-a-z0-9_.]*[a-z0-9_])(\.ino)?$/i.test(
+                applicationName)) {
+          return 'Project name can only contain letters, numbers, "-" and ".", and cannot start or end with "-" or ".".';
+        }
+
+        const projectPath = path.join(rootPath, applicationName);
+        if (fs.isDirectorySync(projectPath)) {
+          return `${projectPath} exists, please choose another name.`;
+        }
+        return;
+      }
+    });
+
+    if (!codeGenProjectName) {
+      return false;
+    }
+
+    const folderPath = path.join(rootPath, codeGenProjectName);
+    utils.mkdirRecursivelySync(folderPath);
+    channel.appendLine(`${DigitalTwinConstants.dtPrefix} Folder ${
+        folderPath} is selected for the generated code.`);
+
+    const languageItems: vscode.QuickPickItem[] = [];
     // select the target of the code stub
     languageItems.push({label: 'ANSI C', description: ''});
 
@@ -185,15 +242,6 @@ export class CodeGenerateCore {
 
     if (!languageSelection) {
       return false;
-    }
-
-    if (languageSelection.label === 'Use previous setting') {
-      fs.copyFileSync(
-          selectedFilePath, path.join(folderPath, capbilityModelFileName));
-      const executionResult = await this.GenerateDeviceCodeCore(
-          path.join(folderPath, capbilityModelFileName), folderPath,
-          exitingCodeGenInfo, context, channel, telemetryContext);
-      return executionResult;
     }
 
     let targetItems: vscode.QuickPickItem[]|null = null;
@@ -269,11 +317,6 @@ export class CodeGenerateCore {
       connectionType = DeviceConnectionType.IoTCSasKey;
     }
 
-    fs.copyFileSync(
-        selectedFilePath, path.join(folderPath, capbilityModelFileName));
-    channel.appendLine(`${DigitalTwinConstants.dtPrefix} Copy ${
-        capbilityModelFileName} into ${folderPath} completed.`);
-
     // Parse the cabability model
     const capabilityModel =
         JSON.parse(fs.readFileSync(selectedFilePath, 'utf8'));
@@ -285,16 +328,9 @@ export class CodeGenerateCore {
       if (typeof schema === 'string') {
         // normal interface, check the interface file offline and online
         const item = interfaceItems.find(item => item.urnId === schema);
-        if (item) {
-          // copy interface to the schema folder
-          const interfaceName = path.basename(item.path);
-          fs.copyFileSync(item.path, path.join(folderPath, interfaceName));
-          channel.appendLine(
-              `${DigitalTwinConstants.dtPrefix} Copy ${interfaceName} with id ${
-                  item.urnId} into ${folderPath} completed.`);
-        } else {
+        if (!item) {
           const result =
-              await this.DownloadInterfaceFile(schema, folderPath, channel);
+              await this.DownloadInterfaceFile(schema, rootPath, channel);
           if (!result) {
             const message = `Unable to get the interface with Id ${
                 schema} online. Please make sure the file exists in server.`;
@@ -306,25 +342,45 @@ export class CodeGenerateCore {
       }
     }
 
-    const codeGenExecutionInfo: CodeGenExecutionInfo = {
-      schemaFolder: '',
+    const codeGenExecutionInfo: CodeGenExecutionItem = {
+      capabilityModelPath: relativePath,
+      projectName: codeGenProjectName,
       languageLabel: 'ANSI C',
       codeGenProjectType,
       deviceConnectionType: connectionType
     };
 
-    const executionResult = await this.GenerateDeviceCodeCore(
-        path.join(folderPath, capbilityModelFileName), folderPath,
-        codeGenExecutionInfo, context, channel, telemetryContext);
+    try {
+      if (fs.existsSync(codeGenConfigPath)) {
+        const codeGenExecutions: CodeGenExecutions =
+            JSON.parse(fs.readFileSync(codeGenConfigPath, 'utf8'));
 
-    fs.writeFileSync(
-        codeGenConfigPath, JSON.stringify(codeGenExecutionInfo, null, 4));
+        if (codeGenExecutions) {
+          codeGenExecutions.codeGenExecutionItems =
+              codeGenExecutions.codeGenExecutionItems.filter(
+                  item => item.capabilityModelPath !== relativePath);
+          codeGenExecutions.codeGenExecutionItems.push(codeGenExecutionInfo);
+          fs.writeFileSync(
+              codeGenConfigPath, JSON.stringify(codeGenExecutions, null, 4));
+        }
+      } else {
+        const codeGenExecutions:
+            CodeGenExecutions = {codeGenExecutionItems: [codeGenExecutionInfo]};
+        fs.writeFileSync(
+            codeGenConfigPath, JSON.stringify(codeGenExecutions, null, 4));
+      }
+    } catch {
+      // save config failure should not impact code gen.
+    }
+
+    const executionResult = await this.GenerateDeviceCodeCore(
+        rootPath, codeGenExecutionInfo, context, channel, telemetryContext);
+
     return executionResult;
   }
 
   async GenerateDeviceCodeCore(
-      capabilityModelFilePath: string, targetFolder: string,
-      codeGenExecutionInfo: CodeGenExecutionInfo,
+      rootPath: string, codeGenExecutionInfo: CodeGenExecutionItem,
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext): Promise<boolean> {
     // We only support Ansi C
@@ -338,9 +394,10 @@ export class CodeGenerateCore {
       return false;
     }
 
-    // Pasre capabilityModel name from id
-    const capabilityModel =
-        JSON.parse(fs.readFileSync(capabilityModelFilePath, 'utf8'));
+    // Parse capabilityModel name from id
+    const capabilityModel = JSON.parse(fs.readFileSync(
+        path.join(rootPath, codeGenExecutionInfo.capabilityModelPath), 'utf8'));
+    const fileName = path.basename(codeGenExecutionInfo.capabilityModelPath);
 
     const capabilityModelId = capabilityModel['@id'];
     const capabilityModelIdStrings = capabilityModelId.split(':');
@@ -354,8 +411,9 @@ export class CodeGenerateCore {
         },
         async () => {
           const result = await codeGenerator.GenerateCode(
-              targetFolder, capabilityModelFilePath, capabilityModelName,
-              path.join(targetFolder, codeGenExecutionInfo.schemaFolder));
+              path.join(rootPath, codeGenExecutionInfo.projectName),
+              path.join(rootPath, codeGenExecutionInfo.capabilityModelPath),
+              capabilityModelName, rootPath);
           if (result) {
             vscode.window.showInformationMessage(
                 `Generate code stub for ${capabilityModelName} completed`);

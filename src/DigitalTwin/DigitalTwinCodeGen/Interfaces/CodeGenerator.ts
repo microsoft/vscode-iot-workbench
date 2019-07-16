@@ -1,4 +1,3 @@
-
 export enum CodeGenProjectType {
   CMake = 1,
   VisualStudio = 2,
@@ -14,5 +13,5 @@ export enum DeviceConnectionType {
 export interface CodeGenerator {
   GenerateCode(
       targetPath: string, filePath: string, capabilityModelName: string,
-      connectionString: string): Promise<boolean>;
+      interfaceDir: string): Promise<boolean>;
 }

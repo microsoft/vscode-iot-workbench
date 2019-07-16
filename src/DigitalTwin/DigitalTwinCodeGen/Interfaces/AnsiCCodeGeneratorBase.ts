@@ -10,7 +10,7 @@ import {CodeGenerator} from './CodeGenerator';
 export abstract class AnsiCCodeGeneratorBase implements CodeGenerator {
   abstract async GenerateCode(
       targetPath: string, filePath: string, capabilityModelName: string,
-      connectionString: string): Promise<boolean>;
+      interfaceDir: string): Promise<boolean>;
 
   constructor(
       protected context: vscode.ExtensionContext,
