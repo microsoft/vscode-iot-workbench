@@ -2,8 +2,8 @@
 // Core header files for C and IoTHub layer
 //
 #include <stdio.h>
-#include "IoT_DevKit_HW.h"
 #include "AZ3166WiFi.h"
+#include "IoT_DevKit_HW.h"
 #include "azureiotcerts.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/xlogging.h"
@@ -43,7 +43,7 @@ static const char *registrationId = "[device registration Id]";
 
 // TODO: Fill in DIGITALTWIN_DEVICE_CAPABILITY_MODEL_ID and DIGITALTWIN_DEVICE_CAPABILITY_MODEL_INLINE_DATA if you indend on using IoT Central.
 #define DIGITALTWIN_DEVICE_CAPABILITY_MODEL_ID "[your capabilityModel Id]"
-#define DIGITALTWIN_DEVICE_CAPABILITY_MODEL_INLINE_DATA "[To fill in with the inline contents of interfaces and capability model.]"
+#define DIGITALTWIN_DEVICE_CAPABILITY_MODEL_INLINE_DATA "{}"
 
 static const char *digitalTwinSample_CustomProvisioningData = "{"
                                                               "\"__iot:interfaces\":"
@@ -215,7 +215,7 @@ void setup()
                      dpsDeviceId);
         }
         
-        if (application_initialize(buff, certificates) != 0)
+        if (pnp_device_initialize(buff, certificates) != 0)
         {
             digitalWrite(LED_AZURE, 0);
             Screen.print(1, "Init failed!\r\nCheck log for\r\n more detail.");

@@ -12,6 +12,8 @@
 #include "azure_prov_client/prov_transport_mqtt_client.h"
 #include "azure_prov_client/prov_security_factory.h"
 
+static bool digitalTwinInitialized;
+
 // State of DPS registration process.  We cannot proceed with DPS until we get into the state APP_DPS_REGISTRATION_SUCCEEDED.
 typedef enum APP_DPS_REGISTRATION_STATUS_TAG
 {
@@ -23,37 +25,35 @@ typedef enum APP_DPS_REGISTRATION_STATUS_TAG
 const SECURE_DEVICE_TYPE secureDeviceTypeForProvisioning = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
 const IOTHUB_SECURITY_TYPE secureDeviceTypeForIotHub = IOTHUB_SECURITY_TYPE_SYMMETRIC_KEY;
 
-// Please follow the below tutorial to create a device enrollment entry.
-// https://docs.microsoft.com/en-us/azure/iot-dps/quick-create-simulated-device-symm-key#create-a-device-enrollment-entry-in-the-portal
-// Note: You cannot use an arbitrary DPS instance with the DigitalTwin IoT Central example.
+// The DPS global device endpoint
 static const char *globalDpsEndpoint = "global.azure-devices-provisioning.net";
 
-// TODO: Specify DPS scope ID if you intend on using IoT Central.
+// TODO: Specify DPS scope ID if you intend on using DPS / IoT Central.
 static const char *dpsIdScope = "[DPS Id Scope]";
 
-// TODO: Specify symmetric keys if you intend on using IoT Central and symmetric key based auth.
+// TODO: Specify symmetric keys if you intend on using DPS / IoT Central and symmetric key based auth.
 static const char *sasKey = "[DPS symmetric key]";
 
 // TODO: specify your device registration ID
-static const char *registrationId = "[registration Id]";
+static const char *registrationId = "[device registration Id]";
 
-// TODO: Fill in DIGITALTWIN_DEVICE_CAPABILITY_MODEL_URI and DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_INLINE_DATA if you indend on using IoT Central.
-#define DIGITALTWIN_DEVICE_CAPABILITY_MODEL_URI "[your capabilityModel Id]"
-#define DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_INLINE_DATA "[To fill in with the inline contents of interfaces and capability model.]"
+// TODO: Fill in DIGITALTWIN_DEVICE_CAPABILITY_MODEL_ID and DIGITALTWIN_DEVICE_CAPABILITY_MODEL_INLINE_DATA if you indend on using IoT Central.
+#define DIGITALTWIN_DEVICE_CAPABILITY_MODEL_ID "[your capabilityModel Id]"
+#define DIGITALTWIN_DEVICE_CAPABILITY_MODEL_INLINE_DATA "{}"
 
 static const char *digitalTwinSample_CustomProvisioningData = "{"
                                                               "\"__iot:interfaces\":"
                                                               "{"
-                                                              "\"CapabilityModelUri\": \"" DIGITALTWIN_DEVICE_CAPABILITY_MODEL_URI "\" ,"
-                                                              "\"CapabilityModel\": \"" DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_INLINE_DATA "\""
+                                                              "\"CapabilityModelId\": \"" DIGITALTWIN_DEVICE_CAPABILITY_MODEL_ID "\" ,"
+                                                              "\"CapabilityModel\": \"" DIGITALTWIN_DEVICE_CAPABILITY_MODEL_INLINE_DATA "\""
                                                               "}"
                                                               "}";
 
-// Amount to sleep between querying state from DPS registration loop
-static const int dpsRegistrationPollSleep = 1000;
+// Amount in ms to sleep between querying state from DPS registration loop
+static const int dpsRegistrationPollSleep = 100;
 
-// Maximum amount of times we'll poll for DPS registration being ready.
-static const int dpsRegistrationMaxPolls = 60;
+// Maximum amount of times we'll poll for DPS registration being ready, 1 min.
+static const int dpsRegistrationMaxPolls = (60 * 1000 / dpsRegistrationPollSleep);
 
 // State of DigitalTwin registration process.  We cannot proceed with DigitalTwin until we get into the state APP_DIGITALTWIN_REGISTRATION_SUCCEEDED.
 typedef enum APP_DIGITALTWIN_REGISTRATION_STATUS_TAG
@@ -63,7 +63,7 @@ typedef enum APP_DIGITALTWIN_REGISTRATION_STATUS_TAG
     APP_DIGITALTWIN_REGISTRATION_FAILED
 } APP_DIGITALTWIN_REGISTRATION_STATUS;
 
-#define IOT_HUB_CONN_STR_MAX_LEN 1024
+#define IOT_HUB_CONN_STR_MAX_LEN 512
 
 static char *dpsIotHubUri;
 static char *dpsDeviceId;
@@ -93,10 +93,11 @@ static void provisioningRegisterCallback(PROV_DEVICE_RESULT register_result, con
     }
 }
 
-static bool initializeIotHubViaProvisioning(bool traceOn)
+static bool registerDevice(bool traceOn)
 {
     PROV_DEVICE_RESULT provDeviceResult;
     PROV_DEVICE_LL_HANDLE provDeviceLLHandle = NULL;
+    bool result = false;
 
     APP_DPS_REGISTRATION_STATUS appDpsRegistrationStatus = APP_DPS_REGISTRATION_PENDING;
 
@@ -109,40 +110,34 @@ static bool initializeIotHubViaProvisioning(bool traceOn)
     if (prov_dev_set_symmetric_key_info(registrationId, sasKey) != 0)
     {
         LogError("prov_dev_set_symmetric_key_info failed.");
-        return false;
     }
-
-    if (prov_dev_security_init(secureDeviceTypeForProvisioning) != 0)
+    else if (prov_dev_security_init(secureDeviceTypeForProvisioning) != 0)
     {
         LogError("prov_dev_security_init failed");
-        return false;
     }
-
-    if ((provDeviceLLHandle = Prov_Device_LL_Create(globalDpsEndpoint, dpsIdScope, Prov_Device_MQTT_Protocol)) == NULL)
+    else if ((provDeviceLLHandle = Prov_Device_LL_Create(globalDpsEndpoint, dpsIdScope, Prov_Device_MQTT_Protocol)) == NULL)
     {
         LogError("failed calling Prov_Device_Create");
-        return false;
     }
-
-    if ((provDeviceResult = Prov_Device_LL_SetOption(provDeviceLLHandle, PROV_OPTION_LOG_TRACE, &traceOn)) != PROV_DEVICE_RESULT_OK)
+    else if ((provDeviceResult = Prov_Device_LL_SetOption(provDeviceLLHandle, PROV_OPTION_LOG_TRACE, &traceOn)) != PROV_DEVICE_RESULT_OK)
     {
         LogError("Setting provisioning tracing on failed, error=%d", provDeviceResult);
-        return false;
     }
-
-    if ((provDeviceResult = Prov_Device_LL_Set_Provisioning_Payload(provDeviceLLHandle, digitalTwinSample_CustomProvisioningData)) != PROV_DEVICE_RESULT_OK)
+    else if ((provDeviceResult = Prov_Device_LL_SetOption(provDeviceLLHandle, "TrustedCerts", certificates)) != PROV_DEVICE_RESULT_OK)
+    {
+        LogError("Setting provisioning TrustedCerts failed, error=%d", provDeviceResult);
+    }
+    else if ((provDeviceResult = Prov_Device_LL_Set_Provisioning_Payload(provDeviceLLHandle, digitalTwinSample_CustomProvisioningData)) != PROV_DEVICE_RESULT_OK)
     {
         LogError("Failed setting provisioning data, error=%d", provDeviceResult);
-        return false;
     }
-
-    if ((provDeviceResult = Prov_Device_LL_Register_Device(provDeviceLLHandle, provisioningRegisterCallback, &appDpsRegistrationStatus, NULL, NULL)) != PROV_DEVICE_RESULT_OK)
+    else if ((provDeviceResult = Prov_Device_LL_Register_Device(provDeviceLLHandle, provisioningRegisterCallback, &appDpsRegistrationStatus, NULL, NULL)) != PROV_DEVICE_RESULT_OK)
     {
         LogError("Prov_Device_Register_Device failed, error=%d", provDeviceResult);
-        return false;
     }
     else
     {
+        // Pulling the registration status
         for (int i = 0; (i < dpsRegistrationMaxPolls) && (appDpsRegistrationStatus == APP_DPS_REGISTRATION_PENDING); i++)
         {
             ThreadAPI_Sleep(dpsRegistrationPollSleep);
@@ -152,26 +147,39 @@ static bool initializeIotHubViaProvisioning(bool traceOn)
         if (appDpsRegistrationStatus == APP_DPS_REGISTRATION_SUCCEEDED)
         {
             LogInfo("DPS successfully registered.  Continuing on to creation of IoTHub device client handle.");
+            result = true;
         }
         else if (appDpsRegistrationStatus == APP_DPS_REGISTRATION_PENDING)
         {
             LogError("Timed out attempting to register DPS device");
-            return false;
         }
         else
         {
             LogError("Error registering device for DPS");
-            return false;
         }
     }
 
-    if (appDpsRegistrationStatus == APP_DPS_REGISTRATION_SUCCEEDED)
+    if (provDeviceLLHandle != NULL)
     {
-        char connectionString[IOT_HUB_CONN_STR_MAX_LEN] = {0};
+        Prov_Device_LL_Destroy(provDeviceLLHandle);
+    }
+    IoTHub_Deinit();
 
+    return result;
+}
+
+static void setup()
+{
+    char buff[IOT_HUB_CONN_STR_MAX_LEN];
+
+    // Initialize device model application
+    digitalTwinInitialized = registerDevice(false);
+    if (digitalTwinInitialized)
+    {
+        buff[0] = 0;
         if (secureDeviceTypeForProvisioning == SECURE_DEVICE_TYPE_SYMMETRIC_KEY)
         {
-            snprintf(connectionString, IOT_HUB_CONN_STR_MAX_LEN,
+            snprintf(buff, sizeof(buff),
                      "HostName=%s;DeviceId=%s;SharedAccessKey=%s",
                      dpsIotHubUri,
                      dpsDeviceId,
@@ -179,39 +187,27 @@ static bool initializeIotHubViaProvisioning(bool traceOn)
         }
         else if (secureDeviceTypeForProvisioning == SECURE_DEVICE_TYPE_X509)
         {
-            snprintf(connectionString, IOT_HUB_CONN_STR_MAX_LEN,
+            snprintf(buff, sizeof(buff),
                      "HostName=%s;DeviceId=%s;UseProvisioning=true",
                      dpsIotHubUri,
                      dpsDeviceId);
         }
-
-        LogInfo("IoT Hub Connection String: %s", connectionString);
-        if (pnp_device_initialize(connectionString, NULL) != 0)
+        
+        if (pnp_device_initialize(buff, certificates) != 0)
         {
-            LogError("Failed to initialize the application.");
-            return false;
+            digitalTwinInitialized = false;
         }
     }
-    else
-    {
-        LogError("Device Provisioning: device registration step has failed.");
-        return false;
-    }
-
-    if (provDeviceLLHandle != NULL)
-    {
-        Prov_Device_LL_Destroy(provDeviceLLHandle);
-    }
-
-    return true;
 }
 
 // main entry point.
 int main()
 {
-    bool initializeResult = initializeIotHubViaProvisioning(false);
+    setup();
+    
     if (initializeResult)
     {
+        LogInfo("PnP enabled, running...");
         while (true)
         {
             pnp_device_run();
