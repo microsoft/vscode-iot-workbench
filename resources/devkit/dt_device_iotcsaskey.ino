@@ -192,7 +192,7 @@ void setup()
     // Initialize device model application
     if (registerDevice(false))
     {
-        Screen.print(1, "Connecting\r\n IoT Hub...\r\n ");
+        Screen.print(1, "Connecting\r\n IoT Hub...");
 
         buff[0] = 0;
         if (secureDeviceTypeForProvisioning == SECURE_DEVICE_TYPE_SYMMETRIC_KEY)
@@ -220,7 +220,7 @@ void setup()
         else
         {
             digitalWrite(LED_AZURE, 1);
-            Screen.print(1, "PnP Enabled\r\nRunning...\r\n ");
+            Screen.print(1, "PnP Enabled\r\nRunning...");
             iotHubConnected = true;
         }
     }
