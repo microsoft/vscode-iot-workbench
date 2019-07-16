@@ -28,14 +28,15 @@ export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
   }
 
   async GenerateCode(
-      targetPath: string, filePath: string, fileCoreName: string,
+      targetPath: string, filePath: string, capabilityModelName: string,
       connectionString: string): Promise<boolean> {
     generateFoldersForIoTWorkbench(
-        targetPath, constants.deviceDefaultFolderName, fileCoreName);
+        targetPath, constants.deviceDefaultFolderName, capabilityModelName);
 
     // Invoke PnP toolset to generate the code
     const libPath = path.join(
-        targetPath, constants.deviceDefaultFolderName, 'src', fileCoreName);
+        targetPath, constants.deviceDefaultFolderName, 'src',
+        capabilityModelName);
     const codeGenerateResult =
         await this.GenerateAnsiCCodeCore(libPath, filePath, connectionString);
     if (!codeGenerateResult) {
@@ -66,7 +67,8 @@ export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
 
     const originalContent = fs.readFileSync(originPath, 'utf8');
     const pathPattern = /{PATHNAME}/g;
-    const replaceStr = originalContent.replace(pathPattern, fileCoreName);
+    const replaceStr =
+        originalContent.replace(pathPattern, capabilityModelName);
 
     const templateFilesInfo: TemplateFileInfo[] = [];
     templateFilesInfo.push({

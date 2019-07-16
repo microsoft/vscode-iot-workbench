@@ -36,7 +36,7 @@
     },
     "Enum": "Schemas/Enum",
     "valueSchema": "Schemas/Enum/valueSchema",
-    "enumValue": "Schemas/EnumValue/value",
+    "enumValue": "EnumValue/value",
     "enumValues": {
       "@id": "Schemas/Enum/values",
       "@container": "@list"

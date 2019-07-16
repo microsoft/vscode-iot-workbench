@@ -12,7 +12,7 @@ export class AnciCCodeGenBoilerplateImpl extends AnsiCCodeGeneratorBase {
   }
 
   async GenerateCode(
-      targetPath: string, filePath: string, fileCoreName: string,
+      targetPath: string, filePath: string, capabilityModelName: string,
       connectionString: string): Promise<boolean> {
     // Invoke toolset to generate the code
     const retvalue = await this.GenerateAnsiCCodeCore(

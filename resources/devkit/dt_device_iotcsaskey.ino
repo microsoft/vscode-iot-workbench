@@ -7,7 +7,7 @@
 #include "azureiotcerts.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/xlogging.h"
-#include "src/{PATHNAME}/application.h"
+#include "src/{PATHNAME}/pnp_device.h"
 
 // IoT Central requires DPS.  Include required header and constants
 #include "azure_prov_client/iothub_security_factory.h"
@@ -163,7 +163,7 @@ static bool initializeIotHubViaProvisioning(bool traceOn)
         {
             LogInfo("DPS successfully registered.  Continuing on to creation of IoTHub device client handle.");
         }
-        else if (appDpsRegistrationStatus == APP_DIGITALTWIN_REGISTRATION_PENDING)
+        else if (appDpsRegistrationStatus == APP_DPS_REGISTRATION_PENDING)
         {
             LogError("Timed out attempting to register DPS device");
             return false;
@@ -196,7 +196,7 @@ static bool initializeIotHubViaProvisioning(bool traceOn)
         }
 
         LogInfo("IoT Hub Connection String: %s", connectionString);
-        if (application_initialize(connectionString, certificates) != 0)
+        if (pnp_device_initialize(connectionString, certificates) != 0)
         {
             LogError("Failed to initialize the application.");
             return false;
@@ -248,7 +248,7 @@ void loop()
     // put your main code here, to run repeatedly:
     if (networkConnected && digitalTwinInitialized)
     {
-        application_run();
+        pnp_device_run();
     }
 
     invokeDevKitPeripheral();

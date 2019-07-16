@@ -171,7 +171,7 @@ export interface Iterator<T> {
 
 
 export function generateFoldersForIoTWorkbench(
-    targetPath: string, deviceFolderName: string, fileCoreName: string) {
+    targetPath: string, deviceFolderName: string, capabilityModelName: string) {
   const devicePath = path.join(targetPath, deviceFolderName);
 
   if (!fs.existsSync(devicePath)) {
@@ -185,8 +185,8 @@ export function generateFoldersForIoTWorkbench(
     fs.mkdirSync(sourcePath);
   }
 
-  const libPath = path.join(
-      sourcePath, fileCoreName);  // Capability model or interface name
+  const libPath =
+      path.join(sourcePath, capabilityModelName);  // Capability model name
   if (!fs.existsSync(libPath)) {
     fs.mkdirSync(libPath);
   }
