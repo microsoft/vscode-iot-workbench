@@ -39,7 +39,7 @@ export class DigitalTwinMetamodelRepositoryClient {
             ConfigHandler.get<string>(ConfigKey.iotPnPRepositoryUrl);
         if (!dtRepositoryUrl) {
           throw new Error(
-              'The default IoT Plug and Play Repository URL is not provided. Please set IoTPnPRepositoryUrl in configuration.');
+              'The default IoT Plug and Play Model Repository URL is not provided. Please set IoTPnPRepositoryUrl in configuration.');
         }
         this.metaModelRepositoryHostName = vscode.Uri.parse(dtRepositoryUrl);
       }
