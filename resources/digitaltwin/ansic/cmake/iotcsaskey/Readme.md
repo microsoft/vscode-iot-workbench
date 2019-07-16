@@ -32,7 +32,7 @@ For more details about setting up development environment for compiling the C De
       // TODO: Specify DPS scope ID if you intend on using IoT Central. 
       static const char* dpsIdScope = "[DPS Id Scope]";
 
-      // TODO: Specify synmmetric keys if you intend on using IoT Central and symmetric key based auth.
+      // TODO: Specify symmetric keys if you intend on using IoT Central and symmetric key based auth.
       static const char* sasKey = "[DPS symmetric key]";
 
       // TODO: specify your device registration ID
@@ -95,7 +95,7 @@ For more details about setting up development environment for compiling the C De
       // TODO: Specify DPS scope ID if you intend on using IoT Central. 
       static const char* dpsIdScope = "[DPS Id Scope]";
 
-      // TODO: Specify synmmetric keys if you intend on using IoT Central and symmetric key based auth.
+      // TODO: Specify symmetric keys if you intend on using IoT Central and symmetric key based auth.
       static const char* sasKey = "[DPS symmetric key]";
 
       // TODO: specify your device registration ID

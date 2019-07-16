@@ -31,7 +31,7 @@ static const char *globalDpsEndpoint = "global.azure-devices-provisioning.net";
 // TODO: Specify DPS scope ID if you intend on using IoT Central.
 static const char *dpsIdScope = "[DPS Id Scope]";
 
-// TODO: Specify synmmetric keys if you intend on using IoT Central and symmetric key based auth.
+// TODO: Specify symmetric keys if you intend on using IoT Central and symmetric key based auth.
 static const char *sasKey = "[DPS symmetric key]";
 
 // TODO: specify your device registration ID
