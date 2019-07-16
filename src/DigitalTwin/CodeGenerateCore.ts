@@ -574,7 +574,7 @@ export class CodeGenerateCore {
           {
             location: vscode.ProgressLocation.Notification,
             title:
-                `Upgrade  ${DigitalTwinConstants.productName} Code Generator...`
+                `Upgrading  ${DigitalTwinConstants.productName} Code Generator...`
           },
           async () => {
             channel.appendLine(`Start upgrading ${
