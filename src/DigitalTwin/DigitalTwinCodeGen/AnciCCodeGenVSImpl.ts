@@ -29,7 +29,7 @@ export class AnsiCCodeGenVSImpl extends AnsiCCodeGeneratorBase {
   }
 
   async GenerateCode(
-      targetPath: string, filePath: string, fileCoreName: string,
+      targetPath: string, filePath: string, capabilityModelName: string,
       connectionString: string): Promise<boolean> {
     // Invoke DigitalTwinCodeGen toolset to generate the code
     const retvalue = await this.GenerateAnsiCCodeCore(
@@ -54,7 +54,9 @@ export class AnsiCCodeGenVSImpl extends AnsiCCodeGeneratorBase {
     const projectName = path.basename(targetPath);
 
     const projectNamePattern = /{PROJECT_NAME}/g;
+    const capabilityModelNamePattern = /{CAPABILITYMODELNAME}/g;
     let replaceStr = '';
+
     templateFileNames.forEach(fileName => {
       const source = path.join(resouceFolder, fileName);
       const target = path.join(targetPath, fileName);
@@ -77,8 +79,10 @@ export class AnsiCCodeGenVSImpl extends AnsiCCodeGeneratorBase {
                 `    <ClInclude Include="utilities\\${name}" />\r\n`;
           }
         });
-        replaceStr = fileContent.replace(utilitiesHPattern, includedHeaderFiles)
-                         .replace(utilitiesCPattern, includedCFiles);
+        replaceStr =
+            fileContent.replace(utilitiesHPattern, includedHeaderFiles)
+                .replace(utilitiesCPattern, includedCFiles)
+                .replace(capabilityModelNamePattern, capabilityModelName);
       } else {
         replaceStr = fileContent.replace(projectNamePattern, projectName);
       }

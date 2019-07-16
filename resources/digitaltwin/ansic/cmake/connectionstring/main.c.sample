@@ -6,7 +6,7 @@
 #include <unistd.h> // for usleep
 #endif
 
-#include "application.h"
+#include "pnp_device.h"
 
 void sleep_ms(int milliseconds) // cross-platform sleep function
 {
@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    if(application_initialize(argv[1], NULL) != 0)
+    if(pnp_device_initialize(argv[1], NULL) != 0)
     {
         LogError("Failed to initialize the application.");
         return 1;
@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
     
     while (1)
     {
-        application_run();
+        pnp_device_run();
         sleep_ms(100);
     }
     return 0;
