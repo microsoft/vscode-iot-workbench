@@ -271,8 +271,8 @@ export class CodeGenerateCore {
 
     fs.copyFileSync(
         selectedFilePath, path.join(folderPath, capbilityModelFileName));
-    channel.appendLine(
-      `${DigitalTwinConstants.dtPrefix} Copy ${capbilityModelFileName} into ${folderPath} completed.`);
+    channel.appendLine(`${DigitalTwinConstants.dtPrefix} Copy ${
+        capbilityModelFileName} into ${folderPath} completed.`);
 
     // Parse the cabability model
     const capabilityModel =
@@ -339,7 +339,8 @@ export class CodeGenerateCore {
     }
 
     // Pasre capabilityModel name from id
-    const capabilityModel = JSON.parse(fs.readFileSync(capabilityModelFilePath, 'utf8'));
+    const capabilityModel =
+        JSON.parse(fs.readFileSync(capabilityModelFilePath, 'utf8'));
 
     const capabilityModelId = capabilityModel['@id'];
     const capabilityModelIdStrings = capabilityModelId.split(':');
