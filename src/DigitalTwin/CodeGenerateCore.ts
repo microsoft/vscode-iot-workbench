@@ -12,15 +12,15 @@ import * as crypto from 'crypto';
 import request = require('request-promise');
 import {FileNames, ConfigKey} from '../constants';
 import {TelemetryContext} from '../telemetry';
-import {DigitalTwinConnector} from './DigitalTwinConnector';
-import {DigitalTwinConstants, CodeGenConstants} from './DigitalTwinConstants';
-import {CodeGenProjectType, DeviceConnectionType} from './DigitalTwinCodeGen/Interfaces/CodeGenerator';
+import {DigitalTwinConstants, CodeGenConstants, DigitalTwinFileNames} from './DigitalTwinConstants';
+import {CodeGenProjectType, DeviceConnectionType, PnpLanguage} from './DigitalTwinCodeGen/Interfaces/CodeGenerator';
 import {AnsiCCodeGeneratorFactory} from './DigitalTwinCodeGen/AnsiCCodeGeneratorFactory';
 import {ConfigHandler} from '../configHandler';
 import extractzip = require('extract-zip');
 import * as utils from '../utils';
 import {DigitalTwinMetamodelRepositoryClient} from './DigitalTwinApi/DigitalTwinMetamodelRepositoryClient';
 import {DigitalTwinConnectionStringBuilder} from './DigitalTwinApi/DigitalTwinConnectionStringBuilder';
+import {PnpProjectType, PnpDeviceConnectionType} from '../Models/Interfaces/ProjectTemplate';
 
 const constants = {
   idName: '@id',
@@ -40,14 +40,6 @@ interface InterfaceInfo {
   urnId: string;
   path: string;
 }
-
-const deviceConnectionConstants = {
-  connectionStringLabel: 'Via IoT Hub device connection string',
-  connectionStringDetail: 'To connect to Azure IoT Hub directly',
-  iotcSasKeyLabel: 'Via DPS (Device Provision Service) symmetric key',
-  iotcSasKeyDetail:
-      'To connect to Azure IoT Hub, Azure IoT Central or Azure IoT Certification Service'
-};
 
 interface CodeGeneratorConfigItem {
   codeGeneratorVersion: string;
@@ -79,85 +71,22 @@ export class CodeGenerateCore {
               .dtPrefix} Unable to upgrade the Code Generator to the latest version.\r\n Trying to use the existing version.`);
     }
 
-    if (!vscode.workspace.workspaceFolders) {
-      return false;
-    }
-
-    const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    if (!rootPath) {
-      const message =
-          'Unable to find the folder for device model files. Please select a folder first';
-      vscode.window.showWarningMessage(message);
-      return false;
-    }
-
-    // list all capability models from device model folder for selection.
-    const metamodelItems: vscode.QuickPickItem[] = [];
+    // Step 1: Choose capability model
     const interfaceItems: InterfaceInfo[] = [];
-
-    const fileList = fs.listTreeSync(rootPath);
-    if (fileList && fileList.length > 0) {
-      fileList.forEach((filePath: string) => {
-        if (!fs.isDirectorySync(filePath)) {
-          const fileName = path.basename(filePath);
-          if (fileName.endsWith(DigitalTwinConstants.capabilityModelSuffix)) {
-            metamodelItems.push(
-                {label: fileName, description: path.dirname(filePath)});
-          } else if (fileName.endsWith(DigitalTwinConstants.interfaceSuffix)) {
-            let urnId;
-            try {
-              const fileJson = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-              urnId = fileJson[constants.idName];
-            } catch {
-            }
-            if (urnId) interfaceItems.push({path: filePath, urnId});
-          }
-        }
-      });
-    }
-
-    if (metamodelItems.length === 0) {
-      const message =
-          'Unable to find capability model files in the folder. Please open a folder that contains capability model files.';
-      vscode.window.showWarningMessage(message);
+    const capabilityModelFileSelection =
+        await this.SelectCapabilityFile(interfaceItems);
+    if (capabilityModelFileSelection === undefined) {
+      channel.show();
+      channel.appendLine(`Fail to select capability model file.`);
       return false;
     }
+    const capbilityModelFileName = capabilityModelFileSelection.label;
+    const selectedFilePath = path.join(
+        capabilityModelFileSelection.description as string,
+        capbilityModelFileName);
 
-    const fileSelection = await vscode.window.showQuickPick(metamodelItems, {
-      ignoreFocusOut: true,
-      matchOnDescription: true,
-      matchOnDetail: true,
-      placeHolder:
-          `Select a ${DigitalTwinConstants.productName} capability model file`
-    });
-
-    if (!fileSelection) {
-      return false;
-    }
-
-    const capbilityModelFileName = fileSelection.label;
-    const selectedFilePath =
-        path.join(fileSelection.description as string, capbilityModelFileName);
-
-    // select the folder for code gen
-    const folderPath = await utils.selectWorkspaceItem(
-        'Please select a folder to contain your generated code:', {
-          canSelectFiles: false,
-          canSelectFolders: true,
-          canSelectMany: false,
-          defaultUri: vscode.workspace.workspaceFolders &&
-                  vscode.workspace.workspaceFolders.length > 0 ?
-              vscode.workspace.workspaceFolders[0].uri :
-              undefined,
-          openLabel: 'Select'
-        });
-
-    if (!folderPath) {
-      throw new Error('User cancelled folder selection.');
-    }
-
-    channel.appendLine(`${DigitalTwinConstants.dtPrefix} Folder ${
-        folderPath} is selected for the generated code.`);
+    // Step 2: Select the folder for code gen
+    const folderPath = await this.SelectFolderPath(channel);
 
     const codeGenConfigPath =
         path.join(folderPath, constants.CodeGenConfigFileName);
@@ -176,8 +105,8 @@ export class CodeGenerateCore {
       }
     }
 
-    // select the target of the code stub
-    languageItems.push({label: 'ANSI C', description: ''});
+    // Step 3: Select code gen language
+    languageItems.push({label: PnpLanguage.ANSIC, description: ''});
 
     const languageSelection = await vscode.window.showQuickPick(
         languageItems,
@@ -187,90 +116,32 @@ export class CodeGenerateCore {
       return false;
     }
 
+    const capabilityModelDestPath =
+        path.join(folderPath, capbilityModelFileName);
     if (languageSelection.label === 'Use previous setting') {
-      fs.copyFileSync(
-          selectedFilePath, path.join(folderPath, capbilityModelFileName));
+      fs.copyFileSync(selectedFilePath, capabilityModelDestPath);
       const executionResult = await this.GenerateDeviceCodeCore(
-          path.join(folderPath, capbilityModelFileName), folderPath,
-          exitingCodeGenInfo, context, channel, telemetryContext);
+          capabilityModelDestPath, folderPath, exitingCodeGenInfo, context,
+          channel, telemetryContext);
       return executionResult;
     }
 
-    let targetItems: vscode.QuickPickItem[]|null = null;
-
-    if (languageSelection.label === 'ANSI C') {
-      targetItems = [
-        {
-          label: 'CMake Project',
-          detail:
-              'Generate device agnostic standard ANSI C code to integrate into existing device project.'
-        },
-        {
-          label: 'Visual Studio Project',
-          detail:
-              'Generate device agnostic standard ANSI C code for Visual Studio project.'
-        },
-        {
-          label: 'MXChip IoT DevKit Project',
-          detail: 'Generate Arduino project for MXChip IoT DevKit'
-        }
-      ];
-    }
-
-    if (!targetItems) {
+    // Step 4: Select project type
+    const codeGenProjectType = await this.SelectProjectType(context);
+    if (codeGenProjectType === undefined) {
+      channel.show();
+      channel.appendLine(`Fail to select code gen project type.`);
       return false;
     }
 
-    const targetSelection = await vscode.window.showQuickPick(
-        targetItems,
-        {ignoreFocusOut: true, placeHolder: 'Please select a target:'});
-
-    if (!targetSelection) {
+    // Step 5: Select device connection type
+    const connectionType = await this.SelectConnectionType(context, channel);
+    if (connectionType === undefined) {
+      channel.appendLine(`Fail to select code gen connection type.`);
       return false;
     }
 
-    let codeGenProjectType = CodeGenProjectType.CMake;
-    if (targetSelection.label === 'MXChip IoT DevKit Project') {
-      codeGenProjectType = CodeGenProjectType.IoTDevKit;
-    } else if (targetSelection.label === 'Visual Studio Project') {
-      codeGenProjectType = CodeGenProjectType.VisualStudio;
-    }
-
-    let connectionType = DeviceConnectionType.DeviceConnectionString;
-    let deviceConnectionSelections: vscode.QuickPickItem[]|null = null;
-    deviceConnectionSelections = [
-      {
-        label: deviceConnectionConstants.connectionStringLabel,
-        detail: deviceConnectionConstants.connectionStringDetail
-      },
-      {
-        label: deviceConnectionConstants.iotcSasKeyLabel,
-        detail: deviceConnectionConstants.iotcSasKeyDetail
-      }
-    ];
-
-    const deviceConnectionSelection =
-        await vscode.window.showQuickPick(deviceConnectionSelections, {
-          ignoreFocusOut: true,
-          placeHolder:
-              'Please specify how will the device connect to Azure IoT?'
-        });
-
-    if (!deviceConnectionSelection) {
-      return false;
-    }
-
-    if (deviceConnectionSelection.label ===
-        deviceConnectionConstants.connectionStringLabel) {
-      connectionType = DeviceConnectionType.DeviceConnectionString;
-    } else if (
-        deviceConnectionSelection.label ===
-        deviceConnectionConstants.iotcSasKeyLabel) {
-      connectionType = DeviceConnectionType.IoTCSasKey;
-    }
-
-    fs.copyFileSync(
-        selectedFilePath, path.join(folderPath, capbilityModelFileName));
+    fs.copyFileSync(selectedFilePath, capabilityModelDestPath);
 
     // Parse the cabability model
     const capabilityModel =
@@ -358,6 +229,176 @@ export class CodeGenerateCore {
           }
         });
     return true;
+  }
+
+  async SelectConnectionType(
+      context: vscode.ExtensionContext,
+      channel: vscode.OutputChannel): Promise<DeviceConnectionType|undefined> {
+    const deviceConnectionListPath = context.asAbsolutePath(path.join(
+        FileNames.resourcesFolderName, FileNames.templatesFolderName,
+        DigitalTwinFileNames.digitalTwinTemplateFolderName,
+        DigitalTwinFileNames.deviceConnectionListFileName));
+    const deviceConnectionListJson =
+        JSON.parse(fs.readFileSync(deviceConnectionListPath, 'utf8'));
+    if (!deviceConnectionListJson) {
+      throw new Error('Internal error. Unable to load device connection list.');
+    }
+
+    const deviceConnectionList: vscode.QuickPickItem[] = [];
+    deviceConnectionListJson.connectionType.forEach(
+        (element: PnpDeviceConnectionType) => {
+          deviceConnectionList.push(
+              {label: element.name, detail: element.detail});
+        });
+
+    const deviceConnectionSelection =
+        await vscode.window.showQuickPick(deviceConnectionList, {
+          ignoreFocusOut: true,
+          placeHolder:
+              'Please specify how will the device connect to Azure IoT?'
+        });
+
+    if (!deviceConnectionSelection) {
+      return;
+    }
+
+    const deviceConnection = deviceConnectionListJson.connectionType.find(
+        (connectionType: PnpDeviceConnectionType) => {
+          return connectionType.name === deviceConnectionSelection.label;
+        });
+
+    const connectionType: DeviceConnectionType = (DeviceConnectionType)
+        [deviceConnection.type as keyof typeof DeviceConnectionType];
+
+    return connectionType;
+  }
+
+  async SelectFolderPath(channel: vscode.OutputChannel): Promise<string> {
+    const folderPath = await utils.selectWorkspaceItem(
+        'Please select a folder to contain your generated code:', {
+          canSelectFiles: false,
+          canSelectFolders: true,
+          canSelectMany: false,
+          defaultUri: vscode.workspace.workspaceFolders &&
+                  vscode.workspace.workspaceFolders.length > 0 ?
+              vscode.workspace.workspaceFolders[0].uri :
+              undefined,
+          openLabel: 'Select'
+        });
+
+    if (!folderPath) {
+      throw new Error('User cancelled folder selection.');
+    }
+
+    channel.appendLine(`${DigitalTwinConstants.dtPrefix} Folder ${
+        folderPath} is selected for the generated code.`);
+
+    return folderPath;
+  }
+
+  async SelectProjectType(context: vscode.ExtensionContext):
+      Promise<CodeGenProjectType|undefined> {
+    const projectTypeListPath = context.asAbsolutePath(path.join(
+        FileNames.resourcesFolderName, FileNames.templatesFolderName,
+        DigitalTwinFileNames.digitalTwinTemplateFolderName,
+        DigitalTwinFileNames.projectTypeListFileName));
+    const projectTypeListJson =
+        JSON.parse(fs.readFileSync(projectTypeListPath, 'utf8'));
+    if (!projectTypeListJson) {
+      throw new Error('Internal error. Unable to load project type list.');
+    }
+
+    const result = projectTypeListJson.projectType.filter(
+        (projectType: PnpProjectType) => {
+          return projectType.language === PnpLanguage.ANSIC;
+        });
+
+    const projectTypeList: vscode.QuickPickItem[] = [];
+    result.forEach((element: PnpProjectType) => {
+      projectTypeList.push({label: element.name, detail: element.detail});
+    });
+
+    if (!projectTypeList) {
+      return;
+    }
+
+    const projectTypeSelection = await vscode.window.showQuickPick(
+        projectTypeList,
+        {ignoreFocusOut: true, placeHolder: 'Please select a target:'});
+
+    if (!projectTypeSelection) {
+      return;
+    }
+
+    const projectType =
+        projectTypeListJson.projectType.find((projectType: PnpProjectType) => {
+          return projectType.name === projectTypeSelection.label;
+        });
+
+    const codeGenProjectType: CodeGenProjectType = (CodeGenProjectType)
+        [projectType.type as keyof typeof CodeGenProjectType];
+
+    return codeGenProjectType;
+  }
+
+  async SelectCapabilityFile(interfaceItems: InterfaceInfo[]):
+      Promise<vscode.QuickPickItem|undefined> {
+    if (!vscode.workspace.workspaceFolders) {
+      return;
+    }
+
+    const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+    if (!rootPath) {
+      const message =
+          'Unable to find the folder for device model files. Please select a folder first';
+      vscode.window.showWarningMessage(message);
+      return;
+    }
+
+    // list all capability models from device model folder for selection.
+    const metamodelItems: vscode.QuickPickItem[] = [];
+
+    const fileList = fs.listTreeSync(rootPath);
+    if (fileList && fileList.length > 0) {
+      fileList.forEach((filePath: string) => {
+        if (!fs.isDirectorySync(filePath)) {
+          const fileName = path.basename(filePath);
+          if (fileName.endsWith(DigitalTwinConstants.capabilityModelSuffix)) {
+            metamodelItems.push(
+                {label: fileName, description: path.dirname(filePath)});
+          } else if (fileName.endsWith(DigitalTwinConstants.interfaceSuffix)) {
+            let urnId;
+            try {
+              const fileJson = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+              urnId = fileJson[constants.idName];
+            } catch {
+            }
+            if (urnId) interfaceItems.push({path: filePath, urnId});
+          }
+        }
+      });
+    }
+
+    if (metamodelItems.length === 0) {
+      const message =
+          'Unable to find capability model files in the folder. Please open a folder that contains capability model files.';
+      vscode.window.showWarningMessage(message);
+      return;
+    }
+
+    const fileSelection = await vscode.window.showQuickPick(metamodelItems, {
+      ignoreFocusOut: true,
+      matchOnDescription: true,
+      matchOnDetail: true,
+      placeHolder:
+          `Select a ${DigitalTwinConstants.productName} capability model file`
+    });
+
+    if (!fileSelection) {
+      return;
+    }
+
+    return fileSelection;
   }
 
   async DownloadInterfaceFile(

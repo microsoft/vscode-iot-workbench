@@ -1,0 +1,19 @@
+{
+  "templateFiles": [
+    {
+        "fileName": "CMakeLists.txt",
+        "sourcePath" : ".",
+        "targetPath" : "."
+    },
+    {
+        "fileName": "main.c.sample",
+        "sourcePath" : ".",
+        "targetPath" : "."
+    },
+    {
+        "fileName": "Readme.md",
+        "sourcePath" : ".",
+        "targetPath" : "."
+    }
+  ]
+}

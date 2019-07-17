@@ -6,7 +6,6 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-plus';
 import * as path from 'path';
-import * as url from 'url';
 
 import {VSCExpress} from 'vscode-express';
 import {DigitalTwinFileNames, DigitalTwinConstants} from './DigitalTwinConstants';
@@ -16,9 +15,9 @@ import {MetaModelType} from './DigitalTwinApi/DataContracts/DigitalTwinContext';
 import {DigitalTwinConnector} from './DigitalTwinConnector';
 import {DialogResponses} from '../DialogResponses';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey} from '../constants';
+import {ConfigKey, FileNames} from '../constants';
 import {DigitalTwinConnectionStringBuilder} from './DigitalTwinApi/DigitalTwinConnectionStringBuilder';
-import {GetModelResult, DigitalTwinModelBase} from './DigitalTwinApi/DataContracts/DigitalTwinModel';
+import {GetModelResult} from './DigitalTwinApi/DataContracts/DigitalTwinModel';
 import {TelemetryContext} from '../telemetry';
 
 const constants = {
@@ -134,8 +133,8 @@ export class DeviceModelOperator {
     const targetInterface = path.join(rootPath, interfaceFileName);
 
     const interfaceTemplate = context.asAbsolutePath(path.join(
-        DigitalTwinFileNames.resourcesFolderName,
-        DigitalTwinFileNames.deviceModelFolderName,
+        FileNames.resourcesFolderName, FileNames.templatesFolderName,
+        DigitalTwinFileNames.digitalTwinTemplateFolderName,
         DigitalTwinFileNames.sampleInterfaceName));
 
     try {
@@ -205,8 +204,8 @@ export class DeviceModelOperator {
     const targetCapabilityModel = path.join(rootPath, capabilityModelFileName);
 
     const capabilityModel = context.asAbsolutePath(path.join(
-        DigitalTwinFileNames.resourcesFolderName,
-        DigitalTwinFileNames.deviceModelFolderName,
+        FileNames.resourcesFolderName, FileNames.templatesFolderName,
+        DigitalTwinFileNames.digitalTwinTemplateFolderName,
         DigitalTwinFileNames.sampleCapabilityModelName));
 
     try {

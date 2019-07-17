@@ -1,0 +1,24 @@
+{
+  "templateFiles": [
+    {
+        "fileName": "CMakeLists.txt",
+        "sourcePath" : ".",
+        "targetPath" : "."
+    },
+    {
+        "fileName": "main.c",
+        "sourcePath" : ".",
+        "targetPath" : "."
+    },
+    {
+        "fileName": "Readme.md",
+        "sourcePath" : ".",
+        "targetPath" : "."
+    },
+    {
+      "fileName": "iotproject.vcxproj",
+      "sourcePath": ".",
+      "targetPath": "."
+    }
+  ]
+}

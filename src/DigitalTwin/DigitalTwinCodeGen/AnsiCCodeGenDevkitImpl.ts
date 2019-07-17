@@ -2,13 +2,13 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {FileNames} from '../../constants';
+import {FileNames, ScaffoldType} from '../../constants';
+import {FileUtility} from '../../FileUtility';
 import {AZ3166Device} from '../../Models/AZ3166Device';
 import {ProjectTemplateType, TemplateFileInfo} from '../../Models/Interfaces/ProjectTemplate';
-
 import {IoTWorkspaceProject} from '../../Models/IoTWorkspaceProject';
 import {TelemetryContext} from '../../telemetry';
-import {generateFoldersForIoTWorkbench} from '../Utilities';
+import {DigitalTwinFileNames} from '../DigitalTwinConstants';
 
 import {AnsiCCodeGeneratorBase} from './Interfaces/AnsiCCodeGeneratorBase';
 import {DeviceConnectionType} from './Interfaces/CodeGenerator';
@@ -30,12 +30,11 @@ export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
   async GenerateCode(
       targetPath: string, filePath: string, fileCoreName: string,
       connectionString: string): Promise<boolean> {
-    generateFoldersForIoTWorkbench(
-        targetPath, constants.deviceDefaultFolderName, fileCoreName);
-
     // Invoke PnP toolset to generate the code
     const libPath = path.join(
         targetPath, constants.deviceDefaultFolderName, 'src', fileCoreName);
+    await FileUtility.mkdirRecursively(ScaffoldType.Local, libPath);
+
     const codeGenerateResult =
         await this.GenerateAnsiCCodeCore(libPath, filePath, connectionString);
     if (!codeGenerateResult) {
@@ -62,7 +61,9 @@ export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
     }
 
     const originPath = this.context.asAbsolutePath(path.join(
-        FileNames.resourcesFolderName, AZ3166Device.boardId, sketchFileName));
+        FileNames.resourcesFolderName, FileNames.templatesFolderName,
+        DigitalTwinFileNames.digitalTwinTemplateFolderName,
+        AZ3166Device.boardId, sketchFileName));
 
     const originalContent = fs.readFileSync(originPath, 'utf8');
     const pathPattern = /{PATHNAME}/g;

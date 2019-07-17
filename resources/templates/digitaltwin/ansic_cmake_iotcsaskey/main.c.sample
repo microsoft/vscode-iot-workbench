@@ -25,18 +25,18 @@ const SECURE_DEVICE_TYPE secureDeviceTypeForProvisioning = SECURE_DEVICE_TYPE_SY
 const IOTHUB_SECURITY_TYPE secureDeviceTypeForIotHub = IOTHUB_SECURITY_TYPE_SYMMETRIC_KEY;
 
 // Please follow the below tutorial to create a device enrollment entry.
-// https://docs.microsoft.com/en-us/azure/iot-dps/quick-create-simulated-device-symm-key#create-a-device-enrollment-entry-in-the-portal 
+// https://docs.microsoft.com/en-us/azure/iot-dps/quick-create-simulated-device-symm-key#create-a-device-enrollment-entry-in-the-portal
 // Note: You cannot use an arbitrary DPS instance with the DigitalTwin IoT Central example.
 static const char* globalDpsEndpoint = "global.azure-devices-provisioning.net";
 
-// TODO: Specify DPS scope ID if you intend on using IoT Central. 
+// TODO: Specify DPS scope ID if you intend on using IoT Central.
 static const char* dpsIdScope = "[DPS Id Scope]";
 
 // TODO: Specify synmmetric keys if you intend on using IoT Central and symmetric key based auth.
 static const char* sasKey = "[DPS symmetric key]";
 
 // TODO: specify your device registration ID
-static const char* registrationId = "[registration Id]"; 
+static const char* registrationId = "[registration Id]";
 
 // TODO: Fill in DIGITALTWIN_DEVICE_CAPABILITY_MODEL_URI and DIGITALTWIN_SAMPLE_DEVICE_CAPABILITY_MODEL_INLINE_DATA if you indend on using IoT Central.
 #define DIGITALTWIN_DEVICE_CAPABILITY_MODEL_URI "[your capabilityModel Id]"
@@ -112,31 +112,31 @@ static bool initializeIotHubViaProvisioning(bool traceOn)
         LogError("prov_dev_set_symmetric_key_info failed.");
         return false;
     }
-    
+
     if (prov_dev_security_init(secureDeviceTypeForProvisioning) != 0)
     {
         LogError("prov_dev_security_init failed");
         return false;
     }
-    
+
     if ((provDeviceLLHandle = Prov_Device_LL_Create(globalDpsEndpoint, dpsIdScope, Prov_Device_MQTT_Protocol)) == NULL)
     {
         LogError("failed calling Prov_Device_Create");
         return false;
     }
-    
+
     if ((provDeviceResult = Prov_Device_LL_SetOption(provDeviceLLHandle, PROV_OPTION_LOG_TRACE, &traceOn)) != PROV_DEVICE_RESULT_OK)
     {
         LogError("Setting provisioning tracing on failed, error=%d", provDeviceResult);
         return false;
     }
-    
+
     if ((provDeviceResult = Prov_Device_LL_Set_Provisioning_Payload(provDeviceLLHandle, digitalTwinSample_CustomProvisioningData)) != PROV_DEVICE_RESULT_OK)
     {
         LogError("Failed setting provisioning data, error=%d", provDeviceResult);
         return false;
     }
-    
+
     if ((provDeviceResult = Prov_Device_LL_Register_Device(provDeviceLLHandle, provisioningRegisterCallback, &appDpsRegistrationStatus, NULL, NULL)) != PROV_DEVICE_RESULT_OK)
     {
         LogError("Prov_Device_Register_Device failed, error=%d", provDeviceResult);

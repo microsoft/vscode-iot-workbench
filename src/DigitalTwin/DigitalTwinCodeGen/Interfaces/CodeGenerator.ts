@@ -1,14 +1,18 @@
 
 export enum CodeGenProjectType {
-  CMake = 1,
-  VisualStudio = 2,
-  IoTDevKit = 3
+  CMake = 'CMake',
+  VisualStudio = 'VisualStudio',
+  IoTDevKit = 'IoTDevKit'
 }
 
 export enum DeviceConnectionType {
-  DeviceConnectionString = 1,
-  IoTCSasKey = 2,
-  IoTCX509 = 3
+  DeviceConnectionString = 'DeviceConnectionString',
+  IoTCSasKey = 'IoTCSasKey',
+  IoTCX509 = 'IoTCX509'
+}
+
+export enum PnpLanguage {
+  ANSIC = 'ANSI C'
 }
 
 export interface CodeGenerator {

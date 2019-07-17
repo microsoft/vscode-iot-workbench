@@ -1,10 +1,6 @@
 // ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 // ----------------------------------------------------------------------------
-
-import * as fs from 'fs-plus';
-import * as path from 'path';
-
 /**
  * Create a deep copy of the provided value.
  */
@@ -167,27 +163,4 @@ export interface Iterator<T> {
    * the iterator has a current value after the move.
    */
   moveNext(): boolean;
-}
-
-
-export function generateFoldersForIoTWorkbench(
-    targetPath: string, deviceFolderName: string, fileCoreName: string) {
-  const devicePath = path.join(targetPath, deviceFolderName);
-
-  if (!fs.existsSync(devicePath)) {
-    fs.mkdirSync(devicePath);
-  }
-
-  // create the path for src. In Arduino, only files under src folder are
-  // compiled together with sketch file.
-  const sourcePath = path.join(devicePath, 'src');
-  if (!fs.existsSync(sourcePath)) {
-    fs.mkdirSync(sourcePath);
-  }
-
-  const libPath = path.join(
-      sourcePath, fileCoreName);  // Capability model or interface name
-  if (!fs.existsSync(libPath)) {
-    fs.mkdirSync(libPath);
-  }
 }

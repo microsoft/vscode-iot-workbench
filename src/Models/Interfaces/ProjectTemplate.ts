@@ -24,3 +24,16 @@ export interface ProjectTemplate {
   boardId: string;
   type: string;
 }
+
+export interface PnpProjectType {
+  language: string;
+  type: string;
+  name: string;
+  detail: string;
+}
+
+export interface PnpDeviceConnectionType {
+  name: string;
+  type: string;
+  detail: string;
+}

@@ -2,8 +2,6 @@
 // Licensed under the MIT License.
 
 export class DigitalTwinFileNames {
-  static readonly resourcesFolderName = 'resources';
-  static readonly deviceModelFolderName = 'devicemodel';
   static readonly graphFileName = 'graph.json';
   static readonly interfaceFileName = 'Interface.json';
   static readonly capabilityModelFileName = 'CapabilityModel.json';
@@ -15,6 +13,10 @@ export class DigitalTwinFileNames {
   static readonly defaultInterfaceName = 'myInterface';
   static readonly defaultCapabilityModelName = 'myCapabilityModel';
   static readonly etagCacheFileName = 'etagCache.json';
+  static readonly digitalTwinTemplateFolderName = 'digitaltwin';
+  static readonly projectTypeListFileName = 'projecttypelist.json';
+  static readonly deviceConnectionListFileName = 'deviceconnectionlist.json';
+  static readonly utilitiesFolderName = 'utilities';
 }
 
 export class DigitalTwinConstants {

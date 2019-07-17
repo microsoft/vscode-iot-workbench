@@ -1,0 +1,27 @@
+{
+  "@context": {
+    "@vocab": "http://azureiot.com/v1/classes/",
+    "@language": "en",
+    "comment": "Entity/comment",
+    "description": {
+      "@id": "Entity/description",
+      "@container": "@language"
+    },
+    "displayName": {
+      "@id": "Entity/displayName",
+      "@container": "@language"
+    },
+    "implements": {
+      "@id": "CapabilityModel/implements",
+      "@container": "@list"
+    },
+    "name": {
+      "@id": "NamedEntity/name",
+      "@language": null
+    },
+    "schema": {
+      "@id": "InterfaceInstance/schema",
+      "@type": "@id"
+    }
+  }
+}
