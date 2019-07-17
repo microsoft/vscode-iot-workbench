@@ -13,7 +13,7 @@ export class DigitalTwinFileNames {
   static readonly defaultInterfaceName = 'myInterface';
   static readonly defaultCapabilityModelName = 'myCapabilityModel';
   static readonly etagCacheFileName = 'etagCache.json';
-  static readonly digitalTwinTemplateFolderName = 'digitaltwin';
+  static readonly devicemodelTemplateFolderName = 'devicemodel';
   static readonly projectTypeListFileName = 'projecttypelist.json';
   static readonly deviceConnectionListFileName = 'deviceconnectionlist.json';
   static readonly utilitiesFolderName = 'utilities';

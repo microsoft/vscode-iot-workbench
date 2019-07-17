@@ -40,7 +40,6 @@ export class AnsiCCodeGenGeneralImpl extends AnsiCCodeGeneratorBase {
 
     const templateFolder = this.context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
-        DigitalTwinFileNames.digitalTwinTemplateFolderName,
         templateFolderName));
     const templateFiles = path.join(templateFolder, FileNames.templateFiles);
     const templateFilesJson =

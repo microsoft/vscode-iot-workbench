@@ -63,7 +63,6 @@ export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
 
     const originPath = this.context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
-        DigitalTwinFileNames.digitalTwinTemplateFolderName,
         AZ3166Device.boardId, sketchFileName));
 
     const originalContent = fs.readFileSync(originPath, 'utf8');

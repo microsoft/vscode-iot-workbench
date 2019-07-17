@@ -10,7 +10,7 @@ import * as path from 'path';
 import * as utils from './utils';
 
 import {TelemetryContext} from './telemetry';
-import {FileNames, ScaffoldType, PlatformType} from './constants';
+import {FileNames, ScaffoldType, PlatformType, TemplateTag} from './constants';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import {FileUtility} from './FileUtility';
 import {ProjectTemplate, ProjectTemplateType, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
@@ -149,7 +149,9 @@ export class ProjectInitializer {
 
     const result =
         templateJson.templates.filter((template: ProjectTemplate) => {
-          return template.platform === platform;
+          return (
+              template.platform === platform &&
+              template.tag === TemplateTag.general);
         });
 
     const projectTemplateList: vscode.QuickPickItem[] = [];

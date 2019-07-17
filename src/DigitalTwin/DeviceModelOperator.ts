@@ -134,7 +134,7 @@ export class DeviceModelOperator {
 
     const interfaceTemplate = context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
-        DigitalTwinFileNames.digitalTwinTemplateFolderName,
+        DigitalTwinFileNames.devicemodelTemplateFolderName,
         DigitalTwinFileNames.sampleInterfaceName));
 
     try {
@@ -205,7 +205,7 @@ export class DeviceModelOperator {
 
     const capabilityModel = context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
-        DigitalTwinFileNames.digitalTwinTemplateFolderName,
+        DigitalTwinFileNames.devicemodelTemplateFolderName,
         DigitalTwinFileNames.sampleCapabilityModelName));
 
     try {

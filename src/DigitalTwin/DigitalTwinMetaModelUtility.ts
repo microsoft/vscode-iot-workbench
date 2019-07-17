@@ -114,7 +114,7 @@ export class DigitalTwinMetaModelUtility {
     const graphFileFromRemote = await this.blobService.getFile(this.graphUrl);
     const graphFilePath = this.context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
-        DigitalTwinFileNames.digitalTwinTemplateFolderName,
+        DigitalTwinFileNames.devicemodelTemplateFolderName,
         DigitalTwinFileNames.graphFileName));
     const dtGraphfaceString =
         graphFileFromRemote || fs.readFileSync(graphFilePath, 'utf8');
@@ -129,7 +129,7 @@ export class DigitalTwinMetaModelUtility {
         await this.blobService.getFile(this.interfaceUrl);
     const interfaceFilePath = this.context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
-        DigitalTwinFileNames.digitalTwinTemplateFolderName,
+        DigitalTwinFileNames.devicemodelTemplateFolderName,
         DigitalTwinFileNames.interfaceFileName));
     const dtInterfaceString =
         interfaceFileFromRemote || fs.readFileSync(interfaceFilePath, 'utf8');
@@ -145,7 +145,7 @@ export class DigitalTwinMetaModelUtility {
         await this.blobService.getFile(this.capabilityModelUrl);
     const capabilityModelFilePath = this.context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
-        DigitalTwinFileNames.digitalTwinTemplateFolderName,
+        DigitalTwinFileNames.devicemodelTemplateFolderName,
         DigitalTwinFileNames.capabilityModelFileName));
     const dtCapabilityModelString = capabilityModelFileFromRemote ||
         fs.readFileSync(capabilityModelFilePath, 'utf8');
