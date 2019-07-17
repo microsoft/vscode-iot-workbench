@@ -1,26 +1,10 @@
-#ifdef WIN32
-#include <windows.h>
-#elif _POSIX_C_SOURCE >= 199309L
-#include <time.h>   // for nanosleep
-#else
-#include <unistd.h> // for usleep
-#endif
-
-#include "application.h"
-
-void sleep_ms(int milliseconds) // cross-platform sleep function
-{
-#ifdef WIN32
-    Sleep(milliseconds);
-#elif _POSIX_C_SOURCE >= 199309L
-    struct timespec ts;
-    ts.tv_sec = milliseconds / 1000;
-    ts.tv_nsec = (milliseconds % 1000) * 1000000;
-    nanosleep(&ts, NULL);
-#else
-    usleep(milliseconds * 1000);
-#endif
-}
+//
+// Core header files for C and IoTHub layer
+//
+#include <stdio.h>
+#include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/xlogging.h"
+#include "pnp_device.h"
 
 int main(int argc, char *argv[])
 {
@@ -30,7 +14,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    if(application_initialize(argv[1], NULL) != 0)
+    if(pnp_device_initialize(argv[1], NULL) != 0)
     {
         LogError("Failed to initialize the application.");
         return 1;
@@ -38,8 +22,8 @@ int main(int argc, char *argv[])
 
     while (1)
     {
-        application_run();
-        sleep_ms(100);
+        pnp_device_run();
+        ThreadAPI_Sleep(100);
     }
     return 0;
 }

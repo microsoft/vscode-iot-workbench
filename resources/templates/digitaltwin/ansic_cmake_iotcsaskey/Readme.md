@@ -16,9 +16,9 @@ For more details about setting up development environment for compiling the C De
 
 1. Install [CMake](https://cmake.org/). Make sure it is in your PATH by typing `cmake -version` from a command prompt. CMake will be used to create Visual Studio projects to build libraries and samples.
 
-1. Clone the preview release of SDK to your local machine using the tag name `private-preview`
+1. Clone the preview release of SDK to your local machine using the tag name `public-preview-utopia`
     ```bash
-    git clone https://github.com/Azure/azure-iot-sdk-c-pnp --recursive -b private-preview
+    git clone https://github.com/Azure/azure-iot-sdk-c-pnp --recursive -b public-preview-utopia
     ```
     > The `--recursive` argument instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
 
@@ -32,7 +32,7 @@ For more details about setting up development environment for compiling the C De
       // TODO: Specify DPS scope ID if you intend on using IoT Central.
       static const char* dpsIdScope = "[DPS Id Scope]";
 
-      // TODO: Specify synmmetric keys if you intend on using IoT Central and symmetric key based auth.
+      // TODO: Specify symmetric keys if you intend on using IoT Central and symmetric key based auth.
       static const char* sasKey = "[DPS symmetric key]";
 
       // TODO: specify your device registration ID
@@ -56,7 +56,7 @@ For more details about setting up development environment for compiling the C De
 
 1. In the **cmake** folder just created, run CMake to build the entire folder of Device SDK including the generated code.
     ```bash
-    cmake .. -Duse_prov_client=ON -Dhsm_type_symm_key:BOOL=ON
+    cmake .. -Duse_prov_client=ON -Dhsm_type_symm_key:BOOL=ON -Dskip_samples:BOOL=ON
     cmake --build . -- /m /p:Configuration=Release
     ```
 
@@ -79,9 +79,9 @@ For more details about setting up development environment for compiling the C De
     gcc --version
     ```
 
-1. Clone the preview release of SDK to your local machine using the tag name `private-preview`
+1. Clone the preview release of SDK to your local machine using the tag name `public-preview-utopia`
     ```bash
-    git clone https://github.com/Azure/azure-iot-sdk-c-pnp --recursive -b private-preview
+    git clone https://github.com/Azure/azure-iot-sdk-c-pnp --recursive -b public-preview-utopia
     ```
     > The `--recursive` argument instructs git to clone other GitHub repos this SDK depends on. Dependencies are listed [here](https://github.com/Azure/azure-iot-sdk-c/blob/master/.gitmodules).
 
@@ -92,18 +92,17 @@ For more details about setting up development environment for compiling the C De
     * Rename `main.c.sample` to `main.c`. Then open `main.c`. Specify paramaters requested by the commented **TODO's** for your configuration.
 
       ```c
-      // TODO: Specify DPS scope ID if you intend on using IoT Central.
-      static const char* dpsIdScope = "[DPS Id Scope]";
-
-      // TODO: Specify synmmetric keys if you intend on using IoT Central and symmetric key based auth.
-      static const char* sasKey = "[DPS symmetric key]";
-
+      // TODO: Specify DPS scope ID if you intend on using DPS / IoT Central.
+      static const char *dpsIdScope = "[DPS Id Scope]";
+      
+      // TODO: Specify symmetric keys if you intend on using DPS / IoT Central and symmetric key based auth.
+      static const char *sasKey = "[DPS symmetric key]";
+      
       // TODO: specify your device registration ID
-      static const char* registrationId = "[registration Id]";
-
-      // TODO: Fill in DIGITALTWIN_DEVICE_CAPABILITY_MODEL_URI and DIGITALTWIN_MODEL_REPOSITORY_URI if you indend on using IoT Central.
-      #define DIGITALTWIN_DEVICE_CAPABILITY_MODEL_URI "[your capabilityModel Id]"
-      #define DIGITALTWIN_MODEL_REPOSITORY_URI "[your model repository service URI]"
+      static const char *registrationId = "[device registration Id]";
+      
+      // TODO: Fill in DIGITALTWIN_DEVICE_CAPABILITY_MODEL_ID and DIGITALTWIN_DEVICE_CAPABILITY_MODEL_INLINE_DATA if you indend on using IoT Central.
+      #define DIGITALTWIN_DEVICE_CAPABILITY_MODEL_ID "[your capabilityModel Id]"
       ```
 
 1. Open the `CMakeLists.txt` in the **azure-iot-sdk-c-pnp** folder. Include the **{PROJECT_NAME}** folder so that it will be built together with the Device SDK. Add the line below to the end of the file.
@@ -119,7 +118,7 @@ For more details about setting up development environment for compiling the C De
 
 1. In the **cmake** folder just created, run CMake to build the entire folder of Device SDK including the generated code.
     ```bash
-    cmake ..
+    cmake .. -Duse_prov_client=ON -Dhsm_type_symm_key:BOOL=ON -Dskip_samples:BOOL=ON
     cmake --build .
     ```
 

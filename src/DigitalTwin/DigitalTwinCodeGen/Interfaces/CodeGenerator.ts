@@ -1,4 +1,3 @@
-
 export enum CodeGenProjectType {
   CMake = 'CMake',
   VisualStudio = 'VisualStudio',
@@ -17,6 +16,6 @@ export enum PnpLanguage {
 
 export interface CodeGenerator {
   GenerateCode(
-      targetPath: string, filePath: string, fileCoreName: string,
-      connectionString: string): Promise<boolean>;
+      targetPath: string, filePath: string, capabilityModelName: string,
+      interfaceDir: string): Promise<boolean>;
 }

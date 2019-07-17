@@ -22,11 +22,11 @@ export class AnsiCCodeGenVSImpl extends AnsiCCodeGeneratorBase {
   }
 
   async GenerateCode(
-      targetPath: string, filePath: string, fileCoreName: string,
-      connectionString: string): Promise<boolean> {
+      targetPath: string, filePath: string, capabilityModelName: string,
+      interfaceDir: string): Promise<boolean> {
     // Invoke DigitalTwinCodeGen toolset to generate the code
-    const retvalue = await this.GenerateAnsiCCodeCore(
-        targetPath, filePath, connectionString);
+    const retvalue =
+        await this.GenerateAnsiCCodeCore(targetPath, filePath, interfaceDir);
 
     let templateFolderName;
     switch (this.provisionType) {
@@ -64,6 +64,8 @@ export class AnsiCCodeGenVSImpl extends AnsiCCodeGeneratorBase {
     const projectName = path.basename(targetPath);
 
     const projectNamePattern = /{PROJECT_NAME}/g;
+    const capabilityModelNamePattern = /{CAPABILITYMODELNAME}/g;
+
     for (const fileInfo of templateFilesInfo) {
       if (fileInfo.fileContent === undefined) {
         continue;
@@ -88,7 +90,8 @@ export class AnsiCCodeGenVSImpl extends AnsiCCodeGeneratorBase {
         });
         fileInfo.fileContent =
             fileInfo.fileContent.replace(utilitiesHPattern, includedHeaderFiles)
-                .replace(utilitiesCPattern, includedCFiles);
+                .replace(utilitiesCPattern, includedCFiles)
+                .replace(capabilityModelNamePattern, capabilityModelName);
       } else {
         fileInfo.fileContent =
             fileInfo.fileContent.replace(projectNamePattern, projectName);

@@ -115,14 +115,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="application.c" />
-    <ClCompile Include="device_model.c" />
+    <ClCompile Include="pnp_device.c" />
+    <ClCompile Include="{CAPABILITYMODELNAME}_impl.c" />
     <ClCompile Include="main.c" />
     {UTILITIESFILES_C}
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="application.h" />
-    <ClInclude Include="device_model.h" />
+    <ClInclude Include="pnp_device.h" />
+    <ClInclude Include="{CAPABILITYMODELNAME}_impl.h" />
     {UTILITIESFILES_H}
   </ItemGroup>
   <ItemGroup>

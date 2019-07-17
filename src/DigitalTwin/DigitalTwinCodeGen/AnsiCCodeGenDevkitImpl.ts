@@ -28,15 +28,16 @@ export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
   }
 
   async GenerateCode(
-      targetPath: string, filePath: string, fileCoreName: string,
-      connectionString: string): Promise<boolean> {
+      targetPath: string, filePath: string, capabilityModelName: string,
+      interfaceDir: string): Promise<boolean> {
     // Invoke PnP toolset to generate the code
     const libPath = path.join(
-        targetPath, constants.deviceDefaultFolderName, 'src', fileCoreName);
+        targetPath, constants.deviceDefaultFolderName, 'src',
+        capabilityModelName);
     await FileUtility.mkdirRecursively(ScaffoldType.Local, libPath);
 
     const codeGenerateResult =
-        await this.GenerateAnsiCCodeCore(libPath, filePath, connectionString);
+        await this.GenerateAnsiCCodeCore(libPath, filePath, interfaceDir);
     if (!codeGenerateResult) {
       vscode.window.showErrorMessage(
           'Unable to generate code, please check output window for detail.');
@@ -67,7 +68,8 @@ export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
 
     const originalContent = fs.readFileSync(originPath, 'utf8');
     const pathPattern = /{PATHNAME}/g;
-    const replaceStr = originalContent.replace(pathPattern, fileCoreName);
+    const replaceStr =
+        originalContent.replace(pathPattern, capabilityModelName);
 
     const templateFilesInfo: TemplateFileInfo[] = [];
     templateFilesInfo.push({
