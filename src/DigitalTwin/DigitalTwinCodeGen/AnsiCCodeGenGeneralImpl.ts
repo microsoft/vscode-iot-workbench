@@ -14,7 +14,7 @@ const ansiConstants = {
   projectType: 'cmake'
 };
 
-const templateFileNames = ['Readme.md', 'main.c.sample', 'CMakeLists.txt'];
+const templateFileNames = ['Readme.md', 'main.c', 'CMakeLists.txt'];
 
 export class AnsiCCodeGenGeneralImpl extends AnsiCCodeGeneratorBase {
   constructor(

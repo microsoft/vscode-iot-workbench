@@ -26,7 +26,7 @@ For more details about setting up development environment for compiling the C De
 
 1. In order to connect to IoT Central:
     * You need to have provisioned a private preview IoT Central instance. See [here](https://github.com/Azure/Azure-IoT-PnP-Preview/blob/master/docs/tutorial.md) for more end-to-end setup instructions.
-    * Rename `main.c.sample` to `main.c`. Then open `main.c`. Specify paramaters requested by the commented **TODO's** for your configuration.
+    * Open `main.c`. Specify paramaters requested by the commented **TODO's** for your configuration.
 
       ```c
       // TODO: Specify DPS scope ID if you intend on using IoT Central. 
@@ -89,7 +89,7 @@ For more details about setting up development environment for compiling the C De
 
 1. In order to connect to IoT Central:
     * You need to have provisioned a private preview IoT Central instance. See [here](https://github.com/Azure/Azure-IoT-PnP-Preview/blob/master/docs/tutorial.md) for more end-to-end setup instructions.
-    * Rename `main.c.sample` to `main.c`. Then open `main.c`. Specify paramaters requested by the commented **TODO's** for your configuration.
+    * Open `main.c`. Specify paramaters requested by the commented **TODO's** for your configuration.
 
       ```c
       // TODO: Specify DPS scope ID if you intend on using DPS / IoT Central.
