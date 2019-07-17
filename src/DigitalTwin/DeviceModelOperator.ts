@@ -251,7 +251,7 @@ export class DeviceModelOperator {
       DeviceModelOperator.vscexpress = DeviceModelOperator.vscexpress ||
           new VSCExpress(context, 'DigitalTwinRepositoryViews');
       await DeviceModelOperator.vscexpress.open(
-          'index.html?public', `${DigitalTwinConstants.productName} Repository`,
+          'index.html?public', `${DigitalTwinConstants.productName} Model Repository`,
           vscode.ViewColumn.Two,
           {retainContextWhenHidden: true, enableScripts: true});
       return true;
@@ -265,7 +265,7 @@ export class DeviceModelOperator {
       const option: vscode.InputBoxOptions = {
         value: DigitalTwinConstants.repoConnectionStringTemplate,
         prompt: `Please input the connection string to the ${
-            DigitalTwinConstants.productName} repository:`,
+            DigitalTwinConstants.productName} Model Repository:`,
         ignoreFocusOut: true
       };
 
@@ -287,7 +287,7 @@ export class DeviceModelOperator {
       DeviceModelOperator.vscexpress = DeviceModelOperator.vscexpress ||
           new VSCExpress(context, 'DigitalTwinRepositoryViews');
       await DeviceModelOperator.vscexpress.open(
-          'index.html', `${DigitalTwinConstants.productName} Repository`,
+          'index.html', `${DigitalTwinConstants.productName} Model Repository`,
           vscode.ViewColumn.Two,
           {retainContextWhenHidden: true, enableScripts: true});
       return true;
@@ -305,7 +305,7 @@ export class DeviceModelOperator {
       DeviceModelOperator.vscexpress.close('index.html');
     }
     const message =
-        `Sign out ${DigitalTwinConstants.productName} repository successfully`;
+        `Sign out ${DigitalTwinConstants.productName} Model Repository successfully`;
     vscode.window.showInformationMessage(message);
   }
 
@@ -327,7 +327,7 @@ export class DeviceModelOperator {
       if (!connectionString) {
         vscode.window.showWarningMessage(`Failed to get interfaces from ${
             DigitalTwinConstants
-                .productName} repository. Please sign out and sign in with a valid connection string.`);
+                .productName} Model Repository. Please sign out and sign in with a valid connection string.`);
         return;
       }
 
@@ -359,7 +359,7 @@ export class DeviceModelOperator {
       if (!connectionString) {
         vscode.window.showWarningMessage(`Failed to get capability models from ${
             DigitalTwinConstants
-                .productName} repository. Please sign out and sign in with a valid connection string.`);
+                .productName} Model Repository. Please sign out and sign in with a valid connection string.`);
         return;
       }
       const dtMetamodelRepositoryClient =
@@ -391,7 +391,7 @@ export class DeviceModelOperator {
     if (!connectionString) {
       vscode.window.showWarningMessage(`Failed to delete models from ${
           DigitalTwinConstants
-              .productName} repository. Please sign out and sign in with a valid connection string.`);
+              .productName} Model Repository. Please sign out and sign in with a valid connection string.`);
       return;  // TODO: delete from public model repository??
     }
 
@@ -616,7 +616,7 @@ export class DeviceModelOperator {
       const option: vscode.InputBoxOptions = {
         value: DigitalTwinConstants.repoConnectionStringTemplate,
         prompt: `Please input the connection string to access the ${
-            DigitalTwinConstants.productName} repository.`,
+            DigitalTwinConstants.productName} Model Repository.`,
         ignoreFocusOut: true
       };
 
@@ -725,7 +725,7 @@ export class DeviceModelOperator {
       try {
         // First, get the file to retrieve the latest etag.
         channel.appendLine(`${DigitalTwinConstants.dtPrefix} Connect to ${
-            DigitalTwinConstants.productName} repository to check whether ${
+            DigitalTwinConstants.productName} Model Repository to check whether ${
             fileId} exists in server...`);
         const interfaceMetaData =
             await dtMetamodelRepositoryClient.GetInterfaceAsync(
@@ -739,7 +739,7 @@ export class DeviceModelOperator {
           const msg =
               `The interface with id "${fileId}" already exists in the ${
                   DigitalTwinConstants
-                      .productName} Repository, do you want to overwrite it?`;
+                      .productName} Model Repository, do you want to overwrite it?`;
           const result: vscode.MessageItem|undefined =
               await vscode.window.showInformationMessage(
                   msg, DialogResponses.all, DialogResponses.yes,
@@ -837,7 +837,7 @@ export class DeviceModelOperator {
       try {
         // First, get the file to retrieve the latest etag.
         channel.appendLine(`${DigitalTwinConstants.dtPrefix} Connect to ${
-            DigitalTwinConstants.productName} repository to check whether "${
+            DigitalTwinConstants.productName} Model Repository to check whether "${
             fileId}" exists in server...`);
         const capabilityModelContext =
             await dtMetamodelRepositoryClient.GetCapabilityModelAsync(
@@ -847,7 +847,7 @@ export class DeviceModelOperator {
           const msg =
               `The capability model with id "${fileId}" already exists in the ${
                   DigitalTwinConstants
-                      .productName} Repository, do you want to overwrite it?`;
+                      .productName} Model Repository, do you want to overwrite it?`;
           const result: vscode.MessageItem|undefined =
               await vscode.window.showInformationMessage(
                   msg, DialogResponses.all, DialogResponses.yes,

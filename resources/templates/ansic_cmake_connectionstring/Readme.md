@@ -29,8 +29,6 @@ For more details about setting up development environment for compiling the C De
     add_subdirectory({PROJECT_NAME})
     ```
 
-1. Rename `main.c.sample` to `main.c`.
-
 1. In the same **azure-iot-sdk-c-pnp** folder, create a folder to contain the compiled app.
     ```bash
     mkdir cmake
@@ -74,8 +72,6 @@ For more details about setting up development environment for compiling the C De
     ```txt
     add_subdirectory({PROJECT_NAME})
     ```
-
-1. Rename `main.c.sample` to `main.c`.
 
 1. In the same **azure-iot-sdk-c-pnp** folder, create a folder to contain the compiled app.
     ```bash

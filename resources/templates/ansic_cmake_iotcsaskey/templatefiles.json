@@ -6,7 +6,7 @@
         "targetPath" : "."
     },
     {
-        "fileName": "main.c.sample",
+        "fileName": "main.c",
         "sourcePath" : ".",
         "targetPath" : "."
     },

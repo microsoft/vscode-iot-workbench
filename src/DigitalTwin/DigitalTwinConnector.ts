@@ -32,11 +32,11 @@ export class DigitalTwinConnector {
           ConfigKey.modelRepositoryKeyName, connectionString,
           vscode.ConfigurationTarget.Global);
       vscode.window.showInformationMessage(`Connect to ${
-          DigitalTwinConstants.productName} Repository successfully.`);
+          DigitalTwinConstants.productName} Model Repository successfully.`);
       return true;
     } catch (error) {
       vscode.window.showErrorMessage(`Failed to connect to ${
-          DigitalTwinConstants.productName} Repository, error: ${error}`);
+          DigitalTwinConstants.productName} Model Repository, error: ${error}`);
       return false;
     }
   }
