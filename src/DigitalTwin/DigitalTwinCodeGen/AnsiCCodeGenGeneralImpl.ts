@@ -3,10 +3,10 @@ import * as vscode from 'vscode';
 
 import {FileNames, ScaffoldType} from '../../constants';
 import {TelemetryContext} from '../../telemetry';
-import {generateTemplateFile, getTemplateFilesInfo} from '../../utils';
+import {generateTemplateFile, GetCodeGenTemplateFolderName, getTemplateFilesInfo} from '../../utils';
 
 import {AnsiCCodeGeneratorBase} from './Interfaces/AnsiCCodeGeneratorBase';
-import {DeviceConnectionType} from './Interfaces/CodeGenerator';
+import {CodeGenProjectType, DeviceConnectionType} from './Interfaces/CodeGenerator';
 
 export class AnsiCCodeGenGeneralImpl extends AnsiCCodeGeneratorBase {
   constructor(
@@ -23,22 +23,16 @@ export class AnsiCCodeGenGeneralImpl extends AnsiCCodeGeneratorBase {
     const retvalue =
         await this.GenerateAnsiCCodeCore(targetPath, filePath, interfaceDir);
 
-    let templateFolderName;
-    switch (this.provisionType) {
-      case DeviceConnectionType.DeviceConnectionString:
-        templateFolderName = 'ansic_cmake_connectionstring';
-        break;
-      case DeviceConnectionType.IoTCSasKey:
-        templateFolderName = 'ansic_cmake_iotcsaskey';
-        break;
-      default:
-        throw new Error('Unsupported device provision type.');
+    const templateFolderName = await GetCodeGenTemplateFolderName(
+        this.context, CodeGenProjectType.CMake, this.provisionType);
+    if (!templateFolderName) {
+      throw new Error(`Fail to get template folder name`);
     }
 
     const templateFolder = this.context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
         templateFolderName));
-    const templateFilesInfo = getTemplateFilesInfo(templateFolder);
+    const templateFilesInfo = await getTemplateFilesInfo(templateFolder);
 
     const projectName = path.basename(targetPath);
 

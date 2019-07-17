@@ -24,6 +24,7 @@ export interface ProjectTemplate {
   boardId: string;
   type: string;
   tag: string;
+  connectionType: string;
 }
 
 export interface PnpDeviceConnectionType {

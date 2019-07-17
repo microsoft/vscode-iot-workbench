@@ -91,10 +91,10 @@
             "path": "ansic_vs_connectionstring",
             "projectHostType": "workspace",
             "boardId": "",
-            "type": "",
+            "type": "VisualStudio",
             "language": "ansic",
-            "projectType": "visualstudio",
-            "tag": "digitaltwin"
+            "tag": "digitaltwin",
+            "connectionType": "DeviceConnectionString"
         },
         {
             "platform": "",
@@ -104,10 +104,10 @@
             "path": "ansic_vs_iotcsaskey",
             "projectHostType": "workspace",
             "boardId": "",
-            "type": "",
+            "type": "VisualStudio",
             "language": "ansic",
-            "projectType": "visualstudio",
-            "tag": "digitaltwin"
+            "tag": "digitaltwin",
+            "connectionType": "IoTCSasKey"
         },
         {
             "platform": "",
@@ -117,10 +117,10 @@
             "path": "ansic_cmake_connectionstring",
             "projectHostType": "workspace",
             "boardId": "",
-            "type": "",
+            "type": "CMake",
             "language": "ansic",
-            "projectType": "cmake",
-            "tag": "digitaltwin"
+            "tag": "digitaltwin",
+            "connectionType": "DeviceConnectionString"
         },
         {
             "platform": "",
@@ -130,10 +130,36 @@
             "path": "ansic_cmake_iotcsaskey",
             "projectHostType": "workspace",
             "boardId": "",
-            "type": "",
+            "type": "CMake",
             "language": "ansic",
-            "projectType": "cmake",
-            "tag": "digitaltwin"
+            "tag": "digitaltwin",
+            "connectionType": "IoTCSasKey"
+        },
+        {
+            "platform": "",
+            "name": "IoT DevKit Project Using ANSI C Via IoT Hub Device Connection String",
+            "description": "",
+            "detail": "Template for DigitalTwin Code Generator to generate ANSI C IoT DevKit Project via IoT Hub device connection string.",
+            "path": "ansic_devkit_iotcsaskey",
+            "projectHostType": "workspace",
+            "boardId": "",
+            "type": "IoTDevKit",
+            "language": "ansic",
+            "tag": "digitaltwin",
+            "connectionType": "DeviceConnectionString"
+        },
+        {
+            "platform": "",
+            "name": "IoT DevKit Project Using ANSI C Via DPS(Device Provision Service) symmetric key",
+            "description": "",
+            "detail": "Template for DigitalTwin Code Generator to generate ANSI C IoT Dev Project via DPS symmetric key.",
+            "path": "ansic_devkit_iotcsaskey",
+            "projectHostType": "workspace",
+            "boardId": "",
+            "type": "IoTDevKit",
+            "language": "ansic",
+            "tag": "digitaltwin",
+            "connectionType": "IoTCSasKey"
         }
     ]
 }

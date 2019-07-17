@@ -102,22 +102,8 @@ export class ProjectInitializer {
                     [template.type as keyof typeof ProjectTemplateType];
 
             const templateFolder = path.join(resourceRootPath, template.path);
-            const templateFiles =
-                require(path.join(templateFolder, FileNames.templateFiles));
-
-            const templateFilesInfo: TemplateFileInfo[] = [];
-            templateFiles.templateFiles.forEach(
-                (fileInfo: TemplateFileInfo) => {
-                  const filePath = path.join(
-                      templateFolder, fileInfo.sourcePath, fileInfo.fileName);
-                  const fileContent = fs.readFileSync(filePath, 'utf8');
-                  templateFilesInfo.push({
-                    fileName: fileInfo.fileName,
-                    sourcePath: fileInfo.sourcePath,
-                    targetPath: fileInfo.targetPath,
-                    fileContent
-                  });
-                });
+            const templateFilesInfo =
+                await utils.getTemplateFilesInfo(templateFolder);
 
             let project;
             if (template.platform === PlatformType.EMBEDDEDLINUX) {
