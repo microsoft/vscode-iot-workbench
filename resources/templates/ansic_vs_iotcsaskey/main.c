@@ -12,6 +12,12 @@
 #include "azure_prov_client/prov_transport_mqtt_client.h"
 #include "azure_prov_client/prov_security_factory.h"
 
+#ifdef SET_TRUSTED_CERT_IN_CODE
+#include "certs.h"
+#else
+static const char *certificates = NULL;
+#endif // SET_TRUSTED_CERT_IN_CODE
+
 static bool iotHubConnected = false;
 
 // State of DPS registration process.  We cannot proceed with DPS until we get into the state APP_DPS_REGISTRATION_SUCCEEDED.
@@ -50,10 +56,10 @@ static const char *digitalTwinSample_CustomProvisioningData = "{"
                                                               "}";
 
 // Amount in ms to sleep between querying state from DPS registration loop
-static const int dpsRegistrationPollSleep = 100;
+#define dpsRegistrationPollSleep 100
 
 // Maximum amount of times we'll poll for DPS registration being ready, 1 min.
-static const int dpsRegistrationMaxPolls = (60 * 1000 / dpsRegistrationPollSleep);
+#define dpsRegistrationMaxPolls (60 * 1000 / dpsRegistrationPollSleep)
 
 // State of DigitalTwin registration process.  We cannot proceed with DigitalTwin until we get into the state APP_DIGITALTWIN_REGISTRATION_SUCCEEDED.
 typedef enum APP_DIGITALTWIN_REGISTRATION_STATUS_TAG
@@ -123,10 +129,12 @@ static bool registerDevice(bool traceOn)
     {
         LogError("Setting provisioning tracing on failed, error=%d", provDeviceResult);
     }
+#ifdef SET_TRUSTED_CERT_IN_CODE
     else if ((provDeviceResult = Prov_Device_LL_SetOption(provDeviceLLHandle, "TrustedCerts", certificates)) != PROV_DEVICE_RESULT_OK)
     {
         LogError("Setting provisioning TrustedCerts failed, error=%d", provDeviceResult);
     }
+#endif // SET_TRUSTED_CERT_IN_CODE
     else if ((provDeviceResult = Prov_Device_LL_Set_Provisioning_Payload(provDeviceLLHandle, digitalTwinSample_CustomProvisioningData)) != PROV_DEVICE_RESULT_OK)
     {
         LogError("Failed setting provisioning data, error=%d", provDeviceResult);

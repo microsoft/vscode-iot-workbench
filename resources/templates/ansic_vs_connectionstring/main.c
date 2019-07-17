@@ -6,6 +6,12 @@
 #include "azure_c_shared_utility/xlogging.h"
 #include "pnp_device.h"
 
+#ifdef SET_TRUSTED_CERT_IN_CODE
+#include "certs.h"
+#else
+static const char *certificates = NULL;
+#endif // SET_TRUSTED_CERT_IN_CODE
+
 int main(int argc, char *argv[])
 {
     if (argc != 2)
@@ -14,7 +20,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    if(pnp_device_initialize(argv[1], NULL) != 0)
+    if(pnp_device_initialize(argv[1], certificates) != 0)
     {
         LogError("Failed to initialize the application.");
         return 1;
