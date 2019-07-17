@@ -19,7 +19,7 @@ file(GLOB {PROJECT_NAME}_c_files
 
 include_directories(.)
 include_directories(./utilities)
-include_directories(../deps/parson)
+include_directories(${PROJECT_SOURCE_DIR}/deps/parson)
 include_directories(${SHARED_UTIL_INC_FOLDER})
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 include_directories(${DIGITALTWIN_CLIENT_INC_FOLDER})
