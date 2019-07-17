@@ -4,10 +4,8 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {FileNames, ScaffoldType} from '../../constants';
-import {TemplateFileInfo} from '../../Models/Interfaces/ProjectTemplate';
 import {TelemetryContext} from '../../telemetry';
 import * as utils from '../../utils';
-import {generateTemplateFile} from '../../utils';
 import {DigitalTwinFileNames} from '../DigitalTwinConstants';
 
 import {AnsiCCodeGeneratorBase} from './Interfaces/AnsiCCodeGeneratorBase';
@@ -40,25 +38,11 @@ export class AnsiCCodeGenVSImpl extends AnsiCCodeGeneratorBase {
         throw new Error('Unsupported device provision type.');
     }
 
+
     const templateFolder = this.context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
         templateFolderName));
-    const templateFiles = path.join(templateFolder, FileNames.templateFiles);
-    const templateFilesJson =
-        JSON.parse(fs.readFileSync(templateFiles, 'utf8'));
-
-    const templateFilesInfo: TemplateFileInfo[] = [];
-    templateFilesJson.templateFiles.forEach((fileInfo: TemplateFileInfo) => {
-      const filePath =
-          path.join(templateFolder, fileInfo.sourcePath, fileInfo.fileName);
-      const fileContent = fs.readFileSync(filePath, 'utf8');
-      templateFilesInfo.push({
-        fileName: fileInfo.fileName,
-        sourcePath: fileInfo.sourcePath,
-        targetPath: fileInfo.targetPath,
-        fileContent
-      });
-    });
+    const templateFilesInfo = utils.getTemplateFilesInfo(templateFolder);
 
     const projectName = path.basename(targetPath);
 
@@ -95,7 +79,8 @@ export class AnsiCCodeGenVSImpl extends AnsiCCodeGeneratorBase {
         fileInfo.fileContent =
             fileInfo.fileContent.replace(projectNamePattern, projectName);
       }
-      await generateTemplateFile(targetPath, ScaffoldType.Local, fileInfo);
+      await utils.generateTemplateFile(
+          targetPath, ScaffoldType.Local, fileInfo);
     }
 
     if (retvalue) {

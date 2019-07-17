@@ -1,0 +1,9 @@
+{
+  "templateFiles": [
+    {
+        "fileName": "dt_device_connectionstring.ino",
+        "sourcePath" : ".",
+        "targetPath" : "."
+    }
+  ]
+}

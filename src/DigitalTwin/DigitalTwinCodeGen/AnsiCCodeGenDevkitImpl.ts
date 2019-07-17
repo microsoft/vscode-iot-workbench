@@ -8,7 +8,7 @@ import {AZ3166Device} from '../../Models/AZ3166Device';
 import {ProjectTemplateType, TemplateFileInfo} from '../../Models/Interfaces/ProjectTemplate';
 import {IoTWorkspaceProject} from '../../Models/IoTWorkspaceProject';
 import {TelemetryContext} from '../../telemetry';
-import {DigitalTwinFileNames} from '../DigitalTwinConstants';
+import * as utils from '../../utils';
 
 import {AnsiCCodeGeneratorBase} from './Interfaces/AnsiCCodeGeneratorBase';
 import {DeviceConnectionType} from './Interfaces/CodeGenerator';
@@ -49,34 +49,33 @@ export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
         this.context, this.channel, this.telemetryContext);
 
     // Generate device code for IoT DevKit according to the provision option.
-    let sketchFileName;
+    let templateFolderName;
     switch (this.connectionType) {
       case DeviceConnectionType.DeviceConnectionString:
-        sketchFileName = constants.deviceConnectionStringSketchFileName;
+        templateFolderName = 'ansic_devkit_connectionstring';
         break;
       case DeviceConnectionType.IoTCSasKey:
-        sketchFileName = constants.deviceIotcSasKeySketchFileName;
+        templateFolderName = 'ansic_devkit_iotcsaskey';
         break;
       default:
         throw new Error('Unsupported device provision type.');
     }
 
-    const originPath = this.context.asAbsolutePath(path.join(
+    const templateFolder = this.context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
-        AZ3166Device.boardId, sketchFileName));
+        templateFolderName));
+    const templateFilesInfo = utils.getTemplateFilesInfo(templateFolder);
 
-    const originalContent = fs.readFileSync(originPath, 'utf8');
-    const pathPattern = /{PATHNAME}/g;
-    const replaceStr =
-        originalContent.replace(pathPattern, capabilityModelName);
-
-    const templateFilesInfo: TemplateFileInfo[] = [];
-    templateFilesInfo.push({
-      fileName: sketchFileName,
-      sourcePath: '',
-      targetPath: '.',
-      fileContent: replaceStr
-    });
+    for (const fileInfo of templateFilesInfo) {
+      if (fileInfo.fileContent === undefined) {
+        continue;
+      }
+      if (fileInfo.fileName.endsWith('.ino')) {
+        const pathPattern = /{PATHNAME}/g;
+        fileInfo.fileContent =
+            fileInfo.fileContent.replace(pathPattern, capabilityModelName);
+      }
+    }
 
     await project.create(
         targetPath, templateFilesInfo, ProjectTemplateType.Basic,

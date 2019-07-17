@@ -1,12 +1,9 @@
-import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {FileNames, ScaffoldType} from '../../constants';
-import {TemplateFileInfo} from '../../Models/Interfaces/ProjectTemplate';
 import {TelemetryContext} from '../../telemetry';
-import {generateTemplateFile} from '../../utils';
-import {DigitalTwinFileNames} from '../DigitalTwinConstants';
+import {generateTemplateFile, getTemplateFilesInfo} from '../../utils';
 
 import {AnsiCCodeGeneratorBase} from './Interfaces/AnsiCCodeGeneratorBase';
 import {DeviceConnectionType} from './Interfaces/CodeGenerator';
@@ -41,22 +38,7 @@ export class AnsiCCodeGenGeneralImpl extends AnsiCCodeGeneratorBase {
     const templateFolder = this.context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
         templateFolderName));
-    const templateFiles = path.join(templateFolder, FileNames.templateFiles);
-    const templateFilesJson =
-        JSON.parse(fs.readFileSync(templateFiles, 'utf8'));
-
-    const templateFilesInfo: TemplateFileInfo[] = [];
-    templateFilesJson.templateFiles.forEach((fileInfo: TemplateFileInfo) => {
-      const filePath =
-          path.join(templateFolder, fileInfo.sourcePath, fileInfo.fileName);
-      const fileContent = fs.readFileSync(filePath, 'utf8');
-      templateFilesInfo.push({
-        fileName: fileInfo.fileName,
-        sourcePath: fileInfo.sourcePath,
-        targetPath: fileInfo.targetPath,
-        fileContent
-      });
-    });
+    const templateFilesInfo = getTemplateFilesInfo(templateFolder);
 
     const projectName = path.basename(targetPath);
 
