@@ -6,7 +6,6 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs-plus';
 import * as path from 'path';
-import * as url from 'url';
 
 import {VSCExpress} from 'vscode-express';
 import {DigitalTwinFileNames, DigitalTwinConstants} from './DigitalTwinConstants';
@@ -16,9 +15,9 @@ import {MetaModelType} from './DigitalTwinApi/DataContracts/DigitalTwinContext';
 import {DigitalTwinConnector} from './DigitalTwinConnector';
 import {DialogResponses} from '../DialogResponses';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey} from '../constants';
+import {ConfigKey, FileNames} from '../constants';
 import {DigitalTwinConnectionStringBuilder} from './DigitalTwinApi/DigitalTwinConnectionStringBuilder';
-import {GetModelResult, DigitalTwinModelBase} from './DigitalTwinApi/DataContracts/DigitalTwinModel';
+import {GetModelResult} from './DigitalTwinApi/DataContracts/DigitalTwinModel';
 import {TelemetryContext} from '../telemetry';
 
 const constants = {
@@ -134,8 +133,8 @@ export class DeviceModelOperator {
     const targetInterface = path.join(rootPath, interfaceFileName);
 
     const interfaceTemplate = context.asAbsolutePath(path.join(
-        DigitalTwinFileNames.resourcesFolderName,
-        DigitalTwinFileNames.deviceModelFolderName,
+        FileNames.resourcesFolderName, FileNames.templatesFolderName,
+        DigitalTwinFileNames.devicemodelTemplateFolderName,
         DigitalTwinFileNames.sampleInterfaceName));
 
     try {
@@ -205,8 +204,8 @@ export class DeviceModelOperator {
     const targetCapabilityModel = path.join(rootPath, capabilityModelFileName);
 
     const capabilityModel = context.asAbsolutePath(path.join(
-        DigitalTwinFileNames.resourcesFolderName,
-        DigitalTwinFileNames.deviceModelFolderName,
+        FileNames.resourcesFolderName, FileNames.templatesFolderName,
+        DigitalTwinFileNames.devicemodelTemplateFolderName,
         DigitalTwinFileNames.sampleCapabilityModelName));
 
     try {
@@ -252,7 +251,8 @@ export class DeviceModelOperator {
       DeviceModelOperator.vscexpress = DeviceModelOperator.vscexpress ||
           new VSCExpress(context, 'DigitalTwinRepositoryViews');
       await DeviceModelOperator.vscexpress.open(
-          'index.html?public', `${DigitalTwinConstants.productName} Model Repository`,
+          'index.html?public',
+          `${DigitalTwinConstants.productName} Model Repository`,
           vscode.ViewColumn.Two,
           {retainContextWhenHidden: true, enableScripts: true});
       return true;
@@ -305,8 +305,8 @@ export class DeviceModelOperator {
     if (DeviceModelOperator.vscexpress) {
       DeviceModelOperator.vscexpress.close('index.html');
     }
-    const message =
-        `Sign out ${DigitalTwinConstants.productName} Model Repository successfully`;
+    const message = `Sign out ${
+        DigitalTwinConstants.productName} Model Repository successfully`;
     vscode.window.showInformationMessage(message);
   }
 
@@ -726,7 +726,8 @@ export class DeviceModelOperator {
       try {
         // First, get the file to retrieve the latest etag.
         channel.appendLine(`${DigitalTwinConstants.dtPrefix} Connect to ${
-            DigitalTwinConstants.productName} Model Repository to check whether ${
+            DigitalTwinConstants
+                .productName} Model Repository to check whether ${
             fileId} exists in server...`);
         const interfaceMetaData =
             await dtMetamodelRepositoryClient.GetInterfaceAsync(
@@ -737,10 +738,10 @@ export class DeviceModelOperator {
             fileId}" exists in server. `);
 
         if (option.overwriteChoice === OverwriteChoice.Unknown) {
-          const msg =
-              `The interface with id "${fileId}" already exists in the ${
-                  DigitalTwinConstants
-                      .productName} Model Repository, do you want to overwrite it?`;
+          const msg = `The interface with id "${
+              fileId}" already exists in the ${
+              DigitalTwinConstants
+                  .productName} Model Repository, do you want to overwrite it?`;
           const result: vscode.MessageItem|undefined =
               await vscode.window.showInformationMessage(
                   msg, DialogResponses.all, DialogResponses.yes,
@@ -838,17 +839,18 @@ export class DeviceModelOperator {
       try {
         // First, get the file to retrieve the latest etag.
         channel.appendLine(`${DigitalTwinConstants.dtPrefix} Connect to ${
-            DigitalTwinConstants.productName} Model Repository to check whether "${
+            DigitalTwinConstants
+                .productName} Model Repository to check whether "${
             fileId}" exists in server...`);
         const capabilityModelContext =
             await dtMetamodelRepositoryClient.GetCapabilityModelAsync(
                 fileId, builder.RepositoryIdValue, true);
 
         if (option.overwriteChoice === OverwriteChoice.Unknown) {
-          const msg =
-              `The capability model with id "${fileId}" already exists in the ${
-                  DigitalTwinConstants
-                      .productName} Model Repository, do you want to overwrite it?`;
+          const msg = `The capability model with id "${
+              fileId}" already exists in the ${
+              DigitalTwinConstants
+                  .productName} Model Repository, do you want to overwrite it?`;
           const result: vscode.MessageItem|undefined =
               await vscode.window.showInformationMessage(
                   msg, DialogResponses.all, DialogResponses.yes,

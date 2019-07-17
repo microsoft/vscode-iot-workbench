@@ -3,22 +3,13 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {FileNames} from '../../constants';
+import {FileNames, ScaffoldType} from '../../constants';
 import {TelemetryContext} from '../../telemetry';
 import * as utils from '../../utils';
+import {DigitalTwinFileNames} from '../DigitalTwinConstants';
 
 import {AnsiCCodeGeneratorBase} from './Interfaces/AnsiCCodeGeneratorBase';
 import {DeviceConnectionType} from './Interfaces/CodeGenerator';
-
-const ansiConstants = {
-  languageName: 'ansic',
-  digitalTwin: 'digitaltwin',
-  projectType: 'visualstudio',
-  utilitiesFolderName: 'utilities'
-};
-
-const templateFileNames =
-    ['Readme.md', 'main.c', 'CMakeLists.txt', 'iotproject.vcxproj'];
 
 export class AnsiCCodeGenVSImpl extends AnsiCCodeGeneratorBase {
   constructor(
@@ -35,39 +26,40 @@ export class AnsiCCodeGenVSImpl extends AnsiCCodeGeneratorBase {
     const retvalue =
         await this.GenerateAnsiCCodeCore(targetPath, filePath, interfaceDir);
 
-    let folderName;
+    let templateFolderName;
     switch (this.provisionType) {
       case DeviceConnectionType.DeviceConnectionString:
-        folderName = 'connectionstring';
+        templateFolderName = 'ansic_vs_connectionstring';
         break;
       case DeviceConnectionType.IoTCSasKey:
-        folderName = 'iotcsaskey';
+        templateFolderName = 'ansic_vs_iotcsaskey';
         break;
       default:
         throw new Error('Unsupported device provision type.');
     }
 
-    const resouceFolder = this.context.asAbsolutePath(path.join(
-        FileNames.resourcesFolderName, ansiConstants.digitalTwin,
-        ansiConstants.languageName, ansiConstants.projectType, folderName));
+
+    const templateFolder = this.context.asAbsolutePath(path.join(
+        FileNames.resourcesFolderName, FileNames.templatesFolderName,
+        templateFolderName));
+    const templateFilesInfo = utils.getTemplateFilesInfo(templateFolder);
 
     const projectName = path.basename(targetPath);
 
     const projectNamePattern = /{PROJECT_NAME}/g;
     const capabilityModelNamePattern = /{CAPABILITYMODELNAME}/g;
-    let replaceStr = '';
 
-    templateFileNames.forEach(fileName => {
-      const source = path.join(resouceFolder, fileName);
-      const target = path.join(targetPath, fileName);
-      const fileContent = fs.readFileSync(source, 'utf8');
-      if (fileName === 'iotproject.vcxproj') {
+    for (const fileInfo of templateFilesInfo) {
+      if (fileInfo.fileContent === undefined) {
+        continue;
+      }
+      if (fileInfo.fileName === 'iotproject.vcxproj') {
         const utilitiesHPattern = /{UTILITIESFILES_H}/g;
         const utilitiesCPattern = /{UTILITIESFILES_C}/g;
         let includedHeaderFiles = '';
         let includedCFiles = '';
         const utilitiesPath =
-            path.join(targetPath, ansiConstants.utilitiesFolderName);
+            path.join(targetPath, DigitalTwinFileNames.utilitiesFolderName);
         const utilitiesFiles = fs.listSync(utilitiesPath);
         utilitiesFiles.forEach(utilitiesFile => {
           const name = path.basename(utilitiesFile);
@@ -79,15 +71,17 @@ export class AnsiCCodeGenVSImpl extends AnsiCCodeGeneratorBase {
                 `    <ClInclude Include="utilities\\${name}" />\r\n`;
           }
         });
-        replaceStr =
-            fileContent.replace(utilitiesHPattern, includedHeaderFiles)
+        fileInfo.fileContent =
+            fileInfo.fileContent.replace(utilitiesHPattern, includedHeaderFiles)
                 .replace(utilitiesCPattern, includedCFiles)
                 .replace(capabilityModelNamePattern, capabilityModelName);
       } else {
-        replaceStr = fileContent.replace(projectNamePattern, projectName);
+        fileInfo.fileContent =
+            fileInfo.fileContent.replace(projectNamePattern, projectName);
       }
-      fs.writeFileSync(target, replaceStr);
-    });
+      await utils.generateTemplateFile(
+          targetPath, ScaffoldType.Local, fileInfo);
+    }
 
     if (retvalue) {
       try {

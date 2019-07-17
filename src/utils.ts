@@ -322,6 +322,27 @@ export class InternalConfig {
   }
 }
 
+export function getTemplateFilesInfo(templateFolder: string):
+    TemplateFileInfo[] {
+  const templateFilesInfo: TemplateFileInfo[] = [];
+
+  const templateFiles = path.join(templateFolder, FileNames.templateFiles);
+  const templateFilesJson = JSON.parse(fs.readFileSync(templateFiles, 'utf8'));
+
+  templateFilesJson.templateFiles.forEach((fileInfo: TemplateFileInfo) => {
+    const filePath =
+        path.join(templateFolder, fileInfo.sourcePath, fileInfo.fileName);
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    templateFilesInfo.push({
+      fileName: fileInfo.fileName,
+      sourcePath: fileInfo.sourcePath,
+      targetPath: fileInfo.targetPath,
+      fileContent
+    });
+  });
+
+  return templateFilesInfo;
+}
 
 export async function generateTemplateFile(
     root: string, type: ScaffoldType,

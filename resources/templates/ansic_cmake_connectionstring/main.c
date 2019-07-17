@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
         LogError("Failed to initialize the application.");
         return 1;
     }
-    
+
     while (1)
     {
         pnp_device_run();

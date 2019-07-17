@@ -40,7 +40,7 @@ For more details about setting up development environment for compiling the C De
     cmake .. -Duse_prov_client=ON -Dhsm_type_symm_key:BOOL=ON
     ```
 
-1. Open the `..\cmake\azure_iot_sdks.sln` in Visual Studio 2017 and build the solution. 
+1. Open the `..\cmake\azure_iot_sdks.sln` in Visual Studio 2017 and build the solution.
 
 1. Once the build success, you can test it by specifying the IoT Hub device connection string as its parameter.
     ```bash

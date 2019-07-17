@@ -113,3 +113,8 @@ export enum DevelopEnvironment {
   CONTAINER = 'in container',
   LOCAL_ENV = 'in local environment'
 }
+
+export enum TemplateTag {
+  general = 'general',
+  digitaltwin = 'digitaltwin'
+}

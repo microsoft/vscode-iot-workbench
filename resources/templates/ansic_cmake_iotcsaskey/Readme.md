@@ -29,14 +29,14 @@ For more details about setting up development environment for compiling the C De
     * Open `main.c`. Specify paramaters requested by the commented **TODO's** for your configuration.
 
       ```c
-      // TODO: Specify DPS scope ID if you intend on using IoT Central. 
+      // TODO: Specify DPS scope ID if you intend on using IoT Central.
       static const char* dpsIdScope = "[DPS Id Scope]";
 
       // TODO: Specify symmetric keys if you intend on using IoT Central and symmetric key based auth.
       static const char* sasKey = "[DPS symmetric key]";
 
       // TODO: specify your device registration ID
-      static const char* registrationId = "[registration Id]"; 
+      static const char* registrationId = "[registration Id]";
 
       // TODO: Fill in DIGITALTWIN_DEVICE_CAPABILITY_MODEL_URI and DIGITALTWIN_MODEL_REPOSITORY_URI if you indend on using IoT Central.
       #define DIGITALTWIN_DEVICE_CAPABILITY_MODEL_URI "[your capabilityModel Id]"
