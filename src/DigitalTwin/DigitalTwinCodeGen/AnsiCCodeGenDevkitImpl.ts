@@ -1,11 +1,10 @@
-import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {FileNames, ScaffoldType} from '../../constants';
 import {FileUtility} from '../../FileUtility';
 import {AZ3166Device} from '../../Models/AZ3166Device';
-import {ProjectTemplateType, TemplateFileInfo} from '../../Models/Interfaces/ProjectTemplate';
+import {ProjectTemplateType} from '../../Models/Interfaces/ProjectTemplate';
 import {IoTWorkspaceProject} from '../../Models/IoTWorkspaceProject';
 import {TelemetryContext} from '../../telemetry';
 import * as utils from '../../utils';
@@ -15,8 +14,7 @@ import {DeviceConnectionType} from './Interfaces/CodeGenerator';
 
 const constants = {
   deviceDefaultFolderName: 'Device',
-  deviceConnectionStringSketchFileName: 'dt_device_connectionstring.ino',
-  deviceIotcSasKeySketchFileName: 'dt_device_iotcsaskey.ino'
+  srcFolderName: 'src'
 };
 
 export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
@@ -31,9 +29,7 @@ export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
       targetPath: string, filePath: string, capabilityModelName: string,
       interfaceDir: string): Promise<boolean> {
     // Invoke PnP toolset to generate the code
-    const libPath = path.join(
-        targetPath, constants.deviceDefaultFolderName, 'src',
-        capabilityModelName);
+    const libPath = path.join(targetPath, constants.deviceDefaultFolderName, constants.srcFolderName, capabilityModelName);
     await FileUtility.mkdirRecursively(ScaffoldType.Local, libPath);
 
     const codeGenerateResult =

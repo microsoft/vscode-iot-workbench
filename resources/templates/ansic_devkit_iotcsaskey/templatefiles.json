@@ -1,7 +1,7 @@
 {
   "templateFiles": [
     {
-        "fileName": "dt_device_iotcsaskey.ino",
+        "fileName": "main.ino",
         "sourcePath" : ".",
         "targetPath" : "."
     }
