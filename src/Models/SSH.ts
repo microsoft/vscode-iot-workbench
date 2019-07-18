@@ -5,6 +5,7 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as ssh2 from 'ssh2';
 import * as vscode from 'vscode';
+import {channelShowAndAppendLine} from '../utils';
 
 export class SSH {
   private _client: ssh2.Client;
@@ -63,16 +64,15 @@ export class SSH {
           const files = fs.listTreeSync(filePath);
 
           if (this._channel) {
-            this._channel.show();
-            this._channel.appendLine('');
+            channelShowAndAppendLine(this._channel, '');
           }
 
           const conn = this._client;
           conn.sftp(async (err, sftp) => {
             if (err) {
               if (this._channel) {
-                this._channel.appendLine(`SFTP Error:`);
-                this._channel.appendLine(err.message);
+                channelShowAndAppendLine(this._channel, `SFTP Error:`);
+                channelShowAndAppendLine(this._channel, err.message);
               }
               return resolve(false);
             }
@@ -86,7 +86,8 @@ export class SSH {
                       'Cancel');
               if (overwriteOption === 'Cancel') {
                 if (this._channel) {
-                  this._channel.appendLine('Device upload cancelled.');
+                  channelShowAndAppendLine(
+                      this._channel, 'Device upload cancelled.');
                 }
                 vscode.window.showWarningMessage('Device upload cancelled.');
                 return resolve(true);
@@ -111,7 +112,8 @@ export class SSH {
               const rmDirRes = await this.shell(`rm -rf ${remoteRootPath}`);
               if (!rmDirRes) {
                 if (this._channel) {
-                  this._channel.appendLine(
+                  channelShowAndAppendLine(
+                      this._channel,
                       `Directory Error: remove ${remoteRootPath} failed.`);
                 }
                 return resolve(false);
@@ -122,8 +124,9 @@ export class SSH {
 
             if (!rootPathCreated) {
               if (this._channel) {
-                this._channel.appendLine(`Directory Error: ${remoteRootPath}`);
-                this._channel.appendLine(err);
+                channelShowAndAppendLine(
+                    this._channel, `Directory Error: ${remoteRootPath}`);
+                channelShowAndAppendLine(this._channel, err);
               }
               return resolve(false);
             }
@@ -195,7 +198,8 @@ export class SSH {
             const pathCreated = await this.ensureDir(sftp, remotePath);
             if (!pathCreated) {
               if (this._channel) {
-                this._channel.appendLine(`Directory Error: ${relativePath}`);
+                channelShowAndAppendLine(
+                    this._channel, `Directory Error: ${relativePath}`);
               }
               return resolve(false);
             }
@@ -204,14 +208,16 @@ export class SSH {
             sftp.fastPut(filePath, remotePath, err => {
               if (err) {
                 if (this._channel) {
-                  this._channel.appendLine(`File Error: ${relativePath}`);
+                  channelShowAndAppendLine(
+                      this._channel, `File Error: ${relativePath}`);
                 }
 
                 return resolve(false);
               }
 
               if (this._channel) {
-                this._channel.appendLine(`File Uploaded: ${relativePath}`);
+                channelShowAndAppendLine(
+                    this._channel, `File Uploaded: ${relativePath}`);
               }
               return resolve(true);
             });
@@ -239,15 +245,14 @@ export class SSH {
           conn.shell((err, stream) => {
             if (err) {
               if (this._channel) {
-                this._channel.appendLine(`Shell Error:`);
-                this._channel.appendLine(err.message);
+                channelShowAndAppendLine(this._channel, `Shell Error:`);
+                channelShowAndAppendLine(this._channel, err.message);
               }
               return resolve(false);
             }
 
             if (this._channel) {
-              this._channel.show();
-              this._channel.appendLine('');
+              channelShowAndAppendLine(this._channel, '');
             }
 
             stream
@@ -255,7 +260,7 @@ export class SSH {
                     () => {
                       clearTimeout(timeoutCounter);
                       if (this._channel) {
-                        this._channel.appendLine('');
+                        channelShowAndAppendLine(this._channel, '');
                       }
                       return resolve(true);
                     })

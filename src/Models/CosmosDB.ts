@@ -13,6 +13,7 @@ import {AzureComponentConfig, AzureConfigFileHandler, AzureConfigs, ComponentInf
 import {ARMTemplate, AzureUtility} from './AzureUtility';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
+import {channelShowAndAppendLine} from '../utils';
 
 export class CosmosDB implements Component, Provisionable {
   dependencies: DependencyConfig[] = [];
@@ -121,8 +122,7 @@ export class CosmosDB implements Component, Provisionable {
 
     if (!cosmosDbNameChoose.description) {
       if (this.channel) {
-        this.channel.show();
-        this.channel.appendLine('Creating Cosmos DB...');
+        channelShowAndAppendLine(this.channel, 'Creating Cosmos DB...');
       }
       const cosmosDBArmTemplatePath = this.extensionContext.asAbsolutePath(
           path.join(FileNames.resourcesFolderName, 'arm', 'cosmosdb.json'));
@@ -138,8 +138,8 @@ export class CosmosDB implements Component, Provisionable {
           !cosmosDBDeploy.properties.outputs.cosmosDBAccountKey) {
         throw new Error('Provision Cosmos DB failed.');
       }
-      this.channel.show();
-      this.channel.appendLine(JSON.stringify(cosmosDBDeploy, null, 4));
+      channelShowAndAppendLine(
+          this.channel, JSON.stringify(cosmosDBDeploy, null, 4));
 
       for (const dependency of this.dependencies) {
         const componentConfig = await this.azureConfigHandler.getComponentById(
@@ -159,15 +159,14 @@ export class CosmosDB implements Component, Provisionable {
       cosmosDbKey = cosmosDBDeploy.properties.outputs.cosmosDBAccountKey.value;
     } else {
       if (this.channel) {
-        this.channel.show();
-        this.channel.appendLine('Creating Cosmos DB...');
+        channelShowAndAppendLine(this.channel, 'Creating Cosmos DB...');
       }
 
       cosmosDbName = cosmosDbNameChoose.label;
       const cosmosDbDetail = this.getCosmosDbByNameFromCache(cosmosDbName);
       if (cosmosDbDetail) {
-        this.channel.show();
-        this.channel.appendLine(JSON.stringify(cosmosDbDetail, null, 4));
+        channelShowAndAppendLine(
+            this.channel, JSON.stringify(cosmosDbDetail, null, 4));
       }
       cosmosDbKey = await this.getCosmosDbKey(cosmosDbName);
     }
@@ -262,8 +261,7 @@ export class CosmosDB implements Component, Provisionable {
     });
 
     if (this.channel) {
-      this.channel.show();
-      this.channel.appendLine('Cosmos DB provision succeeded.');
+      channelShowAndAppendLine(this.channel, 'Cosmos DB provision succeeded.');
     }
     return true;
   }
@@ -319,8 +317,7 @@ export class CosmosDB implements Component, Provisionable {
     });
 
     if (this.channel) {
-      this.channel.show();
-      this.channel.appendLine(JSON.stringify(apiRes, null, 2));
+      channelShowAndAppendLine(this.channel, JSON.stringify(apiRes, null, 2));
     }
     return apiRes;
   }
