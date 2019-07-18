@@ -4,9 +4,9 @@
 #include <stdio.h>
 #include "AZ3166WiFi.h"
 #include "IoT_DevKit_HW.h"
-#include "azureiotcerts.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/xlogging.h"
+#include "certs/certs.h"
 #include "src/{PATHNAME}/pnp_device.h"
 
 // IoT Central requires DPS.  Include required header and constants
