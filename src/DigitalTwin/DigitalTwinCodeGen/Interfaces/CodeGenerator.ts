@@ -6,7 +6,7 @@ export enum CodeGenProjectType {
 
 export enum DeviceConnectionType {
   DeviceConnectionString = 'DeviceConnectionString',
-  IoTCSasKey = 'IoTCSasKey',
+  SymmetricKey = 'SymmetricKey',
   IoTCX509 = 'IoTCX509'
 }
 

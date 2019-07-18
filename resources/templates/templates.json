@@ -107,7 +107,7 @@
             "type": "VisualStudio",
             "language": "ansic",
             "tag": "digitaltwin",
-            "connectionType": "IoTCSasKey"
+            "connectionType": "SymmetricKey"
         },
         {
             "platform": "",
@@ -133,7 +133,7 @@
             "type": "CMake",
             "language": "ansic",
             "tag": "digitaltwin",
-            "connectionType": "IoTCSasKey"
+            "connectionType": "SymmetricKey"
         },
         {
             "platform": "",
@@ -159,7 +159,7 @@
             "type": "IoTDevKit",
             "language": "ansic",
             "tag": "digitaltwin",
-            "connectionType": "IoTCSasKey"
+            "connectionType": "SymmetricKey"
         }
     ]
 }

@@ -4,7 +4,6 @@
 'use strict';
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import * as fs from 'fs-plus';
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as utils from './utils';
@@ -13,7 +12,7 @@ import {TelemetryContext} from './telemetry';
 import {FileNames, ScaffoldType, PlatformType, TemplateTag} from './constants';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import {FileUtility} from './FileUtility';
-import {ProjectTemplate, ProjectTemplateType, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
+import {ProjectTemplate, ProjectTemplateType} from './Models/Interfaces/ProjectTemplate';
 import {Platform} from './Models/Interfaces/Platform';
 import {RemoteExtension} from './Models/RemoteExtension';
 
