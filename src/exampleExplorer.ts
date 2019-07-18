@@ -85,15 +85,13 @@ export class ExampleExplorer {
     try {
       zip.extractAllTo(tempPath, true);
       clearInterval(loading);
-      channel.show();
-      channel.appendLine('');
-      channel.appendLine('Example loaded.');
+      utils.channelShowAndAppendLine(channel, '');
+      utils.channelShowAndAppendLine(channel, 'Example loaded.');
       await this.moveTempFiles(fsPath);
       return true;
     } catch (error) {
       clearInterval(loading);
-      channel.show();
-      channel.appendLine('');
+      utils.channelShowAndAppendLine(channel, '');
       throw error;
     }
   }
@@ -319,7 +317,7 @@ export class ExampleExplorer {
       return true;
     }
 
-    channel.appendLine('Downloading example package...');
+    utils.channelShowAndAppendLine(channel, 'Downloading example package...');
     const res =
         await this.downloadExamplePackage(context, channel, url, fsPath);
     if (res) {

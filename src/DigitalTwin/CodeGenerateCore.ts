@@ -10,7 +10,7 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 
 import request = require('request-promise');
-import {FileNames, ConfigKey, ScaffoldType} from '../constants';
+import {FileNames, ConfigKey} from '../constants';
 import {TelemetryContext} from '../telemetry';
 import {DigitalTwinConstants, CodeGenConstants, DigitalTwinFileNames} from './DigitalTwinConstants';
 import {CodeGenProjectType, DeviceConnectionType, PnpLanguage} from './DigitalTwinCodeGen/Interfaces/CodeGenerator';
@@ -21,7 +21,6 @@ import * as utils from '../utils';
 import {DigitalTwinMetamodelRepositoryClient} from './DigitalTwinApi/DigitalTwinMetamodelRepositoryClient';
 import {DigitalTwinConnectionStringBuilder} from './DigitalTwinApi/DigitalTwinConnectionStringBuilder';
 import {PnpProjectTemplateType, ProjectTemplate, PnpDeviceConnectionType} from '../Models/Interfaces/ProjectTemplate';
-import {FileUtility} from '../FileUtility';
 import {DialogResponses} from '../DialogResponses';
 
 const constants = {
@@ -82,10 +81,10 @@ export class CodeGenerateCore {
     const upgradestate: boolean =
         await this.UpgradeCodeGenerator(context, channel);
     if (!upgradestate) {
-      channel.show();
-      channel.appendLine(`${
+      const message = `${
           DigitalTwinConstants
-              .dtPrefix} Unable to upgrade the Code Generator to the latest version.\r\n Trying to use the existing version.`);
+              .dtPrefix} Unable to upgrade the Code Generator to the latest version.\r\n Trying to use the existing version.`;
+      utils.channelShowAndAppendLine(channel, message);
     }
 
     if (!vscode.workspace.workspaceFolders) {
@@ -108,8 +107,8 @@ export class CodeGenerateCore {
     const capabilityModelFileSelection =
         await this.SelectCapabilityFile(rootPath, interfaceItems);
     if (capabilityModelFileSelection === undefined) {
-      channel.show();
-      channel.appendLine(`Fail to select capability model file.`);
+      const message = `Fail to select capability model file.`;
+      utils.channelShowAndAppendLine(channel, message);
       return false;
     }
 
@@ -169,16 +168,16 @@ export class CodeGenerateCore {
     // Step 2: Get project name
     const codeGenProjectName = await this.GetCodeGenProjectName(rootPath);
     if (codeGenProjectName === undefined) {
-      channel.show();
-      channel.appendLine(
-          `The input project name is not valid. Generating code would stop.`);
+      const message =
+          `The input project name is not valid. Generating code would stop.`;
+      utils.channelShowAndAppendLine(channel, message);
       return false;
     }
 
     const projectPath = path.join(rootPath, codeGenProjectName);
-    channel.show();
-    channel.appendLine(`${DigitalTwinConstants.dtPrefix} Folder ${
-        projectPath} is selected for the generated code.`);
+    const message = `${DigitalTwinConstants.dtPrefix} Folder ${
+        projectPath} is selected for the generated code.`;
+    utils.channelShowAndAppendLine(channel, message);
 
     // Step 3: Select language
     const languageItems: vscode.QuickPickItem[] = [];
@@ -196,16 +195,16 @@ export class CodeGenerateCore {
     const codeGenProjectType =
         await this.SelectProjectType(languageSelection.label, context);
     if (codeGenProjectType === undefined) {
-      channel.show();
-      channel.appendLine(`Fail to select code gen project type.`);
+      const message = `Fail to select code gen project type.`;
+      utils.channelShowAndAppendLine(channel, message);
       return false;
     }
 
     // Step 5: Select device connection string type
     const connectionType = await this.SelectConnectionType(context);
     if (connectionType === undefined) {
-      channel.show();
-      channel.appendLine(`Fail to select code gen connection type.`);
+      const message = `Fail to select code gen connection type.`;
+      utils.channelShowAndAppendLine(channel, message);
       return false;
     }
 
@@ -226,8 +225,8 @@ export class CodeGenerateCore {
           if (!result) {
             const message = `Unable to get the interface with Id ${
                 schema} online. Please make sure the file exists in server.`;
-            channel.show();
-            channel.appendLine(`${DigitalTwinConstants.dtPrefix} ${message}`);
+            utils.channelShowAndAppendLine(
+                channel, `${DigitalTwinConstants.dtPrefix} ${message}`);
             vscode.window.showWarningMessage(message);
             return false;
           }
@@ -542,18 +541,18 @@ export class CodeGenerateCore {
           fs.writeFileSync(
               path.join(targetFolder, fileName),
               JSON.stringify(fileMetaData.content, null, 4));
-          channel.show();
-          channel.appendLine(
+          const message =
               `${DigitalTwinConstants.dtPrefix} Download interface with id ${
-                  urnId}, name: ${fileName} into ${targetFolder} completed.`);
+                  urnId}, name: ${fileName} into ${targetFolder} completed.`;
+          utils.channelShowAndAppendLine(channel, message);
           return true;
         }
       } catch (error) {
         // Do nothing. Try to download the interface from global repo
-        channel.show();
-        channel.appendLine(`${
+        const message = `${
             DigitalTwinConstants.dtPrefix} Unable to get interface with id ${
-            urnId} from organizational Model Repository, try global repository instead.`);
+            urnId} from organizational Model Repository, try global repository instead.`;
+        utils.channelShowAndAppendLine(channel, message);
       }
 
       // Try to download interface file from public repo
@@ -565,18 +564,18 @@ export class CodeGenerateCore {
           fs.writeFileSync(
               path.join(targetFolder, fileName),
               JSON.stringify(fileMetaData.content, null, 4));
-          channel.show();
-          channel.appendLine(
+          const message =
               `${DigitalTwinConstants.dtPrefix} Download interface with id ${
                   urnId}, name: ${fileName} from global repository into ${
-                  targetFolder} completed.`);
+                  targetFolder} completed.`;
+          utils.channelShowAndAppendLine(channel, message);
           return true;
         }
       } catch (error) {
-        channel.show();
-        channel.appendLine(
+        const message =
             `${DigitalTwinConstants.dtPrefix} Unable to get interface with id ${
-                urnId} from global Model Repository. errorcode: ${error.code}`);
+                urnId} from global Model Repository. errorcode: ${error.code}`;
+        utils.channelShowAndAppendLine(channel, message);
       }
     }
     return false;
@@ -622,9 +621,9 @@ export class CodeGenerateCore {
     }
 
     if (!targetConfigItem) {
-      channel.show();
-      channel.appendLine(`Unable to get the updated version the ${
-          DigitalTwinConstants.productName} Code Generator.`);
+      const message = `Unable to get the updated version the ${
+          DigitalTwinConstants.productName} Code Generator.`;
+      utils.channelShowAndAppendLine(channel, message);
       return false;
     }
 
@@ -662,9 +661,9 @@ export class CodeGenerateCore {
                 DigitalTwinConstants.productName} Code Generator...`
           },
           async () => {
-            channel.show();
-            channel.appendLine(`Start upgrading ${
-                DigitalTwinConstants.productName} Code Generator...`);
+            const message = `Start upgrading ${
+                DigitalTwinConstants.productName} Code Generator...`;
+            utils.channelShowAndAppendLine(channel, message);
 
             const configItem = targetConfigItem as CodeGeneratorConfigItem;
             let downloadOption: request.OptionsWithUri;
@@ -697,43 +696,47 @@ export class CodeGenerateCore {
             }, 1000);
 
             try {
-              channel.show();
-              channel.appendLine(`Step 1: Downloading package for ${
-                  DigitalTwinConstants.productName} Code Generator...`);
+              const message = `Step 1: Downloading package for ${
+                  DigitalTwinConstants.productName} Code Generator...`;
+              utils.channelShowAndAppendLine(channel, message);
               const zipData = await request(downloadOption).promise();
               const tempPath =
                   path.join(os.tmpdir(), FileNames.iotworkbenchTempFolder);
               const filePath = path.join(tempPath, `${md5value}.zip`);
               fs.writeFileSync(filePath, zipData);
               clearInterval(loading);
-              channel.appendLine('Download complete');
+              utils.channelShowAndAppendLine(channel, 'Download complete');
 
               // Validate hash code
-              channel.appendLine(
-                  'Step 2: Validating hash code for the package...');
+              utils.channelShowAndAppendLine(
+                  channel, 'Step 2: Validating hash code for the package...');
 
               const hashvalue = await fileHash(filePath);
               if (hashvalue !== md5value) {
                 throw new Error('Validating hash code failed.');
               } else {
-                channel.appendLine('Validating hash code successfully.');
+                utils.channelShowAndAppendLine(
+                    channel, 'Validating hash code successfully.');
               }
 
-              channel.appendLine(`Step 3: Extracting Azure IoT ${
-                  DigitalTwinConstants.productName} Code Generator.`);
+              utils.channelShowAndAppendLine(
+                  channel,
+                  `Step 3: Extracting Azure IoT ${
+                      DigitalTwinConstants.productName} Code Generator.`);
 
               await extract(filePath, codeGenCommandPath);
-              channel.appendLine(`${
-                  DigitalTwinConstants
-                      .productName} Code Generator updated successfully.`);
+              utils.channelShowAndAppendLine(
+                  channel,
+                  `${
+                      DigitalTwinConstants
+                          .productName} Code Generator updated successfully.`);
               await ConfigHandler.update(
                   ConfigKey.codeGeneratorVersion,
                   configItem.codeGeneratorVersion,
                   vscode.ConfigurationTarget.Global);
             } catch (error) {
               clearInterval(loading);
-              channel.show();
-              channel.appendLine('');
+              utils.channelShowAndAppendLine(channel, '');
               throw error;
             }
           });

@@ -248,15 +248,13 @@ export async function askAndOpenInRemote(
           operation} Operation failed and user fail to install Remote Extension.`;
       const message = `Remote extension is not available. Please install ${
           DependentExtensions.remote} first.`;
-      channel.show();
-      channel.appendLine(message);
+      channelShowAndAppendLine(channel, message);
       return false;
     }
     await vscode.commands.executeCommand('openindocker.reopenInContainer');
   } else {
     const message = `${operation} can only be executed in remote container.`;
-    channel.show();
-    channel.appendLine(message);
+    channelShowAndAppendLine(channel, message);
     telemetryContext.properties.errorMessage = 'Operation failed.';
   }
 
@@ -424,4 +422,10 @@ export async function handleIoTWorkspaceProjectFolder(
 
   await askAndNewProject(telemetryContext);
   return true;
+}
+
+export function channelShowAndAppendLine(
+    channel: vscode.OutputChannel, message: string) {
+  channel.show();
+  channel.appendLine(message);
 }

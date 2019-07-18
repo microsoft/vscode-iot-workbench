@@ -34,10 +34,11 @@ export abstract class AnsiCCodeGeneratorBase implements CodeGenerator {
         filePath}" --language ansic --output "${targetPath}" --interfaceDir "${
         interfaceDir}"`;
 
-    this.channel.show();
-    this.channel.appendLine('IoT Workbench: scaffold code stub.');
+    let message = 'IoT Workbench: scaffold code stub.';
+    utils.channelShowAndAppendLine(this.channel, message);
     await utils.runCommand(command, [], cmdPath, this.channel);
-    this.channel.appendLine('IoT Workbench: scaffold code stub completed.');
+    message = 'IoT Workbench: scaffold code stub completed.';
+    utils.channelShowAndAppendLine(this.channel, message);
     return true;
   }
 }
