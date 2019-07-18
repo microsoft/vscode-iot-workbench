@@ -22,6 +22,7 @@ import {DigitalTwinMetamodelRepositoryClient} from './DigitalTwinApi/DigitalTwin
 import {DigitalTwinConnectionStringBuilder} from './DigitalTwinApi/DigitalTwinConnectionStringBuilder';
 import {PnpProjectTemplateType, ProjectTemplate, PnpDeviceConnectionType} from '../Models/Interfaces/ProjectTemplate';
 import {FileUtility} from '../FileUtility';
+import {DialogResponses} from '../DialogResponses';
 
 const constants = {
   idName: '@id',
@@ -88,13 +89,16 @@ export class CodeGenerateCore {
     }
 
     if (!vscode.workspace.workspaceFolders) {
+      const message =
+          'No folder is currently open in Visual Studio Code. Please select a folder first.';
+      vscode.window.showWarningMessage(message);
       return false;
     }
 
     const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
     if (!rootPath) {
       const message =
-          'Unable to find the folder for device model files. Please select a folder first';
+          'Unable to find the folder for device model files. Please select a folder first.';
       vscode.window.showWarningMessage(message);
       return false;
     }
@@ -171,7 +175,6 @@ export class CodeGenerateCore {
     }
 
     const projectPath = path.join(rootPath, codeGenProjectName);
-    await FileUtility.mkdirRecursively(ScaffoldType.Local, projectPath);
     channel.appendLine(`${DigitalTwinConstants.dtPrefix} Folder ${
         projectPath} is selected for the generated code.`);
 
@@ -209,7 +212,7 @@ export class CodeGenerateCore {
         JSON.parse(fs.readFileSync(capabilityModelFilePath, 'utf8'));
 
     const implementedInterfaces = capabilityModel['implements'];
-
+    utils.mkdirRecursivelySync(projectPath);
     for (const interfaceItem of implementedInterfaces) {
       const schema = interfaceItem.schema;
       if (typeof schema === 'string') {
@@ -345,7 +348,7 @@ export class CodeGenerateCore {
           return connectionType.name === deviceConnectionSelection.label;
         });
 
-    const connectionType: DeviceConnectionType = (DeviceConnectionType)
+    const connectionType: DeviceConnectionType = DeviceConnectionType
         [deviceConnection.type as keyof typeof DeviceConnectionType];
 
     return connectionType;
@@ -368,18 +371,13 @@ export class CodeGenerateCore {
 
     // select the application name for code gen
     const codeGenProjectName = await vscode.window.showInputBox({
-      value: candidateName,
-      prompt: 'Please specify the project name.',
+      placeHolder: `${candidateName}`,
+      prompt: `Please specify the project name:`,
       ignoreFocusOut: true,
       validateInput: (applicationName: string) => {
         if (!/^([a-z0-9_]|[a-z0-9_][-a-z0-9_.]*[a-z0-9_])(\.ino)?$/i.test(
                 applicationName)) {
           return 'Project name can only contain letters, numbers, "-" and ".", and cannot start or end with "-" or ".".';
-        }
-
-        const projectPath = path.join(rootPath, applicationName);
-        if (fs.isDirectorySync(projectPath)) {
-          return `${projectPath} exists, please choose another name.`;
         }
         return;
       }
@@ -389,7 +387,18 @@ export class CodeGenerateCore {
       return;
     }
 
-    return codeGenProjectName;
+    const projectPath = path.join(rootPath, codeGenProjectName);
+
+    if (fs.isDirectorySync(projectPath)) {
+      const messge = `The folder ${
+          projectPath} already exists. Do you want to overwrite the contents in this folder?`;
+      const choice = await vscode.window.showWarningMessage(
+          messge, DialogResponses.yes, DialogResponses.no);
+      if (choice === DialogResponses.yes) {
+        return codeGenProjectName;
+      }
+    }
+    return;
   }
 
   async SelectProjectType(language: string, context: vscode.ExtensionContext):
@@ -432,8 +441,8 @@ export class CodeGenerateCore {
           return projectType.name === projectTypeSelection.label;
         });
 
-    const codeGenProjectType: CodeGenProjectType = (CodeGenProjectType)
-        [projectType.type as keyof typeof CodeGenProjectType];
+    const codeGenProjectType: CodeGenProjectType =
+        CodeGenProjectType[projectType.type as keyof typeof CodeGenProjectType];
 
     return codeGenProjectType;
   }
@@ -623,6 +632,10 @@ export class CodeGenerateCore {
     if (!fs.isDirectorySync(codeGenCommandPath)) {
       needUpgrade = true;
     } else {
+      const files = fs.listSync(codeGenCommandPath);
+      if (!files || files.length === 0) {
+        needUpgrade = true;
+      }
       // Then check the version
       const currentVersion =
           ConfigHandler.get<string>(ConfigKey.codeGeneratorVersion);
