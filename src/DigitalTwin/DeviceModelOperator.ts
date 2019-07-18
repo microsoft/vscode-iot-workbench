@@ -378,8 +378,8 @@ export class DeviceModelOperator {
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext, fileIds: string[],
       metaModelValue: string) {
-    channel.show();
     if (!fileIds || fileIds.length === 0) {
+      channel.show();
       channel.appendLine(`Please select the ${metaModelValue} to delete.`);
       return;
     }
@@ -400,23 +400,27 @@ export class DeviceModelOperator {
         new DigitalTwinMetamodelRepositoryClient(connectionString);
     const builder = DigitalTwinConnectionStringBuilder.Create(connectionString);
     for (const id of fileIds) {
+      channel.show();
       channel.appendLine(`${DigitalTwinConstants.dtPrefix} Start deleting ${
           metaModelValue} with id ${id}.`);
       try {
         if (metaModelType === MetaModelType.Interface) {
           await dtMetamodelRepositoryClient.DeleteInterfaceAsync(
               id, builder.RepositoryIdValue);
+          channel.show();
           channel.appendLine(
               `${DigitalTwinConstants.dtPrefix} Deleting interface with id ${
                   id} completed.`);
         } else {
           await dtMetamodelRepositoryClient.DeleteCapabilityModelAsync(
               id, builder.RepositoryIdValue);
+          channel.show();
           channel.appendLine(`${
               DigitalTwinConstants.dtPrefix} Deleting capabilty model with id ${
               id} completed.`);
         }
       } catch (error) {
+        channel.show();
         channel.appendLine(`${DigitalTwinConstants.dtPrefix} Deleting ${
             metaModelValue} with id ${id} failed. Error: ${error.message}`);
       }
@@ -427,8 +431,8 @@ export class DeviceModelOperator {
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext, fileIds: string[],
       metaModelValue: string, usePublicRepository: boolean) {
-    channel.show();
     if (!fileIds || fileIds.length === 0) {
+      channel.show();
       channel.appendLine(`${DigitalTwinConstants.dtPrefix} No ${
           DigitalTwinConstants.productName} model is selected.`);
       return;
@@ -537,8 +541,6 @@ export class DeviceModelOperator {
       throw new Error('User cancelled folder selection.');
     }
 
-    channel.show();
-
     // Get the file to submit:
     const fileItems: vscode.QuickPickItem[] = [];
 
@@ -642,6 +644,7 @@ export class DeviceModelOperator {
     const option: SubmitOptions = {overwriteChoice: OverwriteChoice.Unknown};
 
     for (const fileItem of interfaceFiles) {
+      channel.show();
       channel.appendLine(
           `${DigitalTwinConstants.dtPrefix} File to submit: ${fileItem.label}`);
       const filePath =
@@ -665,6 +668,7 @@ export class DeviceModelOperator {
     }
 
     for (const fileItem of capabilityModels) {
+      channel.show();
       channel.appendLine(
           `${DigitalTwinConstants.dtPrefix} File to submit: ${fileItem.label}`);
       const filePath =
@@ -703,6 +707,7 @@ export class DeviceModelOperator {
         const fileJson = JSON.parse(fileContent);
         fileId = fileJson[constants.idName];
       } catch (error) {
+        channel.show();
         channel.appendLine(`${DigitalTwinConstants.dtPrefix} ${
             fileName} is not a valid ${
             DigitalTwinConstants
@@ -719,12 +724,14 @@ export class DeviceModelOperator {
                 .productName} interface file. Please provide a valid file.`);
         return false;
       }
+      channel.show();
       channel.appendLine(
           `${DigitalTwinConstants.dtPrefix} Load and parse file: "${
               fileName}" successfully.`);
       // check whether file exists in model repo, try to update the file.
       try {
         // First, get the file to retrieve the latest etag.
+        channel.show();
         channel.appendLine(`${DigitalTwinConstants.dtPrefix} Connect to ${
             DigitalTwinConstants
                 .productName} Model Repository to check whether ${
@@ -755,6 +762,7 @@ export class DeviceModelOperator {
           }
         }
 
+        channel.show();
         channel.appendLine(`${DigitalTwinConstants.dtPrefix} Start updating ${
             DigitalTwinConstants.productName} interface with id:"${
             fileId}"... `);
@@ -772,6 +780,7 @@ export class DeviceModelOperator {
       } catch (error) {
         if (error.statusCode === 404)  // Not found
         {
+          channel.show();
           channel.appendLine(`${DigitalTwinConstants.dtPrefix} ${
               DigitalTwinConstants
                   .productName} interface file does not exist in server, creating ${
@@ -791,6 +800,7 @@ export class DeviceModelOperator {
         }
       }
     } catch (error) {
+      channel.show();
       channel.appendLine(`${DigitalTwinConstants.dtPrefix} Submitting ${
           DigitalTwinConstants.productName} interface: fileName: "${
           fileName}" failed, error: ${error.message}.`);
@@ -816,6 +826,7 @@ export class DeviceModelOperator {
         const fileJson = JSON.parse(fileContent);
         fileId = fileJson[constants.idName];
       } catch (error) {
+        channel.show();
         channel.appendLine(`${DigitalTwinConstants.dtPrefix} ${
             fileName} is not a valid ${
             DigitalTwinConstants
@@ -832,12 +843,14 @@ export class DeviceModelOperator {
                 .productName} capability model file. Please provide a valid file.`);
         return false;
       }
+      channel.show();
       channel.appendLine(
           `${DigitalTwinConstants.dtPrefix} Load and parse file: ${
               fileName} successfully.`);
       // check whether file exists in model repo, try to update the file.
       try {
         // First, get the file to retrieve the latest etag.
+        channel.show();
         channel.appendLine(`${DigitalTwinConstants.dtPrefix} Connect to ${
             DigitalTwinConstants
                 .productName} Model Repository to check whether "${
@@ -856,6 +869,7 @@ export class DeviceModelOperator {
                   msg, DialogResponses.all, DialogResponses.yes,
                   DialogResponses.no);
           if (result === DialogResponses.no) {
+            channel.show();
             channel.appendLine(`${DigitalTwinConstants.dtPrefix} Submitting ${
                 DigitalTwinConstants.productName} capability model cancelled.`);
             return false;
@@ -863,7 +877,7 @@ export class DeviceModelOperator {
             option.overwriteChoice = OverwriteChoice.OverwriteAll;
           }
         }
-
+        channel.show();
         channel.appendLine(`${DigitalTwinConstants.dtPrefix} Start updating ${
             DigitalTwinConstants.productName} capability model with id:"${
             fileId}"...`);
@@ -881,6 +895,7 @@ export class DeviceModelOperator {
       } catch (error) {
         if (error.statusCode === 404)  // Not found
         {
+          channel.show();
           channel.appendLine(`${DigitalTwinConstants.dtPrefix} ${
               DigitalTwinConstants
                   .productName} capability model file does not exist in server, creating "${
@@ -902,6 +917,7 @@ export class DeviceModelOperator {
         }
       }
     } catch (error) {
+      channel.show();
       channel.appendLine(`${DigitalTwinConstants.dtPrefix} Submitting ${
           DigitalTwinConstants.productName} capability model: fileName: "${
           fileName}" failed, error: ${error.message}.`);

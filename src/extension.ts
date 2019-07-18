@@ -341,8 +341,6 @@ export async function activate(context: vscode.ExtensionContext) {
       },
       '"');
 
-  const codeGenerator = new CodeGenerateCore();
-
   const telemetryContext: TelemetryContext = {
     properties: {result: 'Succeeded', error: '', errorMessage: ''},
     measurements: {duration: 0}
@@ -381,21 +379,6 @@ export async function activate(context: vscode.ExtensionContext) {
   const azureOperator = new AzureOperator(projectHostType);
   const exampleExplorer = new exampleExplorerModule.ExampleExplorer();
 
-  const codeGeneratorBinder =
-      codeGenerator.GenerateDeviceCodeStub.bind(codeGenerator);
-
-  const pnpEditModelsBinder =
-      deviceModelOperator.DownloadAndEditMetamodelFiles.bind(
-          deviceModelOperator);
-
-  const pnpCreateInterfaceBinder =
-      deviceModelOperator.CreateInterface.bind(deviceModelOperator);
-
-  const pnpCreateCapabilityModelBinder =
-      deviceModelOperator.CreateCapabilityModel.bind(deviceModelOperator);
-
-  const pnpSubmitModelFilesBinder =
-      deviceModelOperator.SubmitMetaModelFiles.bind(deviceModelOperator);
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with  registerCommand
   // The commandId parameter must match the command field in package.json
@@ -720,6 +703,9 @@ export async function activate(context: vscode.ExtensionContext) {
           telemetryWorkerInitialized = true;
         }
 
+        const pnpEditModelsBinder =
+            deviceModelOperator.DownloadAndEditMetamodelFiles.bind(
+                deviceModelOperator);
         telemetryModule.callWithTelemetry(
             EventNames.pnpEditModelsEvent, outputChannel, true, context,
             pnpEditModelsBinder, {}, fileIds, metaModelValue, publicRepository);
@@ -756,6 +742,10 @@ export async function activate(context: vscode.ExtensionContext) {
           telemetryModule.TelemetryWorker.Initialize(context);
           telemetryWorkerInitialized = true;
         }
+
+        const pnpCreateInterfaceBinder =
+            deviceModelOperator.CreateInterface.bind(deviceModelOperator);
+
         telemetryModule.callWithTelemetry(
             EventNames.pnpCreateInterfaceEvent, outputChannel, true, context,
             pnpCreateInterfaceBinder);
@@ -768,6 +758,10 @@ export async function activate(context: vscode.ExtensionContext) {
           telemetryModule.TelemetryWorker.Initialize(context);
           telemetryWorkerInitialized = true;
         }
+
+        const pnpCreateCapabilityModelBinder =
+            deviceModelOperator.CreateCapabilityModel.bind(deviceModelOperator);
+
         telemetryModule.callWithTelemetry(
             EventNames.pnpCreateCapabilityModelEvent, outputChannel, true,
             context, pnpCreateCapabilityModelBinder);
@@ -780,6 +774,9 @@ export async function activate(context: vscode.ExtensionContext) {
           telemetryModule.TelemetryWorker.Initialize(context);
           telemetryWorkerInitialized = true;
         }
+
+        const pnpSubmitModelFilesBinder =
+            deviceModelOperator.SubmitMetaModelFiles.bind(deviceModelOperator);
         telemetryModule.callWithTelemetry(
             EventNames.pnpSubmitMetaModelFilesEvent, outputChannel, true,
             context, pnpSubmitModelFilesBinder);
@@ -792,6 +789,11 @@ export async function activate(context: vscode.ExtensionContext) {
           telemetryModule.TelemetryWorker.Initialize(context);
           telemetryWorkerInitialized = true;
         }
+
+        const codeGenerator = new CodeGenerateCore();
+        const codeGeneratorBinder =
+            codeGenerator.GenerateDeviceCodeStub.bind(codeGenerator);
+
         telemetryModule.callWithTelemetry(
             EventNames.scaffoldDeviceStubEvent, outputChannel, true, context,
             codeGeneratorBinder);

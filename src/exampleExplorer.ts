@@ -68,7 +68,6 @@ export class ExampleExplorer {
   private async downloadExamplePackage(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       url: string, fsPath: string): Promise<boolean> {
-    channel.show();
     const loading = setInterval(() => {
       channel.append('.');
     }, 1000);
@@ -86,12 +85,14 @@ export class ExampleExplorer {
     try {
       zip.extractAllTo(tempPath, true);
       clearInterval(loading);
+      channel.show();
       channel.appendLine('');
       channel.appendLine('Example loaded.');
       await this.moveTempFiles(fsPath);
       return true;
     } catch (error) {
       clearInterval(loading);
+      channel.show();
       channel.appendLine('');
       throw error;
     }
