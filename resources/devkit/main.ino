@@ -1,7 +1,7 @@
 #include "src/{PATHNAME}/pnp_device.h"
 #include "IoT_DevKit_HW.h"
 #include "AZ3166WiFi.h"
-#include "azureiotcerts.h"
+#include "certs/certs.h"
 
 static bool iotHubConnected = false;
 
