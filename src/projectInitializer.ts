@@ -4,7 +4,6 @@
 'use strict';
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import * as fs from 'fs-plus';
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as utils from './utils';
@@ -13,7 +12,7 @@ import {TelemetryContext} from './telemetry';
 import {FileNames, ScaffoldType, PlatformType, TemplateTag} from './constants';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import {FileUtility} from './FileUtility';
-import {ProjectTemplate, ProjectTemplateType, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
+import {ProjectTemplate, ProjectTemplateType} from './Models/Interfaces/ProjectTemplate';
 import {Platform} from './Models/Interfaces/Platform';
 import {RemoteExtension} from './Models/RemoteExtension';
 
@@ -102,22 +101,8 @@ export class ProjectInitializer {
                     [template.type as keyof typeof ProjectTemplateType];
 
             const templateFolder = path.join(resourceRootPath, template.path);
-            const templateFiles =
-                require(path.join(templateFolder, FileNames.templateFiles));
-
-            const templateFilesInfo: TemplateFileInfo[] = [];
-            templateFiles.templateFiles.forEach(
-                (fileInfo: TemplateFileInfo) => {
-                  const filePath = path.join(
-                      templateFolder, fileInfo.sourcePath, fileInfo.fileName);
-                  const fileContent = fs.readFileSync(filePath, 'utf8');
-                  templateFilesInfo.push({
-                    fileName: fileInfo.fileName,
-                    sourcePath: fileInfo.sourcePath,
-                    targetPath: fileInfo.targetPath,
-                    fileContent
-                  });
-                });
+            const templateFilesInfo =
+                await utils.getTemplateFilesInfo(templateFolder);
 
             let project;
             if (template.platform === PlatformType.EMBEDDEDLINUX) {

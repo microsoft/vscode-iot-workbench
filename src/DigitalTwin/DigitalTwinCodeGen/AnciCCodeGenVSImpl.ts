@@ -9,7 +9,7 @@ import * as utils from '../../utils';
 import {DigitalTwinFileNames} from '../DigitalTwinConstants';
 
 import {AnsiCCodeGeneratorBase} from './Interfaces/AnsiCCodeGeneratorBase';
-import {DeviceConnectionType} from './Interfaces/CodeGenerator';
+import {CodeGenProjectType, DeviceConnectionType} from './Interfaces/CodeGenerator';
 
 export class AnsiCCodeGenVSImpl extends AnsiCCodeGeneratorBase {
   constructor(
@@ -26,23 +26,16 @@ export class AnsiCCodeGenVSImpl extends AnsiCCodeGeneratorBase {
     const retvalue =
         await this.GenerateAnsiCCodeCore(targetPath, filePath, interfaceDir);
 
-    let templateFolderName;
-    switch (this.provisionType) {
-      case DeviceConnectionType.DeviceConnectionString:
-        templateFolderName = 'ansic_vs_connectionstring';
-        break;
-      case DeviceConnectionType.IoTCSasKey:
-        templateFolderName = 'ansic_vs_iotcsaskey';
-        break;
-      default:
-        throw new Error('Unsupported device provision type.');
+    const templateFolderName = await utils.GetCodeGenTemplateFolderName(
+        this.context, CodeGenProjectType.VisualStudio, this.provisionType);
+    if (!templateFolderName) {
+      throw new Error(`Fail to get template folder name`);
     }
-
 
     const templateFolder = this.context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
         templateFolderName));
-    const templateFilesInfo = utils.getTemplateFilesInfo(templateFolder);
+    const templateFilesInfo = await utils.getTemplateFilesInfo(templateFolder);
 
     const projectName = path.basename(targetPath);
 

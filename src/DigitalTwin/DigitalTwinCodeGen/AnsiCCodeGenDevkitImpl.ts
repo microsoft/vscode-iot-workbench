@@ -10,7 +10,7 @@ import {TelemetryContext} from '../../telemetry';
 import * as utils from '../../utils';
 
 import {AnsiCCodeGeneratorBase} from './Interfaces/AnsiCCodeGeneratorBase';
-import {DeviceConnectionType} from './Interfaces/CodeGenerator';
+import {CodeGenProjectType, DeviceConnectionType} from './Interfaces/CodeGenerator';
 
 const constants = {
   deviceDefaultFolderName: 'Device',
@@ -47,22 +47,16 @@ export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
         this.context, this.channel, this.telemetryContext);
 
     // Generate device code for IoT DevKit according to the provision option.
-    let templateFolderName;
-    switch (this.connectionType) {
-      case DeviceConnectionType.DeviceConnectionString:
-        templateFolderName = 'ansic_devkit_connectionstring';
-        break;
-      case DeviceConnectionType.IoTCSasKey:
-        templateFolderName = 'ansic_devkit_iotcsaskey';
-        break;
-      default:
-        throw new Error('Unsupported device provision type.');
+    const templateFolderName = await utils.GetCodeGenTemplateFolderName(
+        this.context, CodeGenProjectType.IoTDevKit, this.connectionType);
+    if (!templateFolderName) {
+      throw new Error(`Fail to get template folder name`);
     }
 
     const templateFolder = this.context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
         templateFolderName));
-    const templateFilesInfo = utils.getTemplateFilesInfo(templateFolder);
+    const templateFilesInfo = await utils.getTemplateFilesInfo(templateFolder);
 
     for (const fileInfo of templateFilesInfo) {
       if (fileInfo.fileContent === undefined) {

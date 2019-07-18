@@ -8,10 +8,11 @@ import {setTimeout} from 'timers';
 import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
 
-import {AzureFunctionsLanguage, DependentExtensions, FileNames, GlobalConstants, OperationType, ScaffoldType} from './constants';
+import {AzureFunctionsLanguage, DependentExtensions, FileNames, GlobalConstants, OperationType, ScaffoldType, TemplateTag} from './constants';
 import {DialogResponses} from './DialogResponses';
+import {CodeGenProjectType, DeviceConnectionType} from './DigitalTwin/DigitalTwinCodeGen/Interfaces/CodeGenerator';
 import {FileUtility} from './FileUtility';
-import {TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
+import {ProjectTemplate, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
 import {RemoteExtension} from './Models/RemoteExtension';
 import {TelemetryContext} from './telemetry';
 
@@ -322,11 +323,15 @@ export class InternalConfig {
   }
 }
 
-export function getTemplateFilesInfo(templateFolder: string):
-    TemplateFileInfo[] {
+export async function getTemplateFilesInfo(templateFolder: string):
+    Promise<TemplateFileInfo[]> {
   const templateFilesInfo: TemplateFileInfo[] = [];
 
   const templateFiles = path.join(templateFolder, FileNames.templateFiles);
+  if (!await FileUtility.fileExists(ScaffoldType.Local, templateFiles)) {
+    throw new Error(`Template file ${templateFiles} does not exist.`);
+  }
+
   const templateFilesJson = JSON.parse(fs.readFileSync(templateFiles, 'utf8'));
 
   templateFilesJson.templateFiles.forEach((fileInfo: TemplateFileInfo) => {
@@ -342,6 +347,36 @@ export function getTemplateFilesInfo(templateFolder: string):
   });
 
   return templateFilesInfo;
+}
+
+export async function GetCodeGenTemplateFolderName(
+    context: vscode.ExtensionContext, codeGenProjectType: CodeGenProjectType,
+    connectionType: DeviceConnectionType): Promise<string|undefined> {
+  const templateFilePath = context.asAbsolutePath(path.join(
+      FileNames.resourcesFolderName, FileNames.templatesFolderName,
+      FileNames.templateFileName));
+  if (!await FileUtility.fileExists(ScaffoldType.Local, templateFilePath)) {
+    throw new Error(`Template file ${templateFilePath} does not exist.`);
+  }
+
+  const templateFile =
+      await FileUtility.readFile(
+          ScaffoldType.Local, templateFilePath, 'utf8') as string;
+  const templateFileJson = JSON.parse(templateFile);
+
+  const result =
+      templateFileJson.templates.filter((template: ProjectTemplate) => {
+        return (
+            template.tag === TemplateTag.digitaltwin &&
+            template.type === codeGenProjectType &&
+            template.connectionType === connectionType);
+      });
+
+  if (result && result.length > 0) {
+    return result[0].path;
+  } else {
+    return;
+  }
 }
 
 export async function generateTemplateFile(
