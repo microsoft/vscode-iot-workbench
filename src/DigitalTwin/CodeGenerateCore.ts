@@ -108,7 +108,6 @@ export class CodeGenerateCore {
     const capabilityModelFileSelection =
         await this.SelectCapabilityFile(rootPath, interfaceItems);
     if (capabilityModelFileSelection === undefined) {
-      channel.show();
       channel.appendLine(`Fail to select capability model file.`);
       return false;
     }
@@ -169,8 +168,8 @@ export class CodeGenerateCore {
     // Step 2: Get project name
     const codeGenProjectName = await this.GetCodeGenProjectName(rootPath);
     if (codeGenProjectName === undefined) {
-      channel.show();
-      channel.appendLine(`Fail to get code gen project name.`);
+      channel.appendLine(
+          `The input project name is not valid. Generating code would stop.`);
       return false;
     }
 
@@ -194,7 +193,6 @@ export class CodeGenerateCore {
     const codeGenProjectType =
         await this.SelectProjectType(languageSelection.label, context);
     if (codeGenProjectType === undefined) {
-      channel.show();
       channel.appendLine(`Fail to select code gen project type.`);
       return false;
     }
@@ -396,9 +394,11 @@ export class CodeGenerateCore {
           messge, DialogResponses.yes, DialogResponses.no);
       if (choice === DialogResponses.yes) {
         return codeGenProjectName;
+      } else {
+        return;
       }
     }
-    return;
+    return codeGenProjectName;
   }
 
   async SelectProjectType(language: string, context: vscode.ExtensionContext):
