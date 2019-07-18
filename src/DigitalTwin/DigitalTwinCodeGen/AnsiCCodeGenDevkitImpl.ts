@@ -30,8 +30,8 @@ export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
       interfaceDir: string): Promise<boolean> {
     // Invoke PnP toolset to generate the code
     const libPath = path.join(
-      targetPath, constants.deviceDefaultFolderName, constants.srcFolderName,
-      capabilityModelName);
+        targetPath, constants.deviceDefaultFolderName, constants.srcFolderName,
+        capabilityModelName);
     await FileUtility.mkdirRecursively(ScaffoldType.Local, libPath);
 
     const codeGenerateResult =

@@ -10,7 +10,7 @@ set(iothub_c_files
 
 # Set up the include and library paths
 include_directories(.)
-include_directories(../deps/parson)
+include_directories(${PROJECT_SOURCE_DIR}/deps/parson)
 include_directories(${SHARED_UTIL_INC_FOLDER})
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 
