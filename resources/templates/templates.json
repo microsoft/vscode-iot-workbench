@@ -140,7 +140,7 @@
             "name": "IoT DevKit Project Using ANSI C Via IoT Hub Device Connection String",
             "description": "",
             "detail": "Template for DigitalTwin Code Generator to generate ANSI C IoT DevKit Project via IoT Hub device connection string.",
-            "path": "ansic_devkit_iotcsaskey",
+            "path": "ansic_devkit_connectionstring",
             "projectHostType": "workspace",
             "boardId": "",
             "type": "IoTDevKit",
