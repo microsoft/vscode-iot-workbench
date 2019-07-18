@@ -138,6 +138,7 @@ export class CosmosDB implements Component, Provisionable {
           !cosmosDBDeploy.properties.outputs.cosmosDBAccountKey) {
         throw new Error('Provision Cosmos DB failed.');
       }
+      this.channel.show();
       this.channel.appendLine(JSON.stringify(cosmosDBDeploy, null, 4));
 
       for (const dependency of this.dependencies) {
@@ -165,6 +166,7 @@ export class CosmosDB implements Component, Provisionable {
       cosmosDbName = cosmosDbNameChoose.label;
       const cosmosDbDetail = this.getCosmosDbByNameFromCache(cosmosDbName);
       if (cosmosDbDetail) {
+        this.channel.show();
         this.channel.appendLine(JSON.stringify(cosmosDbDetail, null, 4));
       }
       cosmosDbKey = await this.getCosmosDbKey(cosmosDbName);

@@ -81,8 +81,8 @@ export class CodeGenerateCore {
     // Step 0: update code generator
     const upgradestate: boolean =
         await this.UpgradeCodeGenerator(context, channel);
-    channel.show();
     if (!upgradestate) {
+      channel.show();
       channel.appendLine(`${
           DigitalTwinConstants
               .dtPrefix} Unable to upgrade the Code Generator to the latest version.\r\n Trying to use the existing version.`);
@@ -108,6 +108,7 @@ export class CodeGenerateCore {
     const capabilityModelFileSelection =
         await this.SelectCapabilityFile(rootPath, interfaceItems);
     if (capabilityModelFileSelection === undefined) {
+      channel.show();
       channel.appendLine(`Fail to select capability model file.`);
       return false;
     }
@@ -168,12 +169,14 @@ export class CodeGenerateCore {
     // Step 2: Get project name
     const codeGenProjectName = await this.GetCodeGenProjectName(rootPath);
     if (codeGenProjectName === undefined) {
+      channel.show();
       channel.appendLine(
           `The input project name is not valid. Generating code would stop.`);
       return false;
     }
 
     const projectPath = path.join(rootPath, codeGenProjectName);
+    channel.show();
     channel.appendLine(`${DigitalTwinConstants.dtPrefix} Folder ${
         projectPath} is selected for the generated code.`);
 
@@ -193,6 +196,7 @@ export class CodeGenerateCore {
     const codeGenProjectType =
         await this.SelectProjectType(languageSelection.label, context);
     if (codeGenProjectType === undefined) {
+      channel.show();
       channel.appendLine(`Fail to select code gen project type.`);
       return false;
     }
@@ -222,6 +226,7 @@ export class CodeGenerateCore {
           if (!result) {
             const message = `Unable to get the interface with Id ${
                 schema} online. Please make sure the file exists in server.`;
+            channel.show();
             channel.appendLine(`${DigitalTwinConstants.dtPrefix} ${message}`);
             vscode.window.showWarningMessage(message);
             return false;
@@ -537,6 +542,7 @@ export class CodeGenerateCore {
           fs.writeFileSync(
               path.join(targetFolder, fileName),
               JSON.stringify(fileMetaData.content, null, 4));
+          channel.show();
           channel.appendLine(
               `${DigitalTwinConstants.dtPrefix} Download interface with id ${
                   urnId}, name: ${fileName} into ${targetFolder} completed.`);
@@ -544,6 +550,7 @@ export class CodeGenerateCore {
         }
       } catch (error) {
         // Do nothing. Try to download the interface from global repo
+        channel.show();
         channel.appendLine(`${
             DigitalTwinConstants.dtPrefix} Unable to get interface with id ${
             urnId} from organizational Model Repository, try global repository instead.`);
@@ -558,6 +565,7 @@ export class CodeGenerateCore {
           fs.writeFileSync(
               path.join(targetFolder, fileName),
               JSON.stringify(fileMetaData.content, null, 4));
+          channel.show();
           channel.appendLine(
               `${DigitalTwinConstants.dtPrefix} Download interface with id ${
                   urnId}, name: ${fileName} from global repository into ${
@@ -565,6 +573,7 @@ export class CodeGenerateCore {
           return true;
         }
       } catch (error) {
+        channel.show();
         channel.appendLine(
             `${DigitalTwinConstants.dtPrefix} Unable to get interface with id ${
                 urnId} from global Model Repository. errorcode: ${error.code}`);
@@ -576,8 +585,6 @@ export class CodeGenerateCore {
   async UpgradeCodeGenerator(
       context: vscode.ExtensionContext,
       channel: vscode.OutputChannel): Promise<boolean> {
-    channel.show();
-
     const extensionPackage = require(context.asAbsolutePath('./package.json'));
     const extensionVersion = extensionPackage.version;
 
@@ -615,6 +622,7 @@ export class CodeGenerateCore {
     }
 
     if (!targetConfigItem) {
+      channel.show();
       channel.appendLine(`Unable to get the updated version the ${
           DigitalTwinConstants.productName} Code Generator.`);
       return false;
@@ -654,6 +662,7 @@ export class CodeGenerateCore {
                 DigitalTwinConstants.productName} Code Generator...`
           },
           async () => {
+            channel.show();
             channel.appendLine(`Start upgrading ${
                 DigitalTwinConstants.productName} Code Generator...`);
 
@@ -688,6 +697,7 @@ export class CodeGenerateCore {
             }, 1000);
 
             try {
+              channel.show();
               channel.appendLine(`Step 1: Downloading package for ${
                   DigitalTwinConstants.productName} Code Generator...`);
               const zipData = await request(downloadOption).promise();
@@ -722,6 +732,7 @@ export class CodeGenerateCore {
                   vscode.ConfigurationTarget.Global);
             } catch (error) {
               clearInterval(loading);
+              channel.show();
               channel.appendLine('');
               throw error;
             }
