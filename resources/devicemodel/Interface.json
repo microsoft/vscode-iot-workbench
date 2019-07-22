@@ -36,7 +36,7 @@
     },
     "Enum": "Schemas/Enum",
     "valueSchema": "Schemas/Enum/valueSchema",
-    "enumValue": "EnumValue/value",
+    "enumValue": "Schemas/EnumValue/value",
     "enumValues": {
       "@id": "Schemas/Enum/values",
       "@container": "@list"
@@ -81,6 +81,10 @@
     "synchronous": "ExecutionType/synchronous",
     "time": "Schemas/Time/time",
     "unit": "SchemaField/unit",
-    "writable": "Property/writable"
+    "writable": "Property/writable",
+    "implements": {
+      "@id": "CapabilityModel/implements",
+      "@container": "@list"
+    }
   }
 }
