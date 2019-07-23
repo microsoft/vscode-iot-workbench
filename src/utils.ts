@@ -235,7 +235,7 @@ export async function askAndOpenInRemote(
     telemetryContext: TelemetryContext): Promise<boolean> {
   const message = `${
       operation} can only be executed in remote container. Do you want to reopen the IoT project in container?`;
-  const result: vscode.MessageItem|undefined =
+  const result:|vscode.MessageItem|undefined =
       await vscode.window.showInformationMessage(
           message, DialogResponses.yes, DialogResponses.no);
 
@@ -326,7 +326,7 @@ export async function getTemplateFilesInfo(templateFolder: string):
   const templateFilesInfo: TemplateFileInfo[] = [];
 
   const templateFiles = path.join(templateFolder, FileNames.templateFiles);
-  if (!await FileUtility.fileExists(ScaffoldType.Local, templateFiles)) {
+  if (!(await FileUtility.fileExists(ScaffoldType.Local, templateFiles))) {
     throw new Error(`Template file ${templateFiles} does not exist.`);
   }
 
@@ -340,6 +340,9 @@ export async function getTemplateFilesInfo(templateFolder: string):
       fileName: fileInfo.fileName,
       sourcePath: fileInfo.sourcePath,
       targetPath: fileInfo.targetPath,
+      overwrite: typeof fileInfo.overwrite !== 'undefined' ?
+          fileInfo.overwrite :
+          true,  // if it is not defined, we will overwrite the existing file.
       fileContent
     });
   });
@@ -353,13 +356,13 @@ export async function GetCodeGenTemplateFolderName(
   const templateFilePath = context.asAbsolutePath(path.join(
       FileNames.resourcesFolderName, FileNames.templatesFolderName,
       FileNames.templateFileName));
-  if (!await FileUtility.fileExists(ScaffoldType.Local, templateFilePath)) {
+  if (!(await FileUtility.fileExists(ScaffoldType.Local, templateFilePath))) {
     throw new Error(`Template file ${templateFilePath} does not exist.`);
   }
 
   const templateFile =
-      await FileUtility.readFile(
-          ScaffoldType.Local, templateFilePath, 'utf8') as string;
+      (await FileUtility.readFile(
+          ScaffoldType.Local, templateFilePath, 'utf8')) as string;
   const templateFileJson = JSON.parse(templateFile);
 
   const result =
@@ -381,14 +384,17 @@ export async function generateTemplateFile(
     root: string, type: ScaffoldType,
     fileInfo: TemplateFileInfo): Promise<boolean> {
   const targetFolderPath = path.join(root, fileInfo.targetPath);
-  if (!await FileUtility.directoryExists(type, targetFolderPath)) {
+  if (!(await FileUtility.directoryExists(type, targetFolderPath))) {
     await FileUtility.mkdirRecursively(type, targetFolderPath);
   }
 
   const targetFilePath = path.join(targetFolderPath, fileInfo.fileName);
   if (fileInfo.fileContent) {
     try {
-      await FileUtility.writeFile(type, targetFilePath, fileInfo.fileContent);
+      const fileExist = await FileUtility.fileExists(type, targetFilePath);
+      if (fileInfo.overwrite || !fileExist) {
+        await FileUtility.writeFile(type, targetFilePath, fileInfo.fileContent);
+      }
     } catch (error) {
       throw new Error(`Failed to create sketch file ${fileInfo.fileName}: ${
           error.message}`);

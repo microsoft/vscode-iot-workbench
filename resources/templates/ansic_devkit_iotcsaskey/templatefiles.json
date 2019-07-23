@@ -3,7 +3,8 @@
     {
       "fileName": "main.ino",
       "sourcePath": ".",
-      "targetPath": "."
+      "targetPath": ".",
+      "overwrite": false
     },
     {
       "fileName": "c_cpp_properties_macos.json",
@@ -18,7 +19,8 @@
     {
       "fileName": "arduino.json",
       "sourcePath": ".",
-      "targetPath": "./.vscode"
+      "targetPath": "./.vscode",
+      "overwrite": false
     },
     {
       "fileName": "settings.json",

@@ -13,6 +13,7 @@ export interface TemplateFileInfo {
   sourcePath: string;
   targetPath: string;
   fileContent?: string;
+  overwrite?: boolean;
 }
 export interface ProjectTemplate {
   platform: string;
