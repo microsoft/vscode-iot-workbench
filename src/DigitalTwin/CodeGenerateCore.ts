@@ -180,7 +180,7 @@ export class CodeGenerateCore {
 
     // Step 4: Select project type
     const codeGenProjectType =
-        await this.SelectProjectType(languageSelection.label, context, channel);
+        await this.SelectProjectType(languageSelection.label, context);
     if (codeGenProjectType === undefined) {
       return false;
     }
@@ -389,9 +389,8 @@ export class CodeGenerateCore {
     return codeGenProjectName;
   }
 
-  async SelectProjectType(
-      language: string, context: vscode.ExtensionContext,
-      channel: vscode.OutputChannel): Promise<CodeGenProjectType|undefined> {
+  async SelectProjectType(language: string, context: vscode.ExtensionContext):
+      Promise<CodeGenProjectType|undefined> {
     // Select project type
     const projectTypeListPath = context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
