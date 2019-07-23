@@ -301,7 +301,7 @@ export class DigitalTwinDiagnostic {
       if (!id) {
         return [];
       }
-      rawValueTypes = this._dtParser.getValueTypesFromId(id);
+      rawValueTypes = this._dtParser.getValueTypesFromId(dtContext, id);
       rawValueTypes.forEach(valueType => {
         switch (valueType) {
           case 'string':
