@@ -138,7 +138,7 @@ export class DigitalTwinMetaModelParser {
       return this.cache.TypedPropertiesFromId[id];
     }
     const keys = this.getPropertiesFromId(dtContext, id);
-    const type = this.getShortNameFromId(id);
+    const type = this.getShortNameFromId(dtContext, id);
     const getRequiredProperties =
         type ? this.getRequiredPropertiesFromType(type) : [];
     const results: Array<{label: string, required: boolean, type: string}> = [];
@@ -152,7 +152,7 @@ export class DigitalTwinMetaModelParser {
         required: getRequiredProperties.indexOf(key) !== -1,
         type: this.isArrayFromShortName(key) ?
             'array' :
-            (this.getValueTypesFromId(id)[0] || '')
+            (this.getValueTypesFromId(dtContext, id)[0] || '')
       };
       results.push(item);
     }
@@ -333,7 +333,7 @@ export class DigitalTwinMetaModelParser {
       return [];
     }
 
-    return this.getStringValuesFromId(id);
+    return this.getStringValuesFromId(dtContext, id);
   }
 
   getStringValuesFromShortName(
@@ -347,10 +347,10 @@ export class DigitalTwinMetaModelParser {
       return [];
     }
 
-    return this.getStringValuesFromId(id);
+    return this.getStringValuesFromId(dtContext, id);
   }
 
-  getStringValuesFromId(id: string) {
+  getStringValuesFromId(dtContext: DigitalTwinMetaModelContext, id: string) {
     if (this.cache.StringValuesFromId[id]) {
       return this.cache.StringValuesFromId[id];
     }
@@ -364,17 +364,20 @@ export class DigitalTwinMetaModelParser {
       if (edge.SourceNode.Id === id &&
           edge.Label === DigitalTwinMetaModelParser.LABEL.RANGE) {
         console.log(`${id} has range of ${edge.TargetNode.Id}`);
-        values = values.concat(this.getStringValuesFromId(edge.TargetNode.Id));
+        values = values.concat(
+            this.getStringValuesFromId(dtContext, edge.TargetNode.Id));
       }
       if (edge.TargetNode.Id === id &&
           edge.Label === DigitalTwinMetaModelParser.LABEL.SUBCLASS) {
         console.log(`${edge.SourceNode.Id} is sub class of ${id}`);
-        values = values.concat(this.getStringValuesFromId(edge.SourceNode.Id));
+        values = values.concat(
+            this.getStringValuesFromId(dtContext, edge.SourceNode.Id));
       }
       if (edge.TargetNode.Id === id &&
           edge.Label === DigitalTwinMetaModelParser.LABEL.TYPE) {
         console.log(`${edge.SourceNode.Id} has type of ${id}`);
-        values = values.concat(this.getStringValuesFromId(edge.SourceNode.Id));
+        values = values.concat(
+            this.getStringValuesFromId(dtContext, edge.SourceNode.Id));
       }
     }
     if (values.length === 0) {
@@ -384,7 +387,7 @@ export class DigitalTwinMetaModelParser {
         this.cache.StringValuesFromId[id] = [];
         return [];
       }
-      const shortName = this.getShortNameFromId(id);
+      const shortName = this.getShortNameFromId(dtContext, id);
       if (shortName) {
         console.log(`${id} has string value of ${shortName}`);
         values.push(shortName);
@@ -394,18 +397,36 @@ export class DigitalTwinMetaModelParser {
     return values;
   }
 
-  getShortNameFromId(id: string) {
+  getShortNameFromId(dtContext: DigitalTwinMetaModelContext, id: string) {
+    for (const shortName of Object.keys(dtContext['@context'])) {
+      if (/^@/.test(shortName)) {
+        continue;
+      }
+
+      const shortNameValue = dtContext['@context'][shortName];
+      let _id;
+      if (typeof shortNameValue === 'string') {
+        _id = dtContext['@context']['@vocab'] + shortNameValue;
+      } else {
+        _id = dtContext['@context']['@vocab'] + shortNameValue['@id'];
+      }
+
+      if (id === _id) {
+        return shortName;
+      }
+    }
+
     return id.split('/').pop();
   }
 
-  getValueTypesFromId(id: string) {
+  getValueTypesFromId(dtContext: DigitalTwinMetaModelContext, id: string) {
     if (!id) {
       return [];
     }
     if (this.cache.ValueTypesFromId[id]) {
       return this.cache.ValueTypesFromId[id];
     }
-    const values = this.getStringValuesFromId(id);
+    const values = this.getStringValuesFromId(dtContext, id);
     const valueTypes: string[] = [];
     values.forEach(value => {
       switch (value) {
