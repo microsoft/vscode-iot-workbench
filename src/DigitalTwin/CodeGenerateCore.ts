@@ -165,9 +165,6 @@ export class CodeGenerateCore {
     }
 
     const projectPath = path.join(rootPath, codeGenProjectName);
-    const message = `${DigitalTwinConstants.dtPrefix} Folder ${
-        projectPath} is selected for the generated code.`;
-    utils.channelShowAndAppendLine(channel, message);
 
     // Step 3: Select language
     const languageItems: vscode.QuickPickItem[] = [];
@@ -183,18 +180,14 @@ export class CodeGenerateCore {
 
     // Step 4: Select project type
     const codeGenProjectType =
-        await this.SelectProjectType(languageSelection.label, context);
+        await this.SelectProjectType(languageSelection.label, context, channel);
     if (codeGenProjectType === undefined) {
-      const message = `Fail to select code gen project type.`;
-      utils.channelShowAndAppendLine(channel, message);
       return false;
     }
 
     // Step 5: Select device connection string type
-    const connectionType = await this.SelectConnectionType(context);
+    const connectionType = await this.SelectConnectionType(context, channel);
     if (connectionType === undefined) {
-      const message = `Fail to select code gen connection type.`;
-      utils.channelShowAndAppendLine(channel, message);
       return false;
     }
 
@@ -305,8 +298,9 @@ export class CodeGenerateCore {
         });
     return true;
   }
-  async SelectConnectionType(context: vscode.ExtensionContext):
-      Promise<DeviceConnectionType|undefined> {
+  async SelectConnectionType(
+      context: vscode.ExtensionContext,
+      channel: vscode.OutputChannel): Promise<DeviceConnectionType|undefined> {
     const deviceConnectionListPath = context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
         DigitalTwinFileNames.devicemodelTemplateFolderName,
@@ -395,8 +389,9 @@ export class CodeGenerateCore {
     return codeGenProjectName;
   }
 
-  async SelectProjectType(language: string, context: vscode.ExtensionContext):
-      Promise<CodeGenProjectType|undefined> {
+  async SelectProjectType(
+      language: string, context: vscode.ExtensionContext,
+      channel: vscode.OutputChannel): Promise<CodeGenProjectType|undefined> {
     // Select project type
     const projectTypeListPath = context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
@@ -419,7 +414,8 @@ export class CodeGenerateCore {
     });
 
     if (!projectTypeList) {
-      return;
+      throw new Error(
+          `Internal error. Unable to find project types using ${language}.`);
     }
 
     const projectTypeSelection = await vscode.window.showQuickPick(
@@ -485,8 +481,6 @@ export class CodeGenerateCore {
     });
 
     if (!fileSelection) {
-      const message = `Capability Model file selection is canceled.`;
-      utils.channelShowAndAppendLine(channel, message);
       return;
     }
 
@@ -615,7 +609,9 @@ export class CodeGenerateCore {
     }
 
     if (!targetConfigItem) {
-      const message = `Unable to get the updated version the ${
+      const message = `${
+          DigitalTwinConstants
+              .dtPrefix} Unable to get the updated version the ${
           DigitalTwinConstants.productName} Code Generator.`;
       utils.channelShowAndAppendLine(channel, message);
       return false;
@@ -631,9 +627,12 @@ export class CodeGenerateCore {
 
     // Can we find the target dir for Code Generator?
     let upgradeMessage = '';
-    const firstInstallMessage =
-        `No Code Generator package found. Start installing ${
-            DigitalTwinConstants.productName} Code Generator...`;
+    const firstInstallMessage = `${
+        DigitalTwinConstants
+            .dtPrefix} No Code Generator package found. Start installing ${
+        DigitalTwinConstants.productName} Code Generator...`;
+    let processTitle =
+        `Installing ${DigitalTwinConstants.productName} Code Generator...`;
     if (!fs.isDirectorySync(codeGenCommandPath)) {
       needUpgrade = true;
       upgradeMessage = firstInstallMessage;
@@ -653,23 +652,22 @@ export class CodeGenerateCore {
             compareVersion(
                 targetConfigItem.codeGeneratorVersion, currentVersion) > 0) {
           needUpgrade = true;
-          upgradeMessage = `The latest version of ${
-              DigitalTwinConstants.productName} Code Generator is ${
-              targetConfigItem.codeGeneratorVersion} and you have ${
-              currentVersion}. Start upgrading ${
-              DigitalTwinConstants.productName} Code Generator to ${
-              targetConfigItem.codeGeneratorVersion}...`;
+          upgradeMessage =
+              `${DigitalTwinConstants.dtPrefix} The latest version of ${
+                  DigitalTwinConstants.productName} Code Generator is ${
+                  targetConfigItem.codeGeneratorVersion} and you have ${
+                  currentVersion}. Start upgrading ${
+                  DigitalTwinConstants.productName} Code Generator to ${
+                  targetConfigItem.codeGeneratorVersion}...`;
+          processTitle =
+              `Upgrading ${DigitalTwinConstants.productName} Code Generator...`;
         }
       }
     }
 
     if (needUpgrade) {
       await vscode.window.withProgress(
-          {
-            location: vscode.ProgressLocation.Notification,
-            title: `Upgrading  ${
-                DigitalTwinConstants.productName} Code Generator...`
-          },
+          {location: vscode.ProgressLocation.Notification, title: processTitle},
           async () => {
             const message = upgradeMessage;
             utils.channelShowAndAppendLine(channel, message);

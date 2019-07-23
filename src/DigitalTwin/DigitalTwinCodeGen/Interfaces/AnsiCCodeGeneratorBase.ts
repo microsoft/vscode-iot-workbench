@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import * as utils from '../../../utils';
-import {CodeGenConstants} from '../../DigitalTwinConstants';
+import {CodeGenConstants, DigitalTwinConstants} from '../../DigitalTwinConstants';
 
 import {CodeGenerator} from './CodeGenerator';
 
@@ -34,10 +34,10 @@ export abstract class AnsiCCodeGeneratorBase implements CodeGenerator {
         filePath}" --language ansic --output "${targetPath}" --interfaceDir "${
         interfaceDir}"`;
 
-    let message = 'IoT Workbench: scaffold code stub.';
+    let message = `${DigitalTwinConstants.dtPrefix} Scaffold code stub.`;
     utils.channelShowAndAppendLine(this.channel, message);
     await utils.runCommand(command, [], cmdPath, this.channel);
-    message = 'IoT Workbench: scaffold code stub completed.';
+    message = `${DigitalTwinConstants.dtPrefix} Scaffold code stub completed.`;
     utils.channelShowAndAppendLine(this.channel, message);
     return true;
   }
