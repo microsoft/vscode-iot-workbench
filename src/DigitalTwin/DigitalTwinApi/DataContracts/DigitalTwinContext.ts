@@ -7,6 +7,11 @@ export enum MetaModelType {
   CapabilityModel = 'capabilityModel'
 }
 
+export const humanReadableMetaModelType = new Map<MetaModelType, string>([
+  [MetaModelType.None, 'None'], [MetaModelType.Interface, 'Interface'],
+  [MetaModelType.CapabilityModel, 'Capability Model']
+]);
+
 export interface MetaModelUpsertRequest {
   contents: string;
   etag?: string;

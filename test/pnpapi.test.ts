@@ -36,7 +36,7 @@ suite('IoT Workbench: PnPAPI', () => {
 
 
   // tslint:disable-next-line: only-arrow-functions
-  test('Should be able to get all interfaces', async function() {
+  test('Should be able to get all Interfaces', async function() {
     const context = new TestExtensionContext();
     this.timeout(60 * 1000);
 
@@ -59,7 +59,7 @@ suite('IoT Workbench: PnPAPI', () => {
     }
   });
 
-  test('should be able to get the interface content', async function() {
+  test('should be able to get the Interface content', async function() {
     this.timeout(10 * 60 * 1000);
     const pnpMetamodelRepositoryClient =
         new DigitalTwinMetamodelRepositoryClient(null);
@@ -69,7 +69,7 @@ suite('IoT Workbench: PnPAPI', () => {
 
     if (searchResults.results.length > 0) {
       const sampleUri = searchResults.results[0].urnId;
-      // get the interface by interfaceId.
+      // get the Interface by interfaceId.
       const interfaceContext =
           await pnpMetamodelRepositoryClient.GetInterfaceAsync(
               sampleUri, undefined, true);
@@ -87,7 +87,7 @@ suite('IoT Workbench: PnPAPI', () => {
     }
   });
 
-  test('should be able to get the capability model content', async function() {
+  test('should be able to get the Capability Model content', async function() {
     this.timeout(10 * 60 * 1000);
     const builder =
         DigitalTwinConnectionStringBuilder.Create(constants.connectionString);
@@ -99,7 +99,7 @@ suite('IoT Workbench: PnPAPI', () => {
 
     if (searchResults.results.length > 0) {
       const sampleUri = searchResults.results[0].urnId;
-      // get the interface.
+      // get the Interface.
       const templateContext =
           await pnpMetamodelRepositoryClient.GetCapabilityModelAsync(
               sampleUri, builder.RepositoryIdValue, true);
@@ -112,7 +112,7 @@ suite('IoT Workbench: PnPAPI', () => {
     }
   });
 
-  test('should be able to create and delete interface', async function() {
+  test('should be able to create and delete Interface', async function() {
     this.timeout(60 * 1000);
     const builder =
         DigitalTwinConnectionStringBuilder.Create(constants.connectionString);
