@@ -172,14 +172,14 @@ export async function activate(context: vscode.ExtensionContext) {
                 if (id === '@id') {
                   hoverText = `An identifier for ${
                       DigitalTwinConstants
-                          .productName} capability model or interface.`;
+                          .productName} Capability Model or interface.`;
                 } else if (id === '@type') {
                   hoverText = `The type of ${
                       DigitalTwinConstants.productName} meta model object.`;
                 } else if (id === '@context') {
                   hoverText = `The context for ${
                       DigitalTwinConstants
-                          .productName} capability model or interface.`;
+                          .productName} Capability Model or interface.`;
                 } else {
                   hoverText = dtParser.getCommentFromId(id);
                 }

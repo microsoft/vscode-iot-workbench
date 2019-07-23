@@ -43,14 +43,6 @@ interface InterfaceInfo {
   path: string;
 }
 
-const deviceConnectionConstants = {
-  connectionStringLabel: 'Via IoT Hub device connection string',
-  connectionStringDetail: 'To connect to Azure IoT Hub directly',
-  iotcSasKeyLabel: 'Via DPS (Device Provisioning Service) symmetric key',
-  iotcSasKeyDetail:
-      'To connect to Azure IoT Hub, Azure IoT Central or Azure IoT Certification Service'
-};
-
 interface CodeGeneratorConfigItem {
   codeGeneratorVersion: string;
   iotWorkbenchMinimalVersion: string;
@@ -62,7 +54,7 @@ interface CodeGeneratorConfig {
 }
 
 interface CodeGenExecutionItem {
-  capabilityModelPath: string;  // relative path of the capability model file
+  capabilityModelPath: string;  // relative path of the Capability Model file
   projectName: string;
   languageLabel: string;
   codeGenProjectType: CodeGenProjectType;
@@ -102,17 +94,15 @@ export class CodeGenerateCore {
       return false;
     }
 
-    // Step 1: Choose capability model
+    // Step 1: Choose Capability Model
     const interfaceItems: InterfaceInfo[] = [];
     const capabilityModelFileSelection =
-        await this.SelectCapabilityFile(rootPath, interfaceItems);
+        await this.SelectCapabilityFile(channel, rootPath, interfaceItems);
     if (capabilityModelFileSelection === undefined) {
-      const message = `Fail to select capability model file.`;
-      utils.channelShowAndAppendLine(channel, message);
       return false;
     }
 
-    // Step 1.5: Prompt if old project exists for the same capability model file
+    // Step 1.5: Prompt if old project exists for the same Capability Model file
     const capabilityModelFileName = capabilityModelFileSelection.label;
     const capabilityModelFilePath = path.join(
         capabilityModelFileSelection.description as string,
@@ -217,13 +207,13 @@ export class CodeGenerateCore {
     for (const interfaceItem of implementedInterfaces) {
       const schema = interfaceItem.schema;
       if (typeof schema === 'string') {
-        // normal interface, check the interface file offline and online
+        // normal Interface, check the Interface file offline and online
         const item = interfaceItems.find(item => item.urnId === schema);
         if (!item) {
           const result =
               await this.DownloadInterfaceFile(schema, rootPath, channel);
           if (!result) {
-            const message = `Unable to get the interface with Id ${
+            const message = `Unable to get the Interface with Id ${
                 schema} online. Please make sure the file exists in server.`;
             utils.channelShowAndAppendLine(
                 channel, `${DigitalTwinConstants.dtPrefix} ${message}`);
@@ -451,9 +441,11 @@ export class CodeGenerateCore {
     return codeGenProjectType;
   }
 
-  async SelectCapabilityFile(rootPath: string, interfaceItems: InterfaceInfo[]):
+  async SelectCapabilityFile(
+      channel: vscode.OutputChannel, rootPath: string,
+      interfaceItems: InterfaceInfo[]):
       Promise<vscode.QuickPickItem|undefined> {
-    // list all capability models from device model folder for selection.
+    // list all Capability Models from device model folder for selection.
     const metamodelItems: vscode.QuickPickItem[] = [];
 
     const fileList = fs.listTreeSync(rootPath);
@@ -479,7 +471,7 @@ export class CodeGenerateCore {
 
     if (metamodelItems.length === 0) {
       const message =
-          'Unable to find capability model files in the folder. Please open a folder that contains capability model files.';
+          'Unable to find Capability Model files in the folder. Please open a folder that contains Capability Model files.';
       vscode.window.showWarningMessage(message);
       return;
     }
@@ -489,10 +481,12 @@ export class CodeGenerateCore {
       matchOnDescription: true,
       matchOnDetail: true,
       placeHolder:
-          `Select a ${DigitalTwinConstants.productName} capability model file`
+          `Select a ${DigitalTwinConstants.productName} Capability Model file`
     });
 
     if (!fileSelection) {
+      const message = `Capability Model file selection is canceled.`;
+      utils.channelShowAndAppendLine(channel, message);
       return;
     }
 
@@ -525,14 +519,14 @@ export class CodeGenerateCore {
       await ConfigHandler.update(
           ConfigKey.modelRepositoryKeyName, connectionString,
           vscode.ConfigurationTarget.Global);
-      // Try to download interface file from private repo
+      // Try to download Interface file from private repo
       const dtMetamodelRepositoryClient =
           new DigitalTwinMetamodelRepositoryClient(connectionString);
       const builder =
           DigitalTwinConnectionStringBuilder.Create(connectionString);
       const repositoryId = builder.RepositoryIdValue;
 
-      // Try to download interface file from private repo
+      // Try to download Interface file from private repo
       try {
         const fileMetaData =
             await dtMetamodelRepositoryClient.GetInterfaceAsync(
@@ -542,20 +536,20 @@ export class CodeGenerateCore {
               path.join(targetFolder, fileName),
               JSON.stringify(fileMetaData.content, null, 4));
           const message =
-              `${DigitalTwinConstants.dtPrefix} Download interface with id ${
+              `${DigitalTwinConstants.dtPrefix} Download Interface with id ${
                   urnId}, name: ${fileName} into ${targetFolder} completed.`;
           utils.channelShowAndAppendLine(channel, message);
           return true;
         }
       } catch (error) {
-        // Do nothing. Try to download the interface from global repo
+        // Do nothing. Try to download the Interface from global repo
         const message = `${
-            DigitalTwinConstants.dtPrefix} Unable to get interface with id ${
+            DigitalTwinConstants.dtPrefix} Unable to get Interface with id ${
             urnId} from organizational Model Repository, try global repository instead.`;
         utils.channelShowAndAppendLine(channel, message);
       }
 
-      // Try to download interface file from public repo
+      // Try to download Interface file from public repo
       try {
         const fileMetaData =
             await dtMetamodelRepositoryClient.GetInterfaceAsync(
@@ -565,7 +559,7 @@ export class CodeGenerateCore {
               path.join(targetFolder, fileName),
               JSON.stringify(fileMetaData.content, null, 4));
           const message =
-              `${DigitalTwinConstants.dtPrefix} Download interface with id ${
+              `${DigitalTwinConstants.dtPrefix} Download Interface with id ${
                   urnId}, name: ${fileName} from global repository into ${
                   targetFolder} completed.`;
           utils.channelShowAndAppendLine(channel, message);
@@ -573,7 +567,7 @@ export class CodeGenerateCore {
         }
       } catch (error) {
         const message =
-            `${DigitalTwinConstants.dtPrefix} Unable to get interface with id ${
+            `${DigitalTwinConstants.dtPrefix} Unable to get Interface with id ${
                 urnId} from global Model Repository. errorcode: ${error.code}`;
         utils.channelShowAndAppendLine(channel, message);
       }
@@ -636,20 +630,36 @@ export class CodeGenerateCore {
         path.join(homeDir, CodeGenConstants.codeGeneratorToolPath);
 
     // Can we find the target dir for Code Generator?
+    let upgradeMessage = '';
+    const firstInstallMessage =
+        `No Code Generator package found. Start installing ${
+            DigitalTwinConstants.productName} Code Generator...`;
     if (!fs.isDirectorySync(codeGenCommandPath)) {
       needUpgrade = true;
+      upgradeMessage = firstInstallMessage;
     } else {
       const files = fs.listSync(codeGenCommandPath);
       if (!files || files.length === 0) {
         needUpgrade = true;
-      }
-      // Then check the version
-      const currentVersion =
-          ConfigHandler.get<string>(ConfigKey.codeGeneratorVersion);
-      if (!currentVersion ||
-          compareVersion(
-              targetConfigItem.codeGeneratorVersion, currentVersion) > 0) {
-        needUpgrade = true;
+        upgradeMessage = firstInstallMessage;
+      } else {
+        // Then check the version
+        const currentVersion =
+            ConfigHandler.get<string>(ConfigKey.codeGeneratorVersion);
+        if (!currentVersion) {
+          needUpgrade = true;
+          upgradeMessage = firstInstallMessage;
+        } else if (
+            compareVersion(
+                targetConfigItem.codeGeneratorVersion, currentVersion) > 0) {
+          needUpgrade = true;
+          upgradeMessage = `The latest version of ${
+              DigitalTwinConstants.productName} Code Generator is ${
+              targetConfigItem.codeGeneratorVersion} and you have ${
+              currentVersion}. Start upgrading ${
+              DigitalTwinConstants.productName} Code Generator to ${
+              targetConfigItem.codeGeneratorVersion}...`;
+        }
       }
     }
 
@@ -661,8 +671,7 @@ export class CodeGenerateCore {
                 DigitalTwinConstants.productName} Code Generator...`
           },
           async () => {
-            const message = `Start upgrading ${
-                DigitalTwinConstants.productName} Code Generator...`;
+            const message = upgradeMessage;
             utils.channelShowAndAppendLine(channel, message);
 
             const configItem = targetConfigItem as CodeGeneratorConfigItem;

@@ -11,7 +11,7 @@ import {VSCExpress} from 'vscode-express';
 import {DigitalTwinFileNames, DigitalTwinConstants} from './DigitalTwinConstants';
 import {DigitalTwinMetamodelRepositoryClient} from './DigitalTwinApi/DigitalTwinMetamodelRepositoryClient';
 import * as utils from '../utils';
-import {MetaModelType} from './DigitalTwinApi/DataContracts/DigitalTwinContext';
+import {MetaModelType, humanReadableMetaModelType} from './DigitalTwinApi/DataContracts/DigitalTwinContext';
 import {DigitalTwinConnector} from './DigitalTwinConnector';
 import {DialogResponses} from '../DialogResponses';
 import {ConfigHandler} from '../configHandler';
@@ -98,11 +98,11 @@ export class DeviceModelOperator {
 
     const option: vscode.InputBoxOptions = {
       value: DigitalTwinFileNames.defaultInterfaceName,
-      prompt: `Please input interface name here.`,
+      prompt: `Please input Interface name here.`,
       ignoreFocusOut: true,
       validateInput: (interfaceName: string) => {
         if (!interfaceName) {
-          return 'Please provide a valid interface name.';
+          return 'Please provide a valid Interface name.';
         }
         if (!/\.interface\.json$/i.test(interfaceName)) {
           interfaceName += DigitalTwinConstants.interfaceSuffix;
@@ -144,7 +144,7 @@ export class DeviceModelOperator {
       fs.writeFileSync(targetInterface, content);
     } catch (error) {
       throw new Error(
-          `Creating ${DigitalTwinConstants.productName} interface failed: ${
+          `Creating ${DigitalTwinConstants.productName} Interface failed: ${
               error.message}`);
     }
     await vscode.commands.executeCommand(
@@ -153,7 +153,7 @@ export class DeviceModelOperator {
     await vscode.window.showTextDocument(vscode.Uri.file(targetInterface));
 
     vscode.window.showInformationMessage(
-        `New ${DigitalTwinConstants.productName} interface ${
+        `New ${DigitalTwinConstants.productName} Interface ${
             interfaceFileName} was created successfully.`);
     return;
   }
@@ -169,11 +169,11 @@ export class DeviceModelOperator {
 
     const option: vscode.InputBoxOptions = {
       value: DigitalTwinFileNames.defaultCapabilityModelName,
-      prompt: `Please input capability model name here:`,
+      prompt: `Please input Capability Model name here:`,
       ignoreFocusOut: true,
       validateInput: (capabilityModelName: string) => {
         if (!capabilityModelName) {
-          return 'Please provide a valid capability model name.';
+          return 'Please provide a valid Capability Model name.';
         }
         if (!/\.capabilitymodel\.json$/i.test(capabilityModelName)) {
           capabilityModelName += DigitalTwinConstants.capabilityModelSuffix;
@@ -188,7 +188,7 @@ export class DeviceModelOperator {
           }
           return '';
         }
-        return 'Capability model name can only contain alphanumeric and cannot start with number.';
+        return 'Capability Model name can only contain alphanumeric and cannot start with number.';
       }
     };
 
@@ -215,7 +215,7 @@ export class DeviceModelOperator {
       fs.writeFileSync(targetCapabilityModel, content);
     } catch (error) {
       throw new Error(`Creating ${
-          DigitalTwinConstants.productName} capability model failed: ${
+          DigitalTwinConstants.productName} Capability Model failed: ${
           error.message}`);
     }
 
@@ -226,7 +226,7 @@ export class DeviceModelOperator {
         vscode.Uri.file(targetCapabilityModel));
 
     vscode.window.showInformationMessage(
-        `New ${DigitalTwinConstants.productName} capability model ${
+        `New ${DigitalTwinConstants.productName} Capability Model ${
             capabilityModelFileName} created successfully.`);
     return;
   }
@@ -360,7 +360,7 @@ export class DeviceModelOperator {
       const connectionString =
           ConfigHandler.get<string>(ConfigKey.modelRepositoryKeyName);
       if (!connectionString) {
-        vscode.window.showWarningMessage(`Failed to get capability models from ${
+        vscode.window.showWarningMessage(`Failed to get Capability Models from ${
             DigitalTwinConstants
                 .productName} Model Repository. Please sign out and sign in with a valid connection string.`);
         return;
@@ -410,7 +410,7 @@ export class DeviceModelOperator {
           await dtMetamodelRepositoryClient.DeleteInterfaceAsync(
               id, builder.RepositoryIdValue);
           const message =
-              `${DigitalTwinConstants.dtPrefix} Deleting interface with id ${
+              `${DigitalTwinConstants.dtPrefix} Deleting Interface with id ${
                   id} completed.`;
           utils.channelShowAndAppendLine(channel, message);
         } else {
@@ -471,9 +471,11 @@ export class DeviceModelOperator {
     const dtMetamodelRepositoryClient =
         new DigitalTwinMetamodelRepositoryClient(connectionString);
 
+    const readableMetaModelValue =
+        humanReadableMetaModelType.get(metaModelType) as string;
     for (const id of fileIds) {
       const message = `${DigitalTwinConstants.dtPrefix} Start getting ${
-          metaModelValue} with id ${id}.`;
+          readableMetaModelValue} with id ${id}.`;
       utils.channelShowAndAppendLine(channel, message);
       let fileMetaData: GetModelResult;
       try {
@@ -515,13 +517,15 @@ export class DeviceModelOperator {
           await vscode.window.showTextDocument(
               vscode.Uri.file(path.join(rootPath, candidateName)));
           const message = `${DigitalTwinConstants.dtPrefix} Downloading ${
-              metaModelValue} with id ${id} into ${candidateName} completed.`;
+              readableMetaModelValue} with id ${id} into ${
+              candidateName} completed.`;
           utils.channelShowAndAppendLine(channel, message);
         }
 
       } catch (error) {
         const message = `${DigitalTwinConstants.dtPrefix} Downloading ${
-            metaModelValue} with id ${id} failed. Error: ${error.message}`;
+            readableMetaModelValue} with id ${id} failed. Error: ${
+            error.message}`;
         utils.channelShowAndAppendLine(channel, message);
       }
     }
@@ -726,10 +730,10 @@ export class DeviceModelOperator {
       if (!fileId) {
         vscode.window.showWarningMessage(`Unable to find id from the ${
             DigitalTwinConstants
-                .productName} interface file. Please provide a valid file.`);
+                .productName} Interface file. Please provide a valid file.`);
         return false;
       }
-      let message = `${DigitalTwinConstants.dtPrefix} Load and parse file: "${
+      let message = `${DigitalTwinConstants.dtPrefix} Load and parse file "${
           fileName}" successfully.`;
       utils.channelShowAndAppendLine(channel, message);
       // check whether file exists in model repo, try to update the file.
@@ -746,22 +750,22 @@ export class DeviceModelOperator {
                 fileId, builder.RepositoryIdValue, true);
 
         message = `${DigitalTwinConstants.dtPrefix} ${
-            DigitalTwinConstants.productName} interface file with id:"${
+            DigitalTwinConstants.productName} Interface file with id:"${
             fileId}" exists in server. `;
         utils.channelShowAndAppendLine(channel, message);
 
         if (option.overwriteChoice === OverwriteChoice.Unknown) {
-          const msg = `The interface with id "${
+          const msg = `The Interface with id "${
               fileId}" already exists in the ${
               DigitalTwinConstants
-                  .productName} Model Repository, do you want to overwrite it?`;
+                  .productName} Model Repository. Do you want to overwrite it?`;
           const result: vscode.MessageItem|undefined =
               await vscode.window.showInformationMessage(
                   msg, DialogResponses.all, DialogResponses.yes,
                   DialogResponses.no);
           if (result === DialogResponses.no) {
             const message = `${DigitalTwinConstants.dtPrefix} Submitting ${
-                DigitalTwinConstants.productName} interface cancelled.`;
+                DigitalTwinConstants.productName} Interface cancelled.`;
             utils.channelShowAndAppendLine(channel, message);
             return false;
           } else if (result === DialogResponses.all) {
@@ -770,7 +774,7 @@ export class DeviceModelOperator {
         }
 
         message = `${DigitalTwinConstants.dtPrefix} Start updating ${
-            DigitalTwinConstants.productName} interface with id:"${
+            DigitalTwinConstants.productName} Interface with id:"${
             fileId}"... `;
         utils.channelShowAndAppendLine(channel, message);
 
@@ -779,19 +783,19 @@ export class DeviceModelOperator {
                 fileContent, fileId, interfaceMetaData.etag,
                 builder.RepositoryIdValue);
         message = `${DigitalTwinConstants.dtPrefix} Submitting ${
-            DigitalTwinConstants.productName} interface file: fileName: "${
-            fileName}" successfully, interface id: "${fileId}". `;
+            DigitalTwinConstants.productName} Interface file: fileName: "${
+            fileName}" successfully, Interface id: "${fileId}". `;
         utils.channelShowAndAppendLine(channel, message);
 
         vscode.window.showInformationMessage(`${
-            DigitalTwinConstants.productName} interface with interface id: "${
+            DigitalTwinConstants.productName} Interface with Interface id: "${
             fileId}" updated successfully`);
       } catch (error) {
         if (error.statusCode === 404)  // Not found
         {
           message = `${DigitalTwinConstants.dtPrefix} ${
               DigitalTwinConstants
-                  .productName} interface file does not exist in server, creating ${
+                  .productName} Interface file does not exist in server, creating ${
               fileId}... `;
           utils.channelShowAndAppendLine(channel, message);
 
@@ -801,11 +805,11 @@ export class DeviceModelOperator {
                   fileContent, fileId, undefined, builder.RepositoryIdValue);
           message = `${DigitalTwinConstants.dtPrefix} Submitting ${
               DigitalTwinConstants.productName} interface: fileName: "${
-              fileName}" successfully, interface id: "${fileId}". `;
+              fileName}" successfully, Interface id: "${fileId}". `;
           utils.channelShowAndAppendLine(channel, message);
 
           vscode.window.showInformationMessage(`${
-              DigitalTwinConstants.productName} interface with interface id: "${
+              DigitalTwinConstants.productName} Interface with Interface id: "${
               fileId}" created successfully`);
         } else {
           throw error;
@@ -854,10 +858,10 @@ export class DeviceModelOperator {
       if (!fileId) {
         vscode.window.showWarningMessage(`Unable to find id from the ${
             DigitalTwinConstants
-                .productName} capability model file. Please provide a valid file.`);
+                .productName} Capability Model file. Please provide a valid file.`);
         return false;
       }
-      let message = `${DigitalTwinConstants.dtPrefix} Load and parse file: ${
+      let message = `${DigitalTwinConstants.dtPrefix} Load and parse file ${
           fileName} successfully.`;
       utils.channelShowAndAppendLine(channel, message);
 
@@ -875,17 +879,17 @@ export class DeviceModelOperator {
                 fileId, builder.RepositoryIdValue, true);
 
         if (option.overwriteChoice === OverwriteChoice.Unknown) {
-          const msg = `The capability model with id "${
+          const msg = `The Capability Model with id "${
               fileId}" already exists in the ${
               DigitalTwinConstants
-                  .productName} Model Repository, do you want to overwrite it?`;
+                  .productName} Model Repository. Do you want to overwrite it?`;
           const result: vscode.MessageItem|undefined =
               await vscode.window.showInformationMessage(
                   msg, DialogResponses.all, DialogResponses.yes,
                   DialogResponses.no);
           if (result === DialogResponses.no) {
             const message = `${DigitalTwinConstants.dtPrefix} Submitting ${
-                DigitalTwinConstants.productName} capability model cancelled.`;
+                DigitalTwinConstants.productName} Capability Model cancelled.`;
             utils.channelShowAndAppendLine(channel, message);
 
             return false;
@@ -894,7 +898,7 @@ export class DeviceModelOperator {
           }
         }
         message = `${DigitalTwinConstants.dtPrefix} Start updating ${
-            DigitalTwinConstants.productName} capability model with id:"${
+            DigitalTwinConstants.productName} Capability Model with id:"${
             fileId}"...`;
         utils.channelShowAndAppendLine(channel, message);
 
@@ -904,19 +908,19 @@ export class DeviceModelOperator {
                                fileContent, fileId, capabilityModelContext.etag,
                                builder.RepositoryIdValue);
         message = `${DigitalTwinConstants.dtPrefix} Submitting ${
-            DigitalTwinConstants.productName} capability model: fileName: "${
-            fileName}" successfully, capability model id: "${fileId}". `;
+            DigitalTwinConstants.productName} Capability Model: fileName: "${
+            fileName}" successfully, Capability Model id: "${fileId}". `;
         utils.channelShowAndAppendLine(channel, message);
 
         vscode.window.showInformationMessage(
-            `${DigitalTwinConstants.productName} capability model with id: "${
+            `${DigitalTwinConstants.productName} Capability Model with id: "${
                 fileId}" updated successfully`);
       } catch (error) {
         if (error.statusCode === 404)  // Not found
         {
           message = `${DigitalTwinConstants.dtPrefix} ${
               DigitalTwinConstants
-                  .productName} capability model file does not exist in server, creating "${
+                  .productName} Capability Model file does not exist in server, creating "${
               fileId}"... `;
           utils.channelShowAndAppendLine(channel, message);
 
@@ -927,12 +931,12 @@ export class DeviceModelOperator {
                                  fileContent, fileId, undefined,
                                  builder.RepositoryIdValue);
           message = `${DigitalTwinConstants.dtPrefix} Submitting ${
-              DigitalTwinConstants.productName} capability model: fileName: "${
-              fileName}" successfully, capability model id: "${fileId}". `;
+              DigitalTwinConstants.productName} Capability Model: fileName: "${
+              fileName}" successfully, Capability Model id: "${fileId}". `;
           utils.channelShowAndAppendLine(channel, message);
 
           vscode.window.showInformationMessage(
-              `${DigitalTwinConstants.productName} capability model with id: "${
+              `${DigitalTwinConstants.productName} Capability Model with id: "${
                   fileId}" created successfully`);
         } else {
           throw error;
@@ -940,12 +944,12 @@ export class DeviceModelOperator {
       }
     } catch (error) {
       const message = `${DigitalTwinConstants.dtPrefix} Submitting ${
-          DigitalTwinConstants.productName} capability model: fileName: "${
+          DigitalTwinConstants.productName} Capability Model: fileName: "${
           fileName}" failed, error: ${error.message}.`;
       utils.channelShowAndAppendLine(channel, message);
 
       vscode.window.showWarningMessage(`Unable to submit ${
-          DigitalTwinConstants.productName} capability model, error: ${
+          DigitalTwinConstants.productName} Capability Model, error: ${
           error.message}`);
       return false;
     }

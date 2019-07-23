@@ -56,7 +56,7 @@ export class DigitalTwinMetamodelRepositoryClient {
       expand = false): Promise<GetModelResult> {
     if (repositoryId && !this.dtSharedAccessKey) {
       throw new Error(
-          'The repository connection string is required to get the interface.');
+          'The repository connection string is required to get the Interface.');
     }
 
     return await this.MakeGetModelRequestAsync(
@@ -68,7 +68,7 @@ export class DigitalTwinMetamodelRepositoryClient {
       expand = false): Promise<GetModelResult> {
     if (repositoryId && !this.dtSharedAccessKey) {
       throw new Error(
-          'The repository connection string is required to get the capability model.');
+          'The repository connection string is required to get the Capability Model.');
     }
 
     return await this.MakeGetModelRequestAsync(
@@ -102,7 +102,7 @@ export class DigitalTwinMetamodelRepositoryClient {
 
     if (repositoryId && !this.dtSharedAccessKey) {
       throw new Error(
-          'The connection string is required to search capability models in organizational model repository.');
+          'The connection string is required to search Capability Models in organizational model repository.');
     }
 
     return await this.MakeSearchRequestAsync(
@@ -116,7 +116,7 @@ export class DigitalTwinMetamodelRepositoryClient {
       repositoryId?: string): Promise<string> {
     if (repositoryId && !this.dtSharedAccessKey) {
       throw new Error(
-          'The connection string is required to publish interface in organizational model repository.');
+          'The connection string is required to publish Interface in organizational model repository.');
     }
 
     return await this.MakeCreateOrUpdateRequestAsync(
@@ -124,13 +124,13 @@ export class DigitalTwinMetamodelRepositoryClient {
   }
 
   /// <summary>
-  /// Updates the capability model with the new context content.
+  /// Updates the Capability Model with the new context content.
   /// </summary>
   async CreateOrUpdateCapabilityModelAsync(
       content: string, modelId: string, etag?: string, repositoryId?: string) {
     if (repositoryId && !this.dtSharedAccessKey) {
       throw new Error(
-          'The connection string is required to publish capability model in organizational model repository.');
+          'The connection string is required to publish Capability Model in organizational model repository.');
     }
 
     return await this.MakeCreateOrUpdateRequestAsync(
@@ -138,17 +138,17 @@ export class DigitalTwinMetamodelRepositoryClient {
   }
 
   /// <summary>
-  /// Deletes an interface for given modelId.
+  /// Deletes an Interface for given modelId.
   /// </summary>
   async DeleteInterfaceAsync(modelId: string, repositoryId: string) {
     if (!repositoryId) {
       throw new Error(
-          'The repository id is required to delete capability model. Delete interface is not allowed for public repository.');
+          'The repository id is required to delete Capability Model. Delete Interface is not allowed for public repository.');
     }
 
     if (repositoryId && !this.dtSharedAccessKey) {
       throw new Error(
-          'The connection string is required to delete interface in organizational model repository.');
+          'The connection string is required to delete Interface in organizational model repository.');
     }
 
     await this.MakeDeleteRequestAsync(
@@ -156,17 +156,17 @@ export class DigitalTwinMetamodelRepositoryClient {
   }
 
   /// <summary>
-  /// Deletes a capability model for given model id.
+  /// Deletes a Capability Model for given model id.
   /// </summary>
   async DeleteCapabilityModelAsync(modelId: string, repositoryId: string) {
     if (!repositoryId) {
       throw new Error(
-          'The repository id is required to delete capability model. Delete capability model is not allowed for public repository.');
+          'The repository id is required to delete Capability Model. Delete Capability Model is not allowed for public repository.');
     }
 
     if (!this.dtSharedAccessKey) {
       throw new Error(
-          'The connection string is required to delete capability model in organizational model repository.');
+          'The connection string is required to delete Capability Model in organizational model repository.');
     }
 
     await this.MakeDeleteRequestAsync(
@@ -315,7 +315,7 @@ export class DigitalTwinMetamodelRepositoryClient {
   /// service.
   /// </summary>
   /// <param name="metaModelId">Metamodel id.</param>
-  /// <param name="metaModelType"><see cref="MetaModelType"/> Interface or capability model.</param>
+  /// <param name="metaModelType"><see cref="MetaModelType"/> Interface or Capability Model.</param>
   private async MakeDeleteRequestAsync(
       metaModelType: MetaModelType, modelId: string, repositoryId?: string,
       apiVersion = DigitalTwinConstants.apiVersion) {
