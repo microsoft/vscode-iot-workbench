@@ -363,7 +363,7 @@ export class CodeGenerateCore {
 
     // select the application name for code gen
     const codeGenProjectName = await vscode.window.showInputBox({
-      placeHolder: `${candidateName}`,
+      placeHolder: 'Project name?',
       prompt: `Please specify the project name:`,
       ignoreFocusOut: true,
       validateInput: (applicationName: string) => {

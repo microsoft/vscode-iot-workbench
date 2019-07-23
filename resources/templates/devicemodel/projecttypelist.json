@@ -1,22 +1,22 @@
 {
- "projectType": [
-   {
-     "language": "ANSI C",
-     "type": "CMake",
-     "name": "CMake Project",
-     "detail": "Generate device agnostic standard ANSI C code to integrate into existing device project."
-   },
-   {
-     "language": "ANSI C",
-     "type": "VisualStudio",
-     "name": "Visual Studio Project",
-     "detail": "Generate device agnostic standard ANSI C code for Visual Studio project."
-   },
-   {
-     "language": "ANSI C",
-     "type": "IoTDevKit",
-     "name": "MXChip IoT DevKit Project",
-     "detail": "Generate Arduino project for MXChip IoT DevKit."
-   }
- ] 
+  "projectType": [
+    {
+      "language": "ANSI C",
+      "type": "CMake",
+      "name": "CMake Project",
+      "detail": "Generate ANSI C code as CMake project."
+    },
+    {
+      "language": "ANSI C",
+      "type": "VisualStudio",
+      "name": "Visual Studio Project",
+      "detail": "Generate ANSI C code as Visual Studio (.vcxproj) project."
+    },
+    {
+      "language": "ANSI C",
+      "type": "IoTDevKit",
+      "name": "MXChip IoT DevKit Project",
+      "detail": "Generate code for MXChip IoT DevKit as Arduino project."
+    }
+  ]
 }
