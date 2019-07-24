@@ -316,6 +316,8 @@ export class DigitalTwinDiagnostic {
       });
       if (!validTypes.length) {
         validTypes.push(Json.ValueKind.ObjectValue, Json.ValueKind.StringValue);
+      } else if (this._dtParser.isInternationalizationFromId(dtContext, id)) {
+        validTypes.push(Json.ValueKind.ObjectValue);
       }
     }
 
