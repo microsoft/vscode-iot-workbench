@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import {ContextUris} from '../constants';
+import {ContextUris, ModelType} from '../constants';
 import {DigitalTwinMetaModelParser} from './DigitalTwinMetaModelGraph';
 import * as Json from './JSON';
 
@@ -94,8 +94,8 @@ export class DigitalTwinDiagnostic {
       types = this._dtParser.getTypesFromId(dtContext, id);
     } else {
       const documentType = /\.interface\.json$/.test(document.uri.fsPath) ?
-          'Interface' :
-          'CapabilityModel';
+          ModelType.Interface :
+          ModelType.CapabilityModel;
       types = [documentType];
     }
 
@@ -374,8 +374,8 @@ export class DigitalTwinDiagnostic {
       types = this._dtParser.getTypesFromId(dtContext, id);
     } else {
       const documentType = /\.interface\.json$/.test(document.uri.fsPath) ?
-          'Interface' :
-          'CapabilityModel';
+          ModelType.Interface :
+          ModelType.CapabilityModel;
       types = [documentType];
     }
 
@@ -483,7 +483,8 @@ export class DigitalTwinDiagnostic {
 
     for (let i = 0; i < jsonValue.propertyNames.length; i++) {
       const property = jsonValue.propertyNames[i];
-      if (property !== '@type' && properties.indexOf(property) === -1) {
+      if (property !== '@type' && property !== '@id' &&
+          properties.indexOf(property) === -1) {
         const startIndex = jsonValue.properties[i].name.span.startIndex;
         const endIndex = jsonValue.properties[i].name.span.endIndex;
         const message = `${property} is unexpected.`;
