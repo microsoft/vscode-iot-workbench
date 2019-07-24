@@ -11,7 +11,7 @@ import {DigitalTwinFileNames} from '../DigitalTwinConstants';
 import {AnsiCCodeGeneratorBase} from './Interfaces/AnsiCCodeGeneratorBase';
 import {CodeGenProjectType, DeviceConnectionType} from './Interfaces/CodeGenerator';
 
-export class AnsiCCodeGenVSImpl extends AnsiCCodeGeneratorBase {
+export class AnsiCCodeGeneratorImpl_VS extends AnsiCCodeGeneratorBase {
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       private telemetryContext: TelemetryContext,
@@ -21,7 +21,7 @@ export class AnsiCCodeGenVSImpl extends AnsiCCodeGeneratorBase {
 
   async GenerateCode(
       targetPath: string, filePath: string, capabilityModelName: string,
-      interfaceDir: string): Promise<boolean> {
+      dcmId: string, interfaceDir: string): Promise<boolean> {
     // Invoke DigitalTwinCodeGen toolset to generate the code
     const retvalue =
         await this.GenerateAnsiCCodeCore(targetPath, filePath, interfaceDir);
@@ -41,6 +41,7 @@ export class AnsiCCodeGenVSImpl extends AnsiCCodeGeneratorBase {
 
     const projectNamePattern = /{PROJECT_NAME}/g;
     const capabilityModelNamePattern = /{CAPABILITYMODELNAME}/g;
+    const projectDCMIdPattern = /{DCM_ID}/g;
 
     for (const fileInfo of templateFilesInfo) {
       if (fileInfo.fileContent === undefined) {
@@ -68,9 +69,11 @@ export class AnsiCCodeGenVSImpl extends AnsiCCodeGeneratorBase {
             fileInfo.fileContent.replace(utilitiesHPattern, includedHeaderFiles)
                 .replace(utilitiesCPattern, includedCFiles)
                 .replace(capabilityModelNamePattern, capabilityModelName);
+
       } else {
         fileInfo.fileContent =
-            fileInfo.fileContent.replace(projectNamePattern, projectName);
+            fileInfo.fileContent.replace(projectNamePattern, projectName)
+                .replace(projectDCMIdPattern, dcmId);
       }
       await utils.generateTemplateFile(
           targetPath, ScaffoldType.Local, fileInfo);

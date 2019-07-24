@@ -2,10 +2,9 @@ import * as vscode from 'vscode';
 
 import {TelemetryContext} from '../../telemetry';
 
-import {AnciCCodeGenBoilerplateImpl} from './AnciCCodeGenBoilerplateImpl';
-import {AnsiCCodeGenVSImpl} from './AnciCCodeGenVSImpl';
-import {AnsiCCodeGenDevkitImpl} from './AnsiCCodeGenDevkitImpl';
-import {AnsiCCodeGenGeneralImpl} from './AnsiCCodeGenGeneralImpl';
+import {AnsiCCodeGeneratorImpl_VS} from './AnsiCCodeGeneratorImpl_VS';
+import {AnsiCCodeGeneratorImpl_IoTDevKit} from './AnsiCCodeGeneratorImpl_IoTDevKit';
+import {AnsiCCodeGeneratorImpl_CMake} from './AnsiCCodeGeneratorImpl_CMake';
 import {CodeGenerator, CodeGenProjectType, DeviceConnectionType} from './Interfaces/CodeGenerator';
 import {CodeGeneratorFactory} from './Interfaces/CodeGeneratorFactory';
 
@@ -18,13 +17,13 @@ export class AnsiCCodeGeneratorFactory implements CodeGeneratorFactory {
       projectType: CodeGenProjectType,
       connectionType: DeviceConnectionType): CodeGenerator|null {
     if (projectType === CodeGenProjectType.CMake) {
-      return new AnsiCCodeGenGeneralImpl(
+      return new AnsiCCodeGeneratorImpl_CMake(
           this.context, this.channel, this.telemetryContext, connectionType);
     } else if (projectType === CodeGenProjectType.IoTDevKit) {
-      return new AnsiCCodeGenDevkitImpl(
+      return new AnsiCCodeGeneratorImpl_IoTDevKit(
           this.context, this.channel, this.telemetryContext, connectionType);
     } else if (projectType === CodeGenProjectType.VisualStudio) {
-      return new AnsiCCodeGenVSImpl(
+      return new AnsiCCodeGeneratorImpl_VS(
           this.context, this.channel, this.telemetryContext, connectionType);
     }
     return null;
