@@ -186,9 +186,6 @@
             "type": "boolean",
             "default": false
           },
-          "IoTWorkbench.IoTPnPModelRepositoryKey": {
-            "type": "string"
-          },
           "IoTWorkbench.IoTPnPCodeGenVersion": {
             "type": "string"
           },
@@ -241,6 +238,7 @@
     "@types/ssh2": "^0.5.35",
     "@types/unzip": "^0.1.0",
     "@types/winreg": "^1.2.30",
+    "@types/keytar": "^4.4.0",
     "gts": "^0.5.1",
     "typescript": "^2.6.2",
     "vscode": "^1.1.33",
@@ -274,7 +272,8 @@
     "vscode-express": "^1.0.1",
     "vscode-extension-telemetry": "^0.1.0",
     "vscode-iot-device-cube-sdk": "^0.0.20",
-    "winreg": "^1.2.3"
+    "winreg": "^1.2.3",
+    "keytar": "^4.4.0"
   },
   "extensionDependencies": [
     "vsciot-vscode.azure-iot-toolkit",

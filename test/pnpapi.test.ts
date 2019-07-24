@@ -20,7 +20,6 @@ const constants = {
   sampleCapabilityModelName: 'MxChipCapabilityModel.json'
 };
 
-
 suite('IoT Workbench: PnPAPI', () => {
   test('Should be able generate shared access key', async function() {
     const context = new TestExtensionContext();
@@ -33,8 +32,6 @@ suite('IoT Workbench: PnPAPI', () => {
     assert.equal(result.length > 0, true);
   });
 
-
-
   // tslint:disable-next-line: only-arrow-functions
   test('Should be able to get all Interfaces', async function() {
     const context = new TestExtensionContext();
@@ -43,8 +40,8 @@ suite('IoT Workbench: PnPAPI', () => {
     const builder =
         DigitalTwinConnectionStringBuilder.Create(constants.connectionString);
     const pnpMetamodelRepositoryClient =
-        new DigitalTwinMetamodelRepositoryClient(constants.connectionString);
-
+        new DigitalTwinMetamodelRepositoryClient();
+    await pnpMetamodelRepositoryClient.initialize(constants.connectionString);
     const result = await pnpMetamodelRepositoryClient.SearchInterfacesAsync(
         '', null, builder.RepositoryIdValue, 50);
     assert.equal(result.results.length <= 50, true);
@@ -62,7 +59,8 @@ suite('IoT Workbench: PnPAPI', () => {
   test('should be able to get the Interface content', async function() {
     this.timeout(10 * 60 * 1000);
     const pnpMetamodelRepositoryClient =
-        new DigitalTwinMetamodelRepositoryClient(null);
+        new DigitalTwinMetamodelRepositoryClient();
+    await pnpMetamodelRepositoryClient.initialize(null);
     const searchResults: SearchResults =
         await pnpMetamodelRepositoryClient.SearchInterfacesAsync(
             '', null, undefined, 50);
@@ -92,7 +90,8 @@ suite('IoT Workbench: PnPAPI', () => {
     const builder =
         DigitalTwinConnectionStringBuilder.Create(constants.connectionString);
     const pnpMetamodelRepositoryClient =
-        new DigitalTwinMetamodelRepositoryClient(constants.connectionString);
+        new DigitalTwinMetamodelRepositoryClient();
+    await pnpMetamodelRepositoryClient.initialize(constants.connectionString);
     const searchResults: SearchResults =
         await pnpMetamodelRepositoryClient.SearchCapabilityModelsAsync(
             '', null, builder.RepositoryIdValue, 50);
@@ -117,8 +116,8 @@ suite('IoT Workbench: PnPAPI', () => {
     const builder =
         DigitalTwinConnectionStringBuilder.Create(constants.connectionString);
     const pnpMetamodelRepositoryClient =
-        new DigitalTwinMetamodelRepositoryClient(constants.connectionString);
-
+        new DigitalTwinMetamodelRepositoryClient();
+    await pnpMetamodelRepositoryClient.initialize(constants.connectionString);
     const sampleInterfacePath =
         path.join(constants.sampleFolderPath, constants.sampleIntefaceName);
 

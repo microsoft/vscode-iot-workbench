@@ -13,6 +13,7 @@ import {ConfigKey} from '../../constants';
 import {GetModelResult} from './DataContracts/DigitalTwinModel';
 import {ConfigHandler} from '../../configHandler';
 import {DigitalTwinConstants} from '../DigitalTwinConstants';
+import {CredentialStore} from '../../credentialStore';
 
 const constants = {
   mediaType: 'application/json',
@@ -20,17 +21,19 @@ const constants = {
   modelSearch: '/models/search'
 };
 
-
 export class DigitalTwinMetamodelRepositoryClient {
-  private dtSharedAccessKey: DigitalTwinSharedAccessKey|null;
-  private metaModelRepositoryHostName: vscode.Uri;
+  private modelRepoSharedAccessKey: DigitalTwinSharedAccessKey|null = null;
+  private metaModelRepositoryHostName: vscode.Uri|null = null;
 
-  constructor(connectionString: string|null) {
-    if (!connectionString) {  // Connect to public repo
-      this.dtSharedAccessKey = null;
+  constructor() {}
+
+  async initialize(connectionString: string|null) {
+    if (!connectionString) {
+      // Connect to public repo
+      this.modelRepoSharedAccessKey = null;
       const storedConnectionString =
-          ConfigHandler.get<string>(ConfigKey.modelRepositoryKeyName);
-      if (storedConnectionString) {
+          await CredentialStore.getCredential(ConfigKey.modelRepositoryKeyName);
+      if (storedConnectionString !== null) {
         const builder =
             DigitalTwinConnectionStringBuilder.Create(storedConnectionString);
         this.metaModelRepositoryHostName = vscode.Uri.parse(builder.HostName);
@@ -47,14 +50,14 @@ export class DigitalTwinMetamodelRepositoryClient {
       const builder =
           DigitalTwinConnectionStringBuilder.Create(connectionString);
       this.metaModelRepositoryHostName = vscode.Uri.parse(builder.HostName);
-      this.dtSharedAccessKey = new DigitalTwinSharedAccessKey(builder);
+      this.modelRepoSharedAccessKey = new DigitalTwinSharedAccessKey(builder);
     }
   }
 
   async GetInterfaceAsync(
       modelId: string, repositoryId?: string,
       expand = false): Promise<GetModelResult> {
-    if (repositoryId && !this.dtSharedAccessKey) {
+    if (repositoryId && !this.modelRepoSharedAccessKey) {
       throw new Error(
           'The repository connection string is required to get the Interface.');
     }
@@ -66,7 +69,7 @@ export class DigitalTwinMetamodelRepositoryClient {
   async GetCapabilityModelAsync(
       modelId: string, repositoryId?: string,
       expand = false): Promise<GetModelResult> {
-    if (repositoryId && !this.dtSharedAccessKey) {
+    if (repositoryId && !this.modelRepoSharedAccessKey) {
       throw new Error(
           'The repository connection string is required to get the Capability Model.');
     }
@@ -82,7 +85,7 @@ export class DigitalTwinMetamodelRepositoryClient {
       throw new Error('pageSize should be greater than 0');
     }
 
-    if (repositoryId && !this.dtSharedAccessKey) {
+    if (repositoryId && !this.modelRepoSharedAccessKey) {
       throw new Error(
           'The connection string is required to search intefaces in organizational model repository.');
     }
@@ -92,7 +95,6 @@ export class DigitalTwinMetamodelRepositoryClient {
         pageSize);
   }
 
-
   async SearchCapabilityModelsAsync(
       searchString: string, continuationToken: string|null,
       repositoryId?: string, pageSize = 20): Promise<SearchResults> {
@@ -100,7 +102,7 @@ export class DigitalTwinMetamodelRepositoryClient {
       throw new Error('pageSize should be greater than 0');
     }
 
-    if (repositoryId && !this.dtSharedAccessKey) {
+    if (repositoryId && !this.modelRepoSharedAccessKey) {
       throw new Error(
           'The connection string is required to search Capability Models in organizational model repository.');
     }
@@ -110,11 +112,10 @@ export class DigitalTwinMetamodelRepositoryClient {
         repositoryId, pageSize);
   }
 
-
   async CreateOrUpdateInterfaceAsync(
       content: string, modelId: string, etag?: string,
       repositoryId?: string): Promise<string> {
-    if (repositoryId && !this.dtSharedAccessKey) {
+    if (repositoryId && !this.modelRepoSharedAccessKey) {
       throw new Error(
           'The connection string is required to publish Interface in organizational model repository.');
     }
@@ -128,7 +129,7 @@ export class DigitalTwinMetamodelRepositoryClient {
   /// </summary>
   async CreateOrUpdateCapabilityModelAsync(
       content: string, modelId: string, etag?: string, repositoryId?: string) {
-    if (repositoryId && !this.dtSharedAccessKey) {
+    if (repositoryId && !this.modelRepoSharedAccessKey) {
       throw new Error(
           'The connection string is required to publish Capability Model in organizational model repository.');
     }
@@ -146,7 +147,7 @@ export class DigitalTwinMetamodelRepositoryClient {
           'The repository id is required to delete Capability Model. Delete Interface is not allowed for public repository.');
     }
 
-    if (repositoryId && !this.dtSharedAccessKey) {
+    if (repositoryId && !this.modelRepoSharedAccessKey) {
       throw new Error(
           'The connection string is required to delete Interface in organizational model repository.');
     }
@@ -164,7 +165,7 @@ export class DigitalTwinMetamodelRepositoryClient {
           'The repository id is required to delete Capability Model. Delete Capability Model is not allowed for public repository.');
     }
 
-    if (!this.dtSharedAccessKey) {
+    if (!this.modelRepoSharedAccessKey) {
       throw new Error(
           'The connection string is required to delete Capability Model in organizational model repository.');
     }
@@ -173,11 +174,14 @@ export class DigitalTwinMetamodelRepositoryClient {
         MetaModelType.CapabilityModel, modelId, repositoryId);
   }
 
-
   async MakeCreateOrUpdateRequestAsync(
       metaModelType: MetaModelType, contents: string, modelId: string,
       etag?: string, repositoryId?: string,
       apiVersion = DigitalTwinConstants.apiVersion): Promise<string> {
+    if (!this.metaModelRepositoryHostName) {
+      throw new Error(
+          'The value of metaModelRepositoryHostName is not initialized');
+    }
     let targetUri = this.metaModelRepositoryHostName.toString();
 
     if (repositoryId) {
@@ -191,8 +195,8 @@ export class DigitalTwinMetamodelRepositoryClient {
 
     let authenticationString = '';
 
-    if (this.dtSharedAccessKey) {
-      authenticationString = this.dtSharedAccessKey.GenerateSASToken();
+    if (this.modelRepoSharedAccessKey) {
+      authenticationString = this.modelRepoSharedAccessKey.GenerateSASToken();
     }
 
     const payload = JSON.parse(contents);
@@ -230,8 +234,8 @@ export class DigitalTwinMetamodelRepositoryClient {
 
     let authenticationString = '';
 
-    if (this.dtSharedAccessKey) {
-      authenticationString = this.dtSharedAccessKey.GenerateSASToken();
+    if (this.modelRepoSharedAccessKey) {
+      authenticationString = this.modelRepoSharedAccessKey.GenerateSASToken();
     }
 
     const options: request.OptionsWithUri = {
@@ -269,7 +273,10 @@ export class DigitalTwinMetamodelRepositoryClient {
       continuationToken,
       pageSize
     };
-
+    if (!this.metaModelRepositoryHostName) {
+      throw new Error(
+          'The value of metaModelRepositoryHostName is not initialized');
+    }
     let queryString = this.metaModelRepositoryHostName.toString();
 
     if (repositoryId) {
@@ -281,8 +288,8 @@ export class DigitalTwinMetamodelRepositoryClient {
 
     let authenticationString = '';
 
-    if (this.dtSharedAccessKey) {
-      authenticationString = this.dtSharedAccessKey.GenerateSASToken();
+    if (this.modelRepoSharedAccessKey) {
+      authenticationString = this.modelRepoSharedAccessKey.GenerateSASToken();
     }
 
     const options: request.OptionsWithUri = {
@@ -291,10 +298,10 @@ export class DigitalTwinMetamodelRepositoryClient {
       encoding: 'utf8',
       json: true,
       headers: {
-        'Authorization': authenticationString,
+        Authorization: authenticationString,
         'Content-Type': 'application/json'
       },
-      body: payload,
+      body: payload
     };
 
     return new Promise<SearchResults>((resolve, reject) => {
@@ -309,7 +316,6 @@ export class DigitalTwinMetamodelRepositoryClient {
     });
   }
 
-
   /// <summary>
   /// Helper method to make a Delete Request to PnP Metamodal repository
   /// service.
@@ -319,6 +325,10 @@ export class DigitalTwinMetamodelRepositoryClient {
   private async MakeDeleteRequestAsync(
       metaModelType: MetaModelType, modelId: string, repositoryId?: string,
       apiVersion = DigitalTwinConstants.apiVersion) {
+    if (!this.metaModelRepositoryHostName) {
+      throw new Error(
+          'The value of metaModelRepositoryHostName is not initialized');
+    }
     const queryString = `?repositoryId=${repositoryId}`;
     const resourceUrl =
         `${this.metaModelRepositoryHostName.toString()}${constants.apiModel}/${
@@ -327,15 +337,15 @@ export class DigitalTwinMetamodelRepositoryClient {
 
     let authenticationString = '';
 
-    if (this.dtSharedAccessKey) {
-      authenticationString = this.dtSharedAccessKey.GenerateSASToken();
+    if (this.modelRepoSharedAccessKey) {
+      authenticationString = this.modelRepoSharedAccessKey.GenerateSASToken();
     }
 
     const options = {
       method: 'DELETE',
       uri: resourceUrl,
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
         Authorization: authenticationString,
         'Content-Type': 'application/json'
       },
@@ -356,6 +366,10 @@ export class DigitalTwinMetamodelRepositoryClient {
   private GenerateFetchModelUri(
       modelId: string, apiVersion: string, repositoryId?: string,
       expand = false) {
+    if (!this.metaModelRepositoryHostName) {
+      throw new Error(
+          'The value of metaModelRepositoryHostName is not initialized');
+    }
     let result =
         `${this.metaModelRepositoryHostName.toString()}${constants.apiModel}/${
             encodeURIComponent(modelId)}?api-version=${apiVersion}`;

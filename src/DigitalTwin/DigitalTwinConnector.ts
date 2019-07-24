@@ -5,11 +5,11 @@ import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
+import {CredentialStore} from '../credentialStore';
 
 import {DigitalTwinConnectionStringBuilder} from './DigitalTwinApi/DigitalTwinConnectionStringBuilder';
 import {DigitalTwinMetamodelRepositoryClient} from './DigitalTwinApi/DigitalTwinMetamodelRepositoryClient';
 import {DigitalTwinConstants} from './DigitalTwinConstants';
-
 
 export class DigitalTwinConnector {
   static async ConnectMetamodelRepository(connectionString: string):
@@ -21,16 +21,16 @@ export class DigitalTwinConnector {
 
     try {
       const dtMetamodelRepositoryClient =
-          new DigitalTwinMetamodelRepositoryClient(connectionString);
+          new DigitalTwinMetamodelRepositoryClient();
+      await dtMetamodelRepositoryClient.initialize(connectionString);
       const builder =
           DigitalTwinConnectionStringBuilder.Create(connectionString);
       // try to get one interface.
       const result = await dtMetamodelRepositoryClient.SearchInterfacesAsync(
           '', null, builder.RepositoryIdValue, 1);
       // Save connection string info
-      await ConfigHandler.update(
-          ConfigKey.modelRepositoryKeyName, connectionString,
-          vscode.ConfigurationTarget.Global);
+      await CredentialStore.setCredential(
+          ConfigKey.modelRepositoryKeyName, connectionString);
       vscode.window.showInformationMessage(`Connect to ${
           DigitalTwinConstants.productName} Model Repository successfully.`);
       return true;

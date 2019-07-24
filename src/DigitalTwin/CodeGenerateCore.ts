@@ -22,6 +22,7 @@ import {DigitalTwinMetamodelRepositoryClient} from './DigitalTwinApi/DigitalTwin
 import {DigitalTwinConnectionStringBuilder} from './DigitalTwinApi/DigitalTwinConnectionStringBuilder';
 import {PnpProjectTemplateType, ProjectTemplate, PnpDeviceConnectionType} from '../Models/Interfaces/ProjectTemplate';
 import {DialogResponses} from '../DialogResponses';
+import {CredentialStore} from '../credentialStore';
 
 const constants = {
   idName: '@id',
@@ -197,14 +198,41 @@ export class CodeGenerateCore {
 
     const implementedInterfaces = capabilityModel['implements'];
     utils.mkdirRecursivelySync(projectPath);
+
+    let connectionString: string|null = null;
+    let credentialChecked = false;
     for (const interfaceItem of implementedInterfaces) {
       const schema = interfaceItem.schema;
       if (typeof schema === 'string') {
         // normal Interface, check the Interface file offline and online
         const item = interfaceItems.find(item => item.urnId === schema);
         if (!item) {
-          const result =
-              await this.DownloadInterfaceFile(schema, rootPath, channel);
+          if (!credentialChecked) {
+            // Get the connection string of the IoT Plug and Play repo
+            connectionString = await CredentialStore.getCredential(
+                ConfigKey.modelRepositoryKeyName);
+
+            if (!connectionString) {
+              const option: vscode.InputBoxOptions = {
+                value: DigitalTwinConstants.repoConnectionStringTemplate,
+                prompt:
+                    `Please input the connection string to access the model repository. Press Esc to use global repository only`,
+                ignoreFocusOut: true
+              };
+
+              const connStr = await vscode.window.showInputBox(option);
+              if (connStr) {
+                connectionString = connStr as string;
+                // Save connection string info
+                await CredentialStore.setCredential(
+                    ConfigKey.modelRepositoryKeyName, connectionString);
+              }
+              credentialChecked = true;
+            }
+          }
+
+          const result = await this.DownloadInterfaceFile(
+              schema, rootPath, connectionString, channel);
           if (!result) {
             const message = `Unable to get the Interface with Id ${
                 schema} online. Please make sure the file exists in server.`;
@@ -487,40 +515,22 @@ export class CodeGenerateCore {
   }
 
   async DownloadInterfaceFile(
-      urnId: string, targetFolder: string,
+      urnId: string, targetFolder: string, connectionString: string|null,
       channel: vscode.OutputChannel): Promise<boolean> {
     const fileName =
         utils.generateInterfaceFileNameFromUrnId(urnId, targetFolder);
-    // Get the connection string of the IoT Plug and Play repo
-    let connectionString =
-        ConfigHandler.get<string>(ConfigKey.modelRepositoryKeyName);
 
-    if (!connectionString) {
-      const option: vscode.InputBoxOptions = {
-        value: DigitalTwinConstants.repoConnectionStringTemplate,
-        prompt:
-            `Please input the connection string to access the model repository.`,
-        ignoreFocusOut: true
-      };
+    // Try to download Interface file from private repo
+    const dtMetamodelRepositoryClient =
+        new DigitalTwinMetamodelRepositoryClient();
+    await dtMetamodelRepositoryClient.initialize(connectionString);
 
-      connectionString = await vscode.window.showInputBox(option);
-    }
-    if (!connectionString) {
-      return false;
-    } else {
-      // Save connection string info
-      await ConfigHandler.update(
-          ConfigKey.modelRepositoryKeyName, connectionString,
-          vscode.ConfigurationTarget.Global);
-      // Try to download Interface file from private repo
-      const dtMetamodelRepositoryClient =
-          new DigitalTwinMetamodelRepositoryClient(connectionString);
-      const builder =
-          DigitalTwinConnectionStringBuilder.Create(connectionString);
-      const repositoryId = builder.RepositoryIdValue;
-
-      // Try to download Interface file from private repo
+    // Try to download Interface file from private repo
+    if (connectionString) {
       try {
+        const builder = DigitalTwinConnectionStringBuilder.Create(
+            connectionString.toString());
+        const repositoryId = builder.RepositoryIdValue;
         const fileMetaData =
             await dtMetamodelRepositoryClient.GetInterfaceAsync(
                 urnId, repositoryId, true);
@@ -541,29 +551,27 @@ export class CodeGenerateCore {
             urnId} from organizational Model Repository, try global repository instead.`;
         utils.channelShowAndAppendLine(channel, message);
       }
-
-      // Try to download Interface file from public repo
-      try {
-        const fileMetaData =
-            await dtMetamodelRepositoryClient.GetInterfaceAsync(
-                urnId, undefined, true);
-        if (fileMetaData) {
-          fs.writeFileSync(
-              path.join(targetFolder, fileName),
-              JSON.stringify(fileMetaData.content, null, 4));
-          const message =
-              `${DigitalTwinConstants.dtPrefix} Download Interface with id ${
-                  urnId}, name: ${fileName} from global repository into ${
-                  targetFolder} completed.`;
-          utils.channelShowAndAppendLine(channel, message);
-          return true;
-        }
-      } catch (error) {
+    }
+    // Try to download Interface file from public repo
+    try {
+      const fileMetaData = await dtMetamodelRepositoryClient.GetInterfaceAsync(
+          urnId, undefined, true);
+      if (fileMetaData) {
+        fs.writeFileSync(
+            path.join(targetFolder, fileName),
+            JSON.stringify(fileMetaData.content, null, 4));
         const message =
-            `${DigitalTwinConstants.dtPrefix} Unable to get Interface with id ${
-                urnId} from global Model Repository. errorcode: ${error.code}`;
+            `${DigitalTwinConstants.dtPrefix} Download Interface with id ${
+                urnId}, name: ${fileName} from global repository into ${
+                targetFolder} completed.`;
         utils.channelShowAndAppendLine(channel, message);
+        return true;
       }
+    } catch (error) {
+      const message =
+          `${DigitalTwinConstants.dtPrefix} Unable to get Interface with id ${
+              urnId} from global Model Repository. errorcode: ${error.code}`;
+      utils.channelShowAndAppendLine(channel, message);
     }
     return false;
   }
