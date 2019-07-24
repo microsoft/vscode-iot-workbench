@@ -36,6 +36,7 @@
     },
     "Enum": "Schemas/Enum",
     "valueSchema": "Schemas/Enum/valueSchema",
+    "EnumValue": "Schemas/EnumValue",
     "enumValue": "Schemas/EnumValue/value",
     "enumValues": {
       "@id": "Schemas/Enum/values",
@@ -86,7 +87,7 @@
       "@id": "CapabilityModel/implements",
       "@container": "@list"
     },
-	"interfaceSchema": {
+	 "interfaceSchema": {
       "@id": "InterfaceInstance/schema",
       "@type": "@id"
     }
