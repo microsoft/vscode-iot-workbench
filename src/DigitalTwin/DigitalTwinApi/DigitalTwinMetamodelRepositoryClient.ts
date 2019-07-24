@@ -42,7 +42,7 @@ export class DigitalTwinMetamodelRepositoryClient {
             ConfigHandler.get<string>(ConfigKey.iotPnPRepositoryUrl);
         if (!dtRepositoryUrl) {
           throw new Error(
-              'The default IoT Plug and Play Model Repository URL is not provided. Please set IoTPnPRepositoryUrl in configuration.');
+              'The IoT Plug and Play public repository URL is invalid. Please set IoTPnPRepositoryUrl in configuration.');
         }
         this.metaModelRepositoryHostName = vscode.Uri.parse(dtRepositoryUrl);
       }
@@ -87,7 +87,7 @@ export class DigitalTwinMetamodelRepositoryClient {
 
     if (repositoryId && !this.modelRepoSharedAccessKey) {
       throw new Error(
-          'The connection string is required to search intefaces in company model repository.');
+          'The connection string is required to search intefaces in company repository.');
     }
 
     return await this.MakeSearchRequestAsync(
@@ -104,7 +104,7 @@ export class DigitalTwinMetamodelRepositoryClient {
 
     if (repositoryId && !this.modelRepoSharedAccessKey) {
       throw new Error(
-          'The connection string is required to search Capability Models in company model repository.');
+          'The connection string is required to search Capability Models in company repository.');
     }
 
     return await this.MakeSearchRequestAsync(
@@ -117,7 +117,7 @@ export class DigitalTwinMetamodelRepositoryClient {
       repositoryId?: string): Promise<string> {
     if (repositoryId && !this.modelRepoSharedAccessKey) {
       throw new Error(
-          'The connection string is required to publish Interface in company model repository.');
+          'The connection string is required to publish Interface in company repository.');
     }
 
     return await this.MakeCreateOrUpdateRequestAsync(
@@ -131,7 +131,7 @@ export class DigitalTwinMetamodelRepositoryClient {
       content: string, modelId: string, etag?: string, repositoryId?: string) {
     if (repositoryId && !this.modelRepoSharedAccessKey) {
       throw new Error(
-          'The connection string is required to publish Capability Model in company model repository.');
+          'The connection string is required to publish Capability Model in company repository.');
     }
 
     return await this.MakeCreateOrUpdateRequestAsync(
@@ -149,7 +149,7 @@ export class DigitalTwinMetamodelRepositoryClient {
 
     if (repositoryId && !this.modelRepoSharedAccessKey) {
       throw new Error(
-          'The connection string is required to delete Interface in company model repository.');
+          'The connection string is required to delete Interface in company repository.');
     }
 
     await this.MakeDeleteRequestAsync(
@@ -167,7 +167,7 @@ export class DigitalTwinMetamodelRepositoryClient {
 
     if (!this.modelRepoSharedAccessKey) {
       throw new Error(
-          'The connection string is required to delete Capability Model in company model repository.');
+          'The connection string is required to delete Capability Model in company repository.');
     }
 
     await this.MakeDeleteRequestAsync(
