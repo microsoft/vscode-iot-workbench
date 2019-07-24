@@ -118,3 +118,10 @@ export enum TemplateTag {
   general = 'general',
   digitaltwin = 'digitaltwin'
 }
+
+export class ContextUris {
+  static readonly iotModel = 'http://azureiot.com/v1/contexts/IoTModel.json';
+  static readonly interface = 'http://azureiot.com/v1/contexts/Interface.json';
+  static readonly capabilityModel =
+      'http://azureiot.com/v1/contexts/CapabilityModel.json';
+}

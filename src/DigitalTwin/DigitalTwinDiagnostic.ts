@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 
+import {ContextUris} from '../constants';
 import {DigitalTwinMetaModelParser} from './DigitalTwinMetaModelGraph';
 import * as Json from './JSON';
 
@@ -29,10 +30,7 @@ export class DigitalTwinDiagnostic {
     return false;
   }
 
-  constructor(
-      private _dtParser: DigitalTwinMetaModelParser,
-      private dtInterface: DigitalTwinMetaModelContext,
-      private dtCapabilityModel: DigitalTwinMetaModelContext) {}
+  constructor(private _dtParser: DigitalTwinMetaModelParser) {}
 
   getIssues(
       dtContext: DigitalTwinMetaModelContext,
@@ -118,10 +116,13 @@ export class DigitalTwinDiagnostic {
     let caseInsensitive = false;
     if (jsonKey === '@context') {
       caseInsensitive = true;
-      const contextUri = this.dtInterface === dtContext ?
-          'http://azureiot.com/v1/contexts/Interface.json' :
-          'http://azureiot.com/v1/contexts/CapabilityModel.json';
-      values = [contextUri];
+      let contextUri: string;
+      if (/\.interface\.json$/.test(document.fileName)) {
+        contextUri = ContextUris.interface;
+      } else {
+        contextUri = ContextUris.capabilityModel;
+      }
+      values = [contextUri, ContextUris.iotModel];
     } else if (jsonKey === '@id') {
       caseInsensitive = true;
       values = ['XMLSchema#string'];
@@ -245,13 +246,6 @@ export class DigitalTwinDiagnostic {
       const issue: Issue = {startIndex, endIndex, message};
       issues.push(issue);
       return issues;
-    }
-
-    if (type === 'Interface') {
-      dtContext = this.dtInterface;
-    }
-    if (type === 'CapabilityModel') {
-      dtContext = this.dtCapabilityModel;
     }
 
     if (Array.isArray(type)) {

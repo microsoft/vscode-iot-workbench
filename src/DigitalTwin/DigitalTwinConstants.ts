@@ -5,6 +5,7 @@ export class DigitalTwinFileNames {
   static readonly graphFileName = 'graph.json';
   static readonly interfaceFileName = 'Interface.json';
   static readonly capabilityModelFileName = 'CapabilityModel.json';
+  static readonly iotModelFileName = 'IoTModel.json';
   static readonly settingsJsonFileName = 'settings.json';
   static readonly vscodeSettingsFolderName = '.vscode';
   static readonly sampleInterfaceName = 'sample.interface.json';
