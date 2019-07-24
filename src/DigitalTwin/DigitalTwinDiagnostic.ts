@@ -391,13 +391,40 @@ export class DigitalTwinDiagnostic {
       return [issue];
     } else if (Array.isArray(type)) {
       const typeValue = jsonValue.getPropertyValue('@type') as Json.ArrayValue;
+      const startIndex = typeValue.span.startIndex;
+      const endIndex = typeValue.span.endIndex;
       const issues: Issue[] = [];
+      if (jsonKey === 'contents') {
+        let requiredType = '';
+        for (let index = 0; index < type.length; index++) {
+          const currentType = type[index];
+          if (types.indexOf(currentType) !== -1) {
+            if (requiredType) {
+              issues.push({
+                startIndex,
+                endIndex,
+                message: `Conflict type: ${requiredType} and ${currentType}.`
+              });
+            }
+            requiredType = currentType;
+          }
+        }
+
+        if (!requiredType) {
+          issues.push({
+            startIndex,
+            endIndex,
+            message: `Missing required type. One of types below is required:\n${types.join(',')}`
+          });
+        }
+      }
+      
       for (let index = 0; index < type.length; index++) {
         const currentType = type[index];
         const currentTypeObject = typeValue.elements[index] as Json.StringValue;
         const startIndex = currentTypeObject.span.startIndex;
         const endIndex = currentTypeObject.span.endIndex;
-        if (types.indexOf(currentType) === -1) {
+        if (types.indexOf(currentType) === -1 && jsonKey !== 'contents') {
           issues.push({
             startIndex,
             endIndex,
@@ -411,6 +438,7 @@ export class DigitalTwinDiagnostic {
           });
         }
       }
+      
       if (issues.length) {
         return issues;
       }
