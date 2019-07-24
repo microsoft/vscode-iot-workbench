@@ -20,7 +20,7 @@ import {DeviceModelOperator} from './DigitalTwin/DeviceModelOperator';
 import {DigitalTwinMetaModelJsonParser} from './DigitalTwin/DigitalTwinMetaModelJsonParser';
 import {DigitalTwinDiagnostic} from './DigitalTwin/DigitalTwinDiagnostic';
 import {DigitalTwinConstants} from './DigitalTwin/DigitalTwinConstants';
-import {ConfigKey, ContextUris, EventNames, FileNames} from './constants';
+import {ConfigKey, ContextUris, EventNames, FileNames, ModelType} from './constants';
 import {TelemetryContext, TelemetryProperties} from './telemetry';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 import {RemoteExtension} from './Models/RemoteExtension';
@@ -40,10 +40,10 @@ const request = impor('request-promise') as typeof import('request-promise');
 
 function getDocumentType(document: vscode.TextDocument) {
   if (/\.interface\.json$/.test(document.uri.fsPath)) {
-    return 'Interface';
+    return ModelType.Interface;
   }
 
-  return 'CapabilityModel';
+  return ModelType.CapabilityModel;
 }
 
 let telemetryWorkerInitialized = false;
@@ -80,11 +80,11 @@ export async function activate(context: vscode.ExtensionContext) {
       const contextUris =
           DigitalTwinMetaModelJsonParser.getContextUris(document);
       const documentType = getDocumentType(document);
-      if (documentType === 'Interface' &&
+      if (documentType === ModelType.Interface &&
           contextUris.indexOf(ContextUris.interface) >= 0) {
         dtDiagnostic.update(dtInterface, document);
       } else if (
-          documentType === 'Interface' &&
+          documentType === ModelType.Interface &&
           contextUris.indexOf(ContextUris.capabilityModel) >= 0) {
         dtDiagnostic.update(dtCapabilityModel, document);
       } else {
@@ -105,11 +105,11 @@ export async function activate(context: vscode.ExtensionContext) {
       const contextUris =
           DigitalTwinMetaModelJsonParser.getContextUris(document);
       const documentType = getDocumentType(document);
-      if (documentType === 'Interface' &&
+      if (documentType === ModelType.Interface &&
           contextUris.indexOf(ContextUris.interface) >= 0) {
         dtDiagnostic.update(dtInterface, document);
       } else if (
-          documentType === 'Interface' &&
+          documentType === ModelType.Interface &&
           contextUris.indexOf(ContextUris.capabilityModel) >= 0) {
         dtDiagnostic.update(dtCapabilityModel, document);
       } else {
@@ -133,11 +133,11 @@ export async function activate(context: vscode.ExtensionContext) {
       const contextUris =
           DigitalTwinMetaModelJsonParser.getContextUris(document);
       const documentType = getDocumentType(document);
-      if (documentType === 'Interface' &&
+      if (documentType === ModelType.Interface &&
           contextUris.indexOf(ContextUris.interface) >= 0) {
         dtDiagnostic.update(dtInterface, document);
       } else if (
-          documentType === 'Interface' &&
+          documentType === ModelType.Interface &&
           contextUris.indexOf(ContextUris.capabilityModel) >= 0) {
         dtDiagnostic.update(dtCapabilityModel, document);
       } else {
@@ -160,11 +160,11 @@ export async function activate(context: vscode.ExtensionContext) {
 
     const contextUris = DigitalTwinMetaModelJsonParser.getContextUris(document);
     const documentType = getDocumentType(document);
-    if (documentType === 'Interface' &&
+    if (documentType === ModelType.Interface &&
         contextUris.indexOf(ContextUris.interface) >= 0) {
       dtDiagnostic.update(dtInterface, document);
     } else if (
-        documentType === 'Interface' &&
+        documentType === ModelType.Interface &&
         contextUris.indexOf(ContextUris.capabilityModel) >= 0) {
       dtDiagnostic.update(dtCapabilityModel, document);
     } else {
@@ -179,7 +179,7 @@ export async function activate(context: vscode.ExtensionContext) {
     }
 
     const documentType = getDocumentType(document);
-    if (documentType === 'Interface') {
+    if (documentType === ModelType.Interface) {
       dtDiagnostic.delete(document);
     } else {
       dtDiagnostic.delete(document);
@@ -239,11 +239,11 @@ export async function activate(context: vscode.ExtensionContext) {
 
           const contextUris =
               DigitalTwinMetaModelJsonParser.getContextUris(document);
-          if (documentType === 'Interface' &&
+          if (documentType === ModelType.Interface &&
               contextUris.indexOf(ContextUris.interface) >= 0) {
             dtContext = dtInterface;
           } else if (
-              documentType === 'Interface' &&
+              documentType === ModelType.Interface &&
               contextUris.indexOf(ContextUris.capabilityModel) >= 0) {
             dtContext = dtCapabilityModel;
           } else {
@@ -257,7 +257,7 @@ export async function activate(context: vscode.ExtensionContext) {
           if (jsonInfo.isValue) {
             let values: string[] = [];
             if (jsonInfo.key === '@context') {
-              const contextUri = contextType === 'Interface' ?
+              const contextUri = contextType === ModelType.Interface ?
                   ContextUris.interface :
                   ContextUris.capabilityModel;
               values = [contextUri, ContextUris.iotModel];
@@ -304,8 +304,8 @@ export async function activate(context: vscode.ExtensionContext) {
                   dtParser.getIdFromShortName(dtContext, jsonInfo.lastKey);
               if (id) {
                 const values = dtParser.getTypesFromId(dtContext, id);
-                if (values.length === 1 && values[0] !== 'Interface' &&
-                    values[0] !== 'CapabilityModel') {
+                if (values.length === 1 && values[0] !== ModelType.Interface &&
+                    values[0] !== ModelType.CapabilityModel) {
                   jsonInfo.type = values[0];
                 }
               }
@@ -313,8 +313,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
             if ((typeof jsonInfo.type === 'string' && jsonInfo.type !== '') ||
                 (Array.isArray(jsonInfo.type) && jsonInfo.type.length > 0)) {
-              if ((jsonInfo.type === 'Interface' ||
-                   jsonInfo.type === 'CapabilityModel') &&
+              if ((jsonInfo.type === ModelType.Interface ||
+                   jsonInfo.type === ModelType.CapabilityModel) &&
                   jsonInfo.properties.indexOf('@context') === -1) {
                 completionKeyList.push({label: '@context', required: true});
               }
@@ -359,8 +359,8 @@ export async function activate(context: vscode.ExtensionContext) {
               }
             }
 
-            if ((jsonInfo.type === 'Interface' ||
-                 jsonInfo.type === 'CapabilityModel') &&
+            if ((jsonInfo.type === ModelType.Interface ||
+                 jsonInfo.type === ModelType.CapabilityModel) &&
                 jsonInfo.properties.indexOf('@id') === -1) {
               completionKeyList.push(
                   {label: '@id', required: true, type: 'string'});
