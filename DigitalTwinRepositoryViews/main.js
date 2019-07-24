@@ -1,7 +1,7 @@
 var repository = new Vue({
   el: '#main',
   data: {
-    companyName: _location.search === '?public' ? 'Public model repository' : 'Company model repository',
+    companyName: _location.search === '?public' ? 'Public repository' : 'Company repository',
     selectedInterfaces: {
       value: []
     },
