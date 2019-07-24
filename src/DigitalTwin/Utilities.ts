@@ -1,6 +1,10 @@
 // ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 // ----------------------------------------------------------------------------
+
+import * as fs from 'fs-plus';
+import {DTDLKeywords} from './DigitalTwinConstants';
+
 /**
  * Create a deep copy of the provided value.
  */
@@ -141,6 +145,51 @@ export function isValidSchemaUri(schema: string): boolean {
           /https?:\/\/schema.management.azure.com\/schemas\/.*\/deploymentTemplate.json/) !==
           null :
       false;
+}
+
+
+/**
+ * Retrieves all interface or DCM files under the specified folder.
+ */
+export interface SchemaFileInfo {
+  id: string;
+  type: string;
+  filePath: string;
+}
+
+export function listAllPnPSchemaFilesSync(
+    folder: string, dcmFiles: SchemaFileInfo[],
+    interfaceFiles: SchemaFileInfo[]): boolean {
+  const fileList = fs.listTreeSync(folder);
+  if (fileList && fileList.length > 0) {
+    fileList.forEach((filePath: string) => {
+      if (!fs.isDirectorySync(filePath) &&
+          filePath.toLowerCase().endsWith('.json')) {
+        // JSON file
+        let urnId = '';
+        let type = '';
+        let context = '';
+        try {
+          // Try to find DTDL properties
+          const fileJson = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+          urnId = fileJson['@id'];
+          type = fileJson['@type'];
+          context = fileJson['@context'];
+        } catch {
+          type = '';
+        }
+        if (type === DTDLKeywords.typeValueDCM) {
+          // DCM file
+          dcmFiles.push({id: urnId, type: DTDLKeywords.typeValueDCM, filePath});
+        } else if (type === DTDLKeywords.typeValueInterface) {
+          // Interface file
+          interfaceFiles.push(
+              {id: urnId, type: DTDLKeywords.typeValueInterface, filePath});
+        }
+      }
+    });
+  }
+  return true;
 }
 
 /**

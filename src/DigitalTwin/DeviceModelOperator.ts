@@ -11,16 +11,15 @@ import {VSCExpress} from 'vscode-express';
 import {DigitalTwinFileNames, DigitalTwinConstants} from './DigitalTwinConstants';
 import {DigitalTwinMetamodelRepositoryClient} from './DigitalTwinApi/DigitalTwinMetamodelRepositoryClient';
 import * as utils from '../utils';
+import * as dtUtils from './Utilities';
+import {DTDLKeywords} from './DigitalTwinConstants';
 import {MetaModelType, humanReadableMetaModelType} from './DigitalTwinApi/DataContracts/DigitalTwinContext';
 import {DigitalTwinConnector} from './DigitalTwinConnector';
 import {DialogResponses} from '../DialogResponses';
-import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames} from '../constants';
 import {DigitalTwinConnectionStringBuilder} from './DigitalTwinApi/DigitalTwinConnectionStringBuilder';
 import {GetModelResult} from './DigitalTwinApi/DataContracts/DigitalTwinModel';
 import {TelemetryContext} from '../telemetry';
-import {Message} from 'azure-iot-common';
-import {CookieJar} from 'tough-cookie';
 import {CredentialStore} from '../credentialStore';
 
 const constants = {
@@ -552,22 +551,19 @@ export class DeviceModelOperator {
       throw new Error('User cancelled folder selection.');
     }
 
+    // Retrieve all schema files
+    const allInterfaceFiles: dtUtils.SchemaFileInfo[] = [];
+    const allDCMFiles: dtUtils.SchemaFileInfo[] = [];
+    dtUtils.listAllPnPSchemaFilesSync(rootPath, allDCMFiles, allInterfaceFiles);
+    const allFiles = allDCMFiles.concat(allInterfaceFiles);
+
     // Get the file to submit:
     const fileItems: vscode.QuickPickItem[] = [];
 
-    const fileList = fs.listTreeSync(rootPath);
-    if (fileList && fileList.length > 0) {
-      fileList.forEach((filePath: string) => {
-        if (!fs.isDirectorySync(filePath)) {
-          const fileName = path.basename(filePath);
-          if (fileName.endsWith(DigitalTwinConstants.interfaceSuffix) ||
-              fileName.endsWith(DigitalTwinConstants.capabilityModelSuffix)) {
-            fileItems.push(
-                {label: fileName, description: path.dirname(filePath)});
-          }
-        }
-      });
-    }
+    allFiles.forEach((file: dtUtils.SchemaFileInfo) => {
+      fileItems.push(
+          {label: path.basename(file.filePath), description: file.id});
+    });
 
     if (fileItems.length === 0) {
       const message = `No ${
@@ -616,20 +612,12 @@ export class DeviceModelOperator {
       }
     }
 
-    const interfaceFiles = selectedFiles.filter(file => {
-      return file.label.endsWith(DigitalTwinConstants.interfaceSuffix);
-    });
-
-    const capabilityModels = selectedFiles.filter(file => {
-      return file.label.endsWith(DigitalTwinConstants.capabilityModelSuffix);
-    });
-
     let connectionString =
         await CredentialStore.getCredential(ConfigKey.modelRepositoryKeyName);
     if (!connectionString) {
       const option: vscode.InputBoxOptions = {
         value: DigitalTwinConstants.repoConnectionStringTemplate,
-        prompt: `Please input the connection string to access the ${
+        prompt: `Please input the connection string of your company's ${
             DigitalTwinConstants.productName} Model Repository.`,
         ignoreFocusOut: true
       };
@@ -637,12 +625,16 @@ export class DeviceModelOperator {
       const connStr = await vscode.window.showInputBox(option);
 
       if (!connStr) {
+        utils.channelShowAndAppendLine(
+            channel, `Company repository not specified, cancel submit.`);
         return false;
       } else {
         connectionString = connStr as string;
         const result =
             await DigitalTwinConnector.ConnectMetamodelRepository(connStr);
         if (!result) {
+          utils.channelShowAndAppendLine(
+              channel, `Company repository not specified, cancel submit.`);
           return false;
         }
       }
@@ -654,309 +646,155 @@ export class DeviceModelOperator {
     const builder =
         DigitalTwinConnectionStringBuilder.Create(connectionString.toString());
 
-    let continueOnFailure = false;
     const option: SubmitOptions = {overwriteChoice: OverwriteChoice.Unknown};
 
-    for (const fileItem of interfaceFiles) {
-      const message =
-          `${DigitalTwinConstants.dtPrefix} File to submit: ${fileItem.label}`;
-      utils.channelShowAndAppendLine(channel, message);
-      const filePath =
-          path.join(fileItem.description as string, fileItem.label);
-      const result = await this.SubmitInterface(
-          option, dtMetamodelRepositoryClient, builder, filePath,
-          fileItem.label, channel);
-      if (!result && !continueOnFailure) {
-        const message = `${fileItem.label} was not submitted to ${
-            DigitalTwinConstants
-                .productName} Model Repository successfully, do you want to continue with rest files?`;
-        const continueWithOtherFiles =
-            await vscode.window.showInformationMessage(
-                message, DialogResponses.yes, DialogResponses.no);
-        if (continueWithOtherFiles === DialogResponses.no) {
-          return false;
-        } else {
-          continueOnFailure = true;
-        }
+    for (const selected of selectedFiles) {
+      const item = allFiles.find(item => item.id === selected.description);
+      if (!item) {
+        continue;
+      }
+
+      if (item.type === DTDLKeywords.typeValueInterface) {
+        // Interface file
+        await this.SubmitInterface(
+            option, dtMetamodelRepositoryClient, builder, item, channel);
+      } else {
+        // DCM file
+        await this.SubmitCapabilityModel(
+            option, dtMetamodelRepositoryClient, builder, item, channel);
       }
     }
 
-    for (const fileItem of capabilityModels) {
-      const message =
-          `${DigitalTwinConstants.dtPrefix} File to submit: ${fileItem.label}`;
-      utils.channelShowAndAppendLine(channel, message);
-      const filePath =
-          path.join(fileItem.description as string, fileItem.label);
-      const result = await this.SubmitCapabilityModel(
-          option, dtMetamodelRepositoryClient, builder, filePath,
-          fileItem.label, channel);
-      if (!result && !continueOnFailure) {
-        const message = `${fileItem.label} was not submitted to ${
-            DigitalTwinConstants
-                .productName} Model Repository successfully, do you want to continue with rest files?`;
-        const continueWithOtherFiles =
-            await vscode.window.showInformationMessage(
-                message, DialogResponses.yes, DialogResponses.no);
-        if (continueWithOtherFiles === DialogResponses.no) {
-          return false;
-        } else {
-          continueOnFailure = true;
-        }
-      }
-    }
-
+    utils.channelShowAndAppendLine(
+        channel, `${DigitalTwinConstants.dtPrefix} submit all completed.`);
     return true;
   }
 
   private async SubmitInterface(
       option: SubmitOptions,
       dtMetamodelRepositoryClient: DigitalTwinMetamodelRepositoryClient,
-      builder: DigitalTwinConnectionStringBuilder, filePath: string,
-      fileName: string, channel: vscode.OutputChannel): Promise<boolean> {
+      builder: DigitalTwinConnectionStringBuilder,
+      fileInterface: dtUtils.SchemaFileInfo,
+      channel: vscode.OutputChannel): Promise<void> {
+    let message =
+        `${DigitalTwinConstants.dtPrefix} Start uploading interface '${
+            fileInterface.id}'(${fileInterface.filePath})...`;
+    utils.channelShowAndAppendLine(channel, message);
+
+    const fileContent = fs.readFileSync(fileInterface.filePath, 'utf8');
+
+    let interfaceMetaData: GetModelResult|null = null;
+
     try {
-      const fileContent = fs.readFileSync(filePath, 'utf8');
-
-      let fileId = '';
-      try {
-        const fileJson = JSON.parse(fileContent);
-        fileId = fileJson[constants.idName];
-      } catch (error) {
-        const message = `${DigitalTwinConstants.dtPrefix} ${
-            fileName} is not a valid ${
-            DigitalTwinConstants
-                .productName} model. Please modify the content and submit it again.`;
-        utils.channelShowAndAppendLine(channel, message);
-        vscode.window.showWarningMessage(`${fileName} is not a valid ${
-            DigitalTwinConstants
-                .productName} model. Please modify the content and submit it again.`);
-        return false;
-      }
-
-      if (!fileId) {
-        vscode.window.showWarningMessage(`Unable to find id from the ${
-            DigitalTwinConstants
-                .productName} Interface file. Please provide a valid file.`);
-        return false;
-      }
-      let message = `${DigitalTwinConstants.dtPrefix} Load and parse file "${
-          fileName}" successfully.`;
-      utils.channelShowAndAppendLine(channel, message);
-      // check whether file exists in model repo, try to update the file.
-      try {
-        // First, get the file to retrieve the latest etag.
-        message = `${DigitalTwinConstants.dtPrefix} Connect to ${
-            DigitalTwinConstants
-                .productName} Model Repository to check whether ${
-            fileId} exists in server...`;
-        utils.channelShowAndAppendLine(channel, message);
-
-        const interfaceMetaData =
-            await dtMetamodelRepositoryClient.GetInterfaceAsync(
-                fileId, builder.RepositoryIdValue, true);
-
-        message = `${DigitalTwinConstants.dtPrefix} ${
-            DigitalTwinConstants.productName} Interface file with id:"${
-            fileId}" exists in server. `;
-        utils.channelShowAndAppendLine(channel, message);
-
-        if (option.overwriteChoice === OverwriteChoice.Unknown) {
-          const msg = `The Interface with id "${
-              fileId}" already exists in the ${
-              DigitalTwinConstants
-                  .productName} Model Repository. Do you want to overwrite it?`;
-          const result: vscode.MessageItem|undefined =
-              await vscode.window.showInformationMessage(
-                  msg, DialogResponses.all, DialogResponses.yes,
-                  DialogResponses.no);
-          if (result === DialogResponses.no) {
-            const message = `${DigitalTwinConstants.dtPrefix} Submitting ${
-                DigitalTwinConstants.productName} Interface cancelled.`;
-            utils.channelShowAndAppendLine(channel, message);
-            return false;
-          } else if (result === DialogResponses.all) {
-            option.overwriteChoice = OverwriteChoice.OverwriteAll;
-          }
-        }
-
-        message = `${DigitalTwinConstants.dtPrefix} Start updating ${
-            DigitalTwinConstants.productName} Interface with id:"${
-            fileId}"... `;
-        utils.channelShowAndAppendLine(channel, message);
-
-        const result =
-            await dtMetamodelRepositoryClient.CreateOrUpdateInterfaceAsync(
-                fileContent, fileId, interfaceMetaData.etag,
-                builder.RepositoryIdValue);
-        message = `${DigitalTwinConstants.dtPrefix} Submitting ${
-            DigitalTwinConstants.productName} Interface file: fileName: "${
-            fileName}" successfully, Interface id: "${fileId}". `;
-        utils.channelShowAndAppendLine(channel, message);
-
-        vscode.window.showInformationMessage(`${
-            DigitalTwinConstants.productName} Interface with Interface id: "${
-            fileId}" updated successfully`);
-      } catch (error) {
-        if (error.statusCode === 404) {
-          // Not found
-          message = `${DigitalTwinConstants.dtPrefix} ${
-              DigitalTwinConstants
-                  .productName} Interface file does not exist in server, creating ${
-              fileId}... `;
-          utils.channelShowAndAppendLine(channel, message);
-
-          // Create the interface.
-          const result =
-              await dtMetamodelRepositoryClient.CreateOrUpdateInterfaceAsync(
-                  fileContent, fileId, undefined, builder.RepositoryIdValue);
-          message = `${DigitalTwinConstants.dtPrefix} Submitting ${
-              DigitalTwinConstants.productName} interface: fileName: "${
-              fileName}" successfully, Interface id: "${fileId}". `;
-          utils.channelShowAndAppendLine(channel, message);
-
-          vscode.window.showInformationMessage(`${
-              DigitalTwinConstants.productName} Interface with Interface id: "${
-              fileId}" created successfully`);
-        } else {
-          throw error;
-        }
-      }
+      // Try to get the file to retrieve the latest etag.
+      interfaceMetaData = await dtMetamodelRepositoryClient.GetInterfaceAsync(
+          fileInterface.id, builder.RepositoryIdValue, true);
     } catch (error) {
-      const message = `${DigitalTwinConstants.dtPrefix} Submitting ${
-          DigitalTwinConstants.productName} interface: fileName: "${
-          fileName}" failed, error: ${error.message}.`;
-      utils.channelShowAndAppendLine(channel, message);
-
-      vscode.window.showWarningMessage(`Unable to submit ${
-          DigitalTwinConstants.productName} interface, error: ${
-          error.message}`);
-      return false;
+      if (error.statusCode === 404) {
+        // New interface
+        interfaceMetaData = null;
+      } else {
+        throw error;
+      }
     }
 
-    return true;
+    if (interfaceMetaData) {
+      // Update exiting interface
+      message =
+          `The server already has a interface named '${fileInterface.id}'`;
+
+      if (option.overwriteChoice === OverwriteChoice.Unknown) {
+        const result: vscode.MessageItem|undefined =
+            await vscode.window.showInformationMessage(
+                `${message}, do you want to overwrite it?`, DialogResponses.all,
+                DialogResponses.yes, DialogResponses.no);
+        if (result === DialogResponses.no) {
+          utils.channelShowAndAppendLine(
+              channel, `  ${message}, submit cancelled.`);
+          return;
+        } else if (result === DialogResponses.all) {
+          option.overwriteChoice = OverwriteChoice.OverwriteAll;
+        }
+      }
+      utils.channelShowAndAppendLine(channel, `  ${message}, updating...`);
+      // Overwrite
+      await dtMetamodelRepositoryClient.CreateOrUpdateInterfaceAsync(
+          fileContent, fileInterface.id, interfaceMetaData.etag,
+          builder.RepositoryIdValue);
+    } else {
+      // New interface
+      await dtMetamodelRepositoryClient.CreateOrUpdateInterfaceAsync(
+          fileContent, fileInterface.id, undefined, builder.RepositoryIdValue);
+    }
+
+    message = `Interface '${fileInterface.id}'(${
+        fileInterface.filePath}) has been successfully submitted.`;
+    utils.channelShowAndAppendLine(channel, `  ${message}`);
+    vscode.window.showInformationMessage(message);
   }
 
   private async SubmitCapabilityModel(
       option: SubmitOptions,
       dtMetamodelRepositoryClient: DigitalTwinMetamodelRepositoryClient,
-      builder: DigitalTwinConnectionStringBuilder, filePath: string,
-      fileName: string, channel: vscode.OutputChannel): Promise<boolean> {
+      builder: DigitalTwinConnectionStringBuilder,
+      fileDCM: dtUtils.SchemaFileInfo,
+      channel: vscode.OutputChannel): Promise<void> {
+    let message = `${
+        DigitalTwinConstants
+            .dtPrefix} Start uploading device capability model '${
+        fileDCM.id}'(${fileDCM.filePath})...`;
+    utils.channelShowAndAppendLine(channel, message);
+
+    const fileContent = fs.readFileSync(fileDCM.filePath, 'utf8');
+
+    let capabilityModelContext: GetModelResult|null = null;
+
     try {
-      const fileContent = fs.readFileSync(filePath, 'utf8');
-
-      let fileId = '';
-      try {
-        const fileJson = JSON.parse(fileContent);
-        fileId = fileJson[constants.idName];
-      } catch (error) {
-        const message = `${DigitalTwinConstants.dtPrefix} ${
-            fileName} is not a valid ${
-            DigitalTwinConstants
-                .productName} model. Please modify the content and submit it again.`;
-        utils.channelShowAndAppendLine(channel, message);
-
-        vscode.window.showWarningMessage(`${fileName} is not a valid ${
-            DigitalTwinConstants
-                .productName} model. Please modify the content and submit it again.`);
-        return false;
-      }
-
-      if (!fileId) {
-        vscode.window.showWarningMessage(`Unable to find id from the ${
-            DigitalTwinConstants
-                .productName} Capability Model file. Please provide a valid file.`);
-        return false;
-      }
-      let message = `${DigitalTwinConstants.dtPrefix} Load and parse file ${
-          fileName} successfully.`;
-      utils.channelShowAndAppendLine(channel, message);
-
-      // check whether file exists in model repo, try to update the file.
-      try {
-        // First, get the file to retrieve the latest etag.
-        message = `${DigitalTwinConstants.dtPrefix} Connect to ${
-            DigitalTwinConstants
-                .productName} Model Repository to check whether "${
-            fileId}" exists in server...`;
-        utils.channelShowAndAppendLine(channel, message);
-
-        const capabilityModelContext =
-            await dtMetamodelRepositoryClient.GetCapabilityModelAsync(
-                fileId, builder.RepositoryIdValue, true);
-
-        if (option.overwriteChoice === OverwriteChoice.Unknown) {
-          const msg = `The Capability Model with id "${
-              fileId}" already exists in the ${
-              DigitalTwinConstants
-                  .productName} Model Repository. Do you want to overwrite it?`;
-          const result: vscode.MessageItem|undefined =
-              await vscode.window.showInformationMessage(
-                  msg, DialogResponses.all, DialogResponses.yes,
-                  DialogResponses.no);
-          if (result === DialogResponses.no) {
-            const message = `${DigitalTwinConstants.dtPrefix} Submitting ${
-                DigitalTwinConstants.productName} Capability Model cancelled.`;
-            utils.channelShowAndAppendLine(channel, message);
-
-            return false;
-          } else if (result === DialogResponses.all) {
-            option.overwriteChoice = OverwriteChoice.OverwriteAll;
-          }
-        }
-        message = `${DigitalTwinConstants.dtPrefix} Start updating ${
-            DigitalTwinConstants.productName} Capability Model with id:"${
-            fileId}"...`;
-        utils.channelShowAndAppendLine(channel, message);
-
-        const result = await dtMetamodelRepositoryClient
-                           .CreateOrUpdateCapabilityModelAsync(
-                               fileContent, fileId, capabilityModelContext.etag,
-                               builder.RepositoryIdValue);
-        message = `${DigitalTwinConstants.dtPrefix} Submitting ${
-            DigitalTwinConstants.productName} Capability Model: fileName: "${
-            fileName}" successfully, Capability Model id: "${fileId}". `;
-        utils.channelShowAndAppendLine(channel, message);
-
-        vscode.window.showInformationMessage(
-            `${DigitalTwinConstants.productName} Capability Model with id: "${
-                fileId}" updated successfully`);
-      } catch (error) {
-        if (error.statusCode === 404) {
-          // Not found
-          message = `${DigitalTwinConstants.dtPrefix} ${
-              DigitalTwinConstants
-                  .productName} Capability Model file does not exist in server, creating "${
-              fileId}"... `;
-          utils.channelShowAndAppendLine(channel, message);
-
-          // Create the interface.
-          const result = await dtMetamodelRepositoryClient
-                             .CreateOrUpdateCapabilityModelAsync(
-                                 fileContent, fileId, undefined,
-                                 builder.RepositoryIdValue);
-          message = `${DigitalTwinConstants.dtPrefix} Submitting ${
-              DigitalTwinConstants.productName} Capability Model: fileName: "${
-              fileName}" successfully, Capability Model id: "${fileId}". `;
-          utils.channelShowAndAppendLine(channel, message);
-
-          vscode.window.showInformationMessage(
-              `${DigitalTwinConstants.productName} Capability Model with id: "${
-                  fileId}" created successfully`);
-        } else {
-          throw error;
-        }
-      }
+      // Try to get the file to retrieve the latest etag.
+      capabilityModelContext =
+          await dtMetamodelRepositoryClient.GetCapabilityModelAsync(
+              fileDCM.id, builder.RepositoryIdValue, true);
     } catch (error) {
-      const message = `${DigitalTwinConstants.dtPrefix} Submitting ${
-          DigitalTwinConstants.productName} Capability Model: fileName: "${
-          fileName}" failed, error: ${error.message}.`;
-      utils.channelShowAndAppendLine(channel, message);
-
-      vscode.window.showWarningMessage(`Unable to submit ${
-          DigitalTwinConstants.productName} Capability Model, error: ${
-          error.message}`);
-      return false;
+      if (error.statusCode === 404) {
+        // New DCM
+        capabilityModelContext = null;
+      } else {
+        throw error;
+      }
     }
 
-    return true;
+    if (capabilityModelContext) {
+      // Update exiting DCM
+      message = `The server already has a device capability model named '${
+          fileDCM.id}'`;
+
+      if (option.overwriteChoice === OverwriteChoice.Unknown) {
+        const result: vscode.MessageItem|undefined =
+            await vscode.window.showInformationMessage(
+                `${message}, do you want to overwrite it?`, DialogResponses.all,
+                DialogResponses.yes, DialogResponses.no);
+        if (result === DialogResponses.no) {
+          utils.channelShowAndAppendLine(
+              channel, `  ${message}, submit cancelled.`);
+          return;
+        } else if (result === DialogResponses.all) {
+          option.overwriteChoice = OverwriteChoice.OverwriteAll;
+        }
+      }
+      utils.channelShowAndAppendLine(channel, `  ${message}, updating...`);
+      // Overwrite
+      await dtMetamodelRepositoryClient.CreateOrUpdateCapabilityModelAsync(
+          fileContent, fileDCM.id, capabilityModelContext.etag,
+          builder.RepositoryIdValue);
+    } else {
+      // New interface
+      await dtMetamodelRepositoryClient.CreateOrUpdateCapabilityModelAsync(
+          fileContent, fileDCM.id, undefined, builder.RepositoryIdValue);
+    }
+
+    message = `Device capability model '${fileDCM.id}'(${
+        fileDCM.filePath}) has been successfully submitted.`;
+    utils.channelShowAndAppendLine(channel, `  ${message}`);
+    vscode.window.showInformationMessage(message);
   }
 }
