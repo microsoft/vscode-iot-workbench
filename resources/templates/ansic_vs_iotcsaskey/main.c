@@ -43,14 +43,13 @@ static const char *sasKey = "[DPS symmetric key]";
 // TODO: specify your device registration ID
 static const char *registrationId = "[device registration Id]";
 
-// TODO: Fill in DIGITALTWIN_DEVICE_CAPABILITY_MODEL_ID and DIGITALTWIN_DEVICE_CAPABILITY_MODEL_INLINE_DATA if you indend on using IoT Central.
-#define DIGITALTWIN_DEVICE_CAPABILITY_MODEL_ID "[your capabilityModel Id]"
+// TODO: Fill in DIGITALTWIN_DEVICE_CAPABILITY_MODEL_INLINE_DATA if you indend on using IoT Central.
 #define DIGITALTWIN_DEVICE_CAPABILITY_MODEL_INLINE_DATA "{}"
 
 static const char *digitalTwinSample_CustomProvisioningData = "{"
                                                               "\"__iot:interfaces\":"
                                                               "{"
-                                                              "\"CapabilityModelId\": \"" DIGITALTWIN_DEVICE_CAPABILITY_MODEL_ID "\" ,"
+                                                              "\"CapabilityModelId\": \"{DCM_ID}\" ,"
                                                               "\"CapabilityModel\": \"" DIGITALTWIN_DEVICE_CAPABILITY_MODEL_INLINE_DATA "\""
                                                               "}"
                                                               "}";

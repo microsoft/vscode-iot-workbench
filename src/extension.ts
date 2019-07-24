@@ -13,7 +13,7 @@ import {DeviceOperator} from './DeviceOperator';
 import {AzureOperator} from './AzureOperator';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import {ConfigHandler} from './configHandler';
-import {CodeGenerateCore} from './DigitalTwin/CodeGenerateCore';
+import {CodeGeneratorCore} from './DigitalTwin/CodeGeneratorCore';
 import {DigitalTwinMetaModelUtility, DigitalTwinMetaModelContext} from './DigitalTwin/DigitalTwinMetaModelUtility';
 import {DigitalTwinMetaModelParser, DigitalTwinMetaModelGraph} from './DigitalTwin/DigitalTwinMetaModelGraph';
 import {DeviceModelOperator} from './DigitalTwin/DeviceModelOperator';
@@ -829,7 +829,7 @@ export async function activate(context: vscode.ExtensionContext) {
           telemetryWorkerInitialized = true;
         }
 
-        const codeGenerator = new CodeGenerateCore();
+        const codeGenerator = new CodeGeneratorCore();
         const codeGeneratorBinder =
             codeGenerator.GenerateDeviceCodeStub.bind(codeGenerator);
 

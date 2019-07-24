@@ -17,7 +17,7 @@ const constants = {
   srcFolderName: 'src'
 };
 
-export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
+export class AnsiCCodeGeneratorImpl_IoTDevKit extends AnsiCCodeGeneratorBase {
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       private telemetryContext: TelemetryContext,
@@ -27,7 +27,7 @@ export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
 
   async GenerateCode(
       targetPath: string, filePath: string, capabilityModelName: string,
-      interfaceDir: string): Promise<boolean> {
+      dcmId: string, interfaceDir: string): Promise<boolean> {
     // Invoke PnP toolset to generate the code
     const libPath = path.join(
         targetPath, constants.deviceDefaultFolderName, constants.srcFolderName,
@@ -53,6 +53,8 @@ export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
       throw new Error(`Fail to get template folder name`);
     }
 
+    const projectDCMIdPattern = /{DCM_ID}/g;
+
     const templateFolder = this.context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
         templateFolderName));
@@ -65,7 +67,8 @@ export class AnsiCCodeGenDevkitImpl extends AnsiCCodeGeneratorBase {
       if (fileInfo.fileName.endsWith('.ino')) {
         const pathPattern = /{PATHNAME}/g;
         fileInfo.fileContent =
-            fileInfo.fileContent.replace(pathPattern, capabilityModelName);
+            fileInfo.fileContent.replace(pathPattern, capabilityModelName)
+                .replace(projectDCMIdPattern, dcmId);
       }
     }
 

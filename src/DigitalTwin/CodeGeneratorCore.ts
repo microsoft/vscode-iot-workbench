@@ -66,7 +66,7 @@ interface CodeGenExecutions {
   codeGenExecutionItems: CodeGenExecutionItem[];
 }
 
-export class CodeGenerateCore {
+export class CodeGeneratorCore {
   async GenerateDeviceCodeStub(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext): Promise<boolean> {
@@ -318,7 +318,7 @@ export class CodeGenerateCore {
               path.join(rootPath, codeGenExecutionInfo.capabilityModelPath);
           const result = await codeGenerator.GenerateCode(
               projectPath, capabilityModelFilePath, capabilityModelName,
-              rootPath);
+              capabilityModelId, rootPath);
           if (result) {
             vscode.window.showInformationMessage(
                 `Generate code stub for ${capabilityModelName} completed`);
