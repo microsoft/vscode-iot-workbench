@@ -476,10 +476,12 @@ export class CodeGeneratorCore {
       fileList.forEach((filePath: string) => {
         if (!fs.isDirectorySync(filePath)) {
           const fileName = path.basename(filePath);
-          if (fileName.endsWith(DigitalTwinConstants.capabilityModelSuffix)) {
+          if (fileName.toLowerCase().endsWith(
+                  DigitalTwinConstants.capabilityModelSuffix)) {
             metamodelItems.push(
                 {label: fileName, description: path.dirname(filePath)});
-          } else if (fileName.endsWith(DigitalTwinConstants.interfaceSuffix)) {
+          } else if (fileName.toLowerCase().endsWith(
+                         DigitalTwinConstants.interfaceSuffix)) {
             let urnId;
             try {
               const fileJson = JSON.parse(fs.readFileSync(filePath, 'utf8'));
