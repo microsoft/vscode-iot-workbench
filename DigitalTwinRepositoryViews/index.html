@@ -72,7 +72,7 @@
 <tr v-for="interface in filterItems(interfaceList.value)" v-on:click="addRemoveInterface(interface.urnId)">
   <td><input type="checkbox" v-bind:value="interface.urnId" v-model="selectedInterfaces.value"></td>
   <td v-bind:title="interface.displayName"><div class="td_inner" v-html="highlight(interface.displayName)"></div></td>
-  <td v-bind:title="interface.urnId"><div class="td_inner">{{ interface.urnId }}</div><span class="copy_icon" title="Copy" v-on:click.stop="copy($event, interface.urnId)"></span></td>
+  <td v-bind:title="interface.urnId"><div class="td_inner" v-html="highlight(interface.urnId)"></div><span class="copy_icon" title="Copy" v-on:click.stop="copy($event, interface.urnId)"></span></td>
   <td v-bind:title="interface.version"><div class="td_inner">{{ interface.version }}</div></td>
   <td>{{ interface.publisherName }}</td>
 </tr>
@@ -129,7 +129,7 @@
 <tr v-for="capability in filterItems(capabilityList.value)" v-on:click="addRemoveCapability(capability.urnId)">
   <td><input type="checkbox" v-bind:value="capability.urnId" v-model="selectedCapabilityModels.value"></td>
   <td v-bind:title="capability.displayName"><div class="td_inner" v-html="highlight(capability.displayName)"></div></td>
-  <td v-bind:title="capability.urnId"><div class="td_inner">{{ capability.urnId }}</div><span class="copy_icon" title="Copy" v-on:click.stop="copy($event, capability.urnId)"></span></td>
+  <td v-bind:title="capability.urnId"><div class="td_inner" v-html="highlight(capability.urnId)"></div><span class="copy_icon" title="Copy" v-on:click.stop="copy($event, capability.urnId)"></span></td>
   <td v-bind:title="capability.version"><div class="td_inner">{{ capability.version }}</div></td>
   <td>{{ capability.publisherName }}</td>
 </tr>
