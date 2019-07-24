@@ -10,7 +10,7 @@ function getEntry() {
     encoding: 'utf8'
   });
   const mod = JSON.parse(npmListRes);
-  const unbundledModule = ['impor', 'copy-paste', 'eachr', 'extract-opts', 'getmac', 'typechecker'];
+  const unbundledModule = ['impor', 'copy-paste', 'eachr', 'extract-opts', 'getmac', 'keytar', 'typechecker'];
   for (const mod of unbundledModule) {
     const p = 'node_modules/' + mod;
     fs.copySync(p, 'out/node_modules/' + mod);
