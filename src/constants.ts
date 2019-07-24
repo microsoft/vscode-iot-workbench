@@ -125,3 +125,8 @@ export class ContextUris {
   static readonly capabilityModel =
       'http://azureiot.com/v1/contexts/CapabilityModel.json';
 }
+
+export enum ModelType {
+  Interface = 'Interface',
+  CapabilityModel = 'CapabilityModel'
+}

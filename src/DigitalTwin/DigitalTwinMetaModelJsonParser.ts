@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 
+import {ModelType} from '../constants';
 import {DigitalTwinMetaModelContext} from './DigitalTwinMetaModelUtility';
 import * as Json from './JSON';
 
@@ -310,7 +311,8 @@ export class DigitalTwinMetaModelJsonParser {
         const json = jsonValue as Json.ObjectValue;
         if (json.hasProperty('@type')) {
           const type = json.getPropertyValue('@type').toFriendlyString();
-          if (type === 'Interface' || type === 'CapabilityModel') {
+          if (type === ModelType.Interface ||
+              type === ModelType.CapabilityModel) {
             currentContextType = type;
           }
         }

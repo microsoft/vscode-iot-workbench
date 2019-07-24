@@ -235,8 +235,8 @@ export class DeviceModelOperator {
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext): Promise<boolean> {
     const repoItems = [
-      {label: 'Open Public Model Repository', description: ''},
-      {label: 'Open Company Model Repository', description: ''}
+      {label: 'Public repository', description: ''},
+      {label: 'Company repository', description: ''}
     ];
 
     const repoSelection = await vscode.window.showQuickPick(repoItems, {
@@ -248,8 +248,8 @@ export class DeviceModelOperator {
       return false;
     }
 
-    if (repoSelection.label === 'Open Public Model Repository') {
-      // Open Public Model repository
+    if (repoSelection.label === 'Public repository') {
+      // Open Public repository
       DeviceModelOperator.vscexpress = DeviceModelOperator.vscexpress ||
           new VSCExpress(context, 'DigitalTwinRepositoryViews');
       await DeviceModelOperator.vscexpress.open(
@@ -260,7 +260,7 @@ export class DeviceModelOperator {
       return true;
     }
 
-    // Open Company Model repository
+    // Open Company repository
     let connectionString =
         await CredentialStore.getCredential(ConfigKey.modelRepositoryKeyName);
 
@@ -395,7 +395,7 @@ export class DeviceModelOperator {
       vscode.window.showWarningMessage(`Failed to delete models from ${
           DigitalTwinConstants
               .productName} Model Repository. Please sign out and sign in with a valid connection string.`);
-      return;  // TODO: delete from public model repository??
+      return;  // TODO: delete from public repository??
     }
 
     const dtMetamodelRepositoryClient =

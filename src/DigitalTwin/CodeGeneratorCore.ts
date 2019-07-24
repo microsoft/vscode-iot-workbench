@@ -216,7 +216,7 @@ export class CodeGeneratorCore {
               const option: vscode.InputBoxOptions = {
                 value: DigitalTwinConstants.repoConnectionStringTemplate,
                 prompt:
-                    `Please input the connection string to access the model repository. Press Esc to use global repository only`,
+                    `Please input the connection string to access the company repository. Press Esc to use public repository only`,
                 ignoreFocusOut: true
               };
 
@@ -545,10 +545,10 @@ export class CodeGeneratorCore {
           return true;
         }
       } catch (error) {
-        // Do nothing. Try to download the Interface from global repo
+        // Do nothing. Try to download the Interface from public repo
         const message = `${
             DigitalTwinConstants.dtPrefix} Unable to get Interface with id ${
-            urnId} from Company Model Repository, try global repository instead.`;
+            urnId} from Company repository, try public repository instead.`;
         utils.channelShowAndAppendLine(channel, message);
       }
     }
@@ -562,7 +562,7 @@ export class CodeGeneratorCore {
             JSON.stringify(fileMetaData.content, null, 4));
         const message =
             `${DigitalTwinConstants.dtPrefix} Download Interface with id ${
-                urnId}, name: ${fileName} from global repository into ${
+                urnId}, name: ${fileName} from public repository into ${
                 targetFolder} completed.`;
         utils.channelShowAndAppendLine(channel, message);
         return true;
@@ -570,7 +570,7 @@ export class CodeGeneratorCore {
     } catch (error) {
       const message =
           `${DigitalTwinConstants.dtPrefix} Unable to get Interface with id ${
-              urnId} from global Model Repository. errorcode: ${error.code}`;
+              urnId} from public repository. errorcode: ${error.code}`;
       utils.channelShowAndAppendLine(channel, message);
     }
     return false;
