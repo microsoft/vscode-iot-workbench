@@ -29,7 +29,7 @@ export class AnsiCCodeGeneratorImplVS extends AnsiCCodeGeneratorBase {
     const templateFolderName = await utils.GetCodeGenTemplateFolderName(
         this.context, CodeGenProjectType.VisualStudio, this.provisionType);
     if (!templateFolderName) {
-      throw new Error(`Fail to get template folder name`);
+      throw new Error(`Failed to get template folder name`);
     }
 
     const templateFolder = this.context.asAbsolutePath(path.join(

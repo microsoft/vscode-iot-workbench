@@ -26,7 +26,7 @@ export class AnsiCCodeGeneratorImplCMake extends AnsiCCodeGeneratorBase {
     const templateFolderName = await GetCodeGenTemplateFolderName(
         this.context, CodeGenProjectType.CMake, this.provisionType);
     if (!templateFolderName) {
-      throw new Error(`Fail to get template folder name`);
+      throw new Error(`Failed to get template folder name`);
     }
 
     const templateFolder = this.context.asAbsolutePath(path.join(

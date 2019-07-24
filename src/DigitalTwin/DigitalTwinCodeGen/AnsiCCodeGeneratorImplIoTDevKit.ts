@@ -50,7 +50,7 @@ export class AnsiCCodeGeneratorImplIoTDevKit extends AnsiCCodeGeneratorBase {
     const templateFolderName = await utils.GetCodeGenTemplateFolderName(
         this.context, CodeGenProjectType.IoTDevKit, this.connectionType);
     if (!templateFolderName) {
-      throw new Error(`Fail to get template folder name`);
+      throw new Error(`Failed to get template folder name`);
     }
 
     const projectDCMIdPattern = /{DCM_ID}/g;

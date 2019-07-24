@@ -63,7 +63,7 @@ export class ArduinoPackageManager {
           board.installation.architecture);
       ArduinoPackageManager.INSTALLED_BOARDS.push(board);
     } catch (ignore) {
-      // If we fail to install board package,
+      // If we failed to install board package,
       // it may because the user hasn't installed
       // Arduino extension. Let's just ignore
       // that. We should have asked the the user
