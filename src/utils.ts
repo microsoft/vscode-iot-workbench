@@ -244,8 +244,8 @@ export async function askAndOpenInRemote(
         `${operation} Operation failed and user opens project in container.`;
     const res = await RemoteExtension.checkRemoteExtension();
     if (!res) {
-      telemetryContext.properties.errorMessage = `${
-          operation} Operation failed and user fail to install Remote Extension.`;
+      telemetryContext.properties.errorMessage =
+          `${operation} Operation failed on installing Remote Extension.`;
       const message = `Remote extension is not available. Please install ${
           DependentExtensions.remote} first.`;
       channelShowAndAppendLine(channel, message);

@@ -99,7 +99,9 @@ export class CodeGeneratorCore {
     const capabilityModelFileSelection =
         await this.SelectCapabilityFile(channel, dcmFiles);
     if (capabilityModelFileSelection === undefined) {
-      return false;
+      utils.channelShowAndAppendLine(
+          channel, `${DigitalTwinConstants.dtPrefix} Cancelled.`);
+      return true;
     }
 
     // Step 1.5: Prompt if old project exists for the same Capability Model file
