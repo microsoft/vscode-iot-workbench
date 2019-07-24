@@ -414,11 +414,12 @@ export class DigitalTwinDiagnostic {
           issues.push({
             startIndex,
             endIndex,
-            message: `Missing required type. One of types below is required:\n${types.join(',')}`
+            message: `Missing required type. One of types below is required:\n${
+                types.join(',')}`
           });
         }
       }
-      
+
       for (let index = 0; index < type.length; index++) {
         const currentType = type[index];
         const currentTypeObject = typeValue.elements[index] as Json.StringValue;
@@ -438,7 +439,7 @@ export class DigitalTwinDiagnostic {
           });
         }
       }
-      
+
       if (issues.length) {
         return issues;
       }
