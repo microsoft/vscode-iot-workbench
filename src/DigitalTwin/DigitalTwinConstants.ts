@@ -25,6 +25,7 @@ export class DigitalTwinConstants {
       'HostName=<Host Name>;RepositoryId=<repository id>;SharedAccessKeyName=<Shared AccessKey Name>;SharedAccessKey=<access Key>';
   static readonly interfaceSuffix = '.interface.json';
   static readonly capabilityModelSuffix = '.capabilitymodel.json';
+  static readonly jsonSuffix = '.json';
   static readonly dtPrefix = '[IoT Plug and Play]';
   static readonly apiVersion = '2019-07-01-Preview';
   static readonly productName = 'IoT Plug and Play';
@@ -32,4 +33,9 @@ export class DigitalTwinConstants {
 
 export class CodeGenConstants {
   static readonly codeGeneratorToolPath = 'iotpnp-codegen';
+}
+
+export class DTDLKeywords {
+  static readonly typeValueInterface = 'Interface';
+  static readonly typeValueDCM = 'CapabilityModel';
 }

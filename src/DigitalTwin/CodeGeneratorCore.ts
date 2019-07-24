@@ -18,6 +18,7 @@ import {AnsiCCodeGeneratorFactory} from './DigitalTwinCodeGen/AnsiCCodeGenerator
 import {ConfigHandler} from '../configHandler';
 import extractzip = require('extract-zip');
 import * as utils from '../utils';
+import * as dtUtils from './Utilities';
 import {DigitalTwinMetamodelRepositoryClient} from './DigitalTwinApi/DigitalTwinMetamodelRepositoryClient';
 import {DigitalTwinConnectionStringBuilder} from './DigitalTwinApi/DigitalTwinConnectionStringBuilder';
 import {PnpProjectTemplateType, ProjectTemplate, PnpDeviceConnectionType} from '../Models/Interfaces/ProjectTemplate';
@@ -25,8 +26,7 @@ import {DialogResponses} from '../DialogResponses';
 import {CredentialStore} from '../credentialStore';
 
 const constants = {
-  idName: '@id',
-  CodeGenConfigFileName: '.codeGenConfigs',
+  codeGenConfigFileName: '.codeGenConfigs',
   defaultAppName: 'iot_application'
 };
 
@@ -37,11 +37,6 @@ interface CodeGeneratorDownloadLocation {
   macOSPackageUrl: string;
   ubuntuMd5: string;
   ubuntuPackageUrl: string;
-}
-
-interface InterfaceInfo {
-  urnId: string;
-  path: string;
 }
 
 interface CodeGeneratorConfigItem {
@@ -95,10 +90,14 @@ export class CodeGeneratorCore {
       return false;
     }
 
+    // Retrieve all schema files
+    const interfaceFiles: dtUtils.SchemaFileInfo[] = [];
+    const dcmFiles: dtUtils.SchemaFileInfo[] = [];
+    dtUtils.listAllPnPSchemaFilesSync(rootPath, dcmFiles, interfaceFiles);
+
     // Step 1: Choose Capability Model
-    const interfaceItems: InterfaceInfo[] = [];
     const capabilityModelFileSelection =
-        await this.SelectCapabilityFile(channel, rootPath, interfaceItems);
+        await this.SelectCapabilityFile(channel, dcmFiles);
     if (capabilityModelFileSelection === undefined) {
       return false;
     }
@@ -113,7 +112,7 @@ export class CodeGeneratorCore {
 
     const codeGenConfigPath = path.join(
         rootPath, FileNames.vscodeSettingsFolderName,
-        constants.CodeGenConfigFileName);
+        constants.codeGenConfigFileName);
 
     let codeGenExecutionItem: CodeGenExecutionItem|undefined;
     if (fs.existsSync(codeGenConfigPath)) {
@@ -205,7 +204,7 @@ export class CodeGeneratorCore {
       const schema = interfaceItem.schema;
       if (typeof schema === 'string') {
         // normal Interface, check the Interface file offline and online
-        const item = interfaceItems.find(item => item.urnId === schema);
+        const item = interfaceFiles.find(item => item.id === schema);
         if (!item) {
           if (!credentialChecked) {
             // Get the connection string of the IoT Plug and Play repo
@@ -465,41 +464,23 @@ export class CodeGeneratorCore {
   }
 
   async SelectCapabilityFile(
-      channel: vscode.OutputChannel, rootPath: string,
-      interfaceItems: InterfaceInfo[]):
+      channel: vscode.OutputChannel, dcmFiles: dtUtils.SchemaFileInfo[]):
       Promise<vscode.QuickPickItem|undefined> {
-    // list all Capability Models from device model folder for selection.
-    const metamodelItems: vscode.QuickPickItem[] = [];
-
-    const fileList = fs.listTreeSync(rootPath);
-    if (fileList && fileList.length > 0) {
-      fileList.forEach((filePath: string) => {
-        if (!fs.isDirectorySync(filePath)) {
-          const fileName = path.basename(filePath);
-          if (fileName.toLowerCase().endsWith(
-                  DigitalTwinConstants.capabilityModelSuffix)) {
-            metamodelItems.push(
-                {label: fileName, description: path.dirname(filePath)});
-          } else if (fileName.toLowerCase().endsWith(
-                         DigitalTwinConstants.interfaceSuffix)) {
-            let urnId;
-            try {
-              const fileJson = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-              urnId = fileJson[constants.idName];
-            } catch {
-            }
-            if (urnId) interfaceItems.push({path: filePath, urnId});
-          }
-        }
-      });
-    }
-
-    if (metamodelItems.length === 0) {
+    if (dcmFiles.length === 0) {
       const message =
           'Unable to find Capability Model files in the folder. Please open a folder that contains Capability Model files.';
       vscode.window.showWarningMessage(message);
       return;
     }
+
+    const metamodelItems: vscode.QuickPickItem[] = [];
+
+    dcmFiles.forEach((dcmFile: dtUtils.SchemaFileInfo) => {
+      metamodelItems.push({
+        label: path.basename(dcmFile.filePath),
+        description: path.dirname(dcmFile.filePath)
+      });
+    });
 
     const fileSelection = await vscode.window.showQuickPick(metamodelItems, {
       ignoreFocusOut: true,
