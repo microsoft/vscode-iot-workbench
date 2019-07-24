@@ -102,6 +102,7 @@ export class DigitalTwinMetaModelUtility {
   private graphUrl: string;
   private interfaceUrl: string;
   private capabilityModelUrl: string;
+  private iotModelUrl: string;
 
   constructor(private context: vscode.ExtensionContext) {
     this.blobService = new BlobService(this.context);
@@ -109,6 +110,7 @@ export class DigitalTwinMetaModelUtility {
     this.graphUrl = extensionPackage.graphUrl;
     this.interfaceUrl = extensionPackage.interfaceUrl;
     this.capabilityModelUrl = extensionPackage.capabilityModelUrl;
+    this.iotModelUrl = extensionPackage.iotModelUrl;
   }
   async getGraph() {
     const graphFileFromRemote = await this.blobService.getFile(this.graphUrl);
@@ -154,6 +156,22 @@ export class DigitalTwinMetaModelUtility {
     }
     const dtCapabilityModel: DigitalTwinMetaModelContext =
         JSON.parse(dtCapabilityModelString);
+    return dtCapabilityModel;
+  }
+  async getIoTModel() {
+    const iotModelFileFromRemote =
+        await this.blobService.getFile(this.iotModelUrl);
+    const iotModelFilePath = this.context.asAbsolutePath(path.join(
+        FileNames.resourcesFolderName, FileNames.templatesFolderName,
+        DigitalTwinFileNames.devicemodelTemplateFolderName,
+        DigitalTwinFileNames.iotModelFileName));
+    const dtIoTModelString =
+        iotModelFileFromRemote || fs.readFileSync(iotModelFilePath, 'utf8');
+    if (iotModelFileFromRemote) {
+      fs.writeFileSync(iotModelFilePath, iotModelFileFromRemote);
+    }
+    const dtCapabilityModel: DigitalTwinMetaModelContext =
+        JSON.parse(dtIoTModelString);
     return dtCapabilityModel;
   }
 }

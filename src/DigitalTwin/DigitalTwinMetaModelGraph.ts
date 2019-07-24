@@ -29,10 +29,7 @@ export class DigitalTwinMetaModelParser {
     COMMENT: 'http://www.w3.org/2000/01/rdf-schema#comment'
   };
 
-  constructor(
-      private graph: DigitalTwinMetaModelGraph,
-      private dtInterface: DigitalTwinMetaModelContext,
-      private dtCapabilityModel: DigitalTwinMetaModelContext) {}
+  constructor(private graph: DigitalTwinMetaModelGraph) {}
 
   cache = {
     IdFromLabel: {} as Map<string>,
@@ -162,12 +159,6 @@ export class DigitalTwinMetaModelParser {
 
   getTypedPropertiesFromType(
       dtContext: DigitalTwinMetaModelContext, type: string) {
-    if (type === 'Interface') {
-      dtContext = this.dtInterface;
-    }
-    if (type === 'CapabilityModel') {
-      dtContext = this.dtCapabilityModel;
-    }
     const id = this.getIdFromType(dtContext, type);
     if (!id) {
       console.warn(`Cannot find ID for type ${type}.`);

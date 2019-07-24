@@ -330,6 +330,31 @@ export class DigitalTwinMetaModelJsonParser {
     }
   }
 
+  static getContextUris(document: vscode.TextDocument) {
+    const text = document.getText();
+    const json = Json.parse(text);
+    if (!json) {
+      return [];
+    }
+    const jsonValue = json.value as Json.ObjectValue;
+    if (!jsonValue.hasProperty('@context')) {
+      return [];
+    }
+
+    const contextUriValues = jsonValue.getPropertyValue('@context');
+    const contextUris: string[] = [];
+    if (contextUriValues.valueKind === Json.ValueKind.StringValue) {
+      contextUris.push(contextUriValues.toFriendlyString());
+    } else if (contextUriValues.valueKind === Json.ValueKind.ArrayValue) {
+      for (const uriValue of (contextUriValues as Json.ArrayValue).elements as
+           Json.StringValue[]) {
+        contextUris.push(uriValue.toFriendlyString());
+      }
+    }
+
+    return contextUris;
+  }
+
   static getJsonInfoAtPosition(
       document: vscode.TextDocument, position: vscode.Position) {
     const text = document.getText();

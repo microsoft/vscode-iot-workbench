@@ -20,7 +20,7 @@ import {DeviceModelOperator} from './DigitalTwin/DeviceModelOperator';
 import {DigitalTwinMetaModelJsonParser} from './DigitalTwin/DigitalTwinMetaModelJsonParser';
 import {DigitalTwinDiagnostic} from './DigitalTwin/DigitalTwinDiagnostic';
 import {DigitalTwinConstants} from './DigitalTwin/DigitalTwinConstants';
-import {ConfigKey, EventNames, FileNames} from './constants';
+import {ConfigKey, ContextUris, EventNames, FileNames} from './constants';
 import {TelemetryContext, TelemetryProperties} from './telemetry';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 import {RemoteExtension} from './Models/RemoteExtension';
@@ -67,22 +67,29 @@ export async function activate(context: vscode.ExtensionContext) {
       await dtContext.getInterface();
   const dtCapabilityModel: DigitalTwinMetaModelContext =
       await dtContext.getCapabilityModel();
+  const dtIoTModel: DigitalTwinMetaModelContext = await dtContext.getIoTModel();
   const dtGraph: DigitalTwinMetaModelGraph = await dtContext.getGraph();
-  const dtParser =
-      new DigitalTwinMetaModelParser(dtGraph, dtInterface, dtCapabilityModel);
-  const dtDiagnostic =
-      new DigitalTwinDiagnostic(dtParser, dtInterface, dtCapabilityModel);
+  const dtParser = new DigitalTwinMetaModelParser(dtGraph);
+  const dtDiagnostic = new DigitalTwinDiagnostic(dtParser);
 
   const activeEditor = vscode.window.activeTextEditor;
 
   if (activeEditor) {
     const document = activeEditor.document;
     if (/\.(interface|capabilitymodel)\.json$/.test(document.uri.fsPath)) {
+      const contextUris =
+          DigitalTwinMetaModelJsonParser.getContextUris(document);
       const documentType = getDocumentType(document);
-      if (documentType === 'Interface') {
+      if (documentType === 'Interface' &&
+          contextUris.indexOf(ContextUris.interface) >= 0) {
         dtDiagnostic.update(dtInterface, document);
-      } else {
+      } else if (
+          documentType === 'Interface' &&
+          contextUris.indexOf(ContextUris.capabilityModel) >= 0) {
         dtDiagnostic.update(dtCapabilityModel, document);
+      } else {
+        console.log('using IoTModel.json');
+        dtDiagnostic.update(dtIoTModel, document);
       }
     }
   }
@@ -95,11 +102,19 @@ export async function activate(context: vscode.ExtensionContext) {
     }
 
     waitingForUpdatingDiagnostic = setTimeout(() => {
+      const contextUris =
+          DigitalTwinMetaModelJsonParser.getContextUris(document);
       const documentType = getDocumentType(document);
-      if (documentType === 'Interface') {
+      if (documentType === 'Interface' &&
+          contextUris.indexOf(ContextUris.interface) >= 0) {
         dtDiagnostic.update(dtInterface, document);
-      } else {
+      } else if (
+          documentType === 'Interface' &&
+          contextUris.indexOf(ContextUris.capabilityModel) >= 0) {
         dtDiagnostic.update(dtCapabilityModel, document);
+      } else {
+        console.log('using IoTModel.json');
+        dtDiagnostic.update(dtIoTModel, document);
       }
     }, 0);
   });
@@ -115,11 +130,19 @@ export async function activate(context: vscode.ExtensionContext) {
     }
 
     waitingForUpdatingDiagnostic = setTimeout(() => {
+      const contextUris =
+          DigitalTwinMetaModelJsonParser.getContextUris(document);
       const documentType = getDocumentType(document);
-      if (documentType === 'Interface') {
+      if (documentType === 'Interface' &&
+          contextUris.indexOf(ContextUris.interface) >= 0) {
         dtDiagnostic.update(dtInterface, document);
-      } else {
+      } else if (
+          documentType === 'Interface' &&
+          contextUris.indexOf(ContextUris.capabilityModel) >= 0) {
         dtDiagnostic.update(dtCapabilityModel, document);
+      } else {
+        console.log('using IoTModel.json');
+        dtDiagnostic.update(dtIoTModel, document);
       }
       waitingForUpdatingDiagnostic = null;
     }, 500);
@@ -135,11 +158,18 @@ export async function activate(context: vscode.ExtensionContext) {
       return;
     }
 
+    const contextUris = DigitalTwinMetaModelJsonParser.getContextUris(document);
     const documentType = getDocumentType(document);
-    if (documentType === 'Interface') {
+    if (documentType === 'Interface' &&
+        contextUris.indexOf(ContextUris.interface) >= 0) {
       dtDiagnostic.update(dtInterface, document);
-    } else {
+    } else if (
+        documentType === 'Interface' &&
+        contextUris.indexOf(ContextUris.capabilityModel) >= 0) {
       dtDiagnostic.update(dtCapabilityModel, document);
+    } else {
+      console.log('using IoTModel.json');
+      dtDiagnostic.update(dtIoTModel, document);
     }
   });
 
@@ -206,10 +236,19 @@ export async function activate(context: vscode.ExtensionContext) {
                                       document, position, documentType);
 
           let dtContext: DigitalTwinMetaModelContext;
-          if (contextType === 'Interface') {
+
+          const contextUris =
+              DigitalTwinMetaModelJsonParser.getContextUris(document);
+          if (documentType === 'Interface' &&
+              contextUris.indexOf(ContextUris.interface) >= 0) {
             dtContext = dtInterface;
-          } else {
+          } else if (
+              documentType === 'Interface' &&
+              contextUris.indexOf(ContextUris.capabilityModel) >= 0) {
             dtContext = dtCapabilityModel;
+          } else {
+            console.log('using IoTModel.json');
+            dtContext = dtIoTModel;
           }
 
           if (!jsonInfo) {
@@ -219,9 +258,9 @@ export async function activate(context: vscode.ExtensionContext) {
             let values: string[] = [];
             if (jsonInfo.key === '@context') {
               const contextUri = contextType === 'Interface' ?
-                  'http://azureiot.com/v1/contexts/Interface.json' :
-                  'http://azureiot.com/v1/contexts/CapabilityModel.json';
-              values = [contextUri];
+                  ContextUris.interface :
+                  ContextUris.capabilityModel;
+              values = [contextUri, ContextUris.iotModel];
             } else if (jsonInfo.key === '@type') {
               if (jsonInfo.lastKey) {
                 const id =
