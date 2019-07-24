@@ -85,6 +85,10 @@
     "implements": {
       "@id": "CapabilityModel/implements",
       "@container": "@list"
+    },
+	"interfaceSchema": {
+      "@id": "InterfaceInstance/schema",
+      "@type": "@id"
     }
   }
 }
