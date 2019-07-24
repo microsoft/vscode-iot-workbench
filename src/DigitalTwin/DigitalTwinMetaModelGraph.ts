@@ -1,6 +1,39 @@
 import {DigitalTwinMetaModelContext} from './DigitalTwinMetaModelUtility';
 import uniq = require('lodash.uniq');
 
+const LANGUAGE_CODES = [
+  'af',    'af-ZA', 'ar',    'ar-AE',  'ar-BH',  'ar-DZ', 'ar-EG', 'ar-IQ',
+  'ar-JO', 'ar-KW', 'ar-LB', 'ar-LY',  'ar-MA',  'ar-OM', 'ar-QA', 'ar-SA',
+  'ar-SY', 'ar-TN', 'ar-YE', 'az',     'az-AZ',  'az-AZ', 'be',    'be-BY',
+  'bg',    'bg-BG', 'bs-BA', 'ca',     'ca-ES',  'cs',    'cs-CZ', 'cy',
+  'cy-GB', 'da',    'da-DK', 'de',     'de-AT',  'de-CH', 'de-DE', 'de-LI',
+  'de-LU', 'dv',    'dv-MV', 'el',     'el-GR',  'en',    'en-AU', 'en-BZ',
+  'en-CA', 'en-CB', 'en-GB', 'en-IE',  'en-JM',  'en-NZ', 'en-PH', 'en-TT',
+  'en-US', 'en-ZA', 'en-ZW', 'eo',     'es',     'es-AR', 'es-BO', 'es-CL',
+  'es-CO', 'es-CR', 'es-DO', 'es-EC',  'es-ES',  'es-ES', 'es-GT', 'es-HN',
+  'es-MX', 'es-NI', 'es-PA', 'es-PE',  'es-PR',  'es-PY', 'es-SV', 'es-UY',
+  'es-VE', 'et',    'et-EE', 'eu',     'eu-ES',  'fa',    'fa-IR', 'fi',
+  'fi-FI', 'fo',    'fo-FO', 'fr',     'fr-BE',  'fr-CA', 'fr-CH', 'fr-FR',
+  'fr-LU', 'fr-MC', 'gl',    'gl-ES',  'gu',     'gu-IN', 'he',    'he-IL',
+  'hi',    'hi-IN', 'hr',    'hr-BA',  'hr-HR',  'hu',    'hu-HU', 'hy',
+  'hy-AM', 'id',    'id-ID', 'is',     'is-IS',  'it',    'it-CH', 'it-IT',
+  'ja',    'ja-JP', 'ka',    'ka-GE',  'kk',     'kk-KZ', 'kn',    'kn-IN',
+  'ko',    'ko-KR', 'kok',   'kok-IN', 'ky',     'ky-KG', 'lt',    'lt-LT',
+  'lv',    'lv-LV', 'mi',    'mi-NZ',  'mk',     'mk-MK', 'mn',    'mn-MN',
+  'mr',    'mr-IN', 'ms',    'ms-BN',  'ms-MY',  'mt',    'mt-MT', 'nb',
+  'nb-NO', 'nl',    'nl-BE', 'nl-NL',  'nn-NO',  'ns',    'ns-ZA', 'pa',
+  'pa-IN', 'pl',    'pl-PL', 'ps',     'ps-AR',  'pt',    'pt-BR', 'pt-PT',
+  'qu',    'qu-BO', 'qu-EC', 'qu-PE',  'ro',     'ro-RO', 'ru',    'ru-RU',
+  'sa',    'sa-IN', 'se',    'se-FI',  'se-FI',  'se-FI', 'se-NO', 'se-NO',
+  'se-NO', 'se-SE', 'se-SE', 'se-SE',  'sk',     'sk-SK', 'sl',    'sl-SI',
+  'sq',    'sq-AL', 'sr-BA', 'sr-BA',  'sr-SP',  'sr-SP', 'sv',    'sv-FI',
+  'sv-SE', 'sw',    'sw-KE', 'syr',    'syr-SY', 'ta',    'ta-IN', 'te',
+  'te-IN', 'th',    'th-TH', 'tl',     'tl-PH',  'tn',    'tn-ZA', 'tr',
+  'tr-TR', 'tt',    'tt-RU', 'ts',     'uk',     'uk-UA', 'ur',    'ur-PK',
+  'uz',    'uz-UZ', 'uz-UZ', 'vi',     'vi-VN',  'xh',    'xh-ZA', 'zh',
+  'zh-CN', 'zh-HK', 'zh-MO', 'zh-SG',  'zh-TW',  'zu',    'zu-ZA'
+];
+
 export interface GraphNode {
   Id: string;
   Value?: string;
@@ -134,11 +167,25 @@ export class DigitalTwinMetaModelParser {
     if (this.cache.TypedPropertiesFromId[id]) {
       return this.cache.TypedPropertiesFromId[id];
     }
+
+    const results: Array<{label: string, required: boolean, type: string}> = [];
+
+    if (this.isInternationalizationFromId(dtContext, id)) {
+      for (const code of LANGUAGE_CODES) {
+        results.push({
+          label: code,
+          required: false,
+          type: 'string',
+        });
+      }
+      this.cache.TypedPropertiesFromId[id] = results;
+      return results;
+    }
+
     const keys = this.getPropertiesFromId(dtContext, id);
     const type = this.getShortNameFromId(dtContext, id);
     const getRequiredProperties =
         type ? this.getRequiredPropertiesFromType(type) : [];
-    const results: Array<{label: string, required: boolean, type: string}> = [];
     for (const key of keys) {
       const id = this.getIdFromShortName(dtContext, key);
       if (!id) {
@@ -176,17 +223,21 @@ export class DigitalTwinMetaModelParser {
     console.log(`Checking properties for ${id}...`);
     let properties: string[] = [];
 
-    for (const edge of this.graph.Edges) {
-      if (edge.TargetNode.Id === id &&
-          edge.Label === DigitalTwinMetaModelParser.LABEL.DOMAIN) {
-        properties.push(
-            this.getPropertyNameFromId(dtContext, edge.SourceNode.Id));
-      } else if (
-          edge.SourceNode.Id === id &&
-          edge.Label === DigitalTwinMetaModelParser.LABEL.SUBCLASS) {
-        console.log(`Found sub class of for ${id}: ${edge.TargetNode.Id}`);
-        properties = properties.concat(
-            this.getPropertiesFromId(dtContext, edge.TargetNode.Id));
+    if (this.isInternationalizationFromId(dtContext, id)) {
+      properties = LANGUAGE_CODES;
+    } else {
+      for (const edge of this.graph.Edges) {
+        if (edge.TargetNode.Id === id &&
+            edge.Label === DigitalTwinMetaModelParser.LABEL.DOMAIN) {
+          properties.push(
+              this.getPropertyNameFromId(dtContext, edge.SourceNode.Id));
+        } else if (
+            edge.SourceNode.Id === id &&
+            edge.Label === DigitalTwinMetaModelParser.LABEL.SUBCLASS) {
+          console.log(`Found sub class of for ${id}: ${edge.TargetNode.Id}`);
+          properties = properties.concat(
+              this.getPropertiesFromId(dtContext, edge.TargetNode.Id));
+        }
       }
     }
 
@@ -204,27 +255,6 @@ export class DigitalTwinMetaModelParser {
     const results = this.getPropertiesFromId(dtContext, id);
     console.log(results);
     return results;
-  }
-
-  getTypesFromLabel(dtContext: DigitalTwinMetaModelContext, label: string) {
-    const id = this.getIdFromLabel(dtContext, label);
-    if (!id) {
-      console.warn(`Cannot find ID for type ${label}.`);
-      return [];
-    }
-
-    return this.getTypesFromId(dtContext, id);
-  }
-
-  getTypesFromShortName(
-      dtContext: DigitalTwinMetaModelContext, shortName: string) {
-    const id = this.getIdFromShortName(dtContext, shortName);
-    if (!id) {
-      console.warn(`Cannot find ID for short name ${shortName}.`);
-      return [];
-    }
-
-    return this.getTypesFromId(dtContext, id);
   }
 
   getTypesFromId(dtContext: DigitalTwinMetaModelContext, id: string): string[] {
@@ -316,17 +346,6 @@ export class DigitalTwinMetaModelParser {
     ].indexOf(shortName) > -1;
   }
 
-  getStringValuesFromLabel(
-      dtContext: DigitalTwinMetaModelContext, label: string) {
-    const id = this.getIdFromLabel(dtContext, label);
-    if (!id) {
-      console.warn(`Cannot find ID for type ${label}.`);
-      return [];
-    }
-
-    return this.getStringValuesFromId(dtContext, id);
-  }
-
   getStringValuesFromShortName(
       dtContext: DigitalTwinMetaModelContext, shortName: string) {
     const id = this.getIdFromShortName(dtContext, shortName);
@@ -408,6 +427,29 @@ export class DigitalTwinMetaModelParser {
     }
 
     return id.split('/').pop();
+  }
+
+  isInternationalizationFromId(
+      dtContext: DigitalTwinMetaModelContext, id: string) {
+    for (const shortName of Object.keys(dtContext['@context'])) {
+      if (/^@/.test(shortName)) {
+        continue;
+      }
+
+      const shortNameValue = dtContext['@context'][shortName];
+      let _id;
+      if (typeof shortNameValue !== 'string') {
+        _id = dtContext['@context']['@vocab'] + shortNameValue['@id'];
+        if (id === _id) {
+          if (shortNameValue['@container'] === '@language') {
+            return true;
+          }
+          return false;
+        }
+      }
+    }
+
+    return false;
   }
 
   getValueTypesFromId(dtContext: DigitalTwinMetaModelContext, id: string) {

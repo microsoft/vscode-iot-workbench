@@ -92,7 +92,7 @@ export interface DigitalTwinMetaModelContext {
     '@vocab': string,
     [key: string]:
         string|{
-          '@id': string
+          '@id': string, '@container'?: string|null,
         }
   };
 }
