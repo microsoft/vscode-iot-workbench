@@ -548,7 +548,7 @@ export class CodeGenerateCore {
         // Do nothing. Try to download the Interface from global repo
         const message = `${
             DigitalTwinConstants.dtPrefix} Unable to get Interface with id ${
-            urnId} from organizational Model Repository, try global repository instead.`;
+            urnId} from Company Model Repository, try global repository instead.`;
         utils.channelShowAndAppendLine(channel, message);
       }
     }

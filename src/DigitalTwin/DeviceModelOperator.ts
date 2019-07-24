@@ -236,7 +236,7 @@ export class DeviceModelOperator {
       telemetryContext: TelemetryContext): Promise<boolean> {
     const repoItems = [
       {label: 'Open Public Model Repository', description: ''},
-      {label: 'Open Organizational Model Repository', description: ''}
+      {label: 'Open Company Model Repository', description: ''}
     ];
 
     const repoSelection = await vscode.window.showQuickPick(repoItems, {
@@ -260,7 +260,7 @@ export class DeviceModelOperator {
       return true;
     }
 
-    // Open Organizational Model repository
+    // Open Company Model repository
     let connectionString =
         await CredentialStore.getCredential(ConfigKey.modelRepositoryKeyName);
 
