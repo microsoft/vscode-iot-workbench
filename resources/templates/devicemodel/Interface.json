@@ -81,6 +81,10 @@
     "synchronous": "ExecutionType/synchronous",
     "time": "Schemas/Time/time",
     "unit": "SchemaField/unit",
-    "writable": "Property/writable"
+    "writable": "Property/writable",
+    "implements": {
+      "@id": "CapabilityModel/implements",
+      "@container": "@list"
+    }
   }
 }
