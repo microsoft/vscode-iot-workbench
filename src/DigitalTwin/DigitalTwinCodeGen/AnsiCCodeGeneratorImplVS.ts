@@ -11,7 +11,7 @@ import {DigitalTwinFileNames} from '../DigitalTwinConstants';
 import {AnsiCCodeGeneratorBase} from './Interfaces/AnsiCCodeGeneratorBase';
 import {CodeGenProjectType, DeviceConnectionType} from './Interfaces/CodeGenerator';
 
-export class AnsiCCodeGeneratorImpl_VS extends AnsiCCodeGeneratorBase {
+export class AnsiCCodeGeneratorImplVS extends AnsiCCodeGeneratorBase {
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       private telemetryContext: TelemetryContext,

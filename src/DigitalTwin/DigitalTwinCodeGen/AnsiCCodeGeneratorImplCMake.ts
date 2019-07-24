@@ -8,7 +8,7 @@ import {generateTemplateFile, GetCodeGenTemplateFolderName, getTemplateFilesInfo
 import {AnsiCCodeGeneratorBase} from './Interfaces/AnsiCCodeGeneratorBase';
 import {CodeGenProjectType, DeviceConnectionType} from './Interfaces/CodeGenerator';
 
-export class AnsiCCodeGeneratorImpl_CMake extends AnsiCCodeGeneratorBase {
+export class AnsiCCodeGeneratorImplCMake extends AnsiCCodeGeneratorBase {
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       private telemetryContext: TelemetryContext,

@@ -546,9 +546,9 @@ export class CodeGeneratorCore {
         }
       } catch (error) {
         // Do nothing. Try to download the Interface from public repo
-        const message = `${
-            DigitalTwinConstants.dtPrefix} Unable to get Interface with id ${
-            urnId} from Company repository, try public repository instead.`;
+        const message =
+            `${DigitalTwinConstants.dtPrefix} Unable to get Interface with id ${
+                urnId} from Company repository, try public repository instead.`;
         utils.channelShowAndAppendLine(channel, message);
       }
     }

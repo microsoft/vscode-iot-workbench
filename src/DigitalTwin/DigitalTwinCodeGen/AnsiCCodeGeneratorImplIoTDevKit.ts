@@ -17,7 +17,7 @@ const constants = {
   srcFolderName: 'src'
 };
 
-export class AnsiCCodeGeneratorImpl_IoTDevKit extends AnsiCCodeGeneratorBase {
+export class AnsiCCodeGeneratorImplIoTDevKit extends AnsiCCodeGeneratorBase {
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       private telemetryContext: TelemetryContext,
