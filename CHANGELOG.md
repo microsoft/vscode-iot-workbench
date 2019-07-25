@@ -18,7 +18,7 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 ### Added
 
 - Support generating PnP device code from DCM which is exported from IoT Central.
-- Support generate PnP device code for datetime/date/time/duration schema.
+- Support generating PnP device code for datetime/date/time/duration schema.
 - Adjust commamd payload processing to align with cloud side contract.
 - Codegen doesn't overwrite user source file (e.g. main.c, device_impl.c) when re-generate PnP device Code.
 - Refresh language server to support language features in [latest DTDL](http://aka.ms/dtdl):
