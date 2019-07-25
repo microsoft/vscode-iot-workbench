@@ -113,7 +113,8 @@ export class DigitalTwinMetaModelUtility {
     this.iotModelUrl = extensionPackage.iotModelUrl;
   }
   async getGraph() {
-    //const graphFileFromRemote = await this.blobService.getFile(this.graphUrl);
+    // const graphFileFromRemote = await
+    // this.blobService.getFile(this.graphUrl);
     const graphFilePath = this.context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
         DigitalTwinFileNames.devicemodelTemplateFolderName,
@@ -128,7 +129,7 @@ export class DigitalTwinMetaModelUtility {
     return dtGraph;
   }
   async getInterface() {
-    //const interfaceFileFromRemote =
+    // const interfaceFileFromRemote =
     //    await this.blobService.getFile(this.interfaceUrl);
     const interfaceFilePath = this.context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
@@ -145,13 +146,14 @@ export class DigitalTwinMetaModelUtility {
     return dtInterface;
   }
   async getCapabilityModel() {
-    //const capabilityModelFileFromRemote =
+    // const capabilityModelFileFromRemote =
     //    await this.blobService.getFile(this.capabilityModelUrl);
     const capabilityModelFilePath = this.context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
         DigitalTwinFileNames.devicemodelTemplateFolderName,
         DigitalTwinFileNames.capabilityModelFileName));
-    const dtCapabilityModelString = fs.readFileSync(capabilityModelFilePath, 'utf8');
+    const dtCapabilityModelString =
+        fs.readFileSync(capabilityModelFilePath, 'utf8');
     /*const dtCapabilityModelString = capabilityModelFileFromRemote ||
         fs.readFileSync(capabilityModelFilePath, 'utf8');
     if (capabilityModelFileFromRemote) {
@@ -162,7 +164,7 @@ export class DigitalTwinMetaModelUtility {
     return dtCapabilityModel;
   }
   async getIoTModel() {
-    //const iotModelFileFromRemote =
+    // const iotModelFileFromRemote =
     //    await this.blobService.getFile(this.iotModelUrl);
     const iotModelFilePath = this.context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
