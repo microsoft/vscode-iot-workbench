@@ -40,7 +40,7 @@ static const char *sasKey = "[DPS symmetric key]";
 // TODO: specify your device registration ID
 static const char *registrationId = "[device registration Id]";
 
-// TODO: Fill in DIGITALTWIN_DEVICE_CAPABILITY_MODEL_INLINE_DATA if you indend on using IoT Central.
+// TODO: Fill in DIGITALTWIN_DEVICE_CAPABILITY_MODEL_INLINE_DATA if want to make deivce self-describing.
 #define DIGITALTWIN_DEVICE_CAPABILITY_MODEL_INLINE_DATA "{}"
 
 static const char *digitalTwinSample_CustomProvisioningData = "{"
