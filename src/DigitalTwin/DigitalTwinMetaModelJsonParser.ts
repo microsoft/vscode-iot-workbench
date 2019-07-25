@@ -383,6 +383,7 @@ export class DigitalTwinMetaModelJsonParser {
           if (!key) {
             key = currentLabel;
           } else if (!lastKey) {
+            lastKey = currentLabel;
             // >>> TODO
             // This's a workaroud for issue
             // https://dev.azure.com/mseng/VSIoT/_workitems/edit/1575737, which
@@ -391,12 +392,20 @@ export class DigitalTwinMetaModelJsonParser {
             if (currentLabel === 'schema' &&
                 typeof jsonContext[0] === 'string' &&
                 jsonContext[0] === 'implements') {
-              lastKey = DTDLKeywords.inlineInterfaceKeyName;
-            } else
-            // <<<
-            {
-              lastKey = currentLabel;
+              let j = 1;
+              for (; j < i - 1; j++) {
+                if (typeof jsonContext[j] === 'string' &&
+                    jsonContext[j] === 'schema') {
+                  // not the interfaceSchema
+                  break;
+                }
+              }
+              if (j === i - 1) {
+                // this is interfaceSchema
+                lastKey = DTDLKeywords.inlineInterfaceKeyName;
+              }
             }
+            // <<<
             break;
           }
         }
