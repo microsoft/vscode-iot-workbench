@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 
 import {ModelType} from '../constants';
+
+import {DTDLKeywords} from './DigitalTwinConstants';
 import {DigitalTwinMetaModelContext} from './DigitalTwinMetaModelUtility';
 import * as Json from './JSON';
 
@@ -381,7 +383,20 @@ export class DigitalTwinMetaModelJsonParser {
           if (!key) {
             key = currentLabel;
           } else if (!lastKey) {
-            lastKey = currentLabel;
+            // >>> TODO
+            // This's a workaroud for issue
+            // https://dev.azure.com/mseng/VSIoT/_workitems/edit/1575737, which
+            // caused by the wrong DTDL. Should be removed once the DTDL is
+            // fixed.
+            if (currentLabel === 'schema' &&
+                typeof jsonContext[0] === 'string' &&
+                jsonContext[0] === 'implements') {
+              lastKey = DTDLKeywords.inlineInterfaceKeyName;
+            } else
+            // <<<
+            {
+              lastKey = currentLabel;
+            }
             break;
           }
         }

@@ -6,6 +6,7 @@ import * as Json from './JSON';
 
 import uniq = require('lodash.uniq');
 import {DigitalTwinMetaModelContext} from './DigitalTwinMetaModelUtility';
+import {DTDLKeywords} from './DigitalTwinConstants';
 
 export interface Issue {
   startIndex: number;
@@ -40,7 +41,8 @@ export class DigitalTwinDiagnostic {
     if (!json || !json.value) {
       return [];
     }
-    let issues = this.getJsonValueIssues(dtContext, document, json.value);
+    let issues =
+        this.getJsonValueIssues(dtContext, document, json.value, false);
     issues = issues.concat(this.getTypeIssues(dtContext, document, json.value));
 
     return issues;
@@ -48,22 +50,25 @@ export class DigitalTwinDiagnostic {
 
   getJsonValueIssues(
       dtContext: DigitalTwinMetaModelContext, document: vscode.TextDocument,
-      jsonValue: Json.Value, jsonKey?: string) {
+      jsonValue: Json.Value, isInlineInterface: boolean, jsonKey?: string) {
     switch (jsonValue.valueKind) {
       case Json.ValueKind.ObjectValue:
         return this.getObjectIssues(
-            dtContext, document, jsonValue as Json.ObjectValue, jsonKey);
+            dtContext, document, jsonValue as Json.ObjectValue,
+            isInlineInterface, jsonKey);
       case Json.ValueKind.ArrayValue:
         let issues: Issue[] = [];
         const arrayIssues = this.getArrayIssues(
-            dtContext, document, jsonValue as Json.ArrayValue, jsonKey);
-        const arrayElementNameIssues =
-            this.getArrayElementNameIssues(jsonValue as Json.ArrayValue);
+            dtContext, document, jsonValue as Json.ArrayValue,
+            isInlineInterface, jsonKey);
+        const arrayElementNameIssues = this.getArrayElementNameIssues(
+            jsonValue as Json.ArrayValue, isInlineInterface);
         issues = issues.concat(arrayIssues, arrayElementNameIssues);
         return issues;
       case Json.ValueKind.StringValue:
         return this.getStringIssues(
-            dtContext, document, jsonValue as Json.StringValue, jsonKey);
+            dtContext, document, jsonValue as Json.StringValue,
+            isInlineInterface, jsonKey);
       default:
         return [];
     }
@@ -108,7 +113,8 @@ export class DigitalTwinDiagnostic {
 
   getStringIssues(
       dtContext: DigitalTwinMetaModelContext, document: vscode.TextDocument,
-      jsonValue: Json.StringValue, jsonKey?: string) {
+      jsonValue: Json.StringValue, isInlineInterface: boolean,
+      jsonKey?: string) {
     if (!jsonKey) {
       return [];
     }
@@ -117,10 +123,14 @@ export class DigitalTwinDiagnostic {
     if (jsonKey === '@context') {
       caseInsensitive = true;
       let contextUri: string;
-      if (/\.interface\.json$/.test(document.fileName)) {
+      if (isInlineInterface) {
         contextUri = ContextUris.interface;
       } else {
-        contextUri = ContextUris.capabilityModel;
+        if (/\.interface\.json$/.test(document.fileName)) {
+          contextUri = ContextUris.interface;
+        } else {
+          contextUri = ContextUris.capabilityModel;
+        }
       }
       values = [contextUri, ContextUris.iotModel];
     } else if (jsonKey === '@id') {
@@ -191,17 +201,19 @@ export class DigitalTwinDiagnostic {
 
   getArrayIssues(
       dtContext: DigitalTwinMetaModelContext, document: vscode.TextDocument,
-      jsonValue: Json.ArrayValue, jsonKey?: string) {
+      jsonValue: Json.ArrayValue, isInlineInterface: boolean,
+      jsonKey?: string) {
     let issues: Issue[] = [];
     for (const elementValue of jsonValue.elements) {
-      const elementIssues =
-          this.getJsonValueIssues(dtContext, document, elementValue, jsonKey);
+      const elementIssues = this.getJsonValueIssues(
+          dtContext, document, elementValue, isInlineInterface, jsonKey);
       issues = issues.concat(elementIssues);
     }
     return issues;
   }
 
-  getArrayElementNameIssues(jsonValue: Json.ArrayValue) {
+  getArrayElementNameIssues(
+      jsonValue: Json.ArrayValue, isInlineInterface: boolean) {
     const issues: Issue[] = [];
     const names: string[] = [];
     for (const elementValue of jsonValue.elements) {
@@ -230,7 +242,8 @@ export class DigitalTwinDiagnostic {
 
   getObjectIssues(
       dtContext: DigitalTwinMetaModelContext, document: vscode.TextDocument,
-      jsonValue: Json.ObjectValue, jsonKey?: string) {
+      jsonValue: Json.ObjectValue, isInlineInterface: boolean,
+      jsonKey?: string) {
     let issues: Issue[] = [];
     const typeIssues =
         this.getInvalidTypeIssues(dtContext, document, jsonValue, jsonKey);
@@ -251,12 +264,14 @@ export class DigitalTwinDiagnostic {
     if (Array.isArray(type)) {
       for (const currentType of type) {
         const missingRequiredPropertiesIssues =
-            this.getMissingRequiredPropertiesIssues(jsonValue, currentType);
+            this.getMissingRequiredPropertiesIssues(
+                jsonValue, currentType, isInlineInterface);
         issues = issues.concat(missingRequiredPropertiesIssues);
       }
     } else {
       const missingRequiredPropertiesIssues =
-          this.getMissingRequiredPropertiesIssues(jsonValue, type);
+          this.getMissingRequiredPropertiesIssues(
+              jsonValue, type, isInlineInterface);
       issues = issues.concat(missingRequiredPropertiesIssues);
     }
 
@@ -266,10 +281,22 @@ export class DigitalTwinDiagnostic {
       issues = issues.concat(unexpectedPropertiesIssues);
     }
 
+    let _isInlineInterface = false;
     for (const propertyName of jsonValue.propertyNames) {
+      let _propertyName = propertyName;
+      if (isInlineInterface) {
+        _isInlineInterface = isInlineInterface;
+      } else {
+        if (jsonKey === 'implements' && propertyName === 'schema') {
+          _propertyName = DTDLKeywords.inlineInterfaceKeyName;
+          _isInlineInterface = true;
+        } else {
+          _isInlineInterface = false;
+        }
+      }
       const childIssues = this.getJsonValueIssues(
           dtContext, document, jsonValue.getPropertyValue(propertyName),
-          propertyName);
+          _isInlineInterface, _propertyName);
       issues = issues.concat(childIssues);
     }
 
@@ -449,14 +476,22 @@ export class DigitalTwinDiagnostic {
   }
 
   getMissingRequiredPropertiesIssues(
-      jsonValue: Json.ObjectValue, type: string) {
+      jsonValue: Json.ObjectValue, type: string, isInlineInterface: boolean) {
     const issues: Issue[] = [];
     const missingRequiredProperties: string[] = [];
     const requiredProperties =
         this._dtParser.getRequiredPropertiesFromType(type);
     for (const requiredProperty of requiredProperties) {
       if (!jsonValue.hasProperty(requiredProperty)) {
-        missingRequiredProperties.push(requiredProperty);
+        if (isInlineInterface && requiredProperty === '@context') {
+          // >>> TODO
+          // This's a workaroud for issue
+          // https://dev.azure.com/mseng/VSIoT/_workitems/edit/1575737, which
+          // caused by the wrong DTDL. Should be removed once the DTDL is fixed.
+          // <<<
+        } else {
+          missingRequiredProperties.push(requiredProperty);
+        }
       }
     }
     if (missingRequiredProperties.length) {
