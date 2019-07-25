@@ -128,5 +128,6 @@ export class ContextUris {
 
 export enum ModelType {
   Interface = 'Interface',
-  CapabilityModel = 'CapabilityModel'
+  CapabilityModel = 'CapabilityModel',
+  InlineInterface = 'InterfaceInstance'
 }

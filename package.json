@@ -200,11 +200,11 @@
     "jsonValidation": [
       {
         "fileMatch": "**/*.interface.json",
-        "url": "./resources/devicemodel/EmptySchema.json"
+        "url": "./resources/templates/devicemodel/EmptySchema.json"
       },
       {
         "fileMatch": "**/*.capabilitymodel.json",
-        "url": "./resources/devicemodel/EmptySchema.json"
+        "url": "./resources/templates/devicemodel/EmptySchema.json"
       }
     ]
   },

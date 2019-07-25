@@ -38,4 +38,5 @@ export class CodeGenConstants {
 export class DTDLKeywords {
   static readonly typeValueInterface = 'Interface';
   static readonly typeValueDCM = 'CapabilityModel';
+  static readonly inlineInterfaceKeyName = 'interfaceSchema';
 }

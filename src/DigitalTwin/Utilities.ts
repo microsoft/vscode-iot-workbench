@@ -178,6 +178,9 @@ export function listAllPnPSchemaFilesSync(
         } catch {
           type = '';
         }
+        if (context === '') {
+          type = '';
+        }
         if (type === DTDLKeywords.typeValueDCM) {
           // DCM file
           dcmFiles.push({id: urnId, type: DTDLKeywords.typeValueDCM, filePath});

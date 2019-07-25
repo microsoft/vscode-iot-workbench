@@ -20,6 +20,7 @@ import {DeviceModelOperator} from './DigitalTwin/DeviceModelOperator';
 import {DigitalTwinMetaModelJsonParser} from './DigitalTwin/DigitalTwinMetaModelJsonParser';
 import {DigitalTwinDiagnostic} from './DigitalTwin/DigitalTwinDiagnostic';
 import {DigitalTwinConstants} from './DigitalTwin/DigitalTwinConstants';
+import {DTDLKeywords} from './DigitalTwin/DigitalTwinConstants';
 import {ConfigKey, ContextUris, EventNames, FileNames, ModelType} from './constants';
 import {TelemetryContext, TelemetryProperties} from './telemetry';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
@@ -37,6 +38,12 @@ const ioTContainerizedProjectModule =
     typeof import('./Models/IoTContainerizedProject');
 const telemetryModule = impor('./telemetry') as typeof import('./telemetry');
 const request = impor('request-promise') as typeof import('request-promise');
+
+interface SuggestionInfo {
+  label: string;
+  required: boolean;
+  type?: string;
+}
 
 function getDocumentType(document: vscode.TextDocument) {
   if (/\.interface\.json$/.test(document.uri.fsPath)) {
@@ -272,6 +279,18 @@ export async function activate(context: vscode.ExtensionContext) {
               } else {
                 values = [contextType];
               }
+            } else if (
+                jsonInfo.key === 'schema' &&
+                jsonInfo.lastKey === 'implements') {
+              // >>> TODO
+              // This's a workaroud for issue
+              // https://dev.azure.com/mseng/VSIoT/_workitems/edit/1575737,
+              // which caused by the wrong DTDL.
+              // Should be removed once the DTDL is fixed.
+              jsonInfo.key = DTDLKeywords.inlineInterfaceKeyName;
+              values = dtParser.getStringValuesFromShortName(
+                  dtContext, jsonInfo.key);
+              // <<<
             } else {
               values = dtParser.getStringValuesFromShortName(
                   dtContext, jsonInfo.key);
@@ -286,18 +305,8 @@ export async function activate(context: vscode.ExtensionContext) {
                     values, position, startPosition, endPosition);
             return new vscode.CompletionList(completionItems, false);
           } else {
-            let keyList: Array < {
-              label: string;
-              required: boolean;
-              type?: string;
-            }
-            > = [];
-            const completionKeyList: Array < {
-              label: string;
-              required: boolean;
-              type?: string;
-            }
-            > = [];
+            let keyList: SuggestionInfo[] = [];
+            const completionKeyList: SuggestionInfo[] = [];
             if (!jsonInfo.type ||
                 (Array.isArray(jsonInfo.type) && jsonInfo.type.length === 0)) {
               const id =
@@ -355,6 +364,17 @@ export async function activate(context: vscode.ExtensionContext) {
 
             for (const key of keyList) {
               if (jsonInfo.properties.indexOf(key.label) === -1) {
+                // >>> TODO
+                // This's a workaroud for issue
+                // https://dev.azure.com/mseng/VSIoT/_workitems/edit/1575737,
+                // which caused by the wrong DTDL.
+                // Should be removed once the DTDL is fixed.
+                if (!jsonInfo.isValue &&
+                    key.label === DTDLKeywords.inlineInterfaceKeyName &&
+                    jsonInfo.type === ModelType.InlineInterface) {
+                  key.label = 'schema';
+                }
+                // <<<
                 completionKeyList.push(key);
               }
             }
