@@ -146,8 +146,9 @@ export class CodeGeneratorCore {
           // Regen code
           const projectPath =
               path.join(rootPath, codeGenExecutionItem.projectName);
-          if (!await this.DownloadAllIntefaceFiles(channel, rootPath, capabilityModelFilePath, projectPath, interfaceFiles))
-          {
+          if (!await this.DownloadAllIntefaceFiles(
+                  channel, rootPath, capabilityModelFilePath, projectPath,
+                  interfaceFiles)) {
             return false;
           }
           const executionResult = await this.GenerateDeviceCodeCore(
@@ -283,10 +284,12 @@ export class CodeGeneratorCore {
     return executionResult;
   }
 
-  private async DownloadAllIntefaceFiles(channel: vscode.OutputChannel, rootPath: string, capabilityModelFilePath: string, projectPath : string,interfaceFiles: dtUtils.SchemaFileInfo[] ): Promise<boolean>
-  {
+  private async DownloadAllIntefaceFiles(
+      channel: vscode.OutputChannel, rootPath: string,
+      capabilityModelFilePath: string, projectPath: string,
+      interfaceFiles: dtUtils.SchemaFileInfo[]): Promise<boolean> {
     const capabilityModel =
-    JSON.parse(fs.readFileSync(capabilityModelFilePath, 'utf8'));
+        JSON.parse(fs.readFileSync(capabilityModelFilePath, 'utf8'));
 
     const implementedInterfaces = capabilityModel['implements'];
     utils.mkdirRecursivelySync(projectPath);
