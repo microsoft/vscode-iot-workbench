@@ -3,6 +3,11 @@
 // ----------------------------------------------------------------------------
 
 import * as fs from 'fs-plus';
+
+import {ConfigKey} from '../constants';
+import {CredentialStore} from '../credentialStore';
+
+import {DigitalTwinConnectionStringBuilder} from './DigitalTwinApi/DigitalTwinConnectionStringBuilder';
 import {DTDLKeywords} from './DigitalTwinConstants';
 
 /**
@@ -193,6 +198,15 @@ export function listAllPnPSchemaFilesSync(
     });
   }
   return true;
+}
+
+export async function SaveCompanyRepoConnectionString(
+    connectionString: string) {
+  // Validate the the format of the model repository key
+  DigitalTwinConnectionStringBuilder.Create(connectionString);
+
+  await CredentialStore.setCredential(
+      ConfigKey.modelRepositoryKeyName, connectionString);
 }
 
 /**
