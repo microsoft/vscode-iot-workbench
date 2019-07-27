@@ -194,57 +194,11 @@ export class CodeGeneratorCore {
       return false;
     }
 
-    // Parse the cabability model
-    const capabilityModel =
-        JSON.parse(fs.readFileSync(capabilityModelFilePath, 'utf8'));
-
-    const implementedInterfaces = capabilityModel['implements'];
-    utils.mkdirRecursivelySync(projectPath);
-
-    let connectionString: string|null = null;
-    let credentialChecked = false;
-    for (const interfaceItem of implementedInterfaces) {
-      const schema = interfaceItem.schema;
-      if (typeof schema === 'string') {
-        // normal Interface, check the Interface file offline and online
-        const item = interfaceFiles.find(item => item.id === schema);
-        if (!item) {
-          if (!credentialChecked) {
-            // Get the connection string of the IoT Plug and Play repo
-            connectionString = await CredentialStore.getCredential(
-                ConfigKey.modelRepositoryKeyName);
-
-            if (!connectionString) {
-              const option: vscode.InputBoxOptions = {
-                value: DigitalTwinConstants.repoConnectionStringTemplate,
-                prompt:
-                    `Please input the connection string to access the company repository. Press Esc to use public repository only`,
-                ignoreFocusOut: true
-              };
-
-              const connStr = await vscode.window.showInputBox(option);
-              if (connStr) {
-                connectionString = connStr as string;
-                // Save connection string info
-                await CredentialStore.setCredential(
-                    ConfigKey.modelRepositoryKeyName, connectionString);
-              }
-              credentialChecked = true;
-            }
-          }
-
-          const result = await this.DownloadInterfaceFile(
-              schema, rootPath, connectionString, channel);
-          if (!result) {
-            const message = `Unable to get the Interface with Id ${
-                schema} online. Please make sure the file exists in server.`;
-            utils.channelShowAndAppendLine(
-                channel, `${DigitalTwinConstants.dtPrefix} ${message}`);
-            vscode.window.showWarningMessage(message);
-            return false;
-          }
-        }
-      }
+    // Download all interfaces
+    if (!await this.DownloadAllIntefaceFiles(
+            channel, rootPath, capabilityModelFilePath, projectPath,
+            interfaceFiles)) {
+      return false;
     }
 
     const codeGenExecutionInfo: CodeGenExecutionItem = {
