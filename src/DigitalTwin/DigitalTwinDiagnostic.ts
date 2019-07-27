@@ -350,14 +350,18 @@ export class DigitalTwinDiagnostic {
 
     console.log(`${jsonKey} has types of ${rawValueTypes.join(',')}`);
 
-    if (validTypes.indexOf(jsonValue.valueKind) === -1) {
-      const startIndex = jsonValue.span.startIndex;
-      const endIndex = jsonValue.span.endIndex;
-      const message = `Unexpected value. Expect ${rawValueTypes.join(', ')}.`;
-      const issue: Issue = {startIndex, endIndex, message};
-      issues.push(issue);
-    }
-
+    // To all @list and @set properties, can also be a single value.
+    // Check https://json-ld.org/spec/latest/json-ld/#compacted-document-form
+    // for more infomation. So here ignore the array type check.
+    /*
+        if (validTypes.indexOf(jsonValue.valueKind) === -1) {
+          const startIndex = jsonValue.span.startIndex;
+          const endIndex = jsonValue.span.endIndex;
+          const message = `Unexpected value. Expect ${rawValueTypes.join(',
+       ')}.`; const issue: Issue = {startIndex, endIndex, message};
+          issues.push(issue);
+        }
+    */
     if (issues.length) {
       return issues;
     }
