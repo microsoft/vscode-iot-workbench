@@ -273,8 +273,7 @@ export class CodeGeneratorCore {
               if (connStr) {
                 connectionString = connStr as string;
                 // Save connection string info
-                await CredentialStore.setCredential(
-                    ConfigKey.modelRepositoryKeyName, connectionString);
+                dtUtils.SaveCompanyRepoConnectionString(connectionString);
               }
               credentialChecked = true;
             }
