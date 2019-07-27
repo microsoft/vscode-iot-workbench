@@ -144,6 +144,13 @@ export class CodeGeneratorCore {
 
         if (regenSelection.label !== 'Create new project') {
           // Regen code
+          const projectPath =
+              path.join(rootPath, codeGenExecutionItem.projectName);
+          if (!await this.DownloadAllIntefaceFiles(
+                  channel, rootPath, capabilityModelFilePath, projectPath,
+                  interfaceFiles)) {
+            return false;
+          }
           const executionResult = await this.GenerateDeviceCodeCore(
               rootPath, codeGenExecutionItem, context, channel,
               telemetryContext);
@@ -187,7 +194,54 @@ export class CodeGeneratorCore {
       return false;
     }
 
-    // Parse the cabability model
+    // Download all interfaces
+    if (!await this.DownloadAllIntefaceFiles(
+            channel, rootPath, capabilityModelFilePath, projectPath,
+            interfaceFiles)) {
+      return false;
+    }
+
+    const codeGenExecutionInfo: CodeGenExecutionItem = {
+      capabilityModelPath,
+      projectName: codeGenProjectName,
+      languageLabel: 'ANSI C',
+      codeGenProjectType,
+      deviceConnectionType: connectionType
+    };
+
+    try {
+      if (fs.existsSync(codeGenConfigPath)) {
+        const codeGenExecutions: CodeGenExecutions =
+            JSON.parse(fs.readFileSync(codeGenConfigPath, 'utf8'));
+
+        if (codeGenExecutions) {
+          codeGenExecutions.codeGenExecutionItems =
+              codeGenExecutions.codeGenExecutionItems.filter(
+                  item => item.capabilityModelPath !== capabilityModelPath);
+          codeGenExecutions.codeGenExecutionItems.push(codeGenExecutionInfo);
+          fs.writeFileSync(
+              codeGenConfigPath, JSON.stringify(codeGenExecutions, null, 4));
+        }
+      } else {
+        const codeGenExecutions:
+            CodeGenExecutions = {codeGenExecutionItems: [codeGenExecutionInfo]};
+        fs.writeFileSync(
+            codeGenConfigPath, JSON.stringify(codeGenExecutions, null, 4));
+      }
+    } catch {
+      // save config failure should not impact code gen.
+    }
+
+    const executionResult = await this.GenerateDeviceCodeCore(
+        rootPath, codeGenExecutionInfo, context, channel, telemetryContext);
+
+    return executionResult;
+  }
+
+  private async DownloadAllIntefaceFiles(
+      channel: vscode.OutputChannel, rootPath: string,
+      capabilityModelFilePath: string, projectPath: string,
+      interfaceFiles: dtUtils.SchemaFileInfo[]): Promise<boolean> {
     const capabilityModel =
         JSON.parse(fs.readFileSync(capabilityModelFilePath, 'utf8'));
 
@@ -239,45 +293,10 @@ export class CodeGeneratorCore {
         }
       }
     }
-
-    const codeGenExecutionInfo: CodeGenExecutionItem = {
-      capabilityModelPath,
-      projectName: codeGenProjectName,
-      languageLabel: 'ANSI C',
-      codeGenProjectType,
-      deviceConnectionType: connectionType
-    };
-
-    try {
-      if (fs.existsSync(codeGenConfigPath)) {
-        const codeGenExecutions: CodeGenExecutions =
-            JSON.parse(fs.readFileSync(codeGenConfigPath, 'utf8'));
-
-        if (codeGenExecutions) {
-          codeGenExecutions.codeGenExecutionItems =
-              codeGenExecutions.codeGenExecutionItems.filter(
-                  item => item.capabilityModelPath !== capabilityModelPath);
-          codeGenExecutions.codeGenExecutionItems.push(codeGenExecutionInfo);
-          fs.writeFileSync(
-              codeGenConfigPath, JSON.stringify(codeGenExecutions, null, 4));
-        }
-      } else {
-        const codeGenExecutions:
-            CodeGenExecutions = {codeGenExecutionItems: [codeGenExecutionInfo]};
-        fs.writeFileSync(
-            codeGenConfigPath, JSON.stringify(codeGenExecutions, null, 4));
-      }
-    } catch {
-      // save config failure should not impact code gen.
-    }
-
-    const executionResult = await this.GenerateDeviceCodeCore(
-        rootPath, codeGenExecutionInfo, context, channel, telemetryContext);
-
-    return executionResult;
+    return true;
   }
 
-  async GenerateDeviceCodeCore(
+  private async GenerateDeviceCodeCore(
       rootPath: string, codeGenExecutionInfo: CodeGenExecutionItem,
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext): Promise<boolean> {
