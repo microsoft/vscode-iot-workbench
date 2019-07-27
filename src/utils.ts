@@ -430,6 +430,12 @@ export async function handleIoTWorkspaceProjectFolder(
   return true;
 }
 
+export function channelShowAndAppend(
+    channel: vscode.OutputChannel, message: string) {
+  channel.show();
+  channel.append(message);
+}
+
 export function channelShowAndAppendLine(
     channel: vscode.OutputChannel, message: string) {
   channel.show();

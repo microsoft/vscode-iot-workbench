@@ -29,6 +29,8 @@ export class DigitalTwinConstants {
   static readonly dtPrefix = '[IoT Plug and Play]';
   static readonly apiVersion = '2019-07-01-Preview';
   static readonly productName = 'IoT Plug and Play';
+  static readonly codeGenCli = 'IoT Plug and Play CodeGen Cli';
+  static readonly codeGenCliApp = 'DigitalTwinCodeGen';
 }
 
 export class CodeGenConstants {
