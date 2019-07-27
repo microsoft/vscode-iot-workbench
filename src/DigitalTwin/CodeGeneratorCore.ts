@@ -66,13 +66,8 @@ export class CodeGeneratorCore {
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext): Promise<boolean> {
     // Step 0: update code generator
-    const upgradestate: boolean =
-        await this.UpgradeCodeGenerator(context, channel);
-    if (!upgradestate) {
-      const message = `${
-          DigitalTwinConstants
-              .dtPrefix} Unable to upgrade the Code Generator to the latest version.\r\n Trying to use the existing version.`;
-      utils.channelShowAndAppendLine(channel, message);
+    if (!await this.InstallOrUpgradeCodeGenCli(context, channel)) {
+      return false;
     }
 
     if (!vscode.workspace.workspaceFolders) {
@@ -161,7 +156,7 @@ export class CodeGeneratorCore {
     const codeGenProjectName = await this.GetCodeGenProjectName(rootPath);
     if (codeGenProjectName === undefined) {
       const message =
-          `The input project name is not valid. Generating code would stop.`;
+          `Project name is not specified, cancelled`;
       utils.channelShowAndAppendLine(channel, message);
       return false;
     }
@@ -561,13 +556,13 @@ export class CodeGeneratorCore {
     return false;
   }
 
-  async UpgradeCodeGenerator(
+  private async GetCodeGenCliPackageInfo(
       context: vscode.ExtensionContext,
-      channel: vscode.OutputChannel): Promise<boolean> {
+      channel: vscode.OutputChannel): Promise<CodeGeneratorConfigItem|null> {
     const extensionPackage = require(context.asAbsolutePath('./package.json'));
     const extensionVersion = extensionPackage.version;
 
-    // download the config file for code generator
+    // Download the config file for CodeGen cli
     const options: request.OptionsWithUri = {
       method: 'GET',
       uri: extensionPackage.codeGenConfigUrl,
@@ -603,149 +598,169 @@ export class CodeGeneratorCore {
     if (!targetConfigItem) {
       const message = `${
           DigitalTwinConstants
-              .dtPrefix} Unable to get the updated version the ${
-          DigitalTwinConstants.productName} Code Generator.`;
+              .dtPrefix} Failed to get download information for ${
+          DigitalTwinConstants.codeGenCli}.`;
       utils.channelShowAndAppendLine(channel, message);
+    }
+
+    return targetConfigItem;
+  }
+
+  private async CheckLocalCodeGenCli(): Promise<string|null> {
+    // Check version of existing CodeGen Cli
+    const platform = os.platform();
+    const currentVersion =
+        ConfigHandler.get<string>(ConfigKey.codeGeneratorVersion);
+    let codeGenCliAppPath =
+        path.join(localCodeGenCliPath(), DigitalTwinConstants.codeGenCliApp);
+    if (platform === 'win32') {
+      codeGenCliAppPath += '.exe';
+    }
+
+    if (!fs.isFileSync(codeGenCliAppPath) || currentVersion == null) {
+      // Doen't exist
+      return null;
+    }
+    // TODO: should check the the integrity of the CodeGen Cli
+    return currentVersion;
+  }
+
+  private async DownloadAndInstallCodeGenCli(
+      channel: vscode.OutputChannel, targetConfigItem: CodeGeneratorConfigItem,
+      installOrUpgrade: number, newVersion: string): Promise<boolean> {
+    let packageUri: string;
+    let md5value: string;
+    const platform = os.platform();
+    if (platform === 'win32') {
+      packageUri = targetConfigItem.codeGeneratorLocation.win32PackageUrl;
+      md5value = targetConfigItem.codeGeneratorLocation.win32Md5;
+    } else if (platform === 'darwin') {
+      packageUri = targetConfigItem.codeGeneratorLocation.macOSPackageUrl;
+      md5value = targetConfigItem.codeGeneratorLocation.macOSMd5;
+    } else {
+      packageUri = targetConfigItem.codeGeneratorLocation.ubuntuPackageUrl;
+      md5value = targetConfigItem.codeGeneratorLocation.ubuntuMd5;
+    }
+
+    const loading = setInterval(() => {
+      channel.append('.');
+    }, 1000);
+
+    try {
+      // Download
+      utils.channelShowAndAppend(
+          channel,
+          `Step 1: Downloading ${DigitalTwinConstants.codeGenCli} v${
+              newVersion} package ...`);
+      const downloadOption: request
+          .OptionsWithUri = {method: 'GET', uri: packageUri, encoding: null};
+      const zipData = await request(downloadOption).promise();
+      const tempPath = path.join(os.tmpdir(), FileNames.iotworkbenchTempFolder);
+      const filePath = path.join(tempPath, `${md5value}.zip`);
+      fs.writeFileSync(filePath, zipData);
+      clearInterval(loading);
+      utils.channelShowAndAppendLine(channel, ' download complete.');
+
+      // Verify
+      // Validate hash code
+      utils.channelShowAndAppend(
+          channel, 'Step 2: Validating hash code for the package ...');
+      const hashvalue = await fileHash(filePath);
+      if (hashvalue !== md5value) {
+        utils.channelShowAndAppendLine(
+            channel,
+            `the downloaded ${DigitalTwinConstants.codeGenCli} v${
+                newVersion} package has been corrupted.`);
+        if (installOrUpgrade === 1) {
+          utils.channelShowAndAppendLine(
+              channel, `${DigitalTwinConstants.dtPrefix} Abort generating device code stub.`);
+          return false;
+        } else {
+          utils.channelShowAndAppendLine(
+              channel,
+              `        Abort the installation and continue generating device code stub.`);
+          return true;
+        }
+      } else {
+        utils.channelShowAndAppendLine(channel, ' passed.');
+      }
+
+      // Extract files
+      const codeGenCommandPath = localCodeGenCliPath();
+      utils.channelShowAndAppend(channel, `Step 3: Extracting files ...`);
+      await extract(filePath, codeGenCommandPath);
+      utils.channelShowAndAppendLine(channel, ' done.');
+      // Update the config
+      await ConfigHandler.update(
+          ConfigKey.codeGeneratorVersion, newVersion,
+          vscode.ConfigurationTarget.Global);
+    } finally {
+      clearInterval(loading);
+    }
+
+    utils.channelShowAndAppendLine(
+        channel, `${DigitalTwinConstants.dtPrefix} The ${DigitalTwinConstants.codeGenCli} v${newVersion} is ready to use.`);
+    return true;
+  }
+
+  private async InstallOrUpgradeCodeGenCli(
+      context: vscode.ExtensionContext,
+      channel: vscode.OutputChannel): Promise<boolean> {
+    utils.channelShowAndAppend(
+      channel, `${DigitalTwinConstants.dtPrefix} Check ${DigitalTwinConstants.codeGenCli} ...`);
+    const targetConfigItem =
+        await this.GetCodeGenCliPackageInfo(context, channel);
+    if (targetConfigItem === null) {
       return false;
     }
 
-    // detect version for upgrade
-    let needUpgrade = false;
-    const platform = os.platform();
-    const homeDir = os.homedir();
-
-    const codeGenCommandPath =
-        path.join(homeDir, CodeGenConstants.codeGeneratorToolPath);
-
-    // Can we find the target dir for Code Generator?
-    let upgradeMessage = '';
-    const firstInstallMessage = `${
-        DigitalTwinConstants
-            .dtPrefix} No Code Generator package found. Start installing ${
-        DigitalTwinConstants.productName} Code Generator...`;
-    let processTitle =
-        `Installing ${DigitalTwinConstants.productName} Code Generator...`;
-    if (!fs.isDirectorySync(codeGenCommandPath)) {
-      needUpgrade = true;
-      upgradeMessage = firstInstallMessage;
+    // Check version of existing CodeGen Cli
+    let installOrUpgrade = 0;
+    const currentVersion = await this.CheckLocalCodeGenCli();
+    if (currentVersion == null) {
+      installOrUpgrade = 1;
     } else {
-      const files = fs.listSync(codeGenCommandPath);
-      if (!files || files.length === 0) {
-        needUpgrade = true;
-        upgradeMessage = firstInstallMessage;
-      } else {
-        // Then check the version
-        const currentVersion =
-            ConfigHandler.get<string>(ConfigKey.codeGeneratorVersion);
-        if (!currentVersion) {
-          needUpgrade = true;
-          upgradeMessage = firstInstallMessage;
-        } else if (
-            compareVersion(
-                targetConfigItem.codeGeneratorVersion, currentVersion) > 0) {
-          needUpgrade = true;
-          upgradeMessage =
-              `${DigitalTwinConstants.dtPrefix} The latest version of ${
-                  DigitalTwinConstants.productName} Code Generator is ${
-                  targetConfigItem.codeGeneratorVersion} and you have ${
-                  currentVersion}. Start upgrading ${
-                  DigitalTwinConstants.productName} Code Generator to ${
-                  targetConfigItem.codeGeneratorVersion}...`;
-          processTitle =
-              `Upgrading ${DigitalTwinConstants.productName} Code Generator...`;
-        }
+      // Compare version
+      if (compareVersion(
+              targetConfigItem.codeGeneratorVersion, currentVersion) > 0) {
+        // Upgrade
+        installOrUpgrade = 2;
       }
     }
-
-    if (needUpgrade) {
-      await vscode.window.withProgress(
-          {location: vscode.ProgressLocation.Notification, title: processTitle},
-          async () => {
-            const message = upgradeMessage;
-            utils.channelShowAndAppendLine(channel, message);
-
-            const configItem = targetConfigItem as CodeGeneratorConfigItem;
-            let downloadOption: request.OptionsWithUri;
-            let md5value: string;
-            if (platform === 'win32') {
-              downloadOption = {
-                method: 'GET',
-                uri: configItem.codeGeneratorLocation.win32PackageUrl,
-                encoding: null  // Binary data
-              };
-              md5value = configItem.codeGeneratorLocation.win32Md5;
-            } else if (platform === 'darwin') {
-              downloadOption = {
-                method: 'GET',
-                uri: configItem.codeGeneratorLocation.macOSPackageUrl,
-                encoding: null  // Binary data
-              };
-              md5value = configItem.codeGeneratorLocation.macOSMd5;
-            } else {
-              downloadOption = {
-                method: 'GET',
-                uri: configItem.codeGeneratorLocation.ubuntuPackageUrl,
-                encoding: null  // Binary data
-              };
-              md5value = configItem.codeGeneratorLocation.ubuntuMd5;
-            }
-
-            const loading = setInterval(() => {
-              channel.append('.');
-            }, 1000);
-
-            try {
-              const message = `Step 1: Downloading package for ${
-                  DigitalTwinConstants.productName} Code Generator...`;
-              utils.channelShowAndAppendLine(channel, message);
-              const zipData = await request(downloadOption).promise();
-              const tempPath =
-                  path.join(os.tmpdir(), FileNames.iotworkbenchTempFolder);
-              const filePath = path.join(tempPath, `${md5value}.zip`);
-              fs.writeFileSync(filePath, zipData);
-              clearInterval(loading);
-              utils.channelShowAndAppendLine(channel, 'Download complete');
-
-              // Validate hash code
-              utils.channelShowAndAppendLine(
-                  channel, 'Step 2: Validating hash code for the package...');
-
-              const hashvalue = await fileHash(filePath);
-              if (hashvalue !== md5value) {
-                throw new Error('Validating hash code failed.');
-              } else {
-                utils.channelShowAndAppendLine(
-                    channel, 'Validating hash code successfully.');
-              }
-
-              utils.channelShowAndAppendLine(
-                  channel,
-                  `Step 3: Extracting Azure IoT ${
-                      DigitalTwinConstants.productName} Code Generator.`);
-
-              await extract(filePath, codeGenCommandPath);
-              utils.channelShowAndAppendLine(
-                  channel,
-                  `${
-                      DigitalTwinConstants
-                          .productName} Code Generator updated successfully.`);
-              await ConfigHandler.update(
-                  ConfigKey.codeGeneratorVersion,
-                  configItem.codeGeneratorVersion,
-                  vscode.ConfigurationTarget.Global);
-            } catch (error) {
-              clearInterval(loading);
-              utils.channelShowAndAppendLine(channel, '');
-              throw error;
-            }
-          });
-      vscode.window.showInformationMessage(`${
-          DigitalTwinConstants
-              .productName} Code Generator updated successfully`);
+    if (installOrUpgrade === 0) {
+      // Already exists
+      utils.channelShowAndAppendLine(
+        channel, ` v${currentVersion} is installed and ready to use.`);
+      return true;
     }
-    // No need to upgrade
-    return true;
+
+    const newVersion = targetConfigItem.codeGeneratorVersion;
+    const processTitle =
+        (installOrUpgrade === 1 ?
+             `Installing ${DigitalTwinConstants.codeGenCli} ...` :
+             `Upgrading ${DigitalTwinConstants.codeGenCli} ...`);
+    const upgradeMessage =
+        (installOrUpgrade === 1 ?
+             ` not installed, start installing :` :
+             ` new version detected, start upgrading from ${currentVersion} to ${newVersion} :`);
+    utils.channelShowAndAppendLine(channel, upgradeMessage);
+
+    // Start donwloading
+    let result = false;
+    await vscode.window.withProgress(
+        {location: vscode.ProgressLocation.Notification, title: processTitle},
+        async () => {
+          result = await this.DownloadAndInstallCodeGenCli(
+              channel, targetConfigItem as CodeGeneratorConfigItem,
+              installOrUpgrade, newVersion);
+        });
+
+    return result;
   }
+}
+
+function localCodeGenCliPath(): string {
+  return path.join(os.homedir(), CodeGenConstants.codeGeneratorToolPath);
 }
 
 function compareVersion(verion1: string, verion2: string) {
