@@ -155,8 +155,7 @@ export class CodeGeneratorCore {
     // Step 2: Get project name
     const codeGenProjectName = await this.GetCodeGenProjectName(rootPath);
     if (codeGenProjectName === undefined) {
-      const message =
-          `Project name is not specified, cancelled`;
+      const message = `Project name is not specified, cancelled`;
       utils.channelShowAndAppendLine(channel, message);
       return false;
     }
@@ -673,7 +672,10 @@ export class CodeGeneratorCore {
                 newVersion} package has been corrupted.`);
         if (installOrUpgrade === 1) {
           utils.channelShowAndAppendLine(
-              channel, `${DigitalTwinConstants.dtPrefix} Abort generating device code stub.`);
+              channel,
+              `${
+                  DigitalTwinConstants
+                      .dtPrefix} Abort generating device code stub.`);
           return false;
         } else {
           utils.channelShowAndAppendLine(
@@ -699,7 +701,9 @@ export class CodeGeneratorCore {
     }
 
     utils.channelShowAndAppendLine(
-        channel, `${DigitalTwinConstants.dtPrefix} The ${DigitalTwinConstants.codeGenCli} v${newVersion} is ready to use.`);
+        channel,
+        `${DigitalTwinConstants.dtPrefix} The ${
+            DigitalTwinConstants.codeGenCli} v${newVersion} is ready to use.`);
     return true;
   }
 
@@ -707,7 +711,9 @@ export class CodeGeneratorCore {
       context: vscode.ExtensionContext,
       channel: vscode.OutputChannel): Promise<boolean> {
     utils.channelShowAndAppend(
-      channel, `${DigitalTwinConstants.dtPrefix} Check ${DigitalTwinConstants.codeGenCli} ...`);
+        channel,
+        `${DigitalTwinConstants.dtPrefix} Check ${
+            DigitalTwinConstants.codeGenCli} ...`);
     const targetConfigItem =
         await this.GetCodeGenCliPackageInfo(context, channel);
     if (targetConfigItem === null) {
@@ -730,7 +736,7 @@ export class CodeGeneratorCore {
     if (installOrUpgrade === 0) {
       // Already exists
       utils.channelShowAndAppendLine(
-        channel, ` v${currentVersion} is installed and ready to use.`);
+          channel, ` v${currentVersion} is installed and ready to use.`);
       return true;
     }
 
@@ -742,7 +748,8 @@ export class CodeGeneratorCore {
     const upgradeMessage =
         (installOrUpgrade === 1 ?
              ` not installed, start installing :` :
-             ` new version detected, start upgrading from ${currentVersion} to ${newVersion} :`);
+             ` new version detected, start upgrading from ${
+                 currentVersion} to ${newVersion} :`);
     utils.channelShowAndAppendLine(channel, upgradeMessage);
 
     // Start donwloading
