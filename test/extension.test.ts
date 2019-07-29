@@ -44,7 +44,7 @@ suite('IoT Device Workbench Tests', () => {
         'iotworkbench.device', 'iotworkbench.cloud',
         'iotworkbench.initializeProject', 'iotworkbench.examples',
         'iotworkbench.exampleInitialize', 'iotworkbench.help',
-        'iotworkbench.workbench'
+        'iotworkbench.workbench', 'iotworkbench.pnp'
       ];
 
       const foundIoTWorkbenchCommands = commands.filter((value) => {

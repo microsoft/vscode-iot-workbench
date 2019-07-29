@@ -1,0 +1,895 @@
+[v-cloak] {
+  display: none;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  width: 100%;
+  min-width: 600px;
+  margin: 0;
+  padding: 0 20px;
+  color: #333;
+  font-family: "Segoe UI", SegoeUI, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  box-sizing: border-box;
+  position: absolute;
+  background: white;
+  user-select: none;
+}
+
+em {
+  font-weight: bold;
+  font-style: normal;
+  background: rgba(0, 120, 215, 0.2);
+}
+
+input[type=checkbox] {
+  width: 20px;
+  height: 0;
+  margin: 0;
+  margin-right: 8px;
+  padding: 0;
+  position: relative;
+}
+
+input[type=checkbox]::after {
+  content: "";
+  background: url(image/Checkbox.svg) no-repeat center;
+  background-size: 18px 18px;
+  display: block;
+  position: absolute;
+  top: -14px;
+  width: 20px;
+  height: 20px;
+}
+
+input[type=checkbox]:hover::after {
+  background-image: url(image/CheckboxHover.svg);
+}
+
+input[type=checkbox]:checked::after {
+  background-image: url(image/CheckboxChecked.svg);
+}
+
+input[type=radio] {
+  width: 20px;
+  height: 0;
+  margin: 0;
+  margin-right: 8px;
+  padding: 0;
+  position: relative;
+}
+
+input[type=radio]::after {
+  content: "";
+  background: url(image/Radio.svg) no-repeat center;
+  background-size: 18px 18px;
+  display: block;
+  position: absolute;
+  top: -14px;
+  width: 20px;
+  height: 20px;
+}
+
+input[type=radio]:hover::after {
+  background-image: url(image/RadioHover.svg);
+}
+
+input[type=radio]:checked::after {
+  background-image: url(image/RadioChecked.svg);
+}
+
+.right {
+  float: right;
+}
+
+button {
+  outline: none;
+}
+
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+button:not(:disabled):hover {
+  background: rgba(0, 120, 215, 0.1);
+}
+
+button:not(:disabled):active {
+  background: rgba(0, 120, 215, 0.2)!important;
+}
+button:disabled {
+  color: rgba(102, 102, 102, 0.3);
+  cursor: default!important;
+}
+
+button:disabled::before {
+  background-color: rgba(102, 102, 102, 0.3);
+}
+
+.with-icon::before {
+  content: "";
+  display: inline-block;
+  vertical-align: top;
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  box-sizing: border-box;
+  background-color: #333;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+#main {
+  height: 100%;
+}
+
+header {
+  padding-top: 20px;
+  width: 100%;
+}
+
+header h1.company-name {
+  font-size: 20px;
+  padding: 0;
+  margin: 0;
+  margin-bottom: 20px;
+  display: block;
+  line-height: 30px;
+  height: 30px;
+}
+
+header .digital-twin-file-type-tab {
+  font-size: 15px;
+  margin-bottom: 20px;
+}
+
+header .digital-twin-file-type-tab span {
+  margin-right: 20px;
+  height: 25px;
+  line-height: 25px;
+  font-weight: bold;
+  border-bottom: solid 2px transparent;
+  box-sizing: border-box;
+  display: inline-block;
+  cursor: pointer;
+}
+
+header .digital-twin-file-type-tab span.active {
+  border-color: #0078d7;
+}
+
+header .action-bar {
+  margin-bottom: 5px;
+}
+
+header .action-bar::after {
+  content: "";
+  clear: both;
+}
+
+header .action-bar button {
+  padding: 8px;
+  border: none;
+  font-size: 14px;
+  background: transparent;
+  height: 32px;
+  line-height: 16px;
+  box-sizing: border-box;
+}
+
+header .action-bar button.right::before {
+  margin: 0;
+}
+
+header .action-bar button.new::before {
+  -webkit-mask-image: url(image/Create.svg);
+  mask-image: url(image/Create.svg);
+}
+
+header .action-bar button.download::before {
+  -webkit-mask-image: url(image/Download.svg);
+  mask-image: url(image/Download.svg);
+}
+
+header .action-bar button.publish::before {
+  -webkit-mask-image: url(image/Publish.svg);
+  mask-image: url(image/Publish.svg);
+}
+
+header .action-bar button.delete::before {
+  -webkit-mask-image: url(image/Delete.svg);
+  mask-image: url(image/Delete.svg);
+}
+
+header .action-bar button.filter::before {
+  -webkit-mask-image: url(image/Filter.svg);
+  mask-image: url(image/Filter.svg);
+}
+
+header .action-bar button.refresh::before {
+  -webkit-mask-image: url(image/Refresh.svg);
+  mask-image: url(image/Refresh.svg);
+}
+
+#main.show-search-bar header .action-bar button.filter {
+  background: rgba(0, 120, 215, 0.2);
+}
+
+header .search-bar {
+  border: 1px solid rgba(102, 102, 102, 0.3);
+  box-sizing: border-box;
+  height: 32px;
+  margin: 0 8px 5px 8px;
+  font-size: 0;
+  display: none;
+}
+
+#main.show-search-bar header .search-bar {
+  display: block;
+}
+
+header .search-bar:focus-within {
+  border-color: rgba(0, 120, 215, 0.6);
+  box-shadow: 0 0 1px rgba(0, 120, 215, 0.6);
+}
+
+header .search-bar::before {
+  margin: 7px;
+  -webkit-mask-image: url(image/Search.svg);
+  mask-image: url(image/Search.svg);
+}
+
+header .search-bar input[type=text] {
+  border: none;
+  height: 30px;
+  width: calc(100% - 65px);
+  line-height: 30px;
+  font-size: 12px;
+  color: #333;
+  background: transparent;
+  vertical-align: top;
+  outline: none;
+  padding: 0;
+}
+
+header .search-bar input[type=text]::placeholder {
+  color: #333;
+  opacity: 0.6;
+}
+
+header .search-bar::after {
+  content: "";
+  clear: both;
+}
+
+header .search-bar button {
+  height: 30px;
+  background: none;
+  border: none;
+  outline: none;
+  padding: 0;
+}
+
+header .search-bar button.clear {
+  width: 30px;
+}
+
+header .search-bar button.clear::before {
+  margin: 7px;
+  -webkit-mask-image: url(image/Clear.svg);
+  mask-image: url(image/Clear.svg);
+}
+
+header .search-bar button.dropdown {
+  width: 80px;
+  padding: 0 5px;
+  line-height: 30px;
+  position: relative;
+  margin-left: 10px;
+  text-align: right;
+}
+
+header .search-bar button.dropdown::after {
+  content: "";
+  float: right;
+  vertical-align: top;
+  margin: 9px 0 9px 8px;
+  width: 12px;
+  height: 12px;
+  background-color: #333;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-image: url(image/Arrow.svg);
+  mask-image: url(image/Arrow.svg);
+}
+
+header .tag-selector {
+  position: absolute;
+  top: 184px;
+  right: 58px;
+  border-top: 65px solid white;
+  box-sizing: border-box;
+  max-height: calc(100% - 190px);
+  width: 200px;
+  background: white;
+  box-shadow: 0px 0px 5px 0px rgba(102, 102, 102, 0.3);
+  display: none;
+  overflow-y: auto;
+  font-size: 14px;
+  z-index: 100;
+}
+
+header .tag-selector::-webkit-scrollbar {
+  width: 10px;
+  background: #eee;
+}
+
+header .tag-selector::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border: 2px solid #eee;
+  border-radius: 5px;
+}
+
+header .tag-selector .tag-list {
+  position: relative;
+}
+
+header .tag-selector .tag-list-item:hover {
+  background: rgba(0, 120, 215, 0.1);
+}
+
+header .tag-selector .tag-list-item:active {
+  background: rgba(0, 120, 215, 0.2);
+}
+
+header .tag-selector .tag-list-item label {
+  height: 32px;
+  line-height: 32px;
+  padding: 0 10px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+header .tag-selector-search-bar {
+  position: absolute;
+  top: 184px;
+  right: 58px;
+  width: 200px;
+  z-index: 200;
+  display: none;
+}
+
+header .tag-selector-search-bar .tag-search-bar {
+  height: 32px;
+  font-size: 0;
+  border-bottom: 1px solid rgba(102, 102, 102, 0.1);
+}
+
+header .tag-selector-search-bar .tag-search-bar::before {
+  margin: 0;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  -webkit-mask-image: url(image/Search.svg);
+  mask-image: url(image/Search.svg);
+}
+
+header .tag-selector-search-bar .tag-search-bar input[type=text] {
+  border: none;
+  background: none;
+  padding: 0 5px;
+  height: 32px;
+  width: calc(100% - 32px);
+  outline: none;
+}
+
+header .tag-selector-search-bar .tag-search-bar input[type=text]::placeholder {
+  color: #333;
+  opacity: 0.6;
+}
+
+header .tag-selector-search-bar .tag-and-or {
+  height: 20px;
+  line-height: 20px;
+  font-size: 14px;
+  margin: 6px 0;
+  display: inline-block;
+}
+
+header .tag-selector-search-bar .tag-and-or label {
+  height: 20px;
+  line-height: 20px;
+  vertical-align: top;
+}
+
+header .tag-selector-search-bar .tag-clear {
+  height: 20px;
+  line-height: 20px;
+  font-size: 14px;
+  border-left: 1px solid rgba(102, 102, 102, 0.1);
+  padding: 0 8px;
+  margin: 6px 0;
+  float: right;
+  color: #0078d7;
+  cursor: pointer;
+}
+
+header .tag-selector-search-bar .tag-clear:not(.disabled):hover {
+  text-decoration: underline;
+}
+
+header .tag-selector-search-bar .tag-clear.disabled {
+  color: rgba(0, 120, 215, 0.3);
+  cursor: default;
+}
+
+header .tag-selector-search-bar .tag-and-or input[type=radio] {
+  margin-left: 10px;
+}
+
+header .tag-selector-search-bar .tag-and-or input[type=radio]:not(:first-child) {
+  margin-left: 20px;
+}
+
+header .tag-selector-search-bar .tag-list-item input[type=checkbox] {
+  margin: 0;
+}
+
+header .status-selector {
+  position: absolute;
+  top: 184px;
+  right: 128px;
+  width: 110px;
+  background: white;
+  box-shadow: 0px 0px 5px 0px rgba(102, 102, 102, 0.3);
+  z-index: 100;
+  display: none;
+}
+
+header .status-selector .status-item {
+  height: 32px;
+  line-height: 32px;
+  padding: 0 15px;
+  font-size: 14px;
+  cursor: default;
+}
+
+header .status-selector .status-item:hover {
+  background: rgba(0, 120, 215, 0.1);
+}
+
+header .status-selector .status-item:active {
+  background: rgba(0, 120, 215, 0.2);
+}
+
+header .search-bar button.dropdown.status {
+  width: 90px;
+}
+
+#main.show-search-bar header.show-tag-selector .tag-selector,
+#main.show-search-bar header.show-tag-selector .tag-selector-search-bar {
+  display: block;
+}
+
+#main.show-search-bar header.show-tag-selector .search-bar .tags {
+  background: rgba(0, 120, 215, 0.1);
+}
+
+#main.show-search-bar header.show-status-selector .status-selector {
+  display: block;
+}
+
+#main.show-search-bar header.show-status-selector .search-bar .status {
+  background: rgba(0, 120, 215, 0.1);
+}
+
+button.tags,
+button.status {
+  display: none;
+}
+
+.content {
+  margin: 0 18px 0 8px;
+  height: calc(100% - 152px);
+}
+
+#main.show-search-bar:not(.show-search-result) .content {
+  height: calc(100% - 189px);
+}
+
+#main.show-search-result:not(.show-search-bar) .content {
+  height: calc(100% - 184px);
+}
+
+#main.show-search-bar.show-search-result .content {
+  height: calc(100% - 221px);
+}
+
+.content table {
+  width: 100%;
+  height: 100%;
+  border-collapse: collapse;
+  box-sizing: border-box;
+  display: block;
+  font-size: 0;
+}
+
+.content table thead,
+.content table tbody {
+  display: block;
+}
+
+.content table tr {
+  display: block;
+  height: 32px;
+  border-bottom: 1px solid rgba(102, 102, 102, 0.1);
+  box-sizing: border-box;
+}
+
+.content table tr:not(:last-child):not(.loading-digital-twin-files) {
+  cursor: pointer;
+}
+
+.content table th {
+  color: #666;
+  font-weight: normal;
+}
+
+.content table th,
+.content table td {
+  height: 31px;
+  line-height: 31px;
+  padding: 0 10px;
+  font-size: 12px;
+  text-align: left;
+  box-sizing: border-box;
+  display: inline-block;
+  position: relative;
+}
+
+.content table th,
+.content table td .td_inner {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.content table td .td_inner {
+  width: 100%;
+}
+
+.content table th:nth-child(1),
+.content table td:nth-child(1) {
+  width: 20px;
+  padding: 0;
+}
+
+.content table th:nth-child(2),
+.content table td:nth-child(2) {
+  /* width: calc(23% - 52px);
+  max-width: 74px; */
+  width: calc(20% - 20px);
+}
+
+.content table th:nth-child(3),
+.content table td:nth-child(3) {
+  /* width: calc(46% - 104px);
+  max-width: 150px; */
+  width: calc(50% - 50px);
+}
+
+.content table th:nth-child(4),
+.content table td:nth-child(4) {
+  /* width: 120px; */
+  width: calc(15% - 15px);
+  /* text-align: right; */
+}
+
+.content table th:nth-child(5),
+.content table td:nth-child(5) {
+  /* min-width: calc(30% - 70px);
+  width: calc(100% - 464px); */
+  width: calc(15% + 65px);
+}
+
+.content table tbody {
+  max-height: calc(100% - 32px);
+  margin-right: -10px;
+  margin-top: -1px;
+  overflow-y: scroll;
+}
+
+.content table tbody tr:last-child {
+  height: 12px;
+  background: url(image/More.svg) no-repeat center;
+  background-size: 16px 16px;
+}
+
+.content table tbody tr:last-child td {
+  height: 11px;
+}
+
+.content table tbody::-webkit-scrollbar {
+  width: 10px;
+  background: #eee;
+}
+
+.content table tbody::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border: 2px solid #eee;
+  border-radius: 5px;
+}
+
+.content table tbody tr:not(:last-child):not(.loading-digital-twin-files):hover {
+  background: rgba(0, 120, 215, 0.1);
+}
+
+.content table tbody tr:not(:last-child):not(.loading-digital-twin-files):active {
+  background: rgba(0, 120, 215, 0.2);
+}
+
+.content table tr.loading-digital-twin-files {
+  cursor: default;
+}
+
+.content table tr.loading-digital-twin-files td::before {
+  content: "";
+  display: block;
+  height: 8px;
+  background: rgba(102, 102, 102, 0.2);
+  bottom: 11px;
+  position: absolute;
+}
+
+.content table tr.loading-digital-twin-files td:nth-child(1)::before {
+  height: 16px;
+  width: 16px;
+  border: 1px solid #c8c8c8;
+  background: none;
+  bottom: 6px;
+  left: 1px;
+}
+
+.content table tr.loading-digital-twin-files td:nth-child(2)::before {
+  width: 80px;
+}
+
+.content table tr.loading-digital-twin-files td:nth-child(3)::before {
+  width: 120px;
+}
+
+.content table tr.loading-digital-twin-files td:nth-child(4)::before {
+  width: 70px;
+  /* right: 10px; */
+}
+
+.content table tr.loading-digital-twin-files td:nth-child(5)::before {
+  width: 40px;
+}
+
+.content table tr.loading-digital-twin-files td:nth-child(6)::before {
+  width: 40px;
+}
+
+.copy_icon {
+  width: 32px;
+  height: 32px;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  display: none;
+  z-index: 10;
+}
+
+.copy_icon::after {
+  content: "";
+  width: 16px;
+  height: 16px;
+  display: block;
+  -webkit-mask-image: url(image/Copy.svg);
+  mask-image: url(image/Copy.svg);
+  -webkit-mask-size: 16px 16px;
+  mask-size: 16px 16px;
+  background-color: #333;
+  left: 8px;
+  top: 8px;
+  position: absolute;
+}
+
+:hover > .copy_icon {
+  display: block;
+}
+.copy_icon:hover {
+  background-color: rgba(0, 120, 215, 0.2);
+}
+
+.copy_icon.copied::before {
+  content: "Copied";
+  display: block;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  text-align: center;
+  font-size: 10px;
+  height: 20px;
+  line-height: 20px;
+  width: 50px;
+  position: absolute;
+  right: -55px;
+  top: 6px;
+}
+
+/* .copy_icon.copied::after {
+  content: "";
+  display: block;
+  border-right: 5px solid rgba(0, 0, 0, 0.5);
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  position: absolute;
+  right: -5px;
+  top: 11px;
+} */
+
+.copy-text-box {
+  position: absolute;
+  top: -1000px;
+  left: 0;
+}
+
+.info_icon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  -webkit-mask-image: url(image/Info.svg);
+  mask-image: url(image/Info.svg);
+  background-color: #333;
+  vertical-align: text-bottom;
+  margin: 0 0.6em;
+}
+
+.search_result {
+  height: 32px;
+  line-height: 32px;
+}
+
+.search_result .link {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+body.vscode-dark {
+  color: #ccc;
+  background: #1e1e1e;
+}
+
+body.vscode-dark em {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+body.vscode-dark .with-icon::before {
+  background-color: #ccc;
+}
+
+body.vscode-dark button:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+body.vscode-dark button:not(:disabled):active {
+  background: rgba(255, 255, 255, 0.2)!important;
+}
+body.vscode-dark button:disabled {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+body.vscode-dark button:disabled::before {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+body.vscode-dark button {
+  color: #eee;
+}
+
+body.vscode-dark .content table th {
+  color: #888;
+}
+
+body.vscode-dark #main.show-search-bar header .action-bar button.filter {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+body.vscode-dark #main.show-search-bar header.show-status-selector .search-bar .status {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+body.vscode-dark #main.show-search-bar header.show-tag-selector .search-bar .tags {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+body.vscode-dark header .search-bar input[type=text] {
+  color: #ccc;
+}
+
+body.vscode-dark header .search-bar button.dropdown::after {
+  background-color: #eee;
+}
+
+body.vscode-dark header .status-selector {
+  background: #333;
+}
+
+body.vscode-dark header .tag-selector {
+  border-top-color: #333;
+  background: #333;
+}
+
+body.vscode-dark header .tag-selector .tag-list-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+body.vscode-dark header .tag-selector .tag-list-item:active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+body.vscode-dark header .status-selector .status-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+body.vscode-dark header .status-selector .status-item:active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+body.vscode-dark header .tag-selector-search-bar .tag-search-bar input[type=text] {
+  color: #ccc;
+}
+
+body.vscode-dark .content table tr.loading-digital-twin-files td:not(:first-child)::before {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+body.vscode-dark .content table tr {
+  border-bottom-color: rgba(255, 255, 255, 0.1)
+}
+
+body.vscode-dark .content table tbody tr:not(:last-child):not(.loading-digital-twin-files):hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+body.vscode-dark .content table tbody tr:not(:last-child):not(.loading-digital-twin-files):active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+body.vscode-dark .content table tbody::-webkit-scrollbar {
+  background: #333;
+}
+
+body.vscode-dark .content table tbody::-webkit-scrollbar-thumb {
+  background-color: #1e1e1e;
+  border-color: #333;
+}
+
+body.vscode-dark .copy_icon::after {
+  background-color: #ccc;
+}
+
+body.vscode-dark .copy_icon:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+body.vscode-dark .info_icon {
+  background-color: #ccc;
+}

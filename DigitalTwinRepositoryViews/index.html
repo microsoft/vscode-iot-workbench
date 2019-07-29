@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="style.css">
+<script src="vue.js"></script>
+</head>
+<body>
+<div id="main" v-bind:class="{'show-search-bar': showSearchBar, 'show-search-result': searchKeywords !== ''}" v-cloak>
+
+<header v-bind:class="{'show-status-selector': showStatusSelector, 'show-tag-selector': showTagSelector}">
+<h1 class="company-name">{{ companyName }}</h1>
+<div class="digital-twin-file-type-tab">
+  <span v-bind:class="{active: type.value === 'CapabilityModel'}" v-on:click="type.value = 'CapabilityModel'">Device Capability Models</span>
+  <span v-bind:class="{active: type.value === 'Interface'}" v-on:click="type.value = 'Interface'">Interfaces</span>
+</div>
+<div class="action-bar">
+  <button class="with-icon new" v-if="!publicRepository" v-on:click="createDigitalTwinFile">New</button>
+  <button class="with-icon download" v-on:click="editDigitalTwinFiles" v-bind:disabled="type.value === 'Interface' && !this.selectedInterfaces.value.length || type.value === 'CapabilityModel' && !this.selectedCapabilityModels.value.length">Download</button>
+  <button class="with-icon publish" v-if="false" v-on:click="publishDigitalTwinFiles" v-bind:disabled="hasNoItemToPublish()">Publish</button>
+  <button class="with-icon delete" v-if="!publicRepository" v-on:click="deleteDigitalTwinFiles" v-bind:disabled="type.value === 'Interface' && !this.selectedInterfaces.value.length || type.value === 'CapabilityModel' && !this.selectedCapabilityModels.value.length">Delete</button>
+  <button class="with-icon refresh right" v-on:click="refreshDigitalTwinFileList"></button>
+  <button class="with-icon filter right" v-on:click="showHideSearchBar"></button>
+</div>
+<div class="with-icon search-bar">
+  <input type="text" placeholder="Filter by keyword" v-model="filterKeywords">
+  <button class="with-icon clear right" v-on:click="clearFilter"></button>
+  <button class="dropdown tags right" v-on:click="showHideTagSelector">{{ filterTags.length ? (filterTags.length > 1 ? (filterTags.length + ' Tags') : '1 Tag') : 'Tags' }}</button>
+  <button class="dropdown status right" v-on:click="showHideStatusSelector">{{ filterStatus === 'All' ? 'Status' : filterStatus }}</button>
+</div>
+<div class="tag-selector">
+  <div class="tag-list">
+    <div class="tag-list-item" v-for="tag in searchTags(allTags.value)">
+      <label><input type="checkbox" v-bind:value="tag" v-model="filterTags">{{ tag }}</label>
+    </div>
+  </div>
+</div>
+<div class="tag-selector-search-bar">
+  <div class="with-icon tag-search-bar">
+    <input type="text" placeholder="Search" v-model="filterTagsKeywords">
+  </div>
+  <div class="tag-search-action">
+    <div class="tag-and-or">
+      <input type="radio" name="tag-and-or" value="or" id="tag-or" v-model="filterTagsOrAnd"><label for="tag-or">or</label>
+      <input type="radio" name="tag-and-or" value="and" id="tag-and" v-model="filterTagsOrAnd"><label for="tag-and">and</label>
+    </div>
+    <div class="tag-clear" v-on:click="filterTags = []" v-bind:class="{disabled: !filterTags.length}">Clear</div>
+  </div>
+</div>
+<div class="status-selector">
+  <div class="status-item" v-on:click="selectFilterStatus('All')">All</div>
+  <div class="status-item" v-on:click="selectFilterStatus('Saved')">Saved</div>
+  <div class="status-item" v-on:click="selectFilterStatus('Published')">Published</div>
+</div>
+</header>
+<div class="content">
+<div class="search_result" v-if="searchKeywords !== ''">Search results with keywords: <strong>{{searchKeywords}}</strong>. Click <span class="link" v-on:click="clearKeywords">here</span> to clear keywords.</div>
+<table v-show="type.value === 'Interface'">
+<thead>
+<tr>
+  <th></th>
+  <th>Name</th>
+  <th>ID</th>
+  <th>Version</th>
+  <th>Publisher</th>
+</tr>
+</thead>
+<tbody v-on:wheel="onScrollTable" v-on:touchmove="onScrollTable" id="interfaceListTable">
+<tr v-show="filterKeywords && filterKeywords !== searchKeywords" v-on:click="searchOnServer">
+  <td colspan="5" style="width: 100%"><span class="info_icon"></span>Results below are filtered from local cache. Click here to search on server.</td>
+</tr>
+<tr v-for="interface in filterItems(interfaceList.value)" v-on:click="addRemoveInterface(interface.urnId)">
+  <td><input type="checkbox" v-bind:value="interface.urnId" v-model="selectedInterfaces.value"></td>
+  <td v-bind:title="interface.displayName"><div class="td_inner" v-html="highlight(interface.displayName)"></div></td>
+  <td v-bind:title="interface.urnId"><div class="td_inner" v-html="highlight(interface.urnId)"></div><span class="copy_icon" title="Copy" v-on:click.stop="copy($event, interface.urnId)"></span></td>
+  <td v-bind:title="interface.version"><div class="td_inner">{{ interface.version }}</div></td>
+  <td>{{ interface.publisherName }}</td>
+</tr>
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinInterfaces.value">
+  <td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinInterfaces.value">
+  <td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinInterfaces.value">
+  <td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinInterfaces.value">
+  <td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinInterfaces.value">
+  <td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinInterfaces.value">
+  <td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinInterfaces.value">
+  <td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinInterfaces.value">
+  <td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinInterfaces.value">
+  <td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinInterfaces.value">
+  <td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr v-show="!loadingDigitalTwinInterfaces.value && interfaceNextToken.value">
+  <td colspan="5"></td>
+</tr>
+</tbody>
+</table>
+
+<table v-show="type.value === 'CapabilityModel'">
+<thead>
+<tr>
+  <th></th>
+  <th>Name</th>
+  <th>ID</th>
+  <th>Version</th>
+  <th>Publisher</th>
+</tr>
+</thead>
+<tbody v-on:wheel="onScrollTable" v-on:touchmove="onScrollTable" id="capabilityListTable">
+<tr v-show="filterKeywords && filterKeywords !== searchKeywords" v-on:click="searchOnServer">
+  <td colspan="5" style="width: 100%"><span class="info_icon"></span>Results below are filtered from local cache. Click here to search on server.</td>
+</tr>
+<tr v-for="capability in filterItems(capabilityList.value)" v-on:click="addRemoveCapability(capability.urnId)">
+  <td><input type="checkbox" v-bind:value="capability.urnId" v-model="selectedCapabilityModels.value"></td>
+  <td v-bind:title="capability.displayName"><div class="td_inner" v-html="highlight(capability.displayName)"></div></td>
+  <td v-bind:title="capability.urnId"><div class="td_inner" v-html="highlight(capability.urnId)"></div><span class="copy_icon" title="Copy" v-on:click.stop="copy($event, capability.urnId)"></span></td>
+  <td v-bind:title="capability.version"><div class="td_inner">{{ capability.version }}</div></td>
+  <td>{{ capability.publisherName }}</td>
+</tr>
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinCapabilityModels.value">
+  <td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinCapabilityModels.value">
+  <td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinCapabilityModels.value">
+  <td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinCapabilityModels.value">
+  <td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinCapabilityModels.value">
+  <td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinCapabilityModels.value">
+  <td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinCapabilityModels.value">
+  <td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinCapabilityModels.value">
+  <td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinCapabilityModels.value">
+  <td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr class="loading-digital-twin-files" v-show="loadingDigitalTwinCapabilityModels.value">
+  <td></td><td></td><td></td><td></td><td></td>
+</tr>
+<tr v-show="!loadingDigitalTwinCapabilityModels.value && capabilityNextToken.value">
+  <td colspan="5"></td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+</div>
+<script src="command.js"></script>
+<script src="main.js"></script>
+</body>
+</html>

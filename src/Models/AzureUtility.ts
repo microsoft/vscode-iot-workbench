@@ -3,6 +3,7 @@ import * as fs from 'fs-plus';
 import {HttpMethods, WebResource} from 'ms-rest';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import {channelShowAndAppendLine} from '../utils';
 
 import request = require('request-promise');
 import rq = require('request');
@@ -511,10 +512,9 @@ export class AzureUtility {
 
     let deployPending: NodeJS.Timer|null = null;
     if (AzureUtility._channel) {
-      AzureUtility._channel.show();
       deployPending = setInterval(() => {
         if (AzureUtility._channel) {
-          AzureUtility._channel.append('.');
+          channelShowAndAppendLine(AzureUtility._channel, '.');
         }
       }, 1000);
     }
@@ -530,15 +530,16 @@ export class AzureUtility {
 
       if (AzureUtility._channel && deployPending) {
         clearInterval(deployPending);
-        AzureUtility._channel.appendLine('.');
-        AzureUtility._channel.appendLine(JSON.stringify(deployment, null, 4));
+        channelShowAndAppendLine(AzureUtility._channel, '.');
+        channelShowAndAppendLine(
+            AzureUtility._channel, JSON.stringify(deployment, null, 4));
       }
       return deployment;
     } catch (error) {
       if (AzureUtility._channel && deployPending) {
         clearInterval(deployPending);
-        AzureUtility._channel.appendLine('.');
-        AzureUtility._channel.appendLine(error);
+        channelShowAndAppendLine(AzureUtility._channel, '.');
+        channelShowAndAppendLine(AzureUtility._channel, error);
       }
       return undefined;
     }

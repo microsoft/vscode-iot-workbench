@@ -9,8 +9,6 @@ import * as vscode from 'vscode';
 import {TelemetryContext} from './telemetry';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 import {askAndNewProject, handleIoTWorkspaceProjectFolder} from './utils';
-import {RemoteExtension} from './Models/RemoteExtension';
-import {DevelopEnvironment} from './constants';
 
 const impor = require('impor')(__dirname);
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as

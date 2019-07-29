@@ -20,7 +20,7 @@ export interface TelemetryContext {
 }
 
 export interface TelemetryProperties {
-  result: 'Succeeded'|'Failed'|'Canceled';
+  result: 'Succeeded'|'Failed'|'Cancelled';
   error: string;
   errorMessage: string;
   [key: string]: string;

@@ -5,6 +5,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {AzureComponentsStorage, FileNames, ScaffoldType} from '../constants';
+import {channelShowAndAppendLine} from '../utils';
 
 import {AzureComponentConfig, AzureConfigFileHandler, AzureConfigs, ComponentInfo, Dependency, DependencyConfig, DependencyType} from './AzureComponentConfig';
 import {ARMTemplate, AzureUtility} from './AzureUtility';
@@ -218,8 +219,8 @@ export class StreamAnalyticsJob implements Component, Provisionable,
 
     if (!asaNameChoose.description) {
       if (this.channel) {
-        this.channel.show();
-        this.channel.appendLine('Creating Stream Analytics Job...');
+        channelShowAndAppendLine(
+            this.channel, 'Creating Stream Analytics Job...');
       }
       const asaArmTemplatePath = this.extensionContext.asAbsolutePath(path.join(
           FileNames.resourcesFolderName, 'arm', 'streamanalytics.json'));
@@ -233,20 +234,22 @@ export class StreamAnalyticsJob implements Component, Provisionable,
           !asaDeploy.properties.outputs.streamAnalyticsJobName) {
         throw new Error('Provision Stream Analytics Job failed.');
       }
-      this.channel.appendLine(JSON.stringify(asaDeploy, null, 4));
+      channelShowAndAppendLine(
+          this.channel, JSON.stringify(asaDeploy, null, 4));
 
       streamAnalyticsJobName =
           asaDeploy.properties.outputs.streamAnalyticsJobName.value;
     } else {
       if (this.channel) {
-        this.channel.show();
-        this.channel.appendLine('Creating Stream Analytics Job...');
+        channelShowAndAppendLine(
+            this.channel, 'Creating Stream Analytics Job...');
       }
       streamAnalyticsJobName = asaNameChoose.label;
       const asaDetail =
           this.getStreamAnalyticsByNameFromCache(streamAnalyticsJobName);
       if (asaDetail) {
-        this.channel.appendLine(JSON.stringify(asaDetail, null, 4));
+        channelShowAndAppendLine(
+            this.channel, JSON.stringify(asaDetail, null, 4));
       }
     }
 
@@ -373,8 +376,8 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     });
 
     if (this.channel) {
-      this.channel.show();
-      this.channel.appendLine('Stream Analytics Job provision succeeded.');
+      channelShowAndAppendLine(
+          this.channel, 'Stream Analytics Job provision succeeded.');
     }
     return true;
   }
@@ -385,8 +388,8 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     // Stop Job
     let stopPending: NodeJS.Timer|null = null;
     if (this.channel) {
-      this.channel.show();
-      this.channel.appendLine('Stopping Stream Analytics Job...');
+      channelShowAndAppendLine(
+          this.channel, 'Stopping Stream Analytics Job...');
       stopPending = setInterval(() => {
         this.channel.append('.');
       }, 1000);
@@ -394,15 +397,16 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     const jobStopped = await this.stop();
     if (!jobStopped) {
       if (this.channel) {
-        this.channel.show();
-        this.channel.appendLine('Stop Stream Analytics Job failed.');
+        channelShowAndAppendLine(
+            this.channel, 'Stop Stream Analytics Job failed.');
       }
       return false;
     } else {
       if (this.channel && stopPending) {
         clearInterval(stopPending);
-        this.channel.appendLine('.');
-        this.channel.appendLine('Stop Stream Analytics Job succeeded.');
+        channelShowAndAppendLine(this.channel, '.');
+        channelShowAndAppendLine(
+            this.channel, 'Stop Stream Analytics Job succeeded.');
       }
     }
 
@@ -419,8 +423,8 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     let deployPending: NodeJS.Timer|null = null;
     try {
       if (this.channel) {
-        this.channel.show();
-        this.channel.appendLine('Deploying Stream Analytics Job...');
+        channelShowAndAppendLine(
+            this.channel, 'Deploying Stream Analytics Job...');
         deployPending = setInterval(() => {
           this.channel.append('.');
         }, 1000);
@@ -429,16 +433,18 @@ export class StreamAnalyticsJob implements Component, Provisionable,
           resourceId, apiVersion, parameters);
       if (this.channel && deployPending) {
         clearInterval(deployPending);
-        this.channel.appendLine('.');
-        this.channel.appendLine(JSON.stringify(deployment, null, 4));
-        this.channel.appendLine('Stream Analytics Job query deploy succeeded.');
+        channelShowAndAppendLine(this.channel, '.');
+        channelShowAndAppendLine(
+            this.channel, JSON.stringify(deployment, null, 4));
+        channelShowAndAppendLine(
+            this.channel, 'Stream Analytics Job query deploy succeeded.');
       }
 
       // Start Job
       let startPending: NodeJS.Timer|null = null;
       if (this.channel) {
-        this.channel.show();
-        this.channel.appendLine('Starting Stream Analytics Job...');
+        channelShowAndAppendLine(
+            this.channel, 'Starting Stream Analytics Job...');
         startPending = setInterval(() => {
           this.channel.append('.');
         }, 1000);
@@ -446,21 +452,22 @@ export class StreamAnalyticsJob implements Component, Provisionable,
       const jobStarted = await this.start();
       if (!jobStarted) {
         if (this.channel) {
-          this.channel.show();
-          this.channel.appendLine('Start Stream Analytics Job failed.');
+          channelShowAndAppendLine(
+              this.channel, 'Start Stream Analytics Job failed.');
         }
         return false;
       } else {
         if (this.channel && startPending) {
           clearInterval(startPending);
-          this.channel.appendLine('.');
-          this.channel.appendLine('Start Stream Analytics Job succeeded.');
+          channelShowAndAppendLine(this.channel, '.');
+          channelShowAndAppendLine(
+              this.channel, 'Start Stream Analytics Job succeeded.');
         }
       }
     } catch (error) {
       if (this.channel && deployPending) {
         clearInterval(deployPending);
-        this.channel.appendLine('.');
+        channelShowAndAppendLine(this.channel, '.');
       }
       throw error;
     }

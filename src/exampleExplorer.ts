@@ -68,7 +68,6 @@ export class ExampleExplorer {
   private async downloadExamplePackage(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       url: string, fsPath: string): Promise<boolean> {
-    channel.show();
     const loading = setInterval(() => {
       channel.append('.');
     }, 1000);
@@ -86,13 +85,13 @@ export class ExampleExplorer {
     try {
       zip.extractAllTo(tempPath, true);
       clearInterval(loading);
-      channel.appendLine('');
-      channel.appendLine('Example loaded.');
+      utils.channelShowAndAppendLine(channel, '');
+      utils.channelShowAndAppendLine(channel, 'Example loaded.');
       await this.moveTempFiles(fsPath);
       return true;
     } catch (error) {
       clearInterval(loading);
-      channel.appendLine('');
+      utils.channelShowAndAppendLine(channel, '');
       throw error;
     }
   }
@@ -225,8 +224,8 @@ export class ExampleExplorer {
     });
 
     if (!boardSelection) {
-      telemetryContext.properties.errorMessage = 'Board selection canceled.';
-      telemetryContext.properties.result = 'Canceled';
+      telemetryContext.properties.errorMessage = 'Board selection cancelled.';
+      telemetryContext.properties.result = 'Cancelled';
       return false;
     } else if (boardSelection.id === 'no_device') {
       await utils.TakeNoDeviceSurvey(telemetryContext);
@@ -273,7 +272,7 @@ export class ExampleExplorer {
       if (res) {
         vscode.window.showInformationMessage('Example load successfully.');
       } else {
-        vscode.window.showWarningMessage('Example load canceled.');
+        vscode.window.showWarningMessage('Example load cancelled.');
       }
     } catch (error) {
       vscode.window.showErrorMessage(
@@ -318,7 +317,7 @@ export class ExampleExplorer {
       return true;
     }
 
-    channel.appendLine('Downloading example package...');
+    utils.channelShowAndAppendLine(channel, 'Downloading example package...');
     const res =
         await this.downloadExamplePackage(context, channel, url, fsPath);
     if (res) {
