@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import {exec} from 'child_process';
 import * as crypto from 'crypto';
 import * as fs from 'fs-plus';
 import * as getmac from 'getmac';

@@ -433,7 +433,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
         if (res === false) {
           // TODO: Remove this function and implement with sdk in FileUtility
           fs.removeSync(this.projectRootPath);
-          vscode.window.showWarningMessage('Project initialize cancelled.');
+          vscode.window.showWarningMessage('Project initialize canceled.');
           return false;
         }
       }

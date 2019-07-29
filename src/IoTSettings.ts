@@ -98,7 +98,7 @@ export class IoTWorkbenchSettings {
         userWorkbenchPath = folderUri[0].fsPath;
       } else {
         if (showMessage) {
-          await vscode.window.showWarningMessage('Change workbench cancelled.');
+          await vscode.window.showWarningMessage('Change workbench canceled.');
         }
         return userWorkbenchPath;
       }
