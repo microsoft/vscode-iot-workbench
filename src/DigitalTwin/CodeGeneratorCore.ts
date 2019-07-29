@@ -140,8 +140,8 @@ export class CodeGeneratorCore {
 
         if (!regenSelection) {
           telemetryContext.properties.errorMessage =
-              'Re-generate code selection canceled.';
-          telemetryContext.properties.result = 'Canceled';
+              'Re-generate code selection cancelled.';
+          telemetryContext.properties.result = 'Cancelled';
           return false;
         }
 
@@ -181,8 +181,8 @@ export class CodeGeneratorCore {
         {ignoreFocusOut: true, placeHolder: 'Please select a language:'});
 
     if (!languageSelection) {
-      telemetryContext.properties.errorMessage = 'Language selection canceled.';
-      telemetryContext.properties.result = 'Canceled';
+      telemetryContext.properties.errorMessage = 'Language selection cancelled.';
+      telemetryContext.properties.result = 'Cancelled';
       return false;
     }
 
@@ -375,8 +375,8 @@ export class CodeGeneratorCore {
 
     if (!deviceConnectionSelection) {
       telemetryContext.properties.errorMessage =
-          'Connection type selection canceled.';
-      telemetryContext.properties.result = 'Canceled';
+          'Connection type selection cancelled.';
+      telemetryContext.properties.result = 'Cancelled';
       return;
     }
 
@@ -476,8 +476,8 @@ export class CodeGeneratorCore {
 
     if (!projectTypeSelection) {
       telemetryContext.properties.errorMessage =
-          'Project type selection canceled.';
-      telemetryContext.properties.result = 'Canceled';
+          'Project type selection cancelled.';
+      telemetryContext.properties.result = 'Cancelled';
       return;
     }
 
@@ -522,8 +522,8 @@ export class CodeGeneratorCore {
 
     if (!fileSelection) {
       telemetryContext.properties.errorMessage =
-          'Capability Model file selection canceled.';
-      telemetryContext.properties.result = 'Canceled';
+          'Capability Model file selection cancelled.';
+      telemetryContext.properties.result = 'Cancelled';
       return;
     }
 

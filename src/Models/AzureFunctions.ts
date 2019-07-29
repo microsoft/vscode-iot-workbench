@@ -172,7 +172,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
 
       if (!languageSelection) {
         throw new Error(
-            'Unable to get the language for Azure Functions. Creating project for Azure Functions canceled.');
+            'Unable to get the language for Azure Functions. Creating project for Azure Functions cancelled.');
       }
       this.functionLanguage = languageSelection.label;
     }
@@ -181,7 +181,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
         utils.getScriptTemplateNameFromLanguage(this.functionLanguage);
     if (!templateName) {
       throw new Error(
-          'Unable to get the template for Azure Functions.Creating project for Azure Functions canceled.');
+          'Unable to get the template for Azure Functions.Creating project for Azure Functions cancelled.');
     }
 
     try {

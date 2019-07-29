@@ -176,7 +176,7 @@ export abstract class IoTWorkbenchProjectBase {
 
         const res = await item.provision();
         if (res === false) {
-          vscode.window.showWarningMessage('Provision canceled.');
+          vscode.window.showWarningMessage('Provision cancelled.');
           return false;
         }
       }
