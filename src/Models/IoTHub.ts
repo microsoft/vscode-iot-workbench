@@ -8,7 +8,6 @@ import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
 import {AzureComponentsStorage, ConfigKey, ScaffoldType} from '../constants';
-import {channelShowAndAppendLine} from '../utils';
 
 import {getExtension} from './Apis';
 import {AzureComponentConfig, AzureConfigFileHandler, AzureConfigs, ComponentInfo, DependencyConfig} from './AzureComponentConfig';
@@ -119,7 +118,8 @@ export class IoTHub implements Component, Provisionable {
         break;
       case 'create':
         if (this.channel) {
-          channelShowAndAppendLine(this.channel, 'Creating new IoT Hub...');
+          this.channel.show();
+          this.channel.appendLine('Creating new IoT Hub...');
         }
 
         iothub = await toolkit.azureIoTExplorer.createIoTHub(
@@ -131,7 +131,8 @@ export class IoTHub implements Component, Provisionable {
 
     if (iothub && iothub.iotHubConnectionString) {
       if (this.channel) {
-        channelShowAndAppendLine(this.channel, JSON.stringify(iothub, null, 2));
+        this.channel.show();
+        this.channel.appendLine(JSON.stringify(iothub, null, 2));
       }
 
       const sharedAccessKeyMatches =
@@ -167,7 +168,8 @@ export class IoTHub implements Component, Provisionable {
       });
 
       if (this.channel) {
-        channelShowAndAppendLine(this.channel, 'IoT Hub provision succeeded.');
+        this.channel.show();
+        this.channel.appendLine('IoT Hub provision succeeded.');
       }
       return true;
     } else if (!iothub) {

@@ -22,7 +22,7 @@ suite('IoT Device Workbench: Device', () => {
     done();
   });
 
-  /*test('should be able to run device compile', function(done) {
+  test('should be able to run device compile', function(done) {
     this.timeout(10 * 60 * 1000);
     try {
       const deviceOperator = new DeviceOperator(ProjectHostType.Workspace);
@@ -41,5 +41,5 @@ suite('IoT Device Workbench: Device', () => {
     } catch (error) {
       done(new Error(error));
     }
-  });*/
+  });
 });

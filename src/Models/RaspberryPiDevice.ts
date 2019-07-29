@@ -10,7 +10,7 @@ import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames, OperationType, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext} from '../telemetry';
-import {askAndOpenInRemote, channelShowAndAppendLine, generateTemplateFile, runCommand} from '../utils';
+import {askAndOpenInRemote, generateTemplateFile, runCommand} from '../utils';
 
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
@@ -163,11 +163,10 @@ export class RaspberryPiDevice implements Device {
         await FileUtility.readFile(ScaffoldType.Workspace, configPath);
     const config: Config = JSON.parse(fileContent as string);
 
-    channelShowAndAppendLine(
-        this.channel, 'Compiling Raspberry Pi device code...');
+    this.channel.show();
+    this.channel.appendLine('Compiling Raspberry Pi device code...');
     try {
-      await runCommand(
-          config.buildCommand, [], this.projectFolder, this.channel);
+      await runCommand(config.buildCommand, this.projectFolder, this.channel);
     } catch (error) {
       throw new Error(
           `Failed to compile Raspberry Pi device code. Error message: ${
@@ -180,20 +179,22 @@ export class RaspberryPiDevice implements Device {
       const getOutputFileCmd =
           `cp -rf ${config.buildTarget} ${this.outputPath}`;
       try {
-        await runCommand(getOutputFileCmd, [], '', this.channel);
+        await runCommand(getOutputFileCmd, '', this.channel);
       } catch (error) {
         throw new Error(`Failed to copy compiled files to output folder ${
             this.outputPath}. Error message: ${error.message}`);
       }
     } else {
-      channelShowAndAppendLine(
-          this.channel, 'Bin files not found. Compilation may have failed.');
+      this.channel.show();
+      this.channel.appendLine(
+          'Bin files not found. Compilation may have failed.');
       return false;
     }
 
     const message =
         `Successfully compile Raspberry Pi device code. \rNow you can use the command 'Azure IoT Device Workbench: Upload Device Code' to upload your compiled executable file to your target device.`;
-    channelShowAndAppendLine(this.channel, message);
+    this.channel.show();
+    this.channel.appendLine(message);
     vscode.window.showInformationMessage(message);
 
     return true;
@@ -236,10 +237,11 @@ export class RaspberryPiDevice implements Device {
         await ssh.uploadFile(binFilePath, RaspberryPiUploadConfig.projectPath);
         const enableExecPriorityCommand =
             `cd ${RaspberryPiUploadConfig.projectPath} && chmod -R 755 .\/`;
+        this.channel.show();
         const command = ssh.spawn(enableExecPriorityCommand);
         command.on('data', async (data) => {});
         command.on('close', async () => {
-          channelShowAndAppendLine(this.channel, 'DONE');
+          this.channel.appendLine('DONE');
           await ssh.close();
         });
         command.on('error', this.channel.appendLine);
@@ -252,7 +254,8 @@ export class RaspberryPiDevice implements Device {
       // await ssh.close();
 
       const message = `Successfully deploy bin file to Raspberry Pi board.`;
-      channelShowAndAppendLine(this.channel, message);
+      this.channel.show();
+      this.channel.appendLine(message);
       await vscode.window.showInformationMessage(message);
     } catch (error) {
       throw new Error(`Upload device code failed. ${error.message}`);

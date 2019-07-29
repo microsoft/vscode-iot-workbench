@@ -8,8 +8,7 @@
             "path": "rpi32_iothub",
             "projectHostType": "container",
             "boardId": "raspberrypi",
-            "type": "IotHub",
-            "tag": "general"
+            "type": "IotHub"
         },
         {
             "platform": "Embedded Linux (Preview)",
@@ -19,8 +18,7 @@
             "path": "rpi64_iothub",
             "projectHostType": "container",
             "boardId": "raspberrypi",
-            "type": "IotHub",
-            "tag": "general"
+            "type": "IotHub"
         },
         {
             "platform": "Arduino",
@@ -30,8 +28,7 @@
             "path": "esp32_device",
             "projectHostType": "workspace",
             "boardId": "esp32",
-            "type": "Basic",
-            "tag": "general"
+            "type": "Basic"
         },
         {
             "platform": "Arduino",
@@ -41,8 +38,7 @@
             "path": "esp32_iothub",
             "projectHostType": "workspace",
             "boardId": "esp32",
-            "type": "IotHub",
-            "tag": "general"
+            "type": "IotHub"
         },
         {
             "platform": "Arduino",
@@ -52,8 +48,7 @@
             "path": "devkit_device",
             "projectHostType": "workspace",
             "boardId": "devkit",
-            "type": "Basic",
-            "tag": "general"
+            "type": "Basic"
         },
         {
             "platform": "Arduino",
@@ -63,8 +58,7 @@
             "path": "devkit_iothub",
             "projectHostType": "workspace",
             "boardId": "devkit",
-            "type": "IotHub",
-            "tag": "general"
+            "type": "IotHub"
         },
         {
             "platform": "Arduino",
@@ -74,92 +68,12 @@
             "path": "devkit_azurefunctions",
             "projectHostType": "workspace",
             "boardId": "devkit",
-            "type": "AzureFunctions",
-            "tag": "general"
+            "type": "AzureFunctions"
         },
         {
             "name": "$(issue-opened) My device is not in the list...",
             "id": "no_device",
-            "description": "",
-            "tag": "general"
-        },
-        {
-            "platform": "",
-            "name": "Visual Studio Project Using ANSI C Via IoT Hub Device Connection String",
-            "description": "",
-            "detail": "Template for DigitalTwin Code Generator to generate ANSI C Visual Studio Project via IoT Hub device connection string.",
-            "path": "ansic_vs_connectionstring",
-            "projectHostType": "workspace",
-            "boardId": "",
-            "type": "VisualStudio",
-            "language": "ansic",
-            "tag": "digitaltwin",
-            "connectionType": "DeviceConnectionString"
-        },
-        {
-            "platform": "",
-            "name": "Visual Studio Project Using ANSI C Via DPS(Device Provision Service) symmetric key",
-            "description": "",
-            "detail": "Template for DigitalTwin Code Generator to generate ANSI C Visual Studio Project via DPS symmetric key.",
-            "path": "ansic_vs_iotcsaskey",
-            "projectHostType": "workspace",
-            "boardId": "",
-            "type": "VisualStudio",
-            "language": "ansic",
-            "tag": "digitaltwin",
-            "connectionType": "SymmetricKey"
-        },
-        {
-            "platform": "",
-            "name": "CMake Project Using ANSI C Via IoT Hub Device Connection String",
-            "description": "",
-            "detail": "Template for DigitalTwin Code Generator to generate ANSI C CMake Project via IoT Hub device connection string.",
-            "path": "ansic_cmake_connectionstring",
-            "projectHostType": "workspace",
-            "boardId": "",
-            "type": "CMake",
-            "language": "ansic",
-            "tag": "digitaltwin",
-            "connectionType": "DeviceConnectionString"
-        },
-        {
-            "platform": "",
-            "name": "CMake Project Using ANSI C Via DPS(Device Provision Service) symmetric key",
-            "description": "",
-            "detail": "Template for DigitalTwin Code Generator to generate ANSI C CMake Project via DPS symmetric key.",
-            "path": "ansic_cmake_iotcsaskey",
-            "projectHostType": "workspace",
-            "boardId": "",
-            "type": "CMake",
-            "language": "ansic",
-            "tag": "digitaltwin",
-            "connectionType": "SymmetricKey"
-        },
-        {
-            "platform": "",
-            "name": "IoT DevKit Project Using ANSI C Via IoT Hub Device Connection String",
-            "description": "",
-            "detail": "Template for DigitalTwin Code Generator to generate ANSI C IoT DevKit Project via IoT Hub device connection string.",
-            "path": "ansic_devkit_connectionstring",
-            "projectHostType": "workspace",
-            "boardId": "",
-            "type": "IoTDevKit",
-            "language": "ansic",
-            "tag": "digitaltwin",
-            "connectionType": "DeviceConnectionString"
-        },
-        {
-            "platform": "",
-            "name": "IoT DevKit Project Using ANSI C Via DPS(Device Provision Service) symmetric key",
-            "description": "",
-            "detail": "Template for DigitalTwin Code Generator to generate ANSI C IoT Dev Project via DPS symmetric key.",
-            "path": "ansic_devkit_iotcsaskey",
-            "projectHostType": "workspace",
-            "boardId": "",
-            "type": "IoTDevKit",
-            "language": "ansic",
-            "tag": "digitaltwin",
-            "connectionType": "SymmetricKey"
+            "description": ""
         }
     ]
-}
+  }

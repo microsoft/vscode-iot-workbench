@@ -209,17 +209,18 @@ export abstract class ArduinoDeviceBase implements Device {
   async generateCrc(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
     if (!vscode.workspace.workspaceFolders) {
-      const message = 'No workspace opened.';
-      vscode.window.showWarningMessage(message);
-      utils.channelShowAndAppendLine(channel, message);
+      vscode.window.showWarningMessage('No workspace opened.');
+      channel.show();
+      channel.appendLine('No workspace opened.');
       return false;
     }
 
     const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
     if (!devicePath) {
-      const message = 'No device path found in workspace configuration.';
-      vscode.window.showWarningMessage(message);
-      utils.channelShowAndAppendLine(channel, message);
+      vscode.window.showWarningMessage(
+          'No device path found in workspace configuration.');
+      channel.show();
+      channel.appendLine('No device path found in workspace configuration.');
       return false;
     }
     const deviceBuildLocation = path.join(
@@ -227,9 +228,10 @@ export abstract class ArduinoDeviceBase implements Device {
         '.build');
 
     if (!deviceBuildLocation) {
-      const message = 'No device compile output folder found.';
-      vscode.window.showWarningMessage(message);
-      utils.channelShowAndAppendLine(channel, message);
+      vscode.window.showWarningMessage(
+          'No device compile output folder found.');
+      channel.show();
+      channel.appendLine('No device compile output folder found.');
       return false;
     }
 
@@ -238,7 +240,8 @@ export abstract class ArduinoDeviceBase implements Device {
       const message =
           'No bin file found. Please run the command of Device Compile first.';
       vscode.window.showWarningMessage(message);
-      utils.channelShowAndAppendLine(channel, message);
+      channel.show();
+      channel.appendLine(message);
       return false;
     }
 

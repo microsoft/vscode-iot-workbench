@@ -1,9 +1,0 @@
-{
-  "templateFiles": [
-    {
-        "fileName": "main.ino",
-        "sourcePath" : ".",
-        "targetPath" : "."
-    }
-  ]
-}

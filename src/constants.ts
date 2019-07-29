@@ -12,9 +12,6 @@ export class ConfigKey {
   static readonly boardId = 'BoardId';
   static readonly asaPath = 'StreamAnalyticsPath';
   static readonly shownHelpPage = 'ShownHelpPage';
-  static readonly codeGeneratorVersion = 'IoTPnPCodeGenVersion';
-  static readonly modelRepositoryKeyName = 'IoTPnPModelRepositoryKey';
-  static readonly iotPnPRepositoryUrl = 'IoTPnPRepositoryUrl';
   static readonly projectType = 'ProjectType';
 }
 
@@ -37,22 +34,6 @@ export class EventNames {
   static readonly selectSubscription = 'IoTWorkbench.SelectSubscription';
   static readonly openTutorial = 'IoTWorkbench.OpenTutorial';
   static readonly projectLoadEvent = 'IoTWorkbench.ProjectLoadEvent';
-  static readonly scaffoldDeviceStubEvent = 'IoTWorkbench.ScaffoldDeviceStub';
-  static readonly pnpGetInterfacesEvent = 'IoTWorkbench.IoTPnPGetInterfaces';
-  static readonly pnpGetCapabilityModelsEvent =
-      'IoTWorkbench.IoTPnPGetCapabilityModels';
-  static readonly pnpDeleteModelsEvent = 'IoTWorkbench.IoTPnPDeleteModels';
-  static readonly pnpEditModelsEvent = 'IoTWorkbench.IoTPnPEditModels';
-  static readonly pnpConnectModelRepoEvent =
-      'IoTWorkbench.IoTPnPConnectModelRepo';
-  static readonly pnpDisconnectModelRepoEvent =
-      'IoTWorkbench.IoTPnPDisconnectModelRepo';
-  static readonly pnpCreateInterfaceEvent =
-      'IoTWorkbench.IoTPnPCreateInterface';
-  static readonly pnpCreateCapabilityModelEvent =
-      'IoTWorkbench.IoTPnPCreateCapabilityModel';
-  static readonly pnpSubmitMetaModelFilesEvent =
-      'IoTWorkbench.IoTPnPSubmitMetaModelFiles';
 }
 
 export class FileNames {
@@ -64,10 +45,7 @@ export class FileNames {
   static readonly settingsJsonFileName = 'settings.json';
   static readonly devcontainerFolderName = '.devcontainer';
   static readonly vscodeSettingsFolderName = '.vscode';
-  static readonly workspaceConfigFilePath = 'project.code-workspace';
-  static readonly iotworkbenchTempFolder = '.iotworkbenchtemp';
   static readonly workspaceExtensionName = '.code-workspace';
-  static readonly cacheFolderName = 'cache';
   static readonly outputPathName = '.build';
   static readonly templatesFolderName = 'templates';
   static readonly templateFiles = 'templatefiles.json';
@@ -112,22 +90,4 @@ export enum PlatformType {
 export enum DevelopEnvironment {
   CONTAINER = 'in container',
   LOCAL_ENV = 'in local environment'
-}
-
-export enum TemplateTag {
-  general = 'general',
-  digitaltwin = 'digitaltwin'
-}
-
-export class ContextUris {
-  static readonly iotModel = 'http://azureiot.com/v1/contexts/IoTModel.json';
-  static readonly interface = 'http://azureiot.com/v1/contexts/Interface.json';
-  static readonly capabilityModel =
-      'http://azureiot.com/v1/contexts/CapabilityModel.json';
-}
-
-export enum ModelType {
-  Interface = 'Interface',
-  CapabilityModel = 'CapabilityModel',
-  InlineInterface = 'InterfaceInstance'
 }

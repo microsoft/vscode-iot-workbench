@@ -10,12 +10,14 @@ import * as vscode from 'vscode';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, ScaffoldType} from '../constants';
+import {ConfigKey, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
+import {IoTWorkbenchSettings} from '../IoTSettings';
 
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 import {DeviceType} from './Interfaces/Device';
 import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
+import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
 
 export class Esp32Device extends ArduinoDeviceBase {
   private templateFiles: TemplateFileInfo[] = [];
