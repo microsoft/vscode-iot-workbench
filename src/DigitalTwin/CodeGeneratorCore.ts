@@ -92,11 +92,11 @@ export class CodeGeneratorCore {
 
     // Step 1: Choose Capability Model
     const capabilityModelFileSelection =
-        await this.SelectCapabilityFile(channel, dcmFiles);
+        await this.SelectCapabilityFile(channel, dcmFiles, telemetryContext);
     if (capabilityModelFileSelection === undefined) {
       utils.channelShowAndAppendLine(
           channel, `${DigitalTwinConstants.dtPrefix} Cancelled.`);
-      return true;
+      return false;
     }
 
     // Step 1.5: Prompt if old project exists for the same Capability Model file
@@ -139,6 +139,9 @@ export class CodeGeneratorCore {
             {ignoreFocusOut: true, placeHolder: 'Please select an option:'});
 
         if (!regenSelection) {
+          telemetryContext.properties.errorMessage =
+              'Re-generate code selection canceled.';
+          telemetryContext.properties.result = 'Canceled';
           return false;
         }
 
@@ -178,18 +181,21 @@ export class CodeGeneratorCore {
         {ignoreFocusOut: true, placeHolder: 'Please select a language:'});
 
     if (!languageSelection) {
+      telemetryContext.properties.errorMessage = 'Language selection canceled.';
+      telemetryContext.properties.result = 'Canceled';
       return false;
     }
 
     // Step 4: Select project type
-    const codeGenProjectType =
-        await this.SelectProjectType(languageSelection.label, context);
+    const codeGenProjectType = await this.SelectProjectType(
+        languageSelection.label, context, telemetryContext);
     if (codeGenProjectType === undefined) {
       return false;
     }
 
     // Step 5: Select device connection string type
-    const connectionType = await this.SelectConnectionType(context, channel);
+    const connectionType =
+        await this.SelectConnectionType(context, channel, telemetryContext);
     if (connectionType === undefined) {
       return false;
     }
@@ -340,8 +346,9 @@ export class CodeGeneratorCore {
     return true;
   }
   async SelectConnectionType(
-      context: vscode.ExtensionContext,
-      channel: vscode.OutputChannel): Promise<DeviceConnectionType|undefined> {
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext):
+      Promise<DeviceConnectionType|undefined> {
     const deviceConnectionListPath = context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
         DigitalTwinFileNames.devicemodelTemplateFolderName,
@@ -367,6 +374,9 @@ export class CodeGeneratorCore {
         });
 
     if (!deviceConnectionSelection) {
+      telemetryContext.properties.errorMessage =
+          'Connection type selection canceled.';
+      telemetryContext.properties.result = 'Canceled';
       return;
     }
 
@@ -430,7 +440,9 @@ export class CodeGeneratorCore {
     return codeGenProjectName;
   }
 
-  async SelectProjectType(language: string, context: vscode.ExtensionContext):
+  async SelectProjectType(
+      language: string, context: vscode.ExtensionContext,
+      telemetryContext: TelemetryContext):
       Promise<CodeGenProjectType|undefined> {
     // Select project type
     const projectTypeListPath = context.asAbsolutePath(path.join(
@@ -463,6 +475,9 @@ export class CodeGeneratorCore {
         {ignoreFocusOut: true, placeHolder: 'Please select a target:'});
 
     if (!projectTypeSelection) {
+      telemetryContext.properties.errorMessage =
+          'Project type selection canceled.';
+      telemetryContext.properties.result = 'Canceled';
       return;
     }
 
@@ -478,7 +493,8 @@ export class CodeGeneratorCore {
   }
 
   async SelectCapabilityFile(
-      channel: vscode.OutputChannel, dcmFiles: dtUtils.SchemaFileInfo[]):
+      channel: vscode.OutputChannel, dcmFiles: dtUtils.SchemaFileInfo[],
+      telemetryContext: TelemetryContext):
       Promise<vscode.QuickPickItem|undefined> {
     if (dcmFiles.length === 0) {
       const message =
@@ -505,6 +521,9 @@ export class CodeGeneratorCore {
     });
 
     if (!fileSelection) {
+      telemetryContext.properties.errorMessage =
+          'Capability Model file selection canceled.';
+      telemetryContext.properties.result = 'Canceled';
       return;
     }
 
