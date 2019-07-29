@@ -17,7 +17,7 @@ env:
     - ISPRODTAG=^v?[0-9]+\.[0-9]+\.[0-9]+$
 
 install:
-- apt-get install libsecret-1-dev
+- sudo apt-get install libsecret-1-dev
 - npm install -g vsce
 - npm install
 
