@@ -1,0 +1,14 @@
+{
+  "connectionType": [
+    {
+      "type": "DeviceConnectionString",
+      "name": "Via IoT Hub device connection string",
+      "detail": "To connect to Azure IoT Hub directly"
+    },
+    {
+      "type": "SymmetricKey",
+      "name": "Via DPS (Device Provision Service) symmetric key",
+      "detail": "To connect to Azure IoT Hub, Azure IoT Central or Azure IoT Certification Service"
+    }
+  ]
+}

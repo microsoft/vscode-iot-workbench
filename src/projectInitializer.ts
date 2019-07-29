@@ -6,14 +6,13 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as path from 'path';
-import * as fs from 'fs-plus';
 import * as utils from './utils';
 
 import {TelemetryContext} from './telemetry';
-import {FileNames, ScaffoldType, PlatformType} from './constants';
+import {FileNames, ScaffoldType, PlatformType, TemplateTag} from './constants';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import {FileUtility} from './FileUtility';
-import {ProjectTemplate, ProjectTemplateType, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
+import {ProjectTemplate, ProjectTemplateType} from './Models/Interfaces/ProjectTemplate';
 import {Platform} from './Models/Interfaces/Platform';
 import {RemoteExtension} from './Models/RemoteExtension';
 
@@ -63,8 +62,8 @@ export class ProjectInitializer {
             const projectPath = await this.GenerateProjectFolder();
             if (!projectPath) {
               telemetryContext.properties.errorMessage =
-                  'Project name input canceled.';
-              telemetryContext.properties.result = 'Canceled';
+                  'Project name input cancelled.';
+              telemetryContext.properties.result = 'Cancelled';
               return;
             } else {
               telemetryContext.properties.projectPath = projectPath;
@@ -74,8 +73,8 @@ export class ProjectInitializer {
             const platformSelection = await this.SelectPlatform(context);
             if (!platformSelection) {
               telemetryContext.properties.errorMessage =
-                  'Platform selection canceled.';
-              telemetryContext.properties.result = 'Canceled';
+                  'Platform selection cancelled.';
+              telemetryContext.properties.result = 'Cancelled';
               return;
             } else {
               telemetryContext.properties.platform = platformSelection.label;
@@ -89,8 +88,8 @@ export class ProjectInitializer {
 
             if (!template) {
               telemetryContext.properties.errorMessage =
-                  'Project template selection canceled.';
-              telemetryContext.properties.result = 'Canceled';
+                  'Project template selection cancelled.';
+              telemetryContext.properties.result = 'Cancelled';
               return;
             } else {
               telemetryContext.properties.template = template.name;
@@ -102,21 +101,8 @@ export class ProjectInitializer {
                     [template.type as keyof typeof ProjectTemplateType];
 
             const templateFolder = path.join(resourceRootPath, template.path);
-            const templateFiles =
-                require(path.join(templateFolder, FileNames.templateFiles));
-
-            const templateFilesInfo: TemplateFileInfo[] = [];
-            templateFiles.templateFiles.forEach(
-                (fileInfo: TemplateFileInfo) => {
-                  const filePath = path.join(templateFolder, fileInfo.fileName);
-                  const fileContent = fs.readFileSync(filePath, 'utf8');
-                  templateFilesInfo.push({
-                    fileName: fileInfo.fileName,
-                    sourcePath: fileInfo.sourcePath,
-                    targetPath: fileInfo.targetPath,
-                    fileContent
-                  });
-                });
+            const templateFilesInfo =
+                await utils.getTemplateFilesInfo(templateFolder);
 
             let project;
             if (template.platform === PlatformType.EMBEDDEDLINUX) {
@@ -148,7 +134,9 @@ export class ProjectInitializer {
 
     const result =
         templateJson.templates.filter((template: ProjectTemplate) => {
-          return template.platform === platform;
+          return (
+              template.platform === platform &&
+              template.tag === TemplateTag.general);
         });
 
     const projectTemplateList: vscode.QuickPickItem[] = [];

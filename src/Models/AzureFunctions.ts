@@ -172,7 +172,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
 
       if (!languageSelection) {
         throw new Error(
-            'Unable to get the language for Azure Functions. Creating project for Azure Functions canceled.');
+            'Unable to get the language for Azure Functions. Creating project for Azure Functions cancelled.');
       }
       this.functionLanguage = languageSelection.label;
     }
@@ -181,7 +181,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
         utils.getScriptTemplateNameFromLanguage(this.functionLanguage);
     if (!templateName) {
       throw new Error(
-          'Unable to get the template for Azure Functions.Creating project for Azure Functions canceled.');
+          'Unable to get the template for Azure Functions.Creating project for Azure Functions cancelled.');
     }
 
     try {
@@ -303,8 +303,8 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
   async deploy(): Promise<boolean> {
     let deployPending: NodeJS.Timer|null = null;
     if (this.channel) {
-      this.channel.show();
-      this.channel.appendLine('Deploying Azure Functions App...');
+      utils.channelShowAndAppendLine(
+          this.channel, 'Deploying Azure Functions App...');
       deployPending = setInterval(() => {
         this.channel.append('.');
       }, 1000);
@@ -327,13 +327,13 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
 
       if (this.channel && deployPending) {
         clearInterval(deployPending);
-        this.channel.appendLine('.');
+        utils.channelShowAndAppendLine(this.channel, '.');
       }
       return true;
     } catch (error) {
       if (this.channel && deployPending) {
         clearInterval(deployPending);
-        this.channel.appendLine('.');
+        utils.channelShowAndAppendLine(this.channel, '.');
       }
       throw error;
     }

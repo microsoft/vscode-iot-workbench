@@ -8,6 +8,7 @@ import * as vscode from 'vscode';
 import {ConfigKey, DependentExtensions, DevelopEnvironment, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext, TelemetryProperties, TelemetryWorker} from '../telemetry';
+import {channelShowAndAppendLine} from '../utils';
 
 import {Dependency} from './AzureComponentConfig';
 import {Component} from './Interfaces/Component';
@@ -393,7 +394,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
         if (res === false) {
           // TODO: Remove this function and implement with sdk in FileUtility
           fs.removeSync(this.projectRootPath);
-          vscode.window.showWarningMessage('Project initialize canceled.');
+          vscode.window.showWarningMessage('Project initialize cancelled.');
           return false;
         }
       }
@@ -444,8 +445,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     if (!res) {
       const message = `Remote extension is not available. Please install ${
           DependentExtensions.remote} first.`;
-      this.channel.show();
-      this.channel.appendLine(message);
+      channelShowAndAppendLine(this.channel, message);
       return false;
     }
     return true;

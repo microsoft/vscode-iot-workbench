@@ -8,10 +8,11 @@ import {setTimeout} from 'timers';
 import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
 
-import {AzureFunctionsLanguage, DependentExtensions, FileNames, GlobalConstants, OperationType, ScaffoldType} from './constants';
+import {AzureFunctionsLanguage, DependentExtensions, FileNames, GlobalConstants, OperationType, ScaffoldType, TemplateTag} from './constants';
 import {DialogResponses} from './DialogResponses';
+import {CodeGenProjectType, DeviceConnectionType} from './DigitalTwin/DigitalTwinCodeGen/Interfaces/CodeGenerator';
 import {FileUtility} from './FileUtility';
-import {TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
+import {ProjectTemplate, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
 import {RemoteExtension} from './Models/RemoteExtension';
 import {TelemetryContext} from './telemetry';
 
@@ -25,10 +26,7 @@ export function getRegistryValues(
       async (
           resolve: (value: string) => void, reject: (value: Error) => void) => {
         try {
-          const regKey = new WinReg({
-            hive,
-            key,
-          });
+          const regKey = new WinReg({hive, key});
 
           regKey.valueExists(name, (e, exists) => {
             if (e) {
@@ -159,7 +157,8 @@ export async function selectWorkspaceItem(
         });
   }
   folderPicks.push({label: 'Browse...', description: '', data: undefined});
-  folder = await vscode.window.showQuickPick(folderPicks, {placeHolder});
+  folder = await vscode.window.showQuickPick(
+      folderPicks, {placeHolder, ignoreFocusOut: true});
   if (folder === undefined) {
     throw new Error('User cancelled the operation.');
   }
@@ -168,10 +167,36 @@ export async function selectWorkspaceItem(
                                  (await showOpenDialog(options))[0].fsPath;
 }
 
+export function runCommand(
+    command: string, args: string[], workingDir: string,
+    outputChannel: vscode.OutputChannel): Thenable<object> {
+  return new Promise((resolve, reject) => {
+    const stdout = '';
+    const stderr = '';
+    const process = cp.spawn(command, args, {cwd: workingDir, shell: true});
+    process.stdout.on('data', (data: string) => {
+      console.log(data);
+      outputChannel.appendLine(data);
+    });
+    process.stderr.on('data', (data: string) => {
+      console.log(data);
+      outputChannel.appendLine(data);
+    });
+    process.on('error', error => reject({error, stderr, stdout}));
+    process.on('close', status => {
+      if (status === 0) {
+        resolve({status, stdout, stderr});
+      } else {
+        reject({status, stdout, stderr});
+      }
+    });
+  });
+}
+
 export async function askAndNewProject(telemetryContext: TelemetryContext) {
   const message =
       'An IoT project is needed to process the operation, do you want to create an IoT project?';
-  const result: vscode.MessageItem|undefined =
+  const result:|vscode.MessageItem|undefined =
       await vscode.window.showInformationMessage(
           message, DialogResponses.yes, DialogResponses.no);
 
@@ -190,7 +215,7 @@ export async function askAndOpenProject(
   const message =
       `Operation failed because the IoT project is not opened. Current folder contains an IoT project '${
           workspaceFile}', do you want to open it?`;
-  const result: vscode.MessageItem|undefined =
+  const result:|vscode.MessageItem|undefined =
       await vscode.window.showInformationMessage(
           message, DialogResponses.yes, DialogResponses.no);
 
@@ -210,7 +235,7 @@ export async function askAndOpenInRemote(
     telemetryContext: TelemetryContext): Promise<boolean> {
   const message = `${
       operation} can only be executed in remote container. Do you want to reopen the IoT project in container?`;
-  const result: vscode.MessageItem|undefined =
+  const result:|vscode.MessageItem|undefined =
       await vscode.window.showInformationMessage(
           message, DialogResponses.yes, DialogResponses.no);
 
@@ -219,19 +244,17 @@ export async function askAndOpenInRemote(
         `${operation} Operation failed and user opens project in container.`;
     const res = await RemoteExtension.checkRemoteExtension();
     if (!res) {
-      telemetryContext.properties.errorMessage = `${
-          operation} Operation failed and user fail to install Remote Extension.`;
+      telemetryContext.properties.errorMessage =
+          `${operation} Operation failed on installing Remote Extension.`;
       const message = `Remote extension is not available. Please install ${
           DependentExtensions.remote} first.`;
-      channel.show();
-      channel.appendLine(message);
+      channelShowAndAppendLine(channel, message);
       return false;
     }
     await vscode.commands.executeCommand('openindocker.reopenInContainer');
   } else {
     const message = `${operation} can only be executed in remote container.`;
-    channel.show();
-    channel.appendLine(message);
+    channelShowAndAppendLine(channel, message);
     telemetryContext.properties.errorMessage = 'Operation failed.';
   }
 
@@ -242,14 +265,13 @@ const noDeviceSurveyUrl = 'https://www.surveymonkey.com/r/C7NY7KJ';
 export async function TakeNoDeviceSurvey(telemetryContext: TelemetryContext) {
   const message =
       'Could you help to take a quick survey about what IoT development kit(s) you want Azure IoT Device Workbench to support?';
-  const result: vscode.MessageItem|undefined =
+  const result:|vscode.MessageItem|undefined =
       await vscode.window.showWarningMessage(
           message, DialogResponses.yes, DialogResponses.cancel);
   if (result === DialogResponses.yes) {
     // Open the survey page
     telemetryContext.properties.message = 'User takes no-device survey.';
     telemetryContext.properties.result = 'Succeeded';
-
 
     const extension =
         vscode.extensions.getExtension(GlobalConstants.extensionId);
@@ -266,6 +288,28 @@ export async function TakeNoDeviceSurvey(telemetryContext: TelemetryContext) {
   return;
 }
 
+export function generateInterfaceFileNameFromUrnId(
+    urnId: string, targetPath: string) {
+  const suffix = '.interface.json';
+  const names: string[] = urnId.split(':');
+  // at least the path should contain urn, namespace, name & version
+  if (names.length < 4) {
+    throw new Error(`The id of the file is not valid. id: ${urnId}`);
+  }
+
+  const displayName = names.join('_');
+  let counter = 0;
+  let candidateName = displayName + suffix;
+  while (true) {
+    const filePath = path.join(targetPath, candidateName);
+    if (!fileExistsSync(filePath)) {
+      break;
+    }
+    counter++;
+    candidateName = `${displayName}_${counter}${suffix}`;
+  }
+  return candidateName;
+}
 export class InternalConfig {
   static isInternal: boolean = InternalConfig.isInternalUser();
 
@@ -277,43 +321,80 @@ export class InternalConfig {
   }
 }
 
+export async function getTemplateFilesInfo(templateFolder: string):
+    Promise<TemplateFileInfo[]> {
+  const templateFilesInfo: TemplateFileInfo[] = [];
 
-export function runCommand(
-    command: string, workingDir: string,
-    outputChannel: vscode.OutputChannel): Thenable<object> {
-  return new Promise((resolve, reject) => {
-    const stdout = '';
-    const stderr = '';
-    const process = cp.spawn(command, [], {cwd: workingDir, shell: true});
-    process.stdout.on('data', (data: string) => {
-      outputChannel.appendLine(data);
-    });
-    process.stderr.on('data', (data: string) => {
-      outputChannel.appendLine(data);
-    });
-    process.on('error', (error) => reject({error, stderr, stdout}));
-    process.on('close', (status) => {
-      if (status === 0) {
-        resolve({status, stdout, stderr});
-      } else {
-        reject({status, stdout, stderr});
-      }
+  const templateFiles = path.join(templateFolder, FileNames.templateFiles);
+  if (!(await FileUtility.fileExists(ScaffoldType.Local, templateFiles))) {
+    throw new Error(`Template file ${templateFiles} does not exist.`);
+  }
+
+  const templateFilesJson = JSON.parse(fs.readFileSync(templateFiles, 'utf8'));
+
+  templateFilesJson.templateFiles.forEach((fileInfo: TemplateFileInfo) => {
+    const filePath =
+        path.join(templateFolder, fileInfo.sourcePath, fileInfo.fileName);
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    templateFilesInfo.push({
+      fileName: fileInfo.fileName,
+      sourcePath: fileInfo.sourcePath,
+      targetPath: fileInfo.targetPath,
+      overwrite: typeof fileInfo.overwrite !== 'undefined' ?
+          fileInfo.overwrite :
+          true,  // if it is not defined, we will overwrite the existing file.
+      fileContent
     });
   });
+
+  return templateFilesInfo;
+}
+
+export async function GetCodeGenTemplateFolderName(
+    context: vscode.ExtensionContext, codeGenProjectType: CodeGenProjectType,
+    connectionType: DeviceConnectionType): Promise<string|undefined> {
+  const templateFilePath = context.asAbsolutePath(path.join(
+      FileNames.resourcesFolderName, FileNames.templatesFolderName,
+      FileNames.templateFileName));
+  if (!(await FileUtility.fileExists(ScaffoldType.Local, templateFilePath))) {
+    throw new Error(`Template file ${templateFilePath} does not exist.`);
+  }
+
+  const templateFile =
+      (await FileUtility.readFile(
+          ScaffoldType.Local, templateFilePath, 'utf8')) as string;
+  const templateFileJson = JSON.parse(templateFile);
+
+  const result =
+      templateFileJson.templates.filter((template: ProjectTemplate) => {
+        return (
+            template.tag === TemplateTag.digitaltwin &&
+            template.type === codeGenProjectType &&
+            template.connectionType === connectionType);
+      });
+
+  if (result && result.length > 0) {
+    return result[0].path;
+  } else {
+    return;
+  }
 }
 
 export async function generateTemplateFile(
     root: string, type: ScaffoldType,
     fileInfo: TemplateFileInfo): Promise<boolean> {
   const targetFolderPath = path.join(root, fileInfo.targetPath);
-  if (!await FileUtility.directoryExists(type, targetFolderPath)) {
+  if (!(await FileUtility.directoryExists(type, targetFolderPath))) {
     await FileUtility.mkdirRecursively(type, targetFolderPath);
   }
 
   const targetFilePath = path.join(targetFolderPath, fileInfo.fileName);
   if (fileInfo.fileContent) {
     try {
-      await FileUtility.writeFile(type, targetFilePath, fileInfo.fileContent);
+      const fileExist = await FileUtility.fileExists(type, targetFilePath);
+      if (fileInfo.overwrite || !fileExist) {
+        await FileUtility.writeFile(type, targetFilePath, fileInfo.fileContent);
+      }
     } catch (error) {
       throw new Error(`Failed to create sketch file ${fileInfo.fileName}: ${
           error.message}`);
@@ -347,4 +428,16 @@ export async function handleIoTWorkspaceProjectFolder(
 
   await askAndNewProject(telemetryContext);
   return true;
+}
+
+export function channelShowAndAppend(
+    channel: vscode.OutputChannel, message: string) {
+  channel.show();
+  channel.append(message);
+}
+
+export function channelShowAndAppendLine(
+    channel: vscode.OutputChannel, message: string) {
+  channel.show();
+  channel.appendLine(message);
 }

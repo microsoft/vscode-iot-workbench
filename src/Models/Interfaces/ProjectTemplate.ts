@@ -13,6 +13,7 @@ export interface TemplateFileInfo {
   sourcePath: string;
   targetPath: string;
   fileContent?: string;
+  overwrite?: boolean;
 }
 export interface ProjectTemplate {
   platform: string;
@@ -23,4 +24,19 @@ export interface ProjectTemplate {
   projectHostType: string;
   boardId: string;
   type: string;
+  tag: string;
+  connectionType: string;
+}
+
+export interface PnpDeviceConnectionType {
+  name: string;
+  type: string;
+  detail: string;
+}
+
+export interface PnpProjectTemplateType {
+  language: string;
+  name: string;
+  type: string;
+  detail: string;
 }
