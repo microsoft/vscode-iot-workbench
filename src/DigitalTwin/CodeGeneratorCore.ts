@@ -181,7 +181,8 @@ export class CodeGeneratorCore {
         {ignoreFocusOut: true, placeHolder: 'Please select a language:'});
 
     if (!languageSelection) {
-      telemetryContext.properties.errorMessage = 'Language selection cancelled.';
+      telemetryContext.properties.errorMessage =
+          'Language selection cancelled.';
       telemetryContext.properties.result = 'Cancelled';
       return false;
     }
