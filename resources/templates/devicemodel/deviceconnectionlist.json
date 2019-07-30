@@ -7,7 +7,7 @@
     },
     {
       "type": "SymmetricKey",
-      "name": "Via DPS (Device Provision Service) symmetric key",
+      "name": "Via DPS (Device Provisioning Service) symmetric key",
       "detail": "To connect to Azure IoT Hub, Azure IoT Central or Azure IoT Certification Service"
     }
   ]
