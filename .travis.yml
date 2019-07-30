@@ -23,7 +23,7 @@ install:
 
 script:
 - jq --version
-- if [[ $(jq -r ".version" package.json) == *"-rc" ]]; then sed -i "s#https://aka.ms/iot-pnp-config-staging-v2.json#https://aka.ms/iot-codegen-cli-for-workbench-staging#g" package.json; else  sed -i "s#https://aka.ms/iot-pnp-config-staging-v2.json#https://aka.ms/iot-codegen-cli-for-workbench#g" package.json; fi
+- if [[ $(jq -r ".version" package.json) != *"-rc" ]]; then jq '.codeGenConfigUrl = "https://aka.ms/iot-codegen-cli-for-workbench"' package.json > package_tmp.json && mv package_tmp.json package.json ; fi
 - tsc --version
 - gts --version
 - gts check
