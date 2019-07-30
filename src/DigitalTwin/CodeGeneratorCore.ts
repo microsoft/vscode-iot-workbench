@@ -295,8 +295,8 @@ export class CodeGeneratorCore {
             }
             // Throw error and lead user to set the company model repo
             // connection string
-            throw Error(`Can't find the interface ${
-                schema}, please click 'F1' and invoke 'IoT Plug and Play: Open Model Repository...' command to open the company repository which contains this interface, then try generating the device code again.`);
+            throw Error(`Can't find the interface: ${
+                schema} in local folder, use 'IoT Plug and Play: Open Model Repository' command to connect to the company repository, then try generating the device code again.`);
           }
         }
       }
