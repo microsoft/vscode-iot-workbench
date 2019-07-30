@@ -27,4 +27,4 @@ include_directories(${DEV_AUTH_MODULES_CLIENT_INC_FOLDER})
 
 add_executable({PROJECT_NAME} ${{PROJECT_NAME}_c_files} ${{PROJECT_NAME}_h_files})
 
-target_link_libraries({PROJECT_NAME} parson iothub_client digitaltwin_client prov_device_ll_client prov_mqtt_transport)
+target_link_libraries({PROJECT_NAME} parson iothub_client_mqtt_transport iothub_client_mqtt_ws_transport iothub_client digitaltwin_client prov_device_ll_client prov_mqtt_transport)
