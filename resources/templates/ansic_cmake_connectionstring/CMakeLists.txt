@@ -26,4 +26,4 @@ include_directories(${DIGITALTWIN_CLIENT_INC_FOLDER})
 
 add_executable({PROJECT_NAME} ${{PROJECT_NAME}_c_files} ${{PROJECT_NAME}_h_files})
 
-target_link_libraries({PROJECT_NAME} parson iothub_client digitaltwin_client)
+target_link_libraries({PROJECT_NAME} parson iothub_client_mqtt_transport iothub_client digitaltwin_client)
