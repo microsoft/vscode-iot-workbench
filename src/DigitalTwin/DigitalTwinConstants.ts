@@ -11,8 +11,6 @@ export class DigitalTwinFileNames {
   static readonly sampleInterfaceName = 'sample.interface.json';
   static readonly sampleCapabilityModelName = 'sample.capabilitymodel.json';
   static readonly schemaFolderName = 'schemas';
-  static readonly defaultInterfaceName = 'myInterface';
-  static readonly defaultCapabilityModelName = 'myCapabilityModel';
   static readonly etagCacheFileName = 'etagCache.json';
   static readonly devicemodelTemplateFolderName = 'devicemodel';
   static readonly projectTypeListFileName = 'projecttypelist.json';

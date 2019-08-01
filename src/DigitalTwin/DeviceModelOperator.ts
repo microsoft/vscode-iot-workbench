@@ -96,10 +96,12 @@ export class DeviceModelOperator {
     }
 
     const option: vscode.InputBoxOptions = {
-      value: DigitalTwinFileNames.defaultInterfaceName,
-      prompt: `Please input Interface name here.`,
+      placeHolder: `Please input Interface name here.`,
       ignoreFocusOut: true,
       validateInput: (interfaceName: string) => {
+        if (!interfaceName || interfaceName.length === 0) {
+          return `The Interface name can't be empty`;
+        }
         if (!DigitalTwinConstants.dtidSegmentRegex.test(interfaceName)) {
           return 'Interface name can only contain alphanumeric and underscore, and cannot start with number.';
         }
@@ -157,10 +159,12 @@ export class DeviceModelOperator {
     }
 
     const option: vscode.InputBoxOptions = {
-      value: DigitalTwinFileNames.defaultCapabilityModelName,
-      prompt: `Please input Capability Model name here:`,
+      placeHolder: `Please input Capability Model name here.`,
       ignoreFocusOut: true,
       validateInput: (capabilityModelName: string) => {
+        if (!capabilityModelName || capabilityModelName.length === 0) {
+          return `The Capability Model name can't be empty`;
+        }
         if (!DigitalTwinConstants.dtidSegmentRegex.test(capabilityModelName)) {
           return 'Capability Model name can only contain alphanumeric and underscore, and cannot start with number.';
         }
@@ -242,29 +246,13 @@ export class DeviceModelOperator {
     }
 
     // Open Company repository
-    let connectionString =
-        await CredentialStore.getCredential(ConfigKey.modelRepositoryKeyName);
-
+    const connectionString = await this.RetrieveModelRepoConnectionString();
     if (!connectionString) {
-      const option: vscode.InputBoxOptions = {
-        value: DigitalTwinConstants.repoConnectionStringTemplate,
-        prompt: `Please input the connection string to the ${
-            DigitalTwinConstants.productName} Model Repository:`,
-        ignoreFocusOut: true
-      };
-
-      const connStr = await vscode.window.showInputBox(option);
-
-      if (!connStr) {
-        return false;
-      } else {
-        connectionString = connStr as string;
-      }
+      return false;
     }
 
     const result =
         await DigitalTwinConnector.ConnectMetamodelRepository(connectionString);
-
     if (result) {
       await CredentialStore.setCredential(
           ConfigKey.modelRepositoryKeyName, connectionString);
@@ -594,32 +582,18 @@ export class DeviceModelOperator {
       }
     }
 
-    let connectionString =
-        await CredentialStore.getCredential(ConfigKey.modelRepositoryKeyName);
+    const connectionString = await this.RetrieveModelRepoConnectionString();
     if (!connectionString) {
-      const option: vscode.InputBoxOptions = {
-        value: DigitalTwinConstants.repoConnectionStringTemplate,
-        prompt: `Please input the connection string of your company's ${
-            DigitalTwinConstants.productName} Model Repository.`,
-        ignoreFocusOut: true
-      };
-
-      const connStr = await vscode.window.showInputBox(option);
-
-      if (!connStr) {
-        utils.channelShowAndAppendLine(
-            channel, `Company repository not specified, cancel submit.`);
-        return false;
-      } else {
-        connectionString = connStr as string;
-        const result =
-            await DigitalTwinConnector.ConnectMetamodelRepository(connStr);
-        if (!result) {
-          utils.channelShowAndAppendLine(
-              channel, `Company repository not specified, cancel submit.`);
-          return false;
-        }
-      }
+      utils.channelShowAndAppendLine(
+          channel, `Company repository not specified, cancel submit.`);
+      return false;
+    }
+    const result =
+        await DigitalTwinConnector.ConnectMetamodelRepository(connectionString);
+    if (!result) {
+      utils.channelShowAndAppendLine(
+          channel, `Failed to connect Company repository, cancel submit.`);
+      return false;
     }
 
     const dtMetamodelRepositoryClient =
@@ -650,6 +624,30 @@ export class DeviceModelOperator {
     utils.channelShowAndAppendLine(
         channel, `${DigitalTwinConstants.dtPrefix} All submitted.`);
     return true;
+  }
+
+  private async RetrieveModelRepoConnectionString(): Promise<string|null> {
+    let connectionString =
+        await CredentialStore.getCredential(ConfigKey.modelRepositoryKeyName);
+    if (!connectionString) {
+      const option: vscode.InputBoxOptions = {
+        placeHolder: DigitalTwinConstants.repoConnectionStringTemplate,
+        prompt: `Please input your company repository connection string.`,
+        ignoreFocusOut: true,
+        validateInput: (connectionString: string) => {
+          if (!connectionString || connectionString.length === 0) {
+            return 'The connection string can\'t be empty.';
+          }
+          return;
+        }
+      };
+
+      const connStr = await vscode.window.showInputBox(option);
+      if (connStr) {
+        connectionString = connStr;
+      }
+    }
+    return connectionString;
   }
 
   private async SubmitInterface(
