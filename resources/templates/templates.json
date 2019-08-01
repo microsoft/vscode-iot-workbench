@@ -160,6 +160,32 @@
             "language": "ansic",
             "tag": "digitaltwin",
             "connectionType": "SymmetricKey"
+        },
+        {
+            "platform": "",
+            "name": "CMake Project Simulator Using ANSI C Via DPS(Device Provisioning Service) symmetric key",
+            "description": "",
+            "detail": "Template for DigitalTwin Code Generator to generate ANSI C CMake Project in a container via DPS symmetric key.",
+            "path": "ansic_simulator_iotcsaskey",
+            "projectHostType": "container",
+            "boardId": "",
+            "type": "Simulator",
+            "language": "ansic",
+            "tag": "digitaltwin",
+            "connectionType": "SymmetricKey"
+        },
+        {
+            "platform": "",
+            "name": "CMake Project Simulartor Using ANSI C Via IoT Hub Device Connection String",
+            "description": "",
+            "detail": "Template for DigitalTwin Code Generator to generate ANSI C CMake Project in a container via IoT Hub device connection string.",
+            "path": "ansic_simulator_connectionstring",
+            "projectHostType": "contianer",
+            "boardId": "",
+            "type": "Simulator",
+            "language": "ansic",
+            "tag": "digitaltwin",
+            "connectionType": "DeviceConnectionString"
         }
     ]
 }
