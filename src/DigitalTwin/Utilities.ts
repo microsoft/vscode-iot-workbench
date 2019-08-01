@@ -209,6 +209,10 @@ export async function SaveCompanyRepoConnectionString(
       ConfigKey.modelRepositoryKeyName, connectionString);
 }
 
+export function GenerateDigitalTwinIdentifier(name: string): string {
+  return `urn:{your name}:${name}:1`;
+}
+
 /**
  * An interface for an object that iterates through a sequence of values.
  */

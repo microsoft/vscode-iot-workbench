@@ -1,5 +1,5 @@
 {
-  "@id": "urn:vscsample:myinterface:1",
+  "@id": "{DigitalTwinIdentifier}",
   "@type": "Interface",
   "displayName": "myinterface",
   "contents": [
