@@ -426,7 +426,18 @@ export class DigitalTwinMetaModelParser {
       }
     }
 
-    return id.split('/').pop();
+    if (id.startsWith('http://www.w3.org')) {
+      // RDF schema
+      return id.split('/').pop();
+    }
+    const ct = dtContext['@context']['@vocab'];
+    if (id.startsWith(ct)) {
+      // Abosolut path
+      return id.substr(ct.length);
+    } else {
+      // Relative path
+      return id;
+    }
   }
 
   isInternationalizationFromId(
