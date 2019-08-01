@@ -415,8 +415,7 @@ export class CodeGeneratorCore {
       prompt: `Please specify the project name:`,
       ignoreFocusOut: true,
       validateInput: (applicationName: string) => {
-        if (!/^([a-z0-9_]|[a-z0-9_][-a-z0-9_.]*[a-z0-9_])(\.ino)?$/i.test(
-                applicationName)) {
+        if (!/^[a-z0-9_][-a-z0-9_.]*[a-z0-9]$/i.test(applicationName)) {
           return 'Project name can only contain letters, numbers, "-" and ".", and cannot start or end with "-" or ".".';
         }
         return;

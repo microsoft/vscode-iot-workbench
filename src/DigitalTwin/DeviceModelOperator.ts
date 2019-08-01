@@ -100,38 +100,27 @@ export class DeviceModelOperator {
       prompt: `Please input Interface name here.`,
       ignoreFocusOut: true,
       validateInput: (interfaceName: string) => {
-        if (!interfaceName) {
-          return 'Please provide a valid Interface name.';
+        if (!DigitalTwinConstants.dtidSegmentRegex.test(interfaceName)) {
+          return 'Interface name can only contain alphanumeric and underscore, and cannot start with number.';
         }
-        if (!/\.interface\.json$/i.test(interfaceName)) {
-          interfaceName += DigitalTwinConstants.interfaceSuffix;
+        const interfaceFilename = path.join(
+            rootPath as string,
+            interfaceName + DigitalTwinConstants.interfaceSuffix);
+        if (fs.existsSync(interfaceFilename)) {
+          return `The interface file already exists in current folder.`;
         }
-
-        if (/^([a-z_]|[a-z_][-a-z0-9_.]*[a-z0-9_])(\.interface\.json)?$/i.test(
-                interfaceName)) {
-          const targetInterface = path.join(rootPath as string, interfaceName);
-          if (fs.existsSync(targetInterface)) {
-            return `The file with name ${
-                interfaceName} already exists in current folder.`;
-          }
-          return '';
-        }
-        return 'interface name can only contain alphanumeric and cannot start with number.';
+        return;
       }
     };
 
-    let interfaceFileName = await vscode.window.showInputBox(option);
+    const interfaceName = await vscode.window.showInputBox(option);
 
-    if (interfaceFileName === undefined) {
+    if (interfaceName === undefined) {
       return false;
-    } else {
-      interfaceFileName = interfaceFileName.trim();
-      if (!/\.interface\.json$/i.test(interfaceFileName)) {
-        interfaceFileName += DigitalTwinConstants.interfaceSuffix;
-      }
     }
-
-    const targetInterface = path.join(rootPath, interfaceFileName);
+    const dtid = dtUtils.GenerateDigitalTwinIdentifier(interfaceName);
+    const targetInterface = path.join(
+        rootPath, interfaceName + DigitalTwinConstants.interfaceSuffix);
 
     const interfaceTemplate = context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
@@ -139,7 +128,8 @@ export class DeviceModelOperator {
         DigitalTwinFileNames.sampleInterfaceName));
 
     try {
-      const content = fs.readFileSync(interfaceTemplate, 'utf8');
+      const content = fs.readFileSync(interfaceTemplate, 'utf8')
+                          .replace(DigitalTwinConstants.dtidPlaceholder, dtid);
       fs.writeFileSync(targetInterface, content);
     } catch (error) {
       throw new Error(
@@ -152,8 +142,8 @@ export class DeviceModelOperator {
     await vscode.window.showTextDocument(vscode.Uri.file(targetInterface));
 
     vscode.window.showInformationMessage(
-        `New ${DigitalTwinConstants.productName} Interface ${
-            interfaceFileName} was created successfully.`);
+        `New ${DigitalTwinConstants.productName} Interface '${
+            dtid}' was created successfully.`);
     return;
   }
 
@@ -171,38 +161,29 @@ export class DeviceModelOperator {
       prompt: `Please input Capability Model name here:`,
       ignoreFocusOut: true,
       validateInput: (capabilityModelName: string) => {
-        if (!capabilityModelName) {
-          return 'Please provide a valid Capability Model name.';
+        if (!DigitalTwinConstants.dtidSegmentRegex.test(capabilityModelName)) {
+          return 'Capability Model name can only contain alphanumeric and underscore, and cannot start with number.';
         }
-        if (!/\.capabilitymodel\.json$/i.test(capabilityModelName)) {
-          capabilityModelName += DigitalTwinConstants.capabilityModelSuffix;
+        const capabilityModelFilename = path.join(
+            rootPath as string,
+            capabilityModelName + DigitalTwinConstants.capabilityModelSuffix);
+        if (fs.existsSync(capabilityModelFilename)) {
+          return `The interface file already exists in current folder.`;
         }
-        if (/^([a-z_]|[a-z_][-a-z0-9_.]*[a-z0-9_])(\.capabilitymodel\.json)?$/i
-                .test(capabilityModelName)) {
-          const targetCapabilityModel =
-              path.join(rootPath as string, capabilityModelName);
-          if (fs.existsSync(targetCapabilityModel)) {
-            return `The file with name ${
-                capabilityModelName} already exists in current folder.`;
-          }
-          return '';
-        }
-        return 'Capability Model name can only contain alphanumeric and cannot start with number.';
+        return;
       }
     };
 
-    let capabilityModelFileName = await vscode.window.showInputBox(option);
+    const capabilityModelName = await vscode.window.showInputBox(option);
 
-    if (capabilityModelFileName === undefined) {
+    if (capabilityModelName === undefined) {
       return false;
-    } else {
-      capabilityModelFileName = capabilityModelFileName.trim();
-      if (!/\.capabilitymodel\.json$/i.test(capabilityModelFileName)) {
-        capabilityModelFileName += DigitalTwinConstants.capabilityModelSuffix;
-      }
     }
 
-    const targetCapabilityModel = path.join(rootPath, capabilityModelFileName);
+    const dtid = dtUtils.GenerateDigitalTwinIdentifier(capabilityModelName);
+    const targetCapabilityModel = path.join(
+        rootPath,
+        capabilityModelName + DigitalTwinConstants.capabilityModelSuffix);
 
     const capabilityModel = context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
@@ -210,7 +191,8 @@ export class DeviceModelOperator {
         DigitalTwinFileNames.sampleCapabilityModelName));
 
     try {
-      const content = fs.readFileSync(capabilityModel, 'utf8');
+      const content = fs.readFileSync(capabilityModel, 'utf8')
+                          .replace(DigitalTwinConstants.dtidPlaceholder, dtid);
       fs.writeFileSync(targetCapabilityModel, content);
     } catch (error) {
       throw new Error(`Creating ${
@@ -225,8 +207,8 @@ export class DeviceModelOperator {
         vscode.Uri.file(targetCapabilityModel));
 
     vscode.window.showInformationMessage(
-        `New ${DigitalTwinConstants.productName} Capability Model ${
-            capabilityModelFileName} created successfully.`);
+        `New ${DigitalTwinConstants.productName} Capability Model '${
+            dtid}' was created successfully.`);
     return;
   }
 

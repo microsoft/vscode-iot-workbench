@@ -31,6 +31,10 @@ export class DigitalTwinConstants {
   static readonly productName = 'IoT Plug and Play';
   static readonly codeGenCli = 'IoT Plug and Play CodeGen Cli';
   static readonly codeGenCliApp = 'DigitalTwinCodeGen';
+
+  static readonly dtidPlaceholder = '{DigitalTwinIdentifier}';
+
+  static readonly dtidSegmentRegex = new RegExp('^[a-zA-Z_][a-zA-Z0-9_]*$');
 }
 
 export class CodeGenConstants {

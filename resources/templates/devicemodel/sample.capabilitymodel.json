@@ -1,5 +1,5 @@
 {
-  "@id": "urn:vscsample:mycapabilitymodel:1",
+  "@id": "{DigitalTwinIdentifier}",
   "@type": "CapabilityModel",
   "displayName": "mycapabilitymodel",
   "implements": [
