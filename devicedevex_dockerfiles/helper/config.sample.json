@@ -1,0 +1,8 @@
+{
+    "image_name": "ubuntu_sdk:latest",
+    "dockerfile_path": ".",
+    "arg": {
+        "base_image": "ubuntu:18.04",
+        "c_sdk_version": "2019-04-11"
+    }
+}
