@@ -404,7 +404,8 @@ export class CodeGeneratorCore {
           return `The project name can't be empty.`;
         }
         if (!DigitalTwinConstants.codegenProjectNameRegex.test(projectName)) {
-          return `Project name can only contain ${DigitalTwinConstants.codegenProjectNameRegexDescription}.`;
+          return `Project name can only contain ${
+              DigitalTwinConstants.codegenProjectNameRegexDescription}.`;
         }
         return;
       }
