@@ -59,7 +59,7 @@ export class DigitalTwinConnectionStringBuilder {
   ValidateFormat(value: string, propertyName: string, regex: RegExp) {
     if (value) {
       if (!regex.test(value)) {
-        throw Error(
+        throw new Error(
             `The connection string is invalid for property ${propertyName}`);
       }
     }
@@ -68,7 +68,7 @@ export class DigitalTwinConnectionStringBuilder {
 
   Parse(dtConnectionString: string): void {
     if (!dtConnectionString) {
-      throw Error('The connection string should not be empty');
+      throw new Error('The connection string should not be empty');
     }
 
     const items: {[propertyName: string]: string;} = {};
@@ -77,14 +77,14 @@ export class DigitalTwinConnectionStringBuilder {
     pairs.forEach(value => {
       const index = value.indexOf(constants.ValuePairSeparator);
       if (index <= 0) {
-        throw Error(
+        throw new Error(
             `The format of the connection string is not valid: ${value}`);
       }
 
       const propertyName = value.substr(0, index);
       const propertyValue = value.substr(index + 1, value.length - index - 1);
       if (!propertyName || !propertyValue) {
-        throw Error(
+        throw new Error(
             `The format of the connection string is not valid: ${value}`);
       }
       items[propertyName] = propertyValue;
@@ -103,9 +103,10 @@ export class DigitalTwinConnectionStringBuilder {
     }
 
     if (!this.hostName) {
-      throw Error('Unable to find the host name in the connection string.');
+      throw new Error('Unable to find the host name in the connection string.');
     } else if (!this.repositoryId) {
-      throw Error('Unable to find the repositoryId in the connection string.');
+      throw new Error(
+          'Unable to find the repositoryId in the connection string.');
     }
 
     this.Validate();

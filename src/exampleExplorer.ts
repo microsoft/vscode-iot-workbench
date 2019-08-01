@@ -224,8 +224,8 @@ export class ExampleExplorer {
     });
 
     if (!boardSelection) {
-      telemetryContext.properties.errorMessage = 'Board selection canceled.';
-      telemetryContext.properties.result = 'Canceled';
+      telemetryContext.properties.errorMessage = 'Board selection cancelled.';
+      telemetryContext.properties.result = 'Cancelled';
       return false;
     } else if (boardSelection.id === 'no_device') {
       await utils.TakeNoDeviceSurvey(telemetryContext);
@@ -272,7 +272,7 @@ export class ExampleExplorer {
       if (res) {
         vscode.window.showInformationMessage('Example load successfully.');
       } else {
-        vscode.window.showWarningMessage('Example load canceled.');
+        vscode.window.showWarningMessage('Example load cancelled.');
       }
     } catch (error) {
       vscode.window.showErrorMessage(

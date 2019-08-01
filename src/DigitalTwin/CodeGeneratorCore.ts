@@ -140,8 +140,8 @@ export class CodeGeneratorCore {
 
         if (!regenSelection) {
           telemetryContext.properties.errorMessage =
-              'Re-generate code selection canceled.';
-          telemetryContext.properties.result = 'Canceled';
+              'Re-generate code selection cancelled.';
+          telemetryContext.properties.result = 'Cancelled';
           return false;
         }
 
@@ -181,8 +181,9 @@ export class CodeGeneratorCore {
         {ignoreFocusOut: true, placeHolder: 'Please select a language:'});
 
     if (!languageSelection) {
-      telemetryContext.properties.errorMessage = 'Language selection canceled.';
-      telemetryContext.properties.result = 'Canceled';
+      telemetryContext.properties.errorMessage =
+          'Language selection cancelled.';
+      telemetryContext.properties.result = 'Cancelled';
       return false;
     }
 
@@ -266,34 +267,36 @@ export class CodeGeneratorCore {
             // Get the connection string of the IoT Plug and Play repo
             connectionString = await CredentialStore.getCredential(
                 ConfigKey.modelRepositoryKeyName);
-
-            if (!connectionString) {
-              const option: vscode.InputBoxOptions = {
-                value: DigitalTwinConstants.repoConnectionStringTemplate,
-                prompt:
-                    `Please input the connection string to access the company repository. Press Esc to use public repository only`,
-                ignoreFocusOut: true
-              };
-
-              const connStr = await vscode.window.showInputBox(option);
-              if (connStr) {
-                connectionString = connStr as string;
-                // Save connection string info
-                dtUtils.SaveCompanyRepoConnectionString(connectionString);
-              }
-              credentialChecked = true;
-            }
           }
 
-          const result = await this.DownloadInterfaceFile(
-              schema, rootPath, connectionString, channel);
-          if (!result) {
-            const message = `Unable to get the Interface with Id ${
-                schema} online. Please make sure the file exists in server.`;
-            utils.channelShowAndAppendLine(
-                channel, `${DigitalTwinConstants.dtPrefix} ${message}`);
-            vscode.window.showWarningMessage(message);
-            return false;
+          if (connectionString) {
+            // Company Model Repo connections already set
+            credentialChecked = true;
+            // Try company repo first
+            if (await this.DownloadInterfaceFile(
+                    schema, rootPath, connectionString, channel)) {
+              // Downloaded from company repo.
+              continue;
+            }
+            // Then try public repo
+            if (await this.DownloadInterfaceFile(
+                    schema, rootPath, null, channel)) {
+              // Downloaded from company repo.
+              continue;
+            }
+            // Unknow interface, throw error
+            throw new Error(`Can't find the interface ${schema}.`);
+          } else {
+            // Only can try public repo
+            if (await this.DownloadInterfaceFile(
+                    schema, rootPath, null, channel)) {
+              // Downloaded from public repo.
+              continue;
+            }
+            // Throw error and lead user to set the company model repo
+            // connection string
+            throw new Error(`Can't find the interface: ${
+                schema} in local folder, use 'IoT Plug and Play: Open Model Repository' command to connect to the company repository, then try generating the device code again.`);
           }
         }
       }
@@ -375,8 +378,8 @@ export class CodeGeneratorCore {
 
     if (!deviceConnectionSelection) {
       telemetryContext.properties.errorMessage =
-          'Connection type selection canceled.';
-      telemetryContext.properties.result = 'Canceled';
+          'Connection type selection cancelled.';
+      telemetryContext.properties.result = 'Cancelled';
       return;
     }
 
@@ -476,8 +479,8 @@ export class CodeGeneratorCore {
 
     if (!projectTypeSelection) {
       telemetryContext.properties.errorMessage =
-          'Project type selection canceled.';
-      telemetryContext.properties.result = 'Canceled';
+          'Project type selection cancelled.';
+      telemetryContext.properties.result = 'Cancelled';
       return;
     }
 
@@ -522,8 +525,8 @@ export class CodeGeneratorCore {
 
     if (!fileSelection) {
       telemetryContext.properties.errorMessage =
-          'Capability Model file selection canceled.';
-      telemetryContext.properties.result = 'Canceled';
+          'Capability Model file selection cancelled.';
+      telemetryContext.properties.result = 'Cancelled';
       return;
     }
 
@@ -536,12 +539,12 @@ export class CodeGeneratorCore {
     const fileName =
         utils.generateInterfaceFileNameFromUrnId(urnId, targetFolder);
 
-    // Try to download Interface file from private repo
+    // Try to download Interface file from company repo
     const dtMetamodelRepositoryClient =
         new DigitalTwinMetamodelRepositoryClient();
     await dtMetamodelRepositoryClient.initialize(connectionString);
 
-    // Try to download Interface file from private repo
+    // Try to download Interface file from company repo
     if (connectionString) {
       try {
         const builder = DigitalTwinConnectionStringBuilder.Create(
@@ -554,40 +557,41 @@ export class CodeGeneratorCore {
           fs.writeFileSync(
               path.join(targetFolder, fileName),
               JSON.stringify(fileMetaData.content, null, 4));
-          const message =
-              `${DigitalTwinConstants.dtPrefix} Download Interface with id ${
-                  urnId}, name: ${fileName} into ${targetFolder} completed.`;
+          const message = `${DigitalTwinConstants.dtPrefix} Interface '${
+              urnId}' (${
+              fileName}) has been successfully downloaded from Company repository.`;
           utils.channelShowAndAppendLine(channel, message);
           return true;
         }
       } catch (error) {
         // Do nothing. Try to download the Interface from public repo
         const message =
-            `${DigitalTwinConstants.dtPrefix} Unable to get Interface with id ${
-                urnId} from Company repository, try public repository instead.`;
+            `${DigitalTwinConstants.dtPrefix} Failed to download interface '${
+                urnId}' from Company repository. errorcode: ${error.code}`;
         utils.channelShowAndAppendLine(channel, message);
       }
-    }
-    // Try to download Interface file from public repo
-    try {
-      const fileMetaData = await dtMetamodelRepositoryClient.GetInterfaceAsync(
-          urnId, undefined, true);
-      if (fileMetaData) {
-        fs.writeFileSync(
-            path.join(targetFolder, fileName),
-            JSON.stringify(fileMetaData.content, null, 4));
+    } else {
+      // Try to download Interface file from public repo
+      try {
+        const fileMetaData =
+            await dtMetamodelRepositoryClient.GetInterfaceAsync(
+                urnId, undefined, true);
+        if (fileMetaData) {
+          fs.writeFileSync(
+              path.join(targetFolder, fileName),
+              JSON.stringify(fileMetaData.content, null, 4));
+          const message = `${DigitalTwinConstants.dtPrefix} Interface '${
+              urnId}' (${
+              fileName}) has been successfully downloaded from Public repository.`;
+          utils.channelShowAndAppendLine(channel, message);
+          return true;
+        }
+      } catch (error) {
         const message =
-            `${DigitalTwinConstants.dtPrefix} Download Interface with id ${
-                urnId}, name: ${fileName} from public repository into ${
-                targetFolder} completed.`;
+            `${DigitalTwinConstants.dtPrefix} Failed to download interface '${
+                urnId}' from Public repository. errorcode: ${error.code}`;
         utils.channelShowAndAppendLine(channel, message);
-        return true;
       }
-    } catch (error) {
-      const message =
-          `${DigitalTwinConstants.dtPrefix} Unable to get Interface with id ${
-              urnId} from public repository. errorcode: ${error.code}`;
-      utils.channelShowAndAppendLine(channel, message);
     }
     return false;
   }

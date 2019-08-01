@@ -666,7 +666,7 @@ export class DeviceModelOperator {
     }
 
     utils.channelShowAndAppendLine(
-        channel, `${DigitalTwinConstants.dtPrefix} submit all completed.`);
+        channel, `${DigitalTwinConstants.dtPrefix} All submitted.`);
     return true;
   }
 
