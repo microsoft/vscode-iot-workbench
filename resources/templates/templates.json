@@ -98,7 +98,7 @@
         },
         {
             "platform": "",
-            "name": "Visual Studio Project Using ANSI C Via DPS(Device Provision Service) symmetric key",
+            "name": "Visual Studio Project Using ANSI C Via DPS(Device Provisioning Service) symmetric key",
             "description": "",
             "detail": "Template for DigitalTwin Code Generator to generate ANSI C Visual Studio Project via DPS symmetric key.",
             "path": "ansic_vs_iotcsaskey",
@@ -124,7 +124,7 @@
         },
         {
             "platform": "",
-            "name": "CMake Project Using ANSI C Via DPS(Device Provision Service) symmetric key",
+            "name": "CMake Project Using ANSI C Via DPS(Device Provisioning Service) symmetric key",
             "description": "",
             "detail": "Template for DigitalTwin Code Generator to generate ANSI C CMake Project via DPS symmetric key.",
             "path": "ansic_cmake_iotcsaskey",
@@ -150,7 +150,7 @@
         },
         {
             "platform": "",
-            "name": "IoT DevKit Project Using ANSI C Via DPS(Device Provision Service) symmetric key",
+            "name": "IoT DevKit Project Using ANSI C Via DPS(Device Provisioning Service) symmetric key",
             "description": "",
             "detail": "Template for DigitalTwin Code Generator to generate ANSI C IoT Dev Project via DPS symmetric key.",
             "path": "ansic_devkit_iotcsaskey",

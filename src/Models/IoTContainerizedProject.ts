@@ -394,7 +394,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
         if (res === false) {
           // TODO: Remove this function and implement with sdk in FileUtility
           fs.removeSync(this.projectRootPath);
-          vscode.window.showWarningMessage('Project initialize canceled.');
+          vscode.window.showWarningMessage('Project initialize cancelled.');
           return false;
         }
       }

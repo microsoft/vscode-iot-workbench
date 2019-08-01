@@ -62,8 +62,8 @@ export class ProjectInitializer {
             const projectPath = await this.GenerateProjectFolder();
             if (!projectPath) {
               telemetryContext.properties.errorMessage =
-                  'Project name input canceled.';
-              telemetryContext.properties.result = 'Canceled';
+                  'Project name input cancelled.';
+              telemetryContext.properties.result = 'Cancelled';
               return;
             } else {
               telemetryContext.properties.projectPath = projectPath;
@@ -73,8 +73,8 @@ export class ProjectInitializer {
             const platformSelection = await this.SelectPlatform(context);
             if (!platformSelection) {
               telemetryContext.properties.errorMessage =
-                  'Platform selection canceled.';
-              telemetryContext.properties.result = 'Canceled';
+                  'Platform selection cancelled.';
+              telemetryContext.properties.result = 'Cancelled';
               return;
             } else {
               telemetryContext.properties.platform = platformSelection.label;
@@ -88,8 +88,8 @@ export class ProjectInitializer {
 
             if (!template) {
               telemetryContext.properties.errorMessage =
-                  'Project template selection canceled.';
-              telemetryContext.properties.result = 'Canceled';
+                  'Project template selection cancelled.';
+              telemetryContext.properties.result = 'Cancelled';
               return;
             } else {
               telemetryContext.properties.template = template.name;
