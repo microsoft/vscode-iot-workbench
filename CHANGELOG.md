@@ -10,7 +10,7 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 
 - Support the new model repository connection string.
 - Fix the command request payload format issue that aligned with IoT platform and Central.
-- Change the code flow: throw error if interface can't be found in local folder and public repository, user should use **IoT Plug and Play: Open Model Repository** command to connect to company repository then re-run the code generation command.
+- Change the codegen flow: throw error if the company repository hasn't be set and interface can't be found in local folder and public repository, user need run **IoT Plug and Play: Open Model Repository** command to connect to company repository then re-run the code generation command.
 - Fix the search function in Model Repository UI.
 - Change the naming 'Organization Reposition' to 'Company Repository'.
 - Invalid model repository connection string will not be saved.
