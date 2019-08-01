@@ -395,20 +395,6 @@ export class CodeGeneratorCore {
   }
 
   async GetCodeGenProjectName(rootPath: string): Promise<string|undefined> {
-    let counter = 0;
-    const appName = constants.defaultAppName;
-    let candidateName = appName;
-    while (true) {
-      const appPath = path.join(rootPath, candidateName);
-      const appPathExists = fs.isDirectorySync(appPath);
-      if (!appPathExists) {
-        break;
-      }
-
-      counter++;
-      candidateName = `${appName}_${counter}`;
-    }
-
     // select the project name for code gen
     const codeGenProjectName = await vscode.window.showInputBox({
       placeHolder: 'Please input the project name here.',
@@ -417,8 +403,8 @@ export class CodeGeneratorCore {
         if (!projectName || projectName.length === 0) {
           return `The project name can't be empty.`;
         }
-        if (!/^[a-z0-9_][-a-z0-9_.]*[a-z0-9]$/i.test(projectName)) {
-          return 'Project name can only contain letters, numbers, "-" and ".", and cannot start or end with "-" or ".".';
+        if (!DigitalTwinConstants.codegenProjectNameRegex.test(projectName)) {
+          return `Project name can only contain ${DigitalTwinConstants.codegenProjectNameRegexDescription}.`;
         }
         return;
       }

@@ -103,7 +103,7 @@ export class DeviceModelOperator {
           return `The Interface name can't be empty`;
         }
         if (!DigitalTwinConstants.dtidSegmentRegex.test(interfaceName)) {
-          return 'Interface name can only contain alphanumeric and underscore, and cannot start with number.';
+          return `Interface name can only contain ${DigitalTwinConstants.dtidSegmentRegexDescription}.`;
         }
         const interfaceFilename = path.join(
             rootPath as string,
@@ -166,7 +166,7 @@ export class DeviceModelOperator {
           return `The Capability Model name can't be empty`;
         }
         if (!DigitalTwinConstants.dtidSegmentRegex.test(capabilityModelName)) {
-          return 'Capability Model name can only contain alphanumeric and underscore, and cannot start with number.';
+          return `Capability Model name can only contain ${DigitalTwinConstants.dtidSegmentRegexDescription}.`;
         }
         const capabilityModelFilename = path.join(
             rootPath as string,
@@ -636,7 +636,7 @@ export class DeviceModelOperator {
         ignoreFocusOut: true,
         validateInput: (connectionString: string) => {
           if (!connectionString || connectionString.length === 0) {
-            return 'The connection string can\'t be empty.';
+            return `The connection string can't be empty.`;
           }
           return;
         }
