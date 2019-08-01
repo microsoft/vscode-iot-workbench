@@ -5,7 +5,11 @@
   "implements": [
     {
       "schema": "urn:azureiot:DeviceManagement:DeviceInformation:1",
-      "name": "deviceinfo"
+      "name": "deviceInfo"
+    },
+    {
+      "schema": "urn:azureiot:ModelDiscovery:ModelDefinition:1",
+      "name": "modelDefinition"
     }
   ],
   "@context": "http://azureiot.com/v1/contexts/CapabilityModel.json"
