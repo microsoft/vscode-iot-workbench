@@ -33,6 +33,10 @@ export class DigitalTwinConstants {
   static readonly dtidPlaceholder = '{DigitalTwinIdentifier}';
 
   static readonly dtidSegmentRegex = new RegExp('^[a-zA-Z_][a-zA-Z0-9_]*$');
+  static readonly dtidSegmentRegexDescription = 'alphanumeric and underscore, and cannot start with number';
+
+  static readonly codegenProjectNameRegex = new RegExp('^[a-zA-Z_][-a-zA-Z0-9_]*$');
+  static readonly codegenProjectNameRegexDescription = 'alphanumeric, underscore and dash character, and cannot start with number and dash character';
 }
 
 export class CodeGenConstants {
