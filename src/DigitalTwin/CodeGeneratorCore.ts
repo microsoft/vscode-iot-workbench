@@ -409,13 +409,15 @@ export class CodeGeneratorCore {
       candidateName = `${appName}_${counter}`;
     }
 
-    // select the application name for code gen
+    // select the project name for code gen
     const codeGenProjectName = await vscode.window.showInputBox({
-      placeHolder: 'Project name?',
-      prompt: `Please specify the project name:`,
+      placeHolder: 'Please input the project name here.',
       ignoreFocusOut: true,
-      validateInput: (applicationName: string) => {
-        if (!/^[a-z0-9_][-a-z0-9_.]*[a-z0-9]$/i.test(applicationName)) {
+      validateInput: (projectName: string) => {
+        if (!projectName || projectName.length === 0) {
+          return `The project name can't be empty.`;
+        }
+        if (!/^[a-z0-9_][-a-z0-9_.]*[a-z0-9]$/i.test(projectName)) {
           return 'Project name can only contain letters, numbers, "-" and ".", and cannot start or end with "-" or ".".';
         }
         return;
