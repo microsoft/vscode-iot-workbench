@@ -448,7 +448,7 @@ export class CodeGeneratorCore {
 
     const result = projectTypeListJson.projectType.filter(
         (projectType: PnpProjectTemplateType) => {
-          return projectType.language === language;
+          return (projectType.enabled && projectType.language === language);
         });
 
     const projectTypeList: vscode.QuickPickItem[] = [];
