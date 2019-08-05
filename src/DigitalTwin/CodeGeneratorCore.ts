@@ -200,6 +200,11 @@ export class CodeGeneratorCore {
         languageSelection.label, context, telemetryContext);
     if (codeGenProjectType === undefined) {
       return false;
+    } else if (codeGenProjectType === CodeGenProjectType.Simulator) {
+      const res = await RemoteExtension.checkRemoteExtension(channel);
+      if (!res) {
+        return false;
+      }
     }
 
     // Step 5: Select device connection string type
@@ -319,17 +324,6 @@ export class CodeGeneratorCore {
     // We only support Ansi C
     const codeGenFactory =
         new AnsiCCodeGeneratorFactory(context, channel, telemetryContext);
-
-    if (codeGenExecutionInfo.codeGenProjectType ===
-        CodeGenProjectType.Simulator) {
-      const result = await RemoteExtension.checkRemoteExtension();
-      if (!result) {
-        const message = `Remote extension is not available. Please install ${
-            DependentExtensions.remote} first.`;
-        utils.channelShowAndAppendLine(channel, message);
-        return false;
-      }
-    }
 
     const codeGenerator = codeGenFactory.CreateCodeGeneratorImpl(
         codeGenExecutionInfo.codeGenProjectType,

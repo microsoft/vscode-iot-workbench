@@ -105,6 +105,18 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     return true;
   }
 
+  async compile(): Promise<boolean> {
+    const res = super.compile();
+    if (res) {
+      const message = `Successfully compile ${
+          this.name} device code. \rNow you can use the command 'Azure IoT Device Workbench: Upload Device Code' to upload your compiled executable file to your target device.`;
+      channelShowAndAppendLine(this.channel, message);
+      vscode.window.showInformationMessage(message);
+    }
+
+    return res;
+  }
+
   async configDeviceSettings(): Promise<boolean> {
     const configSelectionItems: vscode.QuickPickItem[] = [{
       label: 'Configure SSH to target device',

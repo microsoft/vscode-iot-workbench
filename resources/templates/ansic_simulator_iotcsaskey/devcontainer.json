@@ -1,6 +1,6 @@
 {
-  "image": "rpi64_iothub",
-  "name": "rpi64_iothub_container",
+  "image": "ansic_simulator_iotcsaskey",
+  "name": "ansic_simulator_iotcsaskey_container",
   "dockerFile": "Dockerfile",
   "extensions": [
     "ms-vscode.cpptools",

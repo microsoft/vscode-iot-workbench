@@ -171,11 +171,6 @@ export abstract class ContainerDeviceBase implements Device {
       return false;
     }
 
-    const message = `Successfully compile ${
-        this.name} device code. \rNow you can use the command 'Azure IoT Device Workbench: Upload Device Code' to upload your compiled executable file to your target device.`;
-    channelShowAndAppendLine(this.channel, message);
-    vscode.window.showInformationMessage(message);
-
     return true;
   }
 

@@ -242,13 +242,10 @@ export async function askAndOpenInRemote(
   if (result === DialogResponses.yes) {
     telemetryContext.properties.errorMessage =
         `${operation} Operation failed and user opens project in container.`;
-    const res = await RemoteExtension.checkRemoteExtension();
+    const res = await RemoteExtension.checkRemoteExtension(channel);
     if (!res) {
       telemetryContext.properties.errorMessage =
           `${operation} Operation failed on installing Remote Extension.`;
-      const message = `Remote extension is not available. Please install ${
-          DependentExtensions.remote} first.`;
-      channelShowAndAppendLine(channel, message);
       return false;
     }
     await vscode.commands.executeCommand('openindocker.reopenInContainer');

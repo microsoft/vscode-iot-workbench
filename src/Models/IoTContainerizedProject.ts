@@ -451,13 +451,6 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
   }
 
   async checkPrerequisites(): Promise<boolean> {
-    const res = await RemoteExtension.checkRemoteExtension();
-    if (!res) {
-      const message = `Remote extension is not available. Please install ${
-          DependentExtensions.remote} first.`;
-      channelShowAndAppendLine(this.channel, message);
-      return false;
-    }
-    return true;
+    return await RemoteExtension.checkRemoteExtension(this.channel);
   }
 }
