@@ -17,7 +17,7 @@ RUN groupadd -o -g $(stat -c "%g" /work) "builder" && \
 USER builder
 
 WORKDIR /work
-RUN git clone https://${github_username}:${github_token}@${c_sdk_repo} --recursive -b ${c_sdk_version}
+RUN git clone https://${github_username}:${github_token}@${c_sdk_repo} --recursive -b ${c_sdk_version} azure-iot-sdk-c
 RUN cd azure-iot-sdk-c && \
     mkdir cmake && \
     cd cmake && \
