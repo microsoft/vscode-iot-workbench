@@ -45,4 +45,5 @@ fi
 echo "Push docker image $new_docker_image to $ACR_domain..."
 docker tag $docker_image $new_docker_image
 docker push $new_docker_image
-# docker rmi $new_docker_image
+docker rmi $docker_image
+docker rmi $new_docker_image

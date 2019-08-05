@@ -171,15 +171,13 @@ export class AzureConfigFileHandler {
 
   async appendComponent(type: ScaffoldType, component: AzureComponentConfig) {
     try {
-      const scaffoldType = ScaffoldType.Local;
       const azureConfigContent =
           await FileUtility.readFile(type, this.configFilePath, 'utf8');
       const azureConfigs =
           JSON.parse(azureConfigContent as string) as AzureConfigs;
       azureConfigs.componentConfigs.push(component);
       await FileUtility.writeFile(
-          scaffoldType, this.configFilePath,
-          JSON.stringify(azureConfigs, null, 4));
+          type, this.configFilePath, JSON.stringify(azureConfigs, null, 4));
       return azureConfigs;
     } catch (error) {
       throw new Error('Invalid azure components config file.');

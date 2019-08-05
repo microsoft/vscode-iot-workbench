@@ -1,20 +1,23 @@
 ARG base_image=ubuntu:18.04
 FROM ${base_image}
-ARG c_sdk_version=2019-04-11
+ARG c_sdk_repo=github.com/Azure/azure-iot-sdk-c-pnp
+ARG c_sdk_version=public-preview-utopia
+ARG github_username=default-username
+ARG github_token=default-token
 
 RUN apt-get update && \
     apt-get install -y git cmake build-essential curl libcurl4-openssl-dev libssl-dev uuid-dev
 
-RUN mkdir /workdir && \
-    chown -R 1000:1000 /workdir
+RUN mkdir /work && \
+    chown -R 1000:1000 /work
 
 # setup new user builder so that we don't run it all as root
-RUN groupadd -o -g $(stat -c "%g" /workdir) "builder" && \
-    useradd -N -g $(stat -c "%g" /workdir) -m -o -u $(stat -c "%u" /workdir) -p builder "builder"
+RUN groupadd -o -g $(stat -c "%g" /work) "builder" && \
+    useradd -N -g $(stat -c "%g" /work) -m -o -u $(stat -c "%u" /work) -p builder "builder"
 USER builder
 
-WORKDIR /workdir
-RUN git clone https://github.com/azure/azure-iot-sdk-c.git -b ${c_sdk_version} --recursive
+WORKDIR /work
+RUN git clone https://${github_username}:${github_token}@${c_sdk_repo} --recursive -b ${c_sdk_version}
 RUN cd azure-iot-sdk-c && \
     mkdir cmake && \
     cd cmake && \
