@@ -22,6 +22,8 @@ install:
 - npm install
 
 script:
+- jq --version
+- if [[ "$TRAVIS_TAG =~ $ISPRODTAG" ]]; then jq '.codeGenConfigUrl = "https://aka.ms/iot-codegen-cli-for-workbench"' package.json > package_tmp.json && mv package_tmp.json package.json ; fi
 - tsc --version
 - gts --version
 - gts check
