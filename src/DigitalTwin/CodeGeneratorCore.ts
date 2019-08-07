@@ -285,7 +285,7 @@ export class CodeGeneratorCore {
               continue;
             }
             // Unknow interface, throw error
-            throw Error(`Can't find the interface ${schema}.`);
+            throw new Error(`Can't find the interface ${schema}.`);
           } else {
             // Only can try public repo
             if (await this.DownloadInterfaceFile(
@@ -295,7 +295,7 @@ export class CodeGeneratorCore {
             }
             // Throw error and lead user to set the company model repo
             // connection string
-            throw Error(`Can't find the interface: ${
+            throw new Error(`Can't find the interface: ${
                 schema} in local folder, use 'IoT Plug and Play: Open Model Repository' command to connect to the company repository, then try generating the device code again.`);
           }
         }
@@ -395,29 +395,17 @@ export class CodeGeneratorCore {
   }
 
   async GetCodeGenProjectName(rootPath: string): Promise<string|undefined> {
-    let counter = 0;
-    const appName = constants.defaultAppName;
-    let candidateName = appName;
-    while (true) {
-      const appPath = path.join(rootPath, candidateName);
-      const appPathExists = fs.isDirectorySync(appPath);
-      if (!appPathExists) {
-        break;
-      }
-
-      counter++;
-      candidateName = `${appName}_${counter}`;
-    }
-
-    // select the application name for code gen
+    // select the project name for code gen
     const codeGenProjectName = await vscode.window.showInputBox({
-      placeHolder: 'Project name?',
-      prompt: `Please specify the project name:`,
+      placeHolder: 'Please input the project name here.',
       ignoreFocusOut: true,
-      validateInput: (applicationName: string) => {
-        if (!/^([a-z0-9_]|[a-z0-9_][-a-z0-9_.]*[a-z0-9_])(\.ino)?$/i.test(
-                applicationName)) {
-          return 'Project name can only contain letters, numbers, "-" and ".", and cannot start or end with "-" or ".".';
+      validateInput: (projectName: string) => {
+        if (!projectName || projectName.length === 0) {
+          return `The project name can't be empty.`;
+        }
+        if (!DigitalTwinConstants.codegenProjectNameRegex.test(projectName)) {
+          return `Project name can only contain ${
+              DigitalTwinConstants.codegenProjectNameRegexDescription}.`;
         }
         return;
       }
@@ -460,7 +448,7 @@ export class CodeGeneratorCore {
 
     const result = projectTypeListJson.projectType.filter(
         (projectType: PnpProjectTemplateType) => {
-          return projectType.language === language;
+          return (projectType.enabled && projectType.language === language);
         });
 
     const projectTypeList: vscode.QuickPickItem[] = [];

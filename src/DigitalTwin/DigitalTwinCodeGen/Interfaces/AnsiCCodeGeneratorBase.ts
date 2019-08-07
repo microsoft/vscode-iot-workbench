@@ -36,7 +36,13 @@ export abstract class AnsiCCodeGeneratorBase implements CodeGenerator {
 
     let message = `${DigitalTwinConstants.dtPrefix} Scaffold code stub.`;
     utils.channelShowAndAppendLine(this.channel, message);
-    await utils.runCommand(command, [], cmdPath, this.channel);
+    try {
+      await utils.runCommand(command, [], cmdPath, this.channel);
+    } catch {
+      message = `${DigitalTwinConstants.dtPrefix} Scaffold code stub failed.`;
+      utils.channelShowAndAppendLine(this.channel, message);
+      return false;
+    }
     message = `${DigitalTwinConstants.dtPrefix} Scaffold code stub completed.`;
     utils.channelShowAndAppendLine(this.channel, message);
     return true;
