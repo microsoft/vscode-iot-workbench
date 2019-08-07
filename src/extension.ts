@@ -715,8 +715,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
         return telemetryModule.callWithTelemetry(
             EventNames.pnpGetInterfacesEvent, outputChannel, true, context,
-            deviceModelOperator.GetInterfaces, {}, publicRepository,
-            searchString, pageSize, continueToken);
+            deviceModelOperator.GetInterfaces.bind(deviceModelOperator), {},
+            publicRepository, searchString, pageSize, continueToken);
       });
 
   vscode.commands.registerCommand(
@@ -732,8 +732,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
         return telemetryModule.callWithTelemetry(
             EventNames.pnpGetCapabilityModelsEvent, outputChannel, true,
-            context, deviceModelOperator.GetCapabilityModels, {},
-            publicRepository, searchString, pageSize, continueToken);
+            context,
+            deviceModelOperator.GetCapabilityModels.bind(deviceModelOperator),
+            {}, publicRepository, searchString, pageSize, continueToken);
       });
 
   vscode.commands.registerCommand(
@@ -747,8 +748,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
         telemetryModule.callWithTelemetry(
             EventNames.pnpDeleteModelsEvent, outputChannel, true, context,
-            deviceModelOperator.DeleteMetamodelFiles, {}, interfaceIds,
-            metaModelValue);
+            deviceModelOperator.DeleteMetamodelFiles.bind(deviceModelOperator),
+            {}, interfaceIds, metaModelValue);
       });
 
   vscode.commands.registerCommand(
@@ -779,7 +780,8 @@ export async function activate(context: vscode.ExtensionContext) {
         }
         telemetryModule.callWithTelemetry(
             EventNames.pnpConnectModelRepoEvent, outputChannel, true, context,
-            deviceModelOperator.ConnectModelRepository);
+            deviceModelOperator.ConnectModelRepository.bind(
+                deviceModelOperator));
       }));
 
   context.subscriptions.push(vscode.commands.registerCommand(
@@ -791,7 +793,7 @@ export async function activate(context: vscode.ExtensionContext) {
         }
         telemetryModule.callWithTelemetry(
             EventNames.pnpConnectModelRepoEvent, outputChannel, true, context,
-            deviceModelOperator.Disconnect);
+            deviceModelOperator.Disconnect.bind(deviceModelOperator));
       }));
 
   context.subscriptions.push(vscode.commands.registerCommand(

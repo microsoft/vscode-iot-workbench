@@ -2,36 +2,13 @@
 
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
 
-## Version 0.10.9
+## Version 0.10.10
 
-- Release date: July 25, 2019
-
-### Fixed
-
-- User can submit interface/capabilityModel with a generic json file name (ending with *.json*).
-
-  **NOTE**: We don't force interface/capabilityModel file name suffix to be *interface.json* / *capabilityModel.json* in submit operation, but the DTDL IntelliSense will not work if the model file nane is not ended with *interface.json* / *capabilityModel.json*.
-
-- Fix issues that IntelliSense doesn't work for Enum/Unit/Schemas authoring.
-- Fix naming conflict issue for InterfaceInstance in capabilityModel/implements.
+- Release date: August 4, 2019
 
 ### Added
 
-- Support generating PnP device code from DCM which is exported from IoT Central.
-- Support generating PnP device code for datetime/date/time/duration schema.
-- Adjust commamd payload processing to align with cloud side contract.
-- Codegen doesn't overwrite user source file (e.g. main.c, device_impl.c) when re-generate PnP device Code.
-- Refresh language server to support language features in [latest DTDL](http://aka.ms/dtdl):
-  - Support unified context file (IoTModel.json) to align with IoT Central Model definition.
-  - Support IntelliSense for localizable properties (e.g. comment, displayName, description).
-
-## Version 0.10.8
-
-- Release date: July 18, 2019
-
-### Fixed
-
-- Improved the experience for generating code from Plug & Play model files.
+Something great is going to be happened, coming soon :)
 
 ## Version 0.3.1
 

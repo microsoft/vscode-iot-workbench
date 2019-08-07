@@ -3,7 +3,6 @@
 
 'use strict';
 
-import * as vscode from 'vscode';
 import * as request from 'request-promise';
 import {SearchResults} from './DataContracts/SearchResults';
 import {MetaModelType, SearchOptions, MetaModelUpsertRequest} from './DataContracts/DigitalTwinContext';
@@ -13,7 +12,7 @@ import {ConfigKey} from '../../constants';
 import {GetModelResult} from './DataContracts/DigitalTwinModel';
 import {ConfigHandler} from '../../configHandler';
 import {DigitalTwinConstants} from '../DigitalTwinConstants';
-import {CredentialStore} from '../../credentialStore';
+import * as url from 'url';
 
 const constants = {
   mediaType: 'application/json',
@@ -23,35 +22,36 @@ const constants = {
 
 export class DigitalTwinMetamodelRepositoryClient {
   private modelRepoSharedAccessKey: DigitalTwinSharedAccessKey|null = null;
-  private metaModelRepositoryHostName: vscode.Uri|null = null;
+  private modelPublicRepoUrl?: string;
 
   constructor() {}
 
   async initialize(connectionString: string|null) {
+    let modelRepoUrl = null;
     if (!connectionString) {
       // Connect to public repo
       this.modelRepoSharedAccessKey = null;
-      const storedConnectionString =
-          await CredentialStore.getCredential(ConfigKey.modelRepositoryKeyName);
-      if (storedConnectionString !== null) {
-        const builder =
-            DigitalTwinConnectionStringBuilder.Create(storedConnectionString);
-        this.metaModelRepositoryHostName = vscode.Uri.parse(builder.HostName);
-      } else {
-        const dtRepositoryUrl =
-            ConfigHandler.get<string>(ConfigKey.iotPnPRepositoryUrl);
-        if (!dtRepositoryUrl) {
-          throw new Error(
-              'The IoT Plug and Play public repository URL is invalid. Please set IoTPnPRepositoryUrl in configuration.');
-        }
-        this.metaModelRepositoryHostName = vscode.Uri.parse(dtRepositoryUrl);
+      const dtRepositoryUrl =
+          ConfigHandler.get<string>(ConfigKey.iotPnPPublicRepositoryUrl);
+      if (!dtRepositoryUrl) {
+        throw new Error(
+            'The IoT Plug and Play public repository URL is invalid.');
       }
+      modelRepoUrl = dtRepositoryUrl;
     } else {
       const builder =
           DigitalTwinConnectionStringBuilder.Create(connectionString);
-      this.metaModelRepositoryHostName = vscode.Uri.parse(builder.HostName);
+      if (!builder.HostName.startsWith('http')) {
+        // The hostname from connections string doesn't contain the protocol
+        modelRepoUrl = 'https://' + builder.HostName;
+      } else {
+        modelRepoUrl = builder.HostName;
+      }
       this.modelRepoSharedAccessKey = new DigitalTwinSharedAccessKey(builder);
     }
+    const repoUrl = url.parse(modelRepoUrl);
+    repoUrl.protocol = 'https';  // force to https
+    this.modelPublicRepoUrl = repoUrl.href;
   }
 
   async GetInterfaceAsync(
@@ -178,11 +178,10 @@ export class DigitalTwinMetamodelRepositoryClient {
       metaModelType: MetaModelType, contents: string, modelId: string,
       etag?: string, repositoryId?: string,
       apiVersion = DigitalTwinConstants.apiVersion): Promise<string> {
-    if (!this.metaModelRepositoryHostName) {
-      throw new Error(
-          'The value of metaModelRepositoryHostName is not initialized');
+    if (!this.modelPublicRepoUrl) {
+      throw new Error('The value of modelPublicRepoUrl is not initialized');
     }
-    let targetUri = this.metaModelRepositoryHostName.toString();
+    let targetUri = this.modelPublicRepoUrl;
 
     if (repositoryId) {
       targetUri +=
@@ -273,11 +272,10 @@ export class DigitalTwinMetamodelRepositoryClient {
       continuationToken,
       pageSize
     };
-    if (!this.metaModelRepositoryHostName) {
-      throw new Error(
-          'The value of metaModelRepositoryHostName is not initialized');
+    if (!this.modelPublicRepoUrl) {
+      throw new Error('The value of modelPublicRepoUrl is not initialized');
     }
-    let queryString = this.metaModelRepositoryHostName.toString();
+    let queryString = this.modelPublicRepoUrl;
 
     if (repositoryId) {
       queryString += `${constants.modelSearch}?repositoryId=${
@@ -325,15 +323,12 @@ export class DigitalTwinMetamodelRepositoryClient {
   private async MakeDeleteRequestAsync(
       metaModelType: MetaModelType, modelId: string, repositoryId?: string,
       apiVersion = DigitalTwinConstants.apiVersion) {
-    if (!this.metaModelRepositoryHostName) {
-      throw new Error(
-          'The value of metaModelRepositoryHostName is not initialized');
+    if (!this.modelPublicRepoUrl) {
+      throw new Error('The value of modelPublicRepoUrl is not initialized');
     }
     const queryString = `?repositoryId=${repositoryId}`;
-    const resourceUrl =
-        `${this.metaModelRepositoryHostName.toString()}${constants.apiModel}/${
-            encodeURIComponent(
-                modelId)}${queryString}&api-version=${apiVersion}`;
+    const resourceUrl = `${this.modelPublicRepoUrl}${constants.apiModel}/${
+        encodeURIComponent(modelId)}${queryString}&api-version=${apiVersion}`;
 
     let authenticationString = '';
 
@@ -366,13 +361,11 @@ export class DigitalTwinMetamodelRepositoryClient {
   private GenerateFetchModelUri(
       modelId: string, apiVersion: string, repositoryId?: string,
       expand = false) {
-    if (!this.metaModelRepositoryHostName) {
-      throw new Error(
-          'The value of metaModelRepositoryHostName is not initialized');
+    if (!this.modelPublicRepoUrl) {
+      throw new Error('The value of modelPublicRepoUrl is not initialized');
     }
-    let result =
-        `${this.metaModelRepositoryHostName.toString()}${constants.apiModel}/${
-            encodeURIComponent(modelId)}?api-version=${apiVersion}`;
+    let result = `${this.modelPublicRepoUrl}${constants.apiModel}/${
+        encodeURIComponent(modelId)}?api-version=${apiVersion}`;
     const expandString = expand ? `&expand=true` : '';
     if (repositoryId) {
       result += `${expandString}&repositoryId=${repositoryId}`;

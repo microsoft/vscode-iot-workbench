@@ -191,9 +191,9 @@
           "IoTWorkbench.IoTPnPCodeGenVersion": {
             "type": "string"
           },
-          "IoTWorkbench.IoTPnPRepositoryUrl": {
+          "IoTWorkbench.IoTPnPPublicRepositoryUrl": {
             "type": "string",
-            "default": "https://canary-repo.azureiotrepository.com"
+            "default": "https://repo.azureiotrepository.com"
           }
         }
       }

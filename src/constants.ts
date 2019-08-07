@@ -14,7 +14,7 @@ export class ConfigKey {
   static readonly shownHelpPage = 'ShownHelpPage';
   static readonly codeGeneratorVersion = 'IoTPnPCodeGenVersion';
   static readonly modelRepositoryKeyName = 'IoTPnPModelRepositoryKey';
-  static readonly iotPnPRepositoryUrl = 'IoTPnPRepositoryUrl';
+  static readonly iotPnPPublicRepositoryUrl = 'IoTPnPPublicRepositoryUrl';
   static readonly projectType = 'ProjectType';
 }
 
