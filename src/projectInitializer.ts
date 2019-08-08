@@ -34,10 +34,8 @@ export class ProjectInitializer {
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     // Only create project when not in remote environment
-    if (RemoteExtension.isRemote(context)) {
-      const message =
-          `The project is open in a Docker container now. Open a new window and run this command again.`;
-      vscode.window.showWarningMessage(message);
+    const notRemote = RemoteExtension.checkNotRemoteBeforeRunCommand(context);
+    if (!notRemote) {
       return;
     }
 

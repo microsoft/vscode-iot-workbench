@@ -32,23 +32,32 @@ export abstract class IoTWorkbenchProjectBase {
 
   static async GetProjectType(
       scaffoldType: ScaffoldType,
-      projectFileRootPath: string): Promise<ProjectHostType> {
+      projectFileRootPath: string|undefined): Promise<ProjectHostType> {
+    if (!projectFileRootPath) {
+      return ProjectHostType.Unknown;
+    }
     const iotWorkbenchProjectFile =
         path.join(projectFileRootPath, FileNames.iotworkbenchprojectFileName);
+    const devcontainerFolderPath =
+        path.join(projectFileRootPath, FileNames.devcontainerFolderName);
     if (!await FileUtility.fileExists(scaffoldType, iotWorkbenchProjectFile)) {
       return ProjectHostType.Unknown;
+    } else if (await FileUtility.directoryExists(
+                   scaffoldType, devcontainerFolderPath)) {
+      return ProjectHostType.Container;
     } else {
       const iotworkbenchprojectFileString =
           await FileUtility.readFile(
               scaffoldType, iotWorkbenchProjectFile, 'utf8') as string;
-      const projectConfig = JSON.parse(iotworkbenchprojectFileString);
-      if (projectConfig &&
-          projectConfig[`${ConfigKey.projectHostType}`] ===
-              ProjectHostType[ProjectHostType.Container]) {
-        return ProjectHostType.Container;
-      } else {
-        return ProjectHostType.Workspace;
+      if (iotworkbenchprojectFileString !== '') {
+        const projectConfig = JSON.parse(iotworkbenchprojectFileString);
+        if (projectConfig &&
+            projectConfig[`${ConfigKey.projectHostType}`] ===
+                ProjectHostType[ProjectHostType.Container]) {
+          return ProjectHostType.Container;
+        }
       }
+      return ProjectHostType.Workspace;
     }
   }
 

@@ -25,6 +25,7 @@ import {ConfigKey, ContextUris, EventNames, FileNames, ModelType, ScaffoldType} 
 import {TelemetryContext, TelemetryProperties} from './telemetry';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 import {RemoteExtension} from './Models/RemoteExtension';
+import {createAndLoadIoTProject} from './utils';
 
 const impor = require('impor')(__dirname);
 const exampleExplorerModule =
@@ -405,37 +406,12 @@ export async function activate(context: vscode.ExtensionContext) {
     measurements: {duration: 0}
   };
 
-  let projectHostType: ProjectHostType = ProjectHostType.Unknown;
-  if (vscode.workspace.workspaceFolders) {
-    try {
-      // Initialize Telemetry
-      if (!telemetryWorkerInitialized) {
-        telemetryModule.TelemetryWorker.Initialize(context);
-        telemetryWorkerInitialized = true;
-      }
-
-      const projectFileRootPath =
-          vscode.workspace.workspaceFolders[0].uri.fsPath;
-      projectHostType = await IoTWorkbenchProjectBase.GetProjectType(
-          ScaffoldType.Workspace, projectFileRootPath);
-      let iotProject;
-      if (projectHostType === ProjectHostType.Container) {
-        iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
-            context, outputChannel, telemetryContext);
-      } else if (projectHostType === ProjectHostType.Workspace) {
-        iotProject = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
-            context, outputChannel, telemetryContext);
-      }
-      if (iotProject !== undefined) {
-        await iotProject.load(true);
-      }
-    } catch (error) {
-      // do nothing as we are not sure whether the project is initialized.
-    }
-  }
-
-  const deviceOperator = new DeviceOperator(projectHostType);
-  const azureOperator = new AzureOperator(projectHostType);
+  // Load iot Project here and do not ask to new an iot project when no iot
+  // project open since no command has been triggered yet.
+  const iotProject = await createAndLoadIoTProject(
+      context, outputChannel, telemetryContext, false);
+  const deviceOperator = new DeviceOperator();
+  const azureOperator = new AzureOperator();
   const exampleExplorer = new exampleExplorerModule.ExampleExplorer();
 
   // The command has been defined in the package.json file
@@ -642,10 +618,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const workbenchPath =
       vscode.commands.registerCommand('iotworkbench.workbench', async () => {
-        if (RemoteExtension.isRemote(context)) {
-          const message =
-              `The project is open in a Docker container now. Open a new window and run this command again.`;
-          vscode.window.showWarningMessage(message);
+        const notRemote =
+            RemoteExtension.checkNotRemoteBeforeRunCommand(context);
+        if (!notRemote) {
           return;
         }
         const settings: IoTWorkbenchSettings =
@@ -668,6 +643,7 @@ export async function activate(context: vscode.ExtensionContext) {
       });
 
   context.subscriptions.push(projectInit);
+  context.subscriptions.push(configuteContainer);
   context.subscriptions.push(examples);
   context.subscriptions.push(exampleInitialize);
   context.subscriptions.push(helpInit);

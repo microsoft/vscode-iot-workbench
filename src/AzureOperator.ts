@@ -6,46 +6,18 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import {TelemetryContext} from './telemetry';
-import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
-import {handleIoTWorkspaceProjectFolder, askAndNewProject} from './utils';
+import {createAndLoadIoTProject} from './utils';
 import {RemoteExtension} from './Models/RemoteExtension';
 
-const impor = require('impor')(__dirname);
-const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
-    typeof import('./Models/IoTWorkspaceProject');
-const ioTContainerizedProjectModule =
-    impor('./Models/IoTContainerizedProject') as
-    typeof import('./Models/IoTContainerizedProject');
 
 export class AzureOperator {
-  private projectHostType: ProjectHostType;
-
-  constructor(projectHostType: ProjectHostType) {
-    this.projectHostType = projectHostType;
-  }
-
   async Provision(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     let status = false;
-    let iotProject;
-    telemetryContext.properties.projectHostType =
-        ProjectHostType[this.projectHostType];
-    if (this.projectHostType === ProjectHostType.Container) {
-      iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
-          context, channel, telemetryContext);
-    } else if (this.projectHostType === ProjectHostType.Workspace) {
-      iotProject = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
-          context, channel, telemetryContext);
-    }
-    if (iotProject === undefined) {
-      await handleIoTWorkspaceProjectFolder(telemetryContext);
-      return;
-    }
-
-    const result = await iotProject.load();
-    if (!result) {
-      await askAndNewProject(telemetryContext);
+    const iotProject =
+        await createAndLoadIoTProject(context, channel, telemetryContext);
+    if (!iotProject) {
       return;
     }
     status = await iotProject.provision();
@@ -68,24 +40,9 @@ export class AzureOperator {
       return;
     }
 
-    let iotProject;
-    telemetryContext.properties.projectHostType =
-        ProjectHostType[this.projectHostType];
-    if (this.projectHostType === ProjectHostType.Container) {
-      iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
-          context, channel, telemetryContext);
-    } else if (this.projectHostType === ProjectHostType.Workspace) {
-      iotProject = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
-          context, channel, telemetryContext);
-    }
-    if (iotProject === undefined) {
-      await handleIoTWorkspaceProjectFolder(telemetryContext);
-      return;
-    }
-
-    const result = await iotProject.load();
-    if (!result) {
-      await askAndNewProject(telemetryContext);
+    const iotProject =
+        await createAndLoadIoTProject(context, channel, telemetryContext);
+    if (!iotProject) {
       return;
     }
     await iotProject.deploy();

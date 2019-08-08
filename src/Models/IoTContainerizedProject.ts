@@ -20,6 +20,8 @@ const raspberryPiDeviceModule =
 const telemetryModule = impor('../telemetry') as typeof import('../telemetry');
 
 export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
+  private projectHostType = ProjectHostType.Container;
+
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
@@ -33,12 +35,6 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     }
 
     this.projectRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    const projectHostType: ProjectHostType =
-        await IoTWorkbenchProjectBase.GetProjectType(
-            loadTimeScaffoldType, this.projectRootPath);
-    if (projectHostType !== ProjectHostType.Container) {
-      return false;
-    }
 
     const iotworkbenchprojectFile =
         path.join(this.projectRootPath, FileNames.iotworkbenchprojectFileName);
@@ -62,7 +58,8 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
           RemoteExtension.isRemote(this.extensionContext) ?
           DevelopEnvironment.CONTAINER :
           DevelopEnvironment.LOCAL_ENV;
-      properties.projectHostType = ProjectHostType[projectHostType];
+      properties.projectHostType = ProjectHostType[this.projectHostType];
+
       const telemetryContext:
           TelemetryContext = {properties, measurements: {duration: 0}};
 
@@ -129,7 +126,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
     projectConfig[`${ConfigKey.boardId}`] = boardId;
     projectConfig[`${ConfigKey.projectHostType}`] =
-        ProjectHostType[ProjectHostType.Container];
+        ProjectHostType[this.projectHostType];
 
     const res = await device.create();
     if (res === false) {

@@ -45,6 +45,7 @@ const constants = {
 
 
 export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
+  private projectHostType = ProjectHostType.Workspace;
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
@@ -68,13 +69,6 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
 
     const deviceLocation = path.join(this.projectRootPath, devicePath);
 
-    const projectHostType: ProjectHostType =
-        await IoTWorkbenchProjectBase.GetProjectType(
-            loadTimeScaffoldType, deviceLocation);
-    if (projectHostType !== ProjectHostType.Workspace) {
-      return false;
-    }
-
     // only send telemetry when the IoT project is load when VS Code opens
     if (initLoad) {
       const properties: TelemetryProperties = {
@@ -86,7 +80,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
           RemoteExtension.isRemote(this.extensionContext) ?
           DevelopEnvironment.CONTAINER :
           DevelopEnvironment.LOCAL_ENV;
-      properties.projectHostType = ProjectHostType[projectHostType];
+      properties.projectHostType = ProjectHostType[this.projectHostType];
       const telemetryContext:
           TelemetryContext = {properties, measurements: {duration: 0}};
 
