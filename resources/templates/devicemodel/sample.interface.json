@@ -1,5 +1,5 @@
 {
-  "@id": "urn:vscsample:myinterface:1",
+  "@id": "{DigitalTwinIdentifier}",
   "@type": "Interface",
   "displayName": "myinterface",
   "contents": [
@@ -70,5 +70,5 @@
       }
     }
   ],
-  "@context": "http://azureiot.com/v1/contexts/Interface.json"
+  "@context": "http://azureiot.com/v1/contexts/IoTModel.json"
 }

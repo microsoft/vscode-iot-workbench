@@ -662,7 +662,7 @@
       "Id": "4e0df0ab-27a9-49a4-bc31-2249d9e33927"
     },
     {
-      "Id": "urn:azureiot:v1:classes:Units:Humidity:gramsPerVolume:1"
+      "Id": "Units/Humidity/gramsPerVolume"
     },
     {
       "Value": "g/m3",
@@ -675,7 +675,7 @@
       "Id": "d9a8e335-c100-455f-866e-e11624fba55d"
     },
     {
-      "Id": "urn:azureiot:v1:classes:Units:Humidity:percent:1"
+      "Id": "Units/Humidity/percent"
     },
     {
       "Value": "%",
@@ -688,7 +688,7 @@
       "Id": "158f0782-ccd8-4e0d-bcf7-aa4495ab9c82"
     },
     {
-      "Id": "urn:azureiot:v1:classes:Units:Pressure:inchesOfMercury:1"
+      "Id": "Units/Pressure/inchesOfMercury"
     },
     {
       "Value": "inHg",
@@ -701,7 +701,7 @@
       "Id": "4f5909fc-62c6-4ca0-b685-c4554af3ea93"
     },
     {
-      "Id": "urn:azureiot:v1:classes:Units:Pressure:inchesOfWater:1"
+      "Id": "Units/Pressure/inchesOfWater"
     },
     {
       "Value": "inH₂O",
@@ -714,7 +714,7 @@
       "Id": "9fcf89b3-e324-47f4-884e-72620a0e71fb"
     },
     {
-      "Id": "urn:azureiot:v1:classes:Units:Pressure:kiloPascal:1"
+      "Id": "Units/Pressure/kiloPascal"
     },
     {
       "Value": "kPa",
@@ -727,7 +727,7 @@
       "Id": "32978d16-fb4d-4290-837f-782add7cd5dd"
     },
     {
-      "Id": "urn:azureiot:v1:classes:Units:Pressure:poundsPerSquareInch:1"
+      "Id": "Units/Pressure/poundsPerSquareInch"
     },
     {
       "Value": "psi",
@@ -740,7 +740,7 @@
       "Id": "75f213f6-7028-4220-9290-fb177418d059"
     },
     {
-      "Id": "urn:azureiot:v1:classes:Units:Temperature:celsius:1"
+      "Id": "Units/Temperature/celsius"
     },
     {
       "Value": "°C",
@@ -753,7 +753,7 @@
       "Id": "4bccda25-0929-4b68-8d34-c475d6ab7625"
     },
     {
-      "Id": "urn:azureiot:v1:classes:Units:Temperature:fahrenheit:1"
+      "Id": "Units/Temperature/fahrenheit"
     },
     {
       "Value": "°F",
@@ -3233,7 +3233,7 @@
     },
     {
       "SourceNode": {
-        "Id": "urn:azureiot:v1:classes:Units:Humidity:gramsPerVolume:1"
+        "Id": "Units/Humidity/gramsPerVolume"
       },
       "TargetNode": {
         "Id": "http://azureiot.com/v1/classes/Units/Humidity"
@@ -3242,7 +3242,7 @@
     },
     {
       "SourceNode": {
-        "Id": "urn:azureiot:v1:classes:Units:Humidity:gramsPerVolume:1"
+        "Id": "Units/Humidity/gramsPerVolume"
       },
       "TargetNode": {
         "Value": "g/m3",
@@ -3253,7 +3253,7 @@
     },
     {
       "SourceNode": {
-        "Id": "urn:azureiot:v1:classes:Units:Humidity:gramsPerVolume:1"
+        "Id": "Units/Humidity/gramsPerVolume"
       },
       "TargetNode": {
         "Value": "Grams per Volume",
@@ -3264,7 +3264,7 @@
     },
     {
       "SourceNode": {
-        "Id": "urn:azureiot:v1:classes:Units:Humidity:percent:1"
+        "Id": "Units/Humidity/percent"
       },
       "TargetNode": {
         "Id": "http://azureiot.com/v1/classes/Units/Humidity"
@@ -3273,7 +3273,7 @@
     },
     {
       "SourceNode": {
-        "Id": "urn:azureiot:v1:classes:Units:Humidity:percent:1"
+        "Id": "Units/Humidity/percent"
       },
       "TargetNode": {
         "Value": "%",
@@ -3284,7 +3284,7 @@
     },
     {
       "SourceNode": {
-        "Id": "urn:azureiot:v1:classes:Units:Humidity:percent:1"
+        "Id": "Units/Humidity/percent"
       },
       "TargetNode": {
         "Value": "Percent",
@@ -3295,7 +3295,7 @@
     },
     {
       "SourceNode": {
-        "Id": "urn:azureiot:v1:classes:Units:Pressure:inchesOfMercury:1"
+        "Id": "Units/Pressure/inchesOfMercury"
       },
       "TargetNode": {
         "Id": "http://azureiot.com/v1/classes/Units/Pressure"
@@ -3304,7 +3304,7 @@
     },
     {
       "SourceNode": {
-        "Id": "urn:azureiot:v1:classes:Units:Pressure:inchesOfMercury:1"
+        "Id": "Units/Pressure/inchesOfMercury"
       },
       "TargetNode": {
         "Value": "inHg",
@@ -3315,7 +3315,7 @@
     },
     {
       "SourceNode": {
-        "Id": "urn:azureiot:v1:classes:Units:Pressure:inchesOfMercury:1"
+        "Id": "Units/Pressure/inchesOfMercury"
       },
       "TargetNode": {
         "Value": "Inches of Mercury",
@@ -3326,7 +3326,7 @@
     },
     {
       "SourceNode": {
-        "Id": "urn:azureiot:v1:classes:Units:Pressure:inchesOfWater:1"
+        "Id": "Units/Pressure/inchesOfWater"
       },
       "TargetNode": {
         "Id": "http://azureiot.com/v1/classes/Units/Pressure"
@@ -3335,7 +3335,7 @@
     },
     {
       "SourceNode": {
-        "Id": "urn:azureiot:v1:classes:Units:Pressure:inchesOfWater:1"
+        "Id": "Units/Pressure/inchesOfWater"
       },
       "TargetNode": {
         "Value": "inH₂O",
@@ -3346,7 +3346,7 @@
     },
     {
       "SourceNode": {
-        "Id": "urn:azureiot:v1:classes:Units:Pressure:inchesOfWater:1"
+        "Id": "Units/Pressure/inchesOfWater"
       },
       "TargetNode": {
         "Value": "Inches of Water",
@@ -3357,7 +3357,7 @@
     },
     {
       "SourceNode": {
-        "Id": "urn:azureiot:v1:classes:Units:Pressure:kiloPascal:1"
+        "Id": "Units/Pressure/kiloPascal"
       },
       "TargetNode": {
         "Id": "http://azureiot.com/v1/classes/Units/Pressure"
@@ -3366,7 +3366,7 @@
     },
     {
       "SourceNode": {
-        "Id": "urn:azureiot:v1:classes:Units:Pressure:kiloPascal:1"
+        "Id": "Units/Pressure/kiloPascal"
       },
       "TargetNode": {
         "Value": "kPa",
@@ -3377,7 +3377,7 @@
     },
     {
       "SourceNode": {
-        "Id": "urn:azureiot:v1:classes:Units:Pressure:kiloPascal:1"
+        "Id": "Units/Pressure/kiloPascal"
       },
       "TargetNode": {
         "Value": "Kilo Pascal",
@@ -3388,7 +3388,7 @@
     },
     {
       "SourceNode": {
-        "Id": "urn:azureiot:v1:classes:Units:Pressure:poundsPerSquareInch:1"
+        "Id": "Units/Pressure/poundsPerSquareInch"
       },
       "TargetNode": {
         "Id": "http://azureiot.com/v1/classes/Units/Pressure"
@@ -3397,7 +3397,7 @@
     },
     {
       "SourceNode": {
-        "Id": "urn:azureiot:v1:classes:Units:Pressure:poundsPerSquareInch:1"
+        "Id": "Units/Pressure/poundsPerSquareInch"
       },
       "TargetNode": {
         "Value": "psi",
@@ -3408,7 +3408,7 @@
     },
     {
       "SourceNode": {
-        "Id": "urn:azureiot:v1:classes:Units:Pressure:poundsPerSquareInch:1"
+        "Id": "Units/Pressure/poundsPerSquareInch"
       },
       "TargetNode": {
         "Value": "Pounds per Square Inch",
@@ -3419,7 +3419,7 @@
     },
     {
       "SourceNode": {
-        "Id": "urn:azureiot:v1:classes:Units:Temperature:celsius:1"
+        "Id": "Units/Temperature/celsius"
       },
       "TargetNode": {
         "Id": "http://azureiot.com/v1/classes/Units/Temperature"
@@ -3428,7 +3428,7 @@
     },
     {
       "SourceNode": {
-        "Id": "urn:azureiot:v1:classes:Units:Temperature:celsius:1"
+        "Id": "Units/Temperature/celsius"
       },
       "TargetNode": {
         "Value": "°C",
@@ -3439,7 +3439,7 @@
     },
     {
       "SourceNode": {
-        "Id": "urn:azureiot:v1:classes:Units:Temperature:celsius:1"
+        "Id": "Units/Temperature/celsius"
       },
       "TargetNode": {
         "Value": "Celsius",
@@ -3450,7 +3450,7 @@
     },
     {
       "SourceNode": {
-        "Id": "urn:azureiot:v1:classes:Units:Temperature:fahrenheit:1"
+        "Id": "Units/Temperature/fahrenheit"
       },
       "TargetNode": {
         "Id": "http://azureiot.com/v1/classes/Units/Temperature"
@@ -3459,7 +3459,7 @@
     },
     {
       "SourceNode": {
-        "Id": "urn:azureiot:v1:classes:Units:Temperature:fahrenheit:1"
+        "Id": "Units/Temperature/fahrenheit"
       },
       "TargetNode": {
         "Value": "°F",
@@ -3470,7 +3470,7 @@
     },
     {
       "SourceNode": {
-        "Id": "urn:azureiot:v1:classes:Units:Temperature:fahrenheit:1"
+        "Id": "Units/Temperature/fahrenheit"
       },
       "TargetNode": {
         "Value": "Fahrenheit",

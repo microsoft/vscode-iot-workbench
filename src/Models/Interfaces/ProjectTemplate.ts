@@ -39,4 +39,5 @@ export interface PnpProjectTemplateType {
   name: string;
   type: string;
   detail: string;
+  enabled: boolean;
 }

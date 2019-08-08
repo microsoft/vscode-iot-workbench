@@ -4,13 +4,15 @@
       "language": "ANSI C",
       "type": "CMake",
       "name": "CMake Project",
-      "detail": "Generate ANSI C code as CMake project."
+      "detail": "Generate ANSI C code as CMake project.",
+      "enabled" : true
     },
     {
       "language": "ANSI C",
       "type": "VisualStudio",
       "name": "Visual Studio Project",
-      "detail": "Generate ANSI C code as Visual Studio (.vcxproj) project."
+      "detail": "Generate ANSI C code as Visual Studio (.vcxproj) project.",
+      "enabled" : false
     },
     {
       "language": "ANSI C",
