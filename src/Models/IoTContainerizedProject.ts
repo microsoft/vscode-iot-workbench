@@ -29,8 +29,6 @@ const ioTHubDeviceModule =
     impor('./IoTHubDevice') as typeof import('./IoTHubDevice');
 const raspberryPiDeviceModule =
     impor('./RaspberryPiDevice') as typeof import('./RaspberryPiDevice');
-const simulatorDeviceModule =
-    impor('./SimulatorDevice') as typeof import('./SimulatorDevice');
 const streamAnalyticsJobModule =
     impor('./StreamAnalyticsJob') as typeof import('./StreamAnalyticsJob');
 const telemetryModule = impor('../telemetry') as typeof import('../telemetry');
@@ -112,10 +110,6 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       }
       if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
         device = new raspberryPiDeviceModule.RaspberryPiDevice(
-            this.extensionContext, this.projectRootPath, this.channel,
-            projectType, this.telemetryContext);
-      } else if (boardId === simulatorDeviceModule.SimulatorDevice.boardId) {
-        device = new simulatorDeviceModule.SimulatorDevice(
             this.extensionContext, this.projectRootPath, this.channel,
             projectType, this.telemetryContext);
       }
@@ -258,10 +252,6 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     let device: Component;
     if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
       device = new raspberryPiDeviceModule.RaspberryPiDevice(
-          this.extensionContext, this.projectRootPath, this.channel,
-          projectType, this.telemetryContext, templateFilesInfo);
-    } else if (boardId === simulatorDeviceModule.SimulatorDevice.boardId) {
-      device = new simulatorDeviceModule.SimulatorDevice(
           this.extensionContext, this.projectRootPath, this.channel,
           projectType, this.telemetryContext, templateFilesInfo);
     } else {

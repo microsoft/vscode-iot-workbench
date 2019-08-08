@@ -4,7 +4,6 @@ import {TelemetryContext} from '../../telemetry';
 
 import {AnsiCCodeGeneratorImplCMake} from './AnsiCCodeGeneratorImplCMake';
 import {AnsiCCodeGeneratorImplIoTDevKit} from './AnsiCCodeGeneratorImplIoTDevKit';
-import {AnsiCCodeGeneratorImplSimulator} from './AnsiCCodeGeneratorImplSimulator';
 import {AnsiCCodeGeneratorImplVS} from './AnsiCCodeGeneratorImplVS';
 import {CodeGenerator, CodeGenProjectType, DeviceConnectionType} from './Interfaces/CodeGenerator';
 import {CodeGeneratorFactory} from './Interfaces/CodeGeneratorFactory';
@@ -26,10 +25,8 @@ export class AnsiCCodeGeneratorFactory implements CodeGeneratorFactory {
     } else if (projectType === CodeGenProjectType.VisualStudio) {
       return new AnsiCCodeGeneratorImplVS(
           this.context, this.channel, this.telemetryContext, connectionType);
-    } else if (projectType === CodeGenProjectType.Simulator) {
-      return new AnsiCCodeGeneratorImplSimulator(
-          this.context, this.channel, this.telemetryContext, connectionType);
     }
+
     return null;
   }
 }

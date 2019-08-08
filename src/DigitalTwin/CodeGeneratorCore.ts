@@ -200,11 +200,6 @@ export class CodeGeneratorCore {
         languageSelection.label, context, telemetryContext);
     if (codeGenProjectType === undefined) {
       return false;
-    } else if (codeGenProjectType === CodeGenProjectType.Simulator) {
-      const res = await RemoteExtension.checkRemoteExtension(channel);
-      if (!res) {
-        return false;
-      }
     }
 
     // Step 5: Select device connection string type

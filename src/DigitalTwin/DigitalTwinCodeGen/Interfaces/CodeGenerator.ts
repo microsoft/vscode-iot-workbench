@@ -1,8 +1,7 @@
 export enum CodeGenProjectType {
   CMake = 'CMake',
   VisualStudio = 'VisualStudio',
-  IoTDevKit = 'IoTDevKit',
-  Simulator = 'Simulator'
+  IoTDevKit = 'IoTDevKit'
 }
 
 export enum DeviceConnectionType {
