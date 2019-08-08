@@ -1,9 +1,18 @@
 {
-  "name": "iot-cargo-vessel3",
-  "displayName": "IoT Cargo Vessel 3",
+  "name": "vscode-iot-workbench",
+  "displayName": "Azure IoT Device Workbench",
   "description": "Integrated environment to enable easy development on IoT prototype devices (e.g. MXChip IoT DevKit, teXXmo IoT Button, ESP32 and Raspberry Pi) with multiple Azure services.",
-  "version": "1.0.0",
-  "publisher": "dilin",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/vscode-iot-workbench.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Microsoft/vscode-iot-workbench/issues"
+  },
+  "homepage": "https://github.com/Microsoft/vscode-iot-workbench/blob/master/README.md",
+  "version": "0.10.10-rc",
+  "publisher": "vsciot-vscode",
+  "icon": "logo.png",
   "license": "SEE LICENSE IN <LICENSE>",
   "aiKey": "5b869bc6-ca93-4f24-aa87-92871a3a616e",
   "codeGenConfigUrl": "https://aka.ms/iot-codegen-cli-for-workbench-staging",
