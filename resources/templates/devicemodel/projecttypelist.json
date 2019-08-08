@@ -18,13 +18,8 @@
       "language": "ANSI C",
       "type": "IoTDevKit",
       "name": "MXChip IoT DevKit Project",
-      "detail": "Generate code for MXChip IoT DevKit as Arduino project."
-    },
-    {
-      "language": "ANSI C",
-      "type": "Simulator",
-      "name": "Simulator",
-      "detail": "Generate code for MXChip IoT DevKit as Arduino project."
+      "detail": "Generate code for MXChip IoT DevKit as Arduino project.",
+      "enabled": true
     }
   ]
 }
