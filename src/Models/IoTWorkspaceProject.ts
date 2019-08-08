@@ -69,7 +69,8 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     const deviceLocation = path.join(this.projectRootPath, devicePath);
 
     const projectHostType: ProjectHostType =
-        IoTWorkbenchProjectBase.GetProjectType(deviceLocation);
+        await IoTWorkbenchProjectBase.GetProjectType(
+            loadTimeScaffoldType, deviceLocation);
     if (projectHostType !== ProjectHostType.Workspace) {
       return false;
     }
@@ -459,8 +460,8 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     }
 
     if (!openInNewWindow) {
-      // Need to add telemetry here otherwise, after restart VSCode, no
-      // telemetry data will be sent.
+      // If open in current window, VSCode will restart. Need to send telemetry
+      // before VSCode restart to advoid data lost.
       try {
         telemetryModule.TelemetryWorker.sendEvent(
             EventNames.createNewProjectEvent, this.telemetryContext);
