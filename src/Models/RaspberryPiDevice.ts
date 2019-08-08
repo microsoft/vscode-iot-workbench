@@ -35,11 +35,10 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
 
   constructor(
       context: vscode.ExtensionContext, projectPath: string,
-      channel: vscode.OutputChannel, projectTemplateType: ProjectTemplateType,
-      telemetryContext: TelemetryContext,
+      channel: vscode.OutputChannel, telemetryContext: TelemetryContext,
       templateFilesInfo: TemplateFileInfo[] = []) {
     super(
-        context, projectPath, channel, projectTemplateType, telemetryContext,
+        context, projectPath, channel, telemetryContext,
         DeviceType.Raspberry_Pi, templateFilesInfo);
   }
 

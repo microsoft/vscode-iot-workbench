@@ -11,7 +11,7 @@ import {askAndOpenInRemote, channelShowAndAppendLine, generateTemplateFile, runC
 
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
-import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
+import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
 import {RemoteExtension} from './RemoteExtension';
 
@@ -43,8 +43,8 @@ export abstract class ContainerDeviceBase implements Device {
 
   constructor(
       context: vscode.ExtensionContext, projectPath: string,
-      channel: vscode.OutputChannel, projectTemplateType: ProjectTemplateType,
-      telemetryContext: TelemetryContext, deviceType: DeviceType,
+      channel: vscode.OutputChannel, telemetryContext: TelemetryContext,
+      deviceType: DeviceType,
       protected templateFilesInfo: TemplateFileInfo[] = []) {
     this.deviceType = deviceType;
     this.componentType = ComponentType.Device;

@@ -21,7 +21,7 @@ import {DigitalTwinMetaModelJsonParser} from './DigitalTwin/DigitalTwinMetaModel
 import {DigitalTwinDiagnostic} from './DigitalTwin/DigitalTwinDiagnostic';
 import {DigitalTwinConstants} from './DigitalTwin/DigitalTwinConstants';
 import {DTDLKeywords} from './DigitalTwin/DigitalTwinConstants';
-import {ConfigKey, ContextUris, EventNames, FileNames, ModelType} from './constants';
+import {ConfigKey, ContextUris, EventNames, FileNames, ModelType, ScaffoldType} from './constants';
 import {TelemetryContext, TelemetryProperties} from './telemetry';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 import {RemoteExtension} from './Models/RemoteExtension';
@@ -416,8 +416,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
       const projectFileRootPath =
           vscode.workspace.workspaceFolders[0].uri.fsPath;
-      projectHostType =
-          IoTWorkbenchProjectBase.GetProjectType(projectFileRootPath);
+      projectHostType = await IoTWorkbenchProjectBase.GetProjectType(
+          ScaffoldType.Workspace, projectFileRootPath);
       let iotProject;
       if (projectHostType === ProjectHostType.Container) {
         iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
