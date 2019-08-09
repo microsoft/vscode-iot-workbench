@@ -58,108 +58,102 @@ export class ProjectInitializer {
             message: 'Updating a list of available template',
           });
 
-          try {
-            const scaffoldType = ScaffoldType.Local;
+          const scaffoldType = ScaffoldType.Local;
 
-            // Step 1: Get project name
-            const projectPath = await this.GenerateProjectFolder(scaffoldType);
-            if (!projectPath) {
-              telemetryContext.properties.errorMessage =
-                  'Project name input cancelled.';
-              telemetryContext.properties.result = 'Cancelled';
-              return;
-            } else {
-              telemetryContext.properties.projectPath = projectPath;
-            }
-
-            // Step 2: Select platform
-            const platformSelection =
-                await this.SelectPlatform(scaffoldType, context);
-            if (!platformSelection) {
-              telemetryContext.properties.errorMessage =
-                  'Platform selection cancelled.';
-              telemetryContext.properties.result = 'Cancelled';
-              return;
-            } else {
-              telemetryContext.properties.platform = platformSelection.label;
-            }
-
-            // Step 3: Select template
-            let template: ProjectTemplate|undefined;
-            const resourceRootPath = context.asAbsolutePath(path.join(
-                FileNames.resourcesFolderName, FileNames.templatesFolderName));
-            const templateJsonFilePath =
-                path.join(resourceRootPath, FileNames.templateFileName);
-            const templateJsonFileString =
-                await FileUtility.readFile(
-                    scaffoldType, templateJsonFilePath, 'utf8') as string;
-            const templateJson = JSON.parse(templateJsonFileString);
-            if (!templateJson) {
-              throw new Error(`Fail to load template json.`);
-            }
-
-            let templateName: string|undefined;
-            if (platformSelection.label === PlatformType.ARDUINO) {
-              const templateSelection = await this.SelectTemplate(
-                  telemetryContext, templateJson, PlatformType.ARDUINO);
-
-              if (!templateSelection) {
-                telemetryContext.properties.errorMessage =
-                    'Project template selection cancelled.';
-                telemetryContext.properties.result = 'Cancelled';
-                return;
-              } else {
-                telemetryContext.properties.template = templateSelection.label;
-                if (templateSelection.label === constants.noDeviceMessage) {
-                  await utils.TakeNoDeviceSurvey(telemetryContext);
-                  return;
-                }
-              }
-              templateName = templateSelection.label;
-            } else {
-              // If choose Embedded Linux platform, generate C project template
-              // directly
-              templateName = constants.embeddedLinuxProjectName;
-            }
-
-            template =
-                templateJson.templates.find((template: ProjectTemplate) => {
-                  return template.platform === platformSelection.label &&
-                      template.name === templateName;
-                });
-            if (!template) {
-              throw new Error(
-                  `Fail to find the wanted project template in template json file.`);
-            }
-
-            // Step 4: Load the list of template files
-            const projectTemplateType: ProjectTemplateType =
-                (ProjectTemplateType)
-                    [template.type as keyof typeof ProjectTemplateType];
-
-            const templateFolder = path.join(resourceRootPath, template.path);
-            const templateFilesInfo =
-                await utils.getTemplateFilesInfo(templateFolder);
-
-            let project;
-            if (template.platform === PlatformType.EMBEDDEDLINUX) {
-              telemetryContext.properties.projectHostType = 'Container';
-              project =
-                  new ioTContainerizedProjectModule.IoTContainerizedProject(
-                      context, channel, telemetryContext);
-            } else if (template.platform === PlatformType.ARDUINO) {
-              telemetryContext.properties.projectHostType = 'Workspace';
-              project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
-                  context, channel, telemetryContext);
-            } else {
-              throw new Error('unsupported platform');
-            }
-            return await project.create(
-                projectPath, templateFilesInfo, projectTemplateType,
-                template.boardId, openInNewWindow);
-          } catch (error) {
-            throw error;
+          // Step 1: Get project name
+          const projectPath = await this.GenerateProjectFolder(scaffoldType);
+          if (!projectPath) {
+            telemetryContext.properties.errorMessage =
+                'Project name input cancelled.';
+            telemetryContext.properties.result = 'Cancelled';
+            return;
+          } else {
+            telemetryContext.properties.projectPath = projectPath;
           }
+
+          // Step 2: Select platform
+          const platformSelection =
+              await this.SelectPlatform(scaffoldType, context);
+          if (!platformSelection) {
+            telemetryContext.properties.errorMessage =
+                'Platform selection cancelled.';
+            telemetryContext.properties.result = 'Cancelled';
+            return;
+          } else {
+            telemetryContext.properties.platform = platformSelection.label;
+          }
+
+          // Step 3: Select template
+          let template: ProjectTemplate|undefined;
+          const resourceRootPath = context.asAbsolutePath(path.join(
+              FileNames.resourcesFolderName, FileNames.templatesFolderName));
+          const templateJsonFilePath =
+              path.join(resourceRootPath, FileNames.templateFileName);
+          const templateJsonFileString =
+              await FileUtility.readFile(
+                  scaffoldType, templateJsonFilePath, 'utf8') as string;
+          const templateJson = JSON.parse(templateJsonFileString);
+          if (!templateJson) {
+            throw new Error(`Fail to load template json.`);
+          }
+
+          let templateName: string|undefined;
+          if (platformSelection.label === PlatformType.ARDUINO) {
+            const templateSelection = await this.SelectTemplate(
+                telemetryContext, templateJson, PlatformType.ARDUINO);
+
+            if (!templateSelection) {
+              telemetryContext.properties.errorMessage =
+                  'Project template selection cancelled.';
+              telemetryContext.properties.result = 'Cancelled';
+              return;
+            } else {
+              telemetryContext.properties.template = templateSelection.label;
+              if (templateSelection.label === constants.noDeviceMessage) {
+                await utils.TakeNoDeviceSurvey(telemetryContext);
+                return;
+              }
+            }
+            templateName = templateSelection.label;
+          } else {
+            // If choose Embedded Linux platform, generate C project template
+            // directly
+            templateName = constants.embeddedLinuxProjectName;
+          }
+
+          template =
+              templateJson.templates.find((template: ProjectTemplate) => {
+                return template.platform === platformSelection.label &&
+                    template.name === templateName;
+              });
+          if (!template) {
+            throw new Error(
+                `Fail to find the wanted project template in template json file.`);
+          }
+
+          // Step 4: Load the list of template files
+          const projectTemplateType: ProjectTemplateType = (ProjectTemplateType)
+              [template.type as keyof typeof ProjectTemplateType];
+
+          const templateFolder = path.join(resourceRootPath, template.path);
+          const templateFilesInfo =
+              await utils.getTemplateFilesInfo(templateFolder);
+
+          let project;
+          if (template.platform === PlatformType.EMBEDDEDLINUX) {
+            telemetryContext.properties.projectHostType = 'Container';
+            project = new ioTContainerizedProjectModule.IoTContainerizedProject(
+                context, channel, telemetryContext);
+          } else if (template.platform === PlatformType.ARDUINO) {
+            telemetryContext.properties.projectHostType = 'Workspace';
+            project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
+                context, channel, telemetryContext);
+          } else {
+            throw new Error('unsupported platform');
+          }
+          return await project.create(
+              projectPath, templateFilesInfo, projectTemplateType,
+              template.boardId, openInNewWindow);
         });
   }
 

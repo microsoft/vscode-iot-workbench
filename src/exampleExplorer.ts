@@ -47,21 +47,12 @@ export class ExampleExplorer {
 
     examplePathList.forEach(item => {
       if (item !== '.' && item !== '..') {
-        try {
-          fs.moveSync(
-              path.join(examplePath as string, item), path.join(fsPath, item));
-        } catch (error) {
-          throw error;
-        }
+        fs.moveSync(
+            path.join(examplePath as string, item), path.join(fsPath, item));
       }
     });
 
-    try {
-      fs.removeSync(tempPath);
-    } catch (error) {
-      throw error;
-    }
-
+    fs.removeSync(tempPath);
     return true;
   }
 

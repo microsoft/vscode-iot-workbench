@@ -31,11 +31,7 @@ export async function checkAzureLogin(): Promise<boolean> {
 
   // Sign in Azure
   if (azureAccount.status !== 'LoggedIn') {
-    try {
-      await vscode.commands.executeCommand('azure-account.login');
-    } catch (error) {
-      throw error;
-    }
+    await vscode.commands.executeCommand('azure-account.login');
   }
 
   return true;

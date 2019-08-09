@@ -67,44 +67,37 @@ export class IoTHubDevice implements Component, Provisionable {
 
     const toolkit = getExtension(extensionName.Toolkit);
     if (toolkit === undefined) {
-      const error = new Error(
+      throw new Error(
           'Azure IoT Hub Toolkit is not installed. Please install it from Marketplace.');
-      throw error;
     }
 
     let device = null;
-    try {
-      switch (selection.detail) {
-        case 'select':
-          device = await toolkit.azureIoTExplorer.getDevice(
-              null, iotHubConnectionString, this.channel);
-          if (device === undefined) {
-            return false;
-          } else {
-            await ConfigHandler.update(
-                ConfigKey.iotHubDeviceConnectionString,
-                device.connectionString);
-          }
-          break;
+    switch (selection.detail) {
+      case 'select':
+        device = await toolkit.azureIoTExplorer.getDevice(
+            null, iotHubConnectionString, this.channel);
+        if (device === undefined) {
+          return false;
+        } else {
+          await ConfigHandler.update(
+              ConfigKey.iotHubDeviceConnectionString, device.connectionString);
+        }
+        break;
 
-        case 'create':
-          device = await toolkit.azureIoTExplorer.createDevice(
-              false, iotHubConnectionString, this.channel);
-          if (device === undefined) {
-            return false;
-          } else {
-            await ConfigHandler.update(
-                ConfigKey.iotHubDeviceConnectionString,
-                device.connectionString);
-          }
-          break;
-        default:
-          break;
-      }
-      return true;
-    } catch (error) {
-      throw error;
+      case 'create':
+        device = await toolkit.azureIoTExplorer.createDevice(
+            false, iotHubConnectionString, this.channel);
+        if (device === undefined) {
+          return false;
+        } else {
+          await ConfigHandler.update(
+              ConfigKey.iotHubDeviceConnectionString, device.connectionString);
+        }
+        break;
+      default:
+        break;
     }
+    return true;
   }
 
   updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo):

@@ -98,9 +98,8 @@ export abstract class IoTWorkbenchProjectBase {
 
         const res = await item.compile();
         if (res === false) {
-          const error = new Error(
+          throw new Error(
               'Unable to compile the device code, please check output window for detail.');
-          throw error;
         }
       }
     }
@@ -117,9 +116,8 @@ export abstract class IoTWorkbenchProjectBase {
 
         const res = await item.upload();
         if (res === false) {
-          const error = new Error(
+          throw new Error(
               'Unable to upload the sketch, please check output window for detail.');
-          throw error;
         }
       }
     }
@@ -250,8 +248,7 @@ export abstract class IoTWorkbenchProjectBase {
 
         const res = await item.deploy();
         if (res === false) {
-          const error = new Error(`The deployment of ${item.name} failed.`);
-          throw error;
+          throw new Error(`The deployment of ${item.name} failed.`);
         }
       }
     }
@@ -270,11 +267,7 @@ export abstract class IoTWorkbenchProjectBase {
     for (const component of this.componentList) {
       if (component.getComponentType() === ComponentType.Device) {
         const device = component as Device;
-        try {
-          await device.configDeviceSettings();
-        } catch (error) {
-          throw error;
-        }
+        await device.configDeviceSettings();
       }
     }
     return true;

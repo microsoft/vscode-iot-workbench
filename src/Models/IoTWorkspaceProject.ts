@@ -422,18 +422,14 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     //   await element.create();
     // });
 
-    try {
-      for (let i = 0; i < this.componentList.length; i++) {
-        const res = await this.componentList[i].create();
-        if (res === false) {
-          // TODO: Remove this function and implement with sdk in FileUtility
-          fs.removeSync(this.projectRootPath);
-          vscode.window.showWarningMessage('Project initialize cancelled.');
-          return false;
-        }
+    for (let i = 0; i < this.componentList.length; i++) {
+      const res = await this.componentList[i].create();
+      if (res === false) {
+        // TODO: Remove this function and implement with sdk in FileUtility
+        fs.removeSync(this.projectRootPath);
+        vscode.window.showWarningMessage('Project initialize cancelled.');
+        return false;
       }
-    } catch (error) {
-      throw error;
     }
 
     const workspaceConfigFilePath = path.join(
@@ -464,14 +460,10 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
       }
     }
 
-    try {
-      setTimeout(
-          () => vscode.commands.executeCommand(
-              'iotcube.openLocally', workspaceConfigFilePath, openInNewWindow),
-          1000);
-      return true;
-    } catch (error) {
-      throw error;
-    }
+    setTimeout(
+        () => vscode.commands.executeCommand(
+            'iotcube.openLocally', workspaceConfigFilePath, openInNewWindow),
+        1000);
+    return true;
   }
 }
