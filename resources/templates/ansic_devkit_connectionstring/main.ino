@@ -49,3 +49,9 @@ void loop()
     invokeDevKitPeripheral();
     delay(500);
 }
+
+void __sys_setup(void)
+{
+    // Default only enable wifi setting
+    EnableSystemWeb(WEB_SETTING_IOT_DEVICE_CONN_STRING);
+}

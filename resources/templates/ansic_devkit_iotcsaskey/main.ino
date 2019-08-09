@@ -30,10 +30,10 @@ typedef enum APP_DPS_REGISTRATION_STATUS_TAG
 const SECURE_DEVICE_TYPE secureDeviceTypeForProvisioning = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
 const IOTHUB_SECURITY_TYPE secureDeviceTypeForIotHub = IOTHUB_SECURITY_TYPE_SYMMETRIC_KEY;
 
-// DPSEndpoint=[DPS global endpoint];ScopeId=[Scope ID];RegistrationID=[Registration ID];SymmetricKey=[symmetric key]
+// DPSEndpoint=[DPS global endpoint];ScopeId=[Scope ID];RegistrationId=[Registration ID];SymmetricKey=[symmetric key]
 static const char *IOTHUBDPS_ENDPOINT = "DPSEndpoint";
 static const char *IOTHUBDPS_SCOPEID = "ScopeId";
-static const char *IOTHUBDPS_REGISTRATIONID = "RegistrationID";
+static const char *IOTHUBDPS_REGISTRATIONID = "RegistrationId";
 static const char *IOTHUBDPS_SYMMETRICKEY = "SymmetricKey";
 
 // The Device Provisioning Service (DPS) endpoint, learn more from https://docs.microsoft.com/en-us/azure/iot-dps/tutorial-set-up-device#create-the-device-registration-software.
@@ -310,4 +310,10 @@ void loop()
 
     invokeDevKitPeripheral();
     delay(500);
+}
+
+void __sys_setup(void)
+{
+    // Default only enable wifi setting
+    EnableSystemWeb(WEB_SETTING_IOT_DPS_SYMMETRIC_KEY);
 }
