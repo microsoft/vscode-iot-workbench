@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include "AZ3166WiFi.h"
 #include "IoT_DevKit_HW.h"
+#include "azure_c_shared_utility/connection_string_parser.h"
+#include "azure_c_shared_utility/string_tokenizer.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "certs/certs.h"
@@ -28,17 +30,20 @@ typedef enum APP_DPS_REGISTRATION_STATUS_TAG
 const SECURE_DEVICE_TYPE secureDeviceTypeForProvisioning = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
 const IOTHUB_SECURITY_TYPE secureDeviceTypeForIotHub = IOTHUB_SECURITY_TYPE_SYMMETRIC_KEY;
 
-// The DPS global device endpoint
-static const char *globalDpsEndpoint = "global.azure-devices-provisioning.net";
+// DPSEndpoint=[DPS global endpoint];ScopeId=[Scope ID];RegistrationID=[Registration ID];SymmetricKey=[symmetric key]
+static const char *IOTHUBDPS_ENDPOINT = "DPSEndpoint";
+static const char *IOTHUBDPS_SCOPEID = "ScopeId";
+static const char *IOTHUBDPS_REGISTRATIONID = "RegistrationID";
+static const char *IOTHUBDPS_SYMMETRICKEY = "SymmetricKey";
 
-// TODO: Specify DPS scope ID if you intend on using DPS / IoT Central.
-static const char *dpsIdScope = "[DPS Id Scope]";
-
-// TODO: Specify symmetric keys if you intend on using DPS / IoT Central and symmetric key based auth.
-static const char *sasKey = "[DPS symmetric key]";
-
-// TODO: specify your device registration ID
-static const char *registrationId = "[device registration Id]";
+// The Device Provisioning Service (DPS) endpoint, learn more from https://docs.microsoft.com/en-us/azure/iot-dps/tutorial-set-up-device#create-the-device-registration-software.
+static char *globalDpsEndpoint = NULL;
+// The Device Provisioning Service (DPS) ID Scope.
+static char *dpsIdScope = NULL;
+// The symmetric key, learn more from https://docs.microsoft.com/en-us/azure/iot-dps/concepts-symmetric-key-attestation.
+static char *sasKey = NULL;
+// The Registration ID, learn more from https://docs.microsoft.com/en-us/azure/iot-dps/use-hsm-with-sdk.
+static char *registrationId = NULL;
 
 // TODO: Fill in DIGITALTWIN_DEVICE_CAPABILITY_MODEL_INLINE_DATA if want to make deivce self-describing.
 #define DIGITALTWIN_DEVICE_CAPABILITY_MODEL_INLINE_DATA "{}"
@@ -69,6 +74,64 @@ typedef enum APP_DIGITALTWIN_REGISTRATION_STATUS_TAG
 
 static char *dpsIotHubUri;
 static char *dpsDeviceId;
+
+static bool parseDPSConnectionString(const char *connection_string)
+{
+    if (connection_string == NULL)
+    {
+        LogError("connection_string is NULL");
+        return false;
+    }
+    MAP_HANDLE connection_string_values_map;
+    if ((connection_string_values_map = connectionstringparser_parse_from_char(connection_string)) == NULL)
+    {
+        LogError("Tokenizing failed on connectionString");
+        return false;
+    }
+    const char *_globalDpsEndpoint = Map_GetValueFromKey(connection_string_values_map, IOTHUBDPS_ENDPOINT);
+    const char *_dpsIdScope = Map_GetValueFromKey(connection_string_values_map, IOTHUBDPS_SCOPEID);
+    const char *_sasKey = Map_GetValueFromKey(connection_string_values_map, IOTHUBDPS_SYMMETRICKEY);
+    const char *_registrationId = Map_GetValueFromKey(connection_string_values_map, IOTHUBDPS_REGISTRATIONID);
+    if (_globalDpsEndpoint)
+    {
+        mallocAndStrcpy_s(&globalDpsEndpoint, _globalDpsEndpoint);
+    }
+    else
+    {
+        LogError("Couldn't find %s in connection string", IOTHUBDPS_ENDPOINT);
+    }
+    if (_dpsIdScope)
+    {
+        mallocAndStrcpy_s(&dpsIdScope, _dpsIdScope);
+    }
+    else
+    {
+        LogError("Couldn't find %s in connection string", IOTHUBDPS_SCOPEID);
+    }
+    if (_sasKey)
+    {
+        mallocAndStrcpy_s(&sasKey, _sasKey);
+    }
+    else
+    {
+        LogError("Couldn't find %s in connection string", IOTHUBDPS_SYMMETRICKEY);
+    }
+    if (_registrationId)
+    {
+        mallocAndStrcpy_s(&registrationId, _registrationId);
+    }
+    else
+    {
+        LogError("Couldn't find %s in connection string", IOTHUBDPS_REGISTRATIONID);
+    }  
+    Map_Destroy(connection_string_values_map);
+
+    if (globalDpsEndpoint == NULL || dpsIdScope == NULL || sasKey == NULL || registrationId == NULL)
+    {
+        return false;
+    }
+    return true;
+}
 
 static void provisioningRegisterCallback(PROV_DEVICE_RESULT register_result, const char *iothub_uri, const char *device_id, void *user_context)
 {
@@ -106,6 +169,12 @@ static bool registerDevice(bool traceOn)
     if (IoTHub_Init() != 0)
     {
         LogError("IoTHub_Init failed");
+        return false;
+    }
+
+    const char *connectionString = getIoTHubConnectionString();
+    if (!parseDPSConnectionString(connectionString))
+    {
         return false;
     }
 
