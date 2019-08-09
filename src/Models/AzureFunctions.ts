@@ -314,17 +314,14 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
       }
       console.log(azureFunctionsPath, functionAppId);
 
-      if (this.channel && deployPending) {
-        clearInterval(deployPending);
-        utils.channelShowAndAppendLine(this.channel, '.');
-      }
       return true;
     } catch (error) {
+      throw error;
+    } finally {
       if (this.channel && deployPending) {
         clearInterval(deployPending);
         utils.channelShowAndAppendLine(this.channel, '.');
       }
-      throw error;
     }
   }
 

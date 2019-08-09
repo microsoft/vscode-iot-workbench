@@ -250,24 +250,18 @@ export class ExampleExplorer {
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext, name?: string, url?: string,
       boardId?: string) {
-    try {
-      if (name && url && boardId) {
-        this._exampleName = name;
-        this._exampleUrl = url;
-        this._boardId = boardId;
-      }
-      const res = await this.initializeExampleInternal(
-          context, channel, telemetryContext);
+    if (name && url && boardId) {
+      this._exampleName = name;
+      this._exampleUrl = url;
+      this._boardId = boardId;
+    }
+    const res = await this.initializeExampleInternal(
+        context, channel, telemetryContext);
 
-      if (res) {
-        vscode.window.showInformationMessage('Example load successfully.');
-      } else {
-        vscode.window.showWarningMessage('Example load cancelled.');
-      }
-    } catch (error) {
-      vscode.window.showErrorMessage(
-          'Unable to load example. Please check output window for detailed information.');
-      throw error;
+    if (res) {
+      vscode.window.showInformationMessage('Example load successfully.');
+    } else {
+      vscode.window.showWarningMessage('Example load cancelled.');
     }
   }
 
