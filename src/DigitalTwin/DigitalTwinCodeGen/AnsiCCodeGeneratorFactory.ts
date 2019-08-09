@@ -26,6 +26,7 @@ export class AnsiCCodeGeneratorFactory implements CodeGeneratorFactory {
       return new AnsiCCodeGeneratorImplVS(
           this.context, this.channel, this.telemetryContext, connectionType);
     }
+
     return null;
   }
 }

@@ -191,7 +191,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
         return;
       }
       await this.azureConfigHandler.updateComponent(
-          asaComponentIndex, componentInfo);
+          type, asaComponentIndex, componentInfo);
     } else {
       const newAsaConfig: AzureComponentConfig = {
         id: this.id,

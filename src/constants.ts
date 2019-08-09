@@ -16,6 +16,7 @@ export class ConfigKey {
   static readonly modelRepositoryKeyName = 'IoTPnPModelRepositoryKey';
   static readonly iotPnPPublicRepositoryUrl = 'IoTPnPPublicRepositoryUrl';
   static readonly projectType = 'ProjectType';
+  static readonly projectHostType = 'ProjectHostType';
 }
 
 export class EventNames {

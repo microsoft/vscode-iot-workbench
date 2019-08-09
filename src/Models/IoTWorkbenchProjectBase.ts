@@ -5,7 +5,7 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {FileNames, ScaffoldType} from '../constants';
+import {ConfigKey, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext} from '../telemetry';
 
@@ -30,17 +30,25 @@ export abstract class IoTWorkbenchProjectBase {
   protected channel: vscode.OutputChannel;
   protected telemetryContext: TelemetryContext;
 
-  static GetProjectType(projectFileRootPath: string): ProjectHostType {
+  static async GetProjectType(
+      scaffoldType: ScaffoldType,
+      projectFileRootPath: string): Promise<ProjectHostType> {
     const iotWorkbenchProjectFile =
         path.join(projectFileRootPath, FileNames.iotworkbenchprojectFileName);
-    const devcontainerFolderPath =
-        path.join(projectFileRootPath, FileNames.devcontainerFolderName);
-    if (!fs.existsSync(iotWorkbenchProjectFile)) {
+    if (!await FileUtility.fileExists(scaffoldType, iotWorkbenchProjectFile)) {
       return ProjectHostType.Unknown;
-    } else if (fs.existsSync(devcontainerFolderPath)) {
-      return ProjectHostType.Container;
     } else {
-      return ProjectHostType.Workspace;
+      const iotworkbenchprojectFileString =
+          await FileUtility.readFile(
+              scaffoldType, iotWorkbenchProjectFile, 'utf8') as string;
+      const projectConfig = JSON.parse(iotworkbenchprojectFileString);
+      if (projectConfig &&
+          projectConfig[`${ConfigKey.projectHostType}`] ===
+              ProjectHostType[ProjectHostType.Container]) {
+        return ProjectHostType.Container;
+      } else {
+        return ProjectHostType.Workspace;
+      }
     }
   }
 

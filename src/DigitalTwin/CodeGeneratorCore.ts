@@ -10,7 +10,7 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 
 import request = require('request-promise');
-import {FileNames, ConfigKey} from '../constants';
+import {FileNames, ConfigKey, DependentExtensions} from '../constants';
 import {TelemetryContext} from '../telemetry';
 import {DigitalTwinConstants, CodeGenConstants, DigitalTwinFileNames} from './DigitalTwinConstants';
 import {CodeGenProjectType, DeviceConnectionType, PnpLanguage} from './DigitalTwinCodeGen/Interfaces/CodeGenerator';
@@ -24,6 +24,7 @@ import {DigitalTwinConnectionStringBuilder} from './DigitalTwinApi/DigitalTwinCo
 import {PnpProjectTemplateType, ProjectTemplate, PnpDeviceConnectionType} from '../Models/Interfaces/ProjectTemplate';
 import {DialogResponses} from '../DialogResponses';
 import {CredentialStore} from '../credentialStore';
+import {RemoteExtension} from '../Models/RemoteExtension';
 
 const constants = {
   codeGenConfigFileName: '.codeGenConfigs',
@@ -65,6 +66,13 @@ export class CodeGeneratorCore {
   async GenerateDeviceCodeStub(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext): Promise<boolean> {
+    if (RemoteExtension.isRemote(context)) {
+      const message =
+          `The project is open in a Docker container now. Open a new window and run this command again.`;
+      vscode.window.showWarningMessage(message);
+      return true;
+    }
+
     // Step 0: update code generator
     if (!await this.InstallOrUpgradeCodeGenCli(context, channel)) {
       return false;

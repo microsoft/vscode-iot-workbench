@@ -19,7 +19,7 @@
       "type": "IoTDevKit",
       "name": "MXChip IoT DevKit Project",
       "detail": "Generate code for MXChip IoT DevKit as Arduino project.",
-      "enabled" : true
+      "enabled": true
     }
   ]
 }

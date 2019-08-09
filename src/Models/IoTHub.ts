@@ -188,7 +188,7 @@ export class IoTHub implements Component, Provisionable {
         return;
       }
       await this.azureConfigFileHandler.updateComponent(
-          iotHubComponentIndex, componentInfo);
+          type, iotHubComponentIndex, componentInfo);
     } else {
       const newIoTHubConfig: AzureComponentConfig = {
         id: this.id,
