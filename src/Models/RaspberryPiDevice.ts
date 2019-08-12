@@ -13,7 +13,7 @@ import {askAndOpenInRemote, channelShowAndAppendLine} from '../utils';
 
 import {ContainerDeviceBase} from './ContainerDeviceBase';
 import {DeviceType} from './Interfaces/Device';
-import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
+import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {RemoteExtension} from './RemoteExtension';
 
 class RaspberryPiUploadConfig {
@@ -158,7 +158,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     }
   }
 
-  async _autoDiscoverDeviceIp(): Promise<vscode.QuickPickItem[]> {
+  private async autoDiscoverDeviceIp(): Promise<vscode.QuickPickItem[]> {
     const sshDevicePickItems: vscode.QuickPickItem[] = [];
     const deviceInfos = await sdk.SSH.discover();
     deviceInfos.forEach((deviceInfo) => {
@@ -209,7 +209,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     if (sshDiscoverOrInputChoice.label === '$(search) Auto discover') {
       let selectDeviceChoice: vscode.QuickPickItem|undefined;
       do {
-        const selectDeviceItems = this._autoDiscoverDeviceIp();
+        const selectDeviceItems = this.autoDiscoverDeviceIp();
         selectDeviceChoice =
             await vscode.window.showQuickPick(selectDeviceItems, {
               ignoreFocusOut: true,

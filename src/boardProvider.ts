@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 'use strict';
-import * as vscode from 'vscode';
 import {FileNames} from './constants';
 import {Board} from './Models/Interfaces/Board';
 import * as path from 'path';

@@ -19,14 +19,14 @@ export class AnsiCCodeGeneratorImplVS extends AnsiCCodeGeneratorBase {
     super(context, channel);
   }
 
-  async GenerateCode(
+  async generateCode(
       targetPath: string, filePath: string, capabilityModelName: string,
       dcmId: string, interfaceDir: string): Promise<boolean> {
     // Invoke DigitalTwinCodeGen toolset to generate the code
     const retvalue =
-        await this.GenerateAnsiCCodeCore(targetPath, filePath, interfaceDir);
+        await this.generateAnsiCCodeCore(targetPath, filePath, interfaceDir);
 
-    const templateFolderName = await utils.GetCodeGenTemplateFolderName(
+    const templateFolderName = await utils.getCodeGenTemplateFolderName(
         this.context, CodeGenProjectType.VisualStudio, this.provisionType);
     if (!templateFolderName) {
       throw new Error(`Failed to get template folder name`);

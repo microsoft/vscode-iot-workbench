@@ -11,7 +11,7 @@ import {RemoteExtension} from './Models/RemoteExtension';
 
 
 export class AzureOperator {
-  async Provision(
+  async provision(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     let status = false;
@@ -28,7 +28,7 @@ export class AzureOperator {
     return status;
   }
 
-  async Deploy(
+  async deploy(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     if (RemoteExtension.isRemote(context)) {

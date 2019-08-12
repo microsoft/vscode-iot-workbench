@@ -26,9 +26,9 @@ suite('IoT Workbench: PnPAPI', () => {
     this.timeout(60 * 1000);
 
     const pnpSharedAccessKey = new DigitalTwinSharedAccessKey(
-        DigitalTwinConnectionStringBuilder.Create(constants.connectionString));
+        DigitalTwinConnectionStringBuilder.create(constants.connectionString));
 
-    const result = pnpSharedAccessKey.GenerateSASToken();
+    const result = pnpSharedAccessKey.generateSASToken();
     assert.equal(result.length > 0, true);
   });
 
@@ -38,19 +38,19 @@ suite('IoT Workbench: PnPAPI', () => {
     this.timeout(60 * 1000);
 
     const builder =
-        DigitalTwinConnectionStringBuilder.Create(constants.connectionString);
+        DigitalTwinConnectionStringBuilder.create(constants.connectionString);
     const pnpMetamodelRepositoryClient =
         new DigitalTwinMetamodelRepositoryClient();
     await pnpMetamodelRepositoryClient.initialize(constants.connectionString);
-    const result = await pnpMetamodelRepositoryClient.SearchInterfacesAsync(
-        '', null, builder.RepositoryIdValue, 50);
+    const result = await pnpMetamodelRepositoryClient.searchInterfacesAsync(
+        '', null, builder.repositoryIdValue, 50);
     assert.equal(result.results.length <= 50, true);
     assert.equal(result.results.length >= 0, true);
 
     if (result && result.continuationToken) {
       const newResult =
-          await pnpMetamodelRepositoryClient.SearchInterfacesAsync(
-              '', result.continuationToken, builder.RepositoryIdValue, 50);
+          await pnpMetamodelRepositoryClient.searchInterfacesAsync(
+              '', result.continuationToken, builder.repositoryIdValue, 50);
       assert.equal(newResult.results.length <= 50, true);
       assert.equal(newResult.results.length > 0, true);
     }
@@ -62,14 +62,14 @@ suite('IoT Workbench: PnPAPI', () => {
         new DigitalTwinMetamodelRepositoryClient();
     await pnpMetamodelRepositoryClient.initialize(null);
     const searchResults: SearchResults =
-        await pnpMetamodelRepositoryClient.SearchInterfacesAsync(
+        await pnpMetamodelRepositoryClient.searchInterfacesAsync(
             '', null, undefined, 50);
 
     if (searchResults.results.length > 0) {
       const sampleUri = searchResults.results[0].urnId;
       // get the Interface by interfaceId.
       const interfaceContext =
-          await pnpMetamodelRepositoryClient.GetInterfaceAsync(
+          await pnpMetamodelRepositoryClient.getInterfaceAsync(
               sampleUri, undefined, true);
 
       assert.equal(interfaceContext.content !== null, true);
@@ -77,7 +77,7 @@ suite('IoT Workbench: PnPAPI', () => {
 
     const fakeModelId = 'urn:1223:123:mxchip:1234';
     try {
-      await pnpMetamodelRepositoryClient.GetInterfaceAsync(
+      await pnpMetamodelRepositoryClient.getInterfaceAsync(
           fakeModelId, undefined, false);
       throw new Error('should not happen');
     } catch (error) {
@@ -88,25 +88,25 @@ suite('IoT Workbench: PnPAPI', () => {
   test('should be able to get the Capability Model content', async function() {
     this.timeout(10 * 60 * 1000);
     const builder =
-        DigitalTwinConnectionStringBuilder.Create(constants.connectionString);
+        DigitalTwinConnectionStringBuilder.create(constants.connectionString);
     const pnpMetamodelRepositoryClient =
         new DigitalTwinMetamodelRepositoryClient();
     await pnpMetamodelRepositoryClient.initialize(constants.connectionString);
     const searchResults: SearchResults =
-        await pnpMetamodelRepositoryClient.SearchCapabilityModelsAsync(
-            '', null, builder.RepositoryIdValue, 50);
+        await pnpMetamodelRepositoryClient.searchCapabilityModelsAsync(
+            '', null, builder.repositoryIdValue, 50);
 
     if (searchResults.results.length > 0) {
       const sampleUri = searchResults.results[0].urnId;
       // get the Interface.
       const templateContext =
-          await pnpMetamodelRepositoryClient.GetCapabilityModelAsync(
-              sampleUri, builder.RepositoryIdValue, true);
+          await pnpMetamodelRepositoryClient.getCapabilityModelAsync(
+              sampleUri, builder.repositoryIdValue, true);
       assert.equal(templateContext.content !== null, true);
 
       const templateContext2 =
-          await pnpMetamodelRepositoryClient.GetCapabilityModelAsync(
-              sampleUri, builder.RepositoryIdValue, false);
+          await pnpMetamodelRepositoryClient.getCapabilityModelAsync(
+              sampleUri, builder.repositoryIdValue, false);
       assert.equal(templateContext2.content !== null, true);
     }
   });
@@ -114,7 +114,7 @@ suite('IoT Workbench: PnPAPI', () => {
   test('should be able to create and delete Interface', async function() {
     this.timeout(60 * 1000);
     const builder =
-        DigitalTwinConnectionStringBuilder.Create(constants.connectionString);
+        DigitalTwinConnectionStringBuilder.create(constants.connectionString);
     const pnpMetamodelRepositoryClient =
         new DigitalTwinMetamodelRepositoryClient();
     await pnpMetamodelRepositoryClient.initialize(constants.connectionString);
@@ -130,28 +130,28 @@ suite('IoT Workbench: PnPAPI', () => {
     const fileJson = JSON.parse(newinteface);
     const fileId = fileJson['@id'];
     const result =
-        await pnpMetamodelRepositoryClient.CreateOrUpdateInterfaceAsync(
-            newinteface, fileId, undefined, builder.RepositoryIdValue);
+        await pnpMetamodelRepositoryClient.createOrUpdateInterfaceAsync(
+            newinteface, fileId, undefined, builder.repositoryIdValue);
 
     assert.equal(result.length > 0, true);
 
     const interfaceContext =
-        await pnpMetamodelRepositoryClient.GetInterfaceAsync(
-            fileId, builder.RepositoryIdValue, true);
+        await pnpMetamodelRepositoryClient.getInterfaceAsync(
+            fileId, builder.repositoryIdValue, true);
 
     const updatedResult =
-        await pnpMetamodelRepositoryClient.CreateOrUpdateInterfaceAsync(
+        await pnpMetamodelRepositoryClient.createOrUpdateInterfaceAsync(
             newinteface, fileId, interfaceContext.etag,
-            builder.RepositoryIdValue);
+            builder.repositoryIdValue);
 
     assert.equal(updatedResult !== result, true);
 
-    await pnpMetamodelRepositoryClient.DeleteInterfaceAsync(
-        fileId, builder.RepositoryIdValue);
+    await pnpMetamodelRepositoryClient.deleteInterfaceAsync(
+        fileId, builder.repositoryIdValue);
     if (fileId) {
       try {
-        await pnpMetamodelRepositoryClient.GetInterfaceAsync(
-            fileId, builder.RepositoryIdValue, true);
+        await pnpMetamodelRepositoryClient.getInterfaceAsync(
+            fileId, builder.repositoryIdValue, true);
       } catch (error) {
         assert.equal(error.statusCode, 404);
       }

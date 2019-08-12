@@ -61,7 +61,7 @@ export class ProjectInitializer {
           const scaffoldType = ScaffoldType.Local;
 
           // Step 1: Get project name
-          const projectPath = await this.GenerateProjectFolder(scaffoldType);
+          const projectPath = await this.generateProjectFolder(scaffoldType);
           if (!projectPath) {
             telemetryContext.properties.errorMessage =
                 'Project name input cancelled.';
@@ -73,7 +73,7 @@ export class ProjectInitializer {
 
           // Step 2: Select platform
           const platformSelection =
-              await this.SelectPlatform(scaffoldType, context);
+              await this.selectPlatform(scaffoldType, context);
           if (!platformSelection) {
             telemetryContext.properties.errorMessage =
                 'Platform selection cancelled.';
@@ -99,7 +99,7 @@ export class ProjectInitializer {
 
           let templateName: string|undefined;
           if (platformSelection.label === PlatformType.ARDUINO) {
-            const templateSelection = await this.SelectTemplate(
+            const templateSelection = await this.selectTemplate(
                 telemetryContext, templateJson, PlatformType.ARDUINO);
 
             if (!templateSelection) {
@@ -110,7 +110,7 @@ export class ProjectInitializer {
             } else {
               telemetryContext.properties.template = templateSelection.label;
               if (templateSelection.label === constants.noDeviceMessage) {
-                await utils.TakeNoDeviceSurvey(telemetryContext);
+                await utils.takeNoDeviceSurvey(telemetryContext);
                 return;
               }
             }
@@ -157,7 +157,7 @@ export class ProjectInitializer {
         });
   }
 
-  private async SelectTemplate(
+  private async selectTemplate(
       telemetryContext: TelemetryContext, templateJson: TemplatesType,
       platform: string): Promise<vscode.QuickPickItem|undefined> {
     const result =
@@ -188,7 +188,7 @@ export class ProjectInitializer {
     return templateSelection;
   }
 
-  private async SelectPlatform(
+  private async selectPlatform(
       type: ScaffoldType, context: vscode.ExtensionContext):
       Promise<vscode.QuickPickItem|undefined> {
     const platformListPath = context.asAbsolutePath(path.join(
@@ -219,7 +219,7 @@ export class ProjectInitializer {
     return platformSelection;
   }
 
-  private async GenerateProjectFolder(scaffoldType: ScaffoldType):
+  private async generateProjectFolder(scaffoldType: ScaffoldType):
       Promise<string|undefined> {
     // Get default workbench path.
     const settings: IoTWorkbenchSettings =
@@ -236,7 +236,7 @@ export class ProjectInitializer {
     let candidateName = name;
     while (true) {
       const projectPath = path.join(projectRootPath, candidateName);
-      const isValid = this.IsProjectPathValid(scaffoldType, projectPath);
+      const isValid = this.isProjectPathValid(scaffoldType, projectPath);
       if (isValid) {
         break;
       }
@@ -257,7 +257,7 @@ export class ProjectInitializer {
 
         const projectPath = path.join(projectRootPath, projectName);
         const isProjectNameValid =
-            this.IsProjectPathValid(scaffoldType, projectPath);
+            this.isProjectPathValid(scaffoldType, projectPath);
         if (isProjectNameValid) {
           return;
         } else {
@@ -274,7 +274,7 @@ export class ProjectInitializer {
     return projectPath;
   }
 
-  private async IsProjectPathValid(
+  private async isProjectPathValid(
       scaffoldType: ScaffoldType, projectPath: string): Promise<boolean> {
     const projectPathExists =
         await FileUtility.fileExists(scaffoldType, projectPath);

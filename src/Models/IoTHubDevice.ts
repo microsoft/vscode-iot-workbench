@@ -10,7 +10,6 @@ import {ConfigKey, ScaffoldType} from '../constants';
 
 import {getExtension} from './Apis';
 import {ComponentInfo, DependencyConfig} from './AzureComponentConfig';
-import {AzureUtility} from './AzureUtility';
 import {extensionName} from './Interfaces/Api';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';

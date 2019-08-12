@@ -8,7 +8,7 @@ import {setTimeout} from 'timers';
 import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
 
-import {AzureFunctionsLanguage, DependentExtensions, FileNames, GlobalConstants, OperationType, ScaffoldType, TemplateTag} from './constants';
+import {AzureFunctionsLanguage, FileNames, GlobalConstants, OperationType, ScaffoldType, TemplateTag} from './constants';
 import {DialogResponses} from './DialogResponses';
 import {CodeGenProjectType, DeviceConnectionType} from './DigitalTwin/DigitalTwinCodeGen/Interfaces/CodeGenerator';
 import {FileUtility} from './FileUtility';
@@ -268,7 +268,7 @@ export async function askAndOpenInRemote(
 }
 const noDeviceSurveyUrl = 'https://www.surveymonkey.com/r/C7NY7KJ';
 
-export async function TakeNoDeviceSurvey(telemetryContext: TelemetryContext) {
+export async function takeNoDeviceSurvey(telemetryContext: TelemetryContext) {
   const message =
       'Could you help to take a quick survey about what IoT development kit(s) you want Azure IoT Device Workbench to support?';
   const result:|vscode.MessageItem|undefined =
@@ -356,7 +356,7 @@ export async function getTemplateFilesInfo(templateFolder: string):
   return templateFilesInfo;
 }
 
-export async function GetCodeGenTemplateFolderName(
+export async function getCodeGenTemplateFolderName(
     context: vscode.ExtensionContext, codeGenProjectType: CodeGenProjectType,
     connectionType: DeviceConnectionType): Promise<string|undefined> {
   const templateFilePath = context.asAbsolutePath(path.join(

@@ -87,7 +87,7 @@ export class ExampleExplorer {
     }
   }
 
-  private async GenerateExampleFolder(exampleName: string) {
+  private async generateExampleFolder(exampleName: string) {
     const settings: IoTWorkbenchSettings =
         await IoTWorkbenchSettings.createAsync();
     const workbench = await settings.workbenchPath();
@@ -218,7 +218,7 @@ export class ExampleExplorer {
       telemetryContext.properties.result = 'Cancelled';
       return false;
     } else if (boardSelection.id === 'no_device') {
-      await utils.TakeNoDeviceSurvey(telemetryContext);
+      await utils.takeNoDeviceSurvey(telemetryContext);
       return;
     } else {
       telemetryContext.properties.board = boardSelection.label;
@@ -288,7 +288,7 @@ export class ExampleExplorer {
     telemetryContext.properties.board = board ? board.name : '';
 
     const url = this._exampleUrl;
-    const fsPath = await this.GenerateExampleFolder(this._exampleName);
+    const fsPath = await this.generateExampleFolder(this._exampleName);
 
     if (!fsPath) {
       return false;
