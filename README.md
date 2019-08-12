@@ -3,28 +3,7 @@
 [![Gitter](https://img.shields.io/badge/chat-on%20gitter-blue.svg)](https://gitter.im/Microsoft/vscode-iot-workbench)
 [![Travis CI](https://travis-ci.org/Microsoft/vscode-iot-workbench.svg?branch=master)](https://travis-ci.org/Microsoft/vscode-iot-workbench)
 
-The **Azure IoT Device Workbench** is an extension in Visual Studio Code that provides an integrated environment to code, build, deploy and debug your IoT device project with multiple Azure services supported.
-
-## Device platforms and languages supported
-
-Azure IoT Device Workbench aims to support multiple device platforms and its devices. Currently the following device platforms and languages are supported :
-
-### Embedded Linux <sup>preview</sup>
-
-Languages supported: `C/C++`
-
-Devices supported: [Cortex-A series](https://developer.arm.com/ip-products/processors/cortex-a) devices (e.g. Raspberry Pi, NXP i.MX6) that are running Embedded Linux such as Debian, Ubuntu or Yocto Linux.
-
-### Arduino
-
-Languages supported: `Arduino C/C++`
-
-Devices supported:
-
-- [MXChip IoT DevKit](https://aka.ms/iot-devkit)
-- [ESP32](https://www.espressif.com/en/products/hardware/esp-wroom-32/overview)
-
-Please help to take the [survey](https://www.surveymonkey.com/r/C7NY7KJ) to let us know extra device platforms and languages you want to have for Device Workbench.
+The **Azure IoT Device Workbench** is an extension in Visual Studio Code that provides an integrated environment to code, build, deploy and debug your IoT device project with multiple Azure services supported. And it also supports working with [IoT Plug and Play](https://docs.microsoft.com/azure/iot-pnp/overview-iot-plug-and-play) by defining *device capability model* schema and generating skeleton device code and project based on it.
 
 ## Installation
 
@@ -50,7 +29,7 @@ For developing on Embedded Linux device, you will need Docker and Visual Studio 
 
 ### Install Docker
 
-[VS Code Remote](https://aka.ms/vscode-remote) needs Docker runtime installed in order to use local containers, which is required for developing Embedded Linux devices in the Device Workbench.
+If you are developing on Embedded Linux for [ARM Cortex-A series](https://developer.arm.com/ip-products/processors/cortex-a) devices, you need to install and configure Docker in order to use container as compiling environment. And [VS Code Remote](https://aka.ms/vscode-remote) is the technology that enables this experience.You can skip this step if you are developing for Arduino or ESP32 devices.
 
 - Install Docker Desktop for Windows
 
@@ -69,13 +48,31 @@ For developing on Embedded Linux device, you will need Docker and Visual Studio 
 
   Linux is a highly variable environment and the large number of server, container, and desktop distributions can make it difficult to know what is supported. Please check this [tutorial](https://code.visualstudio.com/docs/remote/linux) for Linux support.
 
-## Usage
+## Develop device using IoT Plug and Play
 
-Depending on the device platform you choose, follow the resources below to develop on it.
+The Azure IoT Device Workbench Visual Studio Code extension provides an integrated environment to author IoT Plug and Play *device capability models (DCM)* and *interfaces*, publish to model repositories, and generate skeleton C code to implement the device application.
 
-### Embedded Linux <sup>preview</sup>
+Follow these links to get started with IoT Plug and Play and learn how to use Device Workbench to build IoT Plug and Play device:
 
-To simplify the cross compiling toolchain, Azure IoT Device SDK and dependencies setup and configuration, Device Workbench put all these components in the container. All cross-compiling works happen in it. Here is the quick start of using it to develop and compile a simple device app written in C and running on [Raspberry Pi 3 Model B+](https://www.raspberrypi.org/products/raspberry-pi-3-model-b-plus/) to send telemetry data to Azure IoT Hub.
+- [What is IoT Plug and Play](https://docs.microsoft.com/azure/iot-pnp/overview-iot-plug-and-play) and the [Digital Twin Definition Language (DTDL)](https://aka.ms/DTDL) that enables it.
+- [Quickstart: Use a device capability model to create an IoT Plug and Play device](https://docs.microsoft.com/azure/iot-pnp/quickstart-create-pnp-device)
+- [Build an IoT Plug and Play Preview device that's ready for certification](https://docs.microsoft.com/azure/iot-pnp/tutorial-build-device-certification)
+- [Use Azure IoT Device Workbench extension in Visual Studio Code](https://docs.microsoft.com/azure/iot-pnp/howto-use-iot-device-workbench)
+- [Connect an MXChip IoT DevKit device to your Azure IoT Central application via IoT Plug and Play](https://docs.microsoft.com/azure/iot-central/howto-connect-devkit-pnp)
+
+## Develop generic device
+
+Azure IoT Device Workbench aims to support multiple device platforms and its devices. Currently the following device platforms and languages are supported.
+
+Please take the [survey](https://www.surveymonkey.com/r/C7NY7KJ) to let us know extra device platforms and languages you want to see support in Device Workbench.
+
+### Embedded Linux <sup>public preview</sup>
+
+To simplify the cross compiling tool chain, Azure IoT Device SDK and dependencies setup and configuration, Device Workbench put all these components in the container. All cross-compiling works happen in it. Here is the quick start of using it to develop and compile a simple device app written in C and running on [Raspberry Pi 3 Model B+](https://www.raspberrypi.org/products/raspberry-pi-3-model-b-plus/) to send telemetry data to Azure IoT Hub.
+
+Languages supported: `C/C++`
+
+Devices supported: [Cortex-A series](https://developer.arm.com/ip-products/processors/cortex-a) devices (e.g. Raspberry Pi, NXP i.MX6) that are running Embedded Linux such as Debian, Ubuntu or Yocto Linux.
 
 #### Create new project
 
@@ -133,6 +130,13 @@ To simplify the cross compiling toolchain, Azure IoT Device SDK and dependencies
 
 Currently, Device Workbench supports MXChip IoT DevKit and ESP32 DevKits using Arduino. For generic Arduino device, we recommend to use [Arduino extension in VS Code](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-arduino).
 
+Languages supported: `Arduino C/C++`
+
+Devices supported:
+
+- [MXChip IoT DevKit](https://aka.ms/iot-devkit)
+- [ESP32](https://www.espressif.com/en/products/hardware/esp-wroom-32/overview)
+
 #### MXChip IoT DevKit
 
 Follow the [setup guide](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-arduino-iot-devkit-az3166-get-started#prepare-the-development-environment) to setup the environment including the Arduino extension.
@@ -162,6 +166,19 @@ Here are a set of tutorials that will help you get started:
 - [M5Stack Email Receiver](./docs/esp32/m5stack-email-receiver.md)
 
 ## Commands
+
+### IoT Plug and Play
+
+| Command | Description |
+| --- | --- |
+| `IoT Plug and Play: Create Capability Model...`  | Create new IoT Plug and Play device capability model file. |
+| `IoT Plug and Play: Create Interface...` | Create new IoT Plug and Play interface file. |
+| `IoT Plug and Play: Generate Device Code Stub...` | Generate skeleton device code and project based on given device capability model file. |
+| `IoT Plug and Play: Open Model Repository...`  | Open Public or Company Model Repository view to manage device model files. |
+| `IoT Plug and Play: Submit files to Model Repository...`  | Submit files to model repository. |
+| `IoT Plug and Play: Sign out Model Repository`  | Sign out the Company Model Repository. |
+
+### Generic device development
 
 | Command | Description |
 | --- | --- |
