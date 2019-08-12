@@ -7,43 +7,15 @@
 import * as vscode from 'vscode';
 
 import {TelemetryContext} from './telemetry';
-import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
-import {askAndNewProject, handleIoTWorkspaceProjectFolder} from './utils';
-
-const impor = require('impor')(__dirname);
-const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
-    typeof import('./Models/IoTWorkspaceProject');
-const ioTContainerizedProjectModule =
-    impor('./Models/IoTContainerizedProject') as
-    typeof import('./Models/IoTContainerizedProject');
+import {createAndLoadIoTProject} from './utils';
 
 export class DeviceOperator {
-  private projectHostType: ProjectHostType;
-  constructor(projectHostType: ProjectHostType) {
-    this.projectHostType = projectHostType;
-  }
-
   async compile(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    let iotProject;
-    telemetryContext.properties.projectHostType =
-        ProjectHostType[this.projectHostType];
-    if (this.projectHostType === ProjectHostType.Container) {
-      iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
-          context, channel, telemetryContext);
-    } else if (this.projectHostType === ProjectHostType.Workspace) {
-      iotProject = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
-          context, channel, telemetryContext);
-    }
-    if (iotProject === undefined) {
-      await handleIoTWorkspaceProjectFolder(telemetryContext);
-      return;
-    }
-
-    const result = await iotProject.load();
-    if (!result) {
-      await askAndNewProject(telemetryContext);
+    const iotProject =
+        await createAndLoadIoTProject(context, channel, telemetryContext);
+    if (!iotProject) {
       return;
     }
     await iotProject.compile();
@@ -52,24 +24,9 @@ export class DeviceOperator {
   async upload(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    let iotProject;
-    telemetryContext.properties.projectHostType =
-        ProjectHostType[this.projectHostType];
-    if (this.projectHostType === ProjectHostType.Container) {
-      iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
-          context, channel, telemetryContext);
-    } else if (this.projectHostType === ProjectHostType.Workspace) {
-      iotProject = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
-          context, channel, telemetryContext);
-    }
-    if (iotProject === undefined) {
-      await handleIoTWorkspaceProjectFolder(telemetryContext);
-      return;
-    }
-
-    const result = await iotProject.load();
-    if (!result) {
-      await askAndNewProject(telemetryContext);
+    const iotProject =
+        await createAndLoadIoTProject(context, channel, telemetryContext);
+    if (!iotProject) {
       return;
     }
     await iotProject.upload();
@@ -78,24 +35,9 @@ export class DeviceOperator {
   async configDeviceSettings(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    let iotProject;
-    telemetryContext.properties.projectHostType =
-        ProjectHostType[this.projectHostType];
-    if (this.projectHostType === ProjectHostType.Container) {
-      iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
-          context, channel, telemetryContext);
-    } else if (this.projectHostType === ProjectHostType.Workspace) {
-      iotProject = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
-          context, channel, telemetryContext);
-    }
-    if (iotProject === undefined) {
-      await handleIoTWorkspaceProjectFolder(telemetryContext);
-      return;
-    }
-
-    const result = await iotProject.load();
-    if (!result) {
-      await askAndNewProject(telemetryContext);
+    const iotProject =
+        await createAndLoadIoTProject(context, channel, telemetryContext);
+    if (!iotProject) {
       return;
     }
     await iotProject.configDeviceSettings();

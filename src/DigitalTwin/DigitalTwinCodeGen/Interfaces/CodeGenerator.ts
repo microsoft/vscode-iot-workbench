@@ -15,7 +15,7 @@ export enum PnpLanguage {
 }
 
 export interface CodeGenerator {
-  GenerateCode(
+  generateCode(
       targetPath: string, filePath: string, capabilityModelName: string,
       dcmId: string, interfaceDir: string): Promise<boolean>;
 }

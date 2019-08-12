@@ -5,7 +5,7 @@
 
 import * as request from 'request-promise';
 import {SearchResults} from './DataContracts/SearchResults';
-import {MetaModelType, SearchOptions, MetaModelUpsertRequest} from './DataContracts/DigitalTwinContext';
+import {MetaModelType, SearchOptions} from './DataContracts/DigitalTwinContext';
 import {DigitalTwinConnectionStringBuilder} from './DigitalTwinConnectionStringBuilder';
 import {DigitalTwinSharedAccessKey} from './DigitalTwinSharedAccessKey';
 import {ConfigKey} from '../../constants';
@@ -40,12 +40,12 @@ export class DigitalTwinMetamodelRepositoryClient {
       modelRepoUrl = dtRepositoryUrl;
     } else {
       const builder =
-          DigitalTwinConnectionStringBuilder.Create(connectionString);
-      if (!builder.HostName.startsWith('http')) {
+          DigitalTwinConnectionStringBuilder.create(connectionString);
+      if (!builder.hostName.startsWith('http')) {
         // The hostname from connections string doesn't contain the protocol
-        modelRepoUrl = 'https://' + builder.HostName;
+        modelRepoUrl = 'https://' + builder.hostName;
       } else {
-        modelRepoUrl = builder.HostName;
+        modelRepoUrl = builder.hostName;
       }
       this.modelRepoSharedAccessKey = new DigitalTwinSharedAccessKey(builder);
     }
@@ -54,7 +54,7 @@ export class DigitalTwinMetamodelRepositoryClient {
     this.modelPublicRepoUrl = repoUrl.href;
   }
 
-  async GetInterfaceAsync(
+  async getInterfaceAsync(
       modelId: string, repositoryId?: string,
       expand = false): Promise<GetModelResult> {
     if (repositoryId && !this.modelRepoSharedAccessKey) {
@@ -62,11 +62,11 @@ export class DigitalTwinMetamodelRepositoryClient {
           'The repository connection string is required to get the Interface.');
     }
 
-    return await this.MakeGetModelRequestAsync(
+    return await this.makeGetModelRequestAsync(
         MetaModelType.Interface, modelId, repositoryId, expand);
   }
 
-  async GetCapabilityModelAsync(
+  async getCapabilityModelAsync(
       modelId: string, repositoryId?: string,
       expand = false): Promise<GetModelResult> {
     if (repositoryId && !this.modelRepoSharedAccessKey) {
@@ -74,11 +74,11 @@ export class DigitalTwinMetamodelRepositoryClient {
           'The repository connection string is required to get the Capability Model.');
     }
 
-    return await this.MakeGetModelRequestAsync(
+    return await this.makeGetModelRequestAsync(
         MetaModelType.CapabilityModel, modelId, repositoryId, expand);
   }
 
-  async SearchInterfacesAsync(
+  async searchInterfacesAsync(
       searchString: string, continuationToken: string|null,
       repositoryId?: string, pageSize = 20): Promise<SearchResults> {
     if (pageSize <= 0) {
@@ -90,12 +90,12 @@ export class DigitalTwinMetamodelRepositoryClient {
           'The connection string is required to search intefaces in company repository.');
     }
 
-    return await this.MakeSearchRequestAsync(
+    return await this.makeSearchRequestAsync(
         MetaModelType.Interface, searchString, continuationToken, repositoryId,
         pageSize);
   }
 
-  async SearchCapabilityModelsAsync(
+  async searchCapabilityModelsAsync(
       searchString: string, continuationToken: string|null,
       repositoryId?: string, pageSize = 20): Promise<SearchResults> {
     if (pageSize <= 0) {
@@ -107,12 +107,12 @@ export class DigitalTwinMetamodelRepositoryClient {
           'The connection string is required to search Capability Models in company repository.');
     }
 
-    return await this.MakeSearchRequestAsync(
+    return await this.makeSearchRequestAsync(
         MetaModelType.CapabilityModel, searchString, continuationToken,
         repositoryId, pageSize);
   }
 
-  async CreateOrUpdateInterfaceAsync(
+  async createOrUpdateInterfaceAsync(
       content: string, modelId: string, etag?: string,
       repositoryId?: string): Promise<string> {
     if (repositoryId && !this.modelRepoSharedAccessKey) {
@@ -120,28 +120,28 @@ export class DigitalTwinMetamodelRepositoryClient {
           'The connection string is required to publish Interface in company repository.');
     }
 
-    return await this.MakeCreateOrUpdateRequestAsync(
+    return await this.makeCreateOrUpdateRequestAsync(
         MetaModelType.Interface, content, modelId, etag, repositoryId);
   }
 
   /// <summary>
   /// Updates the Capability Model with the new context content.
   /// </summary>
-  async CreateOrUpdateCapabilityModelAsync(
+  async createOrUpdateCapabilityModelAsync(
       content: string, modelId: string, etag?: string, repositoryId?: string) {
     if (repositoryId && !this.modelRepoSharedAccessKey) {
       throw new Error(
           'The connection string is required to publish Capability Model in company repository.');
     }
 
-    return await this.MakeCreateOrUpdateRequestAsync(
+    return await this.makeCreateOrUpdateRequestAsync(
         MetaModelType.CapabilityModel, content, modelId, etag, repositoryId);
   }
 
   /// <summary>
   /// Deletes an Interface for given modelId.
   /// </summary>
-  async DeleteInterfaceAsync(modelId: string, repositoryId: string) {
+  async deleteInterfaceAsync(modelId: string, repositoryId: string) {
     if (!repositoryId) {
       throw new Error(
           'The repository id is required to delete Capability Model. Delete Interface is not allowed for public repository.');
@@ -152,14 +152,14 @@ export class DigitalTwinMetamodelRepositoryClient {
           'The connection string is required to delete Interface in company repository.');
     }
 
-    await this.MakeDeleteRequestAsync(
+    await this.makeDeleteRequestAsync(
         MetaModelType.Interface, modelId, repositoryId);
   }
 
   /// <summary>
   /// Deletes a Capability Model for given model id.
   /// </summary>
-  async DeleteCapabilityModelAsync(modelId: string, repositoryId: string) {
+  async deleteCapabilityModelAsync(modelId: string, repositoryId: string) {
     if (!repositoryId) {
       throw new Error(
           'The repository id is required to delete Capability Model. Delete Capability Model is not allowed for public repository.');
@@ -170,11 +170,11 @@ export class DigitalTwinMetamodelRepositoryClient {
           'The connection string is required to delete Capability Model in company repository.');
     }
 
-    await this.MakeDeleteRequestAsync(
+    await this.makeDeleteRequestAsync(
         MetaModelType.CapabilityModel, modelId, repositoryId);
   }
 
-  async MakeCreateOrUpdateRequestAsync(
+  async makeCreateOrUpdateRequestAsync(
       metaModelType: MetaModelType, contents: string, modelId: string,
       etag?: string, repositoryId?: string,
       apiVersion = DigitalTwinConstants.apiVersion): Promise<string> {
@@ -195,7 +195,7 @@ export class DigitalTwinMetamodelRepositoryClient {
     let authenticationString = '';
 
     if (this.modelRepoSharedAccessKey) {
-      authenticationString = this.modelRepoSharedAccessKey.GenerateSASToken();
+      authenticationString = this.modelRepoSharedAccessKey.generateSASToken();
     }
 
     const payload = JSON.parse(contents);
@@ -224,17 +224,17 @@ export class DigitalTwinMetamodelRepositoryClient {
     });
   }
 
-  private async MakeGetModelRequestAsync(
+  private async makeGetModelRequestAsync(
       metaModelType: MetaModelType, modelId: string, repositoryId?: string,
       expand = false,
       apiVersion = DigitalTwinConstants.apiVersion): Promise<GetModelResult> {
     const targetUri =
-        this.GenerateFetchModelUri(modelId, apiVersion, repositoryId, expand);
+        this.generateFetchModelUri(modelId, apiVersion, repositoryId, expand);
 
     let authenticationString = '';
 
     if (this.modelRepoSharedAccessKey) {
-      authenticationString = this.modelRepoSharedAccessKey.GenerateSASToken();
+      authenticationString = this.modelRepoSharedAccessKey.generateSASToken();
     }
 
     const options: request.OptionsWithUri = {
@@ -262,7 +262,7 @@ export class DigitalTwinMetamodelRepositoryClient {
     });
   }
 
-  private async MakeSearchRequestAsync(
+  private async makeSearchRequestAsync(
       metaModelType: MetaModelType, searchString: string,
       continuationToken: string|null, repositoryId?: string, pageSize = 20,
       apiVersion = DigitalTwinConstants.apiVersion): Promise<SearchResults> {
@@ -287,7 +287,7 @@ export class DigitalTwinMetamodelRepositoryClient {
     let authenticationString = '';
 
     if (this.modelRepoSharedAccessKey) {
-      authenticationString = this.modelRepoSharedAccessKey.GenerateSASToken();
+      authenticationString = this.modelRepoSharedAccessKey.generateSASToken();
     }
 
     const options: request.OptionsWithUri = {
@@ -320,7 +320,7 @@ export class DigitalTwinMetamodelRepositoryClient {
   /// </summary>
   /// <param name="metaModelId">Metamodel id.</param>
   /// <param name="metaModelType"><see cref="MetaModelType"/> Interface or Capability Model.</param>
-  private async MakeDeleteRequestAsync(
+  private async makeDeleteRequestAsync(
       metaModelType: MetaModelType, modelId: string, repositoryId?: string,
       apiVersion = DigitalTwinConstants.apiVersion) {
     if (!this.modelPublicRepoUrl) {
@@ -333,7 +333,7 @@ export class DigitalTwinMetamodelRepositoryClient {
     let authenticationString = '';
 
     if (this.modelRepoSharedAccessKey) {
-      authenticationString = this.modelRepoSharedAccessKey.GenerateSASToken();
+      authenticationString = this.modelRepoSharedAccessKey.generateSASToken();
     }
 
     const options = {
@@ -358,7 +358,7 @@ export class DigitalTwinMetamodelRepositoryClient {
     });
   }
 
-  private GenerateFetchModelUri(
+  private generateFetchModelUri(
       modelId: string, apiVersion: string, repositoryId?: string,
       expand = false) {
     if (!this.modelPublicRepoUrl) {

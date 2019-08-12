@@ -64,7 +64,7 @@ export class TelemetryWorker {
     }
   }
 
-  static Initialize(context: vscode.ExtensionContext): void {
+  static initialize(context: vscode.ExtensionContext): void {
     const packageInfo = getPackageInfo(context);
     if (!packageInfo) {
       console.log('Unable to initialize telemetry');

@@ -10,15 +10,16 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 
 import request = require('request-promise');
-import {FileNames, ConfigKey, DependentExtensions} from '../constants';
+import extractzip = require('extract-zip');
+
+import * as utils from '../utils';
+import * as dtUtils from './Utilities';
+import {FileNames, ConfigKey} from '../constants';
 import {TelemetryContext} from '../telemetry';
 import {DigitalTwinConstants, CodeGenConstants, DigitalTwinFileNames} from './DigitalTwinConstants';
 import {CodeGenProjectType, DeviceConnectionType, PnpLanguage} from './DigitalTwinCodeGen/Interfaces/CodeGenerator';
 import {AnsiCCodeGeneratorFactory} from './DigitalTwinCodeGen/AnsiCCodeGeneratorFactory';
 import {ConfigHandler} from '../configHandler';
-import extractzip = require('extract-zip');
-import * as utils from '../utils';
-import * as dtUtils from './Utilities';
 import {DigitalTwinMetamodelRepositoryClient} from './DigitalTwinApi/DigitalTwinMetamodelRepositoryClient';
 import {DigitalTwinConnectionStringBuilder} from './DigitalTwinApi/DigitalTwinConnectionStringBuilder';
 import {PnpProjectTemplateType, ProjectTemplate, PnpDeviceConnectionType} from '../Models/Interfaces/ProjectTemplate';
@@ -63,18 +64,16 @@ interface CodeGenExecutions {
 }
 
 export class CodeGeneratorCore {
-  async GenerateDeviceCodeStub(
+  async generateDeviceCodeStub(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext): Promise<boolean> {
-    if (RemoteExtension.isRemote(context)) {
-      const message =
-          `The project is open in a Docker container now. Open a new window and run this command again.`;
-      vscode.window.showWarningMessage(message);
+    const notRemote = RemoteExtension.checkNotRemoteBeforeRunCommand(context);
+    if (!notRemote) {
       return true;
     }
 
     // Step 0: update code generator
-    if (!await this.InstallOrUpgradeCodeGenCli(context, channel)) {
+    if (!await this.installOrUpgradeCodeGenCli(context, channel)) {
       return false;
     }
 
@@ -100,7 +99,7 @@ export class CodeGeneratorCore {
 
     // Step 1: Choose Capability Model
     const capabilityModelFileSelection =
-        await this.SelectCapabilityFile(channel, dcmFiles, telemetryContext);
+        await this.selectCapabilityFile(channel, dcmFiles, telemetryContext);
     if (capabilityModelFileSelection === undefined) {
       utils.channelShowAndAppendLine(
           channel, `${DigitalTwinConstants.dtPrefix} Cancelled.`);
@@ -157,12 +156,12 @@ export class CodeGeneratorCore {
           // Regen code
           const projectPath =
               path.join(rootPath, codeGenExecutionItem.projectName);
-          if (!await this.DownloadAllIntefaceFiles(
+          if (!await this.downloadAllIntefaceFiles(
                   channel, rootPath, capabilityModelFilePath, projectPath,
                   interfaceFiles)) {
             return false;
           }
-          const executionResult = await this.GenerateDeviceCodeCore(
+          const executionResult = await this.generateDeviceCodeCore(
               rootPath, codeGenExecutionItem, context, channel,
               telemetryContext);
           return executionResult;
@@ -171,7 +170,7 @@ export class CodeGeneratorCore {
     }
 
     // Step 2: Get project name
-    const codeGenProjectName = await this.GetCodeGenProjectName(rootPath);
+    const codeGenProjectName = await this.getCodeGenProjectName(rootPath);
     if (codeGenProjectName === undefined) {
       const message = `Project name is not specified, cancelled`;
       utils.channelShowAndAppendLine(channel, message);
@@ -196,7 +195,7 @@ export class CodeGeneratorCore {
     }
 
     // Step 4: Select project type
-    const codeGenProjectType = await this.SelectProjectType(
+    const codeGenProjectType = await this.selectProjectType(
         languageSelection.label, context, telemetryContext);
     if (codeGenProjectType === undefined) {
       return false;
@@ -204,13 +203,13 @@ export class CodeGeneratorCore {
 
     // Step 5: Select device connection string type
     const connectionType =
-        await this.SelectConnectionType(context, channel, telemetryContext);
+        await this.selectConnectionType(context, channel, telemetryContext);
     if (connectionType === undefined) {
       return false;
     }
 
     // Download all interfaces
-    if (!await this.DownloadAllIntefaceFiles(
+    if (!await this.downloadAllIntefaceFiles(
             channel, rootPath, capabilityModelFilePath, projectPath,
             interfaceFiles)) {
       return false;
@@ -247,13 +246,13 @@ export class CodeGeneratorCore {
       // save config failure should not impact code gen.
     }
 
-    const executionResult = await this.GenerateDeviceCodeCore(
+    const executionResult = await this.generateDeviceCodeCore(
         rootPath, codeGenExecutionInfo, context, channel, telemetryContext);
 
     return executionResult;
   }
 
-  private async DownloadAllIntefaceFiles(
+  private async downloadAllIntefaceFiles(
       channel: vscode.OutputChannel, rootPath: string,
       capabilityModelFilePath: string, projectPath: string,
       interfaceFiles: dtUtils.SchemaFileInfo[]): Promise<boolean> {
@@ -281,13 +280,13 @@ export class CodeGeneratorCore {
             // Company Model Repo connections already set
             credentialChecked = true;
             // Try company repo first
-            if (await this.DownloadInterfaceFile(
+            if (await this.downloadInterfaceFile(
                     schema, rootPath, connectionString, channel)) {
               // Downloaded from company repo.
               continue;
             }
             // Then try public repo
-            if (await this.DownloadInterfaceFile(
+            if (await this.downloadInterfaceFile(
                     schema, rootPath, null, channel)) {
               // Downloaded from company repo.
               continue;
@@ -296,7 +295,7 @@ export class CodeGeneratorCore {
             throw new Error(`Can't find the interface ${schema}.`);
           } else {
             // Only can try public repo
-            if (await this.DownloadInterfaceFile(
+            if (await this.downloadInterfaceFile(
                     schema, rootPath, null, channel)) {
               // Downloaded from public repo.
               continue;
@@ -312,7 +311,7 @@ export class CodeGeneratorCore {
     return true;
   }
 
-  private async GenerateDeviceCodeCore(
+  private async generateDeviceCodeCore(
       rootPath: string, codeGenExecutionInfo: CodeGenExecutionItem,
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext): Promise<boolean> {
@@ -320,7 +319,7 @@ export class CodeGeneratorCore {
     const codeGenFactory =
         new AnsiCCodeGeneratorFactory(context, channel, telemetryContext);
 
-    const codeGenerator = codeGenFactory.CreateCodeGeneratorImpl(
+    const codeGenerator = codeGenFactory.createCodeGeneratorImpl(
         codeGenExecutionInfo.codeGenProjectType,
         codeGenExecutionInfo.deviceConnectionType);
     if (!codeGenerator) {
@@ -346,7 +345,7 @@ export class CodeGeneratorCore {
               path.join(rootPath, codeGenExecutionInfo.projectName);
           const capabilityModelFilePath =
               path.join(rootPath, codeGenExecutionInfo.capabilityModelPath);
-          const result = await codeGenerator.GenerateCode(
+          const result = await codeGenerator.generateCode(
               projectPath, capabilityModelFilePath, capabilityModelName,
               capabilityModelId, rootPath);
           if (result) {
@@ -356,7 +355,7 @@ export class CodeGeneratorCore {
         });
     return true;
   }
-  async SelectConnectionType(
+  async selectConnectionType(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext):
       Promise<DeviceConnectionType|undefined> {
@@ -402,7 +401,7 @@ export class CodeGeneratorCore {
     return connectionType;
   }
 
-  async GetCodeGenProjectName(rootPath: string): Promise<string|undefined> {
+  async getCodeGenProjectName(rootPath: string): Promise<string|undefined> {
     // select the project name for code gen
     const codeGenProjectName = await vscode.window.showInputBox({
       placeHolder: 'Please input the project name here.',
@@ -439,7 +438,7 @@ export class CodeGeneratorCore {
     return codeGenProjectName;
   }
 
-  async SelectProjectType(
+  async selectProjectType(
       language: string, context: vscode.ExtensionContext,
       telemetryContext: TelemetryContext):
       Promise<CodeGenProjectType|undefined> {
@@ -491,7 +490,7 @@ export class CodeGeneratorCore {
     return codeGenProjectType;
   }
 
-  async SelectCapabilityFile(
+  async selectCapabilityFile(
       channel: vscode.OutputChannel, dcmFiles: dtUtils.SchemaFileInfo[],
       telemetryContext: TelemetryContext):
       Promise<vscode.QuickPickItem|undefined> {
@@ -529,7 +528,7 @@ export class CodeGeneratorCore {
     return fileSelection;
   }
 
-  async DownloadInterfaceFile(
+  async downloadInterfaceFile(
       urnId: string, targetFolder: string, connectionString: string|null,
       channel: vscode.OutputChannel): Promise<boolean> {
     const fileName =
@@ -543,11 +542,11 @@ export class CodeGeneratorCore {
     // Try to download Interface file from company repo
     if (connectionString) {
       try {
-        const builder = DigitalTwinConnectionStringBuilder.Create(
+        const builder = DigitalTwinConnectionStringBuilder.create(
             connectionString.toString());
-        const repositoryId = builder.RepositoryIdValue;
+        const repositoryId = builder.repositoryIdValue;
         const fileMetaData =
-            await dtMetamodelRepositoryClient.GetInterfaceAsync(
+            await dtMetamodelRepositoryClient.getInterfaceAsync(
                 urnId, repositoryId, true);
         if (fileMetaData) {
           fs.writeFileSync(
@@ -570,7 +569,7 @@ export class CodeGeneratorCore {
       // Try to download Interface file from public repo
       try {
         const fileMetaData =
-            await dtMetamodelRepositoryClient.GetInterfaceAsync(
+            await dtMetamodelRepositoryClient.getInterfaceAsync(
                 urnId, undefined, true);
         if (fileMetaData) {
           fs.writeFileSync(
@@ -592,7 +591,7 @@ export class CodeGeneratorCore {
     return false;
   }
 
-  private async GetCodeGenCliPackageInfo(
+  private async getCodeGenCliPackageInfo(
       context: vscode.ExtensionContext,
       channel: vscode.OutputChannel): Promise<CodeGeneratorConfigItem|null> {
     const extensionPackage = require(context.asAbsolutePath('./package.json'));
@@ -642,7 +641,7 @@ export class CodeGeneratorCore {
     return targetConfigItem;
   }
 
-  private async CheckLocalCodeGenCli(): Promise<string|null> {
+  private async checkLocalCodeGenCli(): Promise<string|null> {
     // Check version of existing CodeGen Cli
     const platform = os.platform();
     const currentVersion =
@@ -661,7 +660,7 @@ export class CodeGeneratorCore {
     return currentVersion;
   }
 
-  private async DownloadAndInstallCodeGenCli(
+  private async downloadAndInstallCodeGenCli(
       channel: vscode.OutputChannel, targetConfigItem: CodeGeneratorConfigItem,
       installOrUpgrade: number, newVersion: string): Promise<boolean> {
     let packageUri: string;
@@ -744,7 +743,7 @@ export class CodeGeneratorCore {
     return true;
   }
 
-  private async InstallOrUpgradeCodeGenCli(
+  private async installOrUpgradeCodeGenCli(
       context: vscode.ExtensionContext,
       channel: vscode.OutputChannel): Promise<boolean> {
     utils.channelShowAndAppend(
@@ -752,14 +751,14 @@ export class CodeGeneratorCore {
         `${DigitalTwinConstants.dtPrefix} Check ${
             DigitalTwinConstants.codeGenCli} ...`);
     const targetConfigItem =
-        await this.GetCodeGenCliPackageInfo(context, channel);
+        await this.getCodeGenCliPackageInfo(context, channel);
     if (targetConfigItem === null) {
       return false;
     }
 
     // Check version of existing CodeGen Cli
     let installOrUpgrade = 0;
-    const currentVersion = await this.CheckLocalCodeGenCli();
+    const currentVersion = await this.checkLocalCodeGenCli();
     if (currentVersion == null) {
       installOrUpgrade = 1;
     } else {
@@ -794,7 +793,7 @@ export class CodeGeneratorCore {
     await vscode.window.withProgress(
         {location: vscode.ProgressLocation.Notification, title: processTitle},
         async () => {
-          result = await this.DownloadAndInstallCodeGenCli(
+          result = await this.downloadAndInstallCodeGenCli(
               channel, targetConfigItem as CodeGeneratorConfigItem,
               installOrUpgrade, newVersion);
         });

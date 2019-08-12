@@ -184,119 +184,108 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
           'Unable to get the template for Azure Functions.Creating project for Azure Functions cancelled.');
     }
 
-    try {
-      if (this.functionLanguage === AzureFunctionsLanguage.CSharpLibrary) {
-        await vscode.commands.executeCommand(
-            'azureFunctions.createNewProject', azureFunctionsPath,
-            this.functionLanguage, '~2', false /* openFolder */, templateName,
-            'IoTHubTrigger1', {
-              connection: 'eventHubConnectionString',
-              path: '%eventHubConnectionPath%',
-              consumerGroup: '$Default',
-              namespace: 'IoTWorkbench'
-            });
-      } else {
-        await vscode.commands.executeCommand(
-            'azureFunctions.createNewProject', azureFunctionsPath,
-            this.functionLanguage, '~1', false /* openFolder */, templateName,
-            'IoTHubTrigger1', {
-              connection: 'eventHubConnectionString',
-              path: '%eventHubConnectionPath%',
-              consumerGroup: '$Default'
-            });
-      }
-
-      await this.updateConfigSettings(
-          scaffoldType, {values: {functionLanguage: this.functionLanguage}});
-      return true;
-    } catch (error) {
-      throw error;
+    if (this.functionLanguage === AzureFunctionsLanguage.CSharpLibrary) {
+      await vscode.commands.executeCommand(
+          'azureFunctions.createNewProject', azureFunctionsPath,
+          this.functionLanguage, '~2', false /* openFolder */, templateName,
+          'IoTHubTrigger1', {
+            connection: 'eventHubConnectionString',
+            path: '%eventHubConnectionPath%',
+            consumerGroup: '$Default',
+            namespace: 'IoTWorkbench'
+          });
+    } else {
+      await vscode.commands.executeCommand(
+          'azureFunctions.createNewProject', azureFunctionsPath,
+          this.functionLanguage, '~1', false /* openFolder */, templateName,
+          'IoTHubTrigger1', {
+            connection: 'eventHubConnectionString',
+            path: '%eventHubConnectionPath%',
+            consumerGroup: '$Default'
+          });
     }
+
+    await this.updateConfigSettings(
+        scaffoldType, {values: {functionLanguage: this.functionLanguage}});
+    return true;
   }
 
   async provision(): Promise<boolean> {
-    try {
-      const subscriptionId = azureUtilityModule.AzureUtility.subscriptionId;
-      if (!subscriptionId) {
-        return false;
+    const subscriptionId = azureUtilityModule.AzureUtility.subscriptionId;
+    if (!subscriptionId) {
+      return false;
+    }
+
+    const resourceGroup = azureUtilityModule.AzureUtility.resourceGroup;
+    if (!resourceGroup) {
+      return false;
+    }
+
+    const functionAppId: string|undefined =
+        await vscode.commands.executeCommand<string>(
+            'azureFunctions.createFunctionApp', subscriptionId, resourceGroup);
+    if (functionAppId) {
+      await ConfigHandler.update(ConfigKey.functionAppId, functionAppId);
+      const eventHubConnectionString =
+          ConfigHandler.get<string>(ConfigKey.eventHubConnectionString);
+      const eventHubConnectionPath =
+          ConfigHandler.get<string>(ConfigKey.eventHubConnectionPath);
+      const iotHubConnectionString =
+          ConfigHandler.get<string>(ConfigKey.iotHubConnectionString);
+
+      if (!eventHubConnectionString || !eventHubConnectionPath) {
+        throw new Error('No event hub path or connection string found.');
+      }
+      const credential =
+          await this.getCredentialFromSubscriptionId(subscriptionId);
+      if (credential === undefined) {
+        throw new Error('Unable to get credential for the subscription.');
       }
 
-      const resourceGroup = azureUtilityModule.AzureUtility.resourceGroup;
-      if (!resourceGroup) {
-        return false;
+      const resourceGroupMatches =
+          functionAppId.match(/\/resourceGroups\/([^\/]*)/);
+      if (!resourceGroupMatches || resourceGroupMatches.length < 2) {
+        throw new Error('Cannot parse resource group from function app ID.');
       }
+      const resourceGroup = resourceGroupMatches[1];
 
-      const functionAppId: string|undefined =
-          await vscode.commands.executeCommand<string>(
-              'azureFunctions.createFunctionApp', subscriptionId,
-              resourceGroup);
-      if (functionAppId) {
-        await ConfigHandler.update(ConfigKey.functionAppId, functionAppId);
-        const eventHubConnectionString =
-            ConfigHandler.get<string>(ConfigKey.eventHubConnectionString);
-        const eventHubConnectionPath =
-            ConfigHandler.get<string>(ConfigKey.eventHubConnectionPath);
-        const iotHubConnectionString =
-            ConfigHandler.get<string>(ConfigKey.iotHubConnectionString);
+      const siteNameMatches = functionAppId.match(/\/sites\/([^\/]*)/);
+      if (!siteNameMatches || siteNameMatches.length < 2) {
+        throw new Error('Cannot parse function app name from function app ID.');
+      }
+      const siteName = siteNameMatches[1];
 
-        if (!eventHubConnectionString || !eventHubConnectionPath) {
-          throw new Error('No event hub path or connection string found.');
-        }
-        const credential =
-            await this.getCredentialFromSubscriptionId(subscriptionId);
-        if (credential === undefined) {
-          throw new Error('Unable to get credential for the subscription.');
-        }
+      const client = new WebSiteManagementClient(credential, subscriptionId);
+      console.log(resourceGroup, siteName);
+      const appSettings: StringDictionary =
+          await client.webApps.listApplicationSettings(resourceGroup, siteName);
+      console.log(appSettings);
+      appSettings.properties = appSettings.properties || {};
 
-        const resourceGroupMatches =
-            functionAppId.match(/\/resourceGroups\/([^\/]*)/);
-        if (!resourceGroupMatches || resourceGroupMatches.length < 2) {
-          throw new Error('Cannot parse resource group from function app ID.');
-        }
-        const resourceGroup = resourceGroupMatches[1];
-
-        const siteNameMatches = functionAppId.match(/\/sites\/([^\/]*)/);
-        if (!siteNameMatches || siteNameMatches.length < 2) {
-          throw new Error(
-              'Cannot parse function app name from function app ID.');
-        }
-        const siteName = siteNameMatches[1];
-
-        const client = new WebSiteManagementClient(credential, subscriptionId);
-        console.log(resourceGroup, siteName);
-        const appSettings: StringDictionary =
-            await client.webApps.listApplicationSettings(
-                resourceGroup, siteName);
-        console.log(appSettings);
-        appSettings.properties = appSettings.properties || {};
-
-        // for c# library, use the default setting of ~2.
-        if (this.functionLanguage !==
-            AzureFunctionsLanguage.CSharpLibrary as string) {
-          appSettings.properties['FUNCTIONS_EXTENSION_VERSION'] = '~1';
-        } else {
-          appSettings.properties['FUNCTIONS_EXTENSION_VERSION'] = '~2';
-        }
-        appSettings.properties['eventHubConnectionString'] =
-            eventHubConnectionString || '';
-        appSettings.properties['eventHubConnectionPath'] =
-            eventHubConnectionPath || '';
-        appSettings.properties['iotHubConnectionString'] =
-            iotHubConnectionString || '';
-        // see detail:
-        // https://github.com/Microsoft/vscode-iot-workbench/issues/436
-        appSettings.properties['WEBSITE_RUN_FROM_PACKAGE'] = '0';
-
-        await client.webApps.updateApplicationSettings(
-            resourceGroup, siteName, appSettings);
-
-        return true;
+      // for c# library, use the default setting of ~2.
+      if (this.functionLanguage !==
+          AzureFunctionsLanguage.CSharpLibrary as string) {
+        appSettings.properties['FUNCTIONS_EXTENSION_VERSION'] = '~1';
       } else {
-        throw new Error(
-            'Creating Azure Functions application failed. Please check the error log in output window.');
+        appSettings.properties['FUNCTIONS_EXTENSION_VERSION'] = '~2';
       }
-    } catch (error) {
-      throw error;
+      appSettings.properties['eventHubConnectionString'] =
+          eventHubConnectionString || '';
+      appSettings.properties['eventHubConnectionPath'] =
+          eventHubConnectionPath || '';
+      appSettings.properties['iotHubConnectionString'] =
+          iotHubConnectionString || '';
+      // see detail:
+      // https://github.com/Microsoft/vscode-iot-workbench/issues/436
+      appSettings.properties['WEBSITE_RUN_FROM_PACKAGE'] = '0';
+
+      await client.webApps.updateApplicationSettings(
+          resourceGroup, siteName, appSettings);
+
+      return true;
+    } else {
+      throw new Error(
+          'Creating Azure Functions application failed. Please check the error log in output window.');
     }
   }
 
@@ -325,17 +314,14 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
       }
       console.log(azureFunctionsPath, functionAppId);
 
-      if (this.channel && deployPending) {
-        clearInterval(deployPending);
-        utils.channelShowAndAppendLine(this.channel, '.');
-      }
       return true;
     } catch (error) {
+      throw error;
+    } finally {
       if (this.channel && deployPending) {
         clearInterval(deployPending);
         utils.channelShowAndAppendLine(this.channel, '.');
       }
-      throw error;
     }
   }
 

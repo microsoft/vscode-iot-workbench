@@ -13,7 +13,7 @@ import {askAndOpenInRemote, channelShowAndAppendLine} from '../utils';
 
 import {ContainerDeviceBase} from './ContainerDeviceBase';
 import {DeviceType} from './Interfaces/Device';
-import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
+import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {RemoteExtension} from './RemoteExtension';
 
 class RaspberryPiUploadConfig {
@@ -158,7 +158,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     }
   }
 
-  async _autoDiscoverDeviceIp(): Promise<vscode.QuickPickItem[]> {
+  private async autoDiscoverDeviceIp(): Promise<vscode.QuickPickItem[]> {
     const sshDevicePickItems: vscode.QuickPickItem[] = [];
     const deviceInfos = await sdk.SSH.discover();
     deviceInfos.forEach((deviceInfo) => {
@@ -209,7 +209,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     if (sshDiscoverOrInputChoice.label === '$(search) Auto discover') {
       let selectDeviceChoice: vscode.QuickPickItem|undefined;
       do {
-        const selectDeviceItems = this._autoDiscoverDeviceIp();
+        const selectDeviceItems = this.autoDiscoverDeviceIp();
         selectDeviceChoice =
             await vscode.window.showQuickPick(selectDeviceItems, {
               ignoreFocusOut: true,
@@ -302,41 +302,37 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
   }
 
   async configHub(): Promise<boolean> {
-    try {
-      const projectFolderPath = this.projectFolder;
+    const projectFolderPath = this.projectFolder;
 
-      if (!FileUtility.directoryExists(
-              ScaffoldType.Workspace, projectFolderPath)) {
-        throw new Error('Unable to find the device folder inside the project.');
-      }
-
-      const deviceConnectionStringSelection: vscode.QuickPickItem[] = [{
-        label: 'Copy device connection string',
-        description: 'Copy device connection string',
-        detail: 'Copy'
-      }];
-      const selection =
-          await vscode.window.showQuickPick(deviceConnectionStringSelection, {
-            ignoreFocusOut: true,
-            placeHolder: 'Copy IoT Hub Device Connection String'
-          });
-
-      if (!selection) {
-        return false;
-      }
-
-      const deviceConnectionString =
-          ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
-      if (!deviceConnectionString) {
-        throw new Error(
-            'Unable to get the device connection string, please invoke the command of Azure Provision first.');
-      }
-      await sdk.Clipboard.copy(deviceConnectionString);
-      vscode.window.showInformationMessage(
-          'Device connection string has been copied.');
-      return true;
-    } catch (error) {
-      throw error;
+    if (!FileUtility.directoryExists(
+            ScaffoldType.Workspace, projectFolderPath)) {
+      throw new Error('Unable to find the device folder inside the project.');
     }
+
+    const deviceConnectionStringSelection: vscode.QuickPickItem[] = [{
+      label: 'Copy device connection string',
+      description: 'Copy device connection string',
+      detail: 'Copy'
+    }];
+    const selection =
+        await vscode.window.showQuickPick(deviceConnectionStringSelection, {
+          ignoreFocusOut: true,
+          placeHolder: 'Copy IoT Hub Device Connection String'
+        });
+
+    if (!selection) {
+      return false;
+    }
+
+    const deviceConnectionString =
+        ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
+    if (!deviceConnectionString) {
+      throw new Error(
+          'Unable to get the device connection string, please invoke the command of Azure Provision first.');
+    }
+    await sdk.Clipboard.copy(deviceConnectionString);
+    vscode.window.showInformationMessage(
+        'Device connection string has been copied.');
+    return true;
   }
 }

@@ -4,11 +4,10 @@ import * as vscode from 'vscode';
 
 import * as utils from '../../../utils';
 import {CodeGenConstants, DigitalTwinConstants} from '../../DigitalTwinConstants';
-
 import {CodeGenerator} from './CodeGenerator';
 
 export abstract class AnsiCCodeGeneratorBase implements CodeGenerator {
-  abstract async GenerateCode(
+  abstract async generateCode(
       targetPath: string, filePath: string, capabilityModelName: string,
       dcmId: string, interfaceDir: string): Promise<boolean>;
 
@@ -16,7 +15,7 @@ export abstract class AnsiCCodeGeneratorBase implements CodeGenerator {
       protected context: vscode.ExtensionContext,
       protected channel: vscode.OutputChannel) {}
 
-  async GenerateAnsiCCodeCore(
+  async generateAnsiCCodeCore(
       targetPath: string, filePath: string,
       interfaceDir: string): Promise<boolean> {
     // Invoke DigitalTwinCodeGen toolset to generate the code

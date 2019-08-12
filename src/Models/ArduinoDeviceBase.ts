@@ -87,29 +87,21 @@ export abstract class ArduinoDeviceBase implements Device {
   }
 
   async compile(): Promise<boolean> {
-    try {
-      const result = await this.preCompileAction();
-      if (!result) {
-        return false;
-      }
-      await vscode.commands.executeCommand('arduino.verify');
-      return true;
-    } catch (error) {
-      throw error;
+    const result = await this.preCompileAction();
+    if (!result) {
+      return false;
     }
+    await vscode.commands.executeCommand('arduino.verify');
+    return true;
   }
 
   async upload(): Promise<boolean> {
-    try {
-      const result = await this.preUploadAction();
-      if (!result) {
-        return false;
-      }
-      await vscode.commands.executeCommand('arduino.upload');
-      return true;
-    } catch (error) {
-      throw error;
+    const result = await this.preUploadAction();
+    if (!result) {
+      return false;
     }
+    await vscode.commands.executeCommand('arduino.upload');
+    return true;
   }
 
 

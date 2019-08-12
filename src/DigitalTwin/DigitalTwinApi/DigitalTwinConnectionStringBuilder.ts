@@ -3,8 +3,6 @@
 
 'use strict';
 
-
-
 const constants = {
   ValuePairDelimiter: ';',
   ValuePairSeparator: '=',
@@ -17,46 +15,44 @@ const constants = {
   SharedAccessKeyValueRegex: new RegExp('^.+$')
 };
 
-
-
 export class DigitalTwinConnectionStringBuilder {
-  private hostName: string;
-  private repositoryId: string;
-  private sharedAccessKeyName: string;
-  private sharedAccessKeyValue: string;
+  private _hostName: string;
+  private _repositoryId: string;
+  private _sharedAccessKeyName: string;
+  private _sharedAccessKeyValue: string;
 
   private constructor() {
-    this.hostName = '';
-    this.repositoryId = '';
-    this.sharedAccessKeyName = '';
-    this.sharedAccessKeyValue = '';
+    this._hostName = '';
+    this._repositoryId = '';
+    this._sharedAccessKeyName = '';
+    this._sharedAccessKeyValue = '';
   }
 
-  get HostName() {
-    return this.hostName;
+  get hostName() {
+    return this._hostName;
   }
 
-  get SharedAccessKeyName() {
-    return this.sharedAccessKeyName;
+  get sharedAccessKeyName() {
+    return this._sharedAccessKeyName;
   }
 
-  get SharedAccessKeyValue() {
-    return this.sharedAccessKeyValue;
+  get sharedAccessKeyValue() {
+    return this._sharedAccessKeyValue;
   }
 
-  get RepositoryIdValue() {
-    return this.repositoryId;
+  get repositoryIdValue() {
+    return this._repositoryId;
   }
 
 
-  static Create(dtConnectionString: string):
+  static create(dtConnectionString: string):
       DigitalTwinConnectionStringBuilder {
     const dtConnectionStringBuilder = new DigitalTwinConnectionStringBuilder();
-    dtConnectionStringBuilder.Parse(dtConnectionString);
+    dtConnectionStringBuilder.parse(dtConnectionString);
     return dtConnectionStringBuilder;
   }
 
-  ValidateFormat(value: string, propertyName: string, regex: RegExp) {
+  validateFormat(value: string, propertyName: string, regex: RegExp) {
     if (value) {
       if (!regex.test(value)) {
         throw new Error(
@@ -66,7 +62,7 @@ export class DigitalTwinConnectionStringBuilder {
   }
 
 
-  Parse(dtConnectionString: string): void {
+  parse(dtConnectionString: string): void {
     if (!dtConnectionString) {
       throw new Error('The connection string should not be empty');
     }
@@ -92,34 +88,34 @@ export class DigitalTwinConnectionStringBuilder {
 
     for (const key in items) {
       if (key === constants.HostNamePropertyName) {
-        this.hostName = items[key];
+        this._hostName = items[key];
       } else if (key === constants.RepositoryIdPropertyName) {
-        this.repositoryId = items[key];
+        this._repositoryId = items[key];
       } else if (key === constants.SharedAccessKeyNamePropertyName) {
-        this.sharedAccessKeyName = items[key];
+        this._sharedAccessKeyName = items[key];
       } else if (key === constants.SharedAccessKeyValuePropertyName) {
-        this.sharedAccessKeyValue = items[key];
+        this._sharedAccessKeyValue = items[key];
       }
     }
 
-    if (!this.hostName) {
+    if (!this._hostName) {
       throw new Error('Unable to find the host name in the connection string.');
-    } else if (!this.repositoryId) {
+    } else if (!this._repositoryId) {
       throw new Error(
           'Unable to find the repositoryId in the connection string.');
     }
 
-    this.Validate();
+    this.validate();
   }
 
-  Validate(): void {
-    this.ValidateFormat(
-        this.HostName, constants.HostNamePropertyName, constants.HostNameRegex);
-    this.ValidateFormat(
-        this.SharedAccessKeyName, constants.SharedAccessKeyNamePropertyName,
+  validate(): void {
+    this.validateFormat(
+        this.hostName, constants.HostNamePropertyName, constants.HostNameRegex);
+    this.validateFormat(
+        this.sharedAccessKeyName, constants.SharedAccessKeyNamePropertyName,
         constants.SharedAccessKeyNameRegex);
-    this.ValidateFormat(
-        this.SharedAccessKeyValue, constants.SharedAccessKeyValuePropertyName,
+    this.validateFormat(
+        this.sharedAccessKeyValue, constants.SharedAccessKeyValuePropertyName,
         constants.SharedAccessKeyValueRegex);
   }
 }

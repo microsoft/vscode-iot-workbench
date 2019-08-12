@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
@@ -32,23 +31,32 @@ export abstract class IoTWorkbenchProjectBase {
 
   static async GetProjectType(
       scaffoldType: ScaffoldType,
-      projectFileRootPath: string): Promise<ProjectHostType> {
+      projectFileRootPath: string|undefined): Promise<ProjectHostType> {
+    if (!projectFileRootPath) {
+      return ProjectHostType.Unknown;
+    }
     const iotWorkbenchProjectFile =
         path.join(projectFileRootPath, FileNames.iotworkbenchprojectFileName);
+    const devcontainerFolderPath =
+        path.join(projectFileRootPath, FileNames.devcontainerFolderName);
     if (!await FileUtility.fileExists(scaffoldType, iotWorkbenchProjectFile)) {
       return ProjectHostType.Unknown;
+    } else if (await FileUtility.directoryExists(
+                   scaffoldType, devcontainerFolderPath)) {
+      return ProjectHostType.Container;
     } else {
       const iotworkbenchprojectFileString =
           await FileUtility.readFile(
               scaffoldType, iotWorkbenchProjectFile, 'utf8') as string;
-      const projectConfig = JSON.parse(iotworkbenchprojectFileString);
-      if (projectConfig &&
-          projectConfig[`${ConfigKey.projectHostType}`] ===
-              ProjectHostType[ProjectHostType.Container]) {
-        return ProjectHostType.Container;
-      } else {
-        return ProjectHostType.Workspace;
+      if (iotworkbenchprojectFileString !== '') {
+        const projectConfig = JSON.parse(iotworkbenchprojectFileString);
+        if (projectConfig &&
+            projectConfig[`${ConfigKey.projectHostType}`] ===
+                ProjectHostType[ProjectHostType.Container]) {
+          return ProjectHostType.Container;
+        }
       }
+      return ProjectHostType.Workspace;
     }
   }
 
@@ -89,9 +97,8 @@ export abstract class IoTWorkbenchProjectBase {
 
         const res = await item.compile();
         if (res === false) {
-          const error = new Error(
+          throw new Error(
               'Unable to compile the device code, please check output window for detail.');
-          throw error;
         }
       }
     }
@@ -108,9 +115,8 @@ export abstract class IoTWorkbenchProjectBase {
 
         const res = await item.upload();
         if (res === false) {
-          const error = new Error(
+          throw new Error(
               'Unable to upload the sketch, please check output window for detail.');
-          throw error;
         }
       }
     }
@@ -241,8 +247,7 @@ export abstract class IoTWorkbenchProjectBase {
 
         const res = await item.deploy();
         if (res === false) {
-          const error = new Error(`The deployment of ${item.name} failed.`);
-          throw error;
+          throw new Error(`The deployment of ${item.name} failed.`);
         }
       }
     }
@@ -261,11 +266,7 @@ export abstract class IoTWorkbenchProjectBase {
     for (const component of this.componentList) {
       if (component.getComponentType() === ComponentType.Device) {
         const device = component as Device;
-        try {
-          await device.configDeviceSettings();
-        } catch (error) {
-          throw error;
-        }
+        await device.configDeviceSettings();
       }
     }
     return true;

@@ -8,13 +8,22 @@ import {setTimeout} from 'timers';
 import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
 
-import {AzureFunctionsLanguage, DependentExtensions, FileNames, GlobalConstants, OperationType, ScaffoldType, TemplateTag} from './constants';
+import {AzureFunctionsLanguage, FileNames, GlobalConstants, OperationType, ScaffoldType, TemplateTag} from './constants';
 import {DialogResponses} from './DialogResponses';
 import {CodeGenProjectType, DeviceConnectionType} from './DigitalTwin/DigitalTwinCodeGen/Interfaces/CodeGenerator';
 import {FileUtility} from './FileUtility';
+import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 import {ProjectTemplate, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
 import {RemoteExtension} from './Models/RemoteExtension';
 import {TelemetryContext} from './telemetry';
+
+const impor = require('impor')(__dirname);
+import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
+const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
+    typeof import('./Models/IoTWorkspaceProject');
+const ioTContainerizedProjectModule =
+    impor('./Models/IoTContainerizedProject') as
+    typeof import('./Models/IoTContainerizedProject');
 
 export function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -259,7 +268,7 @@ export async function askAndOpenInRemote(
 }
 const noDeviceSurveyUrl = 'https://www.surveymonkey.com/r/C7NY7KJ';
 
-export async function TakeNoDeviceSurvey(telemetryContext: TelemetryContext) {
+export async function takeNoDeviceSurvey(telemetryContext: TelemetryContext) {
   const message =
       'Could you help to take a quick survey about what IoT development kit(s) you want Azure IoT Device Workbench to support?';
   const result:|vscode.MessageItem|undefined =
@@ -347,7 +356,7 @@ export async function getTemplateFilesInfo(templateFolder: string):
   return templateFilesInfo;
 }
 
-export async function GetCodeGenTemplateFolderName(
+export async function getCodeGenTemplateFolderName(
     context: vscode.ExtensionContext, codeGenProjectType: CodeGenProjectType,
     connectionType: DeviceConnectionType): Promise<string|undefined> {
   const templateFilePath = context.asAbsolutePath(path.join(
@@ -437,4 +446,35 @@ export function channelShowAndAppendLine(
     channel: vscode.OutputChannel, message: string) {
   channel.show();
   channel.appendLine(message);
+}
+
+export async function createAndLoadIoTProject(
+    context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+    telemetryContext: TelemetryContext, askNewProject = true) {
+  let projectHostType;
+  if (vscode.workspace.workspaceFolders) {
+    const projectFileRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+    projectHostType = await IoTWorkbenchProjectBase.GetProjectType(
+        ScaffoldType.Workspace, projectFileRootPath);
+    let iotProject;
+    if (projectHostType === ProjectHostType.Container) {
+      iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
+          context, channel, telemetryContext);
+    } else if (projectHostType === ProjectHostType.Workspace) {
+      iotProject = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
+          context, channel, telemetryContext);
+    }
+    if (iotProject === undefined) {
+      await handleIoTWorkspaceProjectFolder(telemetryContext);
+      return;
+    }
+
+    const result = await iotProject.load();
+    if (!result && askNewProject) {
+      await askAndNewProject(telemetryContext);
+      return;
+    }
+    return iotProject;
+  }
+  return;
 }
