@@ -43,6 +43,7 @@ export class DigitalTwinConstants {
 }
 
 export class CodeGenConstants {
+  static readonly codeGeneratorToolName = 'dtcodegen';
   static readonly codeGeneratorToolPath = 'iotpnp-codegen';
 }
 

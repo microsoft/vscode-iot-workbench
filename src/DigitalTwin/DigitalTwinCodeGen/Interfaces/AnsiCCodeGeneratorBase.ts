@@ -25,9 +25,9 @@ export abstract class AnsiCCodeGeneratorBase implements CodeGenerator {
     const cmdPath = path.join(homeDir, CodeGenConstants.codeGeneratorToolPath);
     let codeGenCommand = '';
     if (platform === 'win32') {
-      codeGenCommand = 'DigitalTwinCodeGen.exe';
+      codeGenCommand = `${CodeGenConstants.codeGeneratorToolName}.exe`;
     } else {
-      codeGenCommand = './DigitalTwinCodeGen';
+      codeGenCommand = `./${CodeGenConstants.codeGeneratorToolName}`;
     }
 
     const command = `${codeGenCommand} scaffold  --dcm "${
