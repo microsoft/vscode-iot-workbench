@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import * as utils from '../../../utils';
-import {CodeGenConstants, DigitalTwinConstants} from '../../DigitalTwinConstants';
+import {DigitalTwinConstants} from '../../DigitalTwinConstants';
 
 import {CodeGenerator} from './CodeGenerator';
 
@@ -22,12 +22,12 @@ export abstract class AnsiCCodeGeneratorBase implements CodeGenerator {
     // Invoke DigitalTwinCodeGen toolset to generate the code
     const platform = os.platform();
     const homeDir = os.homedir();
-    const cmdPath = path.join(homeDir, CodeGenConstants.codeGeneratorToolPath);
+    const cmdPath = path.join(homeDir, DigitalTwinConstants.codeGenCliFolder);
     let codeGenCommand = '';
     if (platform === 'win32') {
-      codeGenCommand = `${CodeGenConstants.codeGeneratorToolName}.exe`;
+      codeGenCommand = `${DigitalTwinConstants.codeGenCliApp}.exe`;
     } else {
-      codeGenCommand = `./${CodeGenConstants.codeGeneratorToolName}`;
+      codeGenCommand = `./${DigitalTwinConstants.codeGenCliApp}`;
     }
 
     const command = `${codeGenCommand} scaffold  --dcm "${

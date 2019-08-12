@@ -27,8 +27,10 @@ export class DigitalTwinConstants {
   static readonly dtPrefix = '[IoT Plug and Play]';
   static readonly apiVersion = '2019-07-01-Preview';
   static readonly productName = 'IoT Plug and Play';
+
   static readonly codeGenCli = 'IoT Plug and Play CodeGen Cli';
-  static readonly codeGenCliApp = 'DigitalTwinCodeGen';
+  static readonly codeGenCliFolder = 'iotpnp-codegen';
+  static readonly codeGenCliApp = 'dtcodegen';
 
   static readonly dtidPlaceholder = '{DigitalTwinIdentifier}';
 
@@ -40,11 +42,6 @@ export class DigitalTwinConstants {
       new RegExp('^[a-zA-Z_][-a-zA-Z0-9_]*$');
   static readonly codegenProjectNameRegexDescription =
       'alphanumeric, underscore and dash character, and cannot start with number and dash character';
-}
-
-export class CodeGenConstants {
-  static readonly codeGeneratorToolName = 'dtcodegen';
-  static readonly codeGeneratorToolPath = 'iotpnp-codegen';
 }
 
 export class DTDLKeywords {
