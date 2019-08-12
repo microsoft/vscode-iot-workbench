@@ -23,7 +23,7 @@ install:
 
 script:
 - jq --version
-- if [[ "$TRAVIS_TAG =~ $ISPRODTAG" ]]; then jq '.codeGenConfigUrl = "a1"' package.json > package_tmp.json else jq '.codeGenConfigUrl = "a2"' package.json > package_tmp.json fi
+- if [[ "$TRAVIS_TAG =~ $ISPRODTAG" ]]; then jq '.codeGenConfigUrl = "a1"' package.json > package_tmp.json; else jq '.codeGenConfigUrl = "a2"' package.json > package_tmp.json; fi
 - mv package_tmp.json package.json
 - tsc --version
 - gts --version
