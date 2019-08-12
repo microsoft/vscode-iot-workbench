@@ -12,7 +12,7 @@ We are excited to announce Azure IoT Device Workbench extension for VS Code supp
 
 * Create IoT Plug and Play *device capability model* and *interface* with sample schema, author with full IntelliSense features to support [Digital Twin Definition Language (DTDL) ](https://aka.ms/DTDL).
 * Interact with IoT Plug an Play public model repository and company model repository, easy to list, download and publish *device capability model* and *interface*.
-* Develop IoT hardware product easier by using *device capability model* to generate skeleton ANSI C code and CMake project.
+* Develop IoT hardware product easier by generating skeleton ANSI C code and CMake project from *device capability model*.
 
 Please check below topics for more information:
 
