@@ -13,6 +13,7 @@ class DummyMemento implements vscode.Memento {
 
 // mock of the extension context for vscode
 class TestExtensionContext implements vscode.ExtensionContext {
+  globalStoragePath = '';
   subscriptions: Array<{dispose(): {}}> = [];
   workspaceState: vscode.Memento = new DummyMemento();
   globalState: vscode.Memento = new DummyMemento();
