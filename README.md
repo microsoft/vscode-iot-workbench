@@ -11,7 +11,7 @@ The **Azure IoT Device Workbench** is an extension in Visual Studio Code that pr
 
 For developing on Embedded Linux device, you will need Docker and Visual Studio Code version with [Visual Studio Code Remote Development](https://aka.ms/vscode-remote) to compile the device code in the [containerized device toolchain](https://aka.ms/iot-device-cube).
 
-- [Visual Studio Code](https://code.visualstudio.com/), with version >= 1.35.1.
+- [Visual Studio Code](https://code.visualstudio.com/), with version >= 1.36.1.
 - [Docker Desktop / CE](https://www.docker.com/get-started).
 
 ### Install extensions
