@@ -41,7 +41,7 @@ For more details about setting up your development environment for compiling the
     cmake --build . -- /m /p:Configuration=Release
     ```
 
-1. Once the build has successed, you can test it by specifying the IoT Hub device connection string as its parameter.
+1. Once the build has succeeded, you can test it by specifying the IoT Hub device connection string as its parameter.
     ```bash
     \\{PROJECT_NAME}\\Release\\{PROJECT_NAME}.exe "[IoTHub device connection string]"
     ```
@@ -85,7 +85,7 @@ For more details about setting up your development environment for compiling the
     cmake --build .
     ```
 
-1. Once the build has successed, you can test it by specifying the IoT Hub device connection string as its parameter.
+1. Once the build has succeeded, you can test it by specifying the IoT Hub device connection string as its parameter.
     ```bash
     ./{PROJECT_NAME}/{PROJECT_NAME} "[IoTHub device connection string]"
     ```

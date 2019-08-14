@@ -42,7 +42,7 @@ For more details about setting up your development environment for compiling the
 
 1. Open the `..\cmake\azure_iot_sdks.sln` in Visual Studio 2017 and build the solution.
 
-1. Once the build has successed, you can test it by specifying the IoT Hub device connection string as its parameter.
+1. Once the build has succeeded, you can test it by specifying the IoT Hub device connection string as its parameter.
     ```bash
     \\{PROJECT_NAME}\\Release\\{PROJECT_NAME}.exe "[IoTHub device connection string]"
     ```

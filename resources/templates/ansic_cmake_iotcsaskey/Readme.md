@@ -56,7 +56,7 @@ For more details about setting up your development environment for compiling the
     cmake --build . -- /m /p:Configuration=Release
     ```
 
-1. Once the build has successed, you can test it by invoking the following command.
+1. Once the build has succeeded, you can test it by invoking the following command.
     ```bash
     \\{PROJECT_NAME}\\Release\\{PROJECT_NAME}.exe
     ```
@@ -115,7 +115,7 @@ For more details about setting up your development environment for compiling the
     cmake --build .
     ```
 
-1. Once the build has successed, you can test it by invoking the following command.
+1. Once the build has succeeded, you can test it by invoking the following command.
     ```bash
     ./{PROJECT_NAME}/{PROJECT_NAME}
     ```
