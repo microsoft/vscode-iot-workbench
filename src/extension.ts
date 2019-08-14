@@ -24,7 +24,7 @@ import {DTDLKeywords} from './DigitalTwin/DigitalTwinConstants';
 import {ConfigKey, ContextUris, EventNames, FileNames, ModelType, ScaffoldType} from './constants';
 import {TelemetryContext, TelemetryProperties} from './telemetry';
 import {RemoteExtension} from './Models/RemoteExtension';
-import {createAndLoadIoTProject} from './utils';
+import {constructAndLoadIoTProject} from './utils';
 import {ContainerConfiger} from './ContainerConfiger';
 
 const impor = require('impor')(__dirname);
@@ -402,7 +402,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // Load iot Project here and do not ask to new an iot project when no iot
   // project open since no command has been triggered yet.
-  await createAndLoadIoTProject(
+  await constructAndLoadIoTProject(
       context, outputChannel, telemetryContext, false);
   const deviceOperator = new DeviceOperator();
   const azureOperator = new AzureOperator();

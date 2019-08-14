@@ -7,14 +7,14 @@
 import * as vscode from 'vscode';
 
 import {TelemetryContext} from './telemetry';
-import {createAndLoadIoTProject} from './utils';
+import {constructAndLoadIoTProject} from './utils';
 
 export class DeviceOperator {
   async compile(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     const iotProject =
-        await createAndLoadIoTProject(context, channel, telemetryContext);
+        await constructAndLoadIoTProject(context, channel, telemetryContext);
     if (!iotProject) {
       return;
     }
@@ -25,7 +25,7 @@ export class DeviceOperator {
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     const iotProject =
-        await createAndLoadIoTProject(context, channel, telemetryContext);
+        await constructAndLoadIoTProject(context, channel, telemetryContext);
     if (!iotProject) {
       return;
     }
@@ -36,7 +36,7 @@ export class DeviceOperator {
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     const iotProject =
-        await createAndLoadIoTProject(context, channel, telemetryContext);
+        await constructAndLoadIoTProject(context, channel, telemetryContext);
     if (!iotProject) {
       return;
     }

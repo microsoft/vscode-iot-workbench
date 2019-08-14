@@ -448,7 +448,7 @@ export function channelShowAndAppendLine(
   channel.appendLine(message);
 }
 
-export async function createAndLoadIoTProject(
+export async function constructAndLoadIoTProject(
     context: vscode.ExtensionContext, channel: vscode.OutputChannel,
     telemetryContext: TelemetryContext, askNewProject = true) {
   let projectHostType;
