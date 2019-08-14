@@ -454,7 +454,7 @@ export async function constructAndLoadIoTProject(
   let projectHostType;
   if (vscode.workspace.workspaceFolders) {
     const projectFileRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    projectHostType = await IoTWorkbenchProjectBase.GetProjectType(
+    projectHostType = await IoTWorkbenchProjectBase.getProjectType(
         ScaffoldType.Workspace, projectFileRootPath);
     let iotProject;
     if (projectHostType === ProjectHostType.Container) {
