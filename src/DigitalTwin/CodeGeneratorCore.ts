@@ -16,7 +16,7 @@ import * as utils from '../utils';
 import * as dtUtils from './Utilities';
 import {FileNames, ConfigKey} from '../constants';
 import {TelemetryContext} from '../telemetry';
-import {DigitalTwinConstants, CodeGenConstants, DigitalTwinFileNames} from './DigitalTwinConstants';
+import {DigitalTwinConstants, DigitalTwinFileNames} from './DigitalTwinConstants';
 import {CodeGenProjectType, DeviceConnectionType, PnpLanguage} from './DigitalTwinCodeGen/Interfaces/CodeGenerator';
 import {AnsiCCodeGeneratorFactory} from './DigitalTwinCodeGen/AnsiCCodeGeneratorFactory';
 import {ConfigHandler} from '../configHandler';
@@ -803,7 +803,7 @@ export class CodeGeneratorCore {
 }
 
 function localCodeGenCliPath(): string {
-  return path.join(os.homedir(), CodeGenConstants.codeGeneratorToolPath);
+  return path.join(os.homedir(), DigitalTwinConstants.codeGenCliFolder);
 }
 
 function compareVersion(verion1: string, verion2: string) {

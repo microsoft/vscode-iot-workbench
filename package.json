@@ -10,7 +10,7 @@
     "url": "https://github.com/Microsoft/vscode-iot-workbench/issues"
   },
   "homepage": "https://github.com/Microsoft/vscode-iot-workbench/blob/master/README.md",
-  "version": "0.10.10-rc",
+  "version": "0.10.12",
   "publisher": "vsciot-vscode",
   "icon": "logo.png",
   "license": "SEE LICENSE IN <LICENSE>",
@@ -21,7 +21,7 @@
   "capabilityModelUrl": "https://aka.ms/iot-pnp-capability-model-staging",
   "iotModelUrl": "https://aka.ms/iot-pnp-iot-model-staging",
   "engines": {
-    "vscode": "^1.30.0"
+    "vscode": "^1.36.1"
   },
   "categories": [
     "Azure",

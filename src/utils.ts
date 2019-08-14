@@ -448,13 +448,13 @@ export function channelShowAndAppendLine(
   channel.appendLine(message);
 }
 
-export async function createAndLoadIoTProject(
+export async function constructAndLoadIoTProject(
     context: vscode.ExtensionContext, channel: vscode.OutputChannel,
     telemetryContext: TelemetryContext, askNewProject = true) {
   let projectHostType;
   if (vscode.workspace.workspaceFolders) {
     const projectFileRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    projectHostType = await IoTWorkbenchProjectBase.GetProjectType(
+    projectHostType = await IoTWorkbenchProjectBase.getProjectType(
         ScaffoldType.Workspace, projectFileRootPath);
     let iotProject;
     if (projectHostType === ProjectHostType.Container) {

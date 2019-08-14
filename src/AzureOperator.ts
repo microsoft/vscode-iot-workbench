@@ -6,7 +6,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import {TelemetryContext} from './telemetry';
-import {createAndLoadIoTProject} from './utils';
+import {constructAndLoadIoTProject} from './utils';
 import {RemoteExtension} from './Models/RemoteExtension';
 
 
@@ -16,7 +16,7 @@ export class AzureOperator {
       telemetryContext: TelemetryContext) {
     let status = false;
     const iotProject =
-        await createAndLoadIoTProject(context, channel, telemetryContext);
+        await constructAndLoadIoTProject(context, channel, telemetryContext);
     if (!iotProject) {
       return;
     }
@@ -41,7 +41,7 @@ export class AzureOperator {
     }
 
     const iotProject =
-        await createAndLoadIoTProject(context, channel, telemetryContext);
+        await constructAndLoadIoTProject(context, channel, telemetryContext);
     if (!iotProject) {
       return;
     }
