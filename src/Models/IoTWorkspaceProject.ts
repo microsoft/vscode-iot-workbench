@@ -45,11 +45,11 @@ const constants = {
 
 
 export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
-  private projectHostType = ProjectHostType.Workspace;
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     super(context, channel, telemetryContext);
+    this.projectHostType = ProjectHostType.Workspace;
   }
 
   async load(initLoad = false): Promise<boolean> {

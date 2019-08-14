@@ -20,12 +20,11 @@ const raspberryPiDeviceModule =
 const telemetryModule = impor('../telemetry') as typeof import('../telemetry');
 
 export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
-  private projectHostType = ProjectHostType.Container;
-
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     super(context, channel, telemetryContext);
+    this.projectHostType = ProjectHostType.Container;
   }
 
   async load(initLoad = false): Promise<boolean> {
