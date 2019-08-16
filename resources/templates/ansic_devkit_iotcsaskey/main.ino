@@ -311,8 +311,3 @@ void loop()
     invokeDevKitPeripheral();
     delay(500);
 }
-
-void __sys_setup(void)
-{
-    SystemWebAddSettings(&az_iot_symmetric_key_settings);
-}
