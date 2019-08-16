@@ -302,7 +302,7 @@ void setup()
     else
     {
         digitalWrite(LED_AZURE, 0);
-        Screen.print(1, "Error: \r\nDPS register\r\ndevice failed.\r\n");
+        Screen.print(1, "Error: \r\nRegistering\r\ndevice failed.\r\n");
         iotHubConnected = false;
     }
 }
