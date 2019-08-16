@@ -38,9 +38,7 @@
     "onCommand:iotworkbench.deviceUpload",
     "onCommand:iotworkbench.azureProvision",
     "onCommand:iotworkbench.azureDeploy",
-    "onCommand:iotworkbench.configureDevice",
-    "onCommand:iotworkbench.installToolchain",
-    "onCommand:iotworkbench.testexample"
+    "onCommand:iotworkbench.configureDevice"
   ],
   "main": "./out/src/extension",
   "contributes": {
@@ -88,11 +86,6 @@
       {
         "command": "iotworkbench.configureDevice",
         "title": "Configure Device Settings...",
-        "category": "Azure IoT Device Workbench"
-      },
-      {
-        "command": "iotworkbench.installToolchain",
-        "title": "Install Device Compiler Toolchain...",
         "category": "Azure IoT Device Workbench"
       },
       {
