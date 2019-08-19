@@ -241,7 +241,7 @@ static bool registerDevice(bool traceOn)
 
 void setup()
 {
-    char buff[IOT_HUB_CONN_STR_MAX_LEN];
+    char buff[64];
 
     // Initialize the board
     int ret = initIoTDevKit(1);

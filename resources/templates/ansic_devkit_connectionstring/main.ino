@@ -7,7 +7,7 @@ static bool iotHubConnected = false;
 
 void setup()
 {
-    char buff[128];
+    char buff[64];
 
     // Initialize the board
     int ret = initIoTDevKit(1);
