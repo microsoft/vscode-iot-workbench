@@ -28,6 +28,7 @@ export abstract class IoTWorkbenchProjectBase {
   protected extensionContext: vscode.ExtensionContext;
   protected channel: vscode.OutputChannel;
   protected telemetryContext: TelemetryContext;
+  protected projectHostType: ProjectHostType = ProjectHostType.Unknown;
 
   static async getProjectType(
       scaffoldType: ScaffoldType,
