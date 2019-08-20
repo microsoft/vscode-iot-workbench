@@ -236,7 +236,7 @@ export class ProjectInitializer {
     let candidateName = name;
     while (true) {
       const projectPath = path.join(projectRootPath, candidateName);
-      const isValid = this.isProjectPathValid(scaffoldType, projectPath);
+      const isValid = await this.isProjectPathValid(scaffoldType, projectPath);
       if (isValid) {
         break;
       }
@@ -257,7 +257,7 @@ export class ProjectInitializer {
 
         const projectPath = path.join(projectRootPath, projectName);
         const isProjectNameValid =
-            this.isProjectPathValid(scaffoldType, projectPath);
+            await this.isProjectPathValid(scaffoldType, projectPath);
         if (isProjectNameValid) {
           return;
         } else {
