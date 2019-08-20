@@ -36,7 +36,7 @@ Something great is going to happen, coming soon :)
 
 ### Added
 
-- We are excited to announce the preview of a new feature enabled in Azure IoT Device Workbench extension in VS Code to simplify the device cross-compiling toolchain acquisition effort for device developers working on embedded Linux devices (e.g. Debian, Ubuntu, Yocto Linux…) with Azure IoT by encapsulating the compilers, [device SDK](https://github.com/Azure/azure-iot-sdk-c) and essential libraries in [Containers](https://www.docker.com/resources/what-container). All you need is to install or upgrade the IoT Device Workbench and [get started](https://github.com/microsoft/vscode-iot-workbench/tree/containerized-toolchain-readme) developing within the container, just like today you are using a local environment.
+- We are excited to announce the preview of a new feature enabled in Azure IoT Device Workbench extension in VS Code to simplify the device cross-compiling toolchain acquisition effort for device developers working on embedded Linux devices (e.g. Debian, Ubuntu, Yocto Linux…) with Azure IoT by encapsulating the compilers, [device SDK](https://github.com/Azure/azure-iot-sdk-c) and essential libraries in [Containers](https://www.docker.com/resources/what-container). All you need is to install or upgrade the IoT Device Workbench and [get started](https://github.com/microsoft/vscode-iot-workbench) developing within the container, just like today you are using a local environment.
 
 ### Fixed
 
