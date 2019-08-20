@@ -247,7 +247,14 @@ void setup()
     int ret = initIoTDevKit(1);
     if (ret != 0)
     {
-        Screen.print(1, "Failed to \r\ninitialize the\r\nIoT DevKit.");
+        if (ret == -100)
+        {
+            Screen.print(1, "No Wi-Fi.\r\n \r\n ");
+        }
+        else
+        {
+            Screen.print(1, "Internal error!\r\nCheck log for\r\n more detail.");
+        }
         return;
     }
     else
@@ -282,7 +289,7 @@ void setup()
         if (pnp_device_initialize(buff, certificates) != 0)
         {
             digitalWrite(LED_AZURE, 0);
-            Screen.print(1, "Init failed!\r\nCheck log for\r\n more detail.");
+            Screen.print(1, "Error: \r\nIoT Hub is not\r\navailable.");
             iotHubConnected = false;
         }
         else
@@ -295,7 +302,7 @@ void setup()
     else
     {
         digitalWrite(LED_AZURE, 0);
-        Screen.print(1, "Init failed!\r\nCheck log for\r\n more detail.");
+        Screen.print(1, "Error: \r\nRegistering\r\ndevice failed.\r\n");
         iotHubConnected = false;
     }
 }
@@ -310,10 +317,4 @@ void loop()
 
     invokeDevKitPeripheral();
     delay(500);
-}
-
-void __sys_setup(void)
-{
-    // Default only enable wifi setting
-    EnableSystemWeb(WEB_SETTING_IOT_DPS_SYMMETRIC_KEY);
 }
