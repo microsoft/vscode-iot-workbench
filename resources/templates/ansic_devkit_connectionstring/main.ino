@@ -7,7 +7,7 @@ static bool iotHubConnected = false;
 
 void setup()
 {
-    char buff[128];
+    char buff[64];
 
     // Initialize the board
     int ret = initIoTDevKit(1);
@@ -55,10 +55,4 @@ void loop()
 
     invokeDevKitPeripheral();
     delay(500);
-}
-
-void __sys_setup(void)
-{
-    // Default only enable wifi setting
-    EnableSystemWeb(WEB_SETTING_IOT_DEVICE_CONN_STRING);
 }
