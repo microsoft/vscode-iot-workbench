@@ -4,18 +4,9 @@
   "version": "2.0.0",
   "tasks": [
       {
-          "label": "default bash script",
+          "label": "default compile script",
           "type": "shell",
-          "command": "bash default_compile.sh",
-          "group": {
-              "kind": "build",
-              "isDefault": true
-          }
-      },
-      {
-          "label": "default bash script2",
-          "type": "shell",
-          "command": "bash default_compile.sh",
+          "command": "bash /work/default_compile.sh",
           "group": {
               "kind": "build",
               "isDefault": true
