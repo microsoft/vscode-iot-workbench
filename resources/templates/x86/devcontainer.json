@@ -1,0 +1,10 @@
+{
+  "image": "x86_iothub",
+  "name": "x86_iothub_container",
+  "dockerFile": "Dockerfile",
+  "extensions": [
+    "ms-vscode.cpptools",
+    "twxs.cmake",
+    "vsciot-vscode.vscode-iot-workbench"
+  ]
+}
