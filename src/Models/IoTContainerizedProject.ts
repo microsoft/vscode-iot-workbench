@@ -19,6 +19,9 @@ const raspberryPiDeviceModule =
     impor('./RaspberryPiDevice') as typeof import('./RaspberryPiDevice');
 const telemetryModule = impor('../telemetry') as typeof import('../telemetry');
 
+const constants = {
+  configPrefix: 'vscode-iot-workbench'
+};
 export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
@@ -55,8 +58,8 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       };
       properties.developEnvironment =
           RemoteExtension.isRemote(this.extensionContext) ?
-          DevelopEnvironment.CONTAINER :
-          DevelopEnvironment.LOCAL_ENV;
+          DevelopEnvironment.Container :
+          DevelopEnvironment.LocalEnv;
       properties.projectHostType = ProjectHostType[this.projectHostType];
 
       const telemetryContext:
@@ -95,6 +98,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       projectType: ProjectTemplateType, boardId: string,
       openInNewWindow: boolean): Promise<boolean> {
     // Step 0: Check prerequisite
+    // Can only create projcet locally
     const result = await RemoteExtension.checkRemoteExtension(this.channel);
     if (!result) {
       return false;
@@ -123,9 +127,9 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       throw new Error('The specified board is not supported.');
     }
 
-    projectConfig[`${ConfigKey.boardId}`] = boardId;
-    projectConfig[`${ConfigKey.projectHostType}`] =
-        ProjectHostType[this.projectHostType];
+    projectConfig[`${constants.configPrefix}.${ConfigKey.boardId}`] = boardId;
+    // projectConfig[`${constants.configPrefix}.${ConfigKey.projectHostType}`] =
+    //     ProjectHostType[this.projectHostType];
 
     const res = await device.create();
     if (res === false) {
@@ -149,7 +153,10 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
           `Internal Error. Could not find iot workbench project file.`);
     }
 
-    // Step 3: Open project
+
+    // Step 3: Configure project
+
+    // Step 4: Open project
     if (!openInNewWindow) {
       // If open in current window, VSCode will restart. Need to send telemetry
       // before VSCode restart to advoid data lost.

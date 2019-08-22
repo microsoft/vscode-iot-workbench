@@ -374,7 +374,7 @@ export async function getCodeGenTemplateFolderName(
   const result =
       templateFileJson.templates.filter((template: ProjectTemplate) => {
         return (
-            template.tag === TemplateTag.digitaltwin &&
+            template.tag === TemplateTag.Digitaltwin &&
             template.type === codeGenProjectType &&
             template.connectionType === connectionType);
       });
@@ -477,4 +477,15 @@ export async function constructAndLoadIoTProject(
     return iotProject;
   }
   return;
+}
+
+// tslint:disable-next-line: no-any
+export function getEnumKeyByEnumValue(myEnum: any, enumValue: any) {
+  // tslint:disable-next-line: no-any
+  const keys = Object.keys(myEnum).filter(x => myEnum[x] === enumValue);
+  const key = keys.length > 0 ? keys[0] : null;
+  if (key === null) {
+    return undefined;
+  }
+  return myEnum[key];
 }

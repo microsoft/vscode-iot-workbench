@@ -10,11 +10,9 @@ import * as utils from './utils';
 
 import {TelemetryContext} from './telemetry';
 import {FileNames, ScaffoldType, PlatformType, TemplateTag} from './constants';
-import {IoTWorkbenchSettings} from './IoTSettings';
 import {FileUtility} from './FileUtility';
-import {Platform, Container, ProjectTemplate, ProjectTemplateType, TemplatesType, ContainersType} from './Models/Interfaces/ProjectTemplate';
+import {ProjectTemplate, TemplatesType} from './Models/Interfaces/ProjectTemplate';
 import {RemoteExtension} from './Models/RemoteExtension';
-import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 import * as UIUtility from './UIUtility';
 
 const impor = require('impor')(__dirname);
@@ -62,7 +60,8 @@ export class ProjectEnvironmentConfiger {
               return;
             } else {
               telemetryContext.properties.platform = platformSelection.label;
-              platform = utils.getEnumKeyByEnumValue(PlatformType, platformSelection.label);
+              platform = utils.getEnumKeyByEnumValue(
+                  PlatformType, platformSelection.label);
             }
           }
 
@@ -71,8 +70,7 @@ export class ProjectEnvironmentConfiger {
           } else if (platform === PlatformType.EmbeddedLinux) {
             // Select container
             const templateJsonFilePath = context.asAbsolutePath(path.join(
-                FileNames.resourcesFolderName,
-                FileNames.templatesFolderName,
+                FileNames.resourcesFolderName, FileNames.templatesFolderName,
                 FileNames.templateFileName));
             const templateJsonFileString =
                 await FileUtility.readFile(
@@ -81,7 +79,7 @@ export class ProjectEnvironmentConfiger {
             if (!templateJson) {
               throw new Error('Fail to load template list.');
             }
-        
+
 
             const containerSelection = await this.selectContainer(templateJson);
             if (!containerSelection) {
@@ -109,19 +107,20 @@ export class ProjectEnvironmentConfiger {
   }
 
   private async configureWorkspaceProjectEnv() {
-    // 
+    // TODO
   }
 
-  private async configureContainerProjectEnv(containerTemplateFileName: string) {
-    // 
+  private async configureContainerProjectEnv(containerTemplateFileName:
+                                                 string) {
+    // TODO
   }
 
   private async selectContainer(templateListJson: TemplatesType):
       Promise<vscode.QuickPickItem|undefined> {
     const containerTemplates =
         templateListJson.templates.filter((template: ProjectTemplate) => {
-              return (template.tag === TemplateTag.DevelopmentEnvironment);
-            });
+          return (template.tag === TemplateTag.DevelopmentEnvironment);
+        });
 
     const containerList: vscode.QuickPickItem[] = [];
     containerTemplates.forEach((container: ProjectTemplate) => {

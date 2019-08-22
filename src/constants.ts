@@ -21,6 +21,8 @@ export class ConfigKey {
 
 export class EventNames {
   static readonly createNewProjectEvent = 'IoTWorkbench.NewProject';
+  static readonly configProjectEnvironmentEvent =
+      'IoTWorkbench.ConfigProjectEnvironment';
   static readonly azureProvisionEvent = 'IoTWorkbench.AzureProvision';
   static readonly azureDeployEvent = 'IoTWorkbench.AzureDeploy';
   static readonly createAzureFunctionsEvent =
@@ -72,6 +74,7 @@ export class FileNames {
   static readonly outputPathName = '.build';
   static readonly templatesFolderName = 'templates';
   static readonly templateFiles = 'templatefiles.json';
+  static readonly taskJsonFile = 'tasks.json';
 }
 
 export enum OperationType {
@@ -106,18 +109,20 @@ export class DependentExtensions {
 }
 
 export enum PlatformType {
-  ARDUINO = 'Arduino',
-  EMBEDDEDLINUX = 'Embedded Linux (Preview)'
+  Arduino = 'Arduino',
+  EmbeddedLinux = 'Embedded Linux (Preview)',
+  Unknown = 'Unknown'
 }
 
 export enum DevelopEnvironment {
-  CONTAINER = 'in container',
-  LOCAL_ENV = 'in local environment'
+  Container = 'in container',
+  LocalEnv = 'in local environment'
 }
 
 export enum TemplateTag {
-  general = 'general',
-  digitaltwin = 'digitaltwin'
+  General = 'general',
+  Digitaltwin = 'digitaltwin',
+  DevelopmentEnvironment = 'development_container'
 }
 
 export class ContextUris {

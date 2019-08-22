@@ -67,7 +67,7 @@ export class CodeGeneratorCore {
   async generateDeviceCodeStub(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext): Promise<boolean> {
-    const notRemote = RemoteExtension.checkNotRemoteBeforeRunCommand(context);
+    const notRemote = RemoteExtension.checkLocalBeforeRunCommand(context);
     if (!notRemote) {
       return true;
     }

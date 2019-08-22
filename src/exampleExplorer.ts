@@ -177,7 +177,7 @@ export class ExampleExplorer {
   async selectBoard(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    const notRemote = RemoteExtension.checkNotRemoteBeforeRunCommand(context);
+    const notRemote = RemoteExtension.checkLocalBeforeRunCommand(context);
     if (!notRemote) {
       return;
     }

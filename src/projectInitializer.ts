@@ -12,9 +12,10 @@ import {TelemetryContext} from './telemetry';
 import {FileNames, ScaffoldType, PlatformType, TemplateTag} from './constants';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import {FileUtility} from './FileUtility';
-import {ProjectTemplate, ProjectTemplateType, TemplatesType} from './Models/Interfaces/ProjectTemplate';
-import {Platform} from './Models/Interfaces/Platform';
+import {ProjectTemplate, ProjectTemplateType, TemplatesType, Platform} from './Models/Interfaces/ProjectTemplate';
 import {RemoteExtension} from './Models/RemoteExtension';
+import * as UIUtility from './UIUtility';
+import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 
 const impor = require('impor')(__dirname);
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
@@ -34,7 +35,7 @@ export class ProjectInitializer {
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     // Only create project when not in remote environment
-    const notRemote = RemoteExtension.checkNotRemoteBeforeRunCommand(context);
+    const notRemote = RemoteExtension.checkLocalBeforeRunCommand(context);
     if (!notRemote) {
       return;
     }
@@ -73,7 +74,7 @@ export class ProjectInitializer {
 
           // Step 2: Select platform
           const platformSelection =
-              await this.selectPlatform(scaffoldType, context);
+              await UIUtility.selectPlatform(scaffoldType, context);
           if (!platformSelection) {
             telemetryContext.properties.errorMessage =
                 'Platform selection cancelled.';
@@ -98,9 +99,9 @@ export class ProjectInitializer {
           }
 
           let templateName: string|undefined;
-          if (platformSelection.label === PlatformType.ARDUINO) {
-            const templateSelection = await this.selectTemplate(
-                telemetryContext, templateJson, PlatformType.ARDUINO);
+          if (platformSelection.label === PlatformType.Arduino) {
+            const templateSelection =
+                await this.selectTemplate(templateJson, PlatformType.Arduino);
 
             if (!templateSelection) {
               telemetryContext.properties.errorMessage =
@@ -132,19 +133,19 @@ export class ProjectInitializer {
           }
 
           // Step 4: Load the list of template files
-          const projectTemplateType: ProjectTemplateType = (ProjectTemplateType)
-              [template.type as keyof typeof ProjectTemplateType];
+          const projectTemplateType: ProjectTemplateType =
+              utils.getEnumKeyByEnumValue(ProjectTemplateType, template.type);
 
           const templateFolder = path.join(resourceRootPath, template.path);
           const templateFilesInfo =
               await utils.getTemplateFilesInfo(templateFolder);
 
           let project;
-          if (template.platform === PlatformType.EMBEDDEDLINUX) {
+          if (template.platform === PlatformType.EmbeddedLinux) {
             telemetryContext.properties.projectHostType = 'Container';
             project = new ioTContainerizedProjectModule.IoTContainerizedProject(
                 context, channel, telemetryContext);
-          } else if (template.platform === PlatformType.ARDUINO) {
+          } else if (template.platform === PlatformType.Arduino) {
             telemetryContext.properties.projectHostType = 'Workspace';
             project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
                 context, channel, telemetryContext);
@@ -157,14 +158,13 @@ export class ProjectInitializer {
         });
   }
 
-  private async selectTemplate(
-      telemetryContext: TelemetryContext, templateJson: TemplatesType,
-      platform: string): Promise<vscode.QuickPickItem|undefined> {
+  private async selectTemplate(templateJson: TemplatesType, platform: string):
+      Promise<vscode.QuickPickItem|undefined> {
     const result =
         templateJson.templates.filter((template: ProjectTemplate) => {
           return (
               template.platform === platform &&
-              template.tag === TemplateTag.general);
+              template.tag === TemplateTag.General);
         });
 
     const projectTemplateList: vscode.QuickPickItem[] = [];
@@ -186,37 +186,6 @@ export class ProjectInitializer {
         });
 
     return templateSelection;
-  }
-
-  private async selectPlatform(
-      type: ScaffoldType, context: vscode.ExtensionContext):
-      Promise<vscode.QuickPickItem|undefined> {
-    const platformListPath = context.asAbsolutePath(path.join(
-        FileNames.resourcesFolderName, FileNames.templatesFolderName,
-        FileNames.platformListFileName));
-    const platformListJsonString =
-        await FileUtility.readFile(type, platformListPath, 'utf8') as string;
-    const platformListJson = JSON.parse(platformListJsonString);
-
-    if (!platformListJson) {
-      throw new Error('Fail to load platform list.');
-    }
-
-    const platformList: vscode.QuickPickItem[] = [];
-
-    platformListJson.platforms.forEach((platform: Platform) => {
-      platformList.push(
-          {label: platform.name, description: platform.description});
-    });
-
-    const platformSelection = await vscode.window.showQuickPick(platformList, {
-      ignoreFocusOut: true,
-      matchOnDescription: true,
-      matchOnDetail: true,
-      placeHolder: 'Select a platform',
-    });
-
-    return platformSelection;
   }
 
   private async generateProjectFolder(scaffoldType: ScaffoldType):
