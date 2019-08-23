@@ -23,7 +23,6 @@ export interface ProjectTemplate {
   detail: string;
   description: string;
   path: string;
-  projectHostType: string;
   boardId: string;
   type: string;
   tag: string;
@@ -42,4 +41,10 @@ export interface PnpProjectTemplateType {
   type: string;
   detail: string;
   enabled: boolean;
+}
+
+export interface Platform {
+  name: string;
+  id: string;
+  description: string;
 }

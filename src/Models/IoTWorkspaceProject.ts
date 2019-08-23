@@ -78,8 +78,8 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
       };
       properties.developEnvironment =
           RemoteExtension.isRemote(this.extensionContext) ?
-          DevelopEnvironment.CONTAINER :
-          DevelopEnvironment.LOCAL_ENV;
+          DevelopEnvironment.Container :
+          DevelopEnvironment.LocalEnv;
       properties.projectHostType = ProjectHostType[this.projectHostType];
       const telemetryContext:
           TelemetryContext = {properties, measurements: {duration: 0}};

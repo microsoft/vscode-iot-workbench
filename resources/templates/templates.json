@@ -6,7 +6,6 @@
             "description": "",
             "detail": "",
             "path": "embedded_linux",
-            "projectHostType": "container",
             "boardId": "raspberrypi",
             "type": "",
             "tag": "general"
@@ -17,7 +16,6 @@
             "description": "",
             "detail": "Use Generic ESP32 boards (e.g. Azure IoT Kit, M5Stack) with only device code.",
             "path": "esp32_device",
-            "projectHostType": "workspace",
             "boardId": "esp32",
             "type": "Basic",
             "tag": "general"
@@ -28,7 +26,6 @@
             "description": "",
             "detail": "Use Generic ESP32 boards (e.g. Azure IoT Kit, M5Stack) with Azure IoT Hub, such as sending sensor data to cloud.",
             "path": "esp32_iothub",
-            "projectHostType": "workspace",
             "boardId": "esp32",
             "type": "IotHub",
             "tag": "general"
@@ -39,7 +36,6 @@
             "description": "",
             "detail": "Use MXChip IoT DevKit with only device code.",
             "path": "devkit_device",
-            "projectHostType": "workspace",
             "boardId": "devkit",
             "type": "Basic",
             "tag": "general"
@@ -50,7 +46,6 @@
             "description": "",
             "detail": "Use MXChip IoT DevKit with Azure IoT Hub, such as sending sensor data to cloud.",
             "path": "devkit_iothub",
-            "projectHostType": "workspace",
             "boardId": "devkit",
             "type": "IotHub",
             "tag": "general"
@@ -61,7 +56,6 @@
             "description": "",
             "detail": "Use MXChip IoT DevKit with Azure IoT Hub and processes device data further in Azure Functions.",
             "path": "devkit_azurefunctions",
-            "projectHostType": "workspace",
             "boardId": "devkit",
             "type": "AzureFunctions",
             "tag": "general"
@@ -72,7 +66,6 @@
             "description": "",
             "detail": "",
             "path": "",
-            "projectHostType": "workspace",
             "boardId": "",
             "type": "no_device",
             "tag": "general"
@@ -83,7 +76,6 @@
             "description": "",
             "detail": "Template for DigitalTwin Code Generator to generate ANSI C Visual Studio Project via IoT Hub device connection string.",
             "path": "ansic_vs_connectionstring",
-            "projectHostType": "workspace",
             "boardId": "",
             "type": "VisualStudio",
             "language": "ansic",
@@ -96,7 +88,6 @@
             "description": "",
             "detail": "Template for DigitalTwin Code Generator to generate ANSI C Visual Studio Project via DPS symmetric key.",
             "path": "ansic_vs_iotcsaskey",
-            "projectHostType": "workspace",
             "boardId": "",
             "type": "VisualStudio",
             "language": "ansic",
@@ -109,7 +100,6 @@
             "description": "",
             "detail": "Template for DigitalTwin Code Generator to generate ANSI C CMake Project via IoT Hub device connection string.",
             "path": "ansic_cmake_connectionstring",
-            "projectHostType": "workspace",
             "boardId": "",
             "type": "CMake",
             "language": "ansic",
@@ -122,7 +112,6 @@
             "description": "",
             "detail": "Template for DigitalTwin Code Generator to generate ANSI C CMake Project via DPS symmetric key.",
             "path": "ansic_cmake_iotcsaskey",
-            "projectHostType": "workspace",
             "boardId": "",
             "type": "CMake",
             "language": "ansic",
@@ -135,7 +124,6 @@
             "description": "",
             "detail": "Template for DigitalTwin Code Generator to generate ANSI C IoT DevKit Project via IoT Hub device connection string.",
             "path": "ansic_devkit_connectionstring",
-            "projectHostType": "workspace",
             "boardId": "",
             "type": "IoTDevKit",
             "language": "ansic",
@@ -148,12 +136,41 @@
             "description": "",
             "detail": "Template for DigitalTwin Code Generator to generate ANSI C IoT Dev Project via DPS symmetric key.",
             "path": "ansic_devkit_iotcsaskey",
-            "projectHostType": "workspace",
             "boardId": "",
             "type": "IoTDevKit",
             "language": "ansic",
             "tag": "digitaltwin",
             "connectionType": "SymmetricKey"
+        },
+        {
+            "name": "32-bit Armv7 Cortex-A",
+            "description": "Generic dev container with Linaro cross-toolchain for GCC, Azure IoT Device C SDK",
+            "tag": "development_container",
+            "path": "arm7"
+        },
+        {
+            "name": "64-bit Armv8 Cortex-A",
+            "description": "Generic dev container with Linaro cross-toolchain for GCC, Azure IoT Device C SDK",
+            "tag": "development_container",
+            "path": "arm8"
+        },
+        {
+            "name": "x86",
+            "description": "X86 PC",
+            "tag": "development_container",
+            "path": "x86"
+        },
+        {
+            "name": "Arduino Task",
+            "description": "Template files used to configure Arduino project's task",
+            "tag": "task",
+            "path": "arduino_task"
+        },
+        {
+            "name": "Embedded Linux Task",
+            "description": "Template files used to configure Embedded Linux project's task",
+            "tag": "task",
+            "path": "embeddedlinux_task"
         }
     ]
 }

@@ -25,7 +25,7 @@ import {ConfigKey, ContextUris, EventNames, FileNames, ModelType, ScaffoldType} 
 import {TelemetryContext, TelemetryProperties} from './telemetry';
 import {RemoteExtension} from './Models/RemoteExtension';
 import {constructAndLoadIoTProject} from './utils';
-import {ContainerConfiger} from './ContainerConfiger';
+import {ProjectEnvironmentConfiger} from './ProjectEnvironmentConfiger';
 
 const impor = require('impor')(__dirname);
 const exampleExplorerModule =
@@ -427,19 +427,19 @@ export async function activate(context: vscode.ExtensionContext) {
         projectInitializerBinder);
   };
 
-  const containerConfigureProvider = async () => {
+  const projectEnvironmentConfigProvider = async () => {
     // Initialize Telemetry
     if (!telemetryWorkerInitialized) {
       telemetryModule.TelemetryWorker.initialize(context);
       telemetryWorkerInitialized = true;
     }
 
-    const containerConfig = new ContainerConfiger();
-    const containerConfigBinder =
-        containerConfig.configureContainer.bind(containerConfig);
+    const projectEnvConfiger = new ProjectEnvironmentConfiger();
+    const projectEnvConfigBinder =
+        projectEnvConfiger.configureProjectEnvironment.bind(projectEnvConfiger);
     telemetryModule.callWithTelemetry(
-        EventNames.createNewProjectEvent, outputChannel, true, context,
-        containerConfigBinder);
+        EventNames.configProjectEnvironmentEvent, outputChannel, true, context,
+        projectEnvConfigBinder);
   };
 
   const azureProvisionProvider = async () => {
@@ -541,7 +541,8 @@ export async function activate(context: vscode.ExtensionContext) {
       'iotworkbench.initializeProject', projectInitProvider);
 
   const configureContainer = vscode.commands.registerCommand(
-      'iotworkbench.configureContainer', containerConfigureProvider);
+      'iotworkbench.configureProjectEnvironment',
+      projectEnvironmentConfigProvider);
   const examples = vscode.commands.registerCommand(
       'iotworkbench.examples', examplesProvider);
 
@@ -629,9 +630,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const workbenchPath =
       vscode.commands.registerCommand('iotworkbench.workbench', async () => {
-        const notRemote =
-            RemoteExtension.checkNotRemoteBeforeRunCommand(context);
-        if (!notRemote) {
+        const isLocal = RemoteExtension.checkLocalBeforeRunCommand(context);
+        if (!isLocal) {
           return;
         }
         const settings: IoTWorkbenchSettings =
