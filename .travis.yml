@@ -3,6 +3,9 @@ language: node_js
 node_js:
 - 'node'
 
+services:
+- docker
+
 os:
 - linux
 dist: trusty # using Ubuntu 14.04.5 LTS
@@ -30,6 +33,7 @@ script:
 - gts check
 - node genAiKey.js
 - vsce package
+- docker run -ti --rm -v $PWD:/mnt:ro dkhamsing/awesome_bot --allow-dupe --allow-redirect --skip-save-results `ls *.md`
 
 deploy:
   # deploy to github release
