@@ -154,24 +154,27 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     }
 
 
-    // Step 3: Configure project
+    // TODO: Trigger configure command to configure project and open project in
+    // new window Step 3: Configure project
 
     // Step 4: Open project
-    if (!openInNewWindow) {
-      // If open in current window, VSCode will restart. Need to send telemetry
-      // before VSCode restart to advoid data lost.
-      try {
-        telemetryModule.TelemetryWorker.sendEvent(
-            EventNames.createNewProjectEvent, this.telemetryContext);
-      } catch {
-        // If sending telemetry failed, skip the error to avoid blocking user.
-      }
-    }
+    // if (!openInNewWindow) {
+    //   // If open in current window, VSCode will restart. Need to send
+    //   telemetry
+    //   // before VSCode restart to advoid data lost.
+    //   try {
+    //     telemetryModule.TelemetryWorker.sendEvent(
+    //         EventNames.createNewProjectEvent, this.telemetryContext);
+    //   } catch {
+    //     // If sending telemetry failed, skip the error to avoid blocking
+    //     user.
+    //   }
+    // }
 
-    setTimeout(
-        () => vscode.commands.executeCommand(
-            'iotcube.openLocally', this.projectRootPath, openInNewWindow),
-        1000);
+    // setTimeout(
+    //     () => vscode.commands.executeCommand(
+    //         'iotcube.openLocally', this.projectRootPath, openInNewWindow),
+    //     1000);
 
     return true;
   }

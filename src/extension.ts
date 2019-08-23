@@ -630,8 +630,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const workbenchPath =
       vscode.commands.registerCommand('iotworkbench.workbench', async () => {
-        const notRemote = RemoteExtension.checkLocalBeforeRunCommand(context);
-        if (!notRemote) {
+        const isLocal = RemoteExtension.checkLocalBeforeRunCommand(context);
+        if (!isLocal) {
           return;
         }
         const settings: IoTWorkbenchSettings =

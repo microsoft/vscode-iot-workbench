@@ -35,8 +35,8 @@ export class ProjectInitializer {
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     // Only create project when not in remote environment
-    const notRemote = RemoteExtension.checkLocalBeforeRunCommand(context);
-    if (!notRemote) {
+    const isLocal = RemoteExtension.checkLocalBeforeRunCommand(context);
+    if (!isLocal) {
       return;
     }
 
