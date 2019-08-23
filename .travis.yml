@@ -33,10 +33,7 @@ script:
 - gts check
 - node genAiKey.js
 - vsce package
-- |
-  if [ $TRAVIS_OS_NAME == "linux" ]; then
-    docker run -ti --rm -v $PWD:/mnt:ro dkhamsing/awesome_bot --allow-dupe --allow-redirect --skip-save-results `ls *.md`
-  fi
+- docker run -ti --rm -v $PWD:/mnt:ro dkhamsing/awesome_bot --allow-dupe --allow-redirect --skip-save-results `ls *.md`
 
 deploy:
   # deploy to github release
