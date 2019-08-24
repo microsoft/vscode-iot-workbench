@@ -8,13 +8,12 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as utils from './utils';
 
-import {TelemetryContext, TelemetryWorker} from './telemetry';
-import {FileNames, ScaffoldType, PlatformType, TemplateTag, EventNames} from './constants';
+import {TelemetryContext} from './telemetry';
+import {FileNames, ScaffoldType, PlatformType, TemplateTag} from './constants';
 import {FileUtility} from './FileUtility';
 import {ProjectTemplate, TemplatesType, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
 import {RemoteExtension} from './Models/RemoteExtension';
 import * as UIUtility from './UIUtility';
-import {open} from 'inspector';
 
 const impor = require('impor')(__dirname);
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
@@ -24,24 +23,16 @@ const ioTContainerizedProjectModule =
     typeof import('./Models/IoTContainerizedProject');
 
 export class ProjectEnvironmentConfiger {
-  // In default situation, configuration command will scaffold configutation
-  // files for project and open the project in remote if it is a Embedded Linux
-  // project(containerized Devex).
+  // Configuration command will scaffold configutation
+  // files for project and WILL NOT open an Embedded Linux project in remote by default.
   async configureProjectEnvironment(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext,
-      platform: PlatformType = PlatformType.Unknown, openInNewWindow = true) {
+      platform: PlatformType = PlatformType.Unknown, openInNewWindow = false) {
     // Only create project when not in remote environment
     const isLocal = RemoteExtension.checkLocalBeforeRunCommand(context);
     if (!isLocal) {
       return;
-    }
-
-    // If current window contains other project, open the created project in new
-    // window.
-    if (vscode.workspace.workspaceFolders &&
-        vscode.workspace.workspaceFolders.length > 0) {
-      openInNewWindow = true;
     }
 
     if (!vscode.workspace.workspaceFolders) {
