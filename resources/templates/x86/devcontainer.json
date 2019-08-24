@@ -1,6 +1,6 @@
 {
-  "image": "x86_iothub",
-  "name": "x86_iothub_container",
+  "image": "x86",
+  "name": "x86_container",
   "dockerFile": "Dockerfile",
   "extensions": [
     "ms-vscode.cpptools",
