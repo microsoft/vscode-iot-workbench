@@ -59,8 +59,11 @@ async function cmd(command: string) {
 export class AZ3166Device extends ArduinoDeviceBase {
   private static _boardId = 'devkit';
   name = 'AZ3166';
+
   // tslint:disable-next-line: no-any
-  private static _serialport: any;
+  private static _registerCallback: any;
+
+  private static _monitorCallbackCommandName: string;
 
   private templateFolderPath: string;
 
@@ -72,13 +75,22 @@ export class AZ3166Device extends ArduinoDeviceBase {
         path.join(this.boardFolderPath, AZ3166Device.boardId);
   }
 
-  // tslint:disable-next-line: no-any
-  static get serialport(): any {
-    if (!AZ3166Device._serialport) {
-      // AZ3166Device._serialport =
-      //     require('../../../vendor/node-usb-native').SerialPort;
+  static async registerGetMonitorCallbackCommand() {
+    AZ3166Device._monitorCallbackCommandName = `iotworkbench.monitorSerialport${new Date().getTime()}_${Math.round(
+      Math.random() * 100
+    )}`
+    try {
+      if(!AZ3166Device._registerCallback) {
+        AZ3166Device._registerCallback = await vscode.commands.registerCommand(
+          'iotworkbench.getMonitorCallbackCommandName',
+          () => {
+            return AZ3166Device._monitorCallbackCommandName;
+          }
+        );
+      }
+    } catch (err) {
+      throw err;
     }
-    return AZ3166Device._serialport;
   }
 
   static get boardId() {
@@ -376,13 +388,13 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
         // Set selected connection string to device
         let res: boolean;
-        const plat = os.platform();
+        const plat = await sdk.SerialPort.getPlatform();
         if (plat === 'win32') {
           res = await this.flushDeviceConfig(
-              deviceConnectionString, configDeviceOptions.ConnectionString);
+            deviceConnectionString, configDeviceOptions.ConnectionString);
         } else {
           res = await this.flushDeviceConfigUnix(
-              deviceConnectionString, configDeviceOptions.ConnectionString);
+            deviceConnectionString, configDeviceOptions.ConnectionString);
         }
 
         if (res === false) {
@@ -434,7 +446,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
         // Set selected connection string to device
         let res: boolean;
-        const plat = os.platform();
+        const plat = await sdk.SerialPort.getPlatform();
         if (plat === 'win32') {
           res = await this.flushDeviceConfig(UDS, configDeviceOptions.UDS);
         } else {
@@ -459,12 +471,13 @@ export class AZ3166Device extends ArduinoDeviceBase {
     return new Promise(
         async (
             resolve: (value: boolean) => void,
-            reject: (value: Error) => void) => {
+            reject: (value: Error) => void
+        ) => {
           let comPort = '';
           let command = '';
           try {
             // Choose COM port that AZ3166 is connected
-            comPort = await this.chooseCOM();
+            comPort = await sdk.SerialPort.chooseCOM(this.board);
             console.log(`Opening ${comPort}.`);
           } catch (error) {
             reject(error);
@@ -483,22 +496,13 @@ export class AZ3166Device extends ArduinoDeviceBase {
                 new Error('IoT DevKit is not found in the board list.'));
           }
 
-          const port = new AZ3166Device.serialport(comPort, {
-            baudRate: az3166.defaultBaudRate,
-            dataBits: 8,
-            stopBits: 1,
-            xon: false,
-            xoff: false,
-            parity: 'none'
-          });
-
           const rejectIfError = (err: Error) => {
             if (errorRejected) return true;
             if (err) {
               errorRejected = true;
               reject(err);
               try {
-                port.close();
+                sdk.SerialPort.close();
               } catch (ignore) {
               }
             }
@@ -516,11 +520,11 @@ export class AZ3166Device extends ArduinoDeviceBase {
                 const length = Math.min(100, restDataLength);
                 restDataLength -= length;
                 const dataChunk = data.substr(start, length);
-                await this.sendDataViaSerialPort(port, dataChunk);
+                await this.sendDataViaSerialPort(dataChunk);
                 await utils.delay(1000);
               }
 
-              port.close();
+              sdk.SerialPort.close();
             } catch (ignore) {
             }
 
@@ -531,24 +535,48 @@ export class AZ3166Device extends ArduinoDeviceBase {
             }
           };
 
-          // Configure serial port callbacks
-          port.on('open', async () => {
-            // tslint:disable-next-line: no-any
-            await vscode.window.showInformationMessage(
-                'Please hold down button A and then push and release the reset button to enter configuration mode. After enter configuration mode, click OK.',
-                'OK');
-            executeSetAzIoTHub()
-                .then(() => resolve(true))
-                .catch((error) => reject(error));
-          });
+          try {
+            await AZ3166Device.registerGetMonitorCallbackCommand();
+            // Configure serial port callbacks
+            const monitorCallback = await vscode.commands.registerCommand(
+              AZ3166Device._monitorCallbackCommandName,
+              async (event: string, payload: any, errorMessage: string) => {
+                if(event === 'open') {
+                  await vscode.window.showInformationMessage(
+                    'Please hold down button A and then push and release the reset button to enter configuration mode. After enter configuration mode, click OK.',
+                    'OK');
+                executeSetAzIoTHub()
+                    .then(() => resolve(true))
+                    .catch((error) => reject(error));
+                } else if (event === 'error') {
+                  if (errorRejected) return;
+                  console.log(errorMessage);
+                  rejectIfError(new Error(errorMessage));
+                } else if (event === 'close') {
+                  monitorCallback.dispose();
+                  AZ3166Device._registerCallback.dispose();                  
+                  AZ3166Device._registerCallback = undefined;
+                }
+              }
+            );
+          } catch (err) {
+            return reject(err);
+          }
 
-          // tslint:disable-next-line: no-any
-          port.on('error', (error: any) => {
-            if (errorRejected) return;
-            console.log(error);
-            rejectIfError(error);
-          });
-        });
+          try{
+            await sdk.SerialPort.open(comPort, {
+              baudRate: az3166.defaultBaudRate,
+              dataBits: 8,
+              stopBits: 1,
+              xon: false,
+              xoff: false,
+              parity: 'none'
+            });
+          } catch (err) {
+            return reject(err);
+          }
+        }
+      );
   }
 
   async flushDeviceConfig(configValue: string, option: number):
@@ -556,12 +584,13 @@ export class AZ3166Device extends ArduinoDeviceBase {
     return new Promise(
         async (
             resolve: (value: boolean) => void,
-            reject: (value: Error) => void) => {
+            reject: (value: Error) => void
+        ) => {
           let comPort = '';
           let command = '';
           try {
             // Choose COM port that AZ3166 is connected
-            comPort = await this.chooseCOM();
+            comPort = await sdk.SerialPort.chooseCOM(this.board);
             console.log(`Opening ${comPort}.`);
           } catch (error) {
             reject(error);
@@ -583,22 +612,13 @@ export class AZ3166Device extends ArduinoDeviceBase {
                 new Error('IoT DevKit is not found in the board list.'));
           }
 
-          const port = new AZ3166Device.serialport(comPort, {
-            baudRate: az3166.defaultBaudRate,
-            dataBits: 8,
-            stopBits: 1,
-            xon: false,
-            xoff: false,
-            parity: 'none'
-          });
-
-          const rejectIfError = (err: Error) => {
+          const rejectIfError = async (err: Error) => {
             if (errorRejected) return true;
             if (err) {
               errorRejected = true;
               reject(err);
               try {
-                port.close();
+                await sdk.SerialPort.close();
               } catch (ignore) {
               }
             }
@@ -609,14 +629,14 @@ export class AZ3166Device extends ArduinoDeviceBase {
           const executeSetAzIoTHub = async () => {
             try {
               const data = `${command} "${configValue}"\r\n`;
-              await this.sendDataViaSerialPort(port, data.slice(0, 120));
+              await this.sendDataViaSerialPort(data.slice(0, 120));
               if (data.length > 120) {
                 await utils.delay(1000);
-                await this.sendDataViaSerialPort(port, data.slice(120));
+                await this.sendDataViaSerialPort(data.slice(120));
               }
 
               await utils.delay(1000);
-              port.close();
+              await sdk.SerialPort.close();
             } catch (ignore) {
             }
 
@@ -627,48 +647,75 @@ export class AZ3166Device extends ArduinoDeviceBase {
             }
           };
 
-          // Configure serial port callbacks
-          port.on('open', () => {
-            // tslint:disable-next-line: no-any
-            port.write('\r\nhelp\r\n', (error: any) => {
-              if (rejectIfError(error)) return;
-            });
-          });
-
-          // tslint:disable-next-line: no-any
-          port.on('data', (data: any) => {
-            gotData = true;
-            const output = data.toString().trim();
-
-            if (commandExecuted) return;
-            if (output.includes('set_')) {
-              commandExecuted = true;
-              configMode = true;
-              executeSetAzIoTHub()
-                  .then(() => resolve(true))
-                  .catch((error) => reject(error));
-            } else {
-              configMode = false;
-            }
-
-            if (configMode) {
-              forEach(output.split('\n'), line => {
-                if (line) {
-                  line = trimStart(line.trim(), '#').trim();
-                  if (line && line.length) {
-                    console.log('SerialOutput', line);
+          try {
+            await AZ3166Device.registerGetMonitorCallbackCommand();
+            
+            // Configure serial port callbacks
+            const monitorCallback = await vscode.commands.registerCommand(
+              AZ3166Device._monitorCallbackCommandName,
+              async (event: string, payload: any, errorMessage: string) => {
+                if(event === 'open') {
+                  try {
+                    // tslint:disable-next-line: no-any
+                    await sdk.SerialPort.send('\r\nhelp\r\n');
+                  } catch (err) {
+                    if (rejectIfError(err)) {
+                      return;
+                    }
                   }
+                } else if (event === 'data') {
+                  gotData = true;
+                  const output = payload.toString().trim();
+                  if (commandExecuted) return;
+                  if (output.includes('set_')) {
+                    commandExecuted = true;
+                    configMode = true;
+                    executeSetAzIoTHub()
+                        .then(() => resolve(true))
+                        .catch((error) => reject(error));
+                  } else {
+                    configMode = false;
+                  }
+      
+                  if (configMode) {
+                    forEach(output.split('\n'), line => {
+                      if (line) {
+                        line = trimStart(line.trim(), '#').trim();
+                        if (line && line.length) {
+                          console.log('SerialOutput', line);
+                          this.channel.appendLine('SerialOutput  ' +  line);
+                        }
+                      }
+                    });
+                  }
+                } else if (event === 'error') {
+                  if (errorRejected) return;
+                  console.log(errorMessage);              
+                  rejectIfError(new Error(errorMessage));
+                } else if (event === 'close') {
+                  monitorCallback.dispose();
+                  AZ3166Device._registerCallback.dispose();                    
+                  AZ3166Device._registerCallback = undefined;
                 }
-              });
-            }
-          });
+              }
+            );
+          } catch (err) {
+            return reject(err);
+          }
 
-          // tslint:disable-next-line: no-any
-          port.on('error', (error: any) => {
-            if (errorRejected) return;
-            console.log(error);
-            rejectIfError(error);
-          });
+          try {
+            await sdk.SerialPort.open(comPort, {
+              baudRate: az3166.defaultBaudRate,
+              dataBits: 8,
+              stopBits: 1,
+              xon: false,
+              xoff: false,
+              parity: 'none'
+            });
+          } catch (err) {
+            console.log(err);
+            return reject(err);
+          }
 
           setTimeout(() => {
             if (errorRejected) return;
@@ -678,93 +725,36 @@ export class AZ3166Device extends ArduinoDeviceBase {
               vscode.window
                   .showInformationMessage(
                       'Please hold down button A and then push and release the reset button to enter configuration mode.')
-                  .then(() => {
+                  .then(async () => {
                     // tslint:disable-next-line: no-any
-                    port.write('\r\nhelp\r\n', (error: any) => {
-                      rejectIfError(error);
-                    });
+                    try{
+                      await sdk.SerialPort.send('\r\nhelp\r\n');
+                    } catch(err) {
+                      rejectIfError(err);
+                    };
                   });
             }
           }, 10000);
         });
   }
 
-  private getComList(): Promise<SerialPortInfo[]> {
-    return new Promise(
-        (resolve: (value: SerialPortInfo[]) => void,
-         reject: (error: Error) => void) => {
-          // tslint:disable-next-line: no-any
-          AZ3166Device.serialport.list((e: any, ports: SerialPortInfo[]) => {
-            if (e) {
-              reject(e);
-            } else {
-              resolve(ports);
-            }
-          });
-        });
-  }
-
-  private async chooseCOM(): Promise<string> {
-    return new Promise(
-        async (
-            resolve: (value: string) => void,
-            reject: (reason: Error) => void) => {
-          const comList = await this.getComList();
-
-          const az3166 = this.board;
-
-          if (!az3166) {
-            return reject(new Error('AZ3166 is not found in the board list.'));
-          }
-
-          const list = _.filter(comList, com => {
-            if (com.vendorId && com.productId && az3166.vendorId &&
-                az3166.productId &&
-                com.vendorId.toLowerCase().endsWith(az3166.vendorId) &&
-                com.productId.toLowerCase().endsWith(az3166.productId)) {
-              return true;
-            } else {
-              return false;
-            }
-          });
-
-          if (list && list.length) {
-            let comPort = list[0].comName;
-            if (list.length > 1) {
-              // TODO: select com port from list when there are multiple AZ3166
-              // boards connected
-              comPort = list[0].comName;
-            }
-
-            if (!comPort) {
-              reject(new Error('No avalible COM port.'));
-            }
-
-            resolve(comPort);
-          } else {
-            reject(new Error('No AZ3166 board connected.'));
-          }
-        });
-  }
-
   // tslint:disable-next-line: no-any
-  private async sendDataViaSerialPort(port: any, data: string):
-      Promise<boolean> {
+  private async sendDataViaSerialPort(data: string):
+    Promise<boolean> {
     return new Promise(
-        (resolve: (value: boolean) => void, reject: (value: Error) => void) => {
-          try {
-            // tslint:disable-next-line: no-any
-            port.write(data, (err: any) => {
-              if (err) {
-                reject(err);
-              } else {
-                port.drain(() => resolve(true));
-              }
-            });
-          } catch (err) {
-            reject(err);
-          }
-        });
+      async (
+        resolve: (value: boolean) => void, 
+        reject: (value: Error) => void
+      ) => {
+        try {
+          // tslint:disable-next-line: no-any
+          await sdk.SerialPort.send(data);
+          resolve(true);
+        } catch (err) {
+          reject(err);
+        }
+      }
+    );
   }
 
   private async stlinkDriverInstalled() {
