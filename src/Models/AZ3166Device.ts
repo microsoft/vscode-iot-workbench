@@ -477,7 +477,10 @@ export class AZ3166Device extends ArduinoDeviceBase {
           let command = '';
           try {
             // Choose COM port that AZ3166 is connected
-            comPort = await sdk.SerialPort.chooseCOM(this.board);
+            const comPortListJson = await sdk.SerialPort.getComList();
+            const comList: Array<Object> = JSON.parse(JSON.stringify(comPortListJson))["portList"];
+            
+            comPort = await this.chooseCOM(comList);
             console.log(`Opening ${comPort}.`);
           } catch (error) {
             reject(error);
@@ -590,7 +593,10 @@ export class AZ3166Device extends ArduinoDeviceBase {
           let command = '';
           try {
             // Choose COM port that AZ3166 is connected
-            comPort = await sdk.SerialPort.chooseCOM(this.board);
+            const comPortListJson = await sdk.SerialPort.getComList();
+            const comList: Array<Object> = JSON.parse(JSON.stringify(comPortListJson))["portList"];
+            
+            comPort = await this.chooseCOM(comList);
             console.log(`Opening ${comPort}.`);
           } catch (error) {
             reject(error);
@@ -735,6 +741,48 @@ export class AZ3166Device extends ArduinoDeviceBase {
                   });
             }
           }, 10000);
+        });
+  }
+
+  private async chooseCOM(comList: Array<any>): Promise<string> {
+    return new Promise(
+        async (
+            resolve: (value: string) => void,
+            reject: (reason: Error) => void) => {
+
+          const az3166 = this.board;
+
+          if (!az3166) {
+            return reject(new Error('AZ3166 is not found in the board list.'));
+          }
+
+          const list = _.filter(comList, com => {
+            if (com.vendorId && com.productId && az3166.vendorId &&
+                az3166.productId &&
+                com.vendorId.toLowerCase().endsWith(az3166.vendorId) &&
+                com.productId.toLowerCase().endsWith(az3166.productId)) {
+              return true;
+            } else {
+              return false;
+            }
+          });
+
+          if (list && list.length) {
+            let comPort = list[0].comName;
+            if (list.length > 1) {
+              // TODO: select com port from list when there are multiple AZ3166
+              // boards connected
+              comPort = list[0].comName;
+            }
+
+            if (!comPort) {
+              reject(new Error('No avalible COM port.'));
+            }
+
+            resolve(comPort);
+          } else {
+            reject(new Error('No AZ3166 board connected.'));
+          }
         });
   }
 
