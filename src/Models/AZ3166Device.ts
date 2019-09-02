@@ -27,13 +27,6 @@ const forEach = impor('lodash.foreach') as typeof import('lodash.foreach');
 const trimStart =
     impor('lodash.trimstart') as typeof import('lodash.trimstart');
 
-interface SerialPortInfo {
-  comName: string;
-  manufacturer: string;
-  vendorId: string;
-  productId: string;
-}
-
 const constants = {
   boardInfo: 'AZ3166:stm32f4:MXCHIP_AZ3166',
   uploadMethod: 'upload_method=OpenOCDMethod',
@@ -478,7 +471,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
           try {
             // Choose COM port that AZ3166 is connected
             const comPortListJson = await sdk.SerialPort.getComList();
-            const comList: Array<Object> = JSON.parse(JSON.stringify(comPortListJson))["portList"];
+            const comList = comPortListJson.portList;
             
             comPort = await this.chooseCOM(comList);
             console.log(`Opening ${comPort}.`);
@@ -594,7 +587,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
           try {
             // Choose COM port that AZ3166 is connected
             const comPortListJson = await sdk.SerialPort.getComList();
-            const comList: Array<Object> = JSON.parse(JSON.stringify(comPortListJson))["portList"];
+            const comList = comPortListJson.portList;
             
             comPort = await this.chooseCOM(comList);
             console.log(`Opening ${comPort}.`);
@@ -744,7 +737,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
         });
   }
 
-  private async chooseCOM(comList: Array<any>): Promise<string> {
+  private async chooseCOM(comList: sdk.ComPort[]): Promise<string> {
     return new Promise(
         async (
             resolve: (value: string) => void,
