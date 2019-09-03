@@ -24,7 +24,8 @@ const ioTContainerizedProjectModule =
 
 export class ProjectEnvironmentConfiger {
   // Configuration command will scaffold configutation
-  // files for project and WILL NOT open an Embedded Linux project in remote by default.
+  // files for project and WILL NOT open an Embedded Linux project in remote by
+  // default.
   async configureProjectEnvironment(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext,
@@ -35,9 +36,10 @@ export class ProjectEnvironmentConfiger {
       return;
     }
 
-    if (!vscode.workspace.workspaceFolders) {
+    if (!(vscode.workspace.workspaceFolders &&
+          vscode.workspace.workspaceFolders.length > 0)) {
       const message =
-          'No folder is currently open in Visual Studio Code. Please select a folder first.';
+          'You have not yet opened a folder in Visual Studio Code. Please select a folder first.';
       vscode.window.showWarningMessage(message);
       return;
     }

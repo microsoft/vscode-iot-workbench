@@ -415,7 +415,8 @@ export async function generateTemplateFile(
  */
 export async function handleIoTWorkspaceProjectFolder(
     telemetryContext: TelemetryContext): Promise<boolean> {
-  if (!vscode.workspace.workspaceFolders ||
+  if (!(vscode.workspace.workspaceFolders &&
+        vscode.workspace.workspaceFolders.length > 0) ||
       !vscode.workspace.workspaceFolders[0]) {
     return false;
   }
@@ -452,7 +453,8 @@ export async function constructAndLoadIoTProject(
     context: vscode.ExtensionContext, channel: vscode.OutputChannel,
     telemetryContext: TelemetryContext, askNewProject = true) {
   let projectHostType;
-  if (vscode.workspace.workspaceFolders) {
+  if (vscode.workspace.workspaceFolders &&
+      vscode.workspace.workspaceFolders.length > 0) {
     const projectFileRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
     projectHostType = await IoTWorkbenchProjectBase.getProjectType(
         ScaffoldType.Workspace, projectFileRootPath);

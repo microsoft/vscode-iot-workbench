@@ -32,7 +32,8 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
   async load(initLoad = false): Promise<boolean> {
     const loadTimeScaffoldType = ScaffoldType.Workspace;
-    if (!vscode.workspace.workspaceFolders) {
+    if (!(vscode.workspace.workspaceFolders &&
+          vscode.workspace.workspaceFolders.length > 0)) {
       return false;
     }
 

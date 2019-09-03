@@ -308,7 +308,8 @@ export class AzureUtility {
         inputValue = _value.label;
       } else if (key.substr(0, 2) === '$$') {
         // Read value from file
-        if (!vscode.workspace.workspaceFolders) {
+        if (!(vscode.workspace.workspaceFolders &&
+              vscode.workspace.workspaceFolders.length > 0)) {
           inputValue = '';
         } else {
           const _key = key.substr(2);

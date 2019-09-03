@@ -77,9 +77,10 @@ export class CodeGeneratorCore {
       return false;
     }
 
-    if (!vscode.workspace.workspaceFolders) {
+    if (!(vscode.workspace.workspaceFolders &&
+          vscode.workspace.workspaceFolders.length > 0)) {
       const message =
-          'No folder is currently open in Visual Studio Code. Please select a folder first.';
+          'You have not yet opened a folder in Visual Studio Code. Please select a folder first.';
       vscode.window.showWarningMessage(message);
       return false;
     }

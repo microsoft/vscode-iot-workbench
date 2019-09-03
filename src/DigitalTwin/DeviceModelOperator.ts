@@ -505,10 +505,11 @@ export class DeviceModelOperator {
   async submitMetaModelFiles(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext): Promise<boolean> {
-    if (!vscode.workspace.workspaceFolders ||
+    if (!(vscode.workspace.workspaceFolders &&
+          vscode.workspace.workspaceFolders.length > 0) ||
         !vscode.workspace.workspaceFolders[0].uri.fsPath) {
       vscode.window.showWarningMessage(
-          'No folder opened in current window. Please select a folder first');
+          'You have not yet opened a folder in Visual Studio Code. Please select a folder first.');
       return false;
     }
 
