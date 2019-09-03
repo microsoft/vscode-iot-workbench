@@ -91,10 +91,10 @@ export class ProjectEnvironmentConfiger {
           }
 
           if (platform === PlatformType.Arduino) {
-            const arduinoTaskName = 'Arduino Task';
+            const templateName = 'Arduino Task';
             const res = await this.configureProjectEnv(
                 context, channel, telemetryContext, scaffoldType, templateJson,
-                rootPath, arduinoTaskName);
+                rootPath, templateName);
             if (!res) {
               return;
             }
@@ -111,9 +111,10 @@ export class ProjectEnvironmentConfiger {
             }
 
             // Configure the selected container environment for the project
+            const templateName = containerSelection.label;
             const res = await this.configureProjectEnv(
                 context, channel, telemetryContext, scaffoldType, templateJson,
-                rootPath, containerSelection.label);
+                rootPath, templateName);
             if (!res) {
               return;
             }
