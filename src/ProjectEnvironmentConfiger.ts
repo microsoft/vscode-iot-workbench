@@ -14,6 +14,7 @@ import {FileUtility} from './FileUtility';
 import {ProjectTemplate, TemplatesType, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
 import {RemoteExtension} from './Models/RemoteExtension';
 import * as UIUtility from './UIUtility';
+import {CancelOperationError} from './CancelOperationError';
 
 const impor = require('impor')(__dirname);
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
@@ -92,11 +93,18 @@ export class ProjectEnvironmentConfiger {
 
           if (platform === PlatformType.Arduino) {
             const templateName = 'Arduino Task';
-            const res = await this.configureProjectEnv(
-                context, channel, telemetryContext, scaffoldType, templateJson,
-                rootPath, templateName);
-            if (!res) {
-              return;
+
+            try {
+              await this.configureProjectEnv(
+                  context, scaffoldType, templateJson, rootPath, templateName);
+            } catch (error) {
+              if (error instanceof CancelOperationError) {
+                telemetryContext.properties.result = 'Cancelled';
+                telemetryContext.properties.errorMessage = error.message;
+                return;
+              } else {
+                throw error;
+              }
             }
           } else if (platform === PlatformType.EmbeddedLinux) {
             // Select container
@@ -112,11 +120,46 @@ export class ProjectEnvironmentConfiger {
 
             // Configure the selected container environment for the project
             const templateName = containerSelection.label;
-            const res = await this.configureProjectEnv(
-                context, channel, telemetryContext, scaffoldType, templateJson,
-                rootPath, templateName);
-            if (!res) {
-              return;
+
+            try {
+              await this.configureProjectEnv(
+                  context, scaffoldType, templateJson, rootPath, templateName);
+            } catch (error) {
+              if (error instanceof CancelOperationError) {
+                telemetryContext.properties.result = 'Cancelled';
+                telemetryContext.properties.errorMessage = error.message;
+                return;
+              } else {
+                throw error;
+              }
+            }
+
+            // If default case, ask user whether or not to customize container
+            // Skip this step if caller already decide to open in remote
+            // directly.
+            if (!openInNewWindow) {
+              let customizeEnvironment;
+              try {
+                customizeEnvironment = await this.askToCustomize();
+              } catch (error) {
+                if (error instanceof CancelOperationError) {
+                  telemetryContext.properties.errorMessage = error.message;
+                  telemetryContext.properties.result = 'Cancelled';
+                  return;
+                } else {
+                  throw error;
+                }
+              }
+              telemetryContext.properties.customizeEnvironment =
+                  customizeEnvironment.toString();
+
+              // If user do not want to customize develpment environment, open
+              // the project in remote directly for user.
+              if (!customizeEnvironment) {
+                openInNewWindow = true;
+              }
+              // TODO: Open configuration file in current window for user to
+              // edit configuration.
             }
 
             // Open project in remote
@@ -142,13 +185,10 @@ export class ProjectEnvironmentConfiger {
   /**
    * Configure Arduino project: Add tasks.json file
    * Ask to overwrite if file already exists.
-   * @returns true - configuration success. false - configuration cancel.
    */
   private async configureProjectEnv(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext, scaffoldType: ScaffoldType,
-      templateJson: TemplatesType, rootPath: string,
-      templateName: string): Promise<boolean> {
+      context: vscode.ExtensionContext, scaffoldType: ScaffoldType,
+      templateJson: TemplatesType, rootPath: string, templateName: string) {
     const projectEnvTemplate =
         templateJson.templates.filter((template: ProjectTemplate) => {
           return (
@@ -156,7 +196,7 @@ export class ProjectEnvironmentConfiger {
               template.name === templateName);
         });
 
-    if (!projectEnvTemplate) {
+    if (!(projectEnvTemplate && projectEnvTemplate.length > 0)) {
       throw new Error(
           `Fail to fetch project development environmnet template files with path name ${
               templateName}.`);
@@ -172,22 +212,39 @@ export class ProjectEnvironmentConfiger {
 
     // configure file
     for (const fileInfo of templateFilesInfo) {
-      const res = await this.scaffoldConfigurationFile(
-          channel, telemetryContext, scaffoldType, rootPath, fileInfo);
-      if (!res) {
-        return false;
-      }
+      await this.scaffoldConfigurationFile(scaffoldType, rootPath, fileInfo);
     }
-    return true;
+  }
+
+
+  /**
+   * Ask whether to customize the development environment or not
+   * @returns true - want to customize; false - don't want to customize
+   */
+  private async askToCustomize(): Promise<boolean> {
+    const customizationOption: vscode.QuickPickItem[] = [];
+    customizationOption.push(
+        {label: `Yes`, description: ''}, {label: `No`, description: ''});
+
+    const customizationSelection =
+        await vscode.window.showQuickPick(customizationOption, {
+          ignoreFocusOut: true,
+          placeHolder: `Do you want to customize the development environment?`
+        });
+
+    if (customizationSelection === undefined) {
+      throw new CancelOperationError(
+          `Ask to customization development environment selection cancelled.`);
+    }
+
+    return customizationSelection.label === 'Yes';
   }
 
   /**
-   * ask to whether overwrite tasks.json file or not
-   * @returns true - overwrite; false - not overwrite; undefined - cancel
-   * selection.
+   * Ask whether to overwrite tasks.json file or not
+   * @returns true - overwrite; false - not overwrite
    */
-  private async askToOverwriteFile(fileName: string):
-      Promise<boolean|undefined> {
+  private async askToOverwriteFile(fileName: string): Promise<boolean> {
     const overwriteTasksJsonOption: vscode.QuickPickItem[] = [];
     overwriteTasksJsonOption.push(
         {label: `Yes`, description: ''}, {label: `No`, description: ''});
@@ -200,20 +257,20 @@ export class ProjectEnvironmentConfiger {
 
     if (overwriteSelection === undefined) {
       // Selection was cancelled
-      return;
+      throw new CancelOperationError(
+          `Ask to overwrite ${fileName} selection cancelled.`);
     }
+
     return overwriteSelection.label === 'Yes';
   }
 
   /**
    * Scaffold configuration file for project. If file already exists, ask to
    * overwrite it.
-   * @returns true - successfully scaffold file; false - cancel configuration.
    */
   private async scaffoldConfigurationFile(
-      channel: vscode.OutputChannel, telemetryContext: TelemetryContext,
       scaffoldType: ScaffoldType, rootPath: string,
-      fileInfo: TemplateFileInfo): Promise<boolean> {
+      fileInfo: TemplateFileInfo) {
     const targetPath = path.join(rootPath, fileInfo.targetPath);
     if (!await FileUtility.directoryExists(scaffoldType, targetPath)) {
       await FileUtility.mkdirRecursively(scaffoldType, targetPath);
@@ -223,20 +280,11 @@ export class ProjectEnvironmentConfiger {
     // File exists.
     if (await FileUtility.fileExists(scaffoldType, targetFilePath)) {
       const fileOverwrite = await this.askToOverwriteFile(fileInfo.fileName);
-      if (fileOverwrite === undefined || !fileOverwrite) {
-        let message = '';
-        if (fileOverwrite === undefined) {
-          message =
-              `Ask to overwrite ${fileInfo.fileName} selection cancelled.`;
-        } else if (!fileOverwrite) {
-          message = `Not overwrite original ${
-              fileInfo.fileName}. Configuration operation cancelled.`;
-        }
-        utils.channelShowAndAppendLine(channel, message);
 
-        telemetryContext.properties.errorMessage = message;
-        telemetryContext.properties.result = 'Cancelled';
-        return false;
+      if (!fileOverwrite) {
+        const message = `Not overwrite original ${
+            fileInfo.fileName}. Configuration operation cancelled.`;
+        throw new CancelOperationError(message);
       }
     }
 
@@ -245,9 +293,12 @@ export class ProjectEnvironmentConfiger {
       throw new Error(`Fail to load ${fileInfo.fileName}.`);
     }
 
-    await FileUtility.writeFile(
-        scaffoldType, targetFilePath, fileInfo.fileContent);
-    return true;
+    try {
+      await FileUtility.writeFile(
+          scaffoldType, targetFilePath, fileInfo.fileContent);
+    } catch (error) {
+      throw new Error(`Write content to file ${targetFilePath} failed.`);
+    }
   }
 
   private async selectContainer(templateListJson: TemplatesType):

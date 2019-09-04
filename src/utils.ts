@@ -466,13 +466,18 @@ export async function constructAndLoadIoTProject(
       iotProject = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
           context, channel, telemetryContext);
     }
+
+    if (!askNewProject) {
+      return;
+    }
+
     if (iotProject === undefined) {
       await handleIoTWorkspaceProjectFolder(telemetryContext);
       return;
     }
 
     const result = await iotProject.load();
-    if (!result && askNewProject) {
+    if (!result) {
       await askAndNewProject(telemetryContext);
       return;
     }
