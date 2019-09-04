@@ -66,15 +66,15 @@ interface CodeGenExecutions {
 export class CodeGeneratorCore {
   async generateDeviceCodeStub(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext): Promise<boolean> {
+      telemetryContext: TelemetryContext) {
     const isLocal = RemoteExtension.checkLocalBeforeRunCommand(context);
     if (!isLocal) {
-      return false;
+      return;
     }
 
     // Step 0: update code generator
     if (!await this.installOrUpgradeCodeGenCli(context, channel)) {
-      return false;
+      return;
     }
 
     if (!(vscode.workspace.workspaceFolders &&
@@ -82,7 +82,7 @@ export class CodeGeneratorCore {
       const message =
           'You have not yet opened a folder in Visual Studio Code. Please select a folder first.';
       vscode.window.showWarningMessage(message);
-      return false;
+      return;
     }
 
     const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
@@ -90,7 +90,7 @@ export class CodeGeneratorCore {
       const message =
           'Unable to find the folder for device model files. Please select a folder first.';
       vscode.window.showWarningMessage(message);
-      return false;
+      return;
     }
 
     // Retrieve all schema files
@@ -104,7 +104,7 @@ export class CodeGeneratorCore {
     if (capabilityModelFileSelection === undefined) {
       utils.channelShowAndAppendLine(
           channel, `${DigitalTwinConstants.dtPrefix} Cancelled.`);
-      return false;
+      return;
     }
 
     // Step 1.5: Prompt if old project exists for the same Capability Model file
@@ -150,7 +150,7 @@ export class CodeGeneratorCore {
           telemetryContext.properties.errorMessage =
               'Re-generate code selection cancelled.';
           telemetryContext.properties.result = 'Cancelled';
-          return false;
+          return;
         }
 
         if (regenSelection.label !== 'Create new project') {
@@ -160,12 +160,12 @@ export class CodeGeneratorCore {
           if (!await this.downloadAllIntefaceFiles(
                   channel, rootPath, capabilityModelFilePath, projectPath,
                   interfaceFiles)) {
-            return false;
+            return;
           }
-          const executionResult = await this.generateDeviceCodeCore(
+          await this.generateDeviceCodeCore(
               rootPath, codeGenExecutionItem, context, channel,
               telemetryContext);
-          return executionResult;
+          return;
         }
       }
     }
@@ -175,7 +175,7 @@ export class CodeGeneratorCore {
     if (codeGenProjectName === undefined) {
       const message = `Project name is not specified, cancelled`;
       utils.channelShowAndAppendLine(channel, message);
-      return false;
+      return;
     }
 
     const projectPath = path.join(rootPath, codeGenProjectName);
@@ -192,28 +192,28 @@ export class CodeGeneratorCore {
       telemetryContext.properties.errorMessage =
           'Language selection cancelled.';
       telemetryContext.properties.result = 'Cancelled';
-      return false;
+      return;
     }
 
     // Step 4: Select project type
     const codeGenProjectType = await this.selectProjectType(
         languageSelection.label, context, telemetryContext);
     if (codeGenProjectType === undefined) {
-      return false;
+      return;
     }
 
     // Step 5: Select device connection string type
     const connectionType =
         await this.selectConnectionType(context, channel, telemetryContext);
     if (connectionType === undefined) {
-      return false;
+      return;
     }
 
     // Download all interfaces
     if (!await this.downloadAllIntefaceFiles(
             channel, rootPath, capabilityModelFilePath, projectPath,
             interfaceFiles)) {
-      return false;
+      return;
     }
 
     const codeGenExecutionInfo: CodeGenExecutionItem = {
@@ -247,10 +247,8 @@ export class CodeGeneratorCore {
       // save config failure should not impact code gen.
     }
 
-    const executionResult = await this.generateDeviceCodeCore(
+    await this.generateDeviceCodeCore(
         rootPath, codeGenExecutionInfo, context, channel, telemetryContext);
-
-    return executionResult;
   }
 
   private async downloadAllIntefaceFiles(
