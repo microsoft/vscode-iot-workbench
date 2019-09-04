@@ -23,6 +23,11 @@ const ioTContainerizedProjectModule =
     impor('./Models/IoTContainerizedProject') as
     typeof import('./Models/IoTContainerizedProject');
 
+enum overWriteLabel {
+  Yes = 'Yes',
+  No = 'No',
+  YesToAll = 'Yes to all'
+}
 export class ProjectEnvironmentConfiger {
   // Configuration command will scaffold configutation
   // files for project and WILL NOT open an Embedded Linux project in remote by
@@ -183,7 +188,7 @@ export class ProjectEnvironmentConfiger {
   }
 
   /**
-   * Configure Arduino project: Add tasks.json file
+   * Configure project: Add configuration files
    * Ask to overwrite if file already exists.
    */
   private async configureProjectEnv(
@@ -211,9 +216,8 @@ export class ProjectEnvironmentConfiger {
         await utils.getTemplateFilesInfo(templateFolder);
 
     // configure file
-    for (const fileInfo of templateFilesInfo) {
-      await this.scaffoldConfigurationFile(scaffoldType, rootPath, fileInfo);
-    }
+    await this.scaffoldConfigurationFiles(
+        scaffoldType, rootPath, templateFilesInfo);
   }
 
 
@@ -242,17 +246,29 @@ export class ProjectEnvironmentConfiger {
 
   /**
    * Ask whether to overwrite tasks.json file or not
-   * @returns true - overwrite; false - not overwrite
    */
-  private async askToOverwriteFile(fileName: string): Promise<boolean> {
+  private async askToOverwriteFile(fileName: string):
+      Promise<vscode.QuickPickItem> {
     const overwriteTasksJsonOption: vscode.QuickPickItem[] = [];
     overwriteTasksJsonOption.push(
-        {label: `Yes`, description: ''}, {label: `No`, description: ''});
+        {
+          label: overWriteLabel.Yes,
+          detail: 'Overwrite existed configuration file.'
+        },
+        {
+          label: overWriteLabel.No,
+          detail:
+              'Do not overwrite existed file and exit the configuration process.'
+        },
+        {
+          label: overWriteLabel.YesToAll,
+          detail: 'Automatically overwrite all configuration files'
+        });
 
     const overwriteSelection =
         await vscode.window.showQuickPick(overwriteTasksJsonOption, {
           ignoreFocusOut: true,
-          placeHolder: `${fileName} already exists. Overwrite?`
+          placeHolder: `${fileName} already exists. Do you want to overwrite?`
         });
 
     if (overwriteSelection === undefined) {
@@ -261,43 +277,55 @@ export class ProjectEnvironmentConfiger {
           `Ask to overwrite ${fileName} selection cancelled.`);
     }
 
-    return overwriteSelection.label === 'Yes';
+    return overwriteSelection;
   }
 
   /**
-   * Scaffold configuration file for project. If file already exists, ask to
+   * Scaffold configuration files for project. If file already exists, ask to
    * overwrite it.
    */
-  private async scaffoldConfigurationFile(
+  private async scaffoldConfigurationFiles(
       scaffoldType: ScaffoldType, rootPath: string,
-      fileInfo: TemplateFileInfo) {
-    const targetPath = path.join(rootPath, fileInfo.targetPath);
-    if (!await FileUtility.directoryExists(scaffoldType, targetPath)) {
-      await FileUtility.mkdirRecursively(scaffoldType, targetPath);
-    }
-
-    const targetFilePath = path.join(targetPath, fileInfo.fileName);
-    // File exists.
-    if (await FileUtility.fileExists(scaffoldType, targetFilePath)) {
-      const fileOverwrite = await this.askToOverwriteFile(fileInfo.fileName);
-
-      if (!fileOverwrite) {
-        const message = `Not overwrite original ${
-            fileInfo.fileName}. Configuration operation cancelled.`;
-        throw new CancelOperationError(message);
+      templateFilesInfo: TemplateFileInfo[]) {
+    let overWriteAll = false;
+    for (const fileInfo of templateFilesInfo) {
+      const targetPath = path.join(rootPath, fileInfo.targetPath);
+      if (!await FileUtility.directoryExists(scaffoldType, targetPath)) {
+        await FileUtility.mkdirRecursively(scaffoldType, targetPath);
       }
-    }
 
-    // File not exists or choose to overwrite it.
-    if (!fileInfo.fileContent) {
-      throw new Error(`Fail to load ${fileInfo.fileName}.`);
-    }
+      const targetFilePath = path.join(targetPath, fileInfo.fileName);
+      if (!overWriteAll) {
+        // File exists.
+        if (await FileUtility.fileExists(scaffoldType, targetFilePath)) {
+          const fileOverwrite =
+              await this.askToOverwriteFile(fileInfo.fileName);
 
-    try {
-      await FileUtility.writeFile(
-          scaffoldType, targetFilePath, fileInfo.fileContent);
-    } catch (error) {
-      throw new Error(`Write content to file ${targetFilePath} failed.`);
+          switch (fileOverwrite.label) {
+            case overWriteLabel.No:
+              const message = `Not overwrite original ${
+                  fileInfo.fileName}. Configuration operation cancelled.`;
+              throw new CancelOperationError(message);
+            case overWriteLabel.YesToAll:
+              overWriteAll = true;
+              break;
+            default:
+              break;
+          }
+        }
+      }
+
+      // File not exists or choose to overwrite it.
+      if (!fileInfo.fileContent) {
+        throw new Error(`Fail to load ${fileInfo.fileName}.`);
+      }
+
+      try {
+        await FileUtility.writeFile(
+            scaffoldType, targetFilePath, fileInfo.fileContent);
+      } catch (error) {
+        throw new Error(`Write content to file ${targetFilePath} failed.`);
+      }
     }
   }
 
