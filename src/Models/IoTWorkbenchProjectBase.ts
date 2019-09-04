@@ -4,6 +4,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+import {CancelOperationError} from '../CancelOperationError';
 import {ConfigKey, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext} from '../telemetry';
@@ -199,7 +200,7 @@ export abstract class IoTWorkbenchProjectBase {
     return true;
   }
 
-  async deploy(): Promise<boolean> {
+  async deploy() {
     let azureLoggedIn = false;
 
     const deployItemList: string[] = [];
@@ -207,7 +208,7 @@ export abstract class IoTWorkbenchProjectBase {
       if (this.canDeploy(item)) {
         const isPrerequisitesAchieved = await item.checkPrerequisites();
         if (!isPrerequisitesAchieved) {
-          return false;
+          return;
         }
 
         deployItemList.push(item.name);
@@ -217,7 +218,7 @@ export abstract class IoTWorkbenchProjectBase {
     if (deployItemList && deployItemList.length <= 0) {
       await vscode.window.showInformationMessage(
           'Congratulations! The project does not contain any Azure components to be deployed.');
-      return false;
+      return;
     }
 
     if (!azureLoggedIn) {
@@ -243,7 +244,7 @@ export abstract class IoTWorkbenchProjectBase {
             {ignoreFocusOut: true, placeHolder: 'Deploy process'});
 
         if (!selection) {
-          return false;
+          throw new CancelOperationError(`Compomemt deployment cancelled.`);
         }
 
         const res = await item.deploy();
@@ -254,8 +255,6 @@ export abstract class IoTWorkbenchProjectBase {
     }
 
     vscode.window.showInformationMessage('Azure deploy succeeded.');
-
-    return true;
   }
 
   abstract async create(

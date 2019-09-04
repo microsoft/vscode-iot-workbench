@@ -178,7 +178,7 @@ export class DeviceModelOperator {
     const capabilityModelName = await vscode.window.showInputBox(option);
 
     if (capabilityModelName === undefined) {
-      return false;
+      return;
     }
 
     const dtid = dtUtils.GenerateDigitalTwinIdentifier(capabilityModelName);
@@ -215,7 +215,7 @@ export class DeviceModelOperator {
 
   async connectModelRepository(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext): Promise<boolean> {
+      telemetryContext: TelemetryContext) {
     const repoItems = [
       {label: 'Public repository', description: ''},
       {label: 'Company repository', description: ''}
@@ -227,11 +227,13 @@ export class DeviceModelOperator {
     });
 
     if (!repoSelection) {
-      return false;
+      telemetryContext.properties.errorMessage = 'Repo selection cancelled.';
+      telemetryContext.properties.result = 'Cancelled';
+      return;
     }
 
     if (repoSelection.label === 'Public repository') {
-      // Open Public repository
+      // Open public repository
       DeviceModelOperator.vscexpress = DeviceModelOperator.vscexpress ||
           new VSCExpress(context, 'DigitalTwinRepositoryViews');
       await DeviceModelOperator.vscexpress.open(
@@ -239,30 +241,29 @@ export class DeviceModelOperator {
           `${DigitalTwinConstants.productName} Model Repository`,
           vscode.ViewColumn.Two,
           {retainContextWhenHidden: true, enableScripts: true});
-      return true;
-    }
+      return;
+    } else {
+      // Open company repository
+      const connectionString = await this.retrieveModelRepoConnectionString();
+      if (!connectionString) {
+        return;
+      }
 
-    // Open Company repository
-    const connectionString = await this.retrieveModelRepoConnectionString();
-    if (!connectionString) {
-      return false;
-    }
+      const result = await DigitalTwinConnector.connectMetamodelRepository(
+          connectionString);
+      if (result) {
+        await CredentialStore.setCredential(
+            ConfigKey.modelRepositoryKeyName, connectionString);
 
-    const result =
-        await DigitalTwinConnector.connectMetamodelRepository(connectionString);
-    if (result) {
-      await CredentialStore.setCredential(
-          ConfigKey.modelRepositoryKeyName, connectionString);
-
-      DeviceModelOperator.vscexpress = DeviceModelOperator.vscexpress ||
-          new VSCExpress(context, 'DigitalTwinRepositoryViews');
-      await DeviceModelOperator.vscexpress.open(
-          'index.html', `${DigitalTwinConstants.productName} Model Repository`,
-          vscode.ViewColumn.Two,
-          {retainContextWhenHidden: true, enableScripts: true});
-      return true;
+        DeviceModelOperator.vscexpress = DeviceModelOperator.vscexpress ||
+            new VSCExpress(context, 'DigitalTwinRepositoryViews');
+        await DeviceModelOperator.vscexpress.open(
+            'index.html',
+            `${DigitalTwinConstants.productName} Model Repository`,
+            vscode.ViewColumn.Two,
+            {retainContextWhenHidden: true, enableScripts: true});
+      }
     }
-    return false;
   }
 
   async disconnect(
@@ -285,9 +286,8 @@ export class DeviceModelOperator {
       const dtMetamodelRepositoryClient =
           new DigitalTwinMetamodelRepositoryClient();
       await dtMetamodelRepositoryClient.initialize(null);
-      const result = await dtMetamodelRepositoryClient.searchInterfacesAsync(
+      await dtMetamodelRepositoryClient.searchInterfacesAsync(
           searchString, continueToken, undefined, pageSize);
-      return result;
     } else {
       const connectionString =
           await CredentialStore.getCredential(ConfigKey.modelRepositoryKeyName);
@@ -303,9 +303,8 @@ export class DeviceModelOperator {
       const dtMetamodelRepositoryClient =
           new DigitalTwinMetamodelRepositoryClient();
       await dtMetamodelRepositoryClient.initialize(connectionString.toString());
-      const result = await dtMetamodelRepositoryClient.searchInterfacesAsync(
+      await dtMetamodelRepositoryClient.searchInterfacesAsync(
           searchString, continueToken, builder.repositoryIdValue, pageSize);
-      return result;
     }
   }
 
@@ -317,10 +316,8 @@ export class DeviceModelOperator {
       const dtMetamodelRepositoryClient =
           new DigitalTwinMetamodelRepositoryClient();
       await dtMetamodelRepositoryClient.initialize(null);
-      const result =
-          await dtMetamodelRepositoryClient.searchCapabilityModelsAsync(
-              searchString, continueToken, undefined, pageSize);
-      return result;
+      await dtMetamodelRepositoryClient.searchCapabilityModelsAsync(
+          searchString, continueToken, undefined, pageSize);
     } else {
       const connectionString =
           await CredentialStore.getCredential(ConfigKey.modelRepositoryKeyName);
@@ -335,10 +332,8 @@ export class DeviceModelOperator {
       await dtMetamodelRepositoryClient.initialize(connectionString.toString());
       const builder = DigitalTwinConnectionStringBuilder.create(
           connectionString.toString());
-      const result =
-          await dtMetamodelRepositoryClient.searchCapabilityModelsAsync(
-              searchString, continueToken, builder.repositoryIdValue, pageSize);
-      return result;
+      await dtMetamodelRepositoryClient.searchCapabilityModelsAsync(
+          searchString, continueToken, builder.repositoryIdValue, pageSize);
     }
   }
 
@@ -504,20 +499,16 @@ export class DeviceModelOperator {
 
   async submitMetaModelFiles(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext): Promise<boolean> {
+      telemetryContext: TelemetryContext) {
     if (!(vscode.workspace.workspaceFolders &&
           vscode.workspace.workspaceFolders.length > 0) ||
         !vscode.workspace.workspaceFolders[0].uri.fsPath) {
       vscode.window.showWarningMessage(
           'You have not yet opened a folder in Visual Studio Code. Please select a folder first.');
-      return false;
+      return;
     }
 
     const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-
-    if (!rootPath) {
-      throw new Error('User cancelled folder selection.');
-    }
 
     // Retrieve all schema files
     const allInterfaceFiles: dtUtils.SchemaFileInfo[] = [];

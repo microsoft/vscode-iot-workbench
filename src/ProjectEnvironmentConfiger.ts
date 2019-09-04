@@ -51,12 +51,6 @@ export class ProjectEnvironmentConfiger {
     }
 
     const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    if (!rootPath) {
-      const message =
-          'Unable to find the folder for device model files. Please select a folder first.';
-      vscode.window.showWarningMessage(message);
-      return;
-    }
 
     await vscode.window.withProgress(
         {
