@@ -9,6 +9,7 @@ import {ConfigKey, DevelopEnvironment, EventNames, FileNames, PlatformType, Scaf
 import {FileUtility} from '../FileUtility';
 import {ProjectEnvironmentConfiger} from '../ProjectEnvironmentConfiger';
 import {TelemetryContext, TelemetryProperties, TelemetryWorker} from '../telemetry';
+import {channelShowAndAppendLine, generateTemplateFile} from '../utils';
 
 import {ProjectHostType} from './Interfaces/ProjectHostType';
 import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
@@ -18,7 +19,6 @@ import {RemoteExtension} from './RemoteExtension';
 const impor = require('impor')(__dirname);
 const raspberryPiDeviceModule =
     impor('./RaspberryPiDevice') as typeof import('./RaspberryPiDevice');
-const telemetryModule = impor('../telemetry') as typeof import('../telemetry');
 
 const constants = {
   configPrefix: 'vscode-iot-workbench'
@@ -160,5 +160,38 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     projectEnvConfiger.configureProjectEnvironmentCore(
         this.extensionContext, this.channel, this.telemetryContext,
         this.projectRootPath, PlatformType.EmbeddedLinux, openInNewWindow);
+  }
+
+  async configureProjectEnv(
+      channel: vscode.OutputChannel, scaffoldType: ScaffoldType,
+      projectPath: string, templateFilesInfo: TemplateFileInfo[],
+      openInNewWindow: boolean, customizeEnvironment: boolean) {
+    // 1. Scaffold template files
+    for (const fileInfo of templateFilesInfo) {
+      await generateTemplateFile(projectPath, scaffoldType, fileInfo);
+    }
+
+    // 2. open project
+    if (!customizeEnvironment) {
+      // If user does not want to customize develpment environment,
+      //  we will open the project in remote directly for user.
+      setTimeout(
+          () => vscode.commands.executeCommand(
+              'iotcube.openInContainer', projectPath),
+          500);
+    } else {
+      // If user wants to customize development environment, open project
+      // locally.
+      setTimeout(
+          () => vscode.commands.executeCommand(
+              'iotcube.openLocally', projectPath, openInNewWindow),
+          500);
+    }
+
+    const message =
+        'Configuration is done. You can edit configuration file to customize development environment And then run \'Azure IoT Device Workbench: Compile Device Code\' command to compile device code';
+
+    channelShowAndAppendLine(channel, message);
+    vscode.window.showInformationMessage(message);
   }
 }

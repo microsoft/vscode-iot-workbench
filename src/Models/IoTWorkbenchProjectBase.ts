@@ -262,6 +262,15 @@ export abstract class IoTWorkbenchProjectBase {
       projectType: ProjectTemplateType, boardId: string,
       openInNewWindow: boolean): Promise<void>;
 
+  /**
+   * Configure project environment: Scaffold configuration files with the given
+   * template files and open project properly.
+   */
+  abstract async configureProjectEnv(
+      channel: vscode.OutputChannel, scaffoldType: ScaffoldType,
+      projectPath: string, templateFilesInfo: TemplateFileInfo[],
+      openInNewWindow: boolean, customizeEnvironment: boolean): Promise<void>;
+
   async configDeviceSettings(): Promise<boolean> {
     for (const component of this.componentList) {
       if (component.getComponentType() === ComponentType.Device) {
