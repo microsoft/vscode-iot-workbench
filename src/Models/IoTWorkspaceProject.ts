@@ -243,7 +243,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
   async create(
       rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
       projectType: ProjectTemplateType, boardId: string,
-      openInNewWindow: boolean): Promise<boolean> {
+      openInNewWindow: boolean) {
     const createTimeScaffoldType = ScaffoldType.Local;
     if (rootFolderPath !== undefined) {
       await FileUtility.mkdirRecursively(
@@ -319,7 +319,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
             new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
         const isIotHubPrerequisitesAchieved = await iothub.checkPrerequisites();
         if (!isIotHubPrerequisitesAchieved) {
-          return false;
+          return;
         }
 
         const functionDir = path.join(
@@ -343,7 +343,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
         const isFunctionsPrerequisitesAchieved =
             await azureFunctions.checkPrerequisites();
         if (!isFunctionsPrerequisitesAchieved) {
-          return false;
+          return;
         }
 
         workspace.settings[`IoTWorkbench.${ConfigKey.functionPath}`] =
@@ -429,7 +429,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
         // TODO: Remove this function and implement with sdk in FileUtility
         fs.removeSync(this.projectRootPath);
         vscode.window.showWarningMessage('Project initialize cancelled.');
-        return false;
+        return;
       }
     }
 
@@ -465,6 +465,5 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
         () => vscode.commands.executeCommand(
             'iotcube.openLocally', workspaceConfigFilePath, openInNewWindow),
         1000);
-    return true;
   }
 }

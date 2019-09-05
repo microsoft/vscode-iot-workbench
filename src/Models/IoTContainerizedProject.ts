@@ -5,14 +5,15 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {ConfigKey, DevelopEnvironment, EventNames, FileNames, ScaffoldType} from '../constants';
+import {ConfigKey, DevelopEnvironment, EventNames, FileNames, PlatformType, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
+import {ProjectEnvironmentConfiger} from '../ProjectEnvironmentConfiger';
 import {TelemetryContext, TelemetryProperties, TelemetryWorker} from '../telemetry';
+
 import {ProjectHostType} from './Interfaces/ProjectHostType';
 import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
 import {RemoteExtension} from './RemoteExtension';
-
 
 const impor = require('impor')(__dirname);
 const raspberryPiDeviceModule =
@@ -97,12 +98,12 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
   async create(
       rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
       projectType: ProjectTemplateType, boardId: string,
-      openInNewWindow: boolean): Promise<boolean> {
+      openInNewWindow: boolean) {
     // Step 0: Check prerequisite
-    // Can only create projcet locally
+    // Can only create project locally
     const result = await RemoteExtension.checkRemoteExtension(this.channel);
     if (!result) {
-      return false;
+      return;
     }
 
     const createTimeScaffoldType = ScaffoldType.Local;
@@ -137,7 +138,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       // TODO: Add remove() in FileUtility class
       fs.removeSync(this.projectRootPath);
       vscode.window.showWarningMessage('Project initialize cancelled.');
-      return false;
+      return;
     }
 
     // Step 2: Write project config into iot workbench project file
@@ -154,29 +155,10 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
           `Internal Error. Could not find iot workbench project file.`);
     }
 
-
-    // TODO: Trigger configure command to configure project and open project in
-    // new window Step 3: Configure project
-
-    // Step 4: Open project
-    // if (!openInNewWindow) {
-    //   // If open in current window, VSCode will restart. Need to send
-    //   telemetry
-    //   // before VSCode restart to advoid data lost.
-    //   try {
-    //     telemetryModule.TelemetryWorker.sendEvent(
-    //         EventNames.createNewProjectEvent, this.telemetryContext);
-    //   } catch {
-    //     // If sending telemetry failed, skip the error to avoid blocking
-    //     user.
-    //   }
-    // }
-
-    // setTimeout(
-    //     () => vscode.commands.executeCommand(
-    //         'iotcube.openLocally', this.projectRootPath, openInNewWindow),
-    //     1000);
-
-    return true;
+    // Configure project and open in container
+    const projectEnvConfiger = new ProjectEnvironmentConfiger();
+    projectEnvConfiger.configureProjectEnvironmentCore(
+        this.extensionContext, this.channel, this.telemetryContext,
+        this.projectRootPath, PlatformType.EmbeddedLinux, openInNewWindow);
   }
 }

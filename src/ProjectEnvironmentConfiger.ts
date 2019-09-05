@@ -16,26 +16,15 @@ import {RemoteExtension} from './Models/RemoteExtension';
 import * as UIUtility from './UIUtility';
 import {CancelOperationError} from './CancelOperationError';
 
-const impor = require('impor')(__dirname);
-const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
-    typeof import('./Models/IoTWorkspaceProject');
-const ioTContainerizedProjectModule =
-    impor('./Models/IoTContainerizedProject') as
-    typeof import('./Models/IoTContainerizedProject');
-
 enum OverwriteLabel {
   Yes = 'Yes',
   No = 'No',
   YesToAll = 'Yes to all'
 }
 export class ProjectEnvironmentConfiger {
-  // Configuration command will scaffold configutation
-  // files for project and WILL NOT open an Embedded Linux project in remote by
-  // default.
   async configureProjectEnvironment(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext,
-      platform: PlatformType = PlatformType.Unknown, openInNewWindow = false) {
+      telemetryContext: TelemetryContext) {
     // Only create project when not in remote environment
     const isLocal = RemoteExtension.checkLocalBeforeRunCommand(context);
     if (!isLocal) {
@@ -58,136 +47,85 @@ export class ProjectEnvironmentConfiger {
           location: vscode.ProgressLocation.Window,
         },
         async () => {
-          const scaffoldType = ScaffoldType.Local;
-
-          // Select platform if not specified
-          if (platform === PlatformType.Unknown) {
-            const platformSelection =
-                await UIUtility.selectPlatform(scaffoldType, context);
-            if (!platformSelection) {
-              telemetryContext.properties.errorMessage =
-                  'Platform selection cancelled.';
-              telemetryContext.properties.result = 'Cancelled';
-              return;
-            } else {
-              telemetryContext.properties.platform = platformSelection.label;
-              platform = utils.getEnumKeyByEnumValue(
-                  PlatformType, platformSelection.label);
-            }
-          }
-
-          telemetryContext.properties.platform = platform;
-
-          // Get template list json object
-          const templateJsonFilePath = context.asAbsolutePath(path.join(
-              FileNames.resourcesFolderName, FileNames.templatesFolderName,
-              FileNames.templateFileName));
-          const templateJsonFileString =
-              await FileUtility.readFile(
-                  scaffoldType, templateJsonFilePath, 'utf8') as string;
-          const templateJson = JSON.parse(templateJsonFileString);
-          if (!templateJson) {
-            throw new Error('Fail to load template list.');
-          }
-
-          if (platform === PlatformType.Arduino) {
-            const templateName = 'Arduino Task';
-
-            try {
-              await this.configureProjectEnv(
-                  context, scaffoldType, templateJson, rootPath, templateName);
-            } catch (error) {
-              if (error instanceof CancelOperationError) {
-                telemetryContext.properties.result = 'Cancelled';
-                telemetryContext.properties.errorMessage = error.message;
-                return;
-              } else {
-                throw error;
-              }
-            }
-          } else if (platform === PlatformType.EmbeddedLinux) {
-            // Select container
-            const containerSelection = await this.selectContainer(templateJson);
-            if (!containerSelection) {
-              telemetryContext.properties.errorMessage =
-                  'Container selection cancelled.';
-              telemetryContext.properties.result = 'Cancelled';
-              return;
-            } else {
-              telemetryContext.properties.platform = containerSelection.label;
-            }
-
-            // Configure the selected container environment for the project
-            const templateName = containerSelection.label;
-
-            try {
-              await this.configureProjectEnv(
-                  context, scaffoldType, templateJson, rootPath, templateName);
-            } catch (error) {
-              if (error instanceof CancelOperationError) {
-                telemetryContext.properties.result = 'Cancelled';
-                telemetryContext.properties.errorMessage = error.message;
-                return;
-              } else {
-                throw error;
-              }
-            }
-
-            // If default case, ask user whether or not to customize container
-            // Skip this step if caller already decide to open in remote
-            // directly.
-            if (!openInNewWindow) {
-              let customizeEnvironment;
-              try {
-                customizeEnvironment = await this.askToCustomize();
-              } catch (error) {
-                if (error instanceof CancelOperationError) {
-                  telemetryContext.properties.errorMessage = error.message;
-                  telemetryContext.properties.result = 'Cancelled';
-                  return;
-                } else {
-                  throw error;
-                }
-              }
-              telemetryContext.properties.customizeEnvironment =
-                  customizeEnvironment.toString();
-
-              // If user do not want to customize develpment environment, open
-              // the project in remote directly for user.
-              if (!customizeEnvironment) {
-                openInNewWindow = true;
-              }
-              // TODO: Open configuration file in current window for user to
-              // edit configuration.
-            }
-
-            // Open project in remote
-            if (openInNewWindow) {
-              setTimeout(
-                  () => vscode.commands.executeCommand(
-                      'iotcube.openInContainer', rootPath),
-                  500);
-            }
-          } else {
-            throw new Error(`Unsupported Platform type!`);
-          }
-
-          const message =
-              'Configuration is done. You can run \'Azure IoT Device Workbench: Compile Device Code\' command to compile device code';
-          utils.channelShowAndAppendLine(channel, message);
-          vscode.window.showInformationMessage(message);
+          this.configureProjectEnvironmentCore(
+              context, channel, telemetryContext, rootPath,
+              PlatformType.Unknown, false);
         });
 
     return;
   }
 
   /**
-   * Configure project: Add configuration files
-   * Ask to overwrite if file already exists.
+   * Configuration operation adds configutation files for project.
+   * For Embedded Linux project, ask user whether to customize environment. If
+   * not, open Embedded Linux project in remote.
+   * @param platform If platform is of Unknown type, command palatte will show
+   * up for user to choose platform type.
+   * @param openInNewWindow
    */
-  private async configureProjectEnv(
-      context: vscode.ExtensionContext, scaffoldType: ScaffoldType,
-      templateJson: TemplatesType, rootPath: string, templateName: string) {
+  async configureProjectEnvironmentCore(
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext, projectPath: string,
+      platform: PlatformType = PlatformType.Unknown, openInNewWindow = false) {
+    if (!projectPath) {
+      throw new Error(
+          'Unable to find the project path, please open the folder and initialize project again.');
+    }
+
+    const scaffoldType = ScaffoldType.Local;
+
+    // Step 1: Select platform if not specified
+    if (platform === PlatformType.Unknown) {
+      const platformSelection =
+          await UIUtility.selectPlatform(scaffoldType, context);
+      if (!platformSelection) {
+        telemetryContext.properties.errorMessage =
+            'Platform selection cancelled.';
+        telemetryContext.properties.result = 'Cancelled';
+        return;
+      } else {
+        telemetryContext.properties.platform = platformSelection.label;
+        platform =
+            utils.getEnumKeyByEnumValue(PlatformType, platformSelection.label);
+      }
+    }
+    telemetryContext.properties.platform = platform;
+
+    // Get template list json object
+    const templateJsonFilePath = context.asAbsolutePath(path.join(
+        FileNames.resourcesFolderName, FileNames.templatesFolderName,
+        FileNames.templateFileName));
+    const templateJsonFileString =
+        await FileUtility.readFile(
+            scaffoldType, templateJsonFilePath, 'utf8') as string;
+    const templateJson = JSON.parse(templateJsonFileString);
+    if (!templateJson) {
+      throw new Error('Fail to load template list.');
+    }
+
+    // Step 2: Get environment template files
+    let templateName: string;
+    if (platform === PlatformType.Arduino) {
+      templateName = 'Arduino Task';
+    } else if (platform === PlatformType.EmbeddedLinux) {
+      // Select container
+      const containerSelection = await this.selectContainer(templateJson);
+      if (!containerSelection) {
+        telemetryContext.properties.errorMessage =
+            'Container selection cancelled.';
+        telemetryContext.properties.result = 'Cancelled';
+        return;
+      }
+      templateName = containerSelection.label;
+      if (!templateName) {
+        throw new Error(
+            `Internal Error: Cannot get template name from template property.`);
+      }
+    } else {
+      throw new Error(`Unsupported Platform type!`);
+    }
+    telemetryContext.properties.templateName = templateName;
+
     const projectEnvTemplate =
         templateJson.templates.filter((template: ProjectTemplate) => {
           return (
@@ -195,12 +133,86 @@ export class ProjectEnvironmentConfiger {
               template.name === templateName);
         });
 
-    if (!(projectEnvTemplate && projectEnvTemplate.length > 0)) {
-      throw new Error(
-          `Fail to fetch project development environmnet template files with path name ${
-              templateName}.`);
+    // Step 3: Configure project environment with template files
+    try {
+      await this.scaffoldConfigurationFiles(
+          context, scaffoldType, projectPath, projectEnvTemplate);
+    } catch (error) {
+      if (error instanceof CancelOperationError) {
+        telemetryContext.properties.result = 'Cancelled';
+        telemetryContext.properties.errorMessage = error.message;
+        return;
+      } else {
+        throw error;
+      }
     }
 
+    let message: string;
+    // Open Embedded Linux project in remote if user don't customize container
+    if (platform === PlatformType.EmbeddedLinux) {
+      // If default case, ask user whether or not to customize container
+      // Skip this step if caller already decide to open in remote
+      // directly.
+      let customizeEnvironment;
+      try {
+        customizeEnvironment = await this.askToCustomize();
+      } catch (error) {
+        if (error instanceof CancelOperationError) {
+          telemetryContext.properties.errorMessage = error.message;
+          telemetryContext.properties.result = 'Cancelled';
+          return;
+        } else {
+          throw error;
+        }
+      }
+      telemetryContext.properties.customizeEnvironment =
+          customizeEnvironment.toString();
+
+      if (!customizeEnvironment) {
+        // If user does not want to customize develpment environment,
+        //  we will open the project in remote directly for user.
+        setTimeout(
+            () => vscode.commands.executeCommand(
+                'iotcube.openInContainer', projectPath),
+            500);
+      } else {
+        // If user wants to customize development environment, open project
+        // locally.
+        setTimeout(
+            () => vscode.commands.executeCommand(
+                'iotcube.openLocally', projectPath, openInNewWindow),
+            500);
+      }
+
+      message =
+          'Configuration is done. You can edit configuration file to customize development environment And then run \'Azure IoT Device Workbench: Compile Device Code\' command to compile device code';
+    } else if (platform === PlatformType.Arduino) {
+      setTimeout(
+          () => vscode.commands.executeCommand(
+              'iotcube.openLocally', projectPath, openInNewWindow),
+          500);
+      message =
+          'Configuration is done. You can run \'Azure IoT Device Workbench: Compile Device Code\' command to compile device code';
+    } else {
+      throw new Error(`Unsupported Platform type!`);
+    }
+
+    utils.channelShowAndAppendLine(channel, message);
+    vscode.window.showInformationMessage(message);
+  }
+
+  /**
+   * Configure project environment: Scaffold configuration files with the given
+   * template files. Ask to overwrite if file already exists.
+   */
+  private async scaffoldConfigurationFiles(
+      context: vscode.ExtensionContext, scaffoldType: ScaffoldType,
+      projectPath: string, projectEnvTemplate: ProjectTemplate[]) {
+    // Load template files
+    if (!(projectEnvTemplate && projectEnvTemplate.length > 0)) {
+      throw new Error(
+          `Fail to get project development environment template files.`);
+    }
     const templateFolderName = projectEnvTemplate[0].path;
 
     const templateFolder = context.asAbsolutePath(path.join(
@@ -209,9 +221,47 @@ export class ProjectEnvironmentConfiger {
     const templateFilesInfo: TemplateFileInfo[] =
         await utils.getTemplateFilesInfo(templateFolder);
 
-    // configure file
-    await this.scaffoldConfigurationFiles(
-        scaffoldType, rootPath, templateFilesInfo);
+    // configure files
+    let overwriteAll = false;
+    for (const fileInfo of templateFilesInfo) {
+      const targetPath = path.join(projectPath, fileInfo.targetPath);
+      if (!await FileUtility.directoryExists(scaffoldType, targetPath)) {
+        await FileUtility.mkdirRecursively(scaffoldType, targetPath);
+      }
+
+      const targetFilePath = path.join(targetPath, fileInfo.fileName);
+      if (!overwriteAll) {
+        // File exists.
+        if (await FileUtility.fileExists(scaffoldType, targetFilePath)) {
+          const fileOverwrite =
+              await this.askToOverwriteFile(fileInfo.fileName);
+
+          switch (fileOverwrite.label) {
+            case OverwriteLabel.No:
+              const message = `Not overwrite original ${
+                  fileInfo.fileName}. Configuration operation cancelled.`;
+              throw new CancelOperationError(message);
+            case OverwriteLabel.YesToAll:
+              overwriteAll = true;
+              break;
+            default:
+              break;
+          }
+        }
+      }
+
+      // File not exists or choose to overwrite it.
+      if (!fileInfo.fileContent) {
+        throw new Error(`Fail to load ${fileInfo.fileName}.`);
+      }
+
+      try {
+        await FileUtility.writeFile(
+            scaffoldType, targetFilePath, fileInfo.fileContent);
+      } catch (error) {
+        throw new Error(`Write content to file ${targetFilePath} failed.`);
+      }
+    }
   }
 
 
@@ -272,55 +322,6 @@ export class ProjectEnvironmentConfiger {
     }
 
     return overwriteSelection;
-  }
-
-  /**
-   * Scaffold configuration files for project. If file already exists, ask to
-   * overwrite it.
-   */
-  private async scaffoldConfigurationFiles(
-      scaffoldType: ScaffoldType, rootPath: string,
-      templateFilesInfo: TemplateFileInfo[]) {
-    let overWriteAll = false;
-    for (const fileInfo of templateFilesInfo) {
-      const targetPath = path.join(rootPath, fileInfo.targetPath);
-      if (!await FileUtility.directoryExists(scaffoldType, targetPath)) {
-        await FileUtility.mkdirRecursively(scaffoldType, targetPath);
-      }
-
-      const targetFilePath = path.join(targetPath, fileInfo.fileName);
-      if (!overWriteAll) {
-        // File exists.
-        if (await FileUtility.fileExists(scaffoldType, targetFilePath)) {
-          const fileOverwrite =
-              await this.askToOverwriteFile(fileInfo.fileName);
-
-          switch (fileOverwrite.label) {
-            case OverwriteLabel.No:
-              const message = `Not overwrite original ${
-                  fileInfo.fileName}. Configuration operation cancelled.`;
-              throw new CancelOperationError(message);
-            case OverwriteLabel.YesToAll:
-              overWriteAll = true;
-              break;
-            default:
-              break;
-          }
-        }
-      }
-
-      // File not exists or choose to overwrite it.
-      if (!fileInfo.fileContent) {
-        throw new Error(`Fail to load ${fileInfo.fileName}.`);
-      }
-
-      try {
-        await FileUtility.writeFile(
-            scaffoldType, targetFilePath, fileInfo.fileContent);
-      } catch (error) {
-        throw new Error(`Write content to file ${targetFilePath} failed.`);
-      }
-    }
   }
 
   private async selectContainer(templateListJson: TemplatesType):

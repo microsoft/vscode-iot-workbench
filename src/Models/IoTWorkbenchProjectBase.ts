@@ -260,7 +260,7 @@ export abstract class IoTWorkbenchProjectBase {
   abstract async create(
       rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
       projectType: ProjectTemplateType, boardId: string,
-      openInNewWindow: boolean): Promise<boolean>;
+      openInNewWindow: boolean): Promise<void>;
 
   async configDeviceSettings(): Promise<boolean> {
     for (const component of this.componentList) {

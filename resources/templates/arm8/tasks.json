@@ -6,7 +6,7 @@
       {
           "label": "default compile script",
           "type": "shell",
-          "command": "bash /work/compile_app.sh",
+          "command": "bash /work/compile_app.sh ./src",
           "group": {
               "kind": "build",
               "isDefault": true
