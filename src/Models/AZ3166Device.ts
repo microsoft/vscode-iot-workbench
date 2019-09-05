@@ -43,7 +43,7 @@ const constants = {
   informationPageUrl: 'https://aka.ms/AA35xln'
 };
 
-enum configDeviceOptions {
+enum ConfigDeviceOptions {
   ConnectionString,
   UDS
 }
@@ -297,10 +297,10 @@ export class AZ3166Device extends ArduinoDeviceBase {
       const plat = os.platform();
       if (plat === 'win32') {
         res = await this.flushDeviceConfig(
-            deviceConnectionString, configDeviceOptions.ConnectionString);
+            deviceConnectionString, ConfigDeviceOptions.ConnectionString);
       } else {
         res = await this.flushDeviceConfigUnix(
-            deviceConnectionString, configDeviceOptions.ConnectionString);
+            deviceConnectionString, ConfigDeviceOptions.ConnectionString);
       }
 
       if (res === false) {
@@ -351,9 +351,9 @@ export class AZ3166Device extends ArduinoDeviceBase {
       let res: boolean;
       const plat = os.platform();
       if (plat === 'win32') {
-        res = await this.flushDeviceConfig(UDS, configDeviceOptions.UDS);
+        res = await this.flushDeviceConfig(UDS, ConfigDeviceOptions.UDS);
       } else {
-        res = await this.flushDeviceConfigUnix(UDS, configDeviceOptions.UDS);
+        res = await this.flushDeviceConfigUnix(UDS, ConfigDeviceOptions.UDS);
       }
 
       if (res === false) {
@@ -381,7 +381,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
           } catch (error) {
             reject(error);
           }
-          if (option === configDeviceOptions.ConnectionString) {
+          if (option === ConfigDeviceOptions.ConnectionString) {
             command = 'set_az_iothub';
           } else {
             command = 'set_dps_uds';
@@ -478,7 +478,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
           } catch (error) {
             reject(error);
           }
-          if (option === configDeviceOptions.ConnectionString) {
+          if (option === ConfigDeviceOptions.ConnectionString) {
             command = 'set_az_iothub';
           } else {
             command = 'set_dps_uds';

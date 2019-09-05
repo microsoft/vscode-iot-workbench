@@ -200,7 +200,8 @@ export abstract class ArduinoDeviceBase implements Device {
 
   async generateCrc(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
-    if (!vscode.workspace.workspaceFolders) {
+    if (!(vscode.workspace.workspaceFolders &&
+          vscode.workspace.workspaceFolders.length > 0)) {
       const message = 'No workspace opened.';
       vscode.window.showWarningMessage(message);
       utils.channelShowAndAppendLine(channel, message);

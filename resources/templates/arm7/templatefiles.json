@@ -1,0 +1,24 @@
+{
+  "templateFiles": [
+    {
+        "fileName": "devcontainer.json",
+        "sourcePath" : ".",
+        "targetPath" : "./.devcontainer"
+    },
+    {
+        "fileName": "Dockerfile",
+        "sourcePath" : ".",
+        "targetPath" : "./.devcontainer"
+    },
+    {
+        "fileName": "install_packages.sh",
+        "sourcePath" : ".",
+        "targetPath" : "./.devcontainer"
+    },
+    {
+      "fileName": "tasks.json",
+      "sourcePath" : ".",
+      "targetPath" : "./.vscode"
+    }
+  ]
+}

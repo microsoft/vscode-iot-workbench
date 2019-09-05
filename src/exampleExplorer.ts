@@ -216,7 +216,7 @@ export class ExampleExplorer {
     if (!boardSelection) {
       telemetryContext.properties.errorMessage = 'Board selection cancelled.';
       telemetryContext.properties.result = 'Cancelled';
-      return false;
+      return;
     } else if (boardSelection.id === 'no_device') {
       await utils.takeNoDeviceSurvey(telemetryContext);
       return;
@@ -239,11 +239,8 @@ export class ExampleExplorer {
               enableCommandUris: true,
               retainContextWhenHidden: true
             });
-        return true;
       }
     }
-
-    return false;
   }
 
   async initializeExample(

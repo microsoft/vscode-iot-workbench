@@ -8,24 +8,22 @@ import * as vscode from 'vscode';
 import {TelemetryContext} from './telemetry';
 import {constructAndLoadIoTProject} from './utils';
 import {RemoteExtension} from './Models/RemoteExtension';
+import {CancelOperationError} from './CancelOperationError';
 
 
 export class AzureOperator {
   async provision(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    let status = false;
     const iotProject =
         await constructAndLoadIoTProject(context, channel, telemetryContext);
     if (!iotProject) {
       return;
     }
-    status = await iotProject.provision();
+    const status = await iotProject.provision();
     if (status) {
       vscode.window.showInformationMessage('Azure provision succeeded.');
     }
-
-    return status;
   }
 
   async deploy(
@@ -42,9 +40,18 @@ export class AzureOperator {
 
     const iotProject =
         await constructAndLoadIoTProject(context, channel, telemetryContext);
-    if (!iotProject) {
-      return;
+    if (iotProject) {
+      try {
+        await iotProject.deploy();
+      } catch (error) {
+        if (error instanceof CancelOperationError) {
+          telemetryContext.properties.errorMessage = error.message;
+          telemetryContext.properties.result = 'Cancelled';
+          return;
+        } else {
+          throw error;
+        }
+      }
     }
-    await iotProject.deploy();
   }
 }

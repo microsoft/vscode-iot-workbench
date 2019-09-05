@@ -152,7 +152,7 @@ export class ProjectInitializer {
           } else {
             throw new Error('unsupported platform');
           }
-          return await project.create(
+          await project.create(
               projectPath, templateFilesInfo, projectTemplateType,
               template.boardId, openInNewWindow);
         });

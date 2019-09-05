@@ -20,7 +20,7 @@ import {ServiceClientCredentials} from 'ms-rest';
 import {AzureAccount, AzureResourceFilter} from '../azure-account.api';
 import {StringDictionary} from 'azure-arm-website/lib/models';
 import {getExtension} from './Apis';
-import {extensionName} from './Interfaces/Api';
+import {ExtensionName} from './Interfaces/Api';
 import {Guid} from 'guid-typescript';
 import {AzureComponentConfig, AzureConfigs, ComponentInfo, DependencyConfig, Dependency} from './AzureComponentConfig';
 import {FileUtility} from '../FileUtility';
@@ -35,7 +35,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
   private channel: vscode.OutputChannel;
   private azureFunctionsPath: string;
   private azureAccountExtension: AzureAccount|undefined =
-      getExtension(extensionName.AzureAccount);
+      getExtension(ExtensionName.AzureAccount);
   private functionLanguage: string|null;
   private functionFolder: string;
 

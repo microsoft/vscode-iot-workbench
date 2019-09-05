@@ -74,7 +74,6 @@ export class FileNames {
   static readonly outputPathName = '.build';
   static readonly templatesFolderName = 'templates';
   static readonly templateFiles = 'templatefiles.json';
-  static readonly taskJsonFile = 'tasks.json';
 }
 
 export enum OperationType {

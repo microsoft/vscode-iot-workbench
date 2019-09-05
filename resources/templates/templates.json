@@ -163,14 +163,8 @@
         {
             "name": "Arduino Task",
             "description": "Template files used to configure Arduino project's task",
-            "tag": "task",
+            "tag": "development_container",
             "path": "arduino_task"
-        },
-        {
-            "name": "Embedded Linux Task",
-            "description": "Template files used to configure Embedded Linux project's task",
-            "tag": "task",
-            "path": "embeddedlinux_task"
         }
     ]
 }

@@ -12,7 +12,7 @@ import {AzureAccount, AzureResourceFilter, AzureSession} from '../azure-account.
 import {ConfigHandler} from '../configHandler';
 
 import {getExtension} from './Apis';
-import {extensionName} from './Interfaces/Api';
+import {ExtensionName} from './Interfaces/Api';
 import {TelemetryWorker, TelemetryContext} from '../telemetry';
 import {EventNames} from '../constants';
 
@@ -42,7 +42,7 @@ export class AzureUtility {
   private static _subscriptionId: string|undefined;
   private static _resourceGroup: string|undefined;
   private static _azureAccountExtension: AzureAccount|undefined =
-      getExtension(extensionName.AzureAccount);
+      getExtension(ExtensionName.AzureAccount);
 
   static init(
       context: vscode.ExtensionContext, channel?: vscode.OutputChannel,
@@ -308,7 +308,8 @@ export class AzureUtility {
         inputValue = _value.label;
       } else if (key.substr(0, 2) === '$$') {
         // Read value from file
-        if (!vscode.workspace.workspaceFolders) {
+        if (!(vscode.workspace.workspaceFolders &&
+              vscode.workspace.workspaceFolders.length > 0)) {
           inputValue = '';
         } else {
           const _key = key.substr(2);

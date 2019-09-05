@@ -1,6 +1,6 @@
 {
-  "image": "rpi64_iothub",
-  "name": "rpi64_iothub_container",
+  "image": "arm64",
+  "name": "arm64_container",
   "dockerFile": "Dockerfile",
   "extensions": [
     "ms-vscode.cpptools",
