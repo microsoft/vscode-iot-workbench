@@ -23,7 +23,7 @@ const ioTContainerizedProjectModule =
     impor('./Models/IoTContainerizedProject') as
     typeof import('./Models/IoTContainerizedProject');
 
-enum overWriteLabel {
+enum OverwriteLabel {
   Yes = 'Yes',
   No = 'No',
   YesToAll = 'Yes to all'
@@ -246,16 +246,16 @@ export class ProjectEnvironmentConfiger {
     const overwriteTasksJsonOption: vscode.QuickPickItem[] = [];
     overwriteTasksJsonOption.push(
         {
-          label: overWriteLabel.Yes,
+          label: OverwriteLabel.Yes,
           detail: 'Overwrite existed configuration file.'
         },
         {
-          label: overWriteLabel.No,
+          label: OverwriteLabel.No,
           detail:
               'Do not overwrite existed file and exit the configuration process.'
         },
         {
-          label: overWriteLabel.YesToAll,
+          label: OverwriteLabel.YesToAll,
           detail: 'Automatically overwrite all configuration files'
         });
 
@@ -296,11 +296,11 @@ export class ProjectEnvironmentConfiger {
               await this.askToOverwriteFile(fileInfo.fileName);
 
           switch (fileOverwrite.label) {
-            case overWriteLabel.No:
+            case OverwriteLabel.No:
               const message = `Not overwrite original ${
                   fileInfo.fileName}. Configuration operation cancelled.`;
               throw new CancelOperationError(message);
-            case overWriteLabel.YesToAll:
+            case OverwriteLabel.YesToAll:
               overWriteAll = true;
               break;
             default:

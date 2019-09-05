@@ -10,7 +10,7 @@ import {ConfigKey, ScaffoldType} from '../constants';
 
 import {getExtension} from './Apis';
 import {ComponentInfo, DependencyConfig} from './AzureComponentConfig';
-import {extensionName} from './Interfaces/Api';
+import {ExtensionName} from './Interfaces/Api';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
 
@@ -64,7 +64,7 @@ export class IoTHubDevice implements Component, Provisionable {
       return false;
     }
 
-    const toolkit = getExtension(extensionName.Toolkit);
+    const toolkit = getExtension(ExtensionName.Toolkit);
     if (toolkit === undefined) {
       throw new Error(
           'Azure IoT Hub Toolkit is not installed. Please install it from Marketplace.');
