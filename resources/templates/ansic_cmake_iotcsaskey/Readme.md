@@ -29,14 +29,14 @@ For more details about setting up your development environment for compiling the
     * Open `main.c`. Specify paramaters requested by the commented **TODO's** for your configuration.
 
       ```c
-      // TODO: Specify DPS scope ID if you intend on using IoT Central.
-      static const char* dpsIdScope = "[DPS Id Scope]";
+      // TODO: Specify DPS ID scope if you intend on using DPS / IoT Central.
+      static const char *dpsIdScope = "[DPS ID Scope]";
 
-      // TODO: Specify symmetric keys if you intend on using IoT Central and symmetric key based auth.
-      static const char* sasKey = "[DPS symmetric key]";
+      // TODO: Specify symmetric keys if you intend on using DPS / IoT Central and symmetric key based auth.
+      static const char *sasKey = "[DPS symmetric key]";
 
-      // TODO: specify your device registration ID
-      static const char* registrationId = "[registration Id]";
+      // TODO: specify your device ID.
+      static const char *deviceId = "[device ID]";
       ```
 
 1. Open the `CMakeLists.txt` in the **azure-iot-sdk-c-pnp** folder. Include the **{PROJECT_NAME}** folder so that it will be built together with the Device SDK. Add the line below to the end of the file.
@@ -95,7 +95,7 @@ For more details about setting up your development environment for compiling the
       static const char *sasKey = "[DPS symmetric key]";
       
       // TODO: specify your device registration ID
-      static const char *registrationId = "[device registration Id]";
+      static const char *deviceId = "[device registration Id]";
       ```
 
 1. Open the `CMakeLists.txt` in the **azure-iot-sdk-c-pnp** folder. Include the **{PROJECT_NAME}** folder so that it will be built together with the Device SDK. Add the line below to the end of the file.

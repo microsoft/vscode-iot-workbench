@@ -42,8 +42,8 @@ static char *globalDpsEndpoint = NULL;
 static char *dpsIdScope = NULL;
 // The symmetric key, learn more from https://docs.microsoft.com/en-us/azure/iot-dps/concepts-symmetric-key-attestation.
 static char *sasKey = NULL;
-// The Registration ID, learn more from https://docs.microsoft.com/en-us/azure/iot-dps/use-hsm-with-sdk.
-static char *registrationId = NULL;
+// The device ID, learn more from https://docs.microsoft.com/en-us/azure/iot-dps/use-hsm-with-sdk.
+static char *deviceId = NULL;
 
 // TODO: Fill in DIGITALTWIN_DEVICE_CAPABILITY_MODEL_INLINE_DATA if want to make deivce self-describing.
 #define DIGITALTWIN_DEVICE_CAPABILITY_MODEL_INLINE_DATA "{}"
@@ -118,7 +118,7 @@ static bool parseDPSConnectionString(const char *connection_string)
     }
     if (_registrationId)
     {
-        mallocAndStrcpy_s(&registrationId, _registrationId);
+        mallocAndStrcpy_s(&deviceId, _registrationId);
     }
     else
     {
@@ -126,7 +126,7 @@ static bool parseDPSConnectionString(const char *connection_string)
     }  
     Map_Destroy(connection_string_values_map);
 
-    if (globalDpsEndpoint == NULL || dpsIdScope == NULL || sasKey == NULL || registrationId == NULL)
+    if (globalDpsEndpoint == NULL || dpsIdScope == NULL || sasKey == NULL || deviceId == NULL)
     {
         return false;
     }
@@ -178,7 +178,7 @@ static bool registerDevice(bool traceOn)
         return false;
     }
 
-    if (prov_dev_set_symmetric_key_info(registrationId, sasKey) != 0)
+    if (prov_dev_set_symmetric_key_info(deviceId, sasKey) != 0)
     {
         LogError("prov_dev_set_symmetric_key_info failed.");
     }

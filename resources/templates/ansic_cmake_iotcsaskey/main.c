@@ -34,14 +34,14 @@ const IOTHUB_SECURITY_TYPE secureDeviceTypeForIotHub = IOTHUB_SECURITY_TYPE_SYMM
 // The DPS global device endpoint
 static const char *globalDpsEndpoint = "global.azure-devices-provisioning.net";
 
-// TODO: Specify DPS scope ID if you intend on using DPS / IoT Central.
-static const char *dpsIdScope = "[DPS Id Scope]";
+// TODO: Specify DPS ID scope if you intend on using DPS / IoT Central.
+static const char *dpsIdScope = "[DPS ID Scope]";
 
 // TODO: Specify symmetric keys if you intend on using DPS / IoT Central and symmetric key based auth.
 static const char *sasKey = "[DPS symmetric key]";
 
-// TODO: specify your device registration ID
-static const char *registrationId = "[device registration Id]";
+// TODO: specify your device ID.
+static const char *deviceId = "[device ID]";
 
 // TODO: Fill in DIGITALTWIN_DEVICE_CAPABILITY_MODEL_INLINE_DATA if want to make deivce self-describing.
 #define DIGITALTWIN_DEVICE_CAPABILITY_MODEL_INLINE_DATA "{}"
@@ -112,7 +112,7 @@ static bool registerDevice(bool traceOn)
         return false;
     }
 
-    if (prov_dev_set_symmetric_key_info(registrationId, sasKey) != 0)
+    if (prov_dev_set_symmetric_key_info(deviceId, sasKey) != 0)
     {
         LogError("prov_dev_set_symmetric_key_info failed.");
     }
