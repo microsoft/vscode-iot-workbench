@@ -7,14 +7,12 @@ compileAsC99()
 
 cmake_minimum_required(VERSION 2.8)
 
-file(GLOB {PROJECT_NAME}_h_files
-    "*.h"
-    "./utilities/*.h"
+set({PROJECT_NAME}_h_files
+    {H_FILE_LIST}
 )
 
-file(GLOB {PROJECT_NAME}_c_files
-    "*.c"
-    "./utilities/*.c"
+set({PROJECT_NAME}_c_files
+    {C_FILE_LIST}
 )
 
 include_directories(.)
