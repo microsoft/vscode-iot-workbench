@@ -244,7 +244,7 @@ export abstract class IoTWorkbenchProjectBase {
             {ignoreFocusOut: true, placeHolder: 'Deploy process'});
 
         if (!selection) {
-          throw new CancelOperationError(`Compomemt deployment cancelled.`);
+          throw new CancelOperationError(`Componemt deployment cancelled.`);
         }
 
         const res = await item.deploy();
@@ -268,7 +268,7 @@ export abstract class IoTWorkbenchProjectBase {
    */
   abstract async configureProjectEnv(
       channel: vscode.OutputChannel, scaffoldType: ScaffoldType,
-      projectPath: string, templateFilesInfo: TemplateFileInfo[],
+      configureRootPath: string, templateFilesInfo: TemplateFileInfo[],
       openInNewWindow: boolean, customizeEnvironment: boolean): Promise<void>;
 
   async configDeviceSettings(): Promise<boolean> {

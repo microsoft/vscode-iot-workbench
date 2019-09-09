@@ -414,11 +414,11 @@ export async function generateTemplateFile(
  * and open the IoT Workspace Project. Otherwise ask and New IoT Project.
  */
 export async function handleIoTWorkspaceProjectFolder(
-    telemetryContext: TelemetryContext): Promise<boolean> {
+    telemetryContext: TelemetryContext) {
   if (!(vscode.workspace.workspaceFolders &&
         vscode.workspace.workspaceFolders.length > 0) ||
       !vscode.workspace.workspaceFolders[0]) {
-    return false;
+    return;
   }
 
   const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
@@ -430,11 +430,11 @@ export async function handleIoTWorkspaceProjectFolder(
 
   if (fs.existsSync(workbenchFileName) && workspaceFiles && workspaceFiles[0]) {
     await askAndOpenProject(rootPath, workspaceFiles[0], telemetryContext);
-    return true;
+    return;
   }
 
   await askAndNewProject(telemetryContext);
-  return true;
+  return;
 }
 
 export function channelShowAndAppend(

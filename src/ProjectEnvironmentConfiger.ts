@@ -68,6 +68,15 @@ export class ProjectEnvironmentConfiger {
                 PlatformType, platformSelection.label);
           }
 
+          // If Arduino project, open as workspace
+          if (platform === PlatformType.Arduino) {
+            const workspaceProject = await utils.constructAndLoadIoTProject(
+                context, channel, telemetryContext);
+            if (workspaceProject === undefined) {
+              return;
+            }
+          }
+
           this.configureProjectEnvironmentCore(
               context, channel, telemetryContext, rootPath, platform, false);
         });
@@ -79,6 +88,7 @@ export class ProjectEnvironmentConfiger {
    * Configuration operation adds configutation files for project.
    * For Embedded Linux project, ask user whether to customize environment. If
    * not, open Embedded Linux project in remote.
+   * @param projectPath For Arduino project, projectPath is the Device directory
    */
   async configureProjectEnvironmentCore(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
@@ -157,7 +167,7 @@ export class ProjectEnvironmentConfiger {
     let overwriteAll = false;
     try {
       overwriteAll = await this.askToOverwrite(
-          context, scaffoldType, projectPath, templateFilesInfo);
+          scaffoldType, projectPath, templateFilesInfo);
     } catch (error) {
       if (error instanceof CancelOperationError) {
         telemetryContext.properties.result = 'Cancelled';
@@ -192,7 +202,6 @@ export class ProjectEnvironmentConfiger {
       telemetryContext.properties.customizeEnvironment =
           customizeEnvironment.toString();
     }
-
     // Step 5: Configure project environment with template files
     await project.configureProjectEnv(
         channel, scaffoldType, projectPath, templateFilesInfo, openInNewWindow,
@@ -204,8 +213,7 @@ export class ProjectEnvironmentConfiger {
    * cancel configuration.
    */
   private async askToOverwrite(
-      context: vscode.ExtensionContext, scaffoldType: ScaffoldType,
-      projectPath: string,
+      scaffoldType: ScaffoldType, projectPath: string,
       templateFilesInfo: TemplateFileInfo[]): Promise<boolean> {
     // Check whether configuration file exists
     for (const fileInfo of templateFilesInfo) {

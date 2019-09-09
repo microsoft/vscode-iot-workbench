@@ -466,25 +466,24 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     // Configure project and open in container
     const projectEnvConfiger = new ProjectEnvironmentConfiger();
     projectEnvConfiger.configureProjectEnvironmentCore(
-        this.extensionContext, this.channel, this.telemetryContext,
-        this.projectRootPath, PlatformType.Arduino, openInNewWindow);
+        this.extensionContext, this.channel, this.telemetryContext, deviceDir,
+        PlatformType.Arduino, openInNewWindow);
   }
 
   async configureProjectEnv(
       channel: vscode.OutputChannel, scaffoldType: ScaffoldType,
-      projectPath: string, templateFilesInfo: TemplateFileInfo[],
+      configureRootPath: string, templateFilesInfo: TemplateFileInfo[],
       openInNewWindow: boolean, customizeEnvironment: boolean) {
     // 1. Scaffold template files
-    const configureRootPath =
-        path.join(projectPath, constants.deviceDefaultFolderName);
     for (const fileInfo of templateFilesInfo) {
       await generateTemplateFile(configureRootPath, scaffoldType, fileInfo);
     }
 
+    const projectRootPath = path.join(configureRootPath, '..');
     // 2. open project
     const workspaceConfigFilePath = path.join(
-        projectPath,
-        `${path.basename(projectPath)}${FileNames.workspaceExtensionName}`);
+        projectRootPath,
+        `${path.basename(projectRootPath)}${FileNames.workspaceExtensionName}`);
     setTimeout(
         () => vscode.commands.executeCommand(
             'iotcube.openLocally', workspaceConfigFilePath, openInNewWindow),

@@ -164,11 +164,11 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
   async configureProjectEnv(
       channel: vscode.OutputChannel, scaffoldType: ScaffoldType,
-      projectPath: string, templateFilesInfo: TemplateFileInfo[],
+      configureRootPath: string, templateFilesInfo: TemplateFileInfo[],
       openInNewWindow: boolean, customizeEnvironment: boolean) {
     // 1. Scaffold template files
     for (const fileInfo of templateFilesInfo) {
-      await generateTemplateFile(projectPath, scaffoldType, fileInfo);
+      await generateTemplateFile(configureRootPath, scaffoldType, fileInfo);
     }
 
     // 2. open project
@@ -177,14 +177,14 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       //  we will open the project in remote directly for user.
       setTimeout(
           () => vscode.commands.executeCommand(
-              'iotcube.openInContainer', projectPath),
+              'iotcube.openInContainer', configureRootPath),
           500);
     } else {
       // If user wants to customize development environment, open project
       // locally.
       setTimeout(
           () => vscode.commands.executeCommand(
-              'iotcube.openLocally', projectPath, openInNewWindow),
+              'iotcube.openLocally', configureRootPath, openInNewWindow),
           500);
     }
 
