@@ -3,6 +3,14 @@
 [![Gitter](https://img.shields.io/badge/chat-on%20gitter-blue.svg)](https://gitter.im/Microsoft/vscode-iot-workbench)
 [![Travis CI](https://travis-ci.org/Microsoft/vscode-iot-workbench.svg?branch=master)](https://travis-ci.org/Microsoft/vscode-iot-workbench)
 
+***[Azure IoT Device Workbench extension](https://aka.ms/iot-workbench) is now part of [Azure IoT Tools](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-tools) extension pack. We highly recommend installing [Azure IoT Tools](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-tools) extension pack, which makes it easy to discover and interact with Azure IoT Hub that power your IoT Edge and device applications.** This extension pack can help you:*
+
+- *Develop and connect your [Azure IoT Applications](https://azure.microsoft.com/en-us/overview/iot/) to Azure. With this extension, you can interact with an Azure IoT Hub, manage connected devices, and enable distributed tracing for your Azure IoT applications.*
+- *Develop and debug [Certifies Azure IoT Devices](https://catalog.azureiotsolutions.com/alldevices) (including [MXChip IoT DevKit](https://aka.ms/iot-devkit), [ESP32](https://catalog.azureiotsolutions.com/details?title=ESP32_DevKitC&source=all-devices-page), [Raspberry Pi](https://www.adafruit.com/category/288)) to Azure. This extension pack makes it easy to code, build, deploy and debug your IoT applications with popular IoT development boards.*
+- *Develop and deploy artificial intelligence and your custom logic to [Azure IoT Edge](https://azure.microsoft.com/en-us/services/iot-edge/). This extension pack makes it easy to code, build, deploy, and debug your IoT Edge applications.*
+
+## Overview
+
 The **Azure IoT Device Workbench** is a Visual Studio Code extension that provides an integrated environment to code, build, deploy, and debug your IoT device project with multiple Azure services supported. The extension also supports working with [IoT Plug and Play](https://docs.microsoft.com/azure/iot-pnp/overview-iot-plug-and-play) by defining *device capability model* schemas and generating skeleton device code and projects.
 
 ## Installation
