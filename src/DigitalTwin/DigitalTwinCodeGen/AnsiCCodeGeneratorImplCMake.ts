@@ -51,9 +51,12 @@ export class AnsiCCodeGeneratorImplCMake extends AnsiCCodeGeneratorBase {
       if (fileInfo.fileName === 'CMakeLists.txt') {
         const generatedFiles = fs.listTreeSync(targetPath);
 
-        // Retrieve and normalize generated files that will be included in CMakeLists.txt
-        const includedHeaderFiles = this.getIncludedFileListString(generatedFiles, targetPath, '.h');
-        const includedCFiles = this.getIncludedFileListString(generatedFiles, targetPath, '.c');
+        // Retrieve and normalize generated files that will be included in
+        // CMakeLists.txt
+        const includedHeaderFiles =
+            this.getIncludedFileListString(generatedFiles, targetPath, '.h');
+        const includedCFiles =
+            this.getIncludedFileListString(generatedFiles, targetPath, '.c');
 
         fileInfo.fileContent =
             fileInfo.fileContent
@@ -61,7 +64,7 @@ export class AnsiCCodeGeneratorImplCMake extends AnsiCCodeGeneratorBase {
                 .replace(cmakeCFilesPattern, includedCFiles);
       }
 
-      fileInfo.fileContent = 
+      fileInfo.fileContent =
           fileInfo.fileContent.replace(projectNamePattern, projectName)
               .replace(projectDCMIdPattern, dcmId);
 
@@ -75,16 +78,20 @@ export class AnsiCCodeGeneratorImplCMake extends AnsiCCodeGeneratorBase {
     return retvalue;
   }
 
-  getIncludedFileListString(generatedFiles: string[], rootDir: string, fileExtension: string) : string {
+  getIncludedFileListString(
+      generatedFiles: string[], rootDir: string,
+      fileExtension: string): string {
     let fileListStr = '';
 
-    if (generatedFiles !== null && generatedFiles.length > 0)
-    {
+    if (generatedFiles !== null && generatedFiles.length > 0) {
       const includeFiles =
-      generatedFiles.filter(file => path.extname(file).endsWith(fileExtension))
-          .map(filePath => path.relative(rootDir, filePath))
-          .map(filePath => './' + filePath.replace(path.sep, '/'));
-  
+          generatedFiles
+              .filter(
+                  file => path.extname(file) === fileExtension &&
+                      !file.endsWith('main.c'))
+              .map(filePath => path.relative(rootDir, filePath))
+              .map(filePath => './' + filePath.replace(path.sep, '/'));
+
       fileListStr = includeFiles.join(`${NewLine}    `);
     }
 

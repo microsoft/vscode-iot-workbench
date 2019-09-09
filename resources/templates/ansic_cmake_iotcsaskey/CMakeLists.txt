@@ -3,7 +3,18 @@
 
 #this is CMakeLists.txt for {PROJECT_NAME}
 
-compileAsC99()
+#Compile As C99
+if (CMAKE_VERSION VERSION_LESS "3.1")
+    if (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
+        set (CMAKE_C_FLAGS "--std=c99 /DWIN32 /D_WINDOWS /W3")
+        if (NOT IN_OPENWRT)
+            set (CMAKE_CXX_FLAGS "--std=c++11 /DWIN32 /D_WINDOWS /W3 /GR /EHsc")
+        endif()
+    endif()
+else()
+    set (CMAKE_C_STANDARD 99)
+    set (CMAKE_CXX_STANDARD 11)
+endif()
 
 cmake_minimum_required(VERSION 2.8)
 
@@ -13,6 +24,7 @@ set({PROJECT_NAME}_h_files
 
 set({PROJECT_NAME}_c_files
     {C_FILE_LIST}
+    ./main.c
 )
 
 include_directories(.)
