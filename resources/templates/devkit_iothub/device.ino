@@ -42,6 +42,6 @@ void loop() {
     {
       Screen.print(1, "Failure...");
     }
-    // delay(2000);
+    delay(2000);
   }
 }
