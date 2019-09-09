@@ -471,9 +471,9 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
   }
 
   async configureProjectEnv(
-      channel: vscode.OutputChannel, scaffoldType: ScaffoldType,
-      configureRootPath: string, templateFilesInfo: TemplateFileInfo[],
-      openInNewWindow: boolean, customizeEnvironment: boolean) {
+      channel: vscode.OutputChannel, telemetryContext: TelemetryContext,
+      scaffoldType: ScaffoldType, configureRootPath: string,
+      templateFilesInfo: TemplateFileInfo[], openInNewWindow: boolean) {
     // 1. Scaffold template files
     for (const fileInfo of templateFilesInfo) {
       await generateTemplateFile(configureRootPath, scaffoldType, fileInfo);

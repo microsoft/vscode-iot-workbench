@@ -5,6 +5,7 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+import {CancelOperationError} from '../CancelOperationError';
 import {ConfigKey, DevelopEnvironment, EventNames, FileNames, PlatformType, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {ProjectEnvironmentConfiger} from '../ProjectEnvironmentConfiger';
@@ -163,15 +164,31 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
   }
 
   async configureProjectEnv(
-      channel: vscode.OutputChannel, scaffoldType: ScaffoldType,
-      configureRootPath: string, templateFilesInfo: TemplateFileInfo[],
-      openInNewWindow: boolean, customizeEnvironment: boolean) {
+      channel: vscode.OutputChannel, telemetryContext: TelemetryContext,
+      scaffoldType: ScaffoldType, configureRootPath: string,
+      templateFilesInfo: TemplateFileInfo[], openInNewWindow: boolean) {
     // 1. Scaffold template files
     for (const fileInfo of templateFilesInfo) {
       await generateTemplateFile(configureRootPath, scaffoldType, fileInfo);
     }
 
-    // 2. open project
+    // 2. Ask to customize
+    let customizeEnvironment = false;
+    try {
+      customizeEnvironment = await this.askToCustomize();
+    } catch (error) {
+      if (error instanceof CancelOperationError) {
+        telemetryContext.properties.errorMessage = error.message;
+        telemetryContext.properties.result = 'Cancelled';
+        return;
+      } else {
+        throw error;
+      }
+    }
+    telemetryContext.properties.customizeEnvironment =
+        customizeEnvironment.toString();
+
+    // 3. open project
     if (!customizeEnvironment) {
       // If user does not want to customize develpment environment,
       //  we will open the project in remote directly for user.
@@ -193,5 +210,28 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
     channelShowAndAppendLine(channel, message);
     vscode.window.showInformationMessage(message);
+  }
+
+  /**
+   * Ask whether to customize the development environment or not
+   * @returns true - want to customize; false - don't want to customize
+   */
+  private async askToCustomize(): Promise<boolean> {
+    const customizationOption: vscode.QuickPickItem[] = [];
+    customizationOption.push(
+        {label: `Yes`, description: ''}, {label: `No`, description: ''});
+
+    const customizationSelection =
+        await vscode.window.showQuickPick(customizationOption, {
+          ignoreFocusOut: true,
+          placeHolder: `Do you want to customize the development environment?`
+        });
+
+    if (customizationSelection === undefined) {
+      throw new CancelOperationError(
+          `Ask to customization development environment selection cancelled.`);
+    }
+
+    return customizationSelection.label === 'Yes';
   }
 }

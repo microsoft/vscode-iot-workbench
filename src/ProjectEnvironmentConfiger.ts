@@ -185,27 +185,10 @@ export class ProjectEnvironmentConfiger {
       return;
     }
 
-    // Step 4: Ask to customize
-    let customizeEnvironment = false;
-    if (platform === PlatformType.EmbeddedLinux) {
-      try {
-        customizeEnvironment = await this.askToCustomize();
-      } catch (error) {
-        if (error instanceof CancelOperationError) {
-          telemetryContext.properties.errorMessage = error.message;
-          telemetryContext.properties.result = 'Cancelled';
-          return;
-        } else {
-          throw error;
-        }
-      }
-      telemetryContext.properties.customizeEnvironment =
-          customizeEnvironment.toString();
-    }
-    // Step 5: Configure project environment with template files
+    // Step 4: Configure project environment with template files
     await project.configureProjectEnv(
-        channel, scaffoldType, projectPath, templateFilesInfo, openInNewWindow,
-        customizeEnvironment);
+        channel, telemetryContext, scaffoldType, projectPath, templateFilesInfo,
+        openInNewWindow);
   }
 
   /**
@@ -228,29 +211,6 @@ export class ProjectEnvironmentConfiger {
 
     // No files exist, overwrite directly.
     return true;
-  }
-
-  /**
-   * Ask whether to customize the development environment or not
-   * @returns true - want to customize; false - don't want to customize
-   */
-  private async askToCustomize(): Promise<boolean> {
-    const customizationOption: vscode.QuickPickItem[] = [];
-    customizationOption.push(
-        {label: `Yes`, description: ''}, {label: `No`, description: ''});
-
-    const customizationSelection =
-        await vscode.window.showQuickPick(customizationOption, {
-          ignoreFocusOut: true,
-          placeHolder: `Do you want to customize the development environment?`
-        });
-
-    if (customizationSelection === undefined) {
-      throw new CancelOperationError(
-          `Ask to customization development environment selection cancelled.`);
-    }
-
-    return customizationSelection.label === 'Yes';
   }
 
   /**
