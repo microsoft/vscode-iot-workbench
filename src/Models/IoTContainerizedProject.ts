@@ -5,19 +5,21 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {ConfigKey, DevelopEnvironment, EventNames, FileNames, ScaffoldType} from '../constants';
+import {CancelOperationError} from '../CancelOperationError';
+import {ConfigKey, DevelopEnvironment, EventNames, FileNames, PlatformType, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
+import {ProjectEnvironmentConfiger} from '../ProjectEnvironmentConfiger';
 import {TelemetryContext, TelemetryProperties, TelemetryWorker} from '../telemetry';
+import {channelShowAndAppendLine, generateTemplateFile} from '../utils';
+
 import {ProjectHostType} from './Interfaces/ProjectHostType';
 import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
 import {RemoteExtension} from './RemoteExtension';
 
-
 const impor = require('impor')(__dirname);
 const raspberryPiDeviceModule =
     impor('./RaspberryPiDevice') as typeof import('./RaspberryPiDevice');
-const telemetryModule = impor('../telemetry') as typeof import('../telemetry');
 
 const constants = {
   configPrefix: 'vscode-iot-workbench'
@@ -97,12 +99,12 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
   async create(
       rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
       projectType: ProjectTemplateType, boardId: string,
-      openInNewWindow: boolean): Promise<boolean> {
+      openInNewWindow: boolean) {
     // Step 0: Check prerequisite
-    // Can only create projcet locally
+    // Can only create project locally
     const result = await RemoteExtension.checkRemoteExtension(this.channel);
     if (!result) {
-      return false;
+      return;
     }
 
     const createTimeScaffoldType = ScaffoldType.Local;
@@ -137,7 +139,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       // TODO: Add remove() in FileUtility class
       fs.removeSync(this.projectRootPath);
       vscode.window.showWarningMessage('Project initialize cancelled.');
-      return false;
+      return;
     }
 
     // Step 2: Write project config into iot workbench project file
@@ -154,29 +156,82 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
           `Internal Error. Could not find iot workbench project file.`);
     }
 
+    // Configure project and open in container
+    const projectEnvConfiger = new ProjectEnvironmentConfiger();
+    projectEnvConfiger.configureProjectEnvironmentCore(
+        this.extensionContext, this.channel, this.telemetryContext,
+        this.projectRootPath, PlatformType.EmbeddedLinux, openInNewWindow);
+  }
 
-    // TODO: Trigger configure command to configure project and open project in
-    // new window Step 3: Configure project
+  async configureProjectEnv(
+      channel: vscode.OutputChannel, telemetryContext: TelemetryContext,
+      scaffoldType: ScaffoldType, configureRootPath: string,
+      templateFilesInfo: TemplateFileInfo[], openInNewWindow: boolean) {
+    // 1. Scaffold template files
+    for (const fileInfo of templateFilesInfo) {
+      await generateTemplateFile(configureRootPath, scaffoldType, fileInfo);
+    }
 
-    // Step 4: Open project
-    // if (!openInNewWindow) {
-    //   // If open in current window, VSCode will restart. Need to send
-    //   telemetry
-    //   // before VSCode restart to advoid data lost.
-    //   try {
-    //     telemetryModule.TelemetryWorker.sendEvent(
-    //         EventNames.createNewProjectEvent, this.telemetryContext);
-    //   } catch {
-    //     // If sending telemetry failed, skip the error to avoid blocking
-    //     user.
-    //   }
-    // }
+    // 2. Ask to customize
+    let customizeEnvironment = false;
+    try {
+      customizeEnvironment = await this.askToCustomize();
+    } catch (error) {
+      if (error instanceof CancelOperationError) {
+        telemetryContext.properties.errorMessage = error.message;
+        telemetryContext.properties.result = 'Cancelled';
+        return;
+      } else {
+        throw error;
+      }
+    }
+    telemetryContext.properties.customizeEnvironment =
+        customizeEnvironment.toString();
 
-    // setTimeout(
-    //     () => vscode.commands.executeCommand(
-    //         'iotcube.openLocally', this.projectRootPath, openInNewWindow),
-    //     1000);
+    // 3. open project
+    if (!customizeEnvironment) {
+      // If user does not want to customize develpment environment,
+      //  we will open the project in remote directly for user.
+      setTimeout(
+          () => vscode.commands.executeCommand(
+              'iotcube.openInContainer', configureRootPath),
+          500);
+    } else {
+      // If user wants to customize development environment, open project
+      // locally.
+      setTimeout(
+          () => vscode.commands.executeCommand(
+              'iotcube.openLocally', configureRootPath, openInNewWindow),
+          500);
+    }
 
-    return true;
+    const message =
+        'Configuration is done. You can edit configuration file to customize development environment And then run \'Azure IoT Device Workbench: Compile Device Code\' command to compile device code';
+
+    channelShowAndAppendLine(channel, message);
+    vscode.window.showInformationMessage(message);
+  }
+
+  /**
+   * Ask whether to customize the development environment or not
+   * @returns true - want to customize; false - don't want to customize
+   */
+  private async askToCustomize(): Promise<boolean> {
+    const customizationOption: vscode.QuickPickItem[] = [];
+    customizationOption.push(
+        {label: `Yes`, description: ''}, {label: `No`, description: ''});
+
+    const customizationSelection =
+        await vscode.window.showQuickPick(customizationOption, {
+          ignoreFocusOut: true,
+          placeHolder: `Do you want to customize the development environment?`
+        });
+
+    if (customizationSelection === undefined) {
+      throw new CancelOperationError(
+          `Ask to customization development environment selection cancelled.`);
+    }
+
+    return customizationSelection.label === 'Yes';
   }
 }

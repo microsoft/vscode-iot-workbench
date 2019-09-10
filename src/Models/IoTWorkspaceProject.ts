@@ -6,9 +6,11 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, DevelopEnvironment, EventNames, FileNames, ScaffoldType} from '../constants';
+import {ConfigKey, DevelopEnvironment, EventNames, FileNames, PlatformType, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
+import {ProjectEnvironmentConfiger} from '../ProjectEnvironmentConfiger';
 import {TelemetryContext, TelemetryProperties, TelemetryWorker} from '../telemetry';
+import {channelShowAndAppendLine, generateTemplateFile} from '../utils';
 
 import {Dependency} from './AzureComponentConfig';
 import {Component} from './Interfaces/Component';
@@ -243,7 +245,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
   async create(
       rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
       projectType: ProjectTemplateType, boardId: string,
-      openInNewWindow: boolean): Promise<boolean> {
+      openInNewWindow: boolean) {
     const createTimeScaffoldType = ScaffoldType.Local;
     if (rootFolderPath !== undefined) {
       await FileUtility.mkdirRecursively(
@@ -319,7 +321,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
             new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
         const isIotHubPrerequisitesAchieved = await iothub.checkPrerequisites();
         if (!isIotHubPrerequisitesAchieved) {
-          return false;
+          return;
         }
 
         const functionDir = path.join(
@@ -343,7 +345,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
         const isFunctionsPrerequisitesAchieved =
             await azureFunctions.checkPrerequisites();
         if (!isFunctionsPrerequisitesAchieved) {
-          return false;
+          return;
         }
 
         workspace.settings[`IoTWorkbench.${ConfigKey.functionPath}`] =
@@ -429,7 +431,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
         // TODO: Remove this function and implement with sdk in FileUtility
         fs.removeSync(this.projectRootPath);
         vscode.window.showWarningMessage('Project initialize cancelled.');
-        return false;
+        return;
       }
     }
 
@@ -461,10 +463,36 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
       }
     }
 
+    // Configure project and open in container
+    const projectEnvConfiger = new ProjectEnvironmentConfiger();
+    projectEnvConfiger.configureProjectEnvironmentCore(
+        this.extensionContext, this.channel, this.telemetryContext, deviceDir,
+        PlatformType.Arduino, openInNewWindow);
+  }
+
+  async configureProjectEnv(
+      channel: vscode.OutputChannel, telemetryContext: TelemetryContext,
+      scaffoldType: ScaffoldType, configureRootPath: string,
+      templateFilesInfo: TemplateFileInfo[], openInNewWindow: boolean) {
+    // 1. Scaffold template files
+    for (const fileInfo of templateFilesInfo) {
+      await generateTemplateFile(configureRootPath, scaffoldType, fileInfo);
+    }
+
+    const projectRootPath = path.join(configureRootPath, '..');
+    // 2. open project
+    const workspaceConfigFilePath = path.join(
+        projectRootPath,
+        `${path.basename(projectRootPath)}${FileNames.workspaceExtensionName}`);
     setTimeout(
         () => vscode.commands.executeCommand(
             'iotcube.openLocally', workspaceConfigFilePath, openInNewWindow),
-        1000);
-    return true;
+        500);
+
+    const message =
+        'Configuration is done. You can run \'Azure IoT Device Workbench: Compile Device Code\' command to compile device code';
+
+    channelShowAndAppendLine(channel, message);
+    vscode.window.showInformationMessage(message);
   }
 }
