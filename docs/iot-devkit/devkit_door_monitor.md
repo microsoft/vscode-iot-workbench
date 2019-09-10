@@ -2,6 +2,8 @@
 
 The MXChip IoT DevKit contains a built-in magnetic sensor. In this tutorial, you detect the presence or absence of a nearby strong magnetic field--in this case, coming from a small. permanent magnet.
 
+> **Notice:** This project is archived and not actively maintained.
+
 ## What you learn
 
 In this tutorial, you learn:

@@ -70,7 +70,7 @@ export class UsbDetector {
               UsbDetector._vscexpress = UsbDetector._vscexpress ||
                   new VSCExpress(this.context, 'views');
               UsbDetector._vscexpress.open(
-                  exampleUrl, 'Examples - Azure IoT Device Workbench',
+                  exampleUrl, 'MXChip IoT DevKit samples - Azure IoT Device Workbench',
                   vscode.ViewColumn.One, {
                     enableScripts: true,
                     enableCommandUris: true,
