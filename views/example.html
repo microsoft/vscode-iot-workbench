@@ -96,6 +96,11 @@ ul.example-list > li > .header > .difficulty.hard {
   background: rgb(240, 90, 45);
 }
 
+#featured > .difficulty.archived,
+ul.example-list > li > .header > .difficulty.archived {
+  background: rgb(105, 105, 105);
+}
+
 #featured > .difficulty.easy:before,
 ul.example-list > li > .header > .difficulty.easy:before {
   content: "EASY"
@@ -109,6 +114,11 @@ ul.example-list > li > .header > .difficulty.medium:before {
 #featured > .difficulty.hard:before,
 ul.example-list > li > .header > .difficulty.hard:before {
   content: "HARD"
+}
+
+#featured > .difficulty.archived:before,
+ul.example-list > li > .header > .difficulty.archived:before {
+  content: "ARCHIVED"
 }
 
 ul.example-list > li > .header > img {
