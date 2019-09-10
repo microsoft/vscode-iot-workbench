@@ -21,9 +21,6 @@ const impor = require('impor')(__dirname);
 const raspberryPiDeviceModule =
     impor('./RaspberryPiDevice') as typeof import('./RaspberryPiDevice');
 
-const constants = {
-  configPrefix: 'vscode-iot-workbench'
-};
 export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
@@ -89,6 +86,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       }
 
       if (device) {
+        this.componentList.push(device);
         await device.load();
       }
     }
@@ -130,7 +128,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       throw new Error('The specified board is not supported.');
     }
 
-    projectConfig[`${constants.configPrefix}.${ConfigKey.boardId}`] = boardId;
+    projectConfig[`${ConfigKey.boardId}`] = boardId;
     // projectConfig[`${constants.configPrefix}.${ConfigKey.projectHostType}`] =
     //     ProjectHostType[this.projectHostType];
 
@@ -229,7 +227,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
     if (customizationSelection === undefined) {
       throw new CancelOperationError(
-          `Ask to customization development environment selection cancelled.`);
+          `Ask to customize development environment selection cancelled.`);
     }
 
     return customizationSelection.label === 'Yes';

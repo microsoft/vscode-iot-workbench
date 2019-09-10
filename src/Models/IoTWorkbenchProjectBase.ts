@@ -244,7 +244,7 @@ export abstract class IoTWorkbenchProjectBase {
             {ignoreFocusOut: true, placeHolder: 'Deploy process'});
 
         if (!selection) {
-          throw new CancelOperationError(`Componemt deployment cancelled.`);
+          throw new CancelOperationError(`Component deployment cancelled.`);
         }
 
         const res = await item.deploy();

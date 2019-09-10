@@ -9,6 +9,7 @@ import {ConfigHandler} from '../configHandler';
 import {ConfigKey, DependentExtensions, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {IoTWorkbenchSettings} from '../IoTSettings';
+import {TelemetryContext} from '../telemetry';
 import * as utils from '../utils';
 
 import {Board} from './Interfaces/Board';
@@ -24,7 +25,8 @@ const constants = {
   cppPropertiesFileName: 'c_cpp_properties.json',
   cppPropertiesFileNameMac: 'c_cpp_properties_macos.json',
   cppPropertiesFileNameWin: 'c_cpp_properties_win32.json',
-  outputPath: './.build'
+  outputPath: './.build',
+  compileTaskName: 'Arduino Compile'
 };
 
 
@@ -33,14 +35,17 @@ export abstract class ArduinoDeviceBase implements Device {
   protected componentType: ComponentType;
   protected deviceFolder: string;
   protected vscodeFolderPath: string;
-  protected extensionContext: vscode.ExtensionContext;
   protected boardFolderPath: string;
+  protected channel: vscode.OutputChannel;
+  protected extensionContext: vscode.ExtensionContext;
+  protected telemetryContext: TelemetryContext;
 
   abstract name: string;
   abstract id: string;
 
   constructor(
       context: vscode.ExtensionContext, devicePath: string,
+      channel: vscode.OutputChannel, telemetryContext: TelemetryContext,
       deviceType: DeviceType) {
     this.deviceType = deviceType;
     this.componentType = ComponentType.Device;
@@ -50,6 +55,8 @@ export abstract class ArduinoDeviceBase implements Device {
         path.join(this.deviceFolder, FileNames.vscodeSettingsFolderName);
     this.boardFolderPath = context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName));
+    this.telemetryContext = telemetryContext;
+    this.channel = channel;
   }
 
   getDeviceType(): DeviceType {
@@ -91,7 +98,25 @@ export abstract class ArduinoDeviceBase implements Device {
     if (!result) {
       return false;
     }
-    await vscode.commands.executeCommand('arduino.verify');
+
+    // Execute default compile task to compile device code.
+    const tasks = await vscode.tasks.fetchTasks();
+    if (!tasks || tasks.length < 1) {
+      const message = `Failed to fetch tasks.`;
+      utils.channelShowAndAppendLine(this.channel, message);
+      return false;
+    }
+
+    const arduinoCompileTask = tasks.filter(task => {
+      return task.name === constants.compileTaskName;
+    });
+    if (!arduinoCompileTask || arduinoCompileTask.length < 1) {
+      const message = `Failed to fetch default arduino compile task.`;
+      utils.channelShowAndAppendLine(this.channel, message);
+      return false;
+    }
+
+    await vscode.tasks.executeTask(arduinoCompileTask[0]);
     return true;
   }
 

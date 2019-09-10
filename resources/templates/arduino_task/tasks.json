@@ -4,14 +4,14 @@
   "version": "2.0.0",
   "tasks": [
       {
-          "label": "Arduino Verify",
+          "label": "Arduino Compile",
           "type": "shell",
-          "command": "echo ${input:echoPrompt}"
+          "command": "echo ${input:arduinoCompile}"
       }
   ],
   "inputs": [
       {
-          "id": "echoPrompt",
+          "id": "arduinoCompile",
           "type": "command",
           "command": "arduino.verify",
       }

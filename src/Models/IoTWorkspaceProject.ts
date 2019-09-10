@@ -108,13 +108,15 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
       let device = null;
       if (boardId === az3166DeviceModule.AZ3166Device.boardId) {
         device = new az3166DeviceModule.AZ3166Device(
-            this.extensionContext, this.channel, deviceLocation);
+            this.extensionContext, this.channel, this.telemetryContext,
+            deviceLocation);
       } else if (boardId === ioTButtonDeviceModule.IoTButtonDevice.boardId) {
         device = new ioTButtonDeviceModule.IoTButtonDevice(
             this.extensionContext, deviceLocation);
       } else if (boardId === esp32DeviceModule.Esp32Device.boardId) {
         device = new esp32DeviceModule.Esp32Device(
-            this.extensionContext, this.channel, deviceLocation);
+            this.extensionContext, this.channel, this.telemetryContext,
+            deviceLocation);
       }
 
       if (device) {
@@ -278,13 +280,15 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
 
     if (boardId === az3166DeviceModule.AZ3166Device.boardId) {
       device = new az3166DeviceModule.AZ3166Device(
-          this.extensionContext, this.channel, deviceDir, templateFilesInfo);
+          this.extensionContext, this.channel, this.telemetryContext, deviceDir,
+          templateFilesInfo);
     } else if (boardId === ioTButtonDeviceModule.IoTButtonDevice.boardId) {
       device = new ioTButtonDeviceModule.IoTButtonDevice(
           this.extensionContext, deviceDir, templateFilesInfo);
     } else if (boardId === esp32DeviceModule.Esp32Device.boardId) {
       device = new esp32DeviceModule.Esp32Device(
-          this.extensionContext, this.channel, deviceDir, templateFilesInfo);
+          this.extensionContext, this.channel, this.telemetryContext, deviceDir,
+          templateFilesInfo);
     } else {
       throw new Error('The specified board is not supported.');
     }
