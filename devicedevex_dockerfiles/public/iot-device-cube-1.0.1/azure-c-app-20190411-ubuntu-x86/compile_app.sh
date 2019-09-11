@@ -10,7 +10,7 @@ output_folder="/work/output"
 
 if [[ $# == 0 ]]; then
   echo "Usage: $0 <srcFileFolder> [application name]"
-  echo "default application name is iot_application"
+  echo "default application name is ${application_name}"
   exit 1
 elif [[ $# -ge 2 ]]; then
   application_name=$2
