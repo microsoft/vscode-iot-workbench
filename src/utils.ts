@@ -465,12 +465,12 @@ export async function constructAndLoadIoTProject(
           context, channel, telemetryContext);
     }
 
-    if (iotProject === undefined) {
-      await handleIoTWorkspaceProjectFolder(telemetryContext);
+    if (!askNewProject) {
       return;
     }
 
-    if (!askNewProject) {
+    if (iotProject === undefined) {
+      await handleIoTWorkspaceProjectFolder(telemetryContext);
       return;
     }
 
