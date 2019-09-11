@@ -320,7 +320,7 @@ export abstract class IoTWorkbenchProjectBase {
           ProjectHostType[this.projectHostType];
 
       const indentationSpace = 4;
-      FileUtility.writeFile(
+      await FileUtility.writeFile(
           type, iotworkbenchprojectFilePath,
           JSON.stringify(projectConfig, null, indentationSpace));
 
