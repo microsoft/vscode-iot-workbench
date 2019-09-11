@@ -1,5 +1,5 @@
 {
-    "image_name": "iot-device-cube:1.0.0-azure-c-app-20190411-ubuntu-x86",
+    "image_name": "iot-device-cube:1.0.1-azure-c-app-20190411-ubuntu-x86",
     "arg": {
         "base_image_tag": "1.0.0-azure-c-sdk-20190411-ubuntu-x86"
     }
