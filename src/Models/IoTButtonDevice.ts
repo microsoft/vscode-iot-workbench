@@ -82,9 +82,6 @@ export class IoTButtonDevice implements Device {
       throw new Error(`Internal error: Couldn't find the template folder.`);
     }
 
-    await IoTWorkbenchProjectBase.generateIotWorkbenchProjectFile(
-        createTimeScaffoldType, this.deviceFolder);
-
     for (const fileInfo of this.templateFilesInfo) {
       await generateTemplateFile(
           this.deviceFolder, createTimeScaffoldType, fileInfo);

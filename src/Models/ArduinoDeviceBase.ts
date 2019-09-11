@@ -150,9 +150,6 @@ export abstract class ArduinoDeviceBase implements Device {
 
     const plat = await IoTWorkbenchSettings.getPlatform();
 
-    await IoTWorkbenchProjectBase.generateIotWorkbenchProjectFile(
-        createTimeScaffoldType, this.deviceFolder);
-
     for (const fileInfo of templateFiles) {
       if (fileInfo.fileName.endsWith('macos.json') ||
           fileInfo.fileName.endsWith('win32.json')) {

@@ -72,9 +72,6 @@ export abstract class ContainerDeviceBase implements Device {
       throw new Error('Unable to find the project folder.');
     }
 
-    await IoTWorkbenchProjectBase.generateIotWorkbenchProjectFile(
-        scaffoldType, this.projectFolder);
-
     return true;
   }
 
@@ -85,8 +82,6 @@ export abstract class ContainerDeviceBase implements Device {
       throw new Error('Unable to find the project folder.');
     }
 
-    await IoTWorkbenchProjectBase.generateIotWorkbenchProjectFile(
-        scaffoldType, this.projectFolder);
     await this.generateTemplateFiles(scaffoldType, this.templateFilesInfo);
 
     return true;

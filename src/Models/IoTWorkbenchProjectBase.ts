@@ -292,7 +292,11 @@ export abstract class IoTWorkbenchProjectBase {
     return true;
   }
 
-  static async generateIotWorkbenchProjectFile(
+  /**
+   * Generate iot workbench project file if not exists,
+   * store project host type configuration
+   */
+  async generateIotWorkbenchProjectFile(
       type: ScaffoldType, projectFolder: string): Promise<void> {
     if (!await FileUtility.directoryExists(type, projectFolder)) {
       throw new Error('Unable to find the project folder.');
@@ -301,9 +305,25 @@ export abstract class IoTWorkbenchProjectBase {
     try {
       const iotworkbenchprojectFilePath =
           path.join(projectFolder, FileNames.iotworkbenchprojectFileName);
-      if (!await FileUtility.fileExists(type, iotworkbenchprojectFilePath)) {
-        await FileUtility.writeFile(type, iotworkbenchprojectFilePath, '');
+
+      let projectConfig: {[key: string]: string} = {};
+      if (await FileUtility.fileExists(type, iotworkbenchprojectFilePath)) {
+        const projectConfigContent =
+            await FileUtility.readFile(
+                type, iotworkbenchprojectFilePath, 'utf8') as string;
+        if (projectConfigContent !== '') {
+          projectConfig = JSON.parse(projectConfigContent);
+        }
       }
+
+      projectConfig[`${ConfigKey.projectHostType}`] =
+          ProjectHostType[this.projectHostType];
+
+      const indentationSpace = 4;
+      FileUtility.writeFile(
+          type, iotworkbenchprojectFilePath,
+          JSON.stringify(projectConfig, null, indentationSpace));
+
     } catch (error) {
       throw new Error(
           `Create ${FileNames.iotworkbenchprojectFileName} file failed: ${

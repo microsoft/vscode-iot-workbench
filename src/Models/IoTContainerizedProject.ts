@@ -38,6 +38,9 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
     this.projectRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
 
+    await this.generateIotWorkbenchProjectFile(
+        loadTimeScaffoldType, this.projectRootPath);
+
     const iotworkbenchprojectFile =
         path.join(this.projectRootPath, FileNames.iotworkbenchprojectFileName);
     if (!await FileUtility.fileExists(
@@ -116,6 +119,9 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
     this.projectRootPath = rootFolderPath;
 
+    await this.generateIotWorkbenchProjectFile(
+        createTimeScaffoldType, this.projectRootPath);
+
     const projectConfig: {[key: string]: string} = {};
 
     // Step 1: Create device
@@ -129,8 +135,8 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     }
 
     projectConfig[`${ConfigKey.boardId}`] = boardId;
-    projectConfig[`${ConfigKey.projectHostType}`] =
-        ProjectHostType[this.projectHostType];
+    // projectConfig[`${ConfigKey.projectHostType}`] =
+    //     ProjectHostType[this.projectHostType];
 
     const res = await device.create();
     if (res === false) {
@@ -153,6 +159,8 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       throw new Error(
           `Internal Error. Could not find iot workbench project file.`);
     }
+    // this.configProjectHostType(this.projectRootPath, createTimeScaffoldType);
+
 
     // Configure project and open in container
     const projectEnvConfiger = new ProjectEnvironmentConfiger();

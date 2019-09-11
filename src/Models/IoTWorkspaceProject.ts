@@ -71,6 +71,8 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
         path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, '..');
 
     const deviceLocation = path.join(this.projectRootPath, devicePath);
+    await this.generateIotWorkbenchProjectFile(
+        loadTimeScaffoldType, deviceLocation);
 
     // only send telemetry when the IoT project is load when VS Code opens
     if (initLoad) {
@@ -274,6 +276,8 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     if (!await FileUtility.directoryExists(createTimeScaffoldType, deviceDir)) {
       await FileUtility.mkdirRecursively(createTimeScaffoldType, deviceDir);
     }
+    await this.generateIotWorkbenchProjectFile(
+        createTimeScaffoldType, deviceDir);
 
     workspace.folders.push({path: constants.deviceDefaultFolderName});
     let device: Component;
@@ -456,25 +460,6 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
           createTimeScaffoldType, vscodeFolderPath);
     }
 
-    // Write projectHostType into iot workbench project file
-    // TODO: When VSCode Remote supports workspace, move the ptojectHostType
-    // config into workspace settings.
-    const projectConfig: {[key: string]: string} = {};
-    projectConfig[`${ConfigKey.projectHostType}`] =
-        ProjectHostType[this.projectHostType];
-    const iotworkbenchprojectFile =
-        path.join(deviceDir, FileNames.iotworkbenchprojectFileName);
-    if (await FileUtility.fileExists(
-            createTimeScaffoldType, iotworkbenchprojectFile)) {
-      const indentationSpace = 4;
-      FileUtility.writeFile(
-          createTimeScaffoldType, iotworkbenchprojectFile,
-          JSON.stringify(projectConfig, null, indentationSpace));
-    } else {
-      throw new Error(
-          `Internal Error. Could not find iot workbench project file.`);
-    }
-
     if (!openInNewWindow) {
       // If open in current window, VSCode will restart. Need to send telemetry
       // before VSCode restart to advoid data lost.
@@ -517,5 +502,26 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
 
     channelShowAndAppendLine(channel, message);
     vscode.window.showInformationMessage(message);
+  }
+
+  /**
+   * For backward compatibility, upgrade iot workbench project file,
+   * adding project host type config in iot workbench project file.
+   */
+  static async updateIoTWorkbenchProjectFile(
+      type: ScaffoldType, projectFolder: string): Promise<void> {
+    const iotworkbenchprojectFilePath =
+        path.join(projectFolder, FileNames.iotworkbenchprojectFileName);
+    if (!await FileUtility.fileExists(type, iotworkbenchprojectFilePath)) {
+      throw new Error(`Cannot find iot workbench project file.`);
+    }
+
+    const projectConfig: {[key: string]: string} = {};
+    projectConfig[`${ConfigKey.projectHostType}`] = ProjectHostType.Workspace;
+
+    const indentationSpace = 4;
+    FileUtility.writeFile(
+        type, iotworkbenchprojectFilePath,
+        JSON.stringify(projectConfig, null, indentationSpace));
   }
 }

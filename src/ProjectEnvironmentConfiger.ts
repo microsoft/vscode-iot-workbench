@@ -17,6 +17,7 @@ import * as UIUtility from './UIUtility';
 import {CancelOperationError} from './CancelOperationError';
 import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
+import {IoTWorkspaceProject} from './Models/IoTWorkspaceProject';
 
 const impor = require('impor')(__dirname);
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
@@ -33,11 +34,12 @@ export class ProjectEnvironmentConfiger {
   async configureProjectEnvironment(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    // Only create project when not in remote environment
+    // Only configure project when not in remote environment
     const isLocal = RemoteExtension.checkLocalBeforeRunCommand(context);
     if (!isLocal) {
       return;
     }
+    const scaffoldType = ScaffoldType.Local;
 
     if (!(vscode.workspace.workspaceFolders &&
           vscode.workspace.workspaceFolders.length > 0)) {
@@ -57,7 +59,7 @@ export class ProjectEnvironmentConfiger {
         async () => {
           // Select platform if not specified
           const platformSelection =
-              await UIUtility.selectPlatform(ScaffoldType.Local, context);
+              await UIUtility.selectPlatform(scaffoldType, context);
           let platform: PlatformType;
           if (!platformSelection) {
             telemetryContext.properties.errorMessage =
@@ -72,15 +74,28 @@ export class ProjectEnvironmentConfiger {
 
           if (platform === PlatformType.Arduino) {
             // First ensure the project is correctly open.
-            await utils.constructAndLoadIoTProject(
+            const iotProject = await utils.constructAndLoadIoTProject(
                 context, channel, telemetryContext);
+            if (iotProject === undefined) {
+              return;
+            }
+
+            // Update Arduino project's iot workbench project file for backward
+            // compatibility.
+            const iotworkbenchprojectFilePath =
+                path.join(rootPath, FileNames.iotworkbenchprojectFileName);
+            if (await FileUtility.fileExists(
+                    scaffoldType, iotworkbenchprojectFilePath)) {
+              IoTWorkspaceProject.updateIoTWorkbenchProjectFile(
+                  scaffoldType, rootPath);
+            }
 
             // Check platform validation.
             // Only iot workbench Arduino project created by workbench extension
             // can be configured as Arduino platform(for upgrade).
             const projectHostType =
                 await IoTWorkbenchProjectBase.getProjectType(
-                    ScaffoldType.Workspace, rootPath);
+                    scaffoldType, rootPath);
             if (projectHostType !== ProjectHostType.Workspace) {
               const message =
                   `This is not an iot workbench Arduino projects. You cannot configure it as Arduino platform.`;
@@ -197,6 +212,9 @@ export class ProjectEnvironmentConfiger {
       telemetryContext.properties.result = 'Cancelled';
       return;
     }
+
+    // Update project host type config in iot workbench project file
+    await project.generateIotWorkbenchProjectFile(scaffoldType, projectPath);
 
     // Step 4: Configure project environment with template files
     await project.configureProjectEnv(
