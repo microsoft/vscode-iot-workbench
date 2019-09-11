@@ -411,7 +411,7 @@ export async function generateTemplateFile(
 
 /**
  * If current folder is an IoT Workspace Project but not open correctly, ask
- * and open the IoT Workspace Project. Otherwise ask and New IoT Project.
+ * and open the IoT Workspace Project.
  */
 export async function handleIoTWorkspaceProjectFolder(
     telemetryContext: TelemetryContext) {
@@ -432,8 +432,6 @@ export async function handleIoTWorkspaceProjectFolder(
     await askAndOpenProject(rootPath, workspaceFiles[0], telemetryContext);
     return;
   }
-
-  await askAndNewProject(telemetryContext);
   return;
 }
 
@@ -467,12 +465,12 @@ export async function constructAndLoadIoTProject(
           context, channel, telemetryContext);
     }
 
-    if (!askNewProject) {
+    if (iotProject === undefined) {
+      await handleIoTWorkspaceProjectFolder(telemetryContext);
       return;
     }
 
-    if (iotProject === undefined) {
-      await handleIoTWorkspaceProjectFolder(telemetryContext);
+    if (!askNewProject) {
       return;
     }
 

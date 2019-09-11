@@ -129,8 +129,8 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     }
 
     projectConfig[`${ConfigKey.boardId}`] = boardId;
-    // projectConfig[`${constants.configPrefix}.${ConfigKey.projectHostType}`] =
-    //     ProjectHostType[this.projectHostType];
+    projectConfig[`${ConfigKey.projectHostType}`] =
+        ProjectHostType[this.projectHostType];
 
     const res = await device.create();
     if (res === false) {

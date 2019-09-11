@@ -456,6 +456,25 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
           createTimeScaffoldType, vscodeFolderPath);
     }
 
+    // Write projectHostType into iot workbench project file
+    // TODO: When VSCode Remote supports workspace, move the ptojectHostType
+    // config into workspace settings.
+    const projectConfig: {[key: string]: string} = {};
+    projectConfig[`${ConfigKey.projectHostType}`] =
+        ProjectHostType[this.projectHostType];
+    const iotworkbenchprojectFile =
+        path.join(deviceDir, FileNames.iotworkbenchprojectFileName);
+    if (await FileUtility.fileExists(
+            createTimeScaffoldType, iotworkbenchprojectFile)) {
+      const indentationSpace = 4;
+      FileUtility.writeFile(
+          createTimeScaffoldType, iotworkbenchprojectFile,
+          JSON.stringify(projectConfig, null, indentationSpace));
+    } else {
+      throw new Error(
+          `Internal Error. Could not find iot workbench project file.`);
+    }
+
     if (!openInNewWindow) {
       // If open in current window, VSCode will restart. Need to send telemetry
       // before VSCode restart to advoid data lost.

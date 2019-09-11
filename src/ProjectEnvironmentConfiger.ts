@@ -15,6 +15,8 @@ import {ProjectTemplate, TemplatesType, TemplateFileInfo} from './Models/Interfa
 import {RemoteExtension} from './Models/RemoteExtension';
 import * as UIUtility from './UIUtility';
 import {CancelOperationError} from './CancelOperationError';
+import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
+import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 
 const impor = require('impor')(__dirname);
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
@@ -68,11 +70,22 @@ export class ProjectEnvironmentConfiger {
                 PlatformType, platformSelection.label);
           }
 
-          // If Arduino project, open as workspace
           if (platform === PlatformType.Arduino) {
-            const workspaceProject = await utils.constructAndLoadIoTProject(
+            // First ensure the project is correctly open.
+            await utils.constructAndLoadIoTProject(
                 context, channel, telemetryContext);
-            if (workspaceProject === undefined) {
+
+            // Check platform validation.
+            // Only iot workbench Arduino project created by workbench extension
+            // can be configured as Arduino platform(for upgrade).
+            const projectHostType =
+                await IoTWorkbenchProjectBase.getProjectType(
+                    ScaffoldType.Workspace, rootPath);
+            if (projectHostType !== ProjectHostType.Workspace) {
+              const message =
+                  `This is not an iot workbench Arduino projects. You cannot configure it as Arduino platform.`;
+              utils.channelShowAndAppendLine(channel, message);
+              vscode.window.showInformationMessage(message);
               return;
             }
           }
@@ -250,7 +263,9 @@ export class ProjectEnvironmentConfiger {
       Promise<vscode.QuickPickItem|undefined> {
     const containerTemplates =
         templateListJson.templates.filter((template: ProjectTemplate) => {
-          return (template.tag === TemplateTag.DevelopmentEnvironment);
+          return (
+              template.tag === TemplateTag.DevelopmentEnvironment &&
+              template.platform === PlatformType.EmbeddedLinux);
         });
 
     const containerList: vscode.QuickPickItem[] = [];
