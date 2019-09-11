@@ -21,7 +21,7 @@ import {DigitalTwinMetaModelJsonParser} from './DigitalTwin/DigitalTwinMetaModel
 import {DigitalTwinDiagnostic} from './DigitalTwin/DigitalTwinDiagnostic';
 import {DigitalTwinConstants} from './DigitalTwin/DigitalTwinConstants';
 import {DTDLKeywords} from './DigitalTwin/DigitalTwinConstants';
-import {ConfigKey, ContextUris, EventNames, FileNames, ModelType, ScaffoldType} from './constants';
+import {ConfigKey, ContextUris, EventNames, FileNames, ModelType} from './constants';
 import {TelemetryContext, TelemetryProperties} from './telemetry';
 import {RemoteExtension} from './Models/RemoteExtension';
 import {constructAndLoadIoTProject} from './utils';

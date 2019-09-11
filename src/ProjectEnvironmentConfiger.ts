@@ -13,7 +13,6 @@ import {FileNames, ScaffoldType, PlatformType, TemplateTag} from './constants';
 import {FileUtility} from './FileUtility';
 import {ProjectTemplate, TemplatesType, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
 import {RemoteExtension} from './Models/RemoteExtension';
-import * as UIUtility from './UIUtility';
 import {CancelOperationError} from './CancelOperationError';
 import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
@@ -59,7 +58,7 @@ export class ProjectEnvironmentConfiger {
         async () => {
           // Select platform if not specified
           const platformSelection =
-              await UIUtility.selectPlatform(scaffoldType, context);
+              await utils.selectPlatform(scaffoldType, context);
           let platform: PlatformType;
           if (!platformSelection) {
             telemetryContext.properties.errorMessage =
