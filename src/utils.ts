@@ -14,9 +14,9 @@ import {CodeGenProjectType, DeviceConnectionType} from './DigitalTwin/DigitalTwi
 import {FileUtility} from './FileUtility';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 import {ProjectTemplate, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
+import {Platform} from './Models/Interfaces/ProjectTemplate';
 import {RemoteExtension} from './Models/RemoteExtension';
 import {TelemetryContext} from './telemetry';
-import {Platform} from './Models/Interfaces/ProjectTemplate';
 
 const impor = require('impor')(__dirname);
 import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
@@ -433,6 +433,8 @@ export async function handleIoTWorkspaceProjectFolder(
     await askAndOpenProject(rootPath, workspaceFiles[0], telemetryContext);
     return;
   }
+
+  await askAndNewProject(telemetryContext);
   return;
 }
 
@@ -497,32 +499,32 @@ export function getEnumKeyByEnumValue(myEnum: any, enumValue: any) {
 }
 
 export async function selectPlatform(
-  type: ScaffoldType,
-  context: vscode.ExtensionContext): Promise<vscode.QuickPickItem|undefined> {
-const platformListPath = context.asAbsolutePath(path.join(
-    FileNames.resourcesFolderName, FileNames.templatesFolderName,
-    FileNames.platformListFileName));
-const platformListJsonString =
-    await FileUtility.readFile(type, platformListPath, 'utf8') as string;
-const platformListJson = JSON.parse(platformListJsonString);
+    type: ScaffoldType,
+    context: vscode.ExtensionContext): Promise<vscode.QuickPickItem|undefined> {
+  const platformListPath = context.asAbsolutePath(path.join(
+      FileNames.resourcesFolderName, FileNames.templatesFolderName,
+      FileNames.platformListFileName));
+  const platformListJsonString =
+      await FileUtility.readFile(type, platformListPath, 'utf8') as string;
+  const platformListJson = JSON.parse(platformListJsonString);
 
-if (!platformListJson) {
-  throw new Error('Fail to load platform list.');
-}
+  if (!platformListJson) {
+    throw new Error('Fail to load platform list.');
+  }
 
-const platformList: vscode.QuickPickItem[] = [];
+  const platformList: vscode.QuickPickItem[] = [];
 
-platformListJson.platforms.forEach((platform: Platform) => {
-  platformList.push(
-      {label: platform.name, description: platform.description});
-});
+  platformListJson.platforms.forEach((platform: Platform) => {
+    platformList.push(
+        {label: platform.name, description: platform.description});
+  });
 
-const platformSelection = await vscode.window.showQuickPick(platformList, {
-  ignoreFocusOut: true,
-  matchOnDescription: true,
-  matchOnDetail: true,
-  placeHolder: 'Select a platform',
-});
+  const platformSelection = await vscode.window.showQuickPick(platformList, {
+    ignoreFocusOut: true,
+    matchOnDescription: true,
+    matchOnDetail: true,
+    placeHolder: 'Select a platform',
+  });
 
-return platformSelection;
+  return platformSelection;
 }
