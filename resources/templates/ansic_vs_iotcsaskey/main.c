@@ -34,14 +34,14 @@ const IOTHUB_SECURITY_TYPE secureDeviceTypeForIotHub = IOTHUB_SECURITY_TYPE_SYMM
 // The DPS global device endpoint
 static const char *globalDpsEndpoint = "global.azure-devices-provisioning.net";
 
-// TODO: Specify DPS scope ID if you intend on using DPS / IoT Central.
-static const char *dpsIdScope = "[DPS Id Scope]";
+// DPS ID scope
+static char *dpsIdScope;
 
-// TODO: Specify symmetric keys if you intend on using DPS / IoT Central and symmetric key based auth.
-static const char *sasKey = "[DPS symmetric key]";
+// DPS symmetric keys for authentication
+static char *sasKey;
 
-// TODO: specify your device registration ID
-static const char *registrationId = "[device registration Id]";
+// device ID
+static char *deviceId;
 
 // TODO: Fill in DIGITALTWIN_DEVICE_CAPABILITY_MODEL_INLINE_DATA if want to make deivce self-describing.
 #define DIGITALTWIN_DEVICE_CAPABILITY_MODEL_INLINE_DATA "{}"
@@ -72,6 +72,26 @@ typedef enum APP_DIGITALTWIN_REGISTRATION_STATUS_TAG
 
 static char *dpsIotHubUri;
 static char *dpsDeviceId;
+
+// Implement the following methods if you want to read your DPS connection info from your device security store.
+static const char * getDpsIdScope()
+{
+    // TODO: read DPS ID Scope from your device security store, e.g. EEPROM.
+    return "[DPS ID Scope]";
+}
+
+static const char * getDpsSymmetricKey()
+{
+    // TODO: read symmetric keys from your device security store, e.r. EEPROM,
+    // if you intend on using DPS / IoT Central and symmetric key based auth.
+    return "[DPS symmetric key]";
+}
+
+static const char * getDeviceId()
+{
+    // TODO: read device ID from your device security store, e.r. EEPROM.
+    return "[device ID]";
+}
 
 static void provisioningRegisterCallback(PROV_DEVICE_RESULT register_result, const char *iothub_uri, const char *device_id, void *user_context)
 {
@@ -112,7 +132,7 @@ static bool registerDevice(bool traceOn)
         return false;
     }
 
-    if (prov_dev_set_symmetric_key_info(registrationId, sasKey) != 0)
+    if (prov_dev_set_symmetric_key_info(deviceId, sasKey) != 0)
     {
         LogError("prov_dev_set_symmetric_key_info failed.");
     }
@@ -209,8 +229,26 @@ static void setup()
 }
 
 // main entry point.
-int main()
+int main(int argc, char *argv[])
 {
+    if (argc == 4)
+    {
+        dpsIdScope = argv[1];
+        sasKey = argv[2];
+        deviceId = argv[3];
+    }
+    else if (argc == 1)
+    {
+        dpsIdScope = (char*)getDpsIdScope();
+        sasKey = (char*)getDpsSymmetricKey();
+        deviceId = (char*)getDeviceId();
+    }
+    else
+    {
+        LogError("USAGE: {PROJECT_NAME} [DPS ID Scope] [DPS symmetric key] [Device ID]");
+        return 1;
+    }
+
     setup();
     
     if (iotHubConnected)

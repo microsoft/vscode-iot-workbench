@@ -25,26 +25,43 @@ For more details about setting up your development environment for compiling the
 1. Copy the folder of **{PROJECT_NAME}** with the generated code into the source folder **azure-iot-sdk-c-pnp** .
 
 1. In order to connect to IoT Central:
-    * You need to have provisioned a private preview IoT Central instance. See [here](https://github.com/Azure/Azure-IoT-PnP-Preview/blob/master/docs/tutorial.md) for more end-to-end setup instructions.
-    * Open `main.c`. Specify paramaters requested by the commented **TODO's** for your configuration.
+    * Complete the [Create an Azure IoT Central application (preview features)](https://docs.microsoft.com/en-us/azure/iot-central/quick-deploy-iot-central-pnp?toc=/azure/iot-central-pnp/toc.json&bc=/azure/iot-central-pnp/breadcrumb/toc.json) quickstart to create an IoT Central application using the Preview application template.
 
-      ```c
-      // TODO: Specify DPS scope ID if you intend on using IoT Central.
-      static const char* dpsIdScope = "[DPS Id Scope]";
+    * Retrieve DPS connection infomation from Azure IoT Central, including ID Scope, symmetric key, device ID. Please refer to [this document](https://docs.microsoft.com/en-us/azure/iot-central/concepts-connectivity) for more details.
 
-      // TODO: Specify symmetric keys if you intend on using IoT Central and symmetric key based auth.
-      static const char* sasKey = "[DPS symmetric key]";
+    * To add the DPS connection information to the generated device code:
 
-      // TODO: specify your device registration ID
-      static const char* registrationId = "[registration Id]";
-      ```
+        * **Option 1**: Open `main.c`. Implement the following DPS related functions to retrieve DPS **ID Scope**, **Symmetric Key**, **Device ID** from your device security store.
 
-1. Open the `CMakeLists.txt` in the **azure-iot-sdk-c-pnp** folder. Include the **{PROJECT_NAME}** folder so that it will be built together with the Device SDK. Add the line below to the end of the file.
+            ```c
+            static const char * getDpsIdScope()
+            {
+                // TODO: read DPS ID Scope from your device security store, e.g. EEPROM.
+                return "[DPS ID Scope]";
+            }
+
+            static const char * getDpsSymmetricKey()
+            {
+                // TODO: read symmetric keys from your device security store, e.r. EEPROM,
+                // if you intend on using DPS / IoT Central and symmetric key based auth.
+                return "[DPS symmetric key]";
+            }
+
+            static const char * getDeviceId()
+            {
+                // TODO: read device ID from your device security store, e.r. EEPROM.
+                return "[device ID]";
+            }
+            ```
+
+        * **Option 2**: pass the DPS connection info as paramerters of the device app executable.
+
+1. Open the `CMakeLists.txt` in the **azure-iot-sdk-c** folder. Include the **{PROJECT_NAME}** folder so that it will be built together with the Device SDK. Add the line below to the end of the file.
     ```txt
     add_subdirectory({PROJECT_NAME})
     ```
 
-1. In the same **azure-iot-sdk-c-pnp** folder, create a folder to contain the compiled app.
+1. In the same **azure-iot-sdk-c** folder, create a folder to contain the compiled app.
     ```bash
     mkdir cmake
     cd cmake
@@ -57,9 +74,16 @@ For more details about setting up your development environment for compiling the
     ```
 
 1. Once the build has succeeded, you can test it by invoking the following command.
-    ```bash
-    \\{PROJECT_NAME}\\Release\\{PROJECT_NAME}.exe
-    ```
+
+    * If you choose to read your DPS connection info from security store and already implemented the related functions in **main.c**.
+        ```bash
+        \\{PROJECT_NAME}\\Release\\{PROJECT_NAME}.exe
+        ```
+
+    * If you want to pass the DPS info as command line paramers.
+        ```bash
+        \\{PROJECT_NAME}\\Release\\{PROJECT_NAME}.exe [DPS ID Scope] [DPS symmetric key] [device ID]
+        ```
 
 ## Ubuntu
 
@@ -84,26 +108,42 @@ For more details about setting up your development environment for compiling the
 1. Copy the folder of **{PROJECT_NAME}** with the generated code into the source folder **azure-iot-sdk-c-pnp** .
 
 1. In order to connect to IoT Central:
-    * You need to have provisioned a private preview IoT Central instance. See [here](https://github.com/Azure/Azure-IoT-PnP-Preview/blob/master/docs/tutorial.md) for more end-to-end setup instructions.
-    * Open `main.c`. Specify paramaters requested by the commented **TODO's** for your configuration.
+    * Complete the [Create an Azure IoT Central application (preview features)](https://docs.microsoft.com/en-us/azure/iot-central/quick-deploy-iot-central-pnp?toc=/azure/iot-central-pnp/toc.json&bc=/azure/iot-central-pnp/breadcrumb/toc.json) quickstart to create an IoT Central application using the Preview application template.
 
-      ```c
-      // TODO: Specify DPS scope ID if you intend on using DPS / IoT Central.
-      static const char *dpsIdScope = "[DPS Id Scope]";
-      
-      // TODO: Specify symmetric keys if you intend on using DPS / IoT Central and symmetric key based auth.
-      static const char *sasKey = "[DPS symmetric key]";
-      
-      // TODO: specify your device registration ID
-      static const char *registrationId = "[device registration Id]";
-      ```
+    * Retrieve DPS connection infomation from Azure IoT Central, including ID Scope, symmetric key, device ID. Please refer to [this document](https://docs.microsoft.com/en-us/azure/iot-central/concepts-connectivity) for more details.
 
-1. Open the `CMakeLists.txt` in the **azure-iot-sdk-c-pnp** folder. Include the **{PROJECT_NAME}** folder so that it will be built together with the Device SDK. Add the line below to the end of the file.
+    * To add the DPS connection information to the generated device code:
+
+        * **Option 1**: Open `main.c`. Implement the following DPS related functions to retrieve DPS **ID Scope**, **Symmetric Key**, **Device ID** from your device security store.
+            ```c
+            static const char * getDpsIdScope()
+            {
+                // TODO: read DPS ID Scope from your device security store, e.g. EEPROM.
+                return "[DPS ID Scope]";
+            }
+
+            static const char * getDpsSymmetricKey()
+            {
+                // TODO: read symmetric keys from your device security store, e.r. EEPROM,
+                // if you intend on using DPS / IoT Central and symmetric key based auth.
+                return "[DPS symmetric key]";
+            }
+
+            static const char * getDeviceId()
+            {
+                // TODO: read device ID from your device security store, e.r. EEPROM.
+                return "[device ID]";
+            }
+            ```
+
+        * **Option 2**: pass the DPS connection info as paramerters of the app executable.
+
+1. Open the `CMakeLists.txt` in the **azure-iot-sdk-c** folder. Include the **{PROJECT_NAME}** folder so that it will be built together with the Device SDK. Add the line below to the end of the file.
     ```txt
     add_subdirectory({PROJECT_NAME})
     ```
 
-1. In the same **azure-iot-sdk-c-pnp** folder, create a folder to contain the compiled app.
+1. In the same **azure-iot-sdk-c** folder, create a folder to contain the compiled app.
     ```bash
     mkdir cmake
     cd cmake
@@ -116,6 +156,12 @@ For more details about setting up your development environment for compiling the
     ```
 
 1. Once the build has succeeded, you can test it by invoking the following command.
-    ```bash
-    ./{PROJECT_NAME}/{PROJECT_NAME}
-    ```
+    * If you choose to read your DPS connection info from security store and already implemented the related functions in **main.c**.
+        ```bash
+        \\{PROJECT_NAME}\\Release\\{PROJECT_NAME}.exe
+        ```
+
+    * If you want to pass the DPS info as command line paramers.
+        ```bash
+        \\{PROJECT_NAME}\\Release\\{PROJECT_NAME}.exe [DPS ID Scope] [DPS symmetric key] [device ID]
+        ```
