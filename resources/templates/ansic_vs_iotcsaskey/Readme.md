@@ -28,33 +28,7 @@ For more details about setting up your development environment for compiling the
 
     * Complete the [Create an Azure IoT Central application (preview features)](https://docs.microsoft.com/en-us/azure/iot-central/quick-deploy-iot-central-pnp?toc=/azure/iot-central-pnp/toc.json&bc=/azure/iot-central-pnp/breadcrumb/toc.json) quickstart to create an IoT Central application using the Preview application template.
 
-    * Retrieve DPS connection infomation from Azure IoT Central, including ID Scope, symmetric key, device ID. Please refer to [this document](https://docs.microsoft.com/en-us/azure/iot-central/concepts-connectivity) for more details.
-
-    * To add the DPS connection information to the generated device code:
-
-        * **Option 1**: Open `main.c`. Implement the following DPS related functions to retrieve DPS **ID Scope**, **Symmetric Key**, **Device ID** from your device security store.
-            ```c
-            static const char * getDpsIdScope()
-            {
-                // TODO: read DPS ID Scope from your device security store, e.g. EEPROM.
-                return "[DPS ID Scope]";
-            }
-
-            static const char * getDpsSymmetricKey()
-            {
-                // TODO: read symmetric keys from your device security store, e.r. EEPROM,
-                // if you intend on using DPS / IoT Central and symmetric key based auth.
-                return "[DPS symmetric key]";
-            }
-
-            static const char * getDeviceId()
-            {
-                // TODO: read device ID from your device security store, e.r. EEPROM.
-                return "[device ID]";
-            }
-            ```
-
-        * **Option 2**: pass the DPS connection info as paramerters of the app executable.
+    * Retrieve DPS connection infomation from Azure IoT Central, including **DPS ID Scope**, **DPS Symmetric Key**, **device ID**, which will be pass the as paramerters of the device app executable. Please refer to [this document](https://docs.microsoft.com/en-us/azure/iot-central/concepts-connectivity) for more details.
 
 1. Open the `CMakeLists.txt` in the **azure-iot-sdk-c** folder. Include the **{PROJECT_NAME}** folder so that it will be built together with the Device SDK. Add the line below to the end of the file.
     ```txt

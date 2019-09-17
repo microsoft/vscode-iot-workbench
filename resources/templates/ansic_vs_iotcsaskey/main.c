@@ -73,26 +73,6 @@ typedef enum APP_DIGITALTWIN_REGISTRATION_STATUS_TAG
 static char *dpsIotHubUri;
 static char *dpsDeviceId;
 
-// Implement the following methods if you want to read your DPS connection info from your device security store.
-static const char * getDpsIdScope()
-{
-    // TODO: read DPS ID Scope from your device security store, e.g. EEPROM.
-    return "[DPS ID Scope]";
-}
-
-static const char * getDpsSymmetricKey()
-{
-    // TODO: read symmetric keys from your device security store, e.r. EEPROM,
-    // if you intend on using DPS / IoT Central and symmetric key based auth.
-    return "[DPS symmetric key]";
-}
-
-static const char * getDeviceId()
-{
-    // TODO: read device ID from your device security store, e.r. EEPROM.
-    return "[device ID]";
-}
-
 static void provisioningRegisterCallback(PROV_DEVICE_RESULT register_result, const char *iothub_uri, const char *device_id, void *user_context)
 {
     APP_DPS_REGISTRATION_STATUS *appDpsRegistrationStatus = (APP_DPS_REGISTRATION_STATUS *)user_context;
@@ -236,12 +216,6 @@ int main(int argc, char *argv[])
         dpsIdScope = argv[1];
         sasKey = argv[2];
         deviceId = argv[3];
-    }
-    else if (argc == 1)
-    {
-        dpsIdScope = (char*)getDpsIdScope();
-        sasKey = (char*)getDpsSymmetricKey();
-        deviceId = (char*)getDeviceId();
     }
     else
     {
