@@ -77,8 +77,9 @@ export class Span {
   }
 
   translate(movement: number): Span {
-    return movement === 0 ? this :
-                            new Span(this._startIndex + movement, this._length);
+    return movement === 0
+      ? this
+      : new Span(this._startIndex + movement, this._length);
   }
 
   toString(): string {
@@ -113,8 +114,9 @@ export class Issue {
     assert(_span !== null, '_span must not be null.');
     assert(_span !== undefined, '_span must not be undefined.');
     assert(
-        1 <= _span.length,
-        '_span\'s length must be greater than or equal to 1.');
+      1 <= _span.length,
+      "_span's length must be greater than or equal to 1."
+    );
     assert(_message !== null, '_message must not be null.');
     assert(_message !== undefined, '_message must not be undefined');
     assert(_message !== '', '_message must not be empty.');

@@ -3,8 +3,6 @@
 
 'use strict';
 
-
-
 const constants = {
   ValuePairDelimiter: ';',
   ValuePairSeparator: '=',
@@ -14,10 +12,8 @@ const constants = {
   SharedAccessKeyValuePropertyName: 'SharedAccessKey',
   HostNameRegex: new RegExp('[a-zA-Z0-9_\\-\\.]+$'),
   SharedAccessKeyNameRegex: new RegExp('^[a-zA-Z0-9_\\-@\\.]+$'),
-  SharedAccessKeyValueRegex: new RegExp('^.+$')
+  SharedAccessKeyValueRegex: new RegExp('^.+$'),
 };
-
-
 
 export class DigitalTwinConnectionStringBuilder {
   private hostName: string;
@@ -48,9 +44,9 @@ export class DigitalTwinConnectionStringBuilder {
     return this.repositoryId;
   }
 
-
-  static Create(dtConnectionString: string):
-      DigitalTwinConnectionStringBuilder {
+  static Create(
+    dtConnectionString: string
+  ): DigitalTwinConnectionStringBuilder {
     const dtConnectionStringBuilder = new DigitalTwinConnectionStringBuilder();
     dtConnectionStringBuilder.Parse(dtConnectionString);
     return dtConnectionStringBuilder;
@@ -60,32 +56,34 @@ export class DigitalTwinConnectionStringBuilder {
     if (value) {
       if (!regex.test(value)) {
         throw new Error(
-            `The connection string is invalid for property ${propertyName}`);
+          `The connection string is invalid for property ${propertyName}`
+        );
       }
     }
   }
-
 
   Parse(dtConnectionString: string): void {
     if (!dtConnectionString) {
       throw new Error('The connection string should not be empty');
     }
 
-    const items: {[propertyName: string]: string;} = {};
+    const items: { [propertyName: string]: string } = {};
 
     const pairs = dtConnectionString.split(constants.ValuePairDelimiter);
     pairs.forEach(value => {
       const index = value.indexOf(constants.ValuePairSeparator);
       if (index <= 0) {
         throw new Error(
-            `The format of the connection string is not valid: ${value}`);
+          `The format of the connection string is not valid: ${value}`
+        );
       }
 
       const propertyName = value.substr(0, index);
       const propertyValue = value.substr(index + 1, value.length - index - 1);
       if (!propertyName || !propertyValue) {
         throw new Error(
-            `The format of the connection string is not valid: ${value}`);
+          `The format of the connection string is not valid: ${value}`
+        );
       }
       items[propertyName] = propertyValue;
     });
@@ -106,7 +104,8 @@ export class DigitalTwinConnectionStringBuilder {
       throw new Error('Unable to find the host name in the connection string.');
     } else if (!this.repositoryId) {
       throw new Error(
-          'Unable to find the repositoryId in the connection string.');
+        'Unable to find the repositoryId in the connection string.'
+      );
     }
 
     this.Validate();
@@ -114,12 +113,19 @@ export class DigitalTwinConnectionStringBuilder {
 
   Validate(): void {
     this.ValidateFormat(
-        this.HostName, constants.HostNamePropertyName, constants.HostNameRegex);
+      this.HostName,
+      constants.HostNamePropertyName,
+      constants.HostNameRegex
+    );
     this.ValidateFormat(
-        this.SharedAccessKeyName, constants.SharedAccessKeyNamePropertyName,
-        constants.SharedAccessKeyNameRegex);
+      this.SharedAccessKeyName,
+      constants.SharedAccessKeyNamePropertyName,
+      constants.SharedAccessKeyNameRegex
+    );
     this.ValidateFormat(
-        this.SharedAccessKeyValue, constants.SharedAccessKeyValuePropertyName,
-        constants.SharedAccessKeyValueRegex);
+      this.SharedAccessKeyValue,
+      constants.SharedAccessKeyValuePropertyName,
+      constants.SharedAccessKeyValueRegex
+    );
   }
 }

@@ -1,37 +1,246 @@
-import {DigitalTwinMetaModelContext} from './DigitalTwinMetaModelUtility';
+import { DigitalTwinMetaModelContext } from './DigitalTwinMetaModelUtility';
 import uniq = require('lodash.uniq');
 
 const LANGUAGE_CODES = [
-  'af',    'af-ZA', 'ar',    'ar-AE',  'ar-BH',  'ar-DZ', 'ar-EG', 'ar-IQ',
-  'ar-JO', 'ar-KW', 'ar-LB', 'ar-LY',  'ar-MA',  'ar-OM', 'ar-QA', 'ar-SA',
-  'ar-SY', 'ar-TN', 'ar-YE', 'az',     'az-AZ',  'az-AZ', 'be',    'be-BY',
-  'bg',    'bg-BG', 'bs-BA', 'ca',     'ca-ES',  'cs',    'cs-CZ', 'cy',
-  'cy-GB', 'da',    'da-DK', 'de',     'de-AT',  'de-CH', 'de-DE', 'de-LI',
-  'de-LU', 'dv',    'dv-MV', 'el',     'el-GR',  'en',    'en-AU', 'en-BZ',
-  'en-CA', 'en-CB', 'en-GB', 'en-IE',  'en-JM',  'en-NZ', 'en-PH', 'en-TT',
-  'en-US', 'en-ZA', 'en-ZW', 'eo',     'es',     'es-AR', 'es-BO', 'es-CL',
-  'es-CO', 'es-CR', 'es-DO', 'es-EC',  'es-ES',  'es-ES', 'es-GT', 'es-HN',
-  'es-MX', 'es-NI', 'es-PA', 'es-PE',  'es-PR',  'es-PY', 'es-SV', 'es-UY',
-  'es-VE', 'et',    'et-EE', 'eu',     'eu-ES',  'fa',    'fa-IR', 'fi',
-  'fi-FI', 'fo',    'fo-FO', 'fr',     'fr-BE',  'fr-CA', 'fr-CH', 'fr-FR',
-  'fr-LU', 'fr-MC', 'gl',    'gl-ES',  'gu',     'gu-IN', 'he',    'he-IL',
-  'hi',    'hi-IN', 'hr',    'hr-BA',  'hr-HR',  'hu',    'hu-HU', 'hy',
-  'hy-AM', 'id',    'id-ID', 'is',     'is-IS',  'it',    'it-CH', 'it-IT',
-  'ja',    'ja-JP', 'ka',    'ka-GE',  'kk',     'kk-KZ', 'kn',    'kn-IN',
-  'ko',    'ko-KR', 'kok',   'kok-IN', 'ky',     'ky-KG', 'lt',    'lt-LT',
-  'lv',    'lv-LV', 'mi',    'mi-NZ',  'mk',     'mk-MK', 'mn',    'mn-MN',
-  'mr',    'mr-IN', 'ms',    'ms-BN',  'ms-MY',  'mt',    'mt-MT', 'nb',
-  'nb-NO', 'nl',    'nl-BE', 'nl-NL',  'nn-NO',  'ns',    'ns-ZA', 'pa',
-  'pa-IN', 'pl',    'pl-PL', 'ps',     'ps-AR',  'pt',    'pt-BR', 'pt-PT',
-  'qu',    'qu-BO', 'qu-EC', 'qu-PE',  'ro',     'ro-RO', 'ru',    'ru-RU',
-  'sa',    'sa-IN', 'se',    'se-FI',  'se-FI',  'se-FI', 'se-NO', 'se-NO',
-  'se-NO', 'se-SE', 'se-SE', 'se-SE',  'sk',     'sk-SK', 'sl',    'sl-SI',
-  'sq',    'sq-AL', 'sr-BA', 'sr-BA',  'sr-SP',  'sr-SP', 'sv',    'sv-FI',
-  'sv-SE', 'sw',    'sw-KE', 'syr',    'syr-SY', 'ta',    'ta-IN', 'te',
-  'te-IN', 'th',    'th-TH', 'tl',     'tl-PH',  'tn',    'tn-ZA', 'tr',
-  'tr-TR', 'tt',    'tt-RU', 'ts',     'uk',     'uk-UA', 'ur',    'ur-PK',
-  'uz',    'uz-UZ', 'uz-UZ', 'vi',     'vi-VN',  'xh',    'xh-ZA', 'zh',
-  'zh-CN', 'zh-HK', 'zh-MO', 'zh-SG',  'zh-TW',  'zu',    'zu-ZA'
+  'af',
+  'af-ZA',
+  'ar',
+  'ar-AE',
+  'ar-BH',
+  'ar-DZ',
+  'ar-EG',
+  'ar-IQ',
+  'ar-JO',
+  'ar-KW',
+  'ar-LB',
+  'ar-LY',
+  'ar-MA',
+  'ar-OM',
+  'ar-QA',
+  'ar-SA',
+  'ar-SY',
+  'ar-TN',
+  'ar-YE',
+  'az',
+  'az-AZ',
+  'az-AZ',
+  'be',
+  'be-BY',
+  'bg',
+  'bg-BG',
+  'bs-BA',
+  'ca',
+  'ca-ES',
+  'cs',
+  'cs-CZ',
+  'cy',
+  'cy-GB',
+  'da',
+  'da-DK',
+  'de',
+  'de-AT',
+  'de-CH',
+  'de-DE',
+  'de-LI',
+  'de-LU',
+  'dv',
+  'dv-MV',
+  'el',
+  'el-GR',
+  'en',
+  'en-AU',
+  'en-BZ',
+  'en-CA',
+  'en-CB',
+  'en-GB',
+  'en-IE',
+  'en-JM',
+  'en-NZ',
+  'en-PH',
+  'en-TT',
+  'en-US',
+  'en-ZA',
+  'en-ZW',
+  'eo',
+  'es',
+  'es-AR',
+  'es-BO',
+  'es-CL',
+  'es-CO',
+  'es-CR',
+  'es-DO',
+  'es-EC',
+  'es-ES',
+  'es-ES',
+  'es-GT',
+  'es-HN',
+  'es-MX',
+  'es-NI',
+  'es-PA',
+  'es-PE',
+  'es-PR',
+  'es-PY',
+  'es-SV',
+  'es-UY',
+  'es-VE',
+  'et',
+  'et-EE',
+  'eu',
+  'eu-ES',
+  'fa',
+  'fa-IR',
+  'fi',
+  'fi-FI',
+  'fo',
+  'fo-FO',
+  'fr',
+  'fr-BE',
+  'fr-CA',
+  'fr-CH',
+  'fr-FR',
+  'fr-LU',
+  'fr-MC',
+  'gl',
+  'gl-ES',
+  'gu',
+  'gu-IN',
+  'he',
+  'he-IL',
+  'hi',
+  'hi-IN',
+  'hr',
+  'hr-BA',
+  'hr-HR',
+  'hu',
+  'hu-HU',
+  'hy',
+  'hy-AM',
+  'id',
+  'id-ID',
+  'is',
+  'is-IS',
+  'it',
+  'it-CH',
+  'it-IT',
+  'ja',
+  'ja-JP',
+  'ka',
+  'ka-GE',
+  'kk',
+  'kk-KZ',
+  'kn',
+  'kn-IN',
+  'ko',
+  'ko-KR',
+  'kok',
+  'kok-IN',
+  'ky',
+  'ky-KG',
+  'lt',
+  'lt-LT',
+  'lv',
+  'lv-LV',
+  'mi',
+  'mi-NZ',
+  'mk',
+  'mk-MK',
+  'mn',
+  'mn-MN',
+  'mr',
+  'mr-IN',
+  'ms',
+  'ms-BN',
+  'ms-MY',
+  'mt',
+  'mt-MT',
+  'nb',
+  'nb-NO',
+  'nl',
+  'nl-BE',
+  'nl-NL',
+  'nn-NO',
+  'ns',
+  'ns-ZA',
+  'pa',
+  'pa-IN',
+  'pl',
+  'pl-PL',
+  'ps',
+  'ps-AR',
+  'pt',
+  'pt-BR',
+  'pt-PT',
+  'qu',
+  'qu-BO',
+  'qu-EC',
+  'qu-PE',
+  'ro',
+  'ro-RO',
+  'ru',
+  'ru-RU',
+  'sa',
+  'sa-IN',
+  'se',
+  'se-FI',
+  'se-FI',
+  'se-FI',
+  'se-NO',
+  'se-NO',
+  'se-NO',
+  'se-SE',
+  'se-SE',
+  'se-SE',
+  'sk',
+  'sk-SK',
+  'sl',
+  'sl-SI',
+  'sq',
+  'sq-AL',
+  'sr-BA',
+  'sr-BA',
+  'sr-SP',
+  'sr-SP',
+  'sv',
+  'sv-FI',
+  'sv-SE',
+  'sw',
+  'sw-KE',
+  'syr',
+  'syr-SY',
+  'ta',
+  'ta-IN',
+  'te',
+  'te-IN',
+  'th',
+  'th-TH',
+  'tl',
+  'tl-PH',
+  'tn',
+  'tn-ZA',
+  'tr',
+  'tr-TR',
+  'tt',
+  'tt-RU',
+  'ts',
+  'uk',
+  'uk-UA',
+  'ur',
+  'ur-PK',
+  'uz',
+  'uz-UZ',
+  'uz-UZ',
+  'vi',
+  'vi-VN',
+  'xh',
+  'xh-ZA',
+  'zh',
+  'zh-CN',
+  'zh-HK',
+  'zh-MO',
+  'zh-SG',
+  'zh-TW',
+  'zu',
+  'zu-ZA',
 ];
 
 export interface GraphNode {
@@ -50,7 +259,9 @@ export interface DigitalTwinMetaModelGraph {
   Edges: GraphEdge[];
 }
 
-export interface Map<T> { [key: string]: T; }
+export interface Map<T> {
+  [key: string]: T;
+}
 
 export class DigitalTwinMetaModelParser {
   static LABEL = {
@@ -59,7 +270,7 @@ export class DigitalTwinMetaModelParser {
     SUBCLASS: 'http://www.w3.org/2000/01/rdf-schema#subClassOf',
     RANGE: 'http://www.w3.org/2000/01/rdf-schema#range',
     TYPE: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type',
-    COMMENT: 'http://www.w3.org/2000/01/rdf-schema#comment'
+    COMMENT: 'http://www.w3.org/2000/01/rdf-schema#comment',
   };
 
   constructor(private graph: DigitalTwinMetaModelGraph) {}
@@ -72,18 +283,21 @@ export class DigitalTwinMetaModelParser {
     StringValuesFromId: {} as Map<string[]>,
     PropertiesFromId: {} as Map<string[]>,
     CommnetFromId: {} as Map<string>,
-    TypedPropertiesFromId: {} as
-        Map<Array<{label: string, required: boolean, type: string}>>,
-    ShortNameFromLabel: {} as Map<string|null>
+    TypedPropertiesFromId: {} as Map<
+      Array<{ label: string; required: boolean; type: string }>
+    >,
+    ShortNameFromLabel: {} as Map<string | null>,
   };
 
-  getCommentFromId(id: string): string|undefined {
+  getCommentFromId(id: string): string | undefined {
     if (this.cache.CommnetFromId[id] !== undefined) {
       return this.cache.CommnetFromId[id];
     }
     for (const edge of this.graph.Edges) {
-      if (edge.SourceNode.Id === id &&
-          edge.Label === DigitalTwinMetaModelParser.LABEL.COMMENT) {
+      if (
+        edge.SourceNode.Id === id &&
+        edge.Label === DigitalTwinMetaModelParser.LABEL.COMMENT
+      ) {
         this.cache.CommnetFromId[id] = edge.TargetNode.Value || '';
         return edge.TargetNode.Value;
       }
@@ -92,8 +306,10 @@ export class DigitalTwinMetaModelParser {
     return undefined;
   }
 
-  getIdFromShortName(dtContext: DigitalTwinMetaModelContext, shortName: string):
-      string|null {
+  getIdFromShortName(
+    dtContext: DigitalTwinMetaModelContext,
+    shortName: string
+  ): string | null {
     if (dtContext['@context'].hasOwnProperty(shortName)) {
       const shortNameValue = dtContext['@context'][shortName];
       if (typeof shortNameValue === 'string') {
@@ -106,8 +322,10 @@ export class DigitalTwinMetaModelParser {
     }
   }
 
-  getIdFromLabel(dtContext: DigitalTwinMetaModelContext, label: string): string
-      |null {
+  getIdFromLabel(
+    dtContext: DigitalTwinMetaModelContext,
+    label: string
+  ): string | null {
     return dtContext['@context']['@vocab'] + label;
     // if (this.cache.IdFromLabel[type]) {
     //     return this.cache.IdFromLabel[type];
@@ -124,8 +342,10 @@ export class DigitalTwinMetaModelParser {
     // return null;
   }
 
-  getIdFromType(dtContext: DigitalTwinMetaModelContext, type: string): string
-      |null {
+  getIdFromType(
+    dtContext: DigitalTwinMetaModelContext,
+    type: string
+  ): string | null {
     const value = dtContext['@context'][type];
     let label = '';
     if (value) {
@@ -168,7 +388,11 @@ export class DigitalTwinMetaModelParser {
       return this.cache.TypedPropertiesFromId[id];
     }
 
-    const results: Array<{label: string, required: boolean, type: string}> = [];
+    const results: Array<{
+      label: string;
+      required: boolean;
+      type: string;
+    }> = [];
 
     if (this.isInternationalizationFromId(dtContext, id)) {
       for (const code of LANGUAGE_CODES) {
@@ -184,8 +408,9 @@ export class DigitalTwinMetaModelParser {
 
     const keys = this.getPropertiesFromId(dtContext, id);
     const type = this.getShortNameFromId(dtContext, id);
-    const getRequiredProperties =
-        type ? this.getRequiredPropertiesFromType(type) : [];
+    const getRequiredProperties = type
+      ? this.getRequiredPropertiesFromType(type)
+      : [];
     for (const key of keys) {
       const id = this.getIdFromShortName(dtContext, key);
       if (!id) {
@@ -194,9 +419,9 @@ export class DigitalTwinMetaModelParser {
       const item = {
         label: key,
         required: getRequiredProperties.indexOf(key) !== -1,
-        type: this.isArrayFromShortName(key) ?
-            'array' :
-            (this.getValueTypesFromId(dtContext, id)[0] || '')
+        type: this.isArrayFromShortName(key)
+          ? 'array'
+          : this.getValueTypesFromId(dtContext, id)[0] || '',
       };
       results.push(item);
     }
@@ -205,7 +430,9 @@ export class DigitalTwinMetaModelParser {
   }
 
   getTypedPropertiesFromType(
-      dtContext: DigitalTwinMetaModelContext, type: string) {
+    dtContext: DigitalTwinMetaModelContext,
+    type: string
+  ) {
     const id = this.getIdFromType(dtContext, type);
     if (!id) {
       console.warn(`Cannot find ID for type ${type}.`);
@@ -227,16 +454,21 @@ export class DigitalTwinMetaModelParser {
       properties = LANGUAGE_CODES;
     } else {
       for (const edge of this.graph.Edges) {
-        if (edge.TargetNode.Id === id &&
-            edge.Label === DigitalTwinMetaModelParser.LABEL.DOMAIN) {
+        if (
+          edge.TargetNode.Id === id &&
+          edge.Label === DigitalTwinMetaModelParser.LABEL.DOMAIN
+        ) {
           properties.push(
-              this.getPropertyNameFromId(dtContext, edge.SourceNode.Id));
+            this.getPropertyNameFromId(dtContext, edge.SourceNode.Id)
+          );
         } else if (
-            edge.SourceNode.Id === id &&
-            edge.Label === DigitalTwinMetaModelParser.LABEL.SUBCLASS) {
+          edge.SourceNode.Id === id &&
+          edge.Label === DigitalTwinMetaModelParser.LABEL.SUBCLASS
+        ) {
           console.log(`Found sub class of for ${id}: ${edge.TargetNode.Id}`);
           properties = properties.concat(
-              this.getPropertiesFromId(dtContext, edge.TargetNode.Id));
+            this.getPropertiesFromId(dtContext, edge.TargetNode.Id)
+          );
         }
       }
     }
@@ -264,16 +496,22 @@ export class DigitalTwinMetaModelParser {
     let types: string[] = [];
 
     for (const edge of this.graph.Edges) {
-      if (edge.SourceNode.Id === id &&
-          edge.Label === DigitalTwinMetaModelParser.LABEL.RANGE) {
-        types =
-            types.concat(this.getTypesFromId(dtContext, edge.TargetNode.Id));
+      if (
+        edge.SourceNode.Id === id &&
+        edge.Label === DigitalTwinMetaModelParser.LABEL.RANGE
+      ) {
+        types = types.concat(
+          this.getTypesFromId(dtContext, edge.TargetNode.Id)
+        );
       }
 
-      if (edge.TargetNode.Id === id &&
-          edge.Label === DigitalTwinMetaModelParser.LABEL.SUBCLASS) {
-        types =
-            types.concat(this.getTypesFromId(dtContext, edge.SourceNode.Id));
+      if (
+        edge.TargetNode.Id === id &&
+        edge.Label === DigitalTwinMetaModelParser.LABEL.SUBCLASS
+      ) {
+        types = types.concat(
+          this.getTypesFromId(dtContext, edge.SourceNode.Id)
+        );
       }
     }
 
@@ -331,7 +569,7 @@ export class DigitalTwinMetaModelParser {
     }
 
     console.log(`Cannot find short name for label ${label}.`);
-    if (label.indexOf('\/') === -1) {
+    if (label.indexOf('/') === -1) {
       this.cache.ShortNameFromLabel[label] = label;
       return label;
     } else {
@@ -341,13 +579,17 @@ export class DigitalTwinMetaModelParser {
   }
 
   isArrayFromShortName(shortName: string) {
-    return [
-      'contents', 'schemas', 'fields', 'enumValues', 'implements'
-    ].indexOf(shortName) > -1;
+    return (
+      ['contents', 'schemas', 'fields', 'enumValues', 'implements'].indexOf(
+        shortName
+      ) > -1
+    );
   }
 
   getStringValuesFromShortName(
-      dtContext: DigitalTwinMetaModelContext, shortName: string) {
+    dtContext: DigitalTwinMetaModelContext,
+    shortName: string
+  ) {
     const id = this.getIdFromShortName(dtContext, shortName);
     if (id === 'http://azureiot.com/v1/classes/InterfaceInstance/schema') {
       return ['XMLSchema#string'];
@@ -367,27 +609,38 @@ export class DigitalTwinMetaModelParser {
     let values: string[] = [];
     let hasProperty = false;
     for (const edge of this.graph.Edges) {
-      if (edge.TargetNode.Id === id &&
-          edge.Label === DigitalTwinMetaModelParser.LABEL.DOMAIN) {
+      if (
+        edge.TargetNode.Id === id &&
+        edge.Label === DigitalTwinMetaModelParser.LABEL.DOMAIN
+      ) {
         hasProperty = true;
       }
-      if (edge.SourceNode.Id === id &&
-          edge.Label === DigitalTwinMetaModelParser.LABEL.RANGE) {
+      if (
+        edge.SourceNode.Id === id &&
+        edge.Label === DigitalTwinMetaModelParser.LABEL.RANGE
+      ) {
         console.log(`${id} has range of ${edge.TargetNode.Id}`);
         values = values.concat(
-            this.getStringValuesFromId(dtContext, edge.TargetNode.Id));
+          this.getStringValuesFromId(dtContext, edge.TargetNode.Id)
+        );
       }
-      if (edge.TargetNode.Id === id &&
-          edge.Label === DigitalTwinMetaModelParser.LABEL.SUBCLASS) {
+      if (
+        edge.TargetNode.Id === id &&
+        edge.Label === DigitalTwinMetaModelParser.LABEL.SUBCLASS
+      ) {
         console.log(`${edge.SourceNode.Id} is sub class of ${id}`);
         values = values.concat(
-            this.getStringValuesFromId(dtContext, edge.SourceNode.Id));
+          this.getStringValuesFromId(dtContext, edge.SourceNode.Id)
+        );
       }
-      if (edge.TargetNode.Id === id &&
-          edge.Label === DigitalTwinMetaModelParser.LABEL.TYPE) {
+      if (
+        edge.TargetNode.Id === id &&
+        edge.Label === DigitalTwinMetaModelParser.LABEL.TYPE
+      ) {
         console.log(`${edge.SourceNode.Id} has type of ${id}`);
         values = values.concat(
-            this.getStringValuesFromId(dtContext, edge.SourceNode.Id));
+          this.getStringValuesFromId(dtContext, edge.SourceNode.Id)
+        );
       }
     }
     if (values.length === 0) {
@@ -441,7 +694,9 @@ export class DigitalTwinMetaModelParser {
   }
 
   isInternationalizationFromId(
-      dtContext: DigitalTwinMetaModelContext, id: string) {
+    dtContext: DigitalTwinMetaModelContext,
+    id: string
+  ) {
     for (const shortName of Object.keys(dtContext['@context'])) {
       if (/^@/.test(shortName)) {
         continue;

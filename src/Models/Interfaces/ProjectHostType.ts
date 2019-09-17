@@ -4,5 +4,5 @@
 export enum ProjectHostType {
   Unknown = 0,
   Workspace,
-  Container
+  Container,
 }

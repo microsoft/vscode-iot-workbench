@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 class DummyMemento implements vscode.Memento {
-  get<T>(key: string): Promise<T|undefined> {
+  get<T>(key: string): Promise<T | undefined> {
     return Promise.resolve(undefined);
   }
 
@@ -14,7 +14,7 @@ class DummyMemento implements vscode.Memento {
 // mock of the extension context for vscode
 class TestExtensionContext implements vscode.ExtensionContext {
   globalStoragePath = '';
-  subscriptions: Array<{dispose(): {}}> = [];
+  subscriptions: Array<{ dispose(): {} }> = [];
   workspaceState: vscode.Memento = new DummyMemento();
   globalState: vscode.Memento = new DummyMemento();
   extensionPath = '';
@@ -26,5 +26,4 @@ class TestExtensionContext implements vscode.ExtensionContext {
   }
 }
 
-
-export {DummyMemento, TestExtensionContext};
+export { DummyMemento, TestExtensionContext };

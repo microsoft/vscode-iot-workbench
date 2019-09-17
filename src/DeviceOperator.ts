@@ -6,16 +6,17 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-import {TelemetryContext} from './telemetry';
-import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
-import {askAndNewProject, handleIoTWorkspaceProjectFolder} from './utils';
+import { TelemetryContext } from './telemetry';
+import { ProjectHostType } from './Models/Interfaces/ProjectHostType';
+import { askAndNewProject, handleIoTWorkspaceProjectFolder } from './utils';
 
 const impor = require('impor')(__dirname);
-const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
-    typeof import('./Models/IoTWorkspaceProject');
-const ioTContainerizedProjectModule =
-    impor('./Models/IoTContainerizedProject') as
-    typeof import('./Models/IoTContainerizedProject');
+const ioTWorkspaceProjectModule = impor(
+  './Models/IoTWorkspaceProject'
+) as typeof import('./Models/IoTWorkspaceProject');
+const ioTContainerizedProjectModule = impor(
+  './Models/IoTContainerizedProject'
+) as typeof import('./Models/IoTContainerizedProject');
 
 export class DeviceOperator {
   private projectHostType: ProjectHostType;
@@ -24,17 +25,25 @@ export class DeviceOperator {
   }
 
   async compile(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext) {
+    context: vscode.ExtensionContext,
+    channel: vscode.OutputChannel,
+    telemetryContext: TelemetryContext
+  ) {
     let iotProject;
     telemetryContext.properties.projectHostType =
-        ProjectHostType[this.projectHostType];
+      ProjectHostType[this.projectHostType];
     if (this.projectHostType === ProjectHostType.Container) {
       iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
-          context, channel, telemetryContext);
+        context,
+        channel,
+        telemetryContext
+      );
     } else if (this.projectHostType === ProjectHostType.Workspace) {
       iotProject = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
-          context, channel, telemetryContext);
+        context,
+        channel,
+        telemetryContext
+      );
     }
     if (iotProject === undefined) {
       await handleIoTWorkspaceProjectFolder(telemetryContext);
@@ -50,17 +59,25 @@ export class DeviceOperator {
   }
 
   async upload(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext) {
+    context: vscode.ExtensionContext,
+    channel: vscode.OutputChannel,
+    telemetryContext: TelemetryContext
+  ) {
     let iotProject;
     telemetryContext.properties.projectHostType =
-        ProjectHostType[this.projectHostType];
+      ProjectHostType[this.projectHostType];
     if (this.projectHostType === ProjectHostType.Container) {
       iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
-          context, channel, telemetryContext);
+        context,
+        channel,
+        telemetryContext
+      );
     } else if (this.projectHostType === ProjectHostType.Workspace) {
       iotProject = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
-          context, channel, telemetryContext);
+        context,
+        channel,
+        telemetryContext
+      );
     }
     if (iotProject === undefined) {
       await handleIoTWorkspaceProjectFolder(telemetryContext);
@@ -76,17 +93,25 @@ export class DeviceOperator {
   }
 
   async configDeviceSettings(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext) {
+    context: vscode.ExtensionContext,
+    channel: vscode.OutputChannel,
+    telemetryContext: TelemetryContext
+  ) {
     let iotProject;
     telemetryContext.properties.projectHostType =
-        ProjectHostType[this.projectHostType];
+      ProjectHostType[this.projectHostType];
     if (this.projectHostType === ProjectHostType.Container) {
       iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
-          context, channel, telemetryContext);
+        context,
+        channel,
+        telemetryContext
+      );
     } else if (this.projectHostType === ProjectHostType.Workspace) {
       iotProject = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
-          context, channel, telemetryContext);
+        context,
+        channel,
+        telemetryContext
+      );
     }
     if (iotProject === undefined) {
       await handleIoTWorkspaceProjectFolder(telemetryContext);

@@ -5,23 +5,27 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {FileNames, ScaffoldType} from '../constants';
-import {FileUtility} from '../FileUtility';
-import {TelemetryContext} from '../telemetry';
+import { FileNames, ScaffoldType } from '../constants';
+import { FileUtility } from '../FileUtility';
+import { TelemetryContext } from '../telemetry';
 
-import {checkAzureLogin} from './Apis';
-import {Compilable} from './Interfaces/Compilable';
-import {Component, ComponentType} from './Interfaces/Component';
-import {Deployable} from './Interfaces/Deployable';
-import {Device} from './Interfaces/Device';
-import {ProjectHostType} from './Interfaces/ProjectHostType';
-import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
-import {Provisionable} from './Interfaces/Provisionable';
-import {Uploadable} from './Interfaces/Uploadable';
+import { checkAzureLogin } from './Apis';
+import { Compilable } from './Interfaces/Compilable';
+import { Component, ComponentType } from './Interfaces/Component';
+import { Deployable } from './Interfaces/Deployable';
+import { Device } from './Interfaces/Device';
+import { ProjectHostType } from './Interfaces/ProjectHostType';
+import {
+  ProjectTemplateType,
+  TemplateFileInfo,
+} from './Interfaces/ProjectTemplate';
+import { Provisionable } from './Interfaces/Provisionable';
+import { Uploadable } from './Interfaces/Uploadable';
 
 const impor = require('impor')(__dirname);
-const azureUtilityModule =
-    impor('./AzureUtility') as typeof import('./AzureUtility');
+const azureUtilityModule = impor(
+  './AzureUtility'
+) as typeof import('./AzureUtility');
 
 export abstract class IoTWorkbenchProjectBase {
   protected componentList: Component[];
@@ -31,10 +35,14 @@ export abstract class IoTWorkbenchProjectBase {
   protected telemetryContext: TelemetryContext;
 
   static GetProjectType(projectFileRootPath: string): ProjectHostType {
-    const iotWorkbenchProjectFile =
-        path.join(projectFileRootPath, FileNames.iotworkbenchprojectFileName);
-    const devcontainerFolderPath =
-        path.join(projectFileRootPath, FileNames.devcontainerFolderName);
+    const iotWorkbenchProjectFile = path.join(
+      projectFileRootPath,
+      FileNames.iotworkbenchprojectFileName
+    );
+    const devcontainerFolderPath = path.join(
+      projectFileRootPath,
+      FileNames.devcontainerFolderName
+    );
     if (!fs.existsSync(iotWorkbenchProjectFile)) {
       return ProjectHostType.Unknown;
     } else if (fs.existsSync(devcontainerFolderPath)) {
@@ -61,8 +69,10 @@ export abstract class IoTWorkbenchProjectBase {
   }
 
   constructor(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext) {
+    context: vscode.ExtensionContext,
+    channel: vscode.OutputChannel,
+    telemetryContext: TelemetryContext
+  ) {
     this.componentList = [];
     this.extensionContext = context;
     this.channel = channel;
@@ -82,7 +92,8 @@ export abstract class IoTWorkbenchProjectBase {
         const res = await item.compile();
         if (res === false) {
           const error = new Error(
-              'Unable to compile the device code, please check output window for detail.');
+            'Unable to compile the device code, please check output window for detail.'
+          );
           throw error;
         }
       }
@@ -101,7 +112,8 @@ export abstract class IoTWorkbenchProjectBase {
         const res = await item.upload();
         if (res === false) {
           const error = new Error(
-              'Unable to upload the sketch, please check output window for detail.');
+            'Unable to upload the sketch, please check output window for detail.'
+          );
           throw error;
         }
       }
@@ -133,13 +145,14 @@ export abstract class IoTWorkbenchProjectBase {
     if (provisionItemList.length === 0) {
       // nothing to provision:
       vscode.window.showInformationMessage(
-          'Congratulations! There is no Azure service to provision in this project.');
+        'Congratulations! There is no Azure service to provision in this project.'
+      );
       return false;
     }
 
     // Ensure azure login before component provision
-    let subscriptionId: string|undefined = '';
-    let resourceGroup: string|undefined = '';
+    let subscriptionId: string | undefined = '';
+    let resourceGroup: string | undefined = '';
     if (provisionItemList.length > 0) {
       await checkAzureLogin();
       azureUtilityModule.AzureUtility.init(this.extensionContext, this.channel);
@@ -163,12 +176,15 @@ export abstract class IoTWorkbenchProjectBase {
           }
         }
         const selection = await vscode.window.showQuickPick(
-            [{
+          [
+            {
               label: _provisionItemList.join('   -   '),
               description: '',
-              detail: 'Click to continue'
-            }],
-            {ignoreFocusOut: true, placeHolder: 'Provision process'});
+              detail: 'Click to continue',
+            },
+          ],
+          { ignoreFocusOut: true, placeHolder: 'Provision process' }
+        );
 
         if (!selection) {
           return false;
@@ -201,7 +217,8 @@ export abstract class IoTWorkbenchProjectBase {
 
     if (deployItemList && deployItemList.length <= 0) {
       await vscode.window.showInformationMessage(
-          'Congratulations! The project does not contain any Azure components to be deployed.');
+        'Congratulations! The project does not contain any Azure components to be deployed.'
+      );
       return false;
     }
 
@@ -220,12 +237,15 @@ export abstract class IoTWorkbenchProjectBase {
           }
         }
         const selection = await vscode.window.showQuickPick(
-            [{
+          [
+            {
               label: _deployItemList.join('   -   '),
               description: '',
-              detail: 'Click to continue'
-            }],
-            {ignoreFocusOut: true, placeHolder: 'Deploy process'});
+              detail: 'Click to continue',
+            },
+          ],
+          { ignoreFocusOut: true, placeHolder: 'Deploy process' }
+        );
 
         if (!selection) {
           return false;
@@ -245,9 +265,12 @@ export abstract class IoTWorkbenchProjectBase {
   }
 
   abstract async create(
-      rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
-      projectType: ProjectTemplateType, boardId: string,
-      openInNewWindow: boolean): Promise<boolean>;
+    rootFolderPath: string,
+    templateFilesInfo: TemplateFileInfo[],
+    projectType: ProjectTemplateType,
+    boardId: string,
+    openInNewWindow: boolean
+  ): Promise<boolean>;
 
   async configDeviceSettings(): Promise<boolean> {
     for (const component of this.componentList) {
@@ -264,21 +287,25 @@ export abstract class IoTWorkbenchProjectBase {
   }
 
   static async generateIotWorkbenchProjectFile(
-      type: ScaffoldType, projectFolder: string): Promise<void> {
-    if (!await FileUtility.directoryExists(type, projectFolder)) {
+    type: ScaffoldType,
+    projectFolder: string
+  ): Promise<void> {
+    if (!(await FileUtility.directoryExists(type, projectFolder))) {
       throw new Error('Unable to find the project folder.');
     }
 
     try {
-      const iotworkbenchprojectFilePath =
-          path.join(projectFolder, FileNames.iotworkbenchprojectFileName);
-      if (!await FileUtility.fileExists(type, iotworkbenchprojectFilePath)) {
+      const iotworkbenchprojectFilePath = path.join(
+        projectFolder,
+        FileNames.iotworkbenchprojectFileName
+      );
+      if (!(await FileUtility.fileExists(type, iotworkbenchprojectFilePath))) {
         await FileUtility.writeFile(type, iotworkbenchprojectFilePath, '');
       }
     } catch (error) {
       throw new Error(
-          `Create ${FileNames.iotworkbenchprojectFileName} file failed: ${
-              error.message}`);
+        `Create ${FileNames.iotworkbenchprojectFileName} file failed: ${error.message}`
+      );
     }
   }
 }

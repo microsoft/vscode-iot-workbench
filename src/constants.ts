@@ -23,12 +23,12 @@ export class EventNames {
   static readonly azureProvisionEvent = 'IoTWorkbench.AzureProvision';
   static readonly azureDeployEvent = 'IoTWorkbench.AzureDeploy';
   static readonly createAzureFunctionsEvent =
-      'IoTWorkbench.CreateAzureFunctions';
+    'IoTWorkbench.CreateAzureFunctions';
   static readonly deviceCompileEvent = 'IoTWorkbench.DeviceCompile';
   static readonly deviceUploadEvent = 'IoTWorkbench.DeviceUpload';
   static readonly devicePackageEvent = 'IoTWorkbench.DevicePackage';
   static readonly configDeviceSettingsEvent =
-      'IoTWorkbench.ConfigDeviceSettingsEvent';
+    'IoTWorkbench.ConfigDeviceSettingsEvent';
   static readonly openExamplePageEvent = 'IoTWorkbench.OpenExamplePage';
   static readonly loadExampleEvent = 'IoTWorkbench.loadExample';
   static readonly detectBoard = 'IoTWorkbench.DetectBoard';
@@ -40,19 +40,19 @@ export class EventNames {
   static readonly scaffoldDeviceStubEvent = 'IoTWorkbench.ScaffoldDeviceStub';
   static readonly pnpGetInterfacesEvent = 'IoTWorkbench.IoTPnPGetInterfaces';
   static readonly pnpGetCapabilityModelsEvent =
-      'IoTWorkbench.IoTPnPGetCapabilityModels';
+    'IoTWorkbench.IoTPnPGetCapabilityModels';
   static readonly pnpDeleteModelsEvent = 'IoTWorkbench.IoTPnPDeleteModels';
   static readonly pnpEditModelsEvent = 'IoTWorkbench.IoTPnPEditModels';
   static readonly pnpConnectModelRepoEvent =
-      'IoTWorkbench.IoTPnPConnectModelRepo';
+    'IoTWorkbench.IoTPnPConnectModelRepo';
   static readonly pnpDisconnectModelRepoEvent =
-      'IoTWorkbench.IoTPnPDisconnectModelRepo';
+    'IoTWorkbench.IoTPnPDisconnectModelRepo';
   static readonly pnpCreateInterfaceEvent =
-      'IoTWorkbench.IoTPnPCreateInterface';
+    'IoTWorkbench.IoTPnPCreateInterface';
   static readonly pnpCreateCapabilityModelEvent =
-      'IoTWorkbench.IoTPnPCreateCapabilityModel';
+    'IoTWorkbench.IoTPnPCreateCapabilityModel';
   static readonly pnpSubmitMetaModelFilesEvent =
-      'IoTWorkbench.IoTPnPSubmitMetaModelFiles';
+    'IoTWorkbench.IoTPnPSubmitMetaModelFiles';
 }
 
 export class FileNames {
@@ -75,18 +75,18 @@ export class FileNames {
 
 export enum OperationType {
   Compile = 'Compile device code',
-  Upload = 'Upload device code'
+  Upload = 'Upload device code',
 }
 
 export enum AzureFunctionsLanguage {
   CSharpScript = 'C#Script',
   JavaScript = 'JavaScript',
-  CSharpLibrary = 'C#'
+  CSharpLibrary = 'C#',
 }
 
 export enum ScaffoldType {
   Local = 'local',
-  Workspace = 'workspace'
+  Workspace = 'workspace',
 }
 
 export class AzureComponentsStorage {
@@ -106,28 +106,28 @@ export class DependentExtensions {
 
 export enum PlatformType {
   ARDUINO = 'Arduino',
-  EMBEDDEDLINUX = 'Embedded Linux (Preview)'
+  EMBEDDEDLINUX = 'Embedded Linux (Preview)',
 }
 
 export enum DevelopEnvironment {
   CONTAINER = 'in container',
-  LOCAL_ENV = 'in local environment'
+  LOCAL_ENV = 'in local environment',
 }
 
 export enum TemplateTag {
   general = 'general',
-  digitaltwin = 'digitaltwin'
+  digitaltwin = 'digitaltwin',
 }
 
 export class ContextUris {
   static readonly iotModel = 'http://azureiot.com/v1/contexts/IoTModel.json';
   static readonly interface = 'http://azureiot.com/v1/contexts/Interface.json';
   static readonly capabilityModel =
-      'http://azureiot.com/v1/contexts/CapabilityModel.json';
+    'http://azureiot.com/v1/contexts/CapabilityModel.json';
 }
 
 export enum ModelType {
   Interface = 'Interface',
   CapabilityModel = 'CapabilityModel',
-  InlineInterface = 'InterfaceInstance'
+  InlineInterface = 'InterfaceInstance',
 }

@@ -3,19 +3,21 @@
 
 import * as vscode from 'vscode';
 
-import {AzureAccount} from '../azure-account.api';
+import { AzureAccount } from '../azure-account.api';
 
-import {extensionName} from './Interfaces/Api';
+import { extensionName } from './Interfaces/Api';
 
 export function getExtension(name: extensionName) {
   switch (name) {
     case extensionName.Toolkit:
-      const toolkit =
-          vscode.extensions.getExtension('vsciot-vscode.azure-iot-toolkit');
+      const toolkit = vscode.extensions.getExtension(
+        'vsciot-vscode.azure-iot-toolkit'
+      );
       return toolkit ? toolkit.exports : undefined;
     case extensionName.AzureAccount:
       const azureAccount = vscode.extensions.getExtension<AzureAccount>(
-          'ms-vscode.azure-account');
+        'ms-vscode.azure-account'
+      );
       return azureAccount ? azureAccount.exports : undefined;
     default:
       return undefined;
@@ -26,7 +28,8 @@ export async function checkAzureLogin(): Promise<boolean> {
   const azureAccount = getExtension(extensionName.AzureAccount);
   if (azureAccount === undefined) {
     throw new Error(
-        'Azure account extension is not found. Please install it from Marketplace.');
+      'Azure account extension is not found. Please install it from Marketplace.'
+    );
   }
 
   // Sign in Azure

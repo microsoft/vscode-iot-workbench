@@ -3,8 +3,8 @@
 
 'use strict';
 import * as vscode from 'vscode';
-import {FileNames} from './constants';
-import {Board} from './Models/Interfaces/Board';
+import { FileNames } from './constants';
+import { Board } from './Models/Interfaces/Board';
 import * as path from 'path';
 
 interface BoardList {
@@ -16,8 +16,8 @@ export interface BoardOption {
   id?: string;
   platform?: string;
   defaultBaudRate?: number;
-  vendorId?: string|number;
-  productId?: string|number;
+  vendorId?: string | number;
+  productId?: string | number;
 }
 
 export class BoardProvider {
@@ -27,8 +27,10 @@ export class BoardProvider {
   }
 
   get list() {
-    const boardList =
-        path.join(this.boardFolderPath, FileNames.boardListFileName);
+    const boardList = path.join(
+      this.boardFolderPath,
+      FileNames.boardListFileName
+    );
     const boardsJson: BoardList = require(boardList);
     return boardsJson.boards;
   }
@@ -49,9 +51,10 @@ export class BoardProvider {
         }
 
         if (key === 'vendorId' || key === 'productId') {
-          const optionId = typeof optionProperty.value === 'number' ?
-              optionProperty.value :
-              Number(`0x${optionProperty.value}`);
+          const optionId =
+            typeof optionProperty.value === 'number'
+              ? optionProperty.value
+              : Number(`0x${optionProperty.value}`);
           const boardId = Number(`0x${boardProperty.value}`);
           if (optionId !== boardId) {
             return false;

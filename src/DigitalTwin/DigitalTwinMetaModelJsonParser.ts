@@ -1,26 +1,32 @@
 import * as vscode from 'vscode';
 
-import {ModelType} from '../constants';
+import { ModelType } from '../constants';
 
-import {DTDLKeywords} from './DigitalTwinConstants';
-import {DigitalTwinMetaModelContext} from './DigitalTwinMetaModelUtility';
+import { DTDLKeywords } from './DigitalTwinConstants';
+import { DigitalTwinMetaModelContext } from './DigitalTwinMetaModelUtility';
 import * as Json from './JSON';
 
 export class DigitalTwinMetaModelJsonParser {
   static getJsonValueFromStack(
-      jsonValue: Json.Value, stack: Array<string|number>) {
+    jsonValue: Json.Value,
+    stack: Array<string | number>
+  ) {
     for (let i = 0; i < stack.length; i++) {
       if (typeof stack[i] === 'string') {
         const key = stack[i] as string;
-        if (jsonValue.valueKind !== Json.ValueKind.ObjectValue ||
-            !(jsonValue as Json.ObjectValue).hasProperty(key)) {
+        if (
+          jsonValue.valueKind !== Json.ValueKind.ObjectValue ||
+          !(jsonValue as Json.ObjectValue).hasProperty(key)
+        ) {
           return null;
         }
         jsonValue = (jsonValue as Json.ObjectValue).getPropertyValue(key);
       } else {
         const index = stack[i] as number;
-        if (jsonValue.valueKind !== Json.ValueKind.ArrayValue ||
-            (jsonValue as Json.ArrayValue).length <= index) {
+        if (
+          jsonValue.valueKind !== Json.ValueKind.ArrayValue ||
+          (jsonValue as Json.ArrayValue).length <= index
+        ) {
           return null;
         }
         jsonValue = (jsonValue as Json.ArrayValue).elements[index];
@@ -103,16 +109,20 @@ export class DigitalTwinMetaModelJsonParser {
       }
     }
 
-    return {startIndex, endIndex};
+    return { startIndex, endIndex };
   }
 
   static isValueString(tokens: Json.Token[], offset: number) {
     for (let i = 0; i < tokens.length; i++) {
-      if (tokens[i].span.startIndex <= offset &&
-          tokens[i].span.afterEndIndex >= offset) {
+      if (
+        tokens[i].span.startIndex <= offset &&
+        tokens[i].span.afterEndIndex >= offset
+      ) {
         if (i >= 1) {
-          if (tokens[i].type === Json.TokenType.QuotedString &&
-              tokens[i - 1].type === Json.TokenType.Colon) {
+          if (
+            tokens[i].type === Json.TokenType.QuotedString &&
+            tokens[i - 1].type === Json.TokenType.Colon
+          ) {
             return true;
           }
 
@@ -133,20 +143,24 @@ export class DigitalTwinMetaModelJsonParser {
     return false;
   }
 
-  static getContextFromOffset(jsonValue: Json.Value, offset: number):
-      Array<string|number> {
-    let stack: Array<string|number> = [];
+  static getContextFromOffset(
+    jsonValue: Json.Value,
+    offset: number
+  ): Array<string | number> {
+    let stack: Array<string | number> = [];
     switch (jsonValue.valueKind) {
       case Json.ValueKind.ArrayValue: {
         const json = jsonValue as Json.ArrayValue;
         for (let i = 0; i < json.length; i++) {
           const value = json.elements[i];
-          if (value.span.startIndex <= offset &&
-              value.span.startIndex + value.span.length >= offset) {
+          if (
+            value.span.startIndex <= offset &&
+            value.span.startIndex + value.span.length >= offset
+          ) {
             stack = [i];
             return stack.concat(
-                DigitalTwinMetaModelJsonParser.getContextFromOffset(
-                    value, offset));
+              DigitalTwinMetaModelJsonParser.getContextFromOffset(value, offset)
+            );
           }
         }
         return [];
@@ -155,12 +169,14 @@ export class DigitalTwinMetaModelJsonParser {
         const json = jsonValue as Json.ObjectValue;
         for (const key of json.propertyNames) {
           const value = json.getPropertyValue(key);
-          if (value.span.startIndex <= offset &&
-              value.span.startIndex + value.span.length >= offset) {
+          if (
+            value.span.startIndex <= offset &&
+            value.span.startIndex + value.span.length >= offset
+          ) {
             stack = [key];
             return stack.concat(
-                DigitalTwinMetaModelJsonParser.getContextFromOffset(
-                    value, offset));
+              DigitalTwinMetaModelJsonParser.getContextFromOffset(value, offset)
+            );
           }
         }
         return [];
@@ -181,18 +197,21 @@ export class DigitalTwinMetaModelJsonParser {
   }
 
   static getCompletionItemsFromArray(
-      chars: Array<string|{label: string, required: boolean, type?: string}>,
-      currentPosition: vscode.Position, startPosition: vscode.Position,
-      endPosition: vscode.Position) {
+    chars: Array<string | { label: string; required: boolean; type?: string }>,
+    currentPosition: vscode.Position,
+    startPosition: vscode.Position,
+    endPosition: vscode.Position
+  ) {
     const items: vscode.CompletionItem[] = [];
     for (const char of chars) {
       const label = typeof char === 'string' ? char : char.label;
       if (label.indexOf('XMLSchema#') !== -1) {
         continue;
       }
-      const labelText = typeof char === 'string' ?
-          label :
-          (label + (!char.required ? ' (optional)' : ''));
+      const labelText =
+        typeof char === 'string'
+          ? label
+          : label + (!char.required ? ' (optional)' : '');
       const item = new vscode.CompletionItem(labelText);
       if (typeof char !== 'string') {
         // insertText is vscode snippet string
@@ -235,8 +254,11 @@ export class DigitalTwinMetaModelJsonParser {
       }
       item.range = new vscode.Range(currentPosition, endPosition);
       if (currentPosition.character !== startPosition.character) {
-        item.additionalTextEdits = [vscode.TextEdit.delete(
-            new vscode.Range(startPosition, currentPosition))];
+        item.additionalTextEdits = [
+          vscode.TextEdit.delete(
+            new vscode.Range(startPosition, currentPosition)
+          ),
+        ];
       }
       items.push(item);
     }
@@ -244,8 +266,10 @@ export class DigitalTwinMetaModelJsonParser {
   }
 
   static getIdAtPosition(
-      document: vscode.TextDocument, position: vscode.Position,
-      dtContext: DigitalTwinMetaModelContext) {
+    document: vscode.TextDocument,
+    position: vscode.Position,
+    dtContext: DigitalTwinMetaModelContext
+  ) {
     const text = document.getText();
     const json = Json.parse(text);
     if (!json) {
@@ -254,11 +278,15 @@ export class DigitalTwinMetaModelJsonParser {
     const offset = document.offsetAt(position);
     let shortName = '';
     for (const token of json.tokens) {
-      if (token.type === Json.TokenType.QuotedString &&
-          token.span.startIndex <= offset &&
-          token.span.afterEndIndex >= offset) {
-        shortName =
-            text.substr(token.span.startIndex + 1, token.span.length - 2);
+      if (
+        token.type === Json.TokenType.QuotedString &&
+        token.span.startIndex <= offset &&
+        token.span.afterEndIndex >= offset
+      ) {
+        shortName = text.substr(
+          token.span.startIndex + 1,
+          token.span.length - 2
+        );
         break;
       }
     }
@@ -280,8 +308,10 @@ export class DigitalTwinMetaModelJsonParser {
   }
 
   static getDigitalTwinContextTypeAtPosition(
-      document: vscode.TextDocument, position: vscode.Position,
-      contextType: string) {
+    document: vscode.TextDocument,
+    position: vscode.Position,
+    contextType: string
+  ) {
     const text = document.getText();
     const json = Json.parse(text);
     if (!json) {
@@ -289,22 +319,31 @@ export class DigitalTwinMetaModelJsonParser {
     }
     const offset = document.offsetAt(position);
     return DigitalTwinMetaModelJsonParser.getDigitalTwinContextTypeFromOffset(
-        json.value, offset, contextType);
+      json.value,
+      offset,
+      contextType
+    );
   }
 
   static getDigitalTwinContextTypeFromOffset(
-      jsonValue: Json.Value, offset: number,
-      currentContextType: string): string {
+    jsonValue: Json.Value,
+    offset: number,
+    currentContextType: string
+  ): string {
     switch (jsonValue.valueKind) {
       case Json.ValueKind.ArrayValue: {
         const json = jsonValue as Json.ArrayValue;
         for (let i = 0; i < json.length; i++) {
           const value = json.elements[i];
-          if (value.span.startIndex <= offset &&
-              value.span.startIndex + value.span.length >= offset) {
-            return DigitalTwinMetaModelJsonParser
-                .getDigitalTwinContextTypeFromOffset(
-                    value, offset, currentContextType);
+          if (
+            value.span.startIndex <= offset &&
+            value.span.startIndex + value.span.length >= offset
+          ) {
+            return DigitalTwinMetaModelJsonParser.getDigitalTwinContextTypeFromOffset(
+              value,
+              offset,
+              currentContextType
+            );
           }
         }
         return currentContextType;
@@ -313,18 +352,24 @@ export class DigitalTwinMetaModelJsonParser {
         const json = jsonValue as Json.ObjectValue;
         if (json.hasProperty('@type')) {
           const type = json.getPropertyValue('@type').toFriendlyString();
-          if (type === ModelType.Interface ||
-              type === ModelType.CapabilityModel) {
+          if (
+            type === ModelType.Interface ||
+            type === ModelType.CapabilityModel
+          ) {
             currentContextType = type;
           }
         }
         for (const key of json.propertyNames) {
           const value = json.getPropertyValue(key);
-          if (value.span.startIndex <= offset &&
-              value.span.startIndex + value.span.length >= offset) {
-            return DigitalTwinMetaModelJsonParser
-                .getDigitalTwinContextTypeFromOffset(
-                    value, offset, currentContextType);
+          if (
+            value.span.startIndex <= offset &&
+            value.span.startIndex + value.span.length >= offset
+          ) {
+            return DigitalTwinMetaModelJsonParser.getDigitalTwinContextTypeFromOffset(
+              value,
+              offset,
+              currentContextType
+            );
           }
         }
         return currentContextType;
@@ -350,8 +395,8 @@ export class DigitalTwinMetaModelJsonParser {
     if (contextUriValues.valueKind === Json.ValueKind.StringValue) {
       contextUris.push(contextUriValues.toFriendlyString());
     } else if (contextUriValues.valueKind === Json.ValueKind.ArrayValue) {
-      for (const uriValue of (contextUriValues as Json.ArrayValue).elements as
-           Json.StringValue[]) {
+      for (const uriValue of (contextUriValues as Json.ArrayValue)
+        .elements as Json.StringValue[]) {
         contextUris.push(uriValue.toFriendlyString());
       }
     }
@@ -360,20 +405,26 @@ export class DigitalTwinMetaModelJsonParser {
   }
 
   static getJsonInfoAtPosition(
-      document: vscode.TextDocument, position: vscode.Position) {
+    document: vscode.TextDocument,
+    position: vscode.Position
+  ) {
     const text = document.getText();
     const json = Json.parse(text);
     if (!json) {
       return null;
     }
     const offset = document.offsetAt(position);
-    const jsonContext =
-        DigitalTwinMetaModelJsonParser.getContextFromOffset(json.value, offset);
-    const isValue =
-        DigitalTwinMetaModelJsonParser.isValueString(json.tokens, offset);
+    const jsonContext = DigitalTwinMetaModelJsonParser.getContextFromOffset(
+      json.value,
+      offset
+    );
+    const isValue = DigitalTwinMetaModelJsonParser.isValueString(
+      json.tokens,
+      offset
+    );
     let key = '';
     let lastKey = '';
-    let type: string|string[] = [];
+    let type: string | string[] = [];
     let properties: string[] = [];
 
     if (isValue) {
@@ -389,13 +440,17 @@ export class DigitalTwinMetaModelJsonParser {
             // https://dev.azure.com/mseng/VSIoT/_workitems/edit/1575737, which
             // caused by the wrong DTDL. Should be removed once the DTDL is
             // fixed.
-            if (currentLabel === 'schema' &&
-                typeof jsonContext[0] === 'string' &&
-                jsonContext[0] === 'implements') {
+            if (
+              currentLabel === 'schema' &&
+              typeof jsonContext[0] === 'string' &&
+              jsonContext[0] === 'implements'
+            ) {
               let j = 1;
               for (; j < i - 1; j++) {
-                if (typeof jsonContext[j] === 'string' &&
-                    jsonContext[j] === 'schema') {
+                if (
+                  typeof jsonContext[j] === 'string' &&
+                  jsonContext[j] === 'schema'
+                ) {
                   // not the interfaceSchema
                   break;
                 }
@@ -411,11 +466,14 @@ export class DigitalTwinMetaModelJsonParser {
         }
       }
     } else {
-      const jsonValueFromStack =
-          DigitalTwinMetaModelJsonParser.getJsonValueFromStack(
-              json.value, jsonContext);
-      if (jsonValueFromStack &&
-          jsonValueFromStack.valueKind === Json.ValueKind.ObjectValue) {
+      const jsonValueFromStack = DigitalTwinMetaModelJsonParser.getJsonValueFromStack(
+        json.value,
+        jsonContext
+      );
+      if (
+        jsonValueFromStack &&
+        jsonValueFromStack.valueKind === Json.ValueKind.ObjectValue
+      ) {
         const jsonValue = jsonValueFromStack as Json.ObjectValue;
 
         if (jsonValue.hasProperty('@type')) {
@@ -424,13 +482,13 @@ export class DigitalTwinMetaModelJsonParser {
             type = typeObject.toFriendlyString();
           } else {
             for (const currentTypeObject of (typeObject as Json.ArrayValue)
-                     .elements) {
+              .elements) {
               type.push(currentTypeObject.toFriendlyString());
             }
           }
         } else if (jsonContext.length > 0) {
           let i = jsonContext.length - 1;
-          let lastKeyInContext: number|string = '';
+          let lastKeyInContext: number | string = '';
           do {
             lastKeyInContext = jsonContext[i];
             i--;
@@ -444,6 +502,6 @@ export class DigitalTwinMetaModelJsonParser {
       }
     }
 
-    return {json, offset, isValue, type, properties, key, lastKey};
+    return { json, offset, isValue, type, properties, key, lastKey };
   }
 }

@@ -2,10 +2,10 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {FileNames} from '../constants';
+import { FileNames } from '../constants';
 
-import {DigitalTwinFileNames} from './DigitalTwinConstants';
-import {DigitalTwinMetaModelGraph} from './DigitalTwinMetaModelGraph';
+import { DigitalTwinFileNames } from './DigitalTwinConstants';
+import { DigitalTwinMetaModelGraph } from './DigitalTwinMetaModelGraph';
 
 const impor = require('impor')(__dirname);
 const request = impor('request-promise') as typeof import('request-promise');
@@ -23,8 +23,12 @@ interface EtagObjCache {
 class BlobService {
   constructor(private context: vscode.ExtensionContext) {}
   private getEtagObjCache() {
-    const etagObjCacheFilePath = this.context.asAbsolutePath(path.join(
-        FileNames.cacheFolderName, DigitalTwinFileNames.etagCacheFileName));
+    const etagObjCacheFilePath = this.context.asAbsolutePath(
+      path.join(
+        FileNames.cacheFolderName,
+        DigitalTwinFileNames.etagCacheFileName
+      )
+    );
     if (fs.existsSync(etagObjCacheFilePath)) {
       const etagObjCacheRawFile = fs.readFileSync(etagObjCacheFilePath, 'utf8');
       const etagObjCache = JSON.parse(etagObjCacheRawFile) as EtagObjCache;
@@ -33,10 +37,16 @@ class BlobService {
     return {};
   }
   private updateEtagObjCache(etagObjCache: EtagObjCache) {
-    const etagObjCacheFilePath = this.context.asAbsolutePath(path.join(
-        FileNames.cacheFolderName, DigitalTwinFileNames.etagCacheFileName));
+    const etagObjCacheFilePath = this.context.asAbsolutePath(
+      path.join(
+        FileNames.cacheFolderName,
+        DigitalTwinFileNames.etagCacheFileName
+      )
+    );
     fs.writeFileSync(
-        etagObjCacheFilePath, JSON.stringify(etagObjCache, null, 2));
+      etagObjCacheFilePath,
+      JSON.stringify(etagObjCache, null, 2)
+    );
   }
   private getEtag(uri: string) {
     const etagObjCache = this.getEtagObjCache();
@@ -47,16 +57,16 @@ class BlobService {
   }
   private updateEtagObj(uri: string, etag: string, lastModified: string) {
     const etagObjCache = this.getEtagObjCache();
-    etagObjCache[uri] = {etag, lastModified};
+    etagObjCache[uri] = { etag, lastModified };
     this.updateEtagObjCache(etagObjCache);
   }
   async getFile(uri: string) {
-    const options = {uri, resolveWithFullResponse: true} as RequestOptions;
+    const options = { uri, resolveWithFullResponse: true } as RequestOptions;
     const etagObj = this.getEtag(uri);
     if (etagObj) {
       const headers = {
         'If-Modified-Since': etagObj.lastModified,
-        'If-None-Match': etagObj.etag
+        'If-None-Match': etagObj.etag,
       };
       options.headers = headers;
     }
@@ -79,8 +89,9 @@ class BlobService {
     } catch (e) {
       // request regards 304 as an expection
       if (e.statusCode !== 304) {
-        console.log(`Error occured when request remote file (${
-            uri}) with status code ${e.statusCode}`);
+        console.log(
+          `Error occured when request remote file (${uri}) with status code ${e.statusCode}`
+        );
       }
       return null;
     }
@@ -89,11 +100,13 @@ class BlobService {
 
 export interface DigitalTwinMetaModelContext {
   '@context': {
-    '@vocab': string,
+    '@vocab': string;
     [key: string]:
-        string|{
-          '@id': string, '@container'?: string|null,
-        }
+      | string
+      | {
+          '@id': string;
+          '@container'?: string | null;
+        };
   };
 }
 
@@ -115,10 +128,14 @@ export class DigitalTwinMetaModelUtility {
   async getGraph() {
     // const graphFileFromRemote = await
     // this.blobService.getFile(this.graphUrl);
-    const graphFilePath = this.context.asAbsolutePath(path.join(
-        FileNames.resourcesFolderName, FileNames.templatesFolderName,
+    const graphFilePath = this.context.asAbsolutePath(
+      path.join(
+        FileNames.resourcesFolderName,
+        FileNames.templatesFolderName,
         DigitalTwinFileNames.devicemodelTemplateFolderName,
-        DigitalTwinFileNames.graphFileName));
+        DigitalTwinFileNames.graphFileName
+      )
+    );
     const dtGraphfaceString = fs.readFileSync(graphFilePath, 'utf8');
     /*const dtGraphfaceString =
         graphFileFromRemote || fs.readFileSync(graphFilePath, 'utf8');
@@ -131,53 +148,70 @@ export class DigitalTwinMetaModelUtility {
   async getInterface() {
     // const interfaceFileFromRemote =
     //    await this.blobService.getFile(this.interfaceUrl);
-    const interfaceFilePath = this.context.asAbsolutePath(path.join(
-        FileNames.resourcesFolderName, FileNames.templatesFolderName,
+    const interfaceFilePath = this.context.asAbsolutePath(
+      path.join(
+        FileNames.resourcesFolderName,
+        FileNames.templatesFolderName,
         DigitalTwinFileNames.devicemodelTemplateFolderName,
-        DigitalTwinFileNames.interfaceFileName));
+        DigitalTwinFileNames.interfaceFileName
+      )
+    );
     const dtInterfaceString = fs.readFileSync(interfaceFilePath, 'utf8');
     /*const dtInterfaceString =
         interfaceFileFromRemote || fs.readFileSync(interfaceFilePath, 'utf8');
     if (interfaceFileFromRemote) {
       fs.writeFileSync(interfaceFilePath, interfaceFileFromRemote);
     }*/
-    const dtInterface: DigitalTwinMetaModelContext =
-        JSON.parse(dtInterfaceString);
+    const dtInterface: DigitalTwinMetaModelContext = JSON.parse(
+      dtInterfaceString
+    );
     return dtInterface;
   }
   async getCapabilityModel() {
     // const capabilityModelFileFromRemote =
     //    await this.blobService.getFile(this.capabilityModelUrl);
-    const capabilityModelFilePath = this.context.asAbsolutePath(path.join(
-        FileNames.resourcesFolderName, FileNames.templatesFolderName,
+    const capabilityModelFilePath = this.context.asAbsolutePath(
+      path.join(
+        FileNames.resourcesFolderName,
+        FileNames.templatesFolderName,
         DigitalTwinFileNames.devicemodelTemplateFolderName,
-        DigitalTwinFileNames.capabilityModelFileName));
-    const dtCapabilityModelString =
-        fs.readFileSync(capabilityModelFilePath, 'utf8');
+        DigitalTwinFileNames.capabilityModelFileName
+      )
+    );
+    const dtCapabilityModelString = fs.readFileSync(
+      capabilityModelFilePath,
+      'utf8'
+    );
     /*const dtCapabilityModelString = capabilityModelFileFromRemote ||
         fs.readFileSync(capabilityModelFilePath, 'utf8');
     if (capabilityModelFileFromRemote) {
       fs.writeFileSync(capabilityModelFilePath, capabilityModelFileFromRemote);
     }*/
-    const dtCapabilityModel: DigitalTwinMetaModelContext =
-        JSON.parse(dtCapabilityModelString);
+    const dtCapabilityModel: DigitalTwinMetaModelContext = JSON.parse(
+      dtCapabilityModelString
+    );
     return dtCapabilityModel;
   }
   async getIoTModel() {
     // const iotModelFileFromRemote =
     //    await this.blobService.getFile(this.iotModelUrl);
-    const iotModelFilePath = this.context.asAbsolutePath(path.join(
-        FileNames.resourcesFolderName, FileNames.templatesFolderName,
+    const iotModelFilePath = this.context.asAbsolutePath(
+      path.join(
+        FileNames.resourcesFolderName,
+        FileNames.templatesFolderName,
         DigitalTwinFileNames.devicemodelTemplateFolderName,
-        DigitalTwinFileNames.iotModelFileName));
+        DigitalTwinFileNames.iotModelFileName
+      )
+    );
     const dtIoTModelString = fs.readFileSync(iotModelFilePath, 'utf8');
     /*const dtIoTModelString =
         iotModelFileFromRemote || fs.readFileSync(iotModelFilePath, 'utf8');
     if (iotModelFileFromRemote) {
       fs.writeFileSync(iotModelFilePath, iotModelFileFromRemote);
     }*/
-    const dtCapabilityModel: DigitalTwinMetaModelContext =
-        JSON.parse(dtIoTModelString);
+    const dtCapabilityModel: DigitalTwinMetaModelContext = JSON.parse(
+      dtIoTModelString
+    );
     return dtCapabilityModel;
   }
 }

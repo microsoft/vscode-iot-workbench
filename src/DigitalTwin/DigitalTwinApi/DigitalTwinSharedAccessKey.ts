@@ -3,8 +3,8 @@
 
 'use strict';
 
-import {createHmac} from 'crypto';
-import {DigitalTwinConnectionStringBuilder} from './DigitalTwinConnectionStringBuilder';
+import { createHmac } from 'crypto';
+import { DigitalTwinConnectionStringBuilder } from './DigitalTwinConnectionStringBuilder';
 
 const constants = {
   SharedAccessSignature: 'SharedAccessSignature',
@@ -12,9 +12,8 @@ const constants = {
   SignatureFieldName: 'sig',
   KeyNameFieldName: 'skn',
   ExpiryFieldName: 'se',
-  ExpiryInMinutes: 30
+  ExpiryInMinutes: 30,
 };
-
 
 export class DigitalTwinSharedAccessKey {
   private keyId: string;
@@ -46,24 +45,28 @@ export class DigitalTwinSharedAccessKey {
     this.repositoryId = builder.RepositoryIdValue;
     const now = new Date();
     const ms = 1000;
-    this.expiry =
-        (Math.round(now.getTime() / ms) + constants.ExpiryInMinutes * 60)
-            .toString();
+    this.expiry = (
+      Math.round(now.getTime() / ms) +
+      constants.ExpiryInMinutes * 60
+    ).toString();
   }
 
   GenerateSASToken(): string {
     const encodedServiceEndpoint = encodeURIComponent(this.audience);
     const signature = [
-      encodeURIComponent(this.repositoryId), encodedServiceEndpoint, this.expiry
-    ].join('\n').toLowerCase();
-    const sigUTF8 = new Buffer(signature, 'utf8');
-    const secret64bit = new Buffer(this.secret, 'base64');
+      encodeURIComponent(this.repositoryId),
+      encodedServiceEndpoint,
+      this.expiry,
+    ]
+      .join('\n')
+      .toLowerCase();
+
+    const sigUTF8 = Buffer.from(signature, 'utf8'); // new Buffer(signature, 'utf8');
+    const secret64bit = Buffer.from(this.secret, 'base64'); //new Buffer(this.secret, 'base64');
     const hmac = createHmac('sha256', secret64bit);
     hmac.update(sigUTF8);
     const hash = encodeURIComponent(hmac.digest('base64'));
-    return `${constants.SharedAccessSignature} sr=${
-        encodedServiceEndpoint}&sig=${hash}&se=${this.expiry}&skn=${
-        this.keyId}&rid=${this.repositoryId}`;
+    return `${constants.SharedAccessSignature} sr=${encodedServiceEndpoint}&sig=${hash}&se=${this.expiry}&skn=${this.keyId}&rid=${this.repositoryId}`;
   }
 
   static Parse(connectionString: string): DigitalTwinSharedAccessKey {

@@ -37,7 +37,7 @@ export const enum TokenType {
   CarriageReturnNewLine,
   Letters,
   Digits,
-  Unrecognized
+  Unrecognized,
 }
 
 /**
@@ -89,8 +89,10 @@ export const Space = new Token(' ', TokenType.Space);
 export const Tab = new Token('\t', TokenType.Tab);
 export const NewLine = new Token('\n', TokenType.NewLine);
 export const CarriageReturn = new Token('\r', TokenType.CarriageReturn);
-export const CarriageReturnNewLine =
-    new Token('\r\n', TokenType.CarriageReturnNewLine);
+export const CarriageReturnNewLine = new Token(
+  '\r\n',
+  TokenType.CarriageReturnNewLine
+);
 
 /**
  * Create a Letters Token from the provided text.
@@ -121,7 +123,7 @@ export class Tokenizer implements utilities.Iterator<Token> {
   private _textLength: number;
   private _textIndex = -1;
 
-  private _currentToken: Token|undefined;
+  private _currentToken: Token | undefined;
 
   constructor(private _text: string) {
     this._textLength = _text ? _text.length : 0;
@@ -146,10 +148,10 @@ export class Tokenizer implements utilities.Iterator<Token> {
   /**
    * Get the current character that this Tokenizer is pointing at.
    */
-  private get currentCharacter(): string|undefined {
-    return 0 <= this._textIndex && this._textIndex < this._textLength ?
-        this._text[this._textIndex] :
-        undefined;
+  private get currentCharacter(): string | undefined {
+    return 0 <= this._textIndex && this._textIndex < this._textLength
+      ? this._text[this._textIndex]
+      : undefined;
   }
 
   /**
@@ -264,8 +266,10 @@ export class Tokenizer implements utilities.Iterator<Token> {
 
         case '\r':
           this.nextCharacter();
-          if (this.currentCharacter &&
-              this.currentCharacter.toString() === '\n') {
+          if (
+            this.currentCharacter &&
+            this.currentCharacter.toString() === '\n'
+          ) {
             this._currentToken = CarriageReturnNewLine;
             this.nextCharacter();
           } else {
@@ -320,8 +324,10 @@ export class Tokenizer implements utilities.Iterator<Token> {
  * Get whether the provided character is a letter or not.
  */
 function isLetter(character: string): boolean {
-  return ('a' <= character && character <= 'z') ||
-      ('A' <= character && character <= 'Z');
+  return (
+    ('a' <= character && character <= 'z') ||
+    ('A' <= character && character <= 'Z')
+  );
 }
 
 /**

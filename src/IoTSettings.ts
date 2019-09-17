@@ -5,9 +5,8 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as sdk from 'vscode-iot-device-cube-sdk';
 
-import {ConfigHandler} from './configHandler';
-import {PickWithData} from './Models/Interfaces/UI';
-
+import { ConfigHandler } from './configHandler';
+import { PickWithData } from './Models/Interfaces/UI';
 
 export class IoTWorkbenchSettings {
   private _workbenchPath = '';
@@ -17,8 +16,7 @@ export class IoTWorkbenchSettings {
   static async createAsync() {
     const iotWorkbenchSettings = new IoTWorkbenchSettings();
 
-    iotWorkbenchSettings._workbenchPath =
-        await IoTWorkbenchSettings.getWorkbenchPath();
+    iotWorkbenchSettings._workbenchPath = await IoTWorkbenchSettings.getWorkbenchPath();
 
     return iotWorkbenchSettings;
   }
@@ -65,24 +63,27 @@ export class IoTWorkbenchSettings {
     } else {
       // Use the default value for workbenchPath.
       await ConfigHandler.update(
-          'workbench', this._workbenchPath, vscode.ConfigurationTarget.Global);
+        'workbench',
+        this._workbenchPath,
+        vscode.ConfigurationTarget.Global
+      );
       return this._workbenchPath;
     }
   }
 
   async setWorkbenchPath(showMessage = true) {
-    let userWorkbenchPath: string|undefined =
-        ConfigHandler.get<string>('workbench') || this._workbenchPath;
+    let userWorkbenchPath: string | undefined =
+      ConfigHandler.get<string>('workbench') || this._workbenchPath;
     const workbenchPicks: Array<PickWithData<string>> = [
-      {label: userWorkbenchPath, description: '', data: userWorkbenchPath},
-      {label: '$(file-directory) Browse...', description: '', data: '$'}
+      { label: userWorkbenchPath, description: '', data: userWorkbenchPath },
+      { label: '$(file-directory) Browse...', description: '', data: '$' },
     ];
 
     const selection = await vscode.window.showQuickPick(workbenchPicks, {
       ignoreFocusOut: true,
       matchOnDescription: true,
       matchOnDetail: true,
-      placeHolder: 'Select workbench folder'
+      placeHolder: 'Select workbench folder',
     });
 
     if (selection && selection.data === '$') {
@@ -90,7 +91,7 @@ export class IoTWorkbenchSettings {
         canSelectMany: false,
         openLabel: 'Select',
         canSelectFolders: true,
-        canSelectFiles: false
+        canSelectFiles: false,
       };
 
       const folderUri = await vscode.window.showOpenDialog(options);
@@ -110,10 +111,14 @@ export class IoTWorkbenchSettings {
 
     if (userWorkbenchPath) {
       await ConfigHandler.update(
-          'workbench', userWorkbenchPath, vscode.ConfigurationTarget.Global);
+        'workbench',
+        userWorkbenchPath,
+        vscode.ConfigurationTarget.Global
+      );
       if (showMessage) {
         await vscode.window.showInformationMessage(
-            'Change workbench successfully.');
+          'Change workbench successfully.'
+        );
       }
     }
     return userWorkbenchPath;

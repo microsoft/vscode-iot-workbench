@@ -3,20 +3,22 @@
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as sdk from 'vscode-iot-device-cube-sdk';
-import {ScaffoldType} from './constants';
+import { ScaffoldType } from './constants';
 
 export class FileUtility {
-  static async directoryExists(type: ScaffoldType, dirPath: string):
-      Promise<boolean> {
+  static async directoryExists(
+    type: ScaffoldType,
+    dirPath: string
+  ): Promise<boolean> {
     if (type === ScaffoldType.Local) {
-      if (!await sdk.FileSystem.exists(dirPath)) {
+      if (!(await sdk.FileSystem.exists(dirPath))) {
         return false;
       }
       const isDirectory = await sdk.FileSystem.isDirectory(dirPath);
       return isDirectory;
     } else {
       return new Promise((resolve: (exist: boolean) => void) => {
-        fs.stat(dirPath, (error: Error|null, stats) => {
+        fs.stat(dirPath, (error: Error | null, stats) => {
           if (error) {
             resolve(false);
             return;
@@ -28,8 +30,10 @@ export class FileUtility {
     }
   }
 
-  static async fileExists(type: ScaffoldType, filePath: string):
-      Promise<boolean> {
+  static async fileExists(
+    type: ScaffoldType,
+    filePath: string
+  ): Promise<boolean> {
     if (type === ScaffoldType.Local) {
       const directoryExists = await sdk.FileSystem.exists(filePath);
       if (!directoryExists) {
@@ -39,7 +43,7 @@ export class FileUtility {
       return isFile;
     } else {
       return new Promise((resolve: (exist: boolean) => void) => {
-        fs.stat(filePath, (error: Error|null, stats) => {
+        fs.stat(filePath, (error: Error | null, stats) => {
           if (error) {
             resolve(false);
             return;
@@ -53,10 +57,10 @@ export class FileUtility {
 
   static async mkdir(type: ScaffoldType, dirPath: string): Promise<void> {
     if (type === ScaffoldType.Local) {
-      return await sdk.FileSystem.mkDir(dirPath);
+      return sdk.FileSystem.mkDir(dirPath);
     } else {
       return new Promise(async (resolve: (value?: void) => void, reject) => {
-        fs.mkdir(dirPath, (error) => {
+        fs.mkdir(dirPath, error => {
           if (error) {
             reject(error);
             return;
@@ -68,8 +72,10 @@ export class FileUtility {
     }
   }
 
-  static async mkdirRecursively(type: ScaffoldType, dirPath: string):
-      Promise<void> {
+  static async mkdirRecursively(
+    type: ScaffoldType,
+    dirPath: string
+  ): Promise<void> {
     if (await FileUtility.directoryExists(type, dirPath)) {
       return;
     }
@@ -86,13 +92,15 @@ export class FileUtility {
 
   // Make sure filepath's parent directory exists
   static async writeFile(
-      type: ScaffoldType, filePath: string,
-      data: string|Buffer): Promise<void> {
+    type: ScaffoldType,
+    filePath: string,
+    data: string | Buffer
+  ): Promise<void> {
     if (type === ScaffoldType.Local) {
-      return await sdk.FileSystem.writeFile(filePath, data);
+      return sdk.FileSystem.writeFile(filePath, data);
     } else {
       return new Promise(async (resolve: (value?: void) => void, reject) => {
-        await fs.writeFile(filePath, data, (err) => {
+        await fs.writeFile(filePath, data, err => {
           if (err) {
             reject(err);
             return;
@@ -105,22 +113,25 @@ export class FileUtility {
   }
 
   static async readFile(
-      type: ScaffoldType, filePath: string,
-      encoding?: string): Promise<string|Buffer> {
+    type: ScaffoldType,
+    filePath: string,
+    encoding?: string
+  ): Promise<string | Buffer> {
     if (type === ScaffoldType.Local) {
-      return await sdk.FileSystem.readFile(filePath, encoding);
+      return sdk.FileSystem.readFile(filePath, encoding);
     } else {
       return new Promise(
-          async (resolve: (data: string|Buffer) => void, reject) => {
-            await fs.readFile(filePath, encoding, (err, data) => {
-              if (err) {
-                reject(err);
-                return;
-              }
-              resolve(data);
+        async (resolve: (data: string | Buffer) => void, reject) => {
+          await fs.readFile(filePath, encoding, (err, data) => {
+            if (err) {
+              reject(err);
               return;
-            });
+            }
+            resolve(data);
+            return;
           });
+        }
+      );
     }
   }
 }

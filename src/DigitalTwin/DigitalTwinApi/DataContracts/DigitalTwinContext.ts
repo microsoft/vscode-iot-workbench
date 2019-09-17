@@ -4,12 +4,13 @@
 export enum MetaModelType {
   None = 'none',
   Interface = 'interface',
-  CapabilityModel = 'capabilityModel'
+  CapabilityModel = 'capabilityModel',
 }
 
 export const humanReadableMetaModelType = new Map<MetaModelType, string>([
-  [MetaModelType.None, 'None'], [MetaModelType.Interface, 'Interface'],
-  [MetaModelType.CapabilityModel, 'Capability Model']
+  [MetaModelType.None, 'None'],
+  [MetaModelType.Interface, 'Interface'],
+  [MetaModelType.CapabilityModel, 'Capability Model'],
 ]);
 
 export interface MetaModelUpsertRequest {
@@ -20,6 +21,6 @@ export interface MetaModelUpsertRequest {
 export interface SearchOptions {
   searchKeyword: string;
   modelFilterType: MetaModelType;
-  continuationToken: string|null;
+  continuationToken: string | null;
   pageSize?: number;
 }

@@ -3,22 +3,29 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import * as utils from '../../../utils';
-import {DigitalTwinConstants} from '../../DigitalTwinConstants';
+import { DigitalTwinConstants } from '../../DigitalTwinConstants';
 
-import {CodeGenerator} from './CodeGenerator';
+import { CodeGenerator } from './CodeGenerator';
 
 export abstract class AnsiCCodeGeneratorBase implements CodeGenerator {
   abstract async GenerateCode(
-      targetPath: string, filePath: string, capabilityModelName: string,
-      dcmId: string, interfaceDir: string): Promise<boolean>;
+    targetPath: string,
+    filePath: string,
+    capabilityModelName: string,
+    dcmId: string,
+    interfaceDir: string
+  ): Promise<boolean>;
 
   constructor(
-      protected context: vscode.ExtensionContext,
-      protected channel: vscode.OutputChannel) {}
+    protected context: vscode.ExtensionContext,
+    protected channel: vscode.OutputChannel
+  ) {}
 
   async GenerateAnsiCCodeCore(
-      targetPath: string, filePath: string,
-      interfaceDir: string): Promise<boolean> {
+    targetPath: string,
+    filePath: string,
+    interfaceDir: string
+  ): Promise<boolean> {
     // Invoke DigitalTwinCodeGen toolset to generate the code
     const platform = os.platform();
     const homeDir = os.homedir();
@@ -30,9 +37,7 @@ export abstract class AnsiCCodeGeneratorBase implements CodeGenerator {
       codeGenCommand = `./${DigitalTwinConstants.codeGenCliApp}`;
     }
 
-    const command = `${codeGenCommand} scaffold  --dcm "${
-        filePath}" --language ansic --output "${targetPath}" --interfaceDir "${
-        interfaceDir}"`;
+    const command = `${codeGenCommand} scaffold  --dcm "${filePath}" --language ansic --output "${targetPath}" --interfaceDir "${interfaceDir}"`;
 
     let message = `${DigitalTwinConstants.dtPrefix} Scaffold code stub.`;
     utils.channelShowAndAppendLine(this.channel, message);

@@ -3,19 +3,19 @@
 
 import * as copypaste from 'copy-paste';
 import * as fs from 'fs-plus';
-import {Guid} from 'guid-typescript';
+import { Guid } from 'guid-typescript';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {BoardProvider} from '../boardProvider';
-import {ConfigHandler} from '../configHandler';
-import {ConfigKey, ScaffoldType} from '../constants';
-import {FileUtility} from '../FileUtility';
+import { BoardProvider } from '../boardProvider';
+import { ConfigHandler } from '../configHandler';
+import { ConfigKey, ScaffoldType } from '../constants';
+import { FileUtility } from '../FileUtility';
 
-import {ArduinoDeviceBase} from './ArduinoDeviceBase';
-import {DeviceType} from './Interfaces/Device';
-import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
+import { ArduinoDeviceBase } from './ArduinoDeviceBase';
+import { DeviceType } from './Interfaces/Device';
+import { TemplateFileInfo } from './Interfaces/ProjectTemplate';
 
 export class Esp32Device extends ArduinoDeviceBase {
   private templateFiles: TemplateFileInfo[] = [];
@@ -33,7 +33,7 @@ export class Esp32Device extends ArduinoDeviceBase {
 
   get board() {
     const boardProvider = new BoardProvider(this.boardFolderPath);
-    const esp32 = boardProvider.find({id: Esp32Device._boardId});
+    const esp32 = boardProvider.find({ id: Esp32Device._boardId });
     return esp32;
   }
 
@@ -46,7 +46,13 @@ export class Esp32Device extends ArduinoDeviceBase {
       const homeDir = os.homedir();
       const localAppData: string = path.join(homeDir, 'AppData', 'Local');
       packageRootPath = path.join(
-          localAppData, 'Arduino15', 'packages', 'esp32', 'hardware', 'esp32');
+        localAppData,
+        'Arduino15',
+        'packages',
+        'esp32',
+        'hardware',
+        'esp32'
+      );
     } else {
       packageRootPath = '~/Library/Arduino15/packages/esp32/hardware/esp32';
     }
@@ -64,8 +70,11 @@ export class Esp32Device extends ArduinoDeviceBase {
   name = 'Esp32Arduino';
 
   constructor(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      devicePath: string, templateFiles?: TemplateFileInfo[]) {
+    context: vscode.ExtensionContext,
+    channel: vscode.OutputChannel,
+    devicePath: string,
+    templateFiles?: TemplateFileInfo[]
+  ) {
     super(context, devicePath, DeviceType.IoT_Button);
     this.channel = channel;
     this.componentId = Guid.create().toString();
@@ -82,8 +91,12 @@ export class Esp32Device extends ArduinoDeviceBase {
     const deviceFolderPath = this.deviceFolder;
 
     const loadTimeScaffoldType = ScaffoldType.Workspace;
-    if (!await FileUtility.directoryExists(
-            loadTimeScaffoldType, deviceFolderPath)) {
+    if (
+      !(await FileUtility.directoryExists(
+        loadTimeScaffoldType,
+        deviceFolderPath
+      ))
+    ) {
       throw new Error('Unable to find the device folder inside the project.');
     }
 
@@ -103,39 +116,45 @@ export class Esp32Device extends ArduinoDeviceBase {
       {
         label: 'Copy device connection string',
         description: 'Copy device connection string',
-        detail: 'Copy'
+        detail: 'Copy',
       },
       {
         label: 'Generate CRC for OTA',
         description:
-            'Generate Cyclic Redundancy Check(CRC) code for OTA Update',
-        detail: 'Config CRC'
-      }
+          'Generate Cyclic Redundancy Check(CRC) code for OTA Update',
+        detail: 'Config CRC',
+      },
     ];
 
-    const configSelection =
-        await vscode.window.showQuickPick(configSelectionItems, {
-          ignoreFocusOut: true,
-          matchOnDescription: true,
-          matchOnDetail: true,
-          placeHolder: 'Select an option',
-        });
+    const configSelection = await vscode.window.showQuickPick(
+      configSelectionItems,
+      {
+        ignoreFocusOut: true,
+        matchOnDescription: true,
+        matchOnDetail: true,
+        placeHolder: 'Select an option',
+      }
+    );
 
     if (!configSelection) {
       return false;
     }
 
     if (configSelection.detail === 'Config CRC') {
-      const retValue: boolean =
-          await this.generateCrc(this.extensionContext, this.channel);
+      const retValue: boolean = await this.generateCrc(
+        this.extensionContext,
+        this.channel
+      );
       return retValue;
     } else if (configSelection.detail === 'Copy') {
-      const deviceConnectionString =
-          ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
+      const deviceConnectionString = ConfigHandler.get<string>(
+        ConfigKey.iotHubDeviceConnectionString
+      );
 
       if (!deviceConnectionString) {
         throw new Error(
-            'Unable to get the device connection string, please invoke the command of Azure Provision first.');
+          'Unable to get the device connection string, please invoke the command of Azure Provision first.'
+        );
       }
       copypaste.copy(deviceConnectionString);
       return true;

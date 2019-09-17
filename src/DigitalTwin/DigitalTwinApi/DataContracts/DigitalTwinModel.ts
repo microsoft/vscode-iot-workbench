@@ -20,7 +20,7 @@ export interface DigitalTwinModelBase {
 export interface GetModelResult {
   etag: string;
   urnId: string;
-  content: {[key: string]: string};
+  content: { [key: string]: string };
 }
 
 export interface LocalizedData {

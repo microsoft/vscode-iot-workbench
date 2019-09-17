@@ -1,21 +1,25 @@
 export enum CodeGenProjectType {
   CMake = 'CMake',
   VisualStudio = 'VisualStudio',
-  IoTDevKit = 'IoTDevKit'
+  IoTDevKit = 'IoTDevKit',
 }
 
 export enum DeviceConnectionType {
   DeviceConnectionString = 'DeviceConnectionString',
   SymmetricKey = 'SymmetricKey',
-  IoTCX509 = 'IoTCX509'
+  IoTCX509 = 'IoTCX509',
 }
 
 export enum PnpLanguage {
-  ANSIC = 'ANSI C'
+  ANSIC = 'ANSI C',
 }
 
 export interface CodeGenerator {
   GenerateCode(
-      targetPath: string, filePath: string, capabilityModelName: string,
-      dcmId: string, interfaceDir: string): Promise<boolean>;
+    targetPath: string,
+    filePath: string,
+    capabilityModelName: string,
+    dcmId: string,
+    interfaceDir: string
+  ): Promise<boolean>;
 }

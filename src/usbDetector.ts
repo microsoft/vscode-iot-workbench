@@ -4,13 +4,13 @@
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import {VSCExpress} from 'vscode-express';
+import { VSCExpress } from 'vscode-express';
 
-import {ArduinoPackageManager} from './ArduinoPackageManager';
-import {BoardProvider} from './boardProvider';
-import {ConfigHandler} from './configHandler';
-import {EventNames, FileNames} from './constants';
-import {callWithTelemetry} from './telemetry';
+import { ArduinoPackageManager } from './ArduinoPackageManager';
+import { BoardProvider } from './boardProvider';
+import { ConfigHandler } from './configHandler';
+import { EventNames, FileNames } from './constants';
+import { callWithTelemetry } from './telemetry';
 
 export interface DeviceInfo {
   vendorId: number;
@@ -18,22 +18,26 @@ export interface DeviceInfo {
 }
 
 export class UsbDetector {
-  private static _vscexpress: VSCExpress|undefined;
+  private static _vscexpress: VSCExpress | undefined;
   // tslint:disable-next-line: no-any
-  private static _usbDetector: any =
-      require('../vendor/node-usb-native').detector;
+  private static _usbDetector: any = require('../vendor/node-usb-native')
+    .detector;
 
   constructor(
-      private context: vscode.ExtensionContext,
-      private channel: vscode.OutputChannel) {}
+    private context: vscode.ExtensionContext,
+    private channel: vscode.OutputChannel
+  ) {}
 
   getBoardFromDeviceInfo(device: DeviceInfo) {
     if (device.vendorId && device.productId) {
-      const boardFolderPath = this.context.asAbsolutePath(path.join(
-          FileNames.resourcesFolderName, FileNames.templatesFolderName));
+      const boardFolderPath = this.context.asAbsolutePath(
+        path.join(FileNames.resourcesFolderName, FileNames.templatesFolderName)
+      );
       const boardProvider = new BoardProvider(boardFolderPath);
-      const board = boardProvider.find(
-          {vendorId: device.vendorId, productId: device.productId});
+      const board = boardProvider.find({
+        vendorId: device.vendorId,
+        productId: device.productId,
+      });
 
       return board;
     }
@@ -60,30 +64,42 @@ export class UsbDetector {
 
     if (board) {
       callWithTelemetry(
-          EventNames.detectBoard, this.channel, false,
-          this.context, async () => {
-            if (board.exampleUrl) {
-              ArduinoPackageManager.installBoard(board);
+        EventNames.detectBoard,
+        this.channel,
+        false,
+        this.context,
+        async () => {
+          if (board.exampleUrl) {
+            ArduinoPackageManager.installBoard(board);
 
-              const exampleUrl = 'example.html?board=' + board.id +
-                  '&url=' + encodeURIComponent(board.exampleUrl || '');
-              UsbDetector._vscexpress = UsbDetector._vscexpress ||
-                  new VSCExpress(this.context, 'views');
-              UsbDetector._vscexpress.open(
-                  exampleUrl, 'MXChip IoT DevKit samples - Azure IoT Device Workbench',
-                  vscode.ViewColumn.One, {
-                    enableScripts: true,
-                    enableCommandUris: true,
-                    retainContextWhenHidden: true
-                  });
-            }
-          }, {board: board.name});
+            const exampleUrl =
+              'example.html?board=' +
+              board.id +
+              '&url=' +
+              encodeURIComponent(board.exampleUrl || '');
+            UsbDetector._vscexpress =
+              UsbDetector._vscexpress || new VSCExpress(this.context, 'views');
+            UsbDetector._vscexpress.open(
+              exampleUrl,
+              'MXChip IoT DevKit samples - Azure IoT Device Workbench',
+              vscode.ViewColumn.One,
+              {
+                enableScripts: true,
+                enableCommandUris: true,
+                retainContextWhenHidden: true,
+              }
+            );
+          }
+        },
+        { board: board.name }
+      );
     }
   }
 
   async startListening() {
-    const disableUSBDetection =
-        ConfigHandler.get<boolean>('disableAutoPopupLandingPage');
+    const disableUSBDetection = ConfigHandler.get<boolean>(
+      'disableAutoPopupLandingPage'
+    );
     if (os.platform() === 'linux' || disableUSBDetection) {
       return;
     }
@@ -92,16 +108,21 @@ export class UsbDetector {
       return;
     }
 
-    const devices: DeviceInfo[]|undefined =
-        await UsbDetector._usbDetector.find();
+    const devices:
+      | DeviceInfo[]
+      | undefined = await UsbDetector._usbDetector.find();
 
     if (devices) {
       const uniqueDevices: DeviceInfo[] = [];
 
       devices.forEach(device => {
-        if (uniqueDevices.findIndex(
-                item => item.vendorId === device.vendorId &&
-                    item.productId === device.productId) < 0) {
+        if (
+          uniqueDevices.findIndex(
+            item =>
+              item.vendorId === device.vendorId &&
+              item.productId === device.productId
+          ) < 0
+        ) {
           uniqueDevices.push(device);
         }
       });

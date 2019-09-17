@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import {Guid} from 'guid-typescript';
+import { Guid } from 'guid-typescript';
 
 export enum ComponentType {
   Device = 1,
@@ -8,7 +8,7 @@ export enum ComponentType {
   AzureFunctions,
   IoTHubDevice,
   StreamAnalyticsJob,
-  CosmosDB
+  CosmosDB,
 }
 
 export interface Component {

@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
 import TelemetryReporter from 'vscode-extension-telemetry';
 
-import {DevelopEnvironment} from './constants';
-import {ExceptionHelper} from './exceptionHelper';
-import {RemoteExtension} from './Models/RemoteExtension';
-import {NSAT} from './nsat';
-import {InternalConfig} from './utils';
+import { DevelopEnvironment } from './constants';
+import { ExceptionHelper } from './exceptionHelper';
+import { RemoteExtension } from './Models/RemoteExtension';
+import { NSAT } from './nsat';
+import { InternalConfig } from './utils';
 
 interface PackageInfo {
   name: string;
@@ -13,14 +13,13 @@ interface PackageInfo {
   aiKey: string;
 }
 
-
 export interface TelemetryContext {
   properties: TelemetryProperties;
   measurements: TelemetryMeasurements;
 }
 
 export interface TelemetryProperties {
-  result: 'Succeeded'|'Failed'|'Cancelled';
+  result: 'Succeeded' | 'Failed' | 'Cancelled';
   error: string;
   errorMessage: string;
   [key: string]: string;
@@ -31,9 +30,9 @@ export interface TelemetryMeasurements {
   [key: string]: number;
 }
 
-
-function getPackageInfo(context: vscode.ExtensionContext): PackageInfo|
-    undefined {
+function getPackageInfo(
+  context: vscode.ExtensionContext
+): PackageInfo | undefined {
   const extensionPackage = require(context.asAbsolutePath('./package.json'));
   if (extensionPackage) {
     const packageInfo: PackageInfo = {
@@ -49,12 +48,16 @@ function getPackageInfo(context: vscode.ExtensionContext): PackageInfo|
 export class TelemetryWorker {
   private static _reporter: TelemetryReporter;
 
-  static sendEvent(eventName: string, telemetryContext: TelemetryContext):
-      void {
+  static sendEvent(
+    eventName: string,
+    telemetryContext: TelemetryContext
+  ): void {
     if (this._reporter) {
       this._reporter.sendTelemetryEvent(
-          eventName, telemetryContext.properties,
-          telemetryContext.measurements);
+        eventName,
+        telemetryContext.properties,
+        telemetryContext.measurements
+      );
     }
   }
 
@@ -72,11 +75,15 @@ export class TelemetryWorker {
     }
     if (!packageInfo.aiKey) {
       console.log(
-          'Unable to initialize telemetry, please make sure AIKey is set in package.json');
+        'Unable to initialize telemetry, please make sure AIKey is set in package.json'
+      );
       return;
     }
     this._reporter = new TelemetryReporter(
-        packageInfo.name, packageInfo.version, packageInfo.aiKey);
+      packageInfo.name,
+      packageInfo.version,
+      packageInfo.aiKey
+    );
   }
 }
 
@@ -84,19 +91,28 @@ export class TelemetryWorker {
 // Licensed under the MIT License.
 
 export async function callWithTelemetry(
-    eventName: string, outputChannel: vscode.OutputChannel,
-    enableSurvey: boolean, context: vscode.ExtensionContext,
-    callback: (
-        context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
-        // tslint:disable-next-line:no-any
-        telemetrycontext: TelemetryContext, ...args: any[]) => any,
+  eventName: string,
+  outputChannel: vscode.OutputChannel,
+  enableSurvey: boolean,
+  context: vscode.ExtensionContext,
+  callback: (
+    context: vscode.ExtensionContext,
+    outputChannel: vscode.OutputChannel,
     // tslint:disable-next-line:no-any
-    additionalProperties?: {[key: string]: string},
-    // tslint:disable-next-line:no-any
-    ...args: any[]): Promise<any> {
+    telemetrycontext: TelemetryContext,
+    ...args: any[]
+  ) => any,
+  // tslint:disable-next-line:no-any
+  additionalProperties?: { [key: string]: string },
+  // tslint:disable-next-line:no-any
+  ...args: any[]
+): Promise<any> {
   const start: number = Date.now();
-  const properties:
-      TelemetryProperties = {result: 'Succeeded', error: '', errorMessage: ''};
+  const properties: TelemetryProperties = {
+    result: 'Succeeded',
+    error: '',
+    errorMessage: '',
+  };
 
   if (additionalProperties) {
     for (const key of Object.keys(additionalProperties)) {
@@ -107,16 +123,19 @@ export async function callWithTelemetry(
   }
 
   properties['isInternal'] =
-      InternalConfig.isInternal === true ? 'true' : 'false';
-  properties['developEnvironment'] = RemoteExtension.isRemote(context) ?
-      DevelopEnvironment.CONTAINER :
-      DevelopEnvironment.LOCAL_ENV;
-  const telemetryContext:
-      TelemetryContext = {properties, measurements: {duration: 0}};
+    InternalConfig.isInternal === true ? 'true' : 'false';
+  properties['developEnvironment'] = RemoteExtension.isRemote(context)
+    ? DevelopEnvironment.CONTAINER
+    : DevelopEnvironment.LOCAL_ENV;
+  const telemetryContext: TelemetryContext = {
+    properties,
+    measurements: { duration: 0 },
+  };
 
   try {
-    return await Promise.resolve(callback.apply(
-        null, [context, outputChannel, telemetryContext, ...args]));
+    return await Promise.resolve(
+      callback.apply(null, [context, outputChannel, telemetryContext, ...args])
+    );
   } catch (error) {
     telemetryContext.properties.result = 'Failed';
     telemetryContext.properties.error = error.errorType;

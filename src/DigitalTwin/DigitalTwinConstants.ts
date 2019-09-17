@@ -20,7 +20,7 @@ export class DigitalTwinFileNames {
 
 export class DigitalTwinConstants {
   static readonly repoConnectionStringTemplate =
-      'HostName=<Host Name>;RepositoryId=<repository id>;SharedAccessKeyName=<Shared AccessKey Name>;SharedAccessKey=<access Key>';
+    'HostName=<Host Name>;RepositoryId=<repository id>;SharedAccessKeyName=<Shared AccessKey Name>;SharedAccessKey=<access Key>';
   static readonly interfaceSuffix = '.interface.json';
   static readonly capabilityModelSuffix = '.capabilitymodel.json';
   static readonly jsonSuffix = '.json';
@@ -36,12 +36,13 @@ export class DigitalTwinConstants {
 
   static readonly dtidSegmentRegex = new RegExp('^[a-zA-Z_][a-zA-Z0-9_]*$');
   static readonly dtidSegmentRegexDescription =
-      'alphanumeric and underscore, and cannot start with number';
+    'alphanumeric and underscore, and cannot start with number';
 
-  static readonly codegenProjectNameRegex =
-      new RegExp('^[a-zA-Z_][-a-zA-Z0-9_]*$');
+  static readonly codegenProjectNameRegex = new RegExp(
+    '^[a-zA-Z_][-a-zA-Z0-9_]*$'
+  );
   static readonly codegenProjectNameRegexDescription =
-      'alphanumeric, underscore and dash character, and cannot start with number and dash character';
+    'alphanumeric, underscore and dash character, and cannot start with number and dash character';
 }
 
 export class DTDLKeywords {

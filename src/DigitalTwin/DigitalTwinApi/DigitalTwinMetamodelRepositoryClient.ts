@@ -4,43 +4,50 @@
 'use strict';
 
 import * as request from 'request-promise';
-import {SearchResults} from './DataContracts/SearchResults';
-import {MetaModelType, SearchOptions, MetaModelUpsertRequest} from './DataContracts/DigitalTwinContext';
-import {DigitalTwinConnectionStringBuilder} from './DigitalTwinConnectionStringBuilder';
-import {DigitalTwinSharedAccessKey} from './DigitalTwinSharedAccessKey';
-import {ConfigKey} from '../../constants';
-import {GetModelResult} from './DataContracts/DigitalTwinModel';
-import {ConfigHandler} from '../../configHandler';
-import {DigitalTwinConstants} from '../DigitalTwinConstants';
+import { SearchResults } from './DataContracts/SearchResults';
+import {
+  MetaModelType,
+  SearchOptions,
+  MetaModelUpsertRequest,
+} from './DataContracts/DigitalTwinContext';
+import { DigitalTwinConnectionStringBuilder } from './DigitalTwinConnectionStringBuilder';
+import { DigitalTwinSharedAccessKey } from './DigitalTwinSharedAccessKey';
+import { ConfigKey } from '../../constants';
+import { GetModelResult } from './DataContracts/DigitalTwinModel';
+import { ConfigHandler } from '../../configHandler';
+import { DigitalTwinConstants } from '../DigitalTwinConstants';
 import * as url from 'url';
 
 const constants = {
   mediaType: 'application/json',
   apiModel: '/models',
-  modelSearch: '/models/search'
+  modelSearch: '/models/search',
 };
 
 export class DigitalTwinMetamodelRepositoryClient {
-  private modelRepoSharedAccessKey: DigitalTwinSharedAccessKey|null = null;
+  private modelRepoSharedAccessKey: DigitalTwinSharedAccessKey | null = null;
   private modelPublicRepoUrl?: string;
 
   constructor() {}
 
-  async initialize(connectionString: string|null) {
+  async initialize(connectionString: string | null) {
     let modelRepoUrl = null;
     if (!connectionString) {
       // Connect to public repo
       this.modelRepoSharedAccessKey = null;
-      const dtRepositoryUrl =
-          ConfigHandler.get<string>(ConfigKey.iotPnPPublicRepositoryUrl);
+      const dtRepositoryUrl = ConfigHandler.get<string>(
+        ConfigKey.iotPnPPublicRepositoryUrl
+      );
       if (!dtRepositoryUrl) {
         throw new Error(
-            'The IoT Plug and Play public repository URL is invalid.');
+          'The IoT Plug and Play public repository URL is invalid.'
+        );
       }
       modelRepoUrl = dtRepositoryUrl;
     } else {
-      const builder =
-          DigitalTwinConnectionStringBuilder.Create(connectionString);
+      const builder = DigitalTwinConnectionStringBuilder.Create(
+        connectionString
+      );
       if (!builder.HostName.startsWith('http')) {
         // The hostname from connections string doesn't contain the protocol
         modelRepoUrl = 'https://' + builder.HostName;
@@ -50,92 +57,141 @@ export class DigitalTwinMetamodelRepositoryClient {
       this.modelRepoSharedAccessKey = new DigitalTwinSharedAccessKey(builder);
     }
     const repoUrl = url.parse(modelRepoUrl);
-    repoUrl.protocol = 'https';  // force to https
+    repoUrl.protocol = 'https'; // force to https
     this.modelPublicRepoUrl = repoUrl.href;
   }
 
   async GetInterfaceAsync(
-      modelId: string, repositoryId?: string,
-      expand = false): Promise<GetModelResult> {
+    modelId: string,
+    repositoryId?: string,
+    expand = false
+  ): Promise<GetModelResult> {
     if (repositoryId && !this.modelRepoSharedAccessKey) {
       throw new Error(
-          'The repository connection string is required to get the Interface.');
+        'The repository connection string is required to get the Interface.'
+      );
     }
 
-    return await this.MakeGetModelRequestAsync(
-        MetaModelType.Interface, modelId, repositoryId, expand);
+    return this.MakeGetModelRequestAsync(
+      MetaModelType.Interface,
+      modelId,
+      repositoryId,
+      expand
+    );
   }
 
   async GetCapabilityModelAsync(
-      modelId: string, repositoryId?: string,
-      expand = false): Promise<GetModelResult> {
+    modelId: string,
+    repositoryId?: string,
+    expand = false
+  ): Promise<GetModelResult> {
     if (repositoryId && !this.modelRepoSharedAccessKey) {
       throw new Error(
-          'The repository connection string is required to get the Capability Model.');
+        'The repository connection string is required to get the Capability Model.'
+      );
     }
 
-    return await this.MakeGetModelRequestAsync(
-        MetaModelType.CapabilityModel, modelId, repositoryId, expand);
+    return this.MakeGetModelRequestAsync(
+      MetaModelType.CapabilityModel,
+      modelId,
+      repositoryId,
+      expand
+    );
   }
 
   async SearchInterfacesAsync(
-      searchString: string, continuationToken: string|null,
-      repositoryId?: string, pageSize = 20): Promise<SearchResults> {
+    searchString: string,
+    continuationToken: string | null,
+    repositoryId?: string,
+    pageSize = 20
+  ): Promise<SearchResults> {
     if (pageSize <= 0) {
       throw new Error('pageSize should be greater than 0');
     }
 
     if (repositoryId && !this.modelRepoSharedAccessKey) {
       throw new Error(
-          'The connection string is required to search intefaces in company repository.');
+        'The connection string is required to search intefaces in company repository.'
+      );
     }
 
-    return await this.MakeSearchRequestAsync(
-        MetaModelType.Interface, searchString, continuationToken, repositoryId,
-        pageSize);
+    return this.MakeSearchRequestAsync(
+      MetaModelType.Interface,
+      searchString,
+      continuationToken,
+      repositoryId,
+      pageSize
+    );
   }
 
   async SearchCapabilityModelsAsync(
-      searchString: string, continuationToken: string|null,
-      repositoryId?: string, pageSize = 20): Promise<SearchResults> {
+    searchString: string,
+    continuationToken: string | null,
+    repositoryId?: string,
+    pageSize = 20
+  ): Promise<SearchResults> {
     if (pageSize <= 0) {
       throw new Error('pageSize should be greater than 0');
     }
 
     if (repositoryId && !this.modelRepoSharedAccessKey) {
       throw new Error(
-          'The connection string is required to search Capability Models in company repository.');
+        'The connection string is required to search Capability Models in company repository.'
+      );
     }
 
-    return await this.MakeSearchRequestAsync(
-        MetaModelType.CapabilityModel, searchString, continuationToken,
-        repositoryId, pageSize);
+    return this.MakeSearchRequestAsync(
+      MetaModelType.CapabilityModel,
+      searchString,
+      continuationToken,
+      repositoryId,
+      pageSize
+    );
   }
 
   async CreateOrUpdateInterfaceAsync(
-      content: string, modelId: string, etag?: string,
-      repositoryId?: string): Promise<string> {
+    content: string,
+    modelId: string,
+    etag?: string,
+    repositoryId?: string
+  ): Promise<string> {
     if (repositoryId && !this.modelRepoSharedAccessKey) {
       throw new Error(
-          'The connection string is required to publish Interface in company repository.');
+        'The connection string is required to publish Interface in company repository.'
+      );
     }
 
-    return await this.MakeCreateOrUpdateRequestAsync(
-        MetaModelType.Interface, content, modelId, etag, repositoryId);
+    return this.MakeCreateOrUpdateRequestAsync(
+      MetaModelType.Interface,
+      content,
+      modelId,
+      etag,
+      repositoryId
+    );
   }
 
   /// <summary>
   /// Updates the Capability Model with the new context content.
   /// </summary>
   async CreateOrUpdateCapabilityModelAsync(
-      content: string, modelId: string, etag?: string, repositoryId?: string) {
+    content: string,
+    modelId: string,
+    etag?: string,
+    repositoryId?: string
+  ) {
     if (repositoryId && !this.modelRepoSharedAccessKey) {
       throw new Error(
-          'The connection string is required to publish Capability Model in company repository.');
+        'The connection string is required to publish Capability Model in company repository.'
+      );
     }
 
-    return await this.MakeCreateOrUpdateRequestAsync(
-        MetaModelType.CapabilityModel, content, modelId, etag, repositoryId);
+    return this.MakeCreateOrUpdateRequestAsync(
+      MetaModelType.CapabilityModel,
+      content,
+      modelId,
+      etag,
+      repositoryId
+    );
   }
 
   /// <summary>
@@ -144,16 +200,21 @@ export class DigitalTwinMetamodelRepositoryClient {
   async DeleteInterfaceAsync(modelId: string, repositoryId: string) {
     if (!repositoryId) {
       throw new Error(
-          'The repository id is required to delete Capability Model. Delete Interface is not allowed for public repository.');
+        'The repository id is required to delete Capability Model. Delete Interface is not allowed for public repository.'
+      );
     }
 
     if (repositoryId && !this.modelRepoSharedAccessKey) {
       throw new Error(
-          'The connection string is required to delete Interface in company repository.');
+        'The connection string is required to delete Interface in company repository.'
+      );
     }
 
     await this.MakeDeleteRequestAsync(
-        MetaModelType.Interface, modelId, repositoryId);
+      MetaModelType.Interface,
+      modelId,
+      repositoryId
+    );
   }
 
   /// <summary>
@@ -162,34 +223,44 @@ export class DigitalTwinMetamodelRepositoryClient {
   async DeleteCapabilityModelAsync(modelId: string, repositoryId: string) {
     if (!repositoryId) {
       throw new Error(
-          'The repository id is required to delete Capability Model. Delete Capability Model is not allowed for public repository.');
+        'The repository id is required to delete Capability Model. Delete Capability Model is not allowed for public repository.'
+      );
     }
 
     if (!this.modelRepoSharedAccessKey) {
       throw new Error(
-          'The connection string is required to delete Capability Model in company repository.');
+        'The connection string is required to delete Capability Model in company repository.'
+      );
     }
 
     await this.MakeDeleteRequestAsync(
-        MetaModelType.CapabilityModel, modelId, repositoryId);
+      MetaModelType.CapabilityModel,
+      modelId,
+      repositoryId
+    );
   }
 
   async MakeCreateOrUpdateRequestAsync(
-      metaModelType: MetaModelType, contents: string, modelId: string,
-      etag?: string, repositoryId?: string,
-      apiVersion = DigitalTwinConstants.apiVersion): Promise<string> {
+    metaModelType: MetaModelType,
+    contents: string,
+    modelId: string,
+    etag?: string,
+    repositoryId?: string,
+    apiVersion = DigitalTwinConstants.apiVersion
+  ): Promise<string> {
     if (!this.modelPublicRepoUrl) {
       throw new Error('The value of modelPublicRepoUrl is not initialized');
     }
     let targetUri = this.modelPublicRepoUrl;
 
     if (repositoryId) {
-      targetUri +=
-          `${constants.apiModel}/${encodeURIComponent(modelId)}?repositoryId=${
-              repositoryId}&api-version=${apiVersion}`;
+      targetUri += `${constants.apiModel}/${encodeURIComponent(
+        modelId
+      )}?repositoryId=${repositoryId}&api-version=${apiVersion}`;
     } else {
-      targetUri += `${constants.apiModel}/${
-          encodeURIComponent(modelId)}?api-version=${apiVersion}`;
+      targetUri += `${constants.apiModel}/${encodeURIComponent(
+        modelId
+      )}?api-version=${apiVersion}`;
     }
 
     let authenticationString = '';
@@ -207,29 +278,36 @@ export class DigitalTwinMetamodelRepositoryClient {
       json: true,
       headers: {
         Authorization: authenticationString,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       resolveWithFullResponse: true,
-      body: payload
+      body: payload,
     };
 
     return new Promise<string>((resolve, reject) => {
       request(options)
-          .then(response => {
-            return resolve(response.headers['etag']);
-          })
-          .catch(err => {
-            reject(err);
-          });
+        .then(response => {
+          return resolve(response.headers['etag']);
+        })
+        .catch(err => {
+          reject(err);
+        });
     });
   }
 
   private async MakeGetModelRequestAsync(
-      metaModelType: MetaModelType, modelId: string, repositoryId?: string,
-      expand = false,
-      apiVersion = DigitalTwinConstants.apiVersion): Promise<GetModelResult> {
-    const targetUri =
-        this.GenerateFetchModelUri(modelId, apiVersion, repositoryId, expand);
+    metaModelType: MetaModelType,
+    modelId: string,
+    repositoryId?: string,
+    expand = false,
+    apiVersion = DigitalTwinConstants.apiVersion
+  ): Promise<GetModelResult> {
+    const targetUri = this.GenerateFetchModelUri(
+      modelId,
+      apiVersion,
+      repositoryId,
+      expand
+    );
 
     let authenticationString = '';
 
@@ -242,35 +320,39 @@ export class DigitalTwinMetamodelRepositoryClient {
       uri: targetUri,
       encoding: 'utf8',
       json: true,
-      headers: {Authorization: authenticationString},
-      resolveWithFullResponse: true
+      headers: { Authorization: authenticationString },
+      resolveWithFullResponse: true,
     };
 
     return new Promise<GetModelResult>((resolve, reject) => {
       request(options)
-          .then(response => {
-            const result: GetModelResult = {
-              content: response.body,
-              etag: response.headers['etag'],
-              urnId: response.headers['x-ms-model-id']
-            };
-            return resolve(result);
-          })
-          .catch(err => {
-            reject(err);
-          });
+        .then(response => {
+          const result: GetModelResult = {
+            content: response.body,
+            etag: response.headers['etag'],
+            urnId: response.headers['x-ms-model-id'],
+          };
+          return resolve(result);
+        })
+        .catch(err => {
+          reject(err);
+        });
     });
   }
 
   private async MakeSearchRequestAsync(
-      metaModelType: MetaModelType, searchString: string,
-      continuationToken: string|null, repositoryId?: string, pageSize = 20,
-      apiVersion = DigitalTwinConstants.apiVersion): Promise<SearchResults> {
+    metaModelType: MetaModelType,
+    searchString: string,
+    continuationToken: string | null,
+    repositoryId?: string,
+    pageSize = 20,
+    apiVersion = DigitalTwinConstants.apiVersion
+  ): Promise<SearchResults> {
     const payload: SearchOptions = {
       searchKeyword: searchString,
       modelFilterType: metaModelType,
       continuationToken,
-      pageSize
+      pageSize,
     };
     if (!this.modelPublicRepoUrl) {
       throw new Error('The value of modelPublicRepoUrl is not initialized');
@@ -278,8 +360,7 @@ export class DigitalTwinMetamodelRepositoryClient {
     let queryString = this.modelPublicRepoUrl;
 
     if (repositoryId) {
-      queryString += `${constants.modelSearch}?repositoryId=${
-          repositoryId}&api-version=${apiVersion}`;
+      queryString += `${constants.modelSearch}?repositoryId=${repositoryId}&api-version=${apiVersion}`;
     } else {
       queryString += `${constants.modelSearch}?api-version=${apiVersion}`;
     }
@@ -297,20 +378,20 @@ export class DigitalTwinMetamodelRepositoryClient {
       json: true,
       headers: {
         Authorization: authenticationString,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: payload
+      body: payload,
     };
 
     return new Promise<SearchResults>((resolve, reject) => {
       request(options)
-          .then(response => {
-            const result: SearchResults = response as SearchResults;
-            return resolve(result);
-          })
-          .catch(err => {
-            reject(err);
-          });
+        .then(response => {
+          const result: SearchResults = response as SearchResults;
+          return resolve(result);
+        })
+        .catch(err => {
+          reject(err);
+        });
     });
   }
 
@@ -321,14 +402,18 @@ export class DigitalTwinMetamodelRepositoryClient {
   /// <param name="metaModelId">Metamodel id.</param>
   /// <param name="metaModelType"><see cref="MetaModelType"/> Interface or Capability Model.</param>
   private async MakeDeleteRequestAsync(
-      metaModelType: MetaModelType, modelId: string, repositoryId?: string,
-      apiVersion = DigitalTwinConstants.apiVersion) {
+    metaModelType: MetaModelType,
+    modelId: string,
+    repositoryId?: string,
+    apiVersion = DigitalTwinConstants.apiVersion
+  ) {
     if (!this.modelPublicRepoUrl) {
       throw new Error('The value of modelPublicRepoUrl is not initialized');
     }
     const queryString = `?repositoryId=${repositoryId}`;
-    const resourceUrl = `${this.modelPublicRepoUrl}${constants.apiModel}/${
-        encodeURIComponent(modelId)}${queryString}&api-version=${apiVersion}`;
+    const resourceUrl = `${this.modelPublicRepoUrl}${
+      constants.apiModel
+    }/${encodeURIComponent(modelId)}${queryString}&api-version=${apiVersion}`;
 
     let authenticationString = '';
 
@@ -342,30 +427,34 @@ export class DigitalTwinMetamodelRepositoryClient {
       headers: {
         Accept: 'application/json',
         Authorization: authenticationString,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      resolveWithFullResponse: true
+      resolveWithFullResponse: true,
     };
     return new Promise<void>((resolve, reject) => {
       request(options)
-          .then(response => {
-            console.log('Delete succeed with status %d', response.statusCode);
-            return resolve();
-          })
-          .catch(err => {
-            reject(err);
-          });
+        .then(response => {
+          console.log('Delete succeed with status %d', response.statusCode);
+          return resolve();
+        })
+        .catch(err => {
+          reject(err);
+        });
     });
   }
 
   private GenerateFetchModelUri(
-      modelId: string, apiVersion: string, repositoryId?: string,
-      expand = false) {
+    modelId: string,
+    apiVersion: string,
+    repositoryId?: string,
+    expand = false
+  ) {
     if (!this.modelPublicRepoUrl) {
       throw new Error('The value of modelPublicRepoUrl is not initialized');
     }
-    let result = `${this.modelPublicRepoUrl}${constants.apiModel}/${
-        encodeURIComponent(modelId)}?api-version=${apiVersion}`;
+    let result = `${this.modelPublicRepoUrl}${
+      constants.apiModel
+    }/${encodeURIComponent(modelId)}?api-version=${apiVersion}`;
     const expandString = expand ? `&expand=true` : '';
     if (repositoryId) {
       result += `${expandString}&repositoryId=${repositoryId}`;
