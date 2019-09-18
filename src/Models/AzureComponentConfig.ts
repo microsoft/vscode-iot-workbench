@@ -7,7 +7,9 @@ import {Component} from './Interfaces/Component';
 import {ComponentType} from './Interfaces/Component';
 
 // TODO: need to check what value should be included here
-export interface ComponentInfo { values: {[key: string]: string}; }
+export interface ComponentInfo {
+  values: {[key: string]: string};
+}
 
 export enum DependencyType {
   Other,
@@ -29,7 +31,9 @@ export interface AzureComponentConfig {
   componentInfo?: ComponentInfo;
 }
 
-export interface AzureConfigs { componentConfigs: AzureComponentConfig[]; }
+export interface AzureConfigs {
+  componentConfigs: AzureComponentConfig[];
+}
 
 export interface Dependency {
   component: Component;

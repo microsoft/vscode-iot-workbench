@@ -97,8 +97,7 @@ export class ProjectInitializer {
 
             // Step 5: Load the list of template files
             const projectTemplateType: ProjectTemplateType =
-                (ProjectTemplateType)
-                    [template.type as keyof typeof ProjectTemplateType];
+                (ProjectTemplateType)[template.type as keyof typeof ProjectTemplateType];
 
             const templateFolder = path.join(resourceRootPath, template.path);
             const templateFilesInfo =
