@@ -71,6 +71,8 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
         path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, '..');
 
     const deviceLocation = path.join(this.projectRootPath, devicePath);
+    await this.generateIotWorkbenchProjectFile(
+        loadTimeScaffoldType, deviceLocation);
 
     // only send telemetry when the IoT project is load when VS Code opens
     if (initLoad) {
@@ -108,13 +110,15 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
       let device = null;
       if (boardId === az3166DeviceModule.AZ3166Device.boardId) {
         device = new az3166DeviceModule.AZ3166Device(
-            this.extensionContext, this.channel, deviceLocation);
+            this.extensionContext, this.channel, this.telemetryContext,
+            deviceLocation);
       } else if (boardId === ioTButtonDeviceModule.IoTButtonDevice.boardId) {
         device = new ioTButtonDeviceModule.IoTButtonDevice(
             this.extensionContext, deviceLocation);
       } else if (boardId === esp32DeviceModule.Esp32Device.boardId) {
         device = new esp32DeviceModule.Esp32Device(
-            this.extensionContext, this.channel, deviceLocation);
+            this.extensionContext, this.channel, this.telemetryContext,
+            deviceLocation);
       }
 
       if (device) {
@@ -272,19 +276,23 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     if (!await FileUtility.directoryExists(createTimeScaffoldType, deviceDir)) {
       await FileUtility.mkdirRecursively(createTimeScaffoldType, deviceDir);
     }
+    await this.generateIotWorkbenchProjectFile(
+        createTimeScaffoldType, deviceDir);
 
     workspace.folders.push({path: constants.deviceDefaultFolderName});
     let device: Component;
 
     if (boardId === az3166DeviceModule.AZ3166Device.boardId) {
       device = new az3166DeviceModule.AZ3166Device(
-          this.extensionContext, this.channel, deviceDir, templateFilesInfo);
+          this.extensionContext, this.channel, this.telemetryContext, deviceDir,
+          templateFilesInfo);
     } else if (boardId === ioTButtonDeviceModule.IoTButtonDevice.boardId) {
       device = new ioTButtonDeviceModule.IoTButtonDevice(
           this.extensionContext, deviceDir, templateFilesInfo);
     } else if (boardId === esp32DeviceModule.Esp32Device.boardId) {
       device = new esp32DeviceModule.Esp32Device(
-          this.extensionContext, this.channel, deviceDir, templateFilesInfo);
+          this.extensionContext, this.channel, this.telemetryContext, deviceDir,
+          templateFilesInfo);
     } else {
       throw new Error('The specified board is not supported.');
     }
@@ -494,5 +502,26 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
 
     channelShowAndAppendLine(channel, message);
     vscode.window.showInformationMessage(message);
+  }
+
+  /**
+   * For backward compatibility, upgrade iot workbench project file,
+   * adding project host type config in iot workbench project file.
+   */
+  static async updateIoTWorkbenchProjectFile(
+      type: ScaffoldType, projectFolder: string): Promise<void> {
+    const iotworkbenchprojectFilePath =
+        path.join(projectFolder, FileNames.iotworkbenchprojectFileName);
+    if (!await FileUtility.fileExists(type, iotworkbenchprojectFilePath)) {
+      throw new Error(`Cannot find iot workbench project file.`);
+    }
+
+    const projectConfig: {[key: string]: string} = {};
+    projectConfig[`${ConfigKey.projectHostType}`] = ProjectHostType.Workspace;
+
+    const indentationSpace = 4;
+    FileUtility.writeFile(
+        type, iotworkbenchprojectFilePath,
+        JSON.stringify(projectConfig, null, indentationSpace));
   }
 }

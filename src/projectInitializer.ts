@@ -12,10 +12,8 @@ import {TelemetryContext} from './telemetry';
 import {FileNames, ScaffoldType, PlatformType, TemplateTag} from './constants';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import {FileUtility} from './FileUtility';
-import {ProjectTemplate, ProjectTemplateType, TemplatesType, Platform} from './Models/Interfaces/ProjectTemplate';
+import {ProjectTemplate, ProjectTemplateType, TemplatesType} from './Models/Interfaces/ProjectTemplate';
 import {RemoteExtension} from './Models/RemoteExtension';
-import * as UIUtility from './UIUtility';
-import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 
 const impor = require('impor')(__dirname);
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
@@ -74,7 +72,7 @@ export class ProjectInitializer {
 
           // Step 2: Select platform
           const platformSelection =
-              await UIUtility.selectPlatform(scaffoldType, context);
+              await utils.selectPlatform(scaffoldType, context);
           if (!platformSelection) {
             telemetryContext.properties.errorMessage =
                 'Platform selection cancelled.';

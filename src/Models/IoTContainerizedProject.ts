@@ -21,9 +21,6 @@ const impor = require('impor')(__dirname);
 const raspberryPiDeviceModule =
     impor('./RaspberryPiDevice') as typeof import('./RaspberryPiDevice');
 
-const constants = {
-  configPrefix: 'vscode-iot-workbench'
-};
 export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
@@ -40,6 +37,9 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     }
 
     this.projectRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+
+    await this.generateIotWorkbenchProjectFile(
+        loadTimeScaffoldType, this.projectRootPath);
 
     const iotworkbenchprojectFile =
         path.join(this.projectRootPath, FileNames.iotworkbenchprojectFileName);
@@ -89,6 +89,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       }
 
       if (device) {
+        this.componentList.push(device);
         await device.load();
       }
     }
@@ -118,6 +119,9 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
     this.projectRootPath = rootFolderPath;
 
+    await this.generateIotWorkbenchProjectFile(
+        createTimeScaffoldType, this.projectRootPath);
+
     const projectConfig: {[key: string]: string} = {};
 
     // Step 1: Create device
@@ -130,8 +134,8 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       throw new Error('The specified board is not supported.');
     }
 
-    projectConfig[`${constants.configPrefix}.${ConfigKey.boardId}`] = boardId;
-    // projectConfig[`${constants.configPrefix}.${ConfigKey.projectHostType}`] =
+    projectConfig[`${ConfigKey.boardId}`] = boardId;
+    // projectConfig[`${ConfigKey.projectHostType}`] =
     //     ProjectHostType[this.projectHostType];
 
     const res = await device.create();
@@ -155,6 +159,8 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       throw new Error(
           `Internal Error. Could not find iot workbench project file.`);
     }
+    // this.configProjectHostType(this.projectRootPath, createTimeScaffoldType);
+
 
     // Configure project and open in container
     const projectEnvConfiger = new ProjectEnvironmentConfiger();
@@ -229,7 +235,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
     if (customizationSelection === undefined) {
       throw new CancelOperationError(
-          `Ask to customization development environment selection cancelled.`);
+          `Ask to customize development environment selection cancelled.`);
     }
 
     return customizationSelection.label === 'Yes';

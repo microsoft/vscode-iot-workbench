@@ -143,24 +143,28 @@
             "connectionType": "SymmetricKey"
         },
         {
+            "platform": "Embedded Linux (Preview)",
             "name": "32-bit Armv7 Cortex-A",
             "description": "Generic dev container with Linaro cross-toolchain for GCC, Azure IoT Device C SDK",
             "tag": "development_container",
             "path": "arm7"
         },
         {
+            "platform": "Embedded Linux (Preview)",
             "name": "64-bit Armv8 Cortex-A",
             "description": "Generic dev container with Linaro cross-toolchain for GCC, Azure IoT Device C SDK",
             "tag": "development_container",
             "path": "arm8"
         },
         {
+            "platform": "Embedded Linux (Preview)",
             "name": "x86",
             "description": "X86 PC",
             "tag": "development_container",
             "path": "x86"
         },
         {
+            "platform": "Arduino",
             "name": "Arduino Task",
             "description": "Template files used to configure Arduino project's task",
             "tag": "development_container",

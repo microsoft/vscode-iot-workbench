@@ -8,6 +8,7 @@ import * as vscode from 'vscode';
 
 import {TelemetryContext} from './telemetry';
 import {constructAndLoadIoTProject} from './utils';
+import {ProjectEnvironmentConfiger} from './ProjectEnvironmentConfiger';
 
 export class DeviceOperator {
   async compile(

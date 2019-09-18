@@ -16,6 +16,7 @@ import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey} from '../constants';
 import {DialogResponses} from '../DialogResponses';
+import {TelemetryContext} from '../telemetry';
 import {delay, getRegistryValues} from '../utils';
 
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
@@ -60,7 +61,6 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
   // tslint:disable-next-line: no-any
   private static _serialport: any;
-  private channel: vscode.OutputChannel;
 
   private componentId: string;
   get id() {
@@ -76,8 +76,11 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      devicePath: string, templateFiles?: TemplateFileInfo[]) {
-    super(context, devicePath, DeviceType.MXChip_AZ3166);
+      telemetryContext: TelemetryContext, devicePath: string,
+      templateFiles?: TemplateFileInfo[]) {
+    super(
+        context, devicePath, channel, telemetryContext,
+        DeviceType.MXChip_AZ3166);
     this.channel = channel;
     this.componentId = Guid.create().toString();
     if (templateFiles) {

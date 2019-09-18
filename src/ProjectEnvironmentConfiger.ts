@@ -13,8 +13,10 @@ import {FileNames, ScaffoldType, PlatformType, TemplateTag} from './constants';
 import {FileUtility} from './FileUtility';
 import {ProjectTemplate, TemplatesType, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
 import {RemoteExtension} from './Models/RemoteExtension';
-import * as UIUtility from './UIUtility';
 import {CancelOperationError} from './CancelOperationError';
+import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
+import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
+import {IoTWorkspaceProject} from './Models/IoTWorkspaceProject';
 
 const impor = require('impor')(__dirname);
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
@@ -31,11 +33,12 @@ export class ProjectEnvironmentConfiger {
   async configureProjectEnvironment(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    // Only create project when not in remote environment
+    // Only configure project when not in remote environment
     const isLocal = RemoteExtension.checkLocalBeforeRunCommand(context);
     if (!isLocal) {
       return;
     }
+    const scaffoldType = ScaffoldType.Local;
 
     if (!(vscode.workspace.workspaceFolders &&
           vscode.workspace.workspaceFolders.length > 0)) {
@@ -55,7 +58,7 @@ export class ProjectEnvironmentConfiger {
         async () => {
           // Select platform if not specified
           const platformSelection =
-              await UIUtility.selectPlatform(ScaffoldType.Local, context);
+              await utils.selectPlatform(scaffoldType, context);
           let platform: PlatformType;
           if (!platformSelection) {
             telemetryContext.properties.errorMessage =
@@ -68,11 +71,35 @@ export class ProjectEnvironmentConfiger {
                 PlatformType, platformSelection.label);
           }
 
-          // If Arduino project, open as workspace
           if (platform === PlatformType.Arduino) {
-            const workspaceProject = await utils.constructAndLoadIoTProject(
+            // First ensure the project is correctly open.
+            const iotProject = await utils.constructAndLoadIoTProject(
                 context, channel, telemetryContext);
-            if (workspaceProject === undefined) {
+            if (iotProject === undefined) {
+              return;
+            }
+
+            // Update Arduino project's iot workbench project file for backward
+            // compatibility.
+            const iotworkbenchprojectFilePath =
+                path.join(rootPath, FileNames.iotworkbenchprojectFileName);
+            if (await FileUtility.fileExists(
+                    scaffoldType, iotworkbenchprojectFilePath)) {
+              IoTWorkspaceProject.updateIoTWorkbenchProjectFile(
+                  scaffoldType, rootPath);
+            }
+
+            // Check platform validation.
+            // Only iot workbench Arduino project created by workbench extension
+            // can be configured as Arduino platform(for upgrade).
+            const projectHostType =
+                await IoTWorkbenchProjectBase.getProjectType(
+                    scaffoldType, rootPath);
+            if (projectHostType !== ProjectHostType.Workspace) {
+              const message =
+                  `This is not an iot workbench Arduino projects. You cannot configure it as Arduino platform.`;
+              utils.channelShowAndAppendLine(channel, message);
+              vscode.window.showInformationMessage(message);
               return;
             }
           }
@@ -185,6 +212,9 @@ export class ProjectEnvironmentConfiger {
       return;
     }
 
+    // Update project host type config in iot workbench project file
+    await project.generateIotWorkbenchProjectFile(scaffoldType, projectPath);
+
     // Step 4: Configure project environment with template files
     await project.configureProjectEnv(
         channel, telemetryContext, scaffoldType, projectPath, templateFilesInfo,
@@ -250,7 +280,9 @@ export class ProjectEnvironmentConfiger {
       Promise<vscode.QuickPickItem|undefined> {
     const containerTemplates =
         templateListJson.templates.filter((template: ProjectTemplate) => {
-          return (template.tag === TemplateTag.DevelopmentEnvironment);
+          return (
+              template.tag === TemplateTag.DevelopmentEnvironment &&
+              template.platform === PlatformType.EmbeddedLinux);
         });
 
     const containerList: vscode.QuickPickItem[] = [];

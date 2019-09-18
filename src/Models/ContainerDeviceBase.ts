@@ -4,10 +4,11 @@
 import {Guid} from 'guid-typescript';
 import * as path from 'path';
 import * as vscode from 'vscode';
+
 import {FileNames, OperationType, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext} from '../telemetry';
-import {askAndOpenInRemote, channelShowAndAppendLine, generateTemplateFile, runCommand} from '../utils';
+import {askAndOpenInRemote, generateTemplateFile, runCommand} from '../utils';
 
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
@@ -17,13 +18,9 @@ import {RemoteExtension} from './RemoteExtension';
 
 const constants = {
   configFile: 'config.json',
+  compileTaskName: 'default compile script',
+  outputPathInContainer: '/work/output'
 };
-
-interface Config {
-  applicationName: string;
-  buildCommand: string;
-  buildTarget: string;
-}
 
 export abstract class ContainerDeviceBase implements Device {
   protected componentId: string;
@@ -75,9 +72,6 @@ export abstract class ContainerDeviceBase implements Device {
       throw new Error('Unable to find the project folder.');
     }
 
-    await IoTWorkbenchProjectBase.generateIotWorkbenchProjectFile(
-        scaffoldType, this.projectFolder);
-
     return true;
   }
 
@@ -88,8 +82,6 @@ export abstract class ContainerDeviceBase implements Device {
       throw new Error('Unable to find the project folder.');
     }
 
-    await IoTWorkbenchProjectBase.generateIotWorkbenchProjectFile(
-        scaffoldType, this.projectFolder);
     await this.generateTemplateFiles(scaffoldType, this.templateFilesInfo);
 
     return true;
@@ -130,46 +122,47 @@ export abstract class ContainerDeviceBase implements Device {
       }
     }
 
-    // load project config
-    const configPath = path.join(
-        this.projectFolder, FileNames.vscodeSettingsFolderName,
-        constants.configFile);
-    if (!await FileUtility.fileExists(ScaffoldType.Workspace, configPath)) {
-      const message = `Config file does not exist. Please check your settings.`;
-      await vscode.window.showWarningMessage(message);
+    const tasks = await vscode.tasks.fetchTasks();
+    if (!tasks || tasks.length < 1) {
       return false;
     }
 
-    const fileContent =
-        await FileUtility.readFile(ScaffoldType.Workspace, configPath);
-    const config: Config = JSON.parse(fileContent as string);
+    const compileTask = tasks.filter(task => {
+      return task.name === constants.compileTaskName;
+    });
+    if (!compileTask || compileTask.length < 1) {
+      return false;
+    }
 
-    channelShowAndAppendLine(
-        this.channel, `Compiling ${this.name} device code...`);
     try {
-      await runCommand(
-          config.buildCommand, [], this.projectFolder, this.channel);
+      await vscode.tasks.executeTask(compileTask[0]);
     } catch (error) {
-      throw new Error(`Failed to compile ${
-          this.name} device code. Error message: ${error.message}`);
+      throw new Error(`Failed to execute compilation task.`);
     }
 
-    // If successfully compiled, copy compiled files to user workspace
-    if (await FileUtility.directoryExists(
-            ScaffoldType.Workspace, config.buildTarget)) {
-      const getOutputFileCmd =
-          `cp -rf ${config.buildTarget} ${this.outputPath}`;
-      try {
-        await runCommand(getOutputFileCmd, [], '', this.channel);
-      } catch (error) {
-        throw new Error(`Failed to copy compiled files to output folder ${
-            this.outputPath}. Error message: ${error.message}`);
+    vscode.tasks.onDidEndTaskProcess(async (event) => {
+      if (event.exitCode === 0) {
+        // If task is successfully executed, copy compiled files to user
+        // workspace
+        if (await FileUtility.directoryExists(
+                ScaffoldType.Workspace, constants.outputPathInContainer)) {
+          const getOutputFileCmd =
+              `cp -rf ${constants.outputPathInContainer}/* ${this.outputPath}`;
+          try {
+            await runCommand(getOutputFileCmd, [], '', this.channel);
+          } catch (error) {
+            throw new Error(`Failed to copy compiled files to output folder ${
+                this.outputPath}. Error message: ${error.message}`);
+          }
+          return true;
+        } else {
+          throw new Error(
+              `Internal error: Cannot find output folder ${this.outputPath}.`);
+        }
+      } else {
+        return false;
       }
-    } else {
-      channelShowAndAppendLine(
-          this.channel, 'Bin files not found. Compilation may have failed.');
-      return false;
-    }
+    });
 
     return true;
   }

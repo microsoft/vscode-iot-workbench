@@ -8,6 +8,7 @@ import {CancelOperationError} from '../CancelOperationError';
 import {ConfigKey, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext} from '../telemetry';
+import * as utils from '../utils';
 
 import {checkAzureLogin} from './Apis';
 import {Compilable} from './Interfaces/Compilable';
@@ -31,6 +32,11 @@ export abstract class IoTWorkbenchProjectBase {
   protected telemetryContext: TelemetryContext;
   protected projectHostType: ProjectHostType = ProjectHostType.Unknown;
 
+  /**
+   * projectHostType config is recoreded in iot workbench project file
+   * @param scaffoldType
+   * @param projectFileRootPath
+   */
   static async getProjectType(
       scaffoldType: ScaffoldType,
       projectFileRootPath: string|undefined): Promise<ProjectHostType> {
@@ -39,25 +45,29 @@ export abstract class IoTWorkbenchProjectBase {
     }
     const iotWorkbenchProjectFile =
         path.join(projectFileRootPath, FileNames.iotworkbenchprojectFileName);
-    const devcontainerFolderPath =
-        path.join(projectFileRootPath, FileNames.devcontainerFolderName);
     if (!await FileUtility.fileExists(scaffoldType, iotWorkbenchProjectFile)) {
       return ProjectHostType.Unknown;
-    } else if (await FileUtility.directoryExists(
-                   scaffoldType, devcontainerFolderPath)) {
+    }
+    const iotworkbenchprojectFileString =
+        await FileUtility.readFile(
+            scaffoldType, iotWorkbenchProjectFile, 'utf8') as string;
+    if (iotworkbenchprojectFileString !== '') {
+      const projectConfig = JSON.parse(iotworkbenchprojectFileString);
+      if (projectConfig &&
+          projectConfig[`${ConfigKey.projectHostType}`] !== undefined) {
+        const projectHostType: ProjectHostType = utils.getEnumKeyByEnumValue(
+            ProjectHostType, projectConfig[`${ConfigKey.projectHostType}`]);
+        return projectHostType;
+      }
+    }
+
+    // TODO: For backward compatibility, will remove later
+    const devcontainerFolderPath =
+        path.join(projectFileRootPath, FileNames.devcontainerFolderName);
+    if (await FileUtility.directoryExists(
+            scaffoldType, devcontainerFolderPath)) {
       return ProjectHostType.Container;
     } else {
-      const iotworkbenchprojectFileString =
-          await FileUtility.readFile(
-              scaffoldType, iotWorkbenchProjectFile, 'utf8') as string;
-      if (iotworkbenchprojectFileString !== '') {
-        const projectConfig = JSON.parse(iotworkbenchprojectFileString);
-        if (projectConfig &&
-            projectConfig[`${ConfigKey.projectHostType}`] ===
-                ProjectHostType[ProjectHostType.Container]) {
-          return ProjectHostType.Container;
-        }
-      }
       return ProjectHostType.Workspace;
     }
   }
@@ -244,7 +254,7 @@ export abstract class IoTWorkbenchProjectBase {
             {ignoreFocusOut: true, placeHolder: 'Deploy process'});
 
         if (!selection) {
-          throw new CancelOperationError(`Componemt deployment cancelled.`);
+          throw new CancelOperationError(`Component deployment cancelled.`);
         }
 
         const res = await item.deploy();
@@ -282,7 +292,11 @@ export abstract class IoTWorkbenchProjectBase {
     return true;
   }
 
-  static async generateIotWorkbenchProjectFile(
+  /**
+   * Generate iot workbench project file if not exists,
+   * store project host type configuration
+   */
+  async generateIotWorkbenchProjectFile(
       type: ScaffoldType, projectFolder: string): Promise<void> {
     if (!await FileUtility.directoryExists(type, projectFolder)) {
       throw new Error('Unable to find the project folder.');
@@ -291,9 +305,25 @@ export abstract class IoTWorkbenchProjectBase {
     try {
       const iotworkbenchprojectFilePath =
           path.join(projectFolder, FileNames.iotworkbenchprojectFileName);
-      if (!await FileUtility.fileExists(type, iotworkbenchprojectFilePath)) {
-        await FileUtility.writeFile(type, iotworkbenchprojectFilePath, '');
+
+      let projectConfig: {[key: string]: string} = {};
+      if (await FileUtility.fileExists(type, iotworkbenchprojectFilePath)) {
+        const projectConfigContent =
+            await FileUtility.readFile(
+                type, iotworkbenchprojectFilePath, 'utf8') as string;
+        if (projectConfigContent !== '') {
+          projectConfig = JSON.parse(projectConfigContent);
+        }
       }
+
+      projectConfig[`${ConfigKey.projectHostType}`] =
+          ProjectHostType[this.projectHostType];
+
+      const indentationSpace = 4;
+      await FileUtility.writeFile(
+          type, iotworkbenchprojectFilePath,
+          JSON.stringify(projectConfig, null, indentationSpace));
+
     } catch (error) {
       throw new Error(
           `Create ${FileNames.iotworkbenchprojectFileName} file failed: ${
