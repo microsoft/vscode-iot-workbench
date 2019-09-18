@@ -333,7 +333,8 @@ export async function activate(context: vscode.ExtensionContext) {
                       dtContext, currentType));
                 }
                 const completionObject: {
-                  [key: string]: {required: boolean; type: string | undefined};
+                  [key: string]:
+                      {required: boolean; type: string | undefined};
                 } = {};
                 for (const keyObject of keyList) {
                   completionObject[keyObject.label] = {

@@ -34,9 +34,7 @@ export interface ARMParameterTemplate {
   [key: string]: ARMParameterTemplateValue;
 }
 
-export interface ARMTemplate {
-  parameters: ARMParameterTemplate;
-}
+export interface ARMTemplate { parameters: ARMParameterTemplate; }
 
 export class AzureUtility {
   private static _context: vscode.ExtensionContext;

@@ -388,8 +388,8 @@ export class CodeGeneratorCore {
           return connectionType.name === deviceConnectionSelection.label;
         });
 
-    const connectionType: DeviceConnectionType =
-        DeviceConnectionType[deviceConnection.type as keyof typeof DeviceConnectionType];
+    const connectionType: DeviceConnectionType = DeviceConnectionType
+        [deviceConnection.type as keyof typeof DeviceConnectionType];
 
     return connectionType;
   }

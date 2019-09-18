@@ -50,9 +50,7 @@ export interface DigitalTwinMetaModelGraph {
   Edges: GraphEdge[];
 }
 
-export interface Map<T> {
-  [key: string]: T;
-}
+export interface Map<T> { [key: string]: T; }
 
 export class DigitalTwinMetaModelParser {
   static LABEL = {

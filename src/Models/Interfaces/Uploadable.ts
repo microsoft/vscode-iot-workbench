@@ -1,6 +1,4 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-export interface Uploadable {
-  upload(): Promise<boolean>;
-}
+export interface Uploadable { upload(): Promise<boolean>; }
