@@ -100,7 +100,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     const azureConfigFileHandler =
         new azureComponentConfigModule.AzureConfigFileHandler(
             this.projectRootPath);
-    azureConfigFileHandler.createIfNotExists(loadTimeScaffoldType);
+    await azureConfigFileHandler.createIfNotExists(loadTimeScaffoldType);
 
     if (deviceLocation !== undefined) {
       const boardId = ConfigHandler.get<string>(ConfigKey.boardId);

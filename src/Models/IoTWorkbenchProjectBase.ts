@@ -51,7 +51,8 @@ export abstract class IoTWorkbenchProjectBase {
     const iotworkbenchprojectFileString =
         await FileUtility.readFile(
             scaffoldType, iotWorkbenchProjectFile, 'utf8') as string;
-    if (iotworkbenchprojectFileString) {
+    if (iotworkbenchprojectFileString &&
+        iotworkbenchprojectFileString !== ' ') {
       const projectConfig = JSON.parse(iotworkbenchprojectFileString);
       if (projectConfig &&
           projectConfig[`${ConfigKey.projectHostType}`] !== undefined) {
@@ -311,7 +312,7 @@ export abstract class IoTWorkbenchProjectBase {
         const projectConfigContent =
             await FileUtility.readFile(
                 type, iotworkbenchprojectFilePath, 'utf8') as string;
-        if (projectConfigContent !== '') {
+        if (projectConfigContent && projectConfigContent !== ' ') {
           projectConfig = JSON.parse(projectConfigContent);
         }
       }

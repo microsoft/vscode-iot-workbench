@@ -157,7 +157,7 @@ export class IoTHub implements Component, Provisionable {
           ConfigKey.eventHubConnectionPath, eventHubConnectionPath);
 
       const scaffoldType = ScaffoldType.Workspace;
-      this.updateConfigSettings(scaffoldType, {
+      await this.updateConfigSettings(scaffoldType, {
         values: {
           iotHubConnectionString: iothub.iotHubConnectionString,
           eventHubConnectionString,
