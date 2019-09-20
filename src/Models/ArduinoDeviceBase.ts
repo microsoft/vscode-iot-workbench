@@ -168,10 +168,10 @@ export abstract class ArduinoDeviceBase implements Device {
     }
 
     // Configurate device environment
-    await this.configDeviceEnvironment(
+    const res = await this.configDeviceEnvironment(
         this.deviceFolder, createTimeScaffoldType);
 
-    return true;
+    return res;
   }
 
   // Backward compatibility: Check configuration

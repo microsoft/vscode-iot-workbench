@@ -86,10 +86,10 @@ export abstract class ContainerDeviceBase implements Device {
     await this.generateTemplateFiles(
         createTimeScaffoldType, this.templateFilesInfo);
 
-    await this.configDeviceEnvironment(
+    const res = await this.configDeviceEnvironment(
         this.projectFolder, createTimeScaffoldType);
 
-    return true;
+    return res;
   }
 
   async generateTemplateFiles(
@@ -271,8 +271,7 @@ export abstract class ContainerDeviceBase implements Device {
 
     const containerList: vscode.QuickPickItem[] = [];
     containerTemplates.forEach((container: ProjectTemplate) => {
-      containerList.push(
-          {label: container.name, description: container.description});
+      containerList.push({label: container.name, detail: container.detail});
     });
 
     const containerSelection =
@@ -280,7 +279,7 @@ export abstract class ContainerDeviceBase implements Device {
           ignoreFocusOut: true,
           matchOnDescription: true,
           matchOnDetail: true,
-          placeHolder: 'Select a platform',
+          placeHolder: 'Select a toolchain container for your device platform',
         });
 
     return containerSelection;

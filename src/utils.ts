@@ -388,8 +388,7 @@ export async function getCodeGenTemplateFolderName(
 }
 
 export async function generateTemplateFile(
-    root: string, type: ScaffoldType,
-    fileInfo: TemplateFileInfo): Promise<boolean> {
+    root: string, type: ScaffoldType, fileInfo: TemplateFileInfo) {
   const targetFolderPath = path.join(root, fileInfo.targetPath);
   if (!(await FileUtility.directoryExists(type, targetFolderPath))) {
     await FileUtility.mkdirRecursively(type, targetFolderPath);
@@ -407,7 +406,7 @@ export async function generateTemplateFile(
           error.message}`);
     }
   }
-  return true;
+  return;
 }
 
 /**

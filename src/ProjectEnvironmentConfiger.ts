@@ -111,11 +111,12 @@ export class ProjectEnvironmentConfiger {
           // Add configuration files
           res = await project.configureProjectEnvironmentCore(
               rootPath, scaffoldType);
-          if (res) {
-            const message = `Successfully configure project environment.`;
-            utils.channelShowAndAppendLine(channel, message);
-            vscode.window.showInformationMessage(message);
+          if (!res) {
+            return;
           }
+          const message = `Successfully configure project environment.`;
+          utils.channelShowAndAppendLine(channel, message);
+          vscode.window.showInformationMessage(message);
 
           await project.openProject(rootPath, false);
         });
