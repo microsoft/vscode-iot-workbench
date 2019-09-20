@@ -15,7 +15,6 @@ import {generateTemplateFile} from '../utils';
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
 import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
-import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
 
 const constants = {
   timeout: 10000,
@@ -416,5 +415,10 @@ export class IoTButtonDevice implements Device {
     const res = await this.setConfig(uri, data);
 
     return res;
+  }
+
+  async configDeviceEnvironment(
+      projectPath: string, scaffoldType: ScaffoldType): Promise<boolean> {
+    return true;
   }
 }

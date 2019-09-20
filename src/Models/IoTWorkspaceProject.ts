@@ -6,11 +6,9 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, DevelopEnvironment, EventNames, FileNames, PlatformType, ScaffoldType} from '../constants';
+import {ConfigKey, DevelopEnvironment, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
-import {ProjectEnvironmentConfiger} from '../ProjectEnvironmentConfiger';
 import {TelemetryContext, TelemetryProperties, TelemetryWorker} from '../telemetry';
-import {channelShowAndAppendLine, generateTemplateFile} from '../utils';
 
 import {Dependency} from './AzureComponentConfig';
 import {Component} from './Interfaces/Component';
@@ -37,14 +35,12 @@ const ioTHubDeviceModule =
     impor('./IoTHubDevice') as typeof import('./IoTHubDevice');
 const streamAnalyticsJobModule =
     impor('./StreamAnalyticsJob') as typeof import('./StreamAnalyticsJob');
-const telemetryModule = impor('../telemetry') as typeof import('../telemetry');
 
 const constants = {
   deviceDefaultFolderName: 'Device',
   functionDefaultFolderName: 'Functions',
   asaFolderName: 'StreamAnalytics'
 };
-
 
 export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
   constructor(
@@ -54,9 +50,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     this.projectHostType = ProjectHostType.Workspace;
   }
 
-  async load(initLoad = false): Promise<boolean> {
-    const loadTimeScaffoldType = ScaffoldType.Workspace;
-
+  async load(scaffoldType: ScaffoldType, initLoad = false): Promise<boolean> {
     if (!(vscode.workspace.workspaceFolders &&
           vscode.workspace.workspaceFolders.length > 0)) {
       return false;
@@ -71,8 +65,8 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
         path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, '..');
 
     const deviceLocation = path.join(this.projectRootPath, devicePath);
-    await this.generateIotWorkbenchProjectFile(
-        loadTimeScaffoldType, deviceLocation);
+    await this.generateOrUpdateIotWorkbenchProjectFile(
+        scaffoldType, deviceLocation);
 
     // only send telemetry when the IoT project is load when VS Code opens
     if (initLoad) {
@@ -100,7 +94,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     const azureConfigFileHandler =
         new azureComponentConfigModule.AzureConfigFileHandler(
             this.projectRootPath);
-    await azureConfigFileHandler.createIfNotExists(loadTimeScaffoldType);
+    await azureConfigFileHandler.createIfNotExists(scaffoldType);
 
     if (deviceLocation !== undefined) {
       const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
@@ -128,12 +122,12 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     }
 
     const componentConfigs =
-        await azureConfigFileHandler.getSortedComponents(loadTimeScaffoldType);
+        await azureConfigFileHandler.getSortedComponents(scaffoldType);
     if (!componentConfigs || componentConfigs.length === 0) {
       // Support backward compact
       const iotHub =
           new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
-      await iotHub.updateConfigSettings(loadTimeScaffoldType);
+      await iotHub.updateConfigSettings(scaffoldType);
       await iotHub.load();
       this.componentList.push(iotHub);
       const device = new ioTHubDeviceModule.IoTHubDevice(this.channel);
@@ -149,7 +143,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
               component: iotHub,
               type: azureComponentConfigModule.DependencyType.Input
             }]);
-        await functionApp.updateConfigSettings(loadTimeScaffoldType);
+        await functionApp.updateConfigSettings(scaffoldType);
         await functionApp.load();
         this.componentList.push(functionApp);
       }
@@ -267,8 +261,6 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
             this.projectRootPath);
     await azureConfigFileHandler.createIfNotExists(createTimeScaffoldType);
 
-    const workspace: Workspace = {folders: [], settings: {}};
-
     // Whatever the template is, we will always create the device.
     const deviceDir =
         path.join(this.projectRootPath, constants.deviceDefaultFolderName);
@@ -276,12 +268,13 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     if (!await FileUtility.directoryExists(createTimeScaffoldType, deviceDir)) {
       await FileUtility.mkdirRecursively(createTimeScaffoldType, deviceDir);
     }
-    await this.generateIotWorkbenchProjectFile(
+    await this.generateOrUpdateIotWorkbenchProjectFile(
         createTimeScaffoldType, deviceDir);
 
+    const workspace: Workspace = {folders: [], settings: {}};
     workspace.folders.push({path: constants.deviceDefaultFolderName});
-    let device: Component;
 
+    let device: Component;
     if (boardId === az3166DeviceModule.AZ3166Device.boardId) {
       device = new az3166DeviceModule.AZ3166Device(
           this.extensionContext, this.channel, this.telemetryContext, deviceDir,
@@ -460,68 +453,38 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
           createTimeScaffoldType, vscodeFolderPath);
     }
 
+    // Open project
+    await this.openProject(deviceDir, openInNewWindow);
+  }
+
+  async openProject(deviceDir: string, openInNewWindow: boolean) {
+    const projectPath = path.join(deviceDir, '..');
+    const projectFiles = fs.readdirSync(projectPath);
+    const workspaceConfigFileName = projectFiles.filter(file => {
+      return path.extname(file).toLocaleLowerCase() ===
+          FileNames.workspaceExtensionName;
+    });
+    if (!workspaceConfigFileName) {
+      throw new Error(`Cannot find workspace config file.`);
+    }
+
+    // Wait until all telemetry data is sent before restart the current window.
     if (!openInNewWindow) {
       // If open in current window, VSCode will restart. Need to send telemetry
       // before VSCode restart to advoid data lost.
       try {
-        telemetryModule.TelemetryWorker.sendEvent(
+        TelemetryWorker.sendEvent(
             EventNames.createNewProjectEvent, this.telemetryContext);
       } catch {
         // If sending telemetry failed, skip the error to avoid blocking user.
       }
     }
 
-    // Configure project and open in container
-    const projectEnvConfiger = new ProjectEnvironmentConfiger();
-    projectEnvConfiger.configureProjectEnvironmentCore(
-        this.extensionContext, this.channel, this.telemetryContext, deviceDir,
-        PlatformType.Arduino, openInNewWindow);
-  }
-
-  async configureProjectEnv(
-      channel: vscode.OutputChannel, telemetryContext: TelemetryContext,
-      scaffoldType: ScaffoldType, configureRootPath: string,
-      templateFilesInfo: TemplateFileInfo[], openInNewWindow: boolean) {
-    // 1. Scaffold template files
-    for (const fileInfo of templateFilesInfo) {
-      await generateTemplateFile(configureRootPath, scaffoldType, fileInfo);
-    }
-
-    const projectRootPath = path.join(configureRootPath, '..');
-    // 2. open project
-    const workspaceConfigFilePath = path.join(
-        projectRootPath,
-        `${path.basename(projectRootPath)}${FileNames.workspaceExtensionName}`);
+    const workspaceConfigFilePath =
+        path.join(projectPath, workspaceConfigFileName[0]);
     setTimeout(
         () => vscode.commands.executeCommand(
             'iotcube.openLocally', workspaceConfigFilePath, openInNewWindow),
         500);
-
-    const message =
-        'Configuration is done. You can run \'Azure IoT Device Workbench: Compile Device Code\' command to compile device code';
-
-    channelShowAndAppendLine(channel, message);
-    vscode.window.showInformationMessage(message);
-  }
-
-  /**
-   * For backward compatibility, upgrade iot workbench project file,
-   * adding project host type config in iot workbench project file.
-   */
-  static async updateIoTWorkbenchProjectFile(
-      type: ScaffoldType, projectFolder: string): Promise<void> {
-    const iotworkbenchprojectFilePath =
-        path.join(projectFolder, FileNames.iotworkbenchprojectFileName);
-    if (!await FileUtility.fileExists(type, iotworkbenchprojectFilePath)) {
-      throw new Error(`Cannot find iot workbench project file.`);
-    }
-
-    const projectConfig: {[key: string]: string} = {};
-    projectConfig[`${ConfigKey.projectHostType}`] = ProjectHostType.Workspace;
-
-    const indentationSpace = 4;
-    FileUtility.writeFile(
-        type, iotworkbenchprojectFilePath,
-        JSON.stringify(projectConfig, null, indentationSpace));
   }
 }

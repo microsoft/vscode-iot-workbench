@@ -7,13 +7,23 @@
           "label": "Arduino Compile",
           "type": "shell",
           "command": "echo ${input:arduinoCompile}"
+      },
+      {
+          "label": "Arduino Upload",
+          "type": "shell",
+          "command": "echo ${input:arduinoUpload}"
       }
   ],
   "inputs": [
       {
           "id": "arduinoCompile",
           "type": "command",
-          "command": "arduino.verify",
+          "command": "arduino.verify"
+      },
+      {
+          "id": "arduinoUpload",
+          "type": "command",
+          "command": "arduino.upload"
       }
   ]
 }

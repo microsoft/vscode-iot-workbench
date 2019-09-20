@@ -5,8 +5,9 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+import {CancelOperationError} from '../CancelOperationError';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, DependentExtensions, FileNames, ScaffoldType} from '../constants';
+import {ConfigKey, DependentExtensions, FileNames, ScaffoldType, TemplateTag} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {IoTWorkbenchSettings} from '../IoTSettings';
 import {TelemetryContext} from '../telemetry';
@@ -15,8 +16,7 @@ import * as utils from '../utils';
 import {Board} from './Interfaces/Board';
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
-import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
-import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
+import {ProjectTemplate, TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {OTA} from './OTA';
 
 const constants = {
@@ -26,7 +26,8 @@ const constants = {
   cppPropertiesFileNameMac: 'c_cpp_properties_macos.json',
   cppPropertiesFileNameWin: 'c_cpp_properties_win32.json',
   outputPath: './.build',
-  compileTaskName: 'Arduino Compile'
+  compileTaskName: 'Arduino Compile',
+  environmentTemplateFolderName: 'Arduino Task'
 };
 
 
@@ -139,6 +140,7 @@ export abstract class ArduinoDeviceBase implements Device {
 
   async createCore(board: Board|undefined, templateFiles: TemplateFileInfo[]):
       Promise<boolean> {
+    // Generate template files
     const createTimeScaffoldType = ScaffoldType.Local;
     if (!await FileUtility.directoryExists(
             createTimeScaffoldType, this.deviceFolder)) {
@@ -164,9 +166,15 @@ export abstract class ArduinoDeviceBase implements Device {
             this.deviceFolder, createTimeScaffoldType, fileInfo);
       }
     }
+
+    // Configurate device environment
+    await this.configDeviceEnvironment(
+        this.deviceFolder, createTimeScaffoldType);
+
     return true;
   }
 
+  // Backward compatibility: Check configuration
   abstract async preCompileAction(): Promise<boolean>;
 
   abstract async preUploadAction(): Promise<boolean>;
@@ -298,6 +306,76 @@ export abstract class ArduinoDeviceBase implements Device {
     channel.appendLine('fwSize: ' + res.size);
     channel.appendLine('');
     channel.appendLine('======================================');
+
+    return true;
+  }
+
+  async configDeviceEnvironment(deviceDir: string, scaffoldType: ScaffoldType):
+      Promise<boolean> {
+    if (!deviceDir) {
+      throw new Error(
+          'Unable to find the project device path, please open the folder and initialize project again.');
+    }
+
+    // Get template list json object
+    const templateJsonFilePath = this.extensionContext.asAbsolutePath(path.join(
+        FileNames.resourcesFolderName, FileNames.templatesFolderName,
+        FileNames.templateFileName));
+    const templateJsonFileString =
+        await FileUtility.readFile(
+            scaffoldType, templateJsonFilePath, 'utf8') as string;
+    const templateJson = JSON.parse(templateJsonFileString);
+    if (!templateJson) {
+      throw new Error('Fail to load template list.');
+    }
+
+    // Get environment template files
+    const projectEnvTemplate: ProjectTemplate[] =
+        templateJson.templates.filter((template: ProjectTemplate) => {
+          return (
+              template.tag === TemplateTag.DevelopmentEnvironment &&
+              template.name === constants.environmentTemplateFolderName);
+        });
+    if (!(projectEnvTemplate && projectEnvTemplate.length > 0)) {
+      throw new Error(
+          `Fail to get project development environment template files.`);
+    }
+    const templateFolderName = projectEnvTemplate[0].path;
+    const templateFolder = this.extensionContext.asAbsolutePath(path.join(
+        FileNames.resourcesFolderName, FileNames.templatesFolderName,
+        templateFolderName));
+    const templateFilesInfo: TemplateFileInfo[] =
+        await utils.getTemplateFilesInfo(templateFolder);
+
+    // Step 3: Ask overwrite or not
+    let overwriteAll = false;
+    try {
+      overwriteAll = await utils.askToOverwrite(
+          scaffoldType, deviceDir, templateFilesInfo);
+    } catch (error) {
+      if (error instanceof CancelOperationError) {
+        this.telemetryContext.properties.result = 'Cancelled';
+        this.telemetryContext.properties.errorMessage = error.message;
+        return false;
+      } else {
+        throw error;
+      }
+    }
+    if (!overwriteAll) {
+      const message =
+          'Do not overwrite configuration files and cancel configuration process.';
+      this.telemetryContext.properties.errorMessage = message;
+      this.telemetryContext.properties.result = 'Cancelled';
+      return false;
+    }
+
+    // Step 4: Configure project environment with template files
+    for (const fileInfo of templateFilesInfo) {
+      await utils.generateTemplateFile(deviceDir, scaffoldType, fileInfo);
+    }
+
+    const message = 'Arduino device configuration done.';
+    utils.channelShowAndAppendLine(this.channel, message);
 
     return true;
   }

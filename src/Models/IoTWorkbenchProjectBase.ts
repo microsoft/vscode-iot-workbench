@@ -98,7 +98,8 @@ export abstract class IoTWorkbenchProjectBase {
     this.telemetryContext = telemetryContext;
   }
 
-  abstract async load(initLoad?: boolean): Promise<boolean>;
+  abstract async load(scaffoldType: ScaffoldType, initLoad?: boolean):
+      Promise<boolean>;
 
   async compile(): Promise<boolean> {
     for (const item of this.componentList) {
@@ -109,7 +110,7 @@ export abstract class IoTWorkbenchProjectBase {
         }
 
         const res = await item.compile();
-        if (res === false) {
+        if (!res) {
           throw new Error(
               'Unable to compile the device code, please check output window for detail.');
         }
@@ -275,13 +276,25 @@ export abstract class IoTWorkbenchProjectBase {
 
   /**
    * Configure project environment: Scaffold configuration files with the given
-   * template files and open project properly.
+   * template files.
    */
-  abstract async configureProjectEnv(
-      channel: vscode.OutputChannel, telemetryContext: TelemetryContext,
-      scaffoldType: ScaffoldType, configureRootPath: string,
-      templateFilesInfo: TemplateFileInfo[],
-      openInNewWindow: boolean): Promise<void>;
+  async configureProjectEnvironmentCore(
+      projectPath: string, scaffoldType: ScaffoldType): Promise<boolean> {
+    for (const component of this.componentList) {
+      if (component.getComponentType() === ComponentType.Device) {
+        const device = component as Device;
+        const res =
+            await device.configDeviceEnvironment(projectPath, scaffoldType);
+        if (!res) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  abstract async openProject(projectPath: string, openInNewWindow: boolean):
+      Promise<void>;
 
   async configDeviceSettings(): Promise<boolean> {
     for (const component of this.componentList) {
@@ -294,10 +307,10 @@ export abstract class IoTWorkbenchProjectBase {
   }
 
   /**
-   * Generate iot workbench project file if not exists,
-   * store project host type configuration
+   * Generate iot workbench project file if not exists.
+   * Update project host type configuration in iot workbench project file.
    */
-  async generateIotWorkbenchProjectFile(
+  async generateOrUpdateIotWorkbenchProjectFile(
       type: ScaffoldType, projectFolder: string): Promise<void> {
     if (!await FileUtility.directoryExists(type, projectFolder)) {
       throw new Error('Unable to find the project folder.');
@@ -326,9 +339,9 @@ export abstract class IoTWorkbenchProjectBase {
           JSON.stringify(projectConfig, null, indentationSpace));
 
     } catch (error) {
-      throw new Error(
-          `Create ${FileNames.iotworkbenchprojectFileName} file failed: ${
-              error.message}`);
+      throw new Error(`Generate or update ${
+          FileNames.iotworkbenchprojectFileName} file failed: ${
+          error.message}`);
     }
   }
 }

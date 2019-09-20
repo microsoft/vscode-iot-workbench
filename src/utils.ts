@@ -4,10 +4,10 @@
 import * as cp from 'child_process';
 import * as fs from 'fs-plus';
 import * as path from 'path';
-import {setTimeout} from 'timers';
 import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
 
+import {CancelOperationError} from './CancelOperationError';
 import {AzureFunctionsLanguage, FileNames, GlobalConstants, OperationType, ScaffoldType, TemplateTag} from './constants';
 import {DialogResponses} from './DialogResponses';
 import {CodeGenProjectType, DeviceConnectionType} from './DigitalTwin/DigitalTwinCodeGen/Interfaces/CodeGenerator';
@@ -450,15 +450,21 @@ export function channelShowAndAppendLine(
   channel.appendLine(message);
 }
 
+/**
+ * Construct and load iot project.
+ * If it is a workspace project not properly opened, prompt to open workspace.
+ * If it is properly opened, load project
+ */
 export async function constructAndLoadIoTProject(
     context: vscode.ExtensionContext, channel: vscode.OutputChannel,
     telemetryContext: TelemetryContext, askNewProject = true) {
   let projectHostType;
+  const scaffoldType = ScaffoldType.Workspace;
   if (vscode.workspace.workspaceFolders &&
       vscode.workspace.workspaceFolders.length > 0) {
     const projectFileRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
     projectHostType = await IoTWorkbenchProjectBase.getProjectType(
-        ScaffoldType.Workspace, projectFileRootPath);
+        scaffoldType, projectFileRootPath);
     let iotProject;
     if (projectHostType === ProjectHostType.Container) {
       iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
@@ -477,7 +483,7 @@ export async function constructAndLoadIoTProject(
       return;
     }
 
-    const result = await iotProject.load();
+    const result = await iotProject.load(scaffoldType);
     if (!result) {
       await askAndNewProject(telemetryContext);
       return;
@@ -527,4 +533,66 @@ export async function selectPlatform(
   });
 
   return platformSelection;
+}
+
+
+enum OverwriteLabel {
+  No = 'No',
+  YesToAll = 'Yes to all'
+}
+/**
+ * If one of any configuration files already exists, ask to overwrite all or
+ * cancel configuration process.
+ * @returns true - overwrite all configuration files; false - cancel
+ * configuration process.
+ */
+export async function askToOverwrite(
+    scaffoldType: ScaffoldType, projectPath: string,
+    templateFilesInfo: TemplateFileInfo[]): Promise<boolean> {
+  // Check whether configuration file exists
+  for (const fileInfo of templateFilesInfo) {
+    const targetFilePath =
+        path.join(projectPath, fileInfo.targetPath, fileInfo.fileName);
+    if (await FileUtility.fileExists(scaffoldType, targetFilePath)) {
+      const fileOverwrite = await askToOverwriteFile(fileInfo.fileName);
+
+      return fileOverwrite.label === OverwriteLabel.YesToAll;
+    }
+  }
+
+  // No files exist, overwrite directly.
+  return true;
+}
+
+/**
+ * Ask whether to overwrite all configuration files
+ */
+export async function askToOverwriteFile(fileName: string):
+    Promise<vscode.QuickPickItem> {
+  const overwriteTasksJsonOption: vscode.QuickPickItem[] = [];
+  overwriteTasksJsonOption.push(
+      {
+        label: OverwriteLabel.No,
+        detail:
+            'Do not overwrite existed file and cancel the configuration process.'
+      },
+      {
+        label: OverwriteLabel.YesToAll,
+        detail: 'Automatically overwrite all configuration files.'
+      });
+
+  const overwriteSelection =
+      await vscode.window.showQuickPick(overwriteTasksJsonOption, {
+        ignoreFocusOut: true,
+        placeHolder: `Configuration file ${
+            fileName} already exists. Do you want to overwrite all existed configuration files or cancel the configuration process?`
+      });
+
+  if (overwriteSelection === undefined) {
+    // Selection was cancelled
+    throw new CancelOperationError(
+        `Ask to overwrite ${fileName} selection cancelled.`);
+  }
+
+  return overwriteSelection;
 }
