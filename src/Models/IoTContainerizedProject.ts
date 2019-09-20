@@ -230,7 +230,11 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
   private async askToCustomize(): Promise<boolean> {
     const customizationOption: vscode.QuickPickItem[] = [];
     customizationOption.push(
-        {label: `No`, description: ''}, {label: `Yes`, description: ''});
+        {label: `No`, detail: 'The project will be open in container.'}, {
+          label: `Yes`,
+          detail:
+              'The project will remain local and you can add customized settings for container.'
+        });
 
     const customizationSelection =
         await vscode.window.showQuickPick(customizationOption, {
