@@ -333,6 +333,10 @@ export abstract class IoTWorkbenchProjectBase {
       projectConfig[`${ConfigKey.projectHostType}`] =
           ProjectHostType[this.projectHostType];
 
+      // Add config version for easier backward compatibility in the future.
+      const workbenchVersion = '1.0.0';
+      projectConfig[`${ConfigKey.workbenchVersion}`] = workbenchVersion;
+
       const indentationSpace = 4;
       await FileUtility.writeFile(
           type, iotworkbenchprojectFilePath,
