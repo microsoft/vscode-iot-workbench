@@ -5,7 +5,7 @@ project(azure_sample_project)
 set(CMAKE_C_FLAGS "--std=c99 ${CMAKE_C_FLAGS}")
 
 set(iothub_c_files
-        iothub_sample.c
+        main.c
 )
 
 # Set up the include and library paths
