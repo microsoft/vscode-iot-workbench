@@ -18,8 +18,7 @@ import {RemoteExtension} from './RemoteExtension';
 
 const constants = {
   configFile: 'config.json',
-  compileTaskName: 'default compile script',
-  outputPathInContainer: '/work/output'
+  compileTaskName: 'default compile script'
 };
 
 export abstract class ContainerDeviceBase implements Device {
@@ -129,17 +128,6 @@ export abstract class ContainerDeviceBase implements Device {
       }
     }
 
-    if (!await FileUtility.directoryExists(
-            ScaffoldType.Workspace, this.outputPath)) {
-      try {
-        await FileUtility.mkdirRecursively(
-            ScaffoldType.Workspace, this.outputPath);
-      } catch (error) {
-        throw new Error(`Failed to create output path ${
-            this.outputPath}. Error message: ${error.message}`);
-      }
-    }
-
     const tasks = await vscode.tasks.fetchTasks();
     if (!tasks || tasks.length < 1) {
       return false;
@@ -157,30 +145,6 @@ export abstract class ContainerDeviceBase implements Device {
     } catch (error) {
       throw new Error(`Failed to execute compilation task.`);
     }
-
-    vscode.tasks.onDidEndTaskProcess(async (event) => {
-      if (event.exitCode === 0) {
-        // If task is successfully executed, copy compiled files to user
-        // workspace
-        if (await FileUtility.directoryExists(
-                ScaffoldType.Workspace, constants.outputPathInContainer)) {
-          const getOutputFileCmd = `rm -rf ${this.outputPath} && cp -rf ${
-              constants.outputPathInContainer}/* ${this.outputPath}`;
-          try {
-            await utils.runCommand(getOutputFileCmd, [], '', this.channel);
-          } catch (error) {
-            throw new Error(`Failed to copy compiled files to output folder ${
-                this.outputPath}. Error message: ${error.message}`);
-          }
-          return true;
-        } else {
-          throw new Error(
-              `Internal error: Cannot find output folder ${this.outputPath}.`);
-        }
-      } else {
-        return false;
-      }
-    });
 
     return true;
   }

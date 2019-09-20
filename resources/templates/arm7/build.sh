@@ -6,7 +6,8 @@ azure_c_sdk_directory="/work/azure-iot-sdk-c"
 cmake_directory="${azure_c_sdk_directory}/cmake"
 CMakeLists_file_path="${azure_c_sdk_directory}/CMakeLists.txt"
 CMakeLists_defaulit_file_path="${azure_c_sdk_directory}/default_CMakeLists.txt"
-output_folder="/work/output"
+current_dir=`dirname $(readlink -f $0)`
+output_folder="${current_dir}/.build"
 
 if [[ $# == 0 ]]; then
   echo "Usage: $0 <srcFileFolder> [application name]"
