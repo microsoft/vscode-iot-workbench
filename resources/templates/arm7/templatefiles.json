@@ -19,6 +19,11 @@
       "fileName": "tasks.json",
       "sourcePath" : ".",
       "targetPath" : "./.vscode"
+    },
+    {
+      "fileName": "build.sh",
+      "sourcePath" : ".",
+      "targetPath" : "."
     }
   ]
 }

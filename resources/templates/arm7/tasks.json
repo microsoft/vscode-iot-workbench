@@ -6,7 +6,7 @@
       {
           "label": "default compile script",
           "type": "shell",
-          "command": "bash /work/compile_app.sh ./src iot_application",
+          "command": "bash ./build.sh . ${project_name}",
           "group": {
               "kind": "build",
               "isDefault": true

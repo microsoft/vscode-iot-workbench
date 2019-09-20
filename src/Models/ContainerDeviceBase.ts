@@ -84,7 +84,7 @@ export abstract class ContainerDeviceBase implements Device {
     }
 
     await this.generateTemplateFiles(
-        createTimeScaffoldType, this.templateFilesInfo);
+        createTimeScaffoldType, this.projectFolder, this.templateFilesInfo);
 
     const res = await this.configDeviceEnvironment(
         this.projectFolder, createTimeScaffoldType);
@@ -93,14 +93,27 @@ export abstract class ContainerDeviceBase implements Device {
   }
 
   async generateTemplateFiles(
-      type: ScaffoldType,
+      type: ScaffoldType, projectPath: string,
       templateFilesInfo: TemplateFileInfo[]): Promise<boolean> {
     if (!templateFilesInfo) {
       throw new Error('No template file provided.');
     }
 
+    if (!projectPath) {
+      throw new Error(`Project path is empty.`);
+    }
+
     // Cannot use forEach here since it's async
     for (const fileInfo of templateFilesInfo) {
+      // Replace binary name in CMakeLists.txt to project name
+      if (fileInfo.fileName === 'CMakeLists.txt') {
+        const pattern = '${project_name}';
+        const projectName = path.basename(projectPath);
+        if (fileInfo.fileContent) {
+          fileInfo.fileContent =
+              fileInfo.fileContent.replace(pattern, projectName);
+        }
+      }
       await utils.generateTemplateFile(this.projectFolder, type, fileInfo);
     }
     return true;
@@ -151,8 +164,8 @@ export abstract class ContainerDeviceBase implements Device {
         // workspace
         if (await FileUtility.directoryExists(
                 ScaffoldType.Workspace, constants.outputPathInContainer)) {
-          const getOutputFileCmd =
-              `cp -rf ${constants.outputPathInContainer}/* ${this.outputPath}`;
+          const getOutputFileCmd = `rm -rf ${this.outputPath} && cp -rf ${
+              constants.outputPathInContainer}/* ${this.outputPath}`;
           try {
             await utils.runCommand(getOutputFileCmd, [], '', this.channel);
           } catch (error) {
@@ -251,6 +264,16 @@ export abstract class ContainerDeviceBase implements Device {
 
     // Step 4: Configure project environment with template files
     for (const fileInfo of templateFilesInfo) {
+      // Replace binary name in tasks.json to project name
+      if (fileInfo.fileName === 'tasks.json') {
+        const pattern = '${project_name}';
+        const projectName = path.basename(projectPath);
+        if (fileInfo.fileContent) {
+          fileInfo.fileContent =
+              fileInfo.fileContent.replace(pattern, projectName);
+        }
+      }
+
       await utils.generateTemplateFile(projectPath, scaffoldType, fileInfo);
     }
 
