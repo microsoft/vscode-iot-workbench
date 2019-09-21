@@ -53,12 +53,10 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     }
 
     try {
-      const binFilePath =
-          path.join(this.outputPath, 'iot_application/azure_iot_app');
-
-      if (!await FileUtility.fileExists(ScaffoldType.Workspace, binFilePath)) {
+      if (!await FileUtility.fileExists(
+              ScaffoldType.Workspace, this.outputPath)) {
         const message =
-            `Binary file does not exist. Please compile device code first.`;
+            `Output folder does not exist. Please compile device code first.`;
         await vscode.window.showWarningMessage(message);
         return false;
       }
@@ -76,7 +74,9 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
           RaspberryPiUploadConfig.host, RaspberryPiUploadConfig.port,
           RaspberryPiUploadConfig.user, RaspberryPiUploadConfig.password);
       try {
-        await ssh.uploadFile(binFilePath, RaspberryPiUploadConfig.projectPath);
+        // Upload the entire output folder to device.
+        await ssh.uploadFile(
+            this.outputPath, RaspberryPiUploadConfig.projectPath);
         const enableExecPriorityCommand =
             `cd ${RaspberryPiUploadConfig.projectPath} && chmod -R 755 .\/`;
         const command = ssh.spawn(enableExecPriorityCommand);
@@ -91,8 +91,6 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
             `Deploy binary file to device ${RaspberryPiUploadConfig.user}@${
                 RaspberryPiUploadConfig.host} failed. ${error.message}`);
       }
-
-      // await ssh.close();
 
       const message = `Successfully deploy bin file to Raspberry Pi board.`;
       channelShowAndAppendLine(this.channel, message);
