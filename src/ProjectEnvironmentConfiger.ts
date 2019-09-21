@@ -62,65 +62,80 @@ export class ProjectEnvironmentConfiger {
                 PlatformType, platformSelection.label);
           }
 
-          if (platform === PlatformType.Arduino) {
-            // First ensure the project is correctly open.
-            const iotProject = await utils.constructAndLoadIoTProject(
-                context, channel, telemetryContext);
-            if (iotProject === undefined) {
-              return;
-            }
-
-            // Validate platform.
-            // Only iot workbench Arduino project created by workbench extension
-            // can be configured as Arduino platform(for upgrade).
-            const projectHostType =
-                await IoTWorkbenchProjectBase.getProjectType(
-                    scaffoldType, rootPath);
-            if (projectHostType !== ProjectHostType.Workspace) {
-              const message =
-                  `This is not an iot workbench Arduino projects. You cannot configure it as Arduino platform.`;
-              utils.channelShowAndAppendLine(channel, message);
-              vscode.window.showInformationMessage(message);
-              return;
-            }
-          }
-
-          let project;
-          if (platform === PlatformType.EmbeddedLinux) {
-            telemetryContext.properties.projectHostType = 'Container';
-            project = new ioTContainerizedProjectModule.IoTContainerizedProject(
-                context, channel, telemetryContext);
-
-            // If external project, construct as RaspberryPi Device based
-            // container iot workbench project
-            await project.handleExternalProject(scaffoldType);
-
-          } else if (platform === PlatformType.Arduino) {
-            telemetryContext.properties.projectHostType = 'Workspace';
-            project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
-                context, channel, telemetryContext);
-          } else {
-            throw new Error('unsupported platform');
-          }
-
-          let res = await project.load(scaffoldType);
+          const res = await ProjectEnvironmentConfiger
+                          .configureProjectEnvironmentAsPlatform(
+                              context, channel, telemetryContext, platform,
+                              rootPath, scaffoldType);
           if (!res) {
             return;
           }
 
-          // Add configuration files
-          res = await project.configureProjectEnvironmentCore(
-              rootPath, scaffoldType);
-          if (!res) {
-            return;
-          }
           const message = `Successfully configure project environment.`;
           utils.channelShowAndAppendLine(channel, message);
           vscode.window.showInformationMessage(message);
-
-          await project.openProject(rootPath, false);
         });
 
     return;
+  }
+
+  static async configureProjectEnvironmentAsPlatform(
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext, platform: PlatformType,
+      rootPath: string, scaffoldType: ScaffoldType): Promise<boolean> {
+    if (platform === PlatformType.Arduino) {
+      // First ensure the project is correctly open.
+      const iotProject = await utils.constructAndLoadIoTProject(
+          context, channel, telemetryContext);
+      if (iotProject === undefined) {
+        return false;
+      }
+
+      // Validate platform.
+      // Only iot workbench Arduino project created by workbench extension
+      // can be configured as Arduino platform(for upgrade).
+      const projectHostType =
+          await IoTWorkbenchProjectBase.getProjectType(scaffoldType, rootPath);
+      if (projectHostType !== ProjectHostType.Workspace) {
+        const message =
+            `This is not an iot workbench Arduino projects. You cannot configure it as Arduino platform.`;
+        utils.channelShowAndAppendLine(channel, message);
+        vscode.window.showInformationMessage(message);
+        return false;
+      }
+    }
+
+    let project;
+    if (platform === PlatformType.EmbeddedLinux) {
+      telemetryContext.properties.projectHostType = 'Container';
+      project = new ioTContainerizedProjectModule.IoTContainerizedProject(
+          context, channel, telemetryContext);
+
+      // If external project, construct as RaspberryPi Device based
+      // container iot workbench project
+      await project.constructExternalProjectToIotProject(scaffoldType);
+
+    } else if (platform === PlatformType.Arduino) {
+      telemetryContext.properties.projectHostType = 'Workspace';
+      project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
+          context, channel, telemetryContext);
+    } else {
+      throw new Error('unsupported platform');
+    }
+
+    let res = await project.load(scaffoldType);
+    if (!res) {
+      throw new Error(
+          `Failed to load project. Project environment configuration stopped.`);
+    }
+
+    // Add configuration files
+    res = await project.configureProjectEnvironmentCore(rootPath, scaffoldType);
+    if (!res) {
+      // User cancel configuration selection
+      return false;
+    }
+
+    await project.openProject(rootPath, false);
+    return true;
   }
 }

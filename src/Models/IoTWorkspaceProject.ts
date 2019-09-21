@@ -459,11 +459,11 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
 
   async openProject(deviceDir: string, openInNewWindow: boolean) {
     const projectPath = path.join(deviceDir, '..');
-    const projectFiles = fs.readdirSync(projectPath);
-    const workspaceConfigFileName = projectFiles.filter(file => {
-      return path.extname(file).toLocaleLowerCase() ===
-          FileNames.workspaceExtensionName;
-    });
+    const workspaceConfigFileName =
+        fs.readdirSync(projectPath)
+            .filter(
+                file => path.extname(file).endsWith(
+                    FileNames.workspaceExtensionName));
     if (!workspaceConfigFileName) {
       throw new Error(`Cannot find workspace config file.`);
     }

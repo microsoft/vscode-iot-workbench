@@ -5,10 +5,11 @@ import * as cp from 'child_process';
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import {MessageItem} from 'vscode';
 import * as WinReg from 'winreg';
 
 import {CancelOperationError} from './CancelOperationError';
-import {AzureFunctionsLanguage, FileNames, GlobalConstants, OperationType, ScaffoldType, TemplateTag} from './constants';
+import {AzureFunctionsLanguage, FileNames, GlobalConstants, OperationType, PlatformType, ScaffoldType, TemplateTag} from './constants';
 import {DialogResponses} from './DialogResponses';
 import {CodeGenProjectType, DeviceConnectionType} from './DigitalTwin/DigitalTwinCodeGen/Interfaces/CodeGenerator';
 import {FileUtility} from './FileUtility';
@@ -16,6 +17,7 @@ import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 import {ProjectTemplate, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
 import {Platform} from './Models/Interfaces/ProjectTemplate';
 import {RemoteExtension} from './Models/RemoteExtension';
+import {ProjectEnvironmentConfiger} from './ProjectEnvironmentConfiger';
 import {TelemetryContext} from './telemetry';
 
 const impor = require('impor')(__dirname);
@@ -203,19 +205,37 @@ export function runCommand(
   });
 }
 
-export async function askAndNewProject(telemetryContext: TelemetryContext) {
-  const message =
-      'An IoT project is needed to process the operation, do you want to create an IoT project?';
+/**
+ * Pop out information window suggesting user to configure project environment
+ * first.
+ * @returns true - configure successfully; false - fail to configure or cancel
+ * configuration.
+ */
+export async function askToConfigureEnvironment(
+    context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+    telemetryContext: TelemetryContext, platform: PlatformType,
+    rootPath: string, scaffoldType: ScaffoldType, operation: OperationType) {
+  const message = `${
+      operation} operation failed because the project environment needs configuring. Do you want to configure project environment first?`;
   const result:|vscode.MessageItem|undefined =
       await vscode.window.showInformationMessage(
           message, DialogResponses.yes, DialogResponses.no);
 
   if (result === DialogResponses.yes) {
     telemetryContext.properties.errorMessage =
-        'Operation failed and user creates new project';
-    await vscode.commands.executeCommand('iotworkbench.initializeProject');
+        `${operation} operation failed and user configures project`;
+    const res =
+        await ProjectEnvironmentConfiger.configureProjectEnvironmentAsPlatform(
+            context, channel, telemetryContext, platform, rootPath,
+            scaffoldType);
+    if (res) {
+      const message =
+          `Configuration of project environmnet done. You can run the ${
+              operation.toLocaleLowerCase()} operation now.`;
+      channelShowAndAppendLine(channel, message);
+    }
   } else {
-    telemetryContext.properties.errorMessage = 'Operation failed.';
+    telemetryContext.properties.errorMessage = `${operation} operation failed.`;
   }
 }
 
@@ -255,14 +275,14 @@ export async function askAndOpenInRemote(
     const res = await RemoteExtension.checkRemoteExtension(channel);
     if (!res) {
       telemetryContext.properties.errorMessage =
-          `${operation} Operation failed on installing Remote Extension.`;
+          `${operation} operation failed on installing Remote Extension.`;
       return false;
     }
     await vscode.commands.executeCommand('openindocker.reopenInContainer');
   } else {
     const message = `${operation} can only be executed in remote container.`;
     channelShowAndAppendLine(channel, message);
-    telemetryContext.properties.errorMessage = 'Operation failed.';
+    telemetryContext.properties.errorMessage = `${operation} operation failed.`;
   }
 
   return false;
@@ -409,16 +429,81 @@ export async function generateTemplateFile(
   return;
 }
 
+export function channelShowAndAppend(
+    channel: vscode.OutputChannel, message: string) {
+  channel.show();
+  channel.append(message);
+}
+
+export function channelShowAndAppendLine(
+    channel: vscode.OutputChannel, message: string) {
+  channel.show();
+  channel.appendLine(message);
+}
+
 /**
- * If current folder is an IoT Workspace Project but not open correctly, ask
- * and open the IoT Workspace Project.
+ * If external project, ask whether to configure the project to be IoT Container
+ * Project or create an IoT Project
  */
-export async function handleIoTWorkspaceProjectFolder(
-    telemetryContext: TelemetryContext) {
+export async function handleExternalProject(
+    context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+    telemetryContext: TelemetryContext, scaffoldType: ScaffoldType,
+    projectFileRootPath: string) {
+  const message =
+      'An IoT project is needed to process the operation, do you want to configure current project to be an IoT Embedded Linux Project or create an IoT project?';
+  class Choice {
+    static configureAsContianerProject:
+        MessageItem = {title: 'Configure as Embedded Linux Project'};
+    static createNewProject: MessageItem = {title: 'Create IoT Project'};
+  }
+
+  const result:|vscode.MessageItem|undefined =
+      await vscode.window.showInformationMessage(
+          message, Choice.configureAsContianerProject, Choice.createNewProject);
+
+  if (result === Choice.configureAsContianerProject) {
+    telemetryContext.properties.errorMessage =
+        'Operation failed and user configures external project to be an IoT Embedded Linux Project';
+    telemetryContext.properties.projectHostType = 'Container';
+
+    const project = new ioTContainerizedProjectModule.IoTContainerizedProject(
+        context, channel, telemetryContext);
+
+    // If external project, construct as RaspberryPi Device based
+    // container iot workbench project
+    await project.constructExternalProjectToIotProject(scaffoldType);
+
+    let res = await project.load(scaffoldType);
+    if (!res) {
+      throw new Error(
+          `Failed to load project. Project environment configuration stopped.`);
+    }
+
+    res = await project.configureProjectEnvironmentCore(
+        projectFileRootPath, scaffoldType);
+    if (!res) {
+      throw new Error(
+          `Failed to add configuration files. Project environment configuration stopped.`);
+    }
+    await project.openProject(projectFileRootPath, false);
+  } else {
+    telemetryContext.properties.errorMessage =
+        'Operation failed and user creates new project';
+    await vscode.commands.executeCommand('iotworkbench.initializeProject');
+  }
+}
+
+/**
+ * Check if current folder is an IoT Workspace Project but not open correctly.
+ * If so, return true and ask to open project properly.
+ * If not, return false.
+ */
+export async function handleIncorrectlyOpenedIoTWorkspaceProject(
+    telemetryContext: TelemetryContext): Promise<boolean> {
   if (!(vscode.workspace.workspaceFolders &&
         vscode.workspace.workspaceFolders.length > 0) ||
       !vscode.workspace.workspaceFolders[0]) {
-    return;
+    return false;
   }
 
   const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
@@ -430,23 +515,10 @@ export async function handleIoTWorkspaceProjectFolder(
 
   if (fs.existsSync(workbenchFileName) && workspaceFiles && workspaceFiles[0]) {
     await askAndOpenProject(rootPath, workspaceFiles[0], telemetryContext);
-    return;
+    return true;
   }
 
-  await askAndNewProject(telemetryContext);
-  return;
-}
-
-export function channelShowAndAppend(
-    channel: vscode.OutputChannel, message: string) {
-  channel.show();
-  channel.append(message);
-}
-
-export function channelShowAndAppendLine(
-    channel: vscode.OutputChannel, message: string) {
-  channel.show();
-  channel.appendLine(message);
+  return false;
 }
 
 /**
@@ -477,15 +549,22 @@ export async function constructAndLoadIoTProject(
       return;
     }
 
+    // IoT Workspace Project improperly open as folder,
+    // or external project.
     if (iotProject === undefined) {
-      await handleIoTWorkspaceProjectFolder(telemetryContext);
+      const isIncorrectlyOpenedIoTWorkspaceProject =
+          await handleIncorrectlyOpenedIoTWorkspaceProject(telemetryContext);
+      if (!isIncorrectlyOpenedIoTWorkspaceProject) {
+        await handleExternalProject(
+            context, channel, telemetryContext, scaffoldType,
+            projectFileRootPath);
+      }
       return;
     }
 
     const result = await iotProject.load(scaffoldType);
     if (!result) {
-      await askAndNewProject(telemetryContext);
-      return;
+      throw new Error(`Failed to load project.`);
     }
     return iotProject;
   }

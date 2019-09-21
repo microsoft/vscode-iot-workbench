@@ -111,7 +111,7 @@ export abstract class IoTWorkbenchProjectBase {
 
         const res = await item.compile();
         if (!res) {
-          throw new Error(
+          vscode.window.showErrorMessage(
               'Unable to compile the device code, please check output window for detail.');
         }
       }
@@ -129,7 +129,7 @@ export abstract class IoTWorkbenchProjectBase {
 
         const res = await item.upload();
         if (res === false) {
-          throw new Error(
+          vscode.window.showErrorMessage(
               'Unable to upload the sketch, please check output window for detail.');
         }
       }
