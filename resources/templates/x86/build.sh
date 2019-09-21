@@ -22,8 +22,7 @@ application_code_path="${azure_c_sdk_directory}/${application_name}"
 application_cmake_path="${cmake_directory}/${application_name}"
 
 # Copy code to azure-c-sdk directory
-rm -rf ${application_code_path}
-mkdir ${application_code_path}
+rm -rf ${application_code_path} && mkdir ${application_code_path}
 cp -rf ${srcFileFolder}/* ${application_code_path}
 
 # Refresh and configure CMakeLists.txt file
@@ -39,9 +38,8 @@ cd ${cmake_directory} && \
 current_binary_name=`cat ${cmake_directory}/CMakeCache.txt | grep binary_name | cut -d "=" -f2`
 cd ${application_cmake_path} | find . -type f -executable -not -name "${current_binary_name}" | xargs rm
 
-# Copy the compiled files to a fixed folder
-rm -rf ${output_folder}
-mkdir ${output_folder}
+# Copy the compiled files to output folder
+rm -rf ${output_folder} && mkdir ${output_folder}
 if [[ -d "${application_cmake_path}" ]]; then
   cp -r ${application_cmake_path}/* ${output_folder}
 fi
