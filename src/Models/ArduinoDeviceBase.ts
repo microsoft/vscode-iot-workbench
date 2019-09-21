@@ -2,12 +2,13 @@
 // Licensed under the MIT License.
 
 import * as fs from 'fs-plus';
+import {open} from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {CancelOperationError} from '../CancelOperationError';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, DependentExtensions, FileNames, ScaffoldType, TemplateTag} from '../constants';
+import {ConfigKey, DependentExtensions, FileNames, OperationType, PlatformType, ScaffoldType, TemplateTag} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {IoTWorkbenchSettings} from '../IoTSettings';
 import {TelemetryContext} from '../telemetry';
@@ -27,6 +28,7 @@ const constants = {
   cppPropertiesFileNameWin: 'c_cpp_properties_win32.json',
   outputPath: './.build',
   compileTaskName: 'Arduino Compile',
+  uploadTaskName: 'Arduino Upload',
   environmentTemplateFolderName: 'Arduino Task'
 };
 
@@ -100,11 +102,22 @@ export abstract class ArduinoDeviceBase implements Device {
       return false;
     }
 
-    // Execute default compile task to compile device code.
+    const compileTimeScaffoldType = ScaffoldType.Workspace;
+    if (!await FileUtility.directoryExists(
+            compileTimeScaffoldType, this.deviceFolder)) {
+      throw new Error('Unable to find the project folder.');
+    }
+
+    // Execute default compilation task to compile device code.
     const tasks = await vscode.tasks.fetchTasks();
     if (!tasks || tasks.length < 1) {
       const message = `Failed to fetch tasks.`;
       utils.channelShowAndAppendLine(this.channel, message);
+
+      await utils.askToConfigureEnvironment(
+          this.extensionContext, this.channel, this.telemetryContext,
+          PlatformType.Arduino, this.deviceFolder, compileTimeScaffoldType,
+          OperationType.Compile);
       return false;
     }
 
@@ -112,12 +125,21 @@ export abstract class ArduinoDeviceBase implements Device {
       return task.name === constants.compileTaskName;
     });
     if (!arduinoCompileTask || arduinoCompileTask.length < 1) {
-      const message = `Failed to fetch default arduino compile task.`;
+      const message = `Failed to fetch default arduino compilation task.`;
       utils.channelShowAndAppendLine(this.channel, message);
+
+      await utils.askToConfigureEnvironment(
+          this.extensionContext, this.channel, this.telemetryContext,
+          PlatformType.Arduino, this.deviceFolder, compileTimeScaffoldType,
+          OperationType.Compile);
       return false;
     }
 
-    await vscode.tasks.executeTask(arduinoCompileTask[0]);
+    try {
+      await vscode.tasks.executeTask(arduinoCompileTask[0]);
+    } catch (error) {
+      throw new Error(`Failed to execute compilation task: ${error.message}`);
+    }
     return true;
   }
 
@@ -126,7 +148,46 @@ export abstract class ArduinoDeviceBase implements Device {
     if (!result) {
       return false;
     }
-    await vscode.commands.executeCommand('arduino.upload');
+
+    const uploadTimeScaffoldType = ScaffoldType.Workspace;
+    if (!await FileUtility.directoryExists(
+            uploadTimeScaffoldType, this.deviceFolder)) {
+      throw new Error('Unable to find the project folder.');
+    }
+
+    // Execute default upload task to upload device code.
+    const tasks = await vscode.tasks.fetchTasks();
+    if (!tasks || tasks.length < 1) {
+      const message = `Failed to fetch tasks.`;
+      utils.channelShowAndAppendLine(this.channel, message);
+
+      await utils.askToConfigureEnvironment(
+          this.extensionContext, this.channel, this.telemetryContext,
+          PlatformType.Arduino, this.deviceFolder, uploadTimeScaffoldType,
+          OperationType.Upload);
+      return false;
+    }
+
+    const arduinoUploadTask = tasks.filter(task => {
+      return task.name === constants.uploadTaskName;
+    });
+    if (!arduinoUploadTask || arduinoUploadTask.length < 1) {
+      const message = `Failed to fetch default arduino upload task.`;
+      utils.channelShowAndAppendLine(this.channel, message);
+
+      await utils.askToConfigureEnvironment(
+          this.extensionContext, this.channel, this.telemetryContext,
+          PlatformType.Arduino, this.deviceFolder, uploadTimeScaffoldType,
+          OperationType.Upload);
+      return false;
+    }
+
+    try {
+      await vscode.tasks.executeTask(arduinoUploadTask[0]);
+    } catch (error) {
+      throw new Error(`Failed to execute upload task: ${error.message}`);
+    }
+
     return true;
   }
 
