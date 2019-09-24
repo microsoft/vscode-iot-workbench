@@ -674,3 +674,46 @@ export async function askToOverwriteFile(fileName: string):
 
   return overwriteSelection;
 }
+
+export async function fetchAndExecuteTask(
+    context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+    telemetryContext: TelemetryContext, projectPath: string,
+    operationType: OperationType, taskName: string): Promise<boolean> {
+  const scaffoldType = ScaffoldType.Workspace;
+  if (!await FileUtility.directoryExists(scaffoldType, projectPath)) {
+    throw new Error('Unable to find the project folder.');
+  }
+
+  const tasks = await vscode.tasks.fetchTasks();
+  if (!tasks || tasks.length < 1) {
+    const message = `Failed to fetch tasks.`;
+    channelShowAndAppendLine(channel, message);
+
+    await askToConfigureEnvironment(
+        context, channel, telemetryContext, PlatformType.Arduino, projectPath,
+        scaffoldType, operationType);
+    return false;
+  }
+
+  const operationTask = tasks.filter(task => {
+    return task.name === taskName;
+  });
+  if (!operationTask || operationTask.length < 1) {
+    const message = `Failed to fetch default ${
+        operationType.toLowerCase()} task with task name ${taskName}.`;
+    channelShowAndAppendLine(channel, message);
+
+    await askToConfigureEnvironment(
+        context, channel, telemetryContext, PlatformType.Arduino, projectPath,
+        scaffoldType, operationType);
+    return false;
+  }
+
+  try {
+    await vscode.tasks.executeTask(operationTask[0]);
+  } catch (error) {
+    throw new Error(`Failed to execute task to ${
+        operationType.toLowerCase()}: ${error.message}`);
+  }
+  return true;
+}

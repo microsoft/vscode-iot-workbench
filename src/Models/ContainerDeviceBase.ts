@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 import {Guid} from 'guid-typescript';
-import {platform} from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
@@ -129,47 +128,9 @@ export abstract class ContainerDeviceBase implements Device {
         return false;
       }
     }
-
-    const compileTimeScaffoldType = ScaffoldType.Workspace;
-    if (!await FileUtility.directoryExists(
-            compileTimeScaffoldType, this.projectFolder)) {
-      throw new Error('Unable to find the project folder.');
-    }
-
-    // Fetch and execute compilation task
-    const tasks = await vscode.tasks.fetchTasks();
-    if (!tasks || tasks.length < 1) {
-      const message = `Failed to fetch tasks.`;
-      utils.channelShowAndAppendLine(this.channel, message);
-
-      await utils.askToConfigureEnvironment(
-          this.extensionContext, this.channel, this.telemetryContext,
-          PlatformType.EmbeddedLinux, this.projectFolder,
-          compileTimeScaffoldType, OperationType.Compile);
-      return false;
-    }
-
-    const compileTask = tasks.filter(task => {
-      return task.name === constants.compileTaskName;
-    });
-    if (!compileTask || compileTask.length < 1) {
-      const message =
-          `Failed to fetch default container device compilation task.`;
-      utils.channelShowAndAppendLine(this.channel, message);
-      await utils.askToConfigureEnvironment(
-          this.extensionContext, this.channel, this.telemetryContext,
-          PlatformType.EmbeddedLinux, this.projectFolder,
-          compileTimeScaffoldType, OperationType.Compile);
-      return false;
-    }
-
-    try {
-      await vscode.tasks.executeTask(compileTask[0]);
-    } catch (error) {
-      throw new Error(`Failed to execute compilation task: ${error.message}`);
-    }
-
-    return true;
+    return await utils.fetchAndExecuteTask(
+        this.extensionContext, this.channel, this.telemetryContext,
+        this.projectFolder, OperationType.Compile, constants.compileTaskName);
   }
 
   abstract async upload(): Promise<boolean>;
@@ -216,7 +177,7 @@ export abstract class ContainerDeviceBase implements Device {
               template.tag === TemplateTag.DevelopmentEnvironment &&
               template.name === templateName);
         });
-    if (!(projectEnvTemplate && projectEnvTemplate.length > 0)) {
+    if (projectEnvTemplate.length === 0) {
       throw new Error(
           `Fail to get project development environment template files.`);
     }

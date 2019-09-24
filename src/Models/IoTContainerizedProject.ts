@@ -128,9 +128,10 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
     let projectConfig: {[key: string]: string} = {};
     const projectConfigContent =
-        await FileUtility.readFile(
-            createTimeScaffoldType, iotworkbenchprojectFile, 'utf8') as string;
-    if (projectConfigContent && projectConfigContent !== ' ') {
+        (await FileUtility.readFile(
+             createTimeScaffoldType, iotworkbenchprojectFile, 'utf8') as string)
+            .trim();
+    if (projectConfigContent) {
       projectConfig = JSON.parse(projectConfigContent);
     }
 

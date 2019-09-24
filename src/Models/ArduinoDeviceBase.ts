@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 import * as fs from 'fs-plus';
-import {open} from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
@@ -102,45 +101,9 @@ export abstract class ArduinoDeviceBase implements Device {
       return false;
     }
 
-    const compileTimeScaffoldType = ScaffoldType.Workspace;
-    if (!await FileUtility.directoryExists(
-            compileTimeScaffoldType, this.deviceFolder)) {
-      throw new Error('Unable to find the project folder.');
-    }
-
-    // Execute default compilation task to compile device code.
-    const tasks = await vscode.tasks.fetchTasks();
-    if (!tasks || tasks.length < 1) {
-      const message = `Failed to fetch tasks.`;
-      utils.channelShowAndAppendLine(this.channel, message);
-
-      await utils.askToConfigureEnvironment(
-          this.extensionContext, this.channel, this.telemetryContext,
-          PlatformType.Arduino, this.deviceFolder, compileTimeScaffoldType,
-          OperationType.Compile);
-      return false;
-    }
-
-    const arduinoCompileTask = tasks.filter(task => {
-      return task.name === constants.compileTaskName;
-    });
-    if (!arduinoCompileTask || arduinoCompileTask.length < 1) {
-      const message = `Failed to fetch default arduino compilation task.`;
-      utils.channelShowAndAppendLine(this.channel, message);
-
-      await utils.askToConfigureEnvironment(
-          this.extensionContext, this.channel, this.telemetryContext,
-          PlatformType.Arduino, this.deviceFolder, compileTimeScaffoldType,
-          OperationType.Compile);
-      return false;
-    }
-
-    try {
-      await vscode.tasks.executeTask(arduinoCompileTask[0]);
-    } catch (error) {
-      throw new Error(`Failed to execute compilation task: ${error.message}`);
-    }
-    return true;
+    return await utils.fetchAndExecuteTask(
+        this.extensionContext, this.channel, this.telemetryContext,
+        this.deviceFolder, OperationType.Compile, constants.compileTaskName);
   }
 
   async upload(): Promise<boolean> {
@@ -148,47 +111,9 @@ export abstract class ArduinoDeviceBase implements Device {
     if (!result) {
       return false;
     }
-
-    const uploadTimeScaffoldType = ScaffoldType.Workspace;
-    if (!await FileUtility.directoryExists(
-            uploadTimeScaffoldType, this.deviceFolder)) {
-      throw new Error('Unable to find the project folder.');
-    }
-
-    // Execute default upload task to upload device code.
-    const tasks = await vscode.tasks.fetchTasks();
-    if (!tasks || tasks.length < 1) {
-      const message = `Failed to fetch tasks.`;
-      utils.channelShowAndAppendLine(this.channel, message);
-
-      await utils.askToConfigureEnvironment(
-          this.extensionContext, this.channel, this.telemetryContext,
-          PlatformType.Arduino, this.deviceFolder, uploadTimeScaffoldType,
-          OperationType.Upload);
-      return false;
-    }
-
-    const arduinoUploadTask = tasks.filter(task => {
-      return task.name === constants.uploadTaskName;
-    });
-    if (!arduinoUploadTask || arduinoUploadTask.length < 1) {
-      const message = `Failed to fetch default arduino upload task.`;
-      utils.channelShowAndAppendLine(this.channel, message);
-
-      await utils.askToConfigureEnvironment(
-          this.extensionContext, this.channel, this.telemetryContext,
-          PlatformType.Arduino, this.deviceFolder, uploadTimeScaffoldType,
-          OperationType.Upload);
-      return false;
-    }
-
-    try {
-      await vscode.tasks.executeTask(arduinoUploadTask[0]);
-    } catch (error) {
-      throw new Error(`Failed to execute upload task: ${error.message}`);
-    }
-
-    return true;
+    return await utils.fetchAndExecuteTask(
+        this.extensionContext, this.channel, this.telemetryContext,
+        this.deviceFolder, OperationType.Compile, constants.uploadTaskName);
   }
 
 
@@ -397,7 +322,7 @@ export abstract class ArduinoDeviceBase implements Device {
               template.tag === TemplateTag.DevelopmentEnvironment &&
               template.name === constants.environmentTemplateFolderName);
         });
-    if (!(projectEnvTemplate && projectEnvTemplate.length > 0)) {
+    if (projectEnvTemplate.length === 0) {
       throw new Error(
           `Fail to get project development environment template files.`);
     }
