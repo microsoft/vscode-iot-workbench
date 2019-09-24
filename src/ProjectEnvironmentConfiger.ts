@@ -86,7 +86,7 @@ export class ProjectEnvironmentConfiger {
       // First ensure the project is correctly open.
       const iotProject = await utils.constructAndLoadIoTProject(
           context, channel, telemetryContext);
-      if (iotProject === undefined) {
+      if (!iotProject) {
         return false;
       }
 

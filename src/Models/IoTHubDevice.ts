@@ -65,7 +65,7 @@ export class IoTHubDevice implements Component, Provisionable {
     }
 
     const toolkit = getExtension(ExtensionName.Toolkit);
-    if (toolkit === undefined) {
+    if (!toolkit) {
       throw new Error(
           'Azure IoT Hub Toolkit is not installed. Please install it from Marketplace.');
     }
@@ -75,7 +75,7 @@ export class IoTHubDevice implements Component, Provisionable {
       case 'select':
         device = await toolkit.azureIoTExplorer.getDevice(
             null, iotHubConnectionString, this.channel);
-        if (device === undefined) {
+        if (!device) {
           return false;
         } else {
           await ConfigHandler.update(
@@ -86,7 +86,7 @@ export class IoTHubDevice implements Component, Provisionable {
       case 'create':
         device = await toolkit.azureIoTExplorer.createDevice(
             false, iotHubConnectionString, this.channel);
-        if (device === undefined) {
+        if (!device) {
           return false;
         } else {
           await ConfigHandler.update(
@@ -140,7 +140,7 @@ async function getDeviceNumber(iotHubConnectionString: string) {
           if (err) {
             return reject(err);
           }
-          if (list === undefined) {
+          if (!list) {
             return resolve(0);
           } else {
             return resolve(list.length);

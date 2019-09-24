@@ -224,14 +224,14 @@ export class IoTButtonDevice implements Device {
       }
     });
 
-    if (ssid === undefined) {
+    if (!ssid) {
       return false;
     }
 
     const password = await vscode.window.showInputBox(
         {prompt: `WiFi Password`, password: true, ignoreFocusOut: true});
 
-    if (password === undefined) {
+    if (!password) {
       return false;
     }
 
@@ -311,7 +311,7 @@ export class IoTButtonDevice implements Device {
       };
 
       deviceConnectionString = await vscode.window.showInputBox(option);
-      if (deviceConnectionString === undefined) {
+      if (!deviceConnectionString) {
         return false;
       }
 
@@ -396,7 +396,7 @@ export class IoTButtonDevice implements Device {
       }
     });
 
-    if (timeserver === undefined) {
+    if (!timeserver) {
       return false;
     }
 

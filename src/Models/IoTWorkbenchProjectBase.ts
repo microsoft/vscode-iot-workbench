@@ -128,7 +128,7 @@ export abstract class IoTWorkbenchProjectBase {
         }
 
         const res = await item.upload();
-        if (res === false) {
+        if (!res) {
           vscode.window.showErrorMessage(
               'Unable to upload the sketch, please check output window for detail.');
         }
@@ -203,7 +203,7 @@ export abstract class IoTWorkbenchProjectBase {
         }
 
         const res = await item.provision();
-        if (res === false) {
+        if (!res) {
           vscode.window.showWarningMessage('Provision cancelled.');
           return false;
         }
@@ -260,7 +260,7 @@ export abstract class IoTWorkbenchProjectBase {
         }
 
         const res = await item.deploy();
-        if (res === false) {
+        if (!res) {
           throw new Error(`The deployment of ${item.name} failed.`);
         }
       }

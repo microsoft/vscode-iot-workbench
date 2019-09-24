@@ -95,7 +95,7 @@ export class CodeGeneratorCore {
     // Step 1: Choose Capability Model
     const capabilityModelFileSelection =
         await this.selectCapabilityFile(channel, dcmFiles, telemetryContext);
-    if (capabilityModelFileSelection === undefined) {
+    if (!capabilityModelFileSelection) {
       utils.channelShowAndAppendLine(
           channel, `${DigitalTwinConstants.dtPrefix} Cancelled.`);
       return;
@@ -166,7 +166,7 @@ export class CodeGeneratorCore {
 
     // Step 2: Get project name
     const codeGenProjectName = await this.getCodeGenProjectName(rootPath);
-    if (codeGenProjectName === undefined) {
+    if (!codeGenProjectName) {
       const message = `Project name is not specified, cancelled`;
       utils.channelShowAndAppendLine(channel, message);
       return;
@@ -192,14 +192,14 @@ export class CodeGeneratorCore {
     // Step 4: Select project type
     const codeGenProjectType = await this.selectProjectType(
         languageSelection.label, context, telemetryContext);
-    if (codeGenProjectType === undefined) {
+    if (!codeGenProjectType) {
       return;
     }
 
     // Step 5: Select device connection string type
     const connectionType =
         await this.selectConnectionType(context, channel, telemetryContext);
-    if (connectionType === undefined) {
+    if (!connectionType) {
       return;
     }
 

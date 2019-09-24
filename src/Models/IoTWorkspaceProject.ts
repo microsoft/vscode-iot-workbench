@@ -428,7 +428,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
 
     for (let i = 0; i < this.componentList.length; i++) {
       const res = await this.componentList[i].create();
-      if (res === false) {
+      if (!res) {
         // TODO: Remove this function and implement with sdk in FileUtility
         fs.removeSync(this.projectRootPath);
         vscode.window.showWarningMessage('Project initialize cancelled.');

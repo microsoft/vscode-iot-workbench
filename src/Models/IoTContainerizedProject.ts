@@ -148,7 +148,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     projectConfig[`${ConfigKey.boardId}`] = boardId;
 
     const res = await device.create();
-    if (res === false) {
+    if (!res) {
       // TODO: Add remove() in FileUtility class
       fs.removeSync(this.projectRootPath);
       vscode.window.showWarningMessage('Project initialize cancelled.');
@@ -243,7 +243,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
           placeHolder: `Do you want to customize the development environment?`
         });
 
-    if (customizationSelection === undefined) {
+    if (!customizationSelection) {
       throw new CancelOperationError(
           `Ask to customize development environment selection cancelled.`);
     }

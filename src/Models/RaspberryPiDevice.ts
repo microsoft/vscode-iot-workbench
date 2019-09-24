@@ -222,7 +222,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
         ignoreFocusOut: true
       };
       raspiHost = await vscode.window.showInputBox(raspiHostOption);
-      if (raspiHost === undefined) {
+      if (!raspiHost) {
         return false;
       }
     }
@@ -235,7 +235,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       ignoreFocusOut: true
     };
     const raspiPortString = await vscode.window.showInputBox(raspiPortOption);
-    if (raspiPortString === undefined) {
+    if (!raspiPortString) {
       return false;
     }
     const raspiPort = raspiPortString && !isNaN(Number(raspiPortString)) ?
@@ -249,7 +249,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       ignoreFocusOut: true
     };
     let raspiUser = await vscode.window.showInputBox(raspiUserOption);
-    if (raspiUser === undefined) {
+    if (!raspiUser) {
       return false;
     }
     raspiUser = raspiUser || RaspberryPiUploadConfig.user;
@@ -261,7 +261,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       ignoreFocusOut: true
     };
     let raspiPassword = await vscode.window.showInputBox(raspiPasswordOption);
-    if (raspiPassword === undefined) {
+    if (!raspiPassword) {
       return false;
     }
     raspiPassword = raspiPassword || RaspberryPiUploadConfig.password;
@@ -273,7 +273,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       ignoreFocusOut: true
     };
     let raspiPath = await vscode.window.showInputBox(raspiPathOption);
-    if (raspiPath === undefined) {
+    if (!raspiPath) {
       return false;
     }
     raspiPath = raspiPath || RaspberryPiUploadConfig.projectPath;

@@ -138,7 +138,7 @@ export async function showOpenDialog(options: vscode.OpenDialogOptions):
   const result: vscode.Uri[]|undefined =
       await vscode.window.showOpenDialog(options);
 
-  if (result === undefined) {
+  if (!result) {
     throw new Error('User cancelled the operation.');
   } else {
     return result;
@@ -171,7 +171,7 @@ export async function selectWorkspaceItem(
   folderPicks.push({label: 'Browse...', description: '', data: undefined});
   folder = await vscode.window.showQuickPick(
       folderPicks, {placeHolder, ignoreFocusOut: true});
-  if (folder === undefined) {
+  if (!folder) {
     throw new Error('User cancelled the operation.');
   }
 
@@ -551,7 +551,7 @@ export async function constructAndLoadIoTProject(
 
     // IoT Workspace Project improperly open as folder,
     // or external project.
-    if (iotProject === undefined) {
+    if (!iotProject) {
       const isIncorrectlyOpenedIoTWorkspaceProject =
           await handleIncorrectlyOpenedIoTWorkspaceProject(telemetryContext);
       if (!isIncorrectlyOpenedIoTWorkspaceProject) {
@@ -666,7 +666,7 @@ export async function askToOverwriteFile(fileName: string):
             fileName} already exists. Do you want to overwrite all existed configuration files or cancel the configuration process?`
       });
 
-  if (overwriteSelection === undefined) {
+  if (!overwriteSelection) {
     // Selection was cancelled
     throw new CancelOperationError(
         `Ask to overwrite ${fileName} selection cancelled.`);
