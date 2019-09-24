@@ -112,7 +112,7 @@ export abstract class ArduinoDeviceBase implements Device {
     }
     return await utils.fetchAndExecuteTask(
         this.extensionContext, this.channel, this.telemetryContext,
-        this.deviceFolder, OperationType.Compile, constants.uploadTaskName);
+        this.deviceFolder, OperationType.Upload, constants.uploadTaskName);
   }
 
 
