@@ -5,7 +5,6 @@ import {Guid} from 'guid-typescript';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {CancelOperationError} from '../CancelOperationError';
 import {FileNames, OperationType, PlatformType, ScaffoldType, TemplateTag} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext} from '../telemetry';
@@ -170,47 +169,14 @@ export abstract class ContainerDeviceBase implements Device {
           `Internal Error: Cannot get template name from template property.`);
     }
 
-    // Get environment template files
-    const projectEnvTemplate: ProjectTemplate[] =
-        templateJson.templates.filter((template: ProjectTemplate) => {
-          return (
-              template.tag === TemplateTag.DevelopmentEnvironment &&
-              template.name === templateName);
-        });
-    if (projectEnvTemplate.length === 0) {
-      throw new Error(
-          `Fail to get project development environment template files.`);
-    }
-    const templateFolderName = projectEnvTemplate[0].path;
-    const templateFolder = this.extensionContext.asAbsolutePath(path.join(
-        FileNames.resourcesFolderName, FileNames.templatesFolderName,
-        templateFolderName));
-    const templateFilesInfo: TemplateFileInfo[] =
-        await utils.getTemplateFilesInfo(templateFolder);
-
-    // Step 3: Ask overwrite or not
-    let overwriteAll = false;
-    try {
-      overwriteAll = await utils.askToOverwrite(
-          scaffoldType, projectPath, templateFilesInfo);
-    } catch (error) {
-      if (error instanceof CancelOperationError) {
-        this.telemetryContext.properties.result = 'Cancelled';
-        this.telemetryContext.properties.errorMessage = error.message;
-        return false;
-      } else {
-        throw error;
-      }
-    }
-    if (!overwriteAll) {
-      const message =
-          'Do not overwrite configuration files and cancel configuration process.';
-      this.telemetryContext.properties.errorMessage = message;
-      this.telemetryContext.properties.result = 'Cancelled';
+    const templateFilesInfo = await utils.getEnvTemplateFilesAndAskOverwrite(
+        this.extensionContext, this.telemetryContext, this.projectFolder,
+        scaffoldType, templateName);
+    if (!templateFilesInfo) {
       return false;
     }
 
-    // Step 4: Configure project environment with template files
+    // Configure project environment with template files
     for (const fileInfo of templateFilesInfo) {
       // Replace binary name in tasks.json to project name
       if (fileInfo.fileName === 'tasks.json') {

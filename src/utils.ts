@@ -717,3 +717,70 @@ export async function fetchAndExecuteTask(
   }
   return true;
 }
+
+/**
+ * Get environment development template files with template name, and ask to
+ * overwrite files if any exists
+ */
+export async function getEnvTemplateFilesAndAskOverwrite(
+    context: vscode.ExtensionContext, telemetryContext: TelemetryContext,
+    projectPath: string, scaffoldType: ScaffoldType,
+    templateName: string): Promise<TemplateFileInfo[]|undefined> {
+  if (!projectPath) {
+    throw new Error(
+        'Unable to find the project path, please open the folder and initialize project again.');
+  }
+
+  // Get template list json object
+  const templateJsonFilePath = context.asAbsolutePath(path.join(
+      FileNames.resourcesFolderName, FileNames.templatesFolderName,
+      FileNames.templateFileName));
+  const templateJsonFileString =
+      await FileUtility.readFile(scaffoldType, templateJsonFilePath, 'utf8') as
+      string;
+  const templateJson = JSON.parse(templateJsonFileString);
+  if (!templateJson) {
+    throw new Error('Fail to load template list.');
+  }
+
+  // Get environment template files
+  const projectEnvTemplate: ProjectTemplate[] =
+      templateJson.templates.filter((template: ProjectTemplate) => {
+        return (
+            template.tag === TemplateTag.DevelopmentEnvironment &&
+            template.name === templateName);
+      });
+  if (projectEnvTemplate.length === 0) {
+    throw new Error(
+        `Fail to get project development environment template files.`);
+  }
+  const templateFolderName = projectEnvTemplate[0].path;
+  const templateFolder = context.asAbsolutePath(path.join(
+      FileNames.resourcesFolderName, FileNames.templatesFolderName,
+      templateFolderName));
+  const templateFilesInfo: TemplateFileInfo[] =
+      await getTemplateFilesInfo(templateFolder);
+
+  // Ask overwrite or not
+  let overwriteAll = false;
+  try {
+    overwriteAll =
+        await askToOverwrite(scaffoldType, projectPath, templateFilesInfo);
+  } catch (error) {
+    if (error instanceof CancelOperationError) {
+      telemetryContext.properties.result = 'Cancelled';
+      telemetryContext.properties.errorMessage = error.message;
+      return;
+    } else {
+      throw error;
+    }
+  }
+  if (!overwriteAll) {
+    const message =
+        'Do not overwrite configuration files and cancel configuration process.';
+    telemetryContext.properties.errorMessage = message;
+    telemetryContext.properties.result = 'Cancelled';
+    return;
+  }
+  return templateFilesInfo;
+}

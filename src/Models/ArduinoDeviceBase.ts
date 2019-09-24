@@ -5,9 +5,8 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {CancelOperationError} from '../CancelOperationError';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, DependentExtensions, FileNames, OperationType, PlatformType, ScaffoldType, TemplateTag} from '../constants';
+import {ConfigKey, DependentExtensions, FileNames, OperationType, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {IoTWorkbenchSettings} from '../IoTSettings';
 import {TelemetryContext} from '../telemetry';
@@ -16,7 +15,7 @@ import * as utils from '../utils';
 import {Board} from './Interfaces/Board';
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
-import {ProjectTemplate, TemplateFileInfo} from './Interfaces/ProjectTemplate';
+import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {OTA} from './OTA';
 
 const constants = {
@@ -303,59 +302,14 @@ export abstract class ArduinoDeviceBase implements Device {
           'Unable to find the project device path, please open the folder and initialize project again.');
     }
 
-    // Get template list json object
-    const templateJsonFilePath = this.extensionContext.asAbsolutePath(path.join(
-        FileNames.resourcesFolderName, FileNames.templatesFolderName,
-        FileNames.templateFileName));
-    const templateJsonFileString =
-        await FileUtility.readFile(
-            scaffoldType, templateJsonFilePath, 'utf8') as string;
-    const templateJson = JSON.parse(templateJsonFileString);
-    if (!templateJson) {
-      throw new Error('Fail to load template list.');
-    }
-
-    // Get environment template files
-    const projectEnvTemplate: ProjectTemplate[] =
-        templateJson.templates.filter((template: ProjectTemplate) => {
-          return (
-              template.tag === TemplateTag.DevelopmentEnvironment &&
-              template.name === constants.environmentTemplateFolderName);
-        });
-    if (projectEnvTemplate.length === 0) {
-      throw new Error(
-          `Fail to get project development environment template files.`);
-    }
-    const templateFolderName = projectEnvTemplate[0].path;
-    const templateFolder = this.extensionContext.asAbsolutePath(path.join(
-        FileNames.resourcesFolderName, FileNames.templatesFolderName,
-        templateFolderName));
-    const templateFilesInfo: TemplateFileInfo[] =
-        await utils.getTemplateFilesInfo(templateFolder);
-
-    // Step 3: Ask overwrite or not
-    let overwriteAll = false;
-    try {
-      overwriteAll = await utils.askToOverwrite(
-          scaffoldType, deviceDir, templateFilesInfo);
-    } catch (error) {
-      if (error instanceof CancelOperationError) {
-        this.telemetryContext.properties.result = 'Cancelled';
-        this.telemetryContext.properties.errorMessage = error.message;
-        return false;
-      } else {
-        throw error;
-      }
-    }
-    if (!overwriteAll) {
-      const message =
-          'Do not overwrite configuration files and cancel configuration process.';
-      this.telemetryContext.properties.errorMessage = message;
-      this.telemetryContext.properties.result = 'Cancelled';
+    const templateFilesInfo = await utils.getEnvTemplateFilesAndAskOverwrite(
+        this.extensionContext, this.telemetryContext, this.deviceFolder,
+        scaffoldType, constants.environmentTemplateFolderName);
+    if (!templateFilesInfo) {
       return false;
     }
 
-    // Step 4: Configure project environment with template files
+    // Configure project environment with template files
     for (const fileInfo of templateFilesInfo) {
       await utils.generateTemplateFile(deviceDir, scaffoldType, fileInfo);
     }
