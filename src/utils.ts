@@ -217,7 +217,7 @@ export async function askToConfigureEnvironment(
     rootPath: string, scaffoldType: ScaffoldType, operation: OperationType) {
   const message = `${
       operation} operation failed because the project environment needs configuring. Do you want to configure project environment first?`;
-  const result:|vscode.MessageItem|undefined =
+  const result: vscode.MessageItem|undefined =
       await vscode.window.showInformationMessage(
           message, DialogResponses.yes, DialogResponses.no);
 
@@ -245,7 +245,7 @@ export async function askAndOpenProject(
   const message =
       `Operation failed because the IoT project is not opened. Current folder contains an IoT project '${
           workspaceFile}', do you want to open it?`;
-  const result:|vscode.MessageItem|undefined =
+  const result: vscode.MessageItem|undefined =
       await vscode.window.showInformationMessage(
           message, DialogResponses.yes, DialogResponses.no);
 
@@ -265,7 +265,7 @@ export async function askAndOpenInRemote(
     telemetryContext: TelemetryContext): Promise<boolean> {
   const message = `${
       operation} can only be executed in remote container. Do you want to reopen the IoT project in container?`;
-  const result:|vscode.MessageItem|undefined =
+  const result: vscode.MessageItem|undefined =
       await vscode.window.showInformationMessage(
           message, DialogResponses.yes, DialogResponses.no);
 
@@ -292,7 +292,7 @@ const noDeviceSurveyUrl = 'https://www.surveymonkey.com/r/C7NY7KJ';
 export async function takeNoDeviceSurvey(telemetryContext: TelemetryContext) {
   const message =
       'Could you help to take a quick survey about what IoT development kit(s) you want Azure IoT Device Workbench to support?';
-  const result:|vscode.MessageItem|undefined =
+  const result: vscode.MessageItem|undefined =
       await vscode.window.showWarningMessage(
           message, DialogResponses.yes, DialogResponses.cancel);
   if (result === DialogResponses.yes) {
@@ -457,7 +457,7 @@ export async function handleExternalProject(
     static createNewProject: MessageItem = {title: 'Create IoT Project'};
   }
 
-  const result:|vscode.MessageItem|undefined =
+  const result: vscode.MessageItem|undefined =
       await vscode.window.showInformationMessage(
           message, Choice.configureAsContianerProject, Choice.createNewProject);
 
