@@ -75,7 +75,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
           RaspberryPiUploadConfig.user, RaspberryPiUploadConfig.password);
       try {
         // Upload the entire output folder to device.
-        await ssh.uploadFile(
+        await ssh.uploadFolder(
             this.outputPath, RaspberryPiUploadConfig.projectPath);
         const enableExecPriorityCommand =
             `cd ${RaspberryPiUploadConfig.projectPath} && chmod -R 755 .\/`;
