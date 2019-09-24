@@ -30,10 +30,10 @@ typedef enum APP_DPS_REGISTRATION_STATUS_TAG
 const SECURE_DEVICE_TYPE secureDeviceTypeForProvisioning = SECURE_DEVICE_TYPE_SYMMETRIC_KEY;
 const IOTHUB_SECURITY_TYPE secureDeviceTypeForIotHub = IOTHUB_SECURITY_TYPE_SYMMETRIC_KEY;
 
-// DPSEndpoint=[DPS global endpoint];ScopeId=[Scope ID];RegistrationId=[Registration ID];SymmetricKey=[symmetric key]
+// DPSEndpoint=[DPS global endpoint];IdScope=[ID Scope];DeviceId=[Device ID];SymmetricKey=[symmetric key]
 static const char *IOTHUBDPS_ENDPOINT = "DPSEndpoint";
-static const char *IOTHUBDPS_SCOPEID = "ScopeId";
-static const char *IOTHUBDPS_REGISTRATIONID = "RegistrationId";
+static const char *IOTHUBDPS_IDSCOPE = "IdScope";
+static const char *IOTHUBDPS_DEVICEID = "DeviceId";
 static const char *IOTHUBDPS_SYMMETRICKEY = "SymmetricKey";
 
 // The Device Provisioning Service (DPS) endpoint, learn more from https://docs.microsoft.com/en-us/azure/iot-dps/tutorial-set-up-device#create-the-device-registration-software.
@@ -42,8 +42,8 @@ static char *globalDpsEndpoint = NULL;
 static char *dpsIdScope = NULL;
 // The symmetric key, learn more from https://docs.microsoft.com/en-us/azure/iot-dps/concepts-symmetric-key-attestation.
 static char *sasKey = NULL;
-// The Registration ID, learn more from https://docs.microsoft.com/en-us/azure/iot-dps/use-hsm-with-sdk.
-static char *registrationId = NULL;
+// The device ID, learn more from https://docs.microsoft.com/en-us/azure/iot-dps/use-hsm-with-sdk.
+static char *deviceId = NULL;
 
 // TODO: Fill in DIGITALTWIN_DEVICE_CAPABILITY_MODEL_INLINE_DATA if want to make deivce self-describing.
 #define DIGITALTWIN_DEVICE_CAPABILITY_MODEL_INLINE_DATA "{}"
@@ -89,9 +89,9 @@ static bool parseDPSConnectionString(const char *connection_string)
         return false;
     }
     const char *_globalDpsEndpoint = Map_GetValueFromKey(connection_string_values_map, IOTHUBDPS_ENDPOINT);
-    const char *_dpsIdScope = Map_GetValueFromKey(connection_string_values_map, IOTHUBDPS_SCOPEID);
+    const char *_dpsIdScope = Map_GetValueFromKey(connection_string_values_map, IOTHUBDPS_IDSCOPE);
     const char *_sasKey = Map_GetValueFromKey(connection_string_values_map, IOTHUBDPS_SYMMETRICKEY);
-    const char *_registrationId = Map_GetValueFromKey(connection_string_values_map, IOTHUBDPS_REGISTRATIONID);
+    const char *_deviceId = Map_GetValueFromKey(connection_string_values_map, IOTHUBDPS_DEVICEID);
     if (_globalDpsEndpoint)
     {
         mallocAndStrcpy_s(&globalDpsEndpoint, _globalDpsEndpoint);
@@ -106,7 +106,7 @@ static bool parseDPSConnectionString(const char *connection_string)
     }
     else
     {
-        LogError("Couldn't find %s in connection string", IOTHUBDPS_SCOPEID);
+        LogError("Couldn't find %s in connection string", IOTHUBDPS_IDSCOPE);
     }
     if (_sasKey)
     {
@@ -116,17 +116,17 @@ static bool parseDPSConnectionString(const char *connection_string)
     {
         LogError("Couldn't find %s in connection string", IOTHUBDPS_SYMMETRICKEY);
     }
-    if (_registrationId)
+    if (_deviceId)
     {
-        mallocAndStrcpy_s(&registrationId, _registrationId);
+        mallocAndStrcpy_s(&deviceId, _deviceId);
     }
     else
     {
-        LogError("Couldn't find %s in connection string", IOTHUBDPS_REGISTRATIONID);
+        LogError("Couldn't find %s in connection string", IOTHUBDPS_DEVICEID);
     }  
     Map_Destroy(connection_string_values_map);
 
-    if (globalDpsEndpoint == NULL || dpsIdScope == NULL || sasKey == NULL || registrationId == NULL)
+    if (globalDpsEndpoint == NULL || dpsIdScope == NULL || sasKey == NULL || deviceId == NULL)
     {
         return false;
     }
@@ -178,7 +178,7 @@ static bool registerDevice(bool traceOn)
         return false;
     }
 
-    if (prov_dev_set_symmetric_key_info(registrationId, sasKey) != 0)
+    if (prov_dev_set_symmetric_key_info(deviceId, sasKey) != 0)
     {
         LogError("prov_dev_set_symmetric_key_info failed.");
     }
