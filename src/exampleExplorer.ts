@@ -244,7 +244,7 @@ export class ExampleExplorer {
             ExampleExplorer._vscexpress || new VSCExpress(context, 'views');
         ExampleExplorer._vscexpress.open(
             exampleUrl,
-            'MXChip IoT DevKit samples - Azure IoT Device Workbench',
+            board.examplePageName + ' samples - Azure IoT Device Workbench',
             vscode.ViewColumn.One, {
               enableScripts: true,
               enableCommandUris: true,
