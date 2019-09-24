@@ -306,7 +306,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
             deviceConnectionString, ConfigDeviceOptions.ConnectionString);
       }
 
-      if (res === false) {
+      if (!res) {
         return false;
       } else {
         vscode.window.showInformationMessage(
@@ -337,7 +337,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
       const UDS = await vscode.window.showInputBox(option);
 
-      if (UDS === undefined) {
+      if (!UDS) {
         return false;
       }
 
@@ -359,7 +359,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
         res = await this.flushDeviceConfigUnix(UDS, ConfigDeviceOptions.UDS);
       }
 
-      if (res === false) {
+      if (!res) {
         return false;
       } else {
         vscode.window.showInformationMessage(

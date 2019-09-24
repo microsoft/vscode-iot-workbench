@@ -113,7 +113,7 @@ export class DeviceModelOperator {
 
     const interfaceName = await vscode.window.showInputBox(option);
 
-    if (interfaceName === undefined) {
+    if (!interfaceName) {
       return false;
     }
     const dtid = dtUtils.GenerateDigitalTwinIdentifier(interfaceName);
@@ -177,7 +177,7 @@ export class DeviceModelOperator {
 
     const capabilityModelName = await vscode.window.showInputBox(option);
 
-    if (capabilityModelName === undefined) {
+    if (!capabilityModelName) {
       return;
     }
 

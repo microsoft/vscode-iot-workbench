@@ -61,7 +61,7 @@ export class AnsiCCodeGeneratorImplIoTDevKit extends AnsiCCodeGeneratorBase {
     const templateFilesInfo = await utils.getTemplateFilesInfo(templateFolder);
 
     for (const fileInfo of templateFilesInfo) {
-      if (fileInfo.fileContent === undefined) {
+      if (!fileInfo.fileContent) {
         continue;
       }
       if (fileInfo.fileName.endsWith('.ino')) {

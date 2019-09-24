@@ -1,4 +1,7 @@
-FROM mcr.microsoft.com/iot-device-cube:1.0.1-azure-c-app-20190705-ubuntu-arm32
+FROM mcr.microsoft.com/iot-device-cube:1.0.0-azure-c-sdk-20190705-cross-toolchain-arm32
 
+RUN cp /work/azure-iot-sdk-c/CMakeLists.txt /work/azure-iot-sdk-c/default_CMakeLists.txt
+
+# Install external libs
 COPY install_packages.sh /work
 RUN /work/install_packages.sh

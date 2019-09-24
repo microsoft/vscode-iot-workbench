@@ -53,12 +53,10 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     }
 
     try {
-      const binFilePath =
-          path.join(this.outputPath, 'iot_application/azure_iot_app');
-
-      if (!await FileUtility.fileExists(ScaffoldType.Workspace, binFilePath)) {
+      if (!await FileUtility.directoryExists(
+              ScaffoldType.Workspace, this.outputPath)) {
         const message =
-            `Binary file does not exist. Please compile device code first.`;
+            `Output folder does not exist. Please compile device code first.`;
         await vscode.window.showWarningMessage(message);
         return false;
       }
@@ -76,7 +74,9 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
           RaspberryPiUploadConfig.host, RaspberryPiUploadConfig.port,
           RaspberryPiUploadConfig.user, RaspberryPiUploadConfig.password);
       try {
-        await ssh.uploadFile(binFilePath, RaspberryPiUploadConfig.projectPath);
+        // Upload the entire output folder to device.
+        await ssh.uploadFolder(
+            this.outputPath, RaspberryPiUploadConfig.projectPath);
         const enableExecPriorityCommand =
             `cd ${RaspberryPiUploadConfig.projectPath} && chmod -R 755 .\/`;
         const command = ssh.spawn(enableExecPriorityCommand);
@@ -91,8 +91,6 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
             `Deploy binary file to device ${RaspberryPiUploadConfig.user}@${
                 RaspberryPiUploadConfig.host} failed. ${error.message}`);
       }
-
-      // await ssh.close();
 
       const message = `Successfully deploy bin file to Raspberry Pi board.`;
       channelShowAndAppendLine(this.channel, message);
@@ -224,7 +222,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
         ignoreFocusOut: true
       };
       raspiHost = await vscode.window.showInputBox(raspiHostOption);
-      if (raspiHost === undefined) {
+      if (!raspiHost) {
         return false;
       }
     }
@@ -237,7 +235,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       ignoreFocusOut: true
     };
     const raspiPortString = await vscode.window.showInputBox(raspiPortOption);
-    if (raspiPortString === undefined) {
+    if (!raspiPortString) {
       return false;
     }
     const raspiPort = raspiPortString && !isNaN(Number(raspiPortString)) ?
@@ -251,7 +249,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       ignoreFocusOut: true
     };
     let raspiUser = await vscode.window.showInputBox(raspiUserOption);
-    if (raspiUser === undefined) {
+    if (!raspiUser) {
       return false;
     }
     raspiUser = raspiUser || RaspberryPiUploadConfig.user;
@@ -275,7 +273,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       ignoreFocusOut: true
     };
     let raspiPath = await vscode.window.showInputBox(raspiPathOption);
-    if (raspiPath === undefined) {
+    if (!raspiPath) {
       return false;
     }
     raspiPath = raspiPath || RaspberryPiUploadConfig.projectPath;

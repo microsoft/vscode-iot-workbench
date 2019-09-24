@@ -44,7 +44,7 @@ export class AnsiCCodeGeneratorImplVS extends AnsiCCodeGeneratorBase {
     const projectDCMIdPattern = /{DCM_ID}/g;
 
     for (const fileInfo of templateFilesInfo) {
-      if (fileInfo.fileContent === undefined) {
+      if (!fileInfo.fileContent) {
         continue;
       }
       if (fileInfo.fileName === 'iotproject.vcxproj') {

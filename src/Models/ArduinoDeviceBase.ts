@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, DependentExtensions, FileNames, ScaffoldType} from '../constants';
+import {ConfigKey, DependentExtensions, FileNames, OperationType, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {IoTWorkbenchSettings} from '../IoTSettings';
 import {TelemetryContext} from '../telemetry';
@@ -16,7 +16,6 @@ import {Board} from './Interfaces/Board';
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
 import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
-import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
 import {OTA} from './OTA';
 
 const constants = {
@@ -26,7 +25,9 @@ const constants = {
   cppPropertiesFileNameMac: 'c_cpp_properties_macos.json',
   cppPropertiesFileNameWin: 'c_cpp_properties_win32.json',
   outputPath: './.build',
-  compileTaskName: 'Arduino Compile'
+  compileTaskName: 'Arduino Compile',
+  uploadTaskName: 'Arduino Upload',
+  environmentTemplateFolderName: 'Arduino Task'
 };
 
 
@@ -99,25 +100,9 @@ export abstract class ArduinoDeviceBase implements Device {
       return false;
     }
 
-    // Execute default compile task to compile device code.
-    const tasks = await vscode.tasks.fetchTasks();
-    if (!tasks || tasks.length < 1) {
-      const message = `Failed to fetch tasks.`;
-      utils.channelShowAndAppendLine(this.channel, message);
-      return false;
-    }
-
-    const arduinoCompileTask = tasks.filter(task => {
-      return task.name === constants.compileTaskName;
-    });
-    if (!arduinoCompileTask || arduinoCompileTask.length < 1) {
-      const message = `Failed to fetch default arduino compile task.`;
-      utils.channelShowAndAppendLine(this.channel, message);
-      return false;
-    }
-
-    await vscode.tasks.executeTask(arduinoCompileTask[0]);
-    return true;
+    return await utils.fetchAndExecuteTask(
+        this.extensionContext, this.channel, this.telemetryContext,
+        this.deviceFolder, OperationType.Compile, constants.compileTaskName);
   }
 
   async upload(): Promise<boolean> {
@@ -125,8 +110,9 @@ export abstract class ArduinoDeviceBase implements Device {
     if (!result) {
       return false;
     }
-    await vscode.commands.executeCommand('arduino.upload');
-    return true;
+    return await utils.fetchAndExecuteTask(
+        this.extensionContext, this.channel, this.telemetryContext,
+        this.deviceFolder, OperationType.Upload, constants.uploadTaskName);
   }
 
 
@@ -139,6 +125,7 @@ export abstract class ArduinoDeviceBase implements Device {
 
   async createCore(board: Board|undefined, templateFiles: TemplateFileInfo[]):
       Promise<boolean> {
+    // Generate template files
     const createTimeScaffoldType = ScaffoldType.Local;
     if (!await FileUtility.directoryExists(
             createTimeScaffoldType, this.deviceFolder)) {
@@ -164,9 +151,15 @@ export abstract class ArduinoDeviceBase implements Device {
             this.deviceFolder, createTimeScaffoldType, fileInfo);
       }
     }
-    return true;
+
+    // Configurate device environment
+    const res = await this.configDeviceEnvironment(
+        this.deviceFolder, createTimeScaffoldType);
+
+    return res;
   }
 
+  // Backward compatibility: Check configuration
   abstract async preCompileAction(): Promise<boolean>;
 
   abstract async preUploadAction(): Promise<boolean>;
@@ -298,6 +291,31 @@ export abstract class ArduinoDeviceBase implements Device {
     channel.appendLine('fwSize: ' + res.size);
     channel.appendLine('');
     channel.appendLine('======================================');
+
+    return true;
+  }
+
+  async configDeviceEnvironment(deviceDir: string, scaffoldType: ScaffoldType):
+      Promise<boolean> {
+    if (!deviceDir) {
+      throw new Error(
+          'Unable to find the project device path, please open the folder and initialize project again.');
+    }
+
+    const templateFilesInfo = await utils.getEnvTemplateFilesAndAskOverwrite(
+        this.extensionContext, this.telemetryContext, this.deviceFolder,
+        scaffoldType, constants.environmentTemplateFolderName);
+    if (!templateFilesInfo) {
+      return false;
+    }
+
+    // Configure project environment with template files
+    for (const fileInfo of templateFilesInfo) {
+      await utils.generateTemplateFile(deviceDir, scaffoldType, fileInfo);
+    }
+
+    const message = 'Arduino device configuration done.';
+    utils.channelShowAndAppendLine(this.channel, message);
 
     return true;
   }

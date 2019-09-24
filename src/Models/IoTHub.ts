@@ -102,7 +102,7 @@ export class IoTHub implements Component, Provisionable {
     }
 
     const toolkit = getExtension(ExtensionName.Toolkit);
-    if (toolkit === undefined) {
+    if (!toolkit) {
       throw new Error(
           'Azure IoT Hub Toolkit is not installed. Please install it from Marketplace.');
     }
@@ -157,7 +157,7 @@ export class IoTHub implements Component, Provisionable {
           ConfigKey.eventHubConnectionPath, eventHubConnectionPath);
 
       const scaffoldType = ScaffoldType.Workspace;
-      this.updateConfigSettings(scaffoldType, {
+      await this.updateConfigSettings(scaffoldType, {
         values: {
           iotHubConnectionString: iothub.iotHubConnectionString,
           eventHubConnectionString,

@@ -3,12 +3,12 @@
     {
         "fileName": "CMakeLists.txt",
         "sourcePath" : ".",
-        "targetPath" : "./src"
+        "targetPath" : "."
     },
     {
-        "fileName": "iothub_sample.c",
+        "fileName": "main.c",
         "sourcePath" : ".",
-        "targetPath" : "./src"
+        "targetPath" : "."
     },
     {
         "fileName": "c_cpp_properties.json",

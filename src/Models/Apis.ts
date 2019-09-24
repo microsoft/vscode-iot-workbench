@@ -24,7 +24,7 @@ export function getExtension(name: ExtensionName) {
 
 export async function checkAzureLogin(): Promise<boolean> {
   const azureAccount = getExtension(ExtensionName.AzureAccount);
-  if (azureAccount === undefined) {
+  if (!azureAccount) {
     throw new Error(
         'Azure account extension is not found. Please install it from Marketplace.');
   }

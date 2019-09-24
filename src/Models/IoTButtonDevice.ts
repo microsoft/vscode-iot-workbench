@@ -15,7 +15,6 @@ import {generateTemplateFile} from '../utils';
 import {ComponentType} from './Interfaces/Component';
 import {Device, DeviceType} from './Interfaces/Device';
 import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
-import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
 
 const constants = {
   timeout: 10000,
@@ -225,14 +224,14 @@ export class IoTButtonDevice implements Device {
       }
     });
 
-    if (ssid === undefined) {
+    if (!ssid) {
       return false;
     }
 
     const password = await vscode.window.showInputBox(
         {prompt: `WiFi Password`, password: true, ignoreFocusOut: true});
 
-    if (password === undefined) {
+    if (!password) {
       return false;
     }
 
@@ -312,7 +311,7 @@ export class IoTButtonDevice implements Device {
       };
 
       deviceConnectionString = await vscode.window.showInputBox(option);
-      if (deviceConnectionString === undefined) {
+      if (!deviceConnectionString) {
         return false;
       }
 
@@ -397,7 +396,7 @@ export class IoTButtonDevice implements Device {
       }
     });
 
-    if (timeserver === undefined) {
+    if (!timeserver) {
       return false;
     }
 
@@ -416,5 +415,10 @@ export class IoTButtonDevice implements Device {
     const res = await this.setConfig(uri, data);
 
     return res;
+  }
+
+  async configDeviceEnvironment(
+      projectPath: string, scaffoldType: ScaffoldType): Promise<boolean> {
+    return true;
   }
 }
