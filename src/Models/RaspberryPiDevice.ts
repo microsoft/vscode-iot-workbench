@@ -53,7 +53,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     }
 
     try {
-      if (!await FileUtility.fileExists(
+      if (!await FileUtility.directoryExists(
               ScaffoldType.Workspace, this.outputPath)) {
         const message =
             `Output folder does not exist. Please compile device code first.`;
@@ -261,7 +261,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       ignoreFocusOut: true
     };
     let raspiPassword = await vscode.window.showInputBox(raspiPasswordOption);
-    if (!raspiPassword) {
+    if (raspiPassword === undefined) {
       return false;
     }
     raspiPassword = raspiPassword || RaspberryPiUploadConfig.password;
