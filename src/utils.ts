@@ -452,16 +452,16 @@ export async function handleExternalProject(
   const message =
       'An IoT project is needed to process the operation, do you want to configure current project to be an IoT Embedded Linux Project or create an IoT project?';
   class Choice {
-    static configureAsContianerProject:
+    static configureAsContainerProject:
         MessageItem = {title: 'Configure as Embedded Linux Project'};
     static createNewProject: MessageItem = {title: 'Create IoT Project'};
   }
 
   const result: vscode.MessageItem|undefined =
       await vscode.window.showInformationMessage(
-          message, Choice.configureAsContianerProject, Choice.createNewProject);
+          message, Choice.configureAsContainerProject, Choice.createNewProject);
 
-  if (result === Choice.configureAsContianerProject) {
+  if (result === Choice.configureAsContainerProject) {
     telemetryContext.properties.errorMessage =
         'Operation failed and user configures external project to be an IoT Embedded Linux Project';
     telemetryContext.properties.projectHostType = 'Container';
