@@ -67,11 +67,12 @@ export class UsbDetector {
 
               const exampleUrl = 'example.html?board=' + board.id +
                   '&url=' + encodeURIComponent(board.exampleUrl || '');
+              const examplePageName = board.samplePageName + ' samples - Azure IoT Device Workbench';
               UsbDetector._vscexpress = UsbDetector._vscexpress ||
                   new VSCExpress(this.context, 'views');
               UsbDetector._vscexpress.open(
                   exampleUrl,
-                  'MXChip IoT DevKit samples - Azure IoT Device Workbench',
+                  examplePageName,
                   vscode.ViewColumn.One, {
                     enableScripts: true,
                     enableCommandUris: true,

@@ -17,6 +17,7 @@ export interface Board {
   vendorId?: string;
   productId?: string;
   exampleUrl?: string;
+  samplePageName?: string;
   helpUrl?: string;
   installation?: BoardInstallation;
 }
