@@ -4,7 +4,7 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 
 ## Version 0.10.15
 
-- Release data: September 20, 2019
+- Release data: September 26, 2019
 
 ### Fixed
 - Add delay() in DevKit IoTHub example
@@ -13,7 +13,7 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 - Improve CMakeLists.txt that generated for PnP Cmake project
 - Rename DPS terminologies in generated device project
 - Move hard-coded DPS credentials out of main.c
-- Adjust ESP32 example page
+- Adjust DevKit and ESP32 example page
 
 ## Version 0.10.13
 
