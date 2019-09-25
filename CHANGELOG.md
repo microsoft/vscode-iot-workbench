@@ -2,21 +2,30 @@
 
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
 
+## Version 0.10.13
+
+- Release data: August 20, 2019
+
+### Fixed
+
+- Fix wording issues
+- Improve error handling
+
 ## Version 0.10.12
 
 - Release data: August 12, 2019
 
 ### Added
 
-We are excited to announce Azure IoT Device Workbench extension for VS Code support IoT Plug and Play Preview which enables:
+We are excited to announce Azure IoT Device Workbench extension for VS Code support IoT Plug and Play Preview that enables:
 
 * Create IoT Plug and Play *device capability model* and *interface* with sample schema, author with full IntelliSense features to support [Digital Twin Definition Language (DTDL) ](https://aka.ms/DTDL).
 * Interact with IoT Plug an Play public model repository and company model repository, easy to list, download and publish *device capability model* and *interface*.
-* Develop IoT hardware product easier by generating skeleton ANSI C code and CMake project from *device capability model*.
+* Develop IoT hardware products more easily by generating skeleton ANSI C code and CMake projects from a *device capability model*.
 
 Please check below topics for more information:
 
-* [What is IoT Plug and Play](https://docs.microsoft.com/en-us/azure/iot-pnp/overview-iot-plug-and-play) 
+* [What is IoT Plug and Play](https://docs.microsoft.com/azure/iot-pnp/overview-iot-plug-and-play) 
 * [Quickstart: Use a device capability model to create an IoT Plug and Play device](https://docs.microsoft.com/azure/iot-pnp/quickstart-create-pnp-device)
 * [Build an IoT Plug and Play Preview device that's ready for certification](https://docs.microsoft.com/azure/iot-pnp/tutorial-build-device-certification)
 * [Use Azure IoT Device Workbench extension in Visual Studio Code](https://docs.microsoft.com/azure/iot-pnp/howto-use-iot-device-workbench)
@@ -36,7 +45,7 @@ Something great is going to happen, coming soon :)
 
 ### Added
 
-- We are excited to announce the preview of a new feature enabled in Azure IoT Device Workbench extension in VS Code to simplify the device cross-compiling toolchain acquisition effort for device developers working on embedded Linux devices (e.g. Debian, Ubuntu, Yocto Linux…) with Azure IoT by encapsulating the compilers, [device SDK](https://github.com/Azure/azure-iot-sdk-c) and essential libraries in [Containers](https://www.docker.com/resources/what-container). All you need is to install or upgrade the IoT Device Workbench and [get started](https://github.com/microsoft/vscode-iot-workbench/tree/containerized-toolchain-readme) developing within the container, just like today you are using a local environment.
+- We are excited to announce the preview of a new feature enabled in Azure IoT Device Workbench extension in VS Code to simplify the device cross-compiling toolchain acquisition effort for device developers working on embedded Linux devices (e.g. Debian, Ubuntu, Yocto Linux…) with Azure IoT by encapsulating the compilers, [device SDK](https://github.com/Azure/azure-iot-sdk-c) and essential libraries in [Containers](https://www.docker.com/resources/what-container). All you need is to install or upgrade the IoT Device Workbench and [get started](https://github.com/microsoft/vscode-iot-workbench#embedded-linux-public-preview) developing within the container, just like today you are using a local environment.
 
 ### Fixed
 

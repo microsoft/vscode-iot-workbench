@@ -10,7 +10,7 @@
     "url": "https://github.com/Microsoft/vscode-iot-workbench/issues"
   },
   "homepage": "https://github.com/Microsoft/vscode-iot-workbench/blob/master/README.md",
-  "version": "0.10.12",
+  "version": "0.10.13",
   "publisher": "vsciot-vscode",
   "icon": "logo.png",
   "license": "SEE LICENSE IN <LICENSE>",
@@ -39,9 +39,7 @@
     "onCommand:iotworkbench.deviceUpload",
     "onCommand:iotworkbench.azureProvision",
     "onCommand:iotworkbench.azureDeploy",
-    "onCommand:iotworkbench.configureDevice",
-    "onCommand:iotworkbench.installToolchain",
-    "onCommand:iotworkbench.testexample"
+    "onCommand:iotworkbench.configureDevice"
   ],
   "main": "./out/src/extension",
   "contributes": {
@@ -94,11 +92,6 @@
       {
         "command": "iotworkbench.configureDevice",
         "title": "Configure Device Settings...",
-        "category": "Azure IoT Device Workbench"
-      },
-      {
-        "command": "iotworkbench.installToolchain",
-        "title": "Install Device Compiler Toolchain...",
         "category": "Azure IoT Device Workbench"
       },
       {
@@ -247,7 +240,7 @@
     "@types/ssh2": "^0.5.35",
     "@types/unzip": "^0.1.0",
     "@types/winreg": "^1.2.30",
-    "gts": "^0.5.1",
+    "gts": "^0.5.4",
     "typescript": "^2.6.2",
     "vscode": "^1.1.33",
     "webpack": "^4.30.0",
@@ -267,6 +260,7 @@
     "glob": "^7.1.3",
     "guid-typescript": "^1.0.7",
     "impor": "^0.1.1",
+    "keytar": "^4.4.0",
     "lodash.filter": "^4.6.0",
     "lodash.foreach": "^4.5.0",
     "lodash.trimstart": "^4.5.1",
@@ -280,8 +274,7 @@
     "vscode-express": "^1.0.1",
     "vscode-extension-telemetry": "^0.1.0",
     "vscode-iot-device-cube-sdk": "^0.0.20",
-    "winreg": "^1.2.3",
-    "keytar": "^4.4.0"
+    "winreg": "^1.2.3"
   },
   "extensionDependencies": [
     "vsciot-vscode.azure-iot-toolkit",
