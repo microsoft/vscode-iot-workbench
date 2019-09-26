@@ -14,7 +14,7 @@ import * as WinReg from 'winreg';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey} from '../constants';
+import {ConfigKey, ScaffoldType} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 import {delay, getRegistryValues} from '../utils';
 
@@ -122,6 +122,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
       throw new Error('Unable to find the board in the config file.');
     }
 
+    await this.generateCppPropertiesFile(ScaffoldType.Workspace, this.board);
     return true;
   }
 
