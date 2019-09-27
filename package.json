@@ -15,7 +15,7 @@
   "icon": "logo.png",
   "aiKey": "5b869bc6-ca93-4f24-aa87-92871a3a616e",
   "engines": {
-    "vscode": "^1.23.0"
+    "vscode": "^1.30.0"
   },
   "categories": [
     "Azure",
@@ -187,7 +187,7 @@
     "@types/lodash.foreach": "^4.5.6",
     "@types/lodash.trimstart": "^4.5.6",
     "@types/mocha": "^2.2.42",
-    "@types/node": "^7.0.43",
+    "@types/node": "^10.1.4",
     "@types/opn": "3.0.28",
     "@types/request-promise": "^4.1.39",
     "@types/ssh2": "^0.5.35",
@@ -195,7 +195,7 @@
     "@types/winreg": "^1.2.30",
     "gts": "^0.5.1",
     "typescript": "^2.6.2",
-    "vscode": "^1.1.30"
+    "vscode": "^1.1.33"
   },
   "dependencies": {
     "adm-zip": "^0.4.11",
@@ -209,11 +209,12 @@
     "fs-plus": "^3.0.1",
     "getmac": "^1.2.1",
     "guid-typescript": "^1.0.7",
-    "impor": "^0.0.2",
+    "impor": "^0.1.1",
     "lodash.filter": "^4.6.0",
     "lodash.foreach": "^4.5.0",
     "lodash.trimstart": "^4.5.1",
-    "ms-rest": "^2.3.0",
+    "ms-rest": "^2.5.3",
+    "ms-rest-azure": "^3.0.0",
     "opn": "5.1.0",
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
