@@ -21,6 +21,9 @@ cmake_minimum_required(VERSION 2.8)
 # Uncomment the following line if you want to build with vcpkg of azure_iot_sdks
 # find_package(azure_iot_sdks REQUIRED)
 
+# Uncomment the following line if you want to build with the source code of azure_iot_sdks
+# add_subdirectory(azure-iot-sdk-c)
+
 set({PROJECT_NAME}_h_files
     {H_FILE_LIST}
 )
