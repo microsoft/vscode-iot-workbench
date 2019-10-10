@@ -14,7 +14,7 @@ import * as WinReg from 'winreg';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey} from '../constants';
+import {ConfigKey, ScaffoldType} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 import {TelemetryContext} from '../telemetry';
 import {delay, getRegistryValues} from '../utils';
@@ -125,6 +125,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
       throw new Error('Unable to find the board in the config file.');
     }
 
+    await this.generateCppPropertiesFile(ScaffoldType.Workspace, this.board);
     return true;
   }
 
@@ -723,7 +724,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
     if (!fs.existsSync(arduinoPackagePath)) {
       throw new Error(
-          'Unable to find the Arduino package path, please install the latest Arduino package for Devkit.');
+          'Unable to locate Arduino IDE. Please install it from https://www.arduino.cc/en/main/software and configure the path in User Settings. Restart VS Code to apply to changes.');
     }
 
     const files = fs.readdirSync(arduinoPackagePath);
