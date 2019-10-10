@@ -74,29 +74,32 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
           RaspberryPiUploadConfig.host, RaspberryPiUploadConfig.port,
           RaspberryPiUploadConfig.user, RaspberryPiUploadConfig.password);
       try {
-        // Upload the entire output folder to device.
         await ssh.uploadFolder(
             this.outputPath, RaspberryPiUploadConfig.projectPath);
-        const enableExecPriorityCommand =
-            `cd ${RaspberryPiUploadConfig.projectPath} && chmod -R 755 .\/`;
-        const command = ssh.spawn(enableExecPriorityCommand);
-        command.on('data', async (data) => {});
-        command.on('close', async () => {
-          channelShowAndAppendLine(this.channel, 'DONE');
-          await ssh.close();
-        });
-        command.on('error', this.channel.appendLine);
       } catch (error) {
-        throw new Error(
-            `Deploy binary file to device ${RaspberryPiUploadConfig.user}@${
-                RaspberryPiUploadConfig.host} failed. ${error.message}`);
+        const message =
+            `SSH traffic is too busy. Please wait a second and retry. Error: ${
+                error}.`;
+        channelShowAndAppendLine(this.channel, message);
+        console.log(error);
+        throw new Error(message);
       }
 
-      const message = `Successfully deploy bin file to Raspberry Pi board.`;
+      try {
+        await ssh.close();
+      } catch (error) {
+        throw new Error(
+            `Failed to close SSH connection. Error: ${error.message}`);
+      }
+
+      const message =
+          `Successfully deploy compiled files to Raspberry Pi board.`;
       channelShowAndAppendLine(this.channel, message);
-      await vscode.window.showInformationMessage(message);
+      vscode.window.showInformationMessage(message);
     } catch (error) {
-      throw new Error(`Upload device code failed. ${error.message}`);
+      throw new Error(
+          `Upload device code to device ${RaspberryPiUploadConfig.user}@${
+              RaspberryPiUploadConfig.host} failed. ${error}`);
     }
 
     return true;
@@ -316,7 +319,9 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       throw new Error(
           'Unable to get the device connection string, please invoke the command of Azure Provision first.');
     }
-    await sdk.Clipboard.copy(deviceConnectionString);
+    const ssh = new sdk.SSH();
+    await ssh.clipboardCopy(deviceConnectionString);
+    await ssh.close();
     vscode.window.showInformationMessage(
         'Device connection string has been copied.');
     return true;
