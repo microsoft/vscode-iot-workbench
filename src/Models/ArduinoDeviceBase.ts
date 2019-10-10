@@ -141,8 +141,7 @@ export abstract class ArduinoDeviceBase implements Device {
           fileInfo.fileName.endsWith('win32.json')) {
         if ((fileInfo.fileName.endsWith('macos.json') && plat === 'darwin') ||
             (fileInfo.fileName.endsWith('win32.json') && plat === 'win32')) {
-          await this.generateCppPropertiesFile(
-              createTimeScaffoldType, board, fileInfo);
+          await this.generateCppPropertiesFile(createTimeScaffoldType, board);
         }
       } else {
         // Copy file directly
@@ -159,17 +158,15 @@ export abstract class ArduinoDeviceBase implements Device {
 
   abstract get version(): string;
 
-  async generateCppPropertiesFile(
-      type: ScaffoldType, board: Board,
-      fileInfo: TemplateFileInfo): Promise<void> {
-    const targetFolder = path.join(this.deviceFolder, fileInfo.targetPath);
-    if (!await FileUtility.directoryExists(type, targetFolder)) {
-      await FileUtility.mkdirRecursively(type, targetFolder);
+  async generateCppPropertiesFile(type: ScaffoldType, board: Board):
+      Promise<void> {
+    if (!await FileUtility.directoryExists(type, this.vscodeFolderPath)) {
+      await FileUtility.mkdirRecursively(type, this.vscodeFolderPath);
     }
 
     // Create c_cpp_properties.json file
     const cppPropertiesFilePath =
-        path.join(targetFolder, constants.cppPropertiesFileName);
+        path.join(this.vscodeFolderPath, constants.cppPropertiesFileName);
 
     if (await FileUtility.directoryExists(type, cppPropertiesFilePath)) {
       return;
@@ -179,12 +176,18 @@ export abstract class ArduinoDeviceBase implements Device {
       const plat = await IoTWorkbenchSettings.getPlatform();
 
       if (plat === 'win32') {
+        const propertiesFilePathWin32 =
+            this.extensionContext.asAbsolutePath(path.join(
+                FileNames.resourcesFolderName, FileNames.templatesFolderName,
+                board.id, constants.cppPropertiesFileNameWin));
+        const propertiesContentWin32 =
+            fs.readFileSync(propertiesFilePathWin32).toString();
         const rootPathPattern = /{ROOTPATH}/g;
         const versionPattern = /{VERSION}/g;
         const homeDir = await IoTWorkbenchSettings.getOs();
         const localAppData: string = path.join(homeDir, 'AppData', 'Local');
         const replaceStr =
-            (fileInfo.fileContent as string)
+            propertiesContentWin32
                 .replace(rootPathPattern, localAppData.replace(/\\/g, '\\\\'))
                 .replace(versionPattern, this.version);
         await FileUtility.writeFile(type, cppPropertiesFilePath, replaceStr);
@@ -194,8 +197,8 @@ export abstract class ArduinoDeviceBase implements Device {
       else {
         const propertiesFilePathMac =
             this.extensionContext.asAbsolutePath(path.join(
-                FileNames.resourcesFolderName, board.id,
-                constants.cppPropertiesFileNameMac));
+                FileNames.resourcesFolderName, FileNames.templatesFolderName,
+                board.id, constants.cppPropertiesFileNameMac));
         const propertiesContentMac =
             await FileUtility.readFile(type, propertiesFilePathMac).toString();
         await FileUtility.writeFile(

@@ -145,6 +145,8 @@ Devices supported:
 - [MXChip IoT DevKit](https://aka.ms/iot-devkit)
 - [ESP32](https://www.espressif.com/en/products/hardware/esp-wroom-32/overview)
 
+> The Device Workbench relies on Arduino IDE as a dependency to develop on the above devices. If you have installed Device Workbench prior to Arduino IDE, you may need to restart VS Code to make it find the Arduino IDE installation path correctly.
+
 #### MXChip IoT DevKit
 
 Follow the [setup guide](https://docs.microsoft.com/azure/iot-hub/iot-hub-arduino-iot-devkit-az3166-get-started#prepare-the-development-environment) to setup the environment including the Arduino extension.
