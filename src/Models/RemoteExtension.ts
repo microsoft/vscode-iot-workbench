@@ -1,25 +1,15 @@
 
 'use strict';
 
-import * as path from 'path';
 import * as vscode from 'vscode';
-import {DependentExtensions} from '../constants';
+import {DependentExtensions, GlobalConstants} from '../constants';
 
 export class RemoteExtension {
-  // [TODO] A rough version provided by Chuck. Will be removed when service API
-  // is ready. Check whether the iot-workbench extension is currently in remote
-  // container or local
   static isRemote(context: vscode.ExtensionContext) {
     // tslint:disable-next-line: no-any
-    if (((vscode as any).ExtensionExecutionContext &&
-         // tslint:disable-next-line: no-any
-         (context as any).executionContext ===
-             // tslint:disable-next-line: no-any
-             (vscode as any).ExtensionExecutionContext.Remote) ||
-        (process.argv[0].indexOf(`${path.sep}.vscode-remote${path.sep}`) > 0)) {
-      return true;
-    }
-    return false;
+    return (vscode as any)
+               .extensions.getExtension(GlobalConstants.extensionId)
+               .extensionKind === vscode.ExtensionKind.Workspace;
   }
 
   static async isAvailable(): Promise<boolean> {
