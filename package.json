@@ -21,7 +21,7 @@
   "capabilityModelUrl": "https://aka.ms/iot-pnp-capability-model-staging",
   "iotModelUrl": "https://aka.ms/iot-pnp-iot-model-staging",
   "engines": {
-    "vscode": "^1.36.1"
+    "vscode": "^1.39.0"
   },
   "categories": [
     "Azure",
