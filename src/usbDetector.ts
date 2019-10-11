@@ -20,12 +20,20 @@ export interface DeviceInfo {
 export class UsbDetector {
   private static _vscexpress: VSCExpress|undefined;
   // tslint:disable-next-line: no-any
-  private static _usbDetector: any =
-      require('../vendor/node-usb-native').detector;
+  private static _usbDetector: any;
 
   constructor(
       private context: vscode.ExtensionContext,
-      private channel: vscode.OutputChannel) {}
+      private channel: vscode.OutputChannel) {
+    const disableUSBDetection =
+        ConfigHandler.get<boolean>('disableAutoPopupLandingPage');
+    if (os.platform() === 'linux' || disableUSBDetection) {
+      return;
+    } else {
+      // Only load detector module when not in remote
+      UsbDetector._usbDetector = require('../vendor/node-usb-native').detector;
+    }
+  }
 
   getBoardFromDeviceInfo(device: DeviceInfo) {
     if (device.vendorId && device.productId) {
