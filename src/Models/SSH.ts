@@ -101,7 +101,7 @@ export class SSH {
                 };
                 let raspiPath =
                     await vscode.window.showInputBox(raspiPathOption);
-                if (raspiPath === undefined) {
+                if (!raspiPath) {
                   return false;
                 }
                 raspiPath = raspiPath || 'IoTProject';

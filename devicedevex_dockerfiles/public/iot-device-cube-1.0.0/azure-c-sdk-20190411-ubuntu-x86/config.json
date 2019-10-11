@@ -1,0 +1,7 @@
+{
+    "image_name": "iot-device-cube:1.0.0-azure-c-sdk-20190411-ubuntu-x86",
+    "arg": {
+        "github_username": "[Your github username]",
+        "github_token": "[Your github token]"
+    }
+}

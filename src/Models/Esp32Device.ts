@@ -12,6 +12,7 @@ import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
+import {TelemetryContext} from '../telemetry';
 
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 import {DeviceType} from './Interfaces/Device';
@@ -20,7 +21,6 @@ import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 export class Esp32Device extends ArduinoDeviceBase {
   private templateFiles: TemplateFileInfo[] = [];
   private static _boardId = 'esp32';
-  private channel: vscode.OutputChannel;
 
   private componentId: string;
   get id() {
@@ -65,8 +65,10 @@ export class Esp32Device extends ArduinoDeviceBase {
 
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      devicePath: string, templateFiles?: TemplateFileInfo[]) {
-    super(context, devicePath, DeviceType.IoT_Button);
+      telemetryContext: TelemetryContext, devicePath: string,
+      templateFiles?: TemplateFileInfo[]) {
+    super(
+        context, devicePath, channel, telemetryContext, DeviceType.IoT_Button);
     this.channel = channel;
     this.componentId = Guid.create().toString();
     if (templateFiles) {

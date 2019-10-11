@@ -8,7 +8,6 @@ import * as sdk from 'vscode-iot-device-cube-sdk';
 import {ConfigHandler} from './configHandler';
 import {PickWithData} from './Models/Interfaces/UI';
 
-
 export class IoTWorkbenchSettings {
   private _workbenchPath = '';
 

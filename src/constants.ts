@@ -16,10 +16,14 @@ export class ConfigKey {
   static readonly modelRepositoryKeyName = 'IoTPnPModelRepositoryKey';
   static readonly iotPnPPublicRepositoryUrl = 'IoTPnPPublicRepositoryUrl';
   static readonly projectType = 'ProjectType';
+  static readonly projectHostType = 'ProjectHostType';
+  static readonly workbenchVersion = 'version';
 }
 
 export class EventNames {
   static readonly createNewProjectEvent = 'IoTWorkbench.NewProject';
+  static readonly configProjectEnvironmentEvent =
+      'IoTWorkbench.ConfigProjectEnvironment';
   static readonly azureProvisionEvent = 'IoTWorkbench.AzureProvision';
   static readonly azureDeployEvent = 'IoTWorkbench.AzureDeploy';
   static readonly createAzureFunctionsEvent =
@@ -105,18 +109,20 @@ export class DependentExtensions {
 }
 
 export enum PlatformType {
-  ARDUINO = 'Arduino',
-  EMBEDDEDLINUX = 'Embedded Linux (Preview)'
+  Arduino = 'Arduino',
+  EmbeddedLinux = 'Embedded Linux (Preview)',
+  Unknown = 'Unknown'
 }
 
 export enum DevelopEnvironment {
-  CONTAINER = 'in container',
-  LOCAL_ENV = 'in local environment'
+  Container = 'in container',
+  LocalEnv = 'in local environment'
 }
 
 export enum TemplateTag {
-  general = 'general',
-  digitaltwin = 'digitaltwin'
+  General = 'general',
+  Digitaltwin = 'digitaltwin',
+  DevelopmentEnvironment = 'development_container'
 }
 
 export class ContextUris {

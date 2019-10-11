@@ -47,21 +47,12 @@ export class ExampleExplorer {
 
     examplePathList.forEach(item => {
       if (item !== '.' && item !== '..') {
-        try {
-          fs.moveSync(
-              path.join(examplePath as string, item), path.join(fsPath, item));
-        } catch (error) {
-          throw error;
-        }
+        fs.moveSync(
+            path.join(examplePath as string, item), path.join(fsPath, item));
       }
     });
 
-    try {
-      fs.removeSync(tempPath);
-    } catch (error) {
-      throw error;
-    }
-
+    fs.removeSync(tempPath);
     return true;
   }
 
@@ -96,7 +87,7 @@ export class ExampleExplorer {
     }
   }
 
-  private async GenerateExampleFolder(exampleName: string) {
+  private async generateExampleFolder(exampleName: string) {
     const settings: IoTWorkbenchSettings =
         await IoTWorkbenchSettings.createAsync();
     const workbench = await settings.workbenchPath();
@@ -186,12 +177,11 @@ export class ExampleExplorer {
   async selectBoard(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    if (RemoteExtension.isRemote(context)) {
-      const message =
-          `The project is open in a Docker container now. Open a new window and run this command again.`;
-      vscode.window.showWarningMessage(message);
+    const isLocal = RemoteExtension.checkLocalBeforeRunCommand(context);
+    if (!isLocal) {
       return;
     }
+
     const boardFolderPath = context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName));
     const boardProvider = new BoardProvider(boardFolderPath);
@@ -226,9 +216,9 @@ export class ExampleExplorer {
     if (!boardSelection) {
       telemetryContext.properties.errorMessage = 'Board selection cancelled.';
       telemetryContext.properties.result = 'Cancelled';
-      return false;
+      return;
     } else if (boardSelection.id === 'no_device') {
-      await utils.TakeNoDeviceSurvey(telemetryContext);
+      await utils.takeNoDeviceSurvey(telemetryContext);
       return;
     } else {
       telemetryContext.properties.board = boardSelection.label;
@@ -250,35 +240,26 @@ export class ExampleExplorer {
               enableCommandUris: true,
               retainContextWhenHidden: true
             });
-        return true;
       }
     }
-
-    return false;
   }
 
   async initializeExample(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext, name?: string, url?: string,
       boardId?: string) {
-    try {
-      if (name && url && boardId) {
-        this._exampleName = name;
-        this._exampleUrl = url;
-        this._boardId = boardId;
-      }
-      const res = await this.initializeExampleInternal(
-          context, channel, telemetryContext);
+    if (name && url && boardId) {
+      this._exampleName = name;
+      this._exampleUrl = url;
+      this._boardId = boardId;
+    }
+    const res = await this.initializeExampleInternal(
+        context, channel, telemetryContext);
 
-      if (res) {
-        vscode.window.showInformationMessage('Example load successfully.');
-      } else {
-        vscode.window.showWarningMessage('Example load cancelled.');
-      }
-    } catch (error) {
-      vscode.window.showErrorMessage(
-          'Unable to load example. Please check output window for detailed information.');
-      throw error;
+    if (res) {
+      vscode.window.showInformationMessage('Example load successfully.');
+    } else {
+      vscode.window.showWarningMessage('Example load cancelled.');
     }
   }
 
@@ -305,7 +286,7 @@ export class ExampleExplorer {
     telemetryContext.properties.board = board ? board.name : '';
 
     const url = this._exampleUrl;
-    const fsPath = await this.GenerateExampleFolder(this._exampleName);
+    const fsPath = await this.generateExampleFolder(this._exampleName);
 
     if (!fsPath) {
       return false;

@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
-
-import {ContextUris, ModelType} from '../constants';
-import {DigitalTwinMetaModelParser} from './DigitalTwinMetaModelGraph';
 import * as Json from './JSON';
 
 import uniq = require('lodash.uniq');
-import {DigitalTwinMetaModelContext} from './DigitalTwinMetaModelUtility';
+
+import {ContextUris, ModelType} from '../constants';
 import {DTDLKeywords} from './DigitalTwinConstants';
+import {DigitalTwinMetaModelParser} from './DigitalTwinMetaModelGraph';
+import {DigitalTwinMetaModelContext} from './DigitalTwinMetaModelUtility';
 
 export interface Issue {
   startIndex: number;

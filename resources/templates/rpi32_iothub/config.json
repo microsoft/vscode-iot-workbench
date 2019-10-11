@@ -1,5 +1,0 @@
-{
-  "applicationName": "",
-  "buildCommand": "bash /work/compile_app.sh ./src",
-  "buildTarget": "/work/azure-iot-sdk-c/cmake/iot_application"
-}

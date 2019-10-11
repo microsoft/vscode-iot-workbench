@@ -92,65 +92,69 @@ export class Token extends Segment {
   }
 }
 
-export function LeftCurlyBracket(startIndex: number): Token {
+export function leftCurlyBracketToken(startIndex: number): Token {
   return new Token(
       TokenType.LeftCurlyBracket, startIndex, [basic.LeftCurlyBracket]);
 }
 
-export function RightCurlyBracket(startIndex: number): Token {
+export function rightCurlyBracketToken(startIndex: number): Token {
   return new Token(
       TokenType.RightCurlyBracket, startIndex, [basic.RightCurlyBracket]);
 }
 
-export function LeftSquareBracket(startIndex: number) {
+export function leftSquareBracketToken(startIndex: number) {
   return new Token(
       TokenType.LeftSquareBracket, startIndex, [basic.LeftSquareBracket]);
 }
 
-export function RightSquareBracket(startIndex: number): Token {
+export function rightSquareBracketToken(startIndex: number): Token {
   return new Token(
       TokenType.RightSquareBracket, startIndex, [basic.RightSquareBracket]);
 }
 
-export function Comma(startIndex: number): Token {
+export function commaToken(startIndex: number): Token {
   return new Token(TokenType.Comma, startIndex, [basic.Comma]);
 }
 
-export function Colon(startIndex: number): Token {
+export function colonToken(startIndex: number): Token {
   return new Token(TokenType.Colon, startIndex, [basic.Colon]);
 }
 
-export function Whitespace(
+export function whitespaceToken(
     startIndex: number, basicTokens: basic.Token[]): Token {
   return new Token(TokenType.Whitespace, startIndex, basicTokens);
 }
 
-export function QuotedString(
+export function quotedStringToken(
     startIndex: number, basicTokens: basic.Token[]): Token {
   return new Token(TokenType.QuotedString, startIndex, basicTokens);
 }
 
-export function Number(startIndex: number, basicTokens: basic.Token[]): Token {
+export function numberToken(
+    startIndex: number, basicTokens: basic.Token[]): Token {
   return new Token(TokenType.Number, startIndex, basicTokens);
 }
 
-export function Boolean(startIndex: number, basicToken: basic.Token): Token {
+export function booleanToken(
+    startIndex: number, basicToken: basic.Token): Token {
   return new Token(TokenType.Boolean, startIndex, [basicToken]);
 }
 
-export function Literal(startIndex: number, basicTokens: basic.Token[]): Token {
+export function literalToken(
+    startIndex: number, basicTokens: basic.Token[]): Token {
   return new Token(TokenType.Literal, startIndex, basicTokens);
 }
 
-export function Null(startIndex: number): Token {
-  return new Token(TokenType.Null, startIndex, [basic.Letters('null')]);
+export function nullToken(startIndex: number): Token {
+  return new Token(TokenType.Null, startIndex, [basic.letters('null')]);
 }
 
-export function Comment(startIndex: number, basicTokens: basic.Token[]): Token {
+export function commentToken(
+    startIndex: number, basicTokens: basic.Token[]): Token {
   return new Token(TokenType.Comment, startIndex, basicTokens);
 }
 
-export function Unrecognized(
+export function unrecognizedToken(
     startIndex: number, basicToken: basic.Token): Token {
   return new Token(TokenType.Unrecognized, startIndex, [basicToken]);
 }
@@ -386,38 +390,38 @@ export class Tokenizer {
         case basic.TokenType.LeftCurlyBracket:
           assert.deepStrictEqual(
               this.currentBasicTokenType(), basic.TokenType.LeftCurlyBracket);
-          this._current = LeftCurlyBracket(this._currentTokenStartIndex);
+          this._current = leftCurlyBracketToken(this._currentTokenStartIndex);
           this.moveNextBasicToken();
           break;
 
         case basic.TokenType.RightCurlyBracket:
-          this._current = RightCurlyBracket(this._currentTokenStartIndex);
+          this._current = rightCurlyBracketToken(this._currentTokenStartIndex);
           this.moveNextBasicToken();
           break;
 
         case basic.TokenType.LeftSquareBracket:
-          this._current = LeftSquareBracket(this._currentTokenStartIndex);
+          this._current = leftSquareBracketToken(this._currentTokenStartIndex);
           this.moveNextBasicToken();
           break;
 
         case basic.TokenType.RightSquareBracket:
-          this._current = RightSquareBracket(this._currentTokenStartIndex);
+          this._current = rightSquareBracketToken(this._currentTokenStartIndex);
           this.moveNextBasicToken();
           break;
 
         case basic.TokenType.Comma:
-          this._current = Comma(this._currentTokenStartIndex);
+          this._current = commaToken(this._currentTokenStartIndex);
           this.moveNextBasicToken();
           break;
 
         case basic.TokenType.Colon:
-          this._current = Colon(this._currentTokenStartIndex);
+          this._current = colonToken(this._currentTokenStartIndex);
           this.moveNextBasicToken();
           break;
 
         case basic.TokenType.Dash:
         case basic.TokenType.Digits:
-          this._current = Number(
+          this._current = numberToken(
               this._currentTokenStartIndex,
               readNumber(this.asBasicTokenIterator()));
           break;
@@ -425,8 +429,8 @@ export class Tokenizer {
         case basic.TokenType.ForwardSlash:
           this.moveNextBasicToken();
           if (!this.currentBasicToken()) {
-            this._current =
-                Literal(this._currentTokenStartIndex, [basic.ForwardSlash]);
+            this._current = literalToken(
+                this._currentTokenStartIndex, [basic.ForwardSlash]);
           } else {
             switch (this.currentBasicTokenType()) {
               case basic.TokenType.ForwardSlash:
@@ -439,7 +443,7 @@ export class Tokenizer {
                            basic.TokenType.CarriageReturnNewLine) {
                   lineCommentBasicTokens.push(this.currentBasicToken());
                 }
-                this._current = Comment(
+                this._current = commentToken(
                     this._currentTokenStartIndex, lineCommentBasicTokens);
                 break;
 
@@ -466,13 +470,13 @@ export class Tokenizer {
                   }
                 }
 
-                this._current = Comment(
+                this._current = commentToken(
                     this._currentTokenStartIndex, blockCommentBasicTokens);
                 break;
 
               default:
-                this._current =
-                    Literal(this._currentTokenStartIndex, [basic.ForwardSlash]);
+                this._current = literalToken(
+                    this._currentTokenStartIndex, [basic.ForwardSlash]);
                 break;
             }
           }
@@ -483,14 +487,14 @@ export class Tokenizer {
         case basic.TokenType.CarriageReturn:
         case basic.TokenType.NewLine:
         case basic.TokenType.CarriageReturnNewLine:
-          this._current = Whitespace(
+          this._current = whitespaceToken(
               this._currentTokenStartIndex,
               readWhitespace(this.asBasicTokenIterator()));
           break;
 
         case basic.TokenType.SingleQuote:
         case basic.TokenType.DoubleQuote:
-          this._current = QuotedString(
+          this._current = quotedStringToken(
               this._currentTokenStartIndex,
               readQuotedString(this.asBasicTokenIterator()));
           break;
@@ -499,13 +503,13 @@ export class Tokenizer {
           switch (this.currentBasicToken().toString()) {
             case 'true':
             case 'false':
-              this._current = Boolean(
+              this._current = booleanToken(
                   this._currentTokenStartIndex, this.currentBasicToken());
               this.moveNextBasicToken();
               break;
 
             case 'null':
-              this._current = Null(this._currentTokenStartIndex);
+              this._current = nullToken(this._currentTokenStartIndex);
               this.moveNextBasicToken();
               break;
 
@@ -523,13 +527,13 @@ export class Tokenizer {
               }
 
               this._current =
-                  Literal(this._currentTokenStartIndex, literalTokens);
+                  literalToken(this._currentTokenStartIndex, literalTokens);
               break;
           }
           break;
 
         default:
-          this._current = Unrecognized(
+          this._current = unrecognizedToken(
               this._currentTokenStartIndex, this.currentBasicToken());
           this.moveNextBasicToken();
           break;

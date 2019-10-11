@@ -64,7 +64,7 @@ export class TelemetryWorker {
     }
   }
 
-  static Initialize(context: vscode.ExtensionContext): void {
+  static initialize(context: vscode.ExtensionContext): void {
     const packageInfo = getPackageInfo(context);
     if (!packageInfo) {
       console.log('Unable to initialize telemetry');
@@ -109,8 +109,8 @@ export async function callWithTelemetry(
   properties['isInternal'] =
       InternalConfig.isInternal === true ? 'true' : 'false';
   properties['developEnvironment'] = RemoteExtension.isRemote(context) ?
-      DevelopEnvironment.CONTAINER :
-      DevelopEnvironment.LOCAL_ENV;
+      DevelopEnvironment.Container :
+      DevelopEnvironment.LocalEnv;
   const telemetryContext:
       TelemetryContext = {properties, measurements: {duration: 0}};
 

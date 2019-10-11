@@ -13,7 +13,7 @@ import {channelShowAndAppendLine} from '../utils';
 import {getExtension} from './Apis';
 import {AzureComponentConfig, AzureConfigFileHandler, AzureConfigs, ComponentInfo, DependencyConfig} from './AzureComponentConfig';
 import {AzureUtility} from './AzureUtility';
-import {extensionName} from './Interfaces/Api';
+import {ExtensionName} from './Interfaces/Api';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
 
@@ -101,11 +101,10 @@ export class IoTHub implements Component, Provisionable {
       return false;
     }
 
-    const toolkit = getExtension(extensionName.Toolkit);
-    if (toolkit === undefined) {
-      const error = new Error(
+    const toolkit = getExtension(ExtensionName.Toolkit);
+    if (!toolkit) {
+      throw new Error(
           'Azure IoT Hub Toolkit is not installed. Please install it from Marketplace.');
-      throw error;
     }
 
     let iothub = null;
@@ -158,7 +157,7 @@ export class IoTHub implements Component, Provisionable {
           ConfigKey.eventHubConnectionPath, eventHubConnectionPath);
 
       const scaffoldType = ScaffoldType.Workspace;
-      this.updateConfigSettings(scaffoldType, {
+      await this.updateConfigSettings(scaffoldType, {
         values: {
           iotHubConnectionString: iothub.iotHubConnectionString,
           eventHubConnectionString,
@@ -188,7 +187,7 @@ export class IoTHub implements Component, Provisionable {
         return;
       }
       await this.azureConfigFileHandler.updateComponent(
-          iotHubComponentIndex, componentInfo);
+          type, iotHubComponentIndex, componentInfo);
     } else {
       const newIoTHubConfig: AzureComponentConfig = {
         id: this.id,

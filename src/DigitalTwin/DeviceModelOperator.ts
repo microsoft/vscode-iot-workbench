@@ -22,11 +22,6 @@ import {GetModelResult} from './DigitalTwinApi/DataContracts/DigitalTwinModel';
 import {TelemetryContext} from '../telemetry';
 import {CredentialStore} from '../credentialStore';
 
-const constants = {
-  storedFilesInfoKeyName: 'StoredFilesInfo',
-  idName: '@id'
-};
-
 enum OverwriteChoice {
   Unknown = 1,
   OverwriteAll = 2
@@ -39,7 +34,7 @@ interface SubmitOptions {
 export class DeviceModelOperator {
   // Initial the folder for authoring device model, return the root path of the
   // workspace
-  private async InitializeFolder(): Promise<string|null> {
+  private async initializeFolder(): Promise<string|null> {
     let rootPath: string;
 
     if (vscode.workspace.workspaceFolders &&
@@ -66,7 +61,7 @@ export class DeviceModelOperator {
 
   private static vscexpress: VSCExpress|undefined;
 
-  async Load(
+  async load(
       rootPath: string, context: vscode.ExtensionContext,
       channel: vscode.OutputChannel): Promise<boolean> {
     if (!rootPath) {
@@ -86,11 +81,11 @@ export class DeviceModelOperator {
     return true;
   }
 
-  async CreateInterface(
+  async createInterface(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     let rootPath: string|null = null;
-    rootPath = await this.InitializeFolder();
+    rootPath = await this.initializeFolder();
     if (!rootPath) {
       return;
     }
@@ -118,7 +113,7 @@ export class DeviceModelOperator {
 
     const interfaceName = await vscode.window.showInputBox(option);
 
-    if (interfaceName === undefined) {
+    if (!interfaceName) {
       return false;
     }
     const dtid = dtUtils.GenerateDigitalTwinIdentifier(interfaceName);
@@ -150,11 +145,11 @@ export class DeviceModelOperator {
     return;
   }
 
-  async CreateCapabilityModel(
+  async createCapabilityModel(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     let rootPath: string|null = null;
-    rootPath = await this.InitializeFolder();
+    rootPath = await this.initializeFolder();
     if (!rootPath) {
       return;
     }
@@ -182,8 +177,8 @@ export class DeviceModelOperator {
 
     const capabilityModelName = await vscode.window.showInputBox(option);
 
-    if (capabilityModelName === undefined) {
-      return false;
+    if (!capabilityModelName) {
+      return;
     }
 
     const dtid = dtUtils.GenerateDigitalTwinIdentifier(capabilityModelName);
@@ -218,9 +213,9 @@ export class DeviceModelOperator {
     return;
   }
 
-  async ConnectModelRepository(
+  async connectModelRepository(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext): Promise<boolean> {
+      telemetryContext: TelemetryContext) {
     const repoItems = [
       {label: 'Public repository', description: ''},
       {label: 'Company repository', description: ''}
@@ -232,11 +227,13 @@ export class DeviceModelOperator {
     });
 
     if (!repoSelection) {
-      return false;
+      telemetryContext.properties.errorMessage = 'Repo selection cancelled.';
+      telemetryContext.properties.result = 'Cancelled';
+      return;
     }
 
     if (repoSelection.label === 'Public repository') {
-      // Open Public repository
+      // Open public repository
       DeviceModelOperator.vscexpress = DeviceModelOperator.vscexpress ||
           new VSCExpress(context, 'DigitalTwinRepositoryViews');
       await DeviceModelOperator.vscexpress.open(
@@ -244,33 +241,32 @@ export class DeviceModelOperator {
           `${DigitalTwinConstants.productName} Model Repository`,
           vscode.ViewColumn.Two,
           {retainContextWhenHidden: true, enableScripts: true});
-      return true;
-    }
+      return;
+    } else {
+      // Open company repository
+      const connectionString = await this.retrieveModelRepoConnectionString();
+      if (!connectionString) {
+        return;
+      }
 
-    // Open Company repository
-    const connectionString = await this.RetrieveModelRepoConnectionString();
-    if (!connectionString) {
-      return false;
-    }
+      const result = await DigitalTwinConnector.connectMetamodelRepository(
+          connectionString);
+      if (result) {
+        await CredentialStore.setCredential(
+            ConfigKey.modelRepositoryKeyName, connectionString);
 
-    const result =
-        await DigitalTwinConnector.ConnectMetamodelRepository(connectionString);
-    if (result) {
-      await CredentialStore.setCredential(
-          ConfigKey.modelRepositoryKeyName, connectionString);
-
-      DeviceModelOperator.vscexpress = DeviceModelOperator.vscexpress ||
-          new VSCExpress(context, 'DigitalTwinRepositoryViews');
-      await DeviceModelOperator.vscexpress.open(
-          'index.html', `${DigitalTwinConstants.productName} Model Repository`,
-          vscode.ViewColumn.Two,
-          {retainContextWhenHidden: true, enableScripts: true});
-      return true;
+        DeviceModelOperator.vscexpress = DeviceModelOperator.vscexpress ||
+            new VSCExpress(context, 'DigitalTwinRepositoryViews');
+        await DeviceModelOperator.vscexpress.open(
+            'index.html',
+            `${DigitalTwinConstants.productName} Model Repository`,
+            vscode.ViewColumn.Two,
+            {retainContextWhenHidden: true, enableScripts: true});
+      }
     }
-    return false;
   }
 
-  async Disconnect(
+  async disconnect(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
     await CredentialStore.deleteCredential(ConfigKey.modelRepositoryKeyName);
@@ -282,7 +278,7 @@ export class DeviceModelOperator {
     vscode.window.showInformationMessage(message);
   }
 
-  async GetInterfaces(
+  async getInterfaces(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext, usePublicRepository: boolean,
       searchString = '', pageSize = 50, continueToken: string|null = null) {
@@ -290,9 +286,8 @@ export class DeviceModelOperator {
       const dtMetamodelRepositoryClient =
           new DigitalTwinMetamodelRepositoryClient();
       await dtMetamodelRepositoryClient.initialize(null);
-      const result = await dtMetamodelRepositoryClient.SearchInterfacesAsync(
+      await dtMetamodelRepositoryClient.searchInterfacesAsync(
           searchString, continueToken, undefined, pageSize);
-      return result;
     } else {
       const connectionString =
           await CredentialStore.getCredential(ConfigKey.modelRepositoryKeyName);
@@ -303,18 +298,17 @@ export class DeviceModelOperator {
         return;
       }
 
-      const builder = DigitalTwinConnectionStringBuilder.Create(
+      const builder = DigitalTwinConnectionStringBuilder.create(
           connectionString.toString());
       const dtMetamodelRepositoryClient =
           new DigitalTwinMetamodelRepositoryClient();
       await dtMetamodelRepositoryClient.initialize(connectionString.toString());
-      const result = await dtMetamodelRepositoryClient.SearchInterfacesAsync(
-          searchString, continueToken, builder.RepositoryIdValue, pageSize);
-      return result;
+      await dtMetamodelRepositoryClient.searchInterfacesAsync(
+          searchString, continueToken, builder.repositoryIdValue, pageSize);
     }
   }
 
-  async GetCapabilityModels(
+  async getCapabilityModels(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext, usePublicRepository: boolean,
       searchString = '', pageSize = 50, continueToken: string|null = null) {
@@ -323,7 +317,7 @@ export class DeviceModelOperator {
           new DigitalTwinMetamodelRepositoryClient();
       await dtMetamodelRepositoryClient.initialize(null);
       const result =
-          await dtMetamodelRepositoryClient.SearchCapabilityModelsAsync(
+          await dtMetamodelRepositoryClient.searchCapabilityModelsAsync(
               searchString, continueToken, undefined, pageSize);
       return result;
     } else {
@@ -338,16 +332,16 @@ export class DeviceModelOperator {
       const dtMetamodelRepositoryClient =
           new DigitalTwinMetamodelRepositoryClient();
       await dtMetamodelRepositoryClient.initialize(connectionString.toString());
-      const builder = DigitalTwinConnectionStringBuilder.Create(
+      const builder = DigitalTwinConnectionStringBuilder.create(
           connectionString.toString());
       const result =
-          await dtMetamodelRepositoryClient.SearchCapabilityModelsAsync(
-              searchString, continueToken, builder.RepositoryIdValue, pageSize);
+          await dtMetamodelRepositoryClient.searchCapabilityModelsAsync(
+              searchString, continueToken, builder.repositoryIdValue, pageSize);
       return result;
     }
   }
 
-  async DeleteMetamodelFiles(
+  async deleteMetamodelFiles(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext, fileIds: string[],
       metaModelValue: string) {
@@ -373,22 +367,22 @@ export class DeviceModelOperator {
         new DigitalTwinMetamodelRepositoryClient();
     await dtMetamodelRepositoryClient.initialize(connectionString.toString());
     const builder =
-        DigitalTwinConnectionStringBuilder.Create(connectionString.toString());
+        DigitalTwinConnectionStringBuilder.create(connectionString.toString());
     for (const id of fileIds) {
       const message = `${DigitalTwinConstants.dtPrefix} Start deleting ${
           metaModelValue} with id ${id}.`;
       utils.channelShowAndAppendLine(channel, message);
       try {
         if (metaModelType === MetaModelType.Interface) {
-          await dtMetamodelRepositoryClient.DeleteInterfaceAsync(
-              id, builder.RepositoryIdValue);
+          await dtMetamodelRepositoryClient.deleteInterfaceAsync(
+              id, builder.repositoryIdValue);
           const message =
               `${DigitalTwinConstants.dtPrefix} Deleting Interface with id ${
                   id} completed.`;
           utils.channelShowAndAppendLine(channel, message);
         } else {
-          await dtMetamodelRepositoryClient.DeleteCapabilityModelAsync(
-              id, builder.RepositoryIdValue);
+          await dtMetamodelRepositoryClient.deleteCapabilityModelAsync(
+              id, builder.repositoryIdValue);
           const message = `${
               DigitalTwinConstants.dtPrefix} Deleting capabilty model with id ${
               id} completed.`;
@@ -402,7 +396,7 @@ export class DeviceModelOperator {
     }
   }
 
-  async DownloadAndEditMetamodelFiles(
+  async downloadAndEditMetamodelFiles(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext, fileIds: string[],
       metaModelValue: string, usePublicRepository: boolean) {
@@ -421,7 +415,7 @@ export class DeviceModelOperator {
       suffix = DigitalTwinConstants.capabilityModelSuffix;
     }
 
-    const rootPath = await this.InitializeFolder();
+    const rootPath = await this.initializeFolder();
     if (!rootPath) {
       return;
     }
@@ -437,8 +431,8 @@ export class DeviceModelOperator {
       }
       connectionString = repoConnectionString.toString();
       const builder =
-          DigitalTwinConnectionStringBuilder.Create(connectionString);
-      repositoryId = builder.RepositoryIdValue;
+          DigitalTwinConnectionStringBuilder.create(connectionString);
+      repositoryId = builder.repositoryIdValue;
     }
 
     const dtMetamodelRepositoryClient =
@@ -454,11 +448,11 @@ export class DeviceModelOperator {
       let fileMetaData: GetModelResult;
       try {
         if (metaModelType === MetaModelType.Interface) {
-          fileMetaData = await dtMetamodelRepositoryClient.GetInterfaceAsync(
+          fileMetaData = await dtMetamodelRepositoryClient.getInterfaceAsync(
               id, repositoryId, true);
         } else {
           fileMetaData =
-              await dtMetamodelRepositoryClient.GetCapabilityModelAsync(
+              await dtMetamodelRepositoryClient.getCapabilityModelAsync(
                   id, repositoryId, true);
         }
         if (fileMetaData) {
@@ -507,21 +501,18 @@ export class DeviceModelOperator {
         'vscode.openFolder', vscode.Uri.file(rootPath), false);
   }
 
-  async SubmitMetaModelFiles(
+  async submitMetaModelFiles(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext): Promise<boolean> {
-    if (!vscode.workspace.workspaceFolders ||
+      telemetryContext: TelemetryContext) {
+    if (!(vscode.workspace.workspaceFolders &&
+          vscode.workspace.workspaceFolders.length > 0) ||
         !vscode.workspace.workspaceFolders[0].uri.fsPath) {
       vscode.window.showWarningMessage(
-          'No folder opened in current window. Please select a folder first');
-      return false;
+          'You have not yet opened a folder in Visual Studio Code. Please select a folder first.');
+      return;
     }
 
     const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-
-    if (!rootPath) {
-      throw new Error('User cancelled folder selection.');
-    }
 
     // Retrieve all schema files
     const allInterfaceFiles: dtUtils.SchemaFileInfo[] = [];
@@ -584,14 +575,14 @@ export class DeviceModelOperator {
       }
     }
 
-    const connectionString = await this.RetrieveModelRepoConnectionString();
+    const connectionString = await this.retrieveModelRepoConnectionString();
     if (!connectionString) {
       utils.channelShowAndAppendLine(
           channel, `Company repository not specified, cancel submit.`);
       return false;
     }
     const result =
-        await DigitalTwinConnector.ConnectMetamodelRepository(connectionString);
+        await DigitalTwinConnector.connectMetamodelRepository(connectionString);
     if (!result) {
       utils.channelShowAndAppendLine(
           channel, `Failed to connect Company repository, cancel submit.`);
@@ -602,7 +593,7 @@ export class DeviceModelOperator {
         new DigitalTwinMetamodelRepositoryClient();
     await dtMetamodelRepositoryClient.initialize(connectionString.toString());
     const builder =
-        DigitalTwinConnectionStringBuilder.Create(connectionString.toString());
+        DigitalTwinConnectionStringBuilder.create(connectionString.toString());
 
     const option: SubmitOptions = {overwriteChoice: OverwriteChoice.Unknown};
 
@@ -614,11 +605,11 @@ export class DeviceModelOperator {
 
       if (item.type === DTDLKeywords.typeValueInterface) {
         // Interface file
-        await this.SubmitInterface(
+        await this.submitInterface(
             option, dtMetamodelRepositoryClient, builder, item, channel);
       } else {
         // DCM file
-        await this.SubmitCapabilityModel(
+        await this.submitCapabilityModel(
             option, dtMetamodelRepositoryClient, builder, item, channel);
       }
     }
@@ -628,7 +619,7 @@ export class DeviceModelOperator {
     return true;
   }
 
-  private async RetrieveModelRepoConnectionString(): Promise<string|null> {
+  private async retrieveModelRepoConnectionString(): Promise<string|null> {
     let connectionString =
         await CredentialStore.getCredential(ConfigKey.modelRepositoryKeyName);
     if (!connectionString) {
@@ -652,7 +643,7 @@ export class DeviceModelOperator {
     return connectionString;
   }
 
-  private async SubmitInterface(
+  private async submitInterface(
       option: SubmitOptions,
       dtMetamodelRepositoryClient: DigitalTwinMetamodelRepositoryClient,
       builder: DigitalTwinConnectionStringBuilder,
@@ -669,8 +660,8 @@ export class DeviceModelOperator {
 
     try {
       // Try to get the file to retrieve the latest etag.
-      interfaceMetaData = await dtMetamodelRepositoryClient.GetInterfaceAsync(
-          fileInterface.id, builder.RepositoryIdValue, true);
+      interfaceMetaData = await dtMetamodelRepositoryClient.getInterfaceAsync(
+          fileInterface.id, builder.repositoryIdValue, true);
     } catch (error) {
       if (error.statusCode === 404) {
         // New interface
@@ -700,13 +691,13 @@ export class DeviceModelOperator {
       }
       utils.channelShowAndAppendLine(channel, `  ${message}, updating...`);
       // Overwrite
-      await dtMetamodelRepositoryClient.CreateOrUpdateInterfaceAsync(
+      await dtMetamodelRepositoryClient.createOrUpdateInterfaceAsync(
           fileContent, fileInterface.id, interfaceMetaData.etag,
-          builder.RepositoryIdValue);
+          builder.repositoryIdValue);
     } else {
       // New interface
-      await dtMetamodelRepositoryClient.CreateOrUpdateInterfaceAsync(
-          fileContent, fileInterface.id, undefined, builder.RepositoryIdValue);
+      await dtMetamodelRepositoryClient.createOrUpdateInterfaceAsync(
+          fileContent, fileInterface.id, undefined, builder.repositoryIdValue);
     }
 
     message = `Interface '${fileInterface.id}'(${
@@ -715,7 +706,7 @@ export class DeviceModelOperator {
     vscode.window.showInformationMessage(message);
   }
 
-  private async SubmitCapabilityModel(
+  private async submitCapabilityModel(
       option: SubmitOptions,
       dtMetamodelRepositoryClient: DigitalTwinMetamodelRepositoryClient,
       builder: DigitalTwinConnectionStringBuilder,
@@ -734,8 +725,8 @@ export class DeviceModelOperator {
     try {
       // Try to get the file to retrieve the latest etag.
       capabilityModelContext =
-          await dtMetamodelRepositoryClient.GetCapabilityModelAsync(
-              fileDCM.id, builder.RepositoryIdValue, true);
+          await dtMetamodelRepositoryClient.getCapabilityModelAsync(
+              fileDCM.id, builder.repositoryIdValue, true);
     } catch (error) {
       if (error.statusCode === 404) {
         // New DCM
@@ -765,13 +756,13 @@ export class DeviceModelOperator {
       }
       utils.channelShowAndAppendLine(channel, `  ${message}, updating...`);
       // Overwrite
-      await dtMetamodelRepositoryClient.CreateOrUpdateCapabilityModelAsync(
+      await dtMetamodelRepositoryClient.createOrUpdateCapabilityModelAsync(
           fileContent, fileDCM.id, capabilityModelContext.etag,
-          builder.RepositoryIdValue);
+          builder.repositoryIdValue);
     } else {
       // New interface
-      await dtMetamodelRepositoryClient.CreateOrUpdateCapabilityModelAsync(
-          fileContent, fileDCM.id, undefined, builder.RepositoryIdValue);
+      await dtMetamodelRepositoryClient.createOrUpdateCapabilityModelAsync(
+          fileContent, fileDCM.id, undefined, builder.repositoryIdValue);
     }
 
     message = `Device capability model '${fileDCM.id}'(${
