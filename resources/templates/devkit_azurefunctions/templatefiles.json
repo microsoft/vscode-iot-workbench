@@ -6,16 +6,6 @@
         "targetPath" : "."
     },
     {
-        "fileName": "c_cpp_properties_macos.json",
-        "sourcePath" : ".",
-        "targetPath" : "./.vscode"
-    },
-    {
-        "fileName": "c_cpp_properties_win32.json",
-        "sourcePath" : ".",
-        "targetPath" : "./.vscode"
-    },
-    {
       "fileName": "arduino.json",
       "sourcePath" : ".",
       "targetPath" : "./.vscode"

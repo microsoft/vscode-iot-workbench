@@ -18,6 +18,12 @@ endif()
 
 cmake_minimum_required(VERSION 2.8)
 
+# Uncomment the following line if you want to build with vcpkg of azure_iot_sdks
+# find_package(azure_iot_sdks REQUIRED)
+
+# Uncomment the following line if you want to build with the source code of azure_iot_sdks
+# add_subdirectory(azure-iot-sdk-c)
+
 set({PROJECT_NAME}_h_files
     {H_FILE_LIST}
 )
@@ -36,4 +42,13 @@ include_directories(${DIGITALTWIN_CLIENT_INC_FOLDER})
 
 add_executable({PROJECT_NAME} ${{PROJECT_NAME}_c_files} ${{PROJECT_NAME}_h_files})
 
-target_link_libraries({PROJECT_NAME} parson iothub_client_mqtt_transport iothub_client digitaltwin_client)
+target_link_libraries({PROJECT_NAME}
+parson
+iothub_client_mqtt_transport
+iothub_client_mqtt_ws_transport
+iothub_client
+digitaltwin_client
+prov_auth_client
+aziotsharedutil
+umqtt
+uuid)
