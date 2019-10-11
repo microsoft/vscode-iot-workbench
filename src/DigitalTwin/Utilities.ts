@@ -202,7 +202,7 @@ export function listAllPnPSchemaFilesSync(
 
 export async function saveCompanyRepoConnectionString(
     connectionString: string) {
-  // Validate the the format of the model repository key
+  // Validate the format of the model repository key
   DigitalTwinConnectionStringBuilder.create(connectionString);
 
   await CredentialStore.setCredential(

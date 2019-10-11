@@ -649,7 +649,7 @@ export class CodeGeneratorCore {
       // Doen't exist
       return null;
     }
-    // TODO: should check the the integrity of the CodeGen Cli
+    // TODO: should check the integrity of the CodeGen Cli
     return currentVersion;
   }
 

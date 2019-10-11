@@ -66,7 +66,7 @@ export class ArduinoPackageManager {
       // If we failed to install board package,
       // it may because the user hasn't installed
       // Arduino extension. Let's just ignore
-      // that. We should have asked the the user
+      // that. We should have asked the user
       // to install Arduino extension somewhere
       // else already
     }

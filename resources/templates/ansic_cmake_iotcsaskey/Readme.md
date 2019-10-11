@@ -48,7 +48,7 @@ In the root folder of your generated app:
 
     * Retrieve DPS connection infomation from Azure IoT Central, including **DPS ID Scope**, **DPS Symmetric Key**, **Device ID**, which will be pass the as paramerters of the device app executable. Please refer to [this document](https://docs.microsoft.com/en-us/azure/iot-central/concepts-connectivity) for more details.
 
-1. Once the build has succeeded, you can test it by specifying the the DPS info (**DPS ID Scope**, **DPS Symmetric Key**, **Device Id**) as its parameter.
+1. Once the build has succeeded, you can test it by specifying the DPS info (**DPS ID Scope**, **DPS Symmetric Key**, **Device Id**) as its parameter.
     ```bash
     \\{PROJECT_NAME}\\Release\\{PROJECT_NAME}.exe [DPS ID Scope] [DPS symmetric key] [device ID]
     ```
@@ -99,7 +99,7 @@ In the root folder of your generated app:
 
     * Retrieve DPS connection infomation from Azure IoT Central, including **DPS ID Scope**, **DPS Symmetric Key**, **Device ID**, which will be pass the as paramerters of the device app executable. Please refer to [this document](https://docs.microsoft.com/en-us/azure/iot-central/concepts-connectivity) for more details.
 
-1. Once the build has succeeded, you can test it by specifying the the DPS info (**DPS ID Scope**, **DPS Symmetric Key**, **Device Id**) as its parameter.
+1. Once the build has succeeded, you can test it by specifying the DPS info (**DPS ID Scope**, **DPS Symmetric Key**, **Device Id**) as its parameter.
     ```bash
     ./{PROJECT_NAME}/{PROJECT_NAME} [DPS ID Scope] [DPS symmetric key] [device ID]
     ```
