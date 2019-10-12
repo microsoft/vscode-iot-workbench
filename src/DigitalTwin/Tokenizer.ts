@@ -95,21 +95,21 @@ export const CarriageReturnNewLine =
 /**
  * Create a Letters Token from the provided text.
  */
-export function Letters(text: string): Token {
+export function letters(text: string): Token {
   return new Token(text, TokenType.Letters);
 }
 
 /**
  * Create a Digits Token from the provided text.
  */
-export function Digits(text: string): Token {
+export function digits(text: string): Token {
   return new Token(text, TokenType.Digits);
 }
 
 /**
  * Create an Unrecognized Token from the provided text.
  */
-export function Unrecognized(text: string): Token {
+export function unrecognized(text: string): Token {
   return new Token(text, TokenType.Unrecognized);
 }
 
@@ -285,11 +285,11 @@ export class Tokenizer implements utilities.Iterator<Token> {
 
         default:
           if (isLetter(this.currentCharacter)) {
-            this._currentToken = Letters(this.readWhile(isLetter));
+            this._currentToken = letters(this.readWhile(isLetter));
           } else if (isDigit(this.currentCharacter)) {
-            this._currentToken = Digits(this.readWhile(isDigit));
+            this._currentToken = digits(this.readWhile(isDigit));
           } else {
-            this._currentToken = Unrecognized(this.currentCharacter);
+            this._currentToken = unrecognized(this.currentCharacter);
             this.nextCharacter();
           }
           break;

@@ -17,33 +17,33 @@ const constants = {
 
 
 export class DigitalTwinSharedAccessKey {
-  private keyId: string;
-  private secret: string;
-  private audience: string;
-  private repositoryId: string;
+  private _keyId: string;
+  private _secret: string;
+  private _audience: string;
+  private _repositoryId: string;
   private expiry: string;
 
-  get KeyId() {
-    return this.keyId;
+  get keyId() {
+    return this._keyId;
   }
 
-  get Secret() {
-    return this.secret;
+  get secret() {
+    return this._secret;
   }
 
-  get Audience() {
-    return this.audience;
+  get audience() {
+    return this._audience;
   }
 
-  get RepositoryId() {
-    return this.repositoryId;
+  get repositoryId() {
+    return this._repositoryId;
   }
 
   constructor(builder: DigitalTwinConnectionStringBuilder) {
-    this.audience = builder.HostName;
-    this.keyId = builder.SharedAccessKeyName;
-    this.secret = builder.SharedAccessKeyValue;
-    this.repositoryId = builder.RepositoryIdValue;
+    this._audience = builder.hostName;
+    this._keyId = builder.sharedAccessKeyName;
+    this._secret = builder.sharedAccessKeyValue;
+    this._repositoryId = builder.repositoryIdValue;
     const now = new Date();
     const ms = 1000;
     this.expiry =
@@ -51,23 +51,24 @@ export class DigitalTwinSharedAccessKey {
             .toString();
   }
 
-  GenerateSASToken(): string {
-    const encodedServiceEndpoint = encodeURIComponent(this.audience);
+  generateSASToken(): string {
+    const encodedServiceEndpoint = encodeURIComponent(this._audience);
     const signature = [
-      encodeURIComponent(this.repositoryId), encodedServiceEndpoint, this.expiry
+      encodeURIComponent(this._repositoryId), encodedServiceEndpoint,
+      this.expiry
     ].join('\n').toLowerCase();
     const sigUTF8 = new Buffer(signature, 'utf8');
-    const secret64bit = new Buffer(this.secret, 'base64');
+    const secret64bit = new Buffer(this._secret, 'base64');
     const hmac = createHmac('sha256', secret64bit);
     hmac.update(sigUTF8);
     const hash = encodeURIComponent(hmac.digest('base64'));
     return `${constants.SharedAccessSignature} sr=${
         encodedServiceEndpoint}&sig=${hash}&se=${this.expiry}&skn=${
-        this.keyId}&rid=${this.repositoryId}`;
+        this._keyId}&rid=${this._repositoryId}`;
   }
 
-  static Parse(connectionString: string): DigitalTwinSharedAccessKey {
-    const builder = DigitalTwinConnectionStringBuilder.Create(connectionString);
+  static parse(connectionString: string): DigitalTwinSharedAccessKey {
+    const builder = DigitalTwinConnectionStringBuilder.create(connectionString);
     return new DigitalTwinSharedAccessKey(builder);
   }
 }

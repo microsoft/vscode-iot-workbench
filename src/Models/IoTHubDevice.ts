@@ -10,8 +10,7 @@ import {ConfigKey, ScaffoldType} from '../constants';
 
 import {getExtension} from './Apis';
 import {ComponentInfo, DependencyConfig} from './AzureComponentConfig';
-import {AzureUtility} from './AzureUtility';
-import {extensionName} from './Interfaces/Api';
+import {ExtensionName} from './Interfaces/Api';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
 
@@ -65,46 +64,39 @@ export class IoTHubDevice implements Component, Provisionable {
       return false;
     }
 
-    const toolkit = getExtension(extensionName.Toolkit);
-    if (toolkit === undefined) {
-      const error = new Error(
+    const toolkit = getExtension(ExtensionName.Toolkit);
+    if (!toolkit) {
+      throw new Error(
           'Azure IoT Hub Toolkit is not installed. Please install it from Marketplace.');
-      throw error;
     }
 
     let device = null;
-    try {
-      switch (selection.detail) {
-        case 'select':
-          device = await toolkit.azureIoTExplorer.getDevice(
-              null, iotHubConnectionString, this.channel);
-          if (device === undefined) {
-            return false;
-          } else {
-            await ConfigHandler.update(
-                ConfigKey.iotHubDeviceConnectionString,
-                device.connectionString);
-          }
-          break;
+    switch (selection.detail) {
+      case 'select':
+        device = await toolkit.azureIoTExplorer.getDevice(
+            null, iotHubConnectionString, this.channel);
+        if (!device) {
+          return false;
+        } else {
+          await ConfigHandler.update(
+              ConfigKey.iotHubDeviceConnectionString, device.connectionString);
+        }
+        break;
 
-        case 'create':
-          device = await toolkit.azureIoTExplorer.createDevice(
-              false, iotHubConnectionString, this.channel);
-          if (device === undefined) {
-            return false;
-          } else {
-            await ConfigHandler.update(
-                ConfigKey.iotHubDeviceConnectionString,
-                device.connectionString);
-          }
-          break;
-        default:
-          break;
-      }
-      return true;
-    } catch (error) {
-      throw error;
+      case 'create':
+        device = await toolkit.azureIoTExplorer.createDevice(
+            false, iotHubConnectionString, this.channel);
+        if (!device) {
+          return false;
+        } else {
+          await ConfigHandler.update(
+              ConfigKey.iotHubDeviceConnectionString, device.connectionString);
+        }
+        break;
+      default:
+        break;
     }
+    return true;
   }
 
   updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo):
@@ -148,7 +140,7 @@ async function getDeviceNumber(iotHubConnectionString: string) {
           if (err) {
             return reject(err);
           }
-          if (list === undefined) {
+          if (!list) {
             return resolve(0);
           } else {
             return resolve(list.length);

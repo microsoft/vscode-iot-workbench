@@ -13,7 +13,7 @@ export class AnsiCCodeGeneratorFactory implements CodeGeneratorFactory {
       private context: vscode.ExtensionContext,
       private channel: vscode.OutputChannel,
       private telemetryContext: TelemetryContext) {}
-  CreateCodeGeneratorImpl(
+  createCodeGeneratorImpl(
       projectType: CodeGenProjectType,
       connectionType: DeviceConnectionType): CodeGenerator|null {
     if (projectType === CodeGenProjectType.CMake) {
@@ -26,6 +26,7 @@ export class AnsiCCodeGeneratorFactory implements CodeGeneratorFactory {
       return new AnsiCCodeGeneratorImplVS(
           this.context, this.channel, this.telemetryContext, connectionType);
     }
+
     return null;
   }
 }

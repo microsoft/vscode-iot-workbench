@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 
 import {FileNames, ScaffoldType} from '../../constants';
 import {TelemetryContext} from '../../telemetry';
-import {generateTemplateFile, GetCodeGenTemplateFolderName, getTemplateFilesInfo} from '../../utils';
+import {generateTemplateFile, getCodeGenTemplateFolderName, getTemplateFilesInfo} from '../../utils';
 import {NewLine} from '../Tokenizer';
 
 import {AnsiCCodeGeneratorBase} from './Interfaces/AnsiCCodeGeneratorBase';
@@ -18,14 +18,14 @@ export class AnsiCCodeGeneratorImplCMake extends AnsiCCodeGeneratorBase {
     super(context, channel);
   }
 
-  async GenerateCode(
+  async generateCode(
       targetPath: string, filePath: string, capabilityModelName: string,
       dcmId: string, interfaceDir: string): Promise<boolean> {
     // Invoke DigitalTwinCodeGen toolset to generate the code
     const retvalue =
-        await this.GenerateAnsiCCodeCore(targetPath, filePath, interfaceDir);
+        await this.generateAnsiCCodeCore(targetPath, filePath, interfaceDir);
 
-    const templateFolderName = await GetCodeGenTemplateFolderName(
+    const templateFolderName = await getCodeGenTemplateFolderName(
         this.context, CodeGenProjectType.CMake, this.provisionType);
     if (!templateFolderName) {
       throw new Error(`Failed to get template folder name`);
@@ -44,7 +44,7 @@ export class AnsiCCodeGeneratorImplCMake extends AnsiCCodeGeneratorBase {
     const cmakeCFilesPattern = /{C_FILE_LIST}/g;
 
     for (const fileInfo of templateFilesInfo) {
-      if (fileInfo.fileContent === undefined) {
+      if (!fileInfo.fileContent) {
         continue;
       }
 

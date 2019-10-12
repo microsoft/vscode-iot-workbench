@@ -2,7 +2,7 @@ import {CodeGenerator, CodeGenProjectType, DeviceConnectionType} from './CodeGen
 
 
 export interface CodeGeneratorFactory {
-  CreateCodeGeneratorImpl(
+  createCodeGeneratorImpl(
       deviceType: CodeGenProjectType,
       connectionType: DeviceConnectionType): CodeGenerator|null;
 }

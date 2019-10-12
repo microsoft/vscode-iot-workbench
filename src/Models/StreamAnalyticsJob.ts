@@ -191,7 +191,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
         return;
       }
       await this.azureConfigHandler.updateComponent(
-          asaComponentIndex, componentInfo);
+          type, asaComponentIndex, componentInfo);
     } else {
       const newAsaConfig: AzureComponentConfig = {
         id: this.id,
@@ -456,13 +456,11 @@ export class StreamAnalyticsJob implements Component, Provisionable,
               this.channel, 'Start Stream Analytics Job failed.');
         }
         return false;
-      } else {
-        if (this.channel && startPending) {
-          clearInterval(startPending);
-          channelShowAndAppendLine(this.channel, '.');
-          channelShowAndAppendLine(
-              this.channel, 'Start Stream Analytics Job succeeded.');
-        }
+      } else if (this.channel && startPending) {
+        clearInterval(startPending);
+        channelShowAndAppendLine(this.channel, '.');
+        channelShowAndAppendLine(
+            this.channel, 'Start Stream Analytics Job succeeded.');
       }
     } catch (error) {
       if (this.channel && deployPending) {

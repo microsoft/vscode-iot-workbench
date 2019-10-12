@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {FileNames, ScaffoldType} from '../constants';
+import {CancelOperationError} from '../CancelOperationError';
+import {ConfigKey, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext} from '../telemetry';
+import * as utils from '../utils';
 
 import {checkAzureLogin} from './Apis';
 import {Compilable} from './Interfaces/Compilable';
@@ -29,15 +30,43 @@ export abstract class IoTWorkbenchProjectBase {
   protected extensionContext: vscode.ExtensionContext;
   protected channel: vscode.OutputChannel;
   protected telemetryContext: TelemetryContext;
+  protected projectHostType: ProjectHostType = ProjectHostType.Unknown;
 
-  static GetProjectType(projectFileRootPath: string): ProjectHostType {
+  /**
+   * projectHostType config is recoreded in iot workbench project file
+   * @param scaffoldType
+   * @param projectFileRootPath
+   */
+  static async getProjectType(
+      scaffoldType: ScaffoldType,
+      projectFileRootPath: string|undefined): Promise<ProjectHostType> {
+    if (!projectFileRootPath) {
+      return ProjectHostType.Unknown;
+    }
     const iotWorkbenchProjectFile =
         path.join(projectFileRootPath, FileNames.iotworkbenchprojectFileName);
+    if (!await FileUtility.fileExists(scaffoldType, iotWorkbenchProjectFile)) {
+      return ProjectHostType.Unknown;
+    }
+    const iotworkbenchprojectFileString =
+        (await FileUtility.readFile(
+             scaffoldType, iotWorkbenchProjectFile, 'utf8') as string)
+            .trim();
+    if (iotworkbenchprojectFileString) {
+      const projectConfig = JSON.parse(iotworkbenchprojectFileString);
+      if (projectConfig &&
+          projectConfig[`${ConfigKey.projectHostType}`] !== undefined) {
+        const projectHostType: ProjectHostType = utils.getEnumKeyByEnumValue(
+            ProjectHostType, projectConfig[`${ConfigKey.projectHostType}`]);
+        return projectHostType;
+      }
+    }
+
+    // TODO: For backward compatibility, will remove later
     const devcontainerFolderPath =
         path.join(projectFileRootPath, FileNames.devcontainerFolderName);
-    if (!fs.existsSync(iotWorkbenchProjectFile)) {
-      return ProjectHostType.Unknown;
-    } else if (fs.existsSync(devcontainerFolderPath)) {
+    if (await FileUtility.directoryExists(
+            scaffoldType, devcontainerFolderPath)) {
       return ProjectHostType.Container;
     } else {
       return ProjectHostType.Workspace;
@@ -69,7 +98,8 @@ export abstract class IoTWorkbenchProjectBase {
     this.telemetryContext = telemetryContext;
   }
 
-  abstract async load(initLoad?: boolean): Promise<boolean>;
+  abstract async load(scaffoldType: ScaffoldType, initLoad?: boolean):
+      Promise<boolean>;
 
   async compile(): Promise<boolean> {
     for (const item of this.componentList) {
@@ -80,10 +110,9 @@ export abstract class IoTWorkbenchProjectBase {
         }
 
         const res = await item.compile();
-        if (res === false) {
-          const error = new Error(
+        if (!res) {
+          vscode.window.showErrorMessage(
               'Unable to compile the device code, please check output window for detail.');
-          throw error;
         }
       }
     }
@@ -99,10 +128,9 @@ export abstract class IoTWorkbenchProjectBase {
         }
 
         const res = await item.upload();
-        if (res === false) {
-          const error = new Error(
+        if (!res) {
+          vscode.window.showErrorMessage(
               'Unable to upload the sketch, please check output window for detail.');
-          throw error;
         }
       }
     }
@@ -175,7 +203,7 @@ export abstract class IoTWorkbenchProjectBase {
         }
 
         const res = await item.provision();
-        if (res === false) {
+        if (!res) {
           vscode.window.showWarningMessage('Provision cancelled.');
           return false;
         }
@@ -184,7 +212,7 @@ export abstract class IoTWorkbenchProjectBase {
     return true;
   }
 
-  async deploy(): Promise<boolean> {
+  async deploy() {
     let azureLoggedIn = false;
 
     const deployItemList: string[] = [];
@@ -192,7 +220,7 @@ export abstract class IoTWorkbenchProjectBase {
       if (this.canDeploy(item)) {
         const isPrerequisitesAchieved = await item.checkPrerequisites();
         if (!isPrerequisitesAchieved) {
-          return false;
+          return;
         }
 
         deployItemList.push(item.name);
@@ -202,7 +230,7 @@ export abstract class IoTWorkbenchProjectBase {
     if (deployItemList && deployItemList.length <= 0) {
       await vscode.window.showInformationMessage(
           'Congratulations! The project does not contain any Azure components to be deployed.');
-      return false;
+      return;
     }
 
     if (!azureLoggedIn) {
@@ -228,42 +256,61 @@ export abstract class IoTWorkbenchProjectBase {
             {ignoreFocusOut: true, placeHolder: 'Deploy process'});
 
         if (!selection) {
-          return false;
+          throw new CancelOperationError(`Component deployment cancelled.`);
         }
 
         const res = await item.deploy();
-        if (res === false) {
-          const error = new Error(`The deployment of ${item.name} failed.`);
-          throw error;
+        if (!res) {
+          throw new Error(`The deployment of ${item.name} failed.`);
         }
       }
     }
 
     vscode.window.showInformationMessage('Azure deploy succeeded.');
-
-    return true;
   }
 
   abstract async create(
       rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
       projectType: ProjectTemplateType, boardId: string,
-      openInNewWindow: boolean): Promise<boolean>;
+      openInNewWindow: boolean): Promise<void>;
 
-  async configDeviceSettings(): Promise<boolean> {
+  /**
+   * Configure project environment: Scaffold configuration files with the given
+   * template files.
+   */
+  async configureProjectEnvironmentCore(
+      projectPath: string, scaffoldType: ScaffoldType): Promise<boolean> {
     for (const component of this.componentList) {
       if (component.getComponentType() === ComponentType.Device) {
         const device = component as Device;
-        try {
-          await device.configDeviceSettings();
-        } catch (error) {
-          throw error;
+        const res =
+            await device.configDeviceEnvironment(projectPath, scaffoldType);
+        if (!res) {
+          return false;
         }
       }
     }
     return true;
   }
 
-  static async generateIotWorkbenchProjectFile(
+  abstract async openProject(projectPath: string, openInNewWindow: boolean):
+      Promise<void>;
+
+  async configDeviceSettings(): Promise<boolean> {
+    for (const component of this.componentList) {
+      if (component.getComponentType() === ComponentType.Device) {
+        const device = component as Device;
+        await device.configDeviceSettings();
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Generate iot workbench project file if not exists.
+   * Update project host type configuration in iot workbench project file.
+   */
+  async generateOrUpdateIotWorkbenchProjectFile(
       type: ScaffoldType, projectFolder: string): Promise<void> {
     if (!await FileUtility.directoryExists(type, projectFolder)) {
       throw new Error('Unable to find the project folder.');
@@ -272,13 +319,34 @@ export abstract class IoTWorkbenchProjectBase {
     try {
       const iotworkbenchprojectFilePath =
           path.join(projectFolder, FileNames.iotworkbenchprojectFileName);
-      if (!await FileUtility.fileExists(type, iotworkbenchprojectFilePath)) {
-        await FileUtility.writeFile(type, iotworkbenchprojectFilePath, '');
+
+      let projectConfig: {[key: string]: string} = {};
+      if (await FileUtility.fileExists(type, iotworkbenchprojectFilePath)) {
+        const projectConfigContent =
+            (await FileUtility.readFile(
+                 type, iotworkbenchprojectFilePath, 'utf8') as string)
+                .trim();
+        if (projectConfigContent) {
+          projectConfig = JSON.parse(projectConfigContent);
+        }
       }
+
+      projectConfig[`${ConfigKey.projectHostType}`] =
+          ProjectHostType[this.projectHostType];
+
+      // Add config version for easier backward compatibility in the future.
+      const workbenchVersion = '1.0.0';
+      projectConfig[`${ConfigKey.workbenchVersion}`] = workbenchVersion;
+
+      const indentationSpace = 4;
+      await FileUtility.writeFile(
+          type, iotworkbenchprojectFilePath,
+          JSON.stringify(projectConfig, null, indentationSpace));
+
     } catch (error) {
-      throw new Error(
-          `Create ${FileNames.iotworkbenchprojectFileName} file failed: ${
-              error.message}`);
+      throw new Error(`Generate or update ${
+          FileNames.iotworkbenchprojectFileName} file failed: ${
+          error.message}`);
     }
   }
 }

@@ -95,7 +95,7 @@ export class CosmosDB implements Component, Provisionable {
         return;
       }
       await this.azureConfigHandler.updateComponent(
-          cosmosDBComponentIndex, componentInfo);
+          type, cosmosDBComponentIndex, componentInfo);
     } else {
       const newCosmosDBConfig: AzureComponentConfig = {
         id: this.id,

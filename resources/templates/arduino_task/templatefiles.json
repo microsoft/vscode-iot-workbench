@@ -1,0 +1,9 @@
+{
+  "templateFiles": [
+    {
+        "fileName": "tasks.json",
+        "sourcePath" : "",
+        "targetPath" : ".vscode/"
+    }
+  ]
+}

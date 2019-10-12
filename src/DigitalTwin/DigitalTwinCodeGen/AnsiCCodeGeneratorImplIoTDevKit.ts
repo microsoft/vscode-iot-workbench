@@ -25,7 +25,7 @@ export class AnsiCCodeGeneratorImplIoTDevKit extends AnsiCCodeGeneratorBase {
     super(context, channel);
   }
 
-  async GenerateCode(
+  async generateCode(
       targetPath: string, filePath: string, capabilityModelName: string,
       dcmId: string, interfaceDir: string): Promise<boolean> {
     // Invoke PnP toolset to generate the code
@@ -35,7 +35,7 @@ export class AnsiCCodeGeneratorImplIoTDevKit extends AnsiCCodeGeneratorBase {
     await FileUtility.mkdirRecursively(ScaffoldType.Local, libPath);
 
     const codeGenerateResult =
-        await this.GenerateAnsiCCodeCore(libPath, filePath, interfaceDir);
+        await this.generateAnsiCCodeCore(libPath, filePath, interfaceDir);
     if (!codeGenerateResult) {
       vscode.window.showErrorMessage(
           'Unable to generate code, please check output window for detail.');
@@ -47,7 +47,7 @@ export class AnsiCCodeGeneratorImplIoTDevKit extends AnsiCCodeGeneratorBase {
         this.context, this.channel, this.telemetryContext);
 
     // Generate device code for IoT DevKit according to the provision option.
-    const templateFolderName = await utils.GetCodeGenTemplateFolderName(
+    const templateFolderName = await utils.getCodeGenTemplateFolderName(
         this.context, CodeGenProjectType.IoTDevKit, this.connectionType);
     if (!templateFolderName) {
       throw new Error(`Failed to get template folder name`);
@@ -61,7 +61,7 @@ export class AnsiCCodeGeneratorImplIoTDevKit extends AnsiCCodeGeneratorBase {
     const templateFilesInfo = await utils.getTemplateFilesInfo(templateFolder);
 
     for (const fileInfo of templateFilesInfo) {
-      if (fileInfo.fileContent === undefined) {
+      if (!fileInfo.fileContent) {
         continue;
       }
       if (fileInfo.fileName.endsWith('.ino')) {
