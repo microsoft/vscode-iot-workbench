@@ -360,24 +360,13 @@ export class AZ3166Device extends ArduinoDeviceBase {
         res = await this.flushDeviceConfigUnix(UDS, ConfigDeviceOptions.UDS);
       }
 
-<<<<<<< HEAD
-        if (res === false) {
-          return false;
-        } else {
-          vscode.window.showInformationMessage(
-              'Configure Unique Device String (UDS) completed successfully.');
-          return true;
-        }
-      } catch (error) {
-        throw error;
-=======
       if (!res) {
         return false;
       } else {
         vscode.window.showInformationMessage(
-            'Configure Unique Device String (UDS) completely.');
+            'Configure Unique Device String (UDS) completed successfully.');
         return true;
->>>>>>> c8a2cded3d53391fd8f70da70700efac0deadfe5
+
       }
     }
   }
