@@ -486,10 +486,13 @@ export async function handleExternalProject(
           `Failed to add configuration files. Project environment configuration stopped.`);
     }
     await project.openProject(projectFileRootPath, false);
-  } else {
+  } else if (result === Choice.createNewProject) {
     telemetryContext.properties.errorMessage =
         'Operation failed and user creates new project';
     await vscode.commands.executeCommand('iotworkbench.initializeProject');
+  } else {
+    throw new CancelOperationError(
+        `Choose to configure external project Cancelled.`);
   }
 }
 
@@ -555,9 +558,17 @@ export async function constructAndLoadIoTProject(
       const isIncorrectlyOpenedIoTWorkspaceProject =
           await handleIncorrectlyOpenedIoTWorkspaceProject(telemetryContext);
       if (!isIncorrectlyOpenedIoTWorkspaceProject) {
-        await handleExternalProject(
-            context, channel, telemetryContext, scaffoldType,
-            projectFileRootPath);
+        try {
+          await handleExternalProject(
+              context, channel, telemetryContext, scaffoldType,
+              projectFileRootPath);
+        } catch (err) {
+          // Ignore if user cancel operation
+          if (!(err instanceof CancelOperationError)) {
+            throw new Error(
+                `Failed to handle external project. Error: ${err.message}`);
+          }
+        }
       }
       return;
     }
