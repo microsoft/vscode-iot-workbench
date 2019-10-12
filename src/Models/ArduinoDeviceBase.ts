@@ -135,21 +135,12 @@ export abstract class ArduinoDeviceBase implements Device {
       throw new Error(`Invalid / unsupported target platform`);
     }
 
-    const plat = await IoTWorkbenchSettings.getPlatform();
-
     for (const fileInfo of templateFiles) {
-      if (fileInfo.fileName.endsWith('macos.json') ||
-          fileInfo.fileName.endsWith('win32.json')) {
-        if ((fileInfo.fileName.endsWith('macos.json') && plat === 'darwin') ||
-            (fileInfo.fileName.endsWith('win32.json') && plat === 'win32')) {
-          await this.generateCppPropertiesFile(createTimeScaffoldType, board);
-        }
-      } else {
-        // Copy file directly
-        await utils.generateTemplateFile(
-            this.deviceFolder, createTimeScaffoldType, fileInfo);
-      }
+      await utils.generateTemplateFile(
+          this.deviceFolder, createTimeScaffoldType, fileInfo);
     }
+
+    await this.generateCppPropertiesFile(createTimeScaffoldType, board);
 
     // Configurate device environment
     const res = await this.configDeviceEnvironment(
