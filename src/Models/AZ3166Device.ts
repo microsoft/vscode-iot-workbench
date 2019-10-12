@@ -366,7 +366,6 @@ export class AZ3166Device extends ArduinoDeviceBase {
         vscode.window.showInformationMessage(
             'Configure Unique Device String (UDS) completed successfully.');
         return true;
-
       }
     }
   }
