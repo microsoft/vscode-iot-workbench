@@ -270,14 +270,11 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
     const iotworkbenchprojectFile =
         path.join(projectPath, FileNames.iotworkbenchprojectFileName);
-    if (await FileUtility.fileExists(scaffoldType, iotworkbenchprojectFile)) {
-      // If iot workbench project file exists, this is not an external project.
-      return;
+    if (!await FileUtility.fileExists(scaffoldType, iotworkbenchprojectFile)) {
+      // Generate iot workbench project file
+      await this.generateOrUpdateIotWorkbenchProjectFile(
+          scaffoldType, projectPath);
     }
-
-    // Generate iot workbench project file
-    await this.generateOrUpdateIotWorkbenchProjectFile(
-        scaffoldType, projectPath);
 
     // Set board Id as default type Raspberry Pi
     const projectConfigContent =
