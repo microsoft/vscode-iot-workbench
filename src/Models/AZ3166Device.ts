@@ -179,7 +179,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
       {
         label: 'Config DPS credentials',
         description: 'Config DPS credentials for Symmetric Key attestation',
-        detail: 'Set DPS'
+        detail: 'Config DPS'
       },
       {
         label: 'Generate CRC for OTA',
@@ -321,10 +321,10 @@ export class AZ3166Device extends ArduinoDeviceBase {
             'Configure Device connection string completely.');
         return true;
       }
-    } else if (configSelection.detail === 'Set DPS') {
+    } else if (configSelection.detail === 'Config DPS') {
       const option: vscode.InputBoxOptions = {
         value:
-            'IdScope=<Id Scope>;DeviceId=<Device Id>;SymmetricKey=<Symmetric Key>',
+            'DPSEndpoint=global.azure-devices-provisioning.net;IdScope=<Id Scope>;DeviceId=<Device Id>;SymmetricKey=<Symmetric Key>',
         prompt: `Please input DPS credentials here.`,
         ignoreFocusOut: true,
         validateInput: (deviceConnectionString: string) => {
@@ -332,7 +332,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
             return 'Please provide a valid DPS credentials.';
           }
 
-          if ((deviceConnectionString.indexOf('IdScope') === -1) ||
+          if ((deviceConnectionString.indexOf('DPSEndpoint') === -1) ||
+              (deviceConnectionString.indexOf('IdScope') === -1) ||
               (deviceConnectionString.indexOf('DeviceId') === -1) ||
               (deviceConnectionString.indexOf('SymmetricKey') === -1)) {
             return 'The format of the DPS credentials is invalid.';
