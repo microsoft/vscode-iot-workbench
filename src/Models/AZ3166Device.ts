@@ -167,18 +167,18 @@ export class AZ3166Device extends ArduinoDeviceBase {
     const configSelectionItems: vscode.QuickPickItem[] = [
       {
         label: 'Config Device Connection String',
-        description: 'Config Device Connection String',
+        description: 'Config IoT Hub Device Connection String',
         detail: 'Config Connection String'
       },
       {
-        label: 'Config Unique Device String (UDS)',
-        description: 'Config Unique Device String (UDS)',
+        label: 'Config DPS Unique Device Secret (UDS)',
+        description:
+            'Config DPS Unique Device Secret (UDS) for X.509 certificates attestation',
         detail: 'Config UDS'
       },
       {
-        label: 'Set DPS credentials',
-        description:
-            'Config Device Connection String For IoT Central',
+        label: 'Config DPS credentials',
+        description: 'Config DPS credentials for Symmetric Key attestation',
         detail: 'Set DPS'
       },
       {
@@ -322,7 +322,6 @@ export class AZ3166Device extends ArduinoDeviceBase {
         return true;
       }
     } else if (configSelection.detail === 'Set DPS') {
-
       const option: vscode.InputBoxOptions = {
         value:
             'IdScope=<Id Scope>;DeviceId=<Device Id>;SymmetricKey=<Symmetric Key>',
@@ -334,16 +333,16 @@ export class AZ3166Device extends ArduinoDeviceBase {
           }
 
           if ((deviceConnectionString.indexOf('IdScope') === -1) ||
-             (deviceConnectionString.indexOf('DeviceId') === -1) ||
-             (deviceConnectionString.indexOf('SymmetricKey') === -1)) {
-              return 'The format of the DPS credentials is invalid.';
+              (deviceConnectionString.indexOf('DeviceId') === -1) ||
+              (deviceConnectionString.indexOf('SymmetricKey') === -1)) {
+            return 'The format of the DPS credentials is invalid.';
           }
           return;
         }
       };
 
       const deviceConnectionString = await vscode.window.showInputBox(option);
-      
+
       if (!deviceConnectionString) {
         return false;
       }
@@ -372,7 +371,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
         return false;
       } else {
         vscode.window.showInformationMessage(
-            'Set DPS credentials completely.');
+            'Config DPS credentials completely.');
         return true;
       }
 
@@ -449,7 +448,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
           }
           if (option === ConfigDeviceOptions.ConnectionString) {
             command = 'set_az_iothub';
-          } else if (option === ConfigDeviceOptions.DPS ) {
+          } else if (option === ConfigDeviceOptions.DPS) {
             command = 'set_az_iotdps';
           } else {
             command = 'set_dps_uds';
@@ -548,7 +547,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
           }
           if (option === ConfigDeviceOptions.ConnectionString) {
             command = 'set_az_iothub';
-          } else if (option === ConfigDeviceOptions.DPS ) {
+          } else if (option === ConfigDeviceOptions.DPS) {
             command = 'set_az_iotdps';
           } else {
             command = 'set_dps_uds';
