@@ -35,9 +35,9 @@ Currently the following device platforms and languages are supported in Azure Io
 
 For Embedded Linux devices, the Device Workbench uses container to simplify the cross-compiling tool chain setup and configuration, which means all cross-compiling work happens in the container.
 
-**Languages supported:** `C/C++`
+Languages supported: `C/C++`
 
-**Devices supported:** [Cortex-A series](https://developer.arm.com/ip-products/processors/cortex-a) devices (e.g. Raspberry Pi, NXP i.MX6) that are running embedded Linux such as Debian, Ubuntu or Yocto Linux.
+Devices supported: [Cortex-A series](https://developer.arm.com/ip-products/processors/cortex-a) devices (e.g. Raspberry Pi, NXP i.MX6) that are running embedded Linux such as Debian, Ubuntu or Yocto Linux.
 
 Follow the [setup guide](docs/embedded-linux/embedded-linux-setup.md) to setup the prerequisite including Docker runtime.
 
@@ -49,9 +49,9 @@ Here are a set of tutorials to help you get started:
 
 Currently, Device Workbench supports MXChip IoT DevKit and ESP32 DevKits using Arduino. For generic Arduino device, we recommend you use [Arduino extension in VS Code](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-arduino).
 
-**Languages supported:** `Arduino C/C++`
+Languages supported: `Arduino C/C++`
 
-**Devices supported:**
+Devices supported:
 
 - [MXChip IoT DevKit](https://aka.ms/iot-devkit)
 - [ESP32](https://www.espressif.com/en/products/hardware/esp-wroom-32/overview)
