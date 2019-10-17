@@ -78,9 +78,8 @@ Follow the [setup guide](docs/esp32/esp32-setup.md) to setup ESP32 device includ
 
 Here are a set of tutorials to help you get started:
 
-- [Get Started connect ESP32 device to Azure IoT Hub](./docs/esp32/esp32-get-started.md)
-- [Stream Analytics and Cosmos DB](./docs/esp32/esp32-stream-analytics-cosmos-db.md)
-- [ESP32 State](./docs/esp32/esp32-state.md)
+- [Get Started connect ESP32 device to Azure IoT Hub](https://docs.microsoft.com/en-us/samples/azure-samples/esp32-iot-devkit-get-started/sample/)
+- [ESP32 State](https://docs.microsoft.com/en-us/samples/azure-samples/esp32-iot-devkit-state/sample/)
 
 Please take the [survey](https://www.surveymonkey.com/r/C7NY7KJ) to let us know extra device platforms and languages you want to see support in Device Workbench.
 
