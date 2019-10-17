@@ -51,10 +51,7 @@ Currently, Device Workbench supports MXChip IoT DevKit and ESP32 DevKits using A
 
 Languages supported: `Arduino C/C++`
 
-Devices supported:
-
-- [MXChip IoT DevKit](https://aka.ms/iot-devkit)
-- [ESP32](https://www.espressif.com/en/products/hardware/esp-wroom-32/overview)
+Devices supported: [MXChip IoT DevKit](https://aka.ms/iot-devkit), [ESP32](https://www.espressif.com/en/products/hardware/esp-wroom-32/overview).
 
 > The Device Workbench relies on Arduino IDE as a dependency to develop on the above devices. If you have installed Device Workbench prior to Arduino IDE, you may need to restart VS Code to make it find the Arduino IDE installation path correctly.
 
