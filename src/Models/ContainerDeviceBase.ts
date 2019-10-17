@@ -171,8 +171,7 @@ export abstract class ContainerDeviceBase implements Device {
           `Internal Error: Cannot get template name from template property.`);
     }
 
-    let templateFilesInfo;
-    templateFilesInfo = await utils.getEnvTemplateFilesAndAskOverwrite(
+    const templateFilesInfo = await utils.getEnvTemplateFilesAndAskOverwrite(
         this.extensionContext, this.telemetryContext, this.projectFolder,
         scaffoldType, templateName);
     if (!templateFilesInfo) {
