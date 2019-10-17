@@ -1,22 +1,23 @@
-# Get Started with ESP32 Devices
+# Get Started with connecting ESP32 Arduino device to Azure IoT Hub
 
-For first-time users of ESP32 devices, follow these quick steps to:
+For first-time users of ESP32 device, follow these quick steps to:
+
 - Prepare your development environment.
 - Send information from the device to the Azure IoT Hub 
 - Listen to cloud to device message with ESP32
 
 ## What you learn
 
-* How to install the development environment.
-* How to create an IoT Hub and register a ESP32 device.
-* How to send sample data to your IoT hub.
+- How to install the development environment.
+- How to create an IoT Hub and register a ESP32 device.
+- How to send sample data to your IoT hub.
 
 ## What you need
 
-* A ESP32 device. 
-> Note: We use [M5Stack](www.m5stack.com) in this tutorial, but the steps below could also be applied to other ESP32 devices.
-* A computer running Windows 10 or macOS 10.10+.
-* An active Azure subscription. [Activate a free 30-day trial Microsoft Azure account](https://azure.microsoft.com/en-us/free/).
+- A ESP32 device. 
+    > Note: We use [M5Stack](www.m5stack.com) in this tutorial, but the steps below could also be applied to other ESP32 devices.
+- A computer running Windows 10, Ubuntu 18.04+ or macOS 10.10+.
+- An active Azure subscription. [Activate a free 30-day trial Microsoft Azure account](https://azure.microsoft.com/en-us/free/).
 
 ![Required hardware](media/esp32-get-started/hardware.jpg)
 
