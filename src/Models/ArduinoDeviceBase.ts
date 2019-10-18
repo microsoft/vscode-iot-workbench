@@ -181,13 +181,14 @@ export abstract class ArduinoDeviceBase implements Device {
                 FileNames.resourcesFolderName, FileNames.templatesFolderName,
                 board.id, constants.cppPropertiesFileNameWin));
         const propertiesContentWin32 =
-            fs.readFileSync(propertiesFilePathWin32).toString();
+            await FileUtility.readFile(type, propertiesFilePathWin32);
+        const propertiesContentWin32String = propertiesContentWin32.toString();
         const rootPathPattern = /{ROOTPATH}/g;
         const versionPattern = /{VERSION}/g;
         const homeDir = await IoTWorkbenchSettings.getOs();
         const localAppData: string = path.join(homeDir, 'AppData', 'Local');
         const replaceStr =
-            propertiesContentWin32
+            propertiesContentWin32String
                 .replace(rootPathPattern, localAppData.replace(/\\/g, '\\\\'))
                 .replace(versionPattern, this.version);
         await FileUtility.writeFile(type, cppPropertiesFilePath, replaceStr);
@@ -200,9 +201,12 @@ export abstract class ArduinoDeviceBase implements Device {
                 FileNames.resourcesFolderName, FileNames.templatesFolderName,
                 board.id, constants.cppPropertiesFileNameMac));
         const propertiesContentMac =
-            await FileUtility.readFile(type, propertiesFilePathMac).toString();
-        await FileUtility.writeFile(
-            type, cppPropertiesFilePath, propertiesContentMac);
+            await FileUtility.readFile(type, propertiesFilePathMac);
+        const propertiesContentMacString = propertiesContentMac.toString();
+        const versionPattern = /{VERSION}/g;
+        const replaceStr =
+            propertiesContentMacString.replace(versionPattern, this.version);
+        await FileUtility.writeFile(type, cppPropertiesFilePath, replaceStr);
       }
     } catch (error) {
       throw new Error(`Create cpp properties file failed: ${error.message}`);
