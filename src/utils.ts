@@ -396,7 +396,7 @@ export async function getCodeGenTemplateFolderName(
       templateFileJson.templates.filter((template: ProjectTemplate) => {
         return (
             template.tag === TemplateTag.Digitaltwin &&
-            template.type === codeGenProjectType &&
+            template.type.includes(codeGenProjectType) &&
             template.connectionType === connectionType);
       });
 

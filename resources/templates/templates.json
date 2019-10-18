@@ -1,174 +1,174 @@
 {
-    "templates": [
-        {
-            "platform": "Embedded Linux (Preview)",
-            "name": "Embedded Linux Project",
-            "description": "",
-            "detail": "",
-            "path": "embedded_linux",
-            "boardId": "raspberrypi",
-            "type": "",
-            "tag": "general"
-        },
-        {
-            "platform": "Arduino",
-            "name": "Generic ESP32 boards",
-            "description": "",
-            "detail": "Use Generic ESP32 boards (e.g. Azure IoT Kit, M5Stack) with only device code.",
-            "path": "esp32_device",
-            "boardId": "esp32",
-            "type": "Basic",
-            "tag": "general"
-        },
-        {
-            "platform": "Arduino",
-            "name": "Generic ESP32 boards with Azure IoT Hub",
-            "description": "",
-            "detail": "Use Generic ESP32 boards (e.g. Azure IoT Kit, M5Stack) with Azure IoT Hub, such as sending sensor data to cloud.",
-            "path": "esp32_iothub",
-            "boardId": "esp32",
-            "type": "IotHub",
-            "tag": "general"
-        },
-        {
-            "platform": "Arduino",
-            "name": "MXChip IoT DevKit",
-            "description": "",
-            "detail": "Use MXChip IoT DevKit with only device code.",
-            "path": "devkit_device",
-            "boardId": "devkit",
-            "type": "Basic",
-            "tag": "general"
-        },
-        {
-            "platform": "Arduino",
-            "name": "MXChip IoT DevKit with Azure IoT Hub",
-            "description": "",
-            "detail": "Use MXChip IoT DevKit with Azure IoT Hub, such as sending sensor data to cloud.",
-            "path": "devkit_iothub",
-            "boardId": "devkit",
-            "type": "IotHub",
-            "tag": "general"
-        },
-        {
-            "platform": "Arduino",
-            "name": "MXChip IoT DevKit With Azure Functions",
-            "description": "",
-            "detail": "Use MXChip IoT DevKit with Azure IoT Hub and processes device data further in Azure Functions.",
-            "path": "devkit_azurefunctions",
-            "boardId": "devkit",
-            "type": "AzureFunctions",
-            "tag": "general"
-        },
-        {
-            "platform": "Arduino",
-            "name": "$(issue-opened) My device is not in the list...",
-            "description": "",
-            "detail": "",
-            "path": "",
-            "boardId": "",
-            "type": "no_device",
-            "tag": "general"
-        },
-        {
-            "platform": "",
-            "name": "Visual Studio Project Using ANSI C Via IoT Hub Device Connection String",
-            "description": "",
-            "detail": "Template for DigitalTwin Code Generator to generate ANSI C Visual Studio Project via IoT Hub device connection string.",
-            "path": "ansic_vs_connectionstring",
-            "boardId": "",
-            "type": "VisualStudio",
-            "language": "ansic",
-            "tag": "digitaltwin",
-            "connectionType": "DeviceConnectionString"
-        },
-        {
-            "platform": "",
-            "name": "Visual Studio Project Using ANSI C Via DPS(Device Provisioning Service) symmetric key",
-            "description": "",
-            "detail": "Template for DigitalTwin Code Generator to generate ANSI C Visual Studio Project via DPS symmetric key.",
-            "path": "ansic_vs_iotcsaskey",
-            "boardId": "",
-            "type": "VisualStudio",
-            "language": "ansic",
-            "tag": "digitaltwin",
-            "connectionType": "SymmetricKey"
-        },
-        {
-            "platform": "",
-            "name": "CMake Project Using ANSI C Via IoT Hub Device Connection String",
-            "description": "",
-            "detail": "Template for DigitalTwin Code Generator to generate ANSI C CMake Project via IoT Hub device connection string.",
-            "path": "ansic_cmake_connectionstring",
-            "boardId": "",
-            "type": "CMake",
-            "language": "ansic",
-            "tag": "digitaltwin",
-            "connectionType": "DeviceConnectionString"
-        },
-        {
-            "platform": "",
-            "name": "CMake Project Using ANSI C Via DPS(Device Provisioning Service) symmetric key",
-            "description": "",
-            "detail": "Template for DigitalTwin Code Generator to generate ANSI C CMake Project via DPS symmetric key.",
-            "path": "ansic_cmake_iotcsaskey",
-            "boardId": "",
-            "type": "CMake",
-            "language": "ansic",
-            "tag": "digitaltwin",
-            "connectionType": "SymmetricKey"
-        },
-        {
-            "platform": "",
-            "name": "IoT DevKit Project Using ANSI C Via IoT Hub Device Connection String",
-            "description": "",
-            "detail": "Template for DigitalTwin Code Generator to generate ANSI C IoT DevKit Project via IoT Hub device connection string.",
-            "path": "ansic_devkit_connectionstring",
-            "boardId": "",
-            "type": "IoTDevKit",
-            "language": "ansic",
-            "tag": "digitaltwin",
-            "connectionType": "DeviceConnectionString"
-        },
-        {
-            "platform": "",
-            "name": "IoT DevKit Project Using ANSI C Via DPS(Device Provisioning Service) symmetric key",
-            "description": "",
-            "detail": "Template for DigitalTwin Code Generator to generate ANSI C IoT Dev Project via DPS symmetric key.",
-            "path": "ansic_devkit_iotcsaskey",
-            "boardId": "",
-            "type": "IoTDevKit",
-            "language": "ansic",
-            "tag": "digitaltwin",
-            "connectionType": "SymmetricKey"
-        },
-        {
-            "platform": "Embedded Linux (Preview)",
-            "name": "Azure IoT Device C SDK for armv7 Linux",
-            "detail": "Develop with Azure IoT Device C SDK and cross compiling for generic armv7 Linux devices",
-            "tag": "development_container",
-            "path": "arm7"
-        },
-        {
-            "platform": "Embedded Linux (Preview)",
-            "name": "Azure IoT Device C SDK for arm64 Linux",
-            "detail": "Develop with Azure IoT Device C SDK and cross compiling for generic arm64 Linux devices",
-            "tag": "development_container",
-            "path": "arm8"
-        },
-        {
-            "platform": "Embedded Linux (Preview)",
-            "name": "Azure IoT Device C SDK for x86 Linux",
-            "detail": "Develop with Azure IoT Device C SDK and cross compiling for generic x86 Linux devices",
-            "tag": "development_container",
-            "path": "x86"
-        },
-        {
-            "platform": "Arduino",
-            "name": "Arduino Task",
-            "description": "Template files used to configure Arduino project's task",
-            "tag": "development_container",
-            "path": "arduino_task"
-        }
-    ]
+  "templates": [
+    {
+      "platform": "Embedded Linux (Preview)",
+      "name": "Embedded Linux Project",
+      "description": "",
+      "detail": "",
+      "path": "embedded_linux",
+      "boardId": "raspberrypi",
+      "type": "",
+      "tag": "general"
+    },
+    {
+      "platform": "Arduino",
+      "name": "Generic ESP32 boards",
+      "description": "",
+      "detail": "Use Generic ESP32 boards (e.g. Azure IoT Kit, M5Stack) with only device code.",
+      "path": "esp32_device",
+      "boardId": "esp32",
+      "type": "Basic",
+      "tag": "general"
+    },
+    {
+      "platform": "Arduino",
+      "name": "Generic ESP32 boards with Azure IoT Hub",
+      "description": "",
+      "detail": "Use Generic ESP32 boards (e.g. Azure IoT Kit, M5Stack) with Azure IoT Hub, such as sending sensor data to cloud.",
+      "path": "esp32_iothub",
+      "boardId": "esp32",
+      "type": "IotHub",
+      "tag": "general"
+    },
+    {
+      "platform": "Arduino",
+      "name": "MXChip IoT DevKit",
+      "description": "",
+      "detail": "Use MXChip IoT DevKit with only device code.",
+      "path": "devkit_device",
+      "boardId": "devkit",
+      "type": "Basic",
+      "tag": "general"
+    },
+    {
+      "platform": "Arduino",
+      "name": "MXChip IoT DevKit with Azure IoT Hub",
+      "description": "",
+      "detail": "Use MXChip IoT DevKit with Azure IoT Hub, such as sending sensor data to cloud.",
+      "path": "devkit_iothub",
+      "boardId": "devkit",
+      "type": "IotHub",
+      "tag": "general"
+    },
+    {
+      "platform": "Arduino",
+      "name": "MXChip IoT DevKit With Azure Functions",
+      "description": "",
+      "detail": "Use MXChip IoT DevKit with Azure IoT Hub and processes device data further in Azure Functions.",
+      "path": "devkit_azurefunctions",
+      "boardId": "devkit",
+      "type": "AzureFunctions",
+      "tag": "general"
+    },
+    {
+      "platform": "Arduino",
+      "name": "$(issue-opened) My device is not in the list...",
+      "description": "",
+      "detail": "",
+      "path": "",
+      "boardId": "",
+      "type": "no_device",
+      "tag": "general"
+    },
+    {
+      "platform": "",
+      "name": "Visual Studio Project Using ANSI C Via IoT Hub Device Connection String",
+      "description": "",
+      "detail": "Template for DigitalTwin Code Generator to generate ANSI C Visual Studio Project via IoT Hub device connection string.",
+      "path": "ansic_vs_connectionstring",
+      "boardId": "",
+      "type": "VisualStudio",
+      "language": "ansic",
+      "tag": "digitaltwin",
+      "connectionType": "DeviceConnectionString"
+    },
+    {
+      "platform": "",
+      "name": "Visual Studio Project Using ANSI C Via DPS(Device Provisioning Service) symmetric key",
+      "description": "",
+      "detail": "Template for DigitalTwin Code Generator to generate ANSI C Visual Studio Project via DPS symmetric key.",
+      "path": "ansic_vs_iotcsaskey",
+      "boardId": "",
+      "type": "VisualStudio",
+      "language": "ansic",
+      "tag": "digitaltwin",
+      "connectionType": "SymmetricKey"
+    },
+    {
+      "platform": "",
+      "name": "CMake Project Using ANSI C Via IoT Hub Device Connection String",
+      "description": "",
+      "detail": "Template for DigitalTwin Code Generator to generate ANSI C CMake Project via IoT Hub device connection string.",
+      "path": "ansic_cmake_connectionstring",
+      "boardId": "",
+      "type": ["CMake-Windows", "CMake-Linux"],
+      "language": "ansic",
+      "tag": "digitaltwin",
+      "connectionType": "DeviceConnectionString"
+    },
+    {
+      "platform": "",
+      "name": "CMake Project Using ANSI C Via DPS(Device Provisioning Service) symmetric key",
+      "description": "",
+      "detail": "Template for DigitalTwin Code Generator to generate ANSI C CMake Project via DPS symmetric key.",
+      "path": "ansic_cmake_iotcsaskey",
+      "boardId": "",
+      "type": ["CMake-Windows", "CMake-Linux"],
+      "language": "ansic",
+      "tag": "digitaltwin",
+      "connectionType": "SymmetricKey"
+    },
+    {
+      "platform": "",
+      "name": "IoT DevKit Project Using ANSI C Via IoT Hub Device Connection String",
+      "description": "",
+      "detail": "Template for DigitalTwin Code Generator to generate ANSI C IoT DevKit Project via IoT Hub device connection string.",
+      "path": "ansic_devkit_connectionstring",
+      "boardId": "",
+      "type": "IoTDevKit",
+      "language": "ansic",
+      "tag": "digitaltwin",
+      "connectionType": "DeviceConnectionString"
+    },
+    {
+      "platform": "",
+      "name": "IoT DevKit Project Using ANSI C Via DPS(Device Provisioning Service) symmetric key",
+      "description": "",
+      "detail": "Template for DigitalTwin Code Generator to generate ANSI C IoT Dev Project via DPS symmetric key.",
+      "path": "ansic_devkit_iotcsaskey",
+      "boardId": "",
+      "type": "IoTDevKit",
+      "language": "ansic",
+      "tag": "digitaltwin",
+      "connectionType": "SymmetricKey"
+    },
+    {
+      "platform": "Embedded Linux (Preview)",
+      "name": "Azure IoT Device C SDK for armv7 Linux",
+      "detail": "Develop with Azure IoT Device C SDK and cross compiling for generic armv7 Linux devices",
+      "tag": "development_container",
+      "path": "arm7"
+    },
+    {
+      "platform": "Embedded Linux (Preview)",
+      "name": "Azure IoT Device C SDK for arm64 Linux",
+      "detail": "Develop with Azure IoT Device C SDK and cross compiling for generic arm64 Linux devices",
+      "tag": "development_container",
+      "path": "arm8"
+    },
+    {
+      "platform": "Embedded Linux (Preview)",
+      "name": "Azure IoT Device C SDK for x86 Linux",
+      "detail": "Develop with Azure IoT Device C SDK and cross compiling for generic x86 Linux devices",
+      "tag": "development_container",
+      "path": "x86"
+    },
+    {
+      "platform": "Arduino",
+      "name": "Arduino Task",
+      "description": "Template files used to configure Arduino project's task",
+      "tag": "development_container",
+      "path": "arduino_task"
+    }
+  ]
 }

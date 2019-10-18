@@ -13,7 +13,6 @@ export class DigitalTwinFileNames {
   static readonly schemaFolderName = 'schemas';
   static readonly etagCacheFileName = 'etagCache.json';
   static readonly devicemodelTemplateFolderName = 'devicemodel';
-  static readonly projectTypeListFileName = 'projecttypelist.json';
   static readonly deviceConnectionListFileName = 'deviceconnectionlist.json';
   static readonly utilitiesFolderName = 'utilities';
 }
@@ -42,6 +41,9 @@ export class DigitalTwinConstants {
       new RegExp('^[a-zA-Z_][-a-zA-Z0-9_]*$');
   static readonly codegenProjectNameRegexDescription =
       'alphanumeric, underscore and dash character, and cannot start with number and dash character';
+
+  static readonly codeGenProjectTypeSeperator = '-';
+  static readonly cmakeListsFileName = 'CMakeLists.txt';
 }
 
 export class DTDLKeywords {

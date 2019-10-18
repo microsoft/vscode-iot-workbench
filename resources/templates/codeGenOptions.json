@@ -1,0 +1,56 @@
+{
+  "connectionTypes": [
+    {
+      "type": "DeviceConnectionString",
+      "name": "Via IoT Hub device connection string",
+      "detail": "To connect to Azure IoT Hub directly"
+    },
+    {
+      "type": "SymmetricKey",
+      "name": "Via DPS (Device Provisioning Service) symmetric key",
+      "detail": "To connect to Azure IoT Hub, Azure IoT Central or Azure IoT Certification Service"
+    }
+  ],
+  "projectTemplates": [
+    {
+      "language": "ANSI C",
+      "type": "CMakeWindows",
+      "name": "CMake Project on Windows",
+      "detail": "Generate ANSI C code as CMake project for Windows.",
+      "enabled": true
+    },
+    {
+      "language": "ANSI C",
+      "type": "CMakeLinux",
+      "name": "CMake Project on Linux",
+      "detail": "Generate ANSI C code as CMake project for Linux.",
+      "enabled": true
+    },
+    {
+      "language": "ANSI C",
+      "type": "IoTDevKit",
+      "name": "MXChip IoT DevKit Project",
+      "detail": "Generate code for MXChip IoT DevKit as Arduino project.",
+      "enabled" : true
+    },
+    {
+      "language": "ANSI C",
+      "type": "VisualStudio",
+      "name": "Visual Studio Project",
+      "detail": "Generate ANSI C code as Visual Studio (.vcxproj) project.",
+      "enabled": false
+    }
+  ],
+  "deviceSdkReferenceTypes": [
+    {
+      "type": "SourceCode",
+      "name": "Via Source Code",
+      "detail": "Use Azure IoT Device C SDK with its Source Code."
+    },
+    {
+      "type": "Vcpkg",
+      "name": "Via Vcpkg",
+      "detail": "Use Azure IoT Device C SDK with azure-iot-sdk-c Vcpkg package along with its dependencies."
+    }
+  ]
+}

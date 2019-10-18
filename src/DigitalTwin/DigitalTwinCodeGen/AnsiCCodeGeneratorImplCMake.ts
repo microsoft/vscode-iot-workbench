@@ -3,19 +3,31 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {FileNames, ScaffoldType} from '../../constants';
-import {TelemetryContext} from '../../telemetry';
+import {TemplateFileInfo} from '../../Models/Interfaces/ProjectTemplate';
 import {generateTemplateFile, getCodeGenTemplateFolderName, getTemplateFilesInfo} from '../../utils';
+import {DigitalTwinConstants} from '../DigitalTwinConstants';
 import {NewLine} from '../Tokenizer';
 
 import {AnsiCCodeGeneratorBase} from './Interfaces/AnsiCCodeGeneratorBase';
-import {CodeGenProjectType, DeviceConnectionType} from './Interfaces/CodeGenerator';
+import {CodeGenProjectType, DeviceConnectionType, DeviceSdkReferenceType} from './Interfaces/CodeGenerator';
 
 export class AnsiCCodeGeneratorImplCMake extends AnsiCCodeGeneratorBase {
+  private projectType: CodeGenProjectType;
+  private sdkReferenceType: DeviceSdkReferenceType;
+  private connectionType: DeviceConnectionType;
+
   constructor(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      private telemetryContext: TelemetryContext,
-      private provisionType: DeviceConnectionType) {
+      projectType: CodeGenProjectType,
+      sdkReferenceType: DeviceSdkReferenceType,
+      connectionType: DeviceConnectionType,
+      context: vscode.ExtensionContext,
+      channel: vscode.OutputChannel,
+  ) {
     super(context, channel);
+
+    this.connectionType = connectionType;
+    this.projectType = projectType;
+    this.sdkReferenceType = sdkReferenceType;
   }
 
   async generateCode(
@@ -26,7 +38,7 @@ export class AnsiCCodeGeneratorImplCMake extends AnsiCCodeGeneratorBase {
         await this.generateAnsiCCodeCore(targetPath, filePath, interfaceDir);
 
     const templateFolderName = await getCodeGenTemplateFolderName(
-        this.context, CodeGenProjectType.CMake, this.provisionType);
+        this.context, this.projectType, this.connectionType);
     if (!templateFolderName) {
       throw new Error(`Failed to get template folder name`);
     }
@@ -34,7 +46,6 @@ export class AnsiCCodeGeneratorImplCMake extends AnsiCCodeGeneratorBase {
     const templateFolder = this.context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
         templateFolderName));
-    const templateFilesInfo = await getTemplateFilesInfo(templateFolder);
 
     const projectName = path.basename(targetPath);
 
@@ -43,13 +54,23 @@ export class AnsiCCodeGeneratorImplCMake extends AnsiCCodeGeneratorBase {
     const cmakeHeaderFilesPattern = /{H_FILE_LIST}/g;
     const cmakeCFilesPattern = /{C_FILE_LIST}/g;
 
-    for (const fileInfo of templateFilesInfo) {
+    const allTemplateFiles: TemplateFileInfo[] =
+        await getTemplateFilesInfo(templateFolder);
+    const cmakeListsFileName =
+        this.getCmakeListsFileName(this.projectType, this.sdkReferenceType);
+    const requiredTemplateFiles = allTemplateFiles.filter(
+        fileInfo => !fileInfo.fileName.startsWith('CMakeLists') ||
+            fileInfo.fileName === cmakeListsFileName);
+
+    for (const fileInfo of requiredTemplateFiles) {
       if (!fileInfo.fileContent) {
         continue;
       }
 
-      if (fileInfo.fileName === 'CMakeLists.txt') {
+      if (fileInfo.fileName === cmakeListsFileName) {
         const generatedFiles = fs.listTreeSync(targetPath);
+        // Rename to standard CMakeLists.txt file name
+        fileInfo.fileName = DigitalTwinConstants.cmakeListsFileName;
 
         // Retrieve and normalize generated files that will be included in
         // CMakeLists.txt
@@ -78,7 +99,23 @@ export class AnsiCCodeGeneratorImplCMake extends AnsiCCodeGeneratorBase {
     return retvalue;
   }
 
-  getIncludedFileListString(
+  private getCmakeListsFileName(
+      projectType: CodeGenProjectType,
+      deviceSdkReferenceType: DeviceSdkReferenceType): string {
+    const projectTypeSegments: string[] = projectType.toString().split(
+        DigitalTwinConstants.codeGenProjectTypeSeperator);
+    if (projectTypeSegments.length !== 2) {
+      throw new Error(`Invalid project type: ${projectType.toString()}`);
+    }
+
+    const platform: string = projectTypeSegments[1];
+    const cmakeListsFileName =
+        `CMakeLists-${platform}-${deviceSdkReferenceType.toString()}.txt`;
+
+    return cmakeListsFileName;
+  }
+
+  private getIncludedFileListString(
       generatedFiles: string[], rootDir: string,
       fileExtension: string): string {
     let fileListStr = '';

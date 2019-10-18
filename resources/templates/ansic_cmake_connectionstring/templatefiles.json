@@ -1,7 +1,22 @@
 {
   "templateFiles": [
     {
-      "fileName": "CMakeLists.txt",
+      "fileName": "CMakeLists-Windows-SourceCode.txt",
+      "sourcePath": ".",
+      "targetPath": "."
+    },
+    {
+      "fileName": "CMakeLists-Windows-Vcpkg.txt",
+      "sourcePath": ".",
+      "targetPath": "."
+    },
+    {
+      "fileName": "CMakeLists-Linux-SourceCode.txt",
+      "sourcePath": ".",
+      "targetPath": "."
+    },
+    {
+      "fileName": "CMakeLists-Linux-Vcpkg.txt",
       "sourcePath": ".",
       "targetPath": "."
     },

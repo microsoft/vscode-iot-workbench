@@ -66,6 +66,7 @@ export class FileNames {
   static readonly resourcesFolderName = 'resources';
   static readonly iotworkbenchprojectFileName = '.iotworkbenchproject';
   static readonly settingsJsonFileName = 'settings.json';
+  static readonly codeGenOptionsFileName = 'codeGenOptions.json';
   static readonly devcontainerFolderName = '.devcontainer';
   static readonly vscodeSettingsFolderName = '.vscode';
   static readonly workspaceConfigFilePath = 'project.code-workspace';

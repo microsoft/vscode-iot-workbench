@@ -213,6 +213,16 @@ export function GenerateDigitalTwinIdentifier(name: string): string {
   return `urn:{your name}:${name}:1`;
 }
 
+// tslint:disable-next-line: no-any
+export function loadJsonConfiguration(jsonFilePath: string): any {
+  try {
+    const jsonContent = fs.readFileSync(jsonFilePath, 'utf8');
+    return JSON.parse(jsonContent);
+  } catch (error) {
+    throw new Error(`Failed to load json content from file ${jsonFilePath}`);
+  }
+}
+
 /**
  * An interface for an object that iterates through a sequence of values.
  */
