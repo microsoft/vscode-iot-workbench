@@ -191,7 +191,7 @@ export async function selectWorkspaceItem(
                                  (await showOpenDialog(options))[0].fsPath;
 }
 
-export function execute(command: string): Promise<string> {
+export function executeCommand(command: string): Promise<string> {
   return new Promise((resolve, reject) => {
     cp.exec(command, (error, stdout, stderr) => {
       if (error) {

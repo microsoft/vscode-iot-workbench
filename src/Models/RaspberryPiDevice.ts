@@ -9,7 +9,7 @@ import {ConfigHandler} from '../configHandler';
 import {ConfigKey, OperationType, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext} from '../telemetry';
-import {askAndOpenInRemote, channelShowAndAppendLine, execute} from '../utils';
+import {askAndOpenInRemote, channelShowAndAppendLine, executeCommand} from '../utils';
 
 import {ContainerDeviceBase} from './ContainerDeviceBase';
 import {DeviceType} from './Interfaces/Device';
@@ -51,7 +51,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     const getBinaryFileNameCmd = `cat ${
         cmakeFilePath} | grep 'set(binary_name' | cut -d ' ' -f2 | sed -e 's/^"//' -e 's/"$//' | tr -d '\n'`;
 
-    const binaryName = await execute(getBinaryFileNameCmd);
+    const binaryName = await executeCommand(getBinaryFileNameCmd);
     return binaryName;
   }
 
