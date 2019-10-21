@@ -6,6 +6,7 @@ import * as vscode from 'vscode';
 import * as sdk from 'vscode-iot-device-cube-sdk';
 
 import {ConfigHandler} from './configHandler';
+import {OSPlatform} from './constants';
 import {PickWithData} from './Models/Interfaces/UI';
 
 export class IoTWorkbenchSettings {
@@ -44,11 +45,11 @@ export class IoTWorkbenchSettings {
     const platform = await getPlatform();
 
     let _workbenchPath = '';
-    if (platform === 'win32') {
+    if (platform === OSPlatform.WIN32) {
       _workbenchPath = path.join(homeDir, 'Documents', 'IoTWorkbenchProjects');
-    } else if (platform === 'linux') {
+    } else if (platform === OSPlatform.LINUX) {
       _workbenchPath = path.join(homeDir, 'IoTWorkbenchProjects');
-    } else if (platform === 'darwin') {
+    } else if (platform === OSPlatform.DARWIN) {
       _workbenchPath = path.join(homeDir, 'Documents', 'IoTWorkbenchProjects');
     } else {
       _workbenchPath = '/IoTWorkbenchProjects';

@@ -138,3 +138,9 @@ export enum ModelType {
   CapabilityModel = 'CapabilityModel',
   InlineInterface = 'InterfaceInstance'
 }
+
+export enum OSPlatform {
+  WIN32 = 'win32',
+  LINUX = 'linux',
+  DARWIN = 'darwin'
+}
