@@ -55,7 +55,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     return binaryName;
   }
 
-  private async EnableBinaryExecutability(
+  private async enableBinaryExecutability(
       ssh: sdk.SSH, binaryName: string|undefined) {
     if (!binaryName) {
       return;
@@ -117,7 +117,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       }
 
       try {
-        await this.EnableBinaryExecutability(ssh, binaryName);
+        await this.enableBinaryExecutability(ssh, binaryName);
       } catch (error) {
         throw new Error(
             `Failed to enable binary executability. Error: ${error.message}`);
