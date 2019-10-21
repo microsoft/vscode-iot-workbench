@@ -57,15 +57,18 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
               ScaffoldType.Workspace, this.outputPath)) {
         const message =
             `Output folder does not exist. Please compile device code first.`;
-        await vscode.window.showWarningMessage(message);
+        vscode.window.showWarningMessage(message);
+        channelShowAndAppendLine(this.channel, message);
         return false;
       }
 
       if (!RaspberryPiUploadConfig.updated) {
         const res = await this.configSSH();
         if (!res) {
-          vscode.window.showWarningMessage('Configure SSH cancelled.');
-          return true;
+          const message = `Configure SSH cancelled.`;
+          vscode.window.showWarningMessage(message);
+          channelShowAndAppendLine(this.channel, message);
+          return false;
         }
       }
 

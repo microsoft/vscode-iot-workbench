@@ -100,9 +100,10 @@ export abstract class ArduinoDeviceBase implements Device {
       return false;
     }
 
-    return await utils.fetchAndExecuteTask(
+    await utils.fetchAndExecuteTask(
         this.extensionContext, this.channel, this.telemetryContext,
         this.deviceFolder, OperationType.Compile, constants.compileTaskName);
+    return true;
   }
 
   async upload(): Promise<boolean> {
@@ -110,9 +111,10 @@ export abstract class ArduinoDeviceBase implements Device {
     if (!result) {
       return false;
     }
-    return await utils.fetchAndExecuteTask(
+    await utils.fetchAndExecuteTask(
         this.extensionContext, this.channel, this.telemetryContext,
         this.deviceFolder, OperationType.Upload, constants.uploadTaskName);
+    return true;
   }
 
 

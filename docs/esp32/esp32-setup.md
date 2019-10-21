@@ -1,4 +1,4 @@
-# ESP32
+# ESP32 Arduino Setup
 
 [ESP32](https://www.espressif.com/en/products/hardware/esp32/overview) is a series of low-cost, low-power system on a chip microcontrollers with integrated Wi-Fi and dual-mode Bluetooth. You can develop for it using [Azure IoT Device Workbench](https://aka.ms/azure-iot-workbench) to take advantage of Microsoft Azure services.
 
@@ -10,7 +10,7 @@ Azure IoT Device Workbench provides an integrated experience to develop IoT solu
 
 Follow these steps to prepare the development environment for ESP32 devices:
 
-1. Download and install [Arduino IDE](https://www.arduino.cc/en/Main/Software). It provides the necessary toolchain for compiling and uploading Arduino code.
+1. Download and install [Arduino IDE](https://www.arduino.cc/en/Main/Software). It provides the necessary tool chain for compiling and uploading Arduino code.
 
   **Note:** Arduino IDE `1.8.7` has breaking changes, causing board package and library installation failures. It is recommended to that you install version `1.8.6`
 
@@ -23,7 +23,7 @@ Follow these steps to prepare the development environment for ESP32 devices:
 3. Install [Arduino](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-arduino) for Visual Studio Code.
 
 4. Look for **Azure IoT Device Workbench** in the extension marketplace and install it.
-    ![Install IoT Device Workbench](esp32/media/esp32-get-started/install-workbench.png)
+    ![Install IoT Device Workbench](media/esp32-get-started/install-workbench.png)
     Together with **Azure IoT Device Workbench**, other dependent extensions will be installed.
 
 5. Open **File > Preference > Settings** and add following lines to configure Arduino.
@@ -51,7 +51,7 @@ Follow these steps to prepare the development environment for ESP32 devices:
 
 6. Use `F1` or `Ctrl+Shift+P` (macOS: `Cmd+Shift+P`) to open the command palette, type and select **Arduino: Board Manager**. Search for **esp32** and install the latest version.
 
-    ![Install DevKit SDK](esp32/media/esp32-get-started/esp32-install-sdk.jpg)
+    ![Install DevKit SDK](media/esp32-get-started/esp32-install-sdk.jpg)
 
 ## Problems and feedback
 
