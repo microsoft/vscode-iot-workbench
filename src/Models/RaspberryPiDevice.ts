@@ -9,7 +9,7 @@ import {ConfigHandler} from '../configHandler';
 import {ConfigKey, OperationType, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext} from '../telemetry';
-import {askAndOpenInRemote, channelShowAndAppendLine} from '../utils';
+import {askAndOpenInRemote, channelShowAndAppendLine, execute} from '../utils';
 
 import {ContainerDeviceBase} from './ContainerDeviceBase';
 import {DeviceType} from './Interfaces/Device';
@@ -42,6 +42,36 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
         DeviceType.Raspberry_Pi, templateFilesInfo);
   }
 
+  private async getBinaryFileName(): Promise<string|undefined> {
+    // Parse binary name from CMakeCache.txt file
+    const cmakeFilePath = path.join(this.projectFolder, 'CMakeLists.txt');
+    if (!await FileUtility.fileExists(ScaffoldType.Workspace, cmakeFilePath)) {
+      return;
+    }
+    const getBinaryFileNameCmd = `cat ${
+        cmakeFilePath} | grep 'set(binary_name' | cut -d ' ' -f2 | sed -e 's/^"//' -e 's/"$//' | tr -d '\n'`;
+
+    const binaryName = await execute(getBinaryFileNameCmd);
+    return binaryName;
+  }
+
+  private async EnableBinaryExecutability(
+      ssh: sdk.SSH, binaryName: string|undefined) {
+    if (!binaryName) {
+      return;
+    }
+    const binaryFilePath = path.join(this.outputPath, binaryName);
+    if (!await FileUtility.fileExists(ScaffoldType.Workspace, binaryFilePath)) {
+      return;
+    }
+
+    const chmodCmd =
+        `cd ${RaspberryPiUploadConfig.projectPath} && chmod +x ${binaryName}`;
+    await ssh.exec(chmodCmd);
+
+    return;
+  }
+
   async upload(): Promise<boolean> {
     const isRemote = RemoteExtension.isRemote(this.extensionContext);
     if (!isRemote) {
@@ -72,6 +102,8 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
         }
       }
 
+      const binaryName = await this.getBinaryFileName();
+
       const ssh = new sdk.SSH();
       await ssh.open(
           RaspberryPiUploadConfig.host, RaspberryPiUploadConfig.port,
@@ -89,11 +121,19 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       }
 
       try {
+        await this.EnableBinaryExecutability(ssh, binaryName);
+      } catch (error) {
+        throw new Error(
+            `Failed to enable binary executability. Error: ${error.message}`);
+      }
+
+      try {
         await ssh.close();
       } catch (error) {
         throw new Error(
             `Failed to close SSH connection. Error: ${error.message}`);
       }
+
 
       const message =
           `Successfully deploy compiled files to Raspberry Pi board.`;
