@@ -55,8 +55,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     return binaryName;
   }
 
-  private async enableBinaryExecutability(
-      ssh: sdk.SSH, binaryName: string|undefined) {
+  private async enableBinaryExecutability(ssh: sdk.SSH, binaryName: string) {
     if (!binaryName) {
       return;
     }
@@ -116,11 +115,14 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
         throw new Error(message);
       }
 
-      try {
-        await this.enableBinaryExecutability(ssh, binaryName);
-      } catch (error) {
-        throw new Error(
-            `Failed to enable binary executability. Error: ${error.message}`);
+      // Just ignore if we cannot find binary file in the right place
+      if (binaryName) {
+        try {
+          await this.enableBinaryExecutability(ssh, binaryName);
+        } catch (error) {
+          throw new Error(
+              `Failed to enable binary executability. Error: ${error.message}`);
+        }
       }
 
       try {
