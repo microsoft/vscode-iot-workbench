@@ -29,18 +29,25 @@ export interface ProjectTemplate {
   connectionType: string;
 }
 
-export interface PnpDeviceConnectionType {
+export interface PnpDeviceConnection {
   name: string;
   type: string;
   detail: string;
 }
 
-export interface PnpProjectTemplateType {
+export interface CodeGenProjectTemplate {
   language: string;
   name: string;
+  supportedPlatforms: string[];
   type: string;
   detail: string;
   enabled: boolean;
+}
+
+export interface DeviceSdkReference {
+  type: string;
+  name: string;
+  detail: string;
 }
 
 export interface Platform {

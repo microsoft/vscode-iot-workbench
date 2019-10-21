@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 
 import {CancelOperationError} from '../CancelOperationError';
 import {FileNames, OperationType, PlatformType, ScaffoldType, TemplateTag} from '../constants';
+import {DigitalTwinConstants} from '../DigitalTwin/DigitalTwinConstants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext} from '../telemetry';
 import * as utils from '../utils';
@@ -105,7 +106,7 @@ export abstract class ContainerDeviceBase implements Device {
     // Cannot use forEach here since it's async
     for (const fileInfo of templateFilesInfo) {
       // Replace binary name in CMakeLists.txt to project name
-      if (fileInfo.fileName === 'CMakeLists.txt') {
+      if (fileInfo.fileName === DigitalTwinConstants.cmakeListsFileName) {
         const pattern = '${project_name}';
         const projectName = path.basename(projectPath);
         if (fileInfo.fileContent) {

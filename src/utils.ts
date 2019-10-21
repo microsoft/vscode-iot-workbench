@@ -115,6 +115,18 @@ export interface FolderQuickPickItem<T = undefined> extends
   data: T;
 }
 
+export function checkOpenedFolder(): string|undefined {
+  if (!(vscode.workspace.workspaceFolders &&
+        vscode.workspace.workspaceFolders.length > 0) ||
+      !vscode.workspace.workspaceFolders[0].uri.fsPath) {
+    vscode.window.showWarningMessage(
+        'You have not yet opened a folder in Visual Studio Code. Please select a folder first.');
+    return;
+  }
+
+  return vscode.workspace.workspaceFolders[0].uri.fsPath;
+}
+
 export async function selectWorkspaceFolder(
     placeHolder: string,
     getSubPath?: (f: vscode.WorkspaceFolder) =>
@@ -418,7 +430,7 @@ export async function getCodeGenTemplateFolderName(
       templateFileJson.templates.filter((template: ProjectTemplate) => {
         return (
             template.tag === TemplateTag.Digitaltwin &&
-            template.type === codeGenProjectType &&
+            template.type.includes(codeGenProjectType) &&
             template.connectionType === connectionType);
       });
 
