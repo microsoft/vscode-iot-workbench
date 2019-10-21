@@ -43,7 +43,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
   }
 
   private async getBinaryFileName(): Promise<string|undefined> {
-    // Parse binary name from CMakeCache.txt file
+    // Parse binary name from CMakeLists.txt file
     const cmakeFilePath = path.join(this.projectFolder, 'CMakeLists.txt');
     if (!await FileUtility.fileExists(ScaffoldType.Workspace, cmakeFilePath)) {
       return;
@@ -60,13 +60,9 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     if (!binaryName) {
       return;
     }
-    const binaryFilePath = path.join(this.outputPath, binaryName);
-    if (!await FileUtility.fileExists(ScaffoldType.Workspace, binaryFilePath)) {
-      return;
-    }
 
     const chmodCmd =
-        `cd ${RaspberryPiUploadConfig.projectPath} && chmod +x ${binaryName}`;
+        `cd ${RaspberryPiUploadConfig.projectPath} && [ -f ${binaryName} ] && chmod +x ${binaryName}`;
     await ssh.exec(chmodCmd);
 
     return;
