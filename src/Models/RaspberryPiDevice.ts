@@ -61,8 +61,8 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       return;
     }
 
-    const chmodCmd =
-        `cd ${RaspberryPiUploadConfig.projectPath} && [ -f ${binaryName} ] && chmod +x ${binaryName}`;
+    const chmodCmd = `cd ${RaspberryPiUploadConfig.projectPath} && [ -f ${
+        binaryName} ] && chmod +x ${binaryName}`;
     await ssh.exec(chmodCmd);
 
     return;
