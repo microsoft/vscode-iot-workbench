@@ -207,8 +207,8 @@ export abstract class ArduinoDeviceBase implements Device {
                 .replace(versionPattern, this.version);
         await FileUtility.writeFile(type, cppPropertiesFilePath, replaceStr);
       }
-      // TODO: Let's use the MacOS template file for OS system that is not win32
-      // / linux. Revisit this part if want to support other OS system.
+      // TODO: Let's use the MacOS template file for OS that is not win32/linux.
+      // Revisit this part if want to support other OS.
       else {
         const propertiesFilePathMac =
             this.extensionContext.asAbsolutePath(path.join(
