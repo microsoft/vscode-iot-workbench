@@ -23,6 +23,7 @@ const constants = {
   arduinoJsonFileName: 'arduino.json',
   cppPropertiesFileName: 'c_cpp_properties.json',
   cppPropertiesFileNameMac: 'c_cpp_properties_macos.json',
+  cppPropertiesFileNameLinux: 'c_cpp_properties_linux.json',
   cppPropertiesFileNameWin: 'c_cpp_properties_win32.json',
   outputPath: './.build',
   compileTaskName: 'Arduino Compile',
@@ -191,9 +192,23 @@ export abstract class ArduinoDeviceBase implements Device {
                 .replace(rootPathPattern, localAppData.replace(/\\/g, '\\\\'))
                 .replace(versionPattern, this.version);
         await FileUtility.writeFile(type, cppPropertiesFilePath, replaceStr);
+      } else if (plat === 'linux') {
+        const propertiesFilePathLinux =
+            this.extensionContext.asAbsolutePath(path.join(
+                FileNames.resourcesFolderName, FileNames.templatesFolderName,
+                board.id, constants.cppPropertiesFileNameLinux));
+        const propertiesContentLinux =
+            fs.readFileSync(propertiesFilePathLinux).toString();
+        const rootPathPattern = /{ROOTPATH}/g;
+        const versionPattern = /{VERSION}/g;
+        const homeDir = await IoTWorkbenchSettings.getOs();
+        const replaceStr =
+            propertiesContentLinux.replace(rootPathPattern, homeDir)
+                .replace(versionPattern, this.version);
+        await FileUtility.writeFile(type, cppPropertiesFilePath, replaceStr);
       }
-      // TODO: Let's use the same file for Linux and MacOS for now. Need to
-      // revisit this part.
+      // TODO: Let's use the MacOS template file for OS system that is not win32
+      // / linux. Revisit this part if want to support other OS system.
       else {
         const propertiesFilePathMac =
             this.extensionContext.asAbsolutePath(path.join(
