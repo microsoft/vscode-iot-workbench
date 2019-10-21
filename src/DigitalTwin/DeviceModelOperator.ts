@@ -504,15 +504,10 @@ export class DeviceModelOperator {
   async submitMetaModelFiles(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    if (!(vscode.workspace.workspaceFolders &&
-          vscode.workspace.workspaceFolders.length > 0) ||
-        !vscode.workspace.workspaceFolders[0].uri.fsPath) {
-      vscode.window.showWarningMessage(
-          'You have not yet opened a folder in Visual Studio Code. Please select a folder first.');
+    const rootPath = utils.checkOpenedFolder();
+    if (!rootPath) {
       return;
     }
-
-    const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
 
     // Retrieve all schema files
     const allInterfaceFiles: dtUtils.SchemaFileInfo[] = [];

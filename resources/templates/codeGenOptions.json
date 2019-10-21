@@ -16,21 +16,21 @@
       "language": "ANSI C",
       "type": "CMakeWindows",
       "name": "CMake Project on Windows",
-      "detail": "Generate ANSI C code as CMake project for Windows.",
+      "detail": "Generate CMake project can be built with Visual Studio MSBuild.",
       "enabled": true
     },
     {
       "language": "ANSI C",
       "type": "CMakeLinux",
       "name": "CMake Project on Linux",
-      "detail": "Generate ANSI C code as CMake project for Linux.",
+      "detail": "Generate CMake project can be built with gcc.",
       "enabled": true
     },
     {
       "language": "ANSI C",
       "type": "IoTDevKit",
       "name": "MXChip IoT DevKit Project",
-      "detail": "Generate code for MXChip IoT DevKit as Arduino project.",
+      "detail": "Generate Arduino project for MXChip IoT DevKit.",
       "enabled" : true
     },
     {
@@ -45,12 +45,12 @@
     {
       "type": "SourceCode",
       "name": "Via Source Code",
-      "detail": "Use Azure IoT Device C SDK with its Source Code."
+      "detail": "Include Azure IoT Device SDK as Source Code."
     },
     {
       "type": "Vcpkg",
       "name": "Via Vcpkg",
-      "detail": "Use Azure IoT Device C SDK with azure-iot-sdk-c Vcpkg package along with its dependencies."
+      "detail": "Include Azure IoT Device SDK as Vcpkg."
     }
   ]
 }

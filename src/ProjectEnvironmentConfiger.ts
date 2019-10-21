@@ -31,15 +31,10 @@ export class ProjectEnvironmentConfiger {
     }
     const scaffoldType = ScaffoldType.Local;
 
-    if (!(vscode.workspace.workspaceFolders &&
-          vscode.workspace.workspaceFolders.length > 0)) {
-      const message =
-          'You have not yet opened a folder in Visual Studio Code. Please select a folder first.';
-      vscode.window.showWarningMessage(message);
+    const rootPath = utils.checkOpenedFolder();
+    if (!rootPath) {
       return;
     }
-
-    const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
 
     await vscode.window.withProgress(
         {

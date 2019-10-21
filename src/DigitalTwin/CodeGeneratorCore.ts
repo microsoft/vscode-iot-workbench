@@ -16,7 +16,7 @@ import * as utils from '../utils';
 import * as dtUtils from './Utilities';
 import {FileNames, ConfigKey} from '../constants';
 import {TelemetryContext} from '../telemetry';
-import {DigitalTwinConstants} from './DigitalTwinConstants';
+import {DigitalTwinConstants, DigitalTwinFileNames} from './DigitalTwinConstants';
 import {CodeGenProjectType, DeviceConnectionType, CodeGenLanguage, DeviceSdkReferenceType} from './DigitalTwinCodeGen/Interfaces/CodeGenerator';
 import {AnsiCCodeGeneratorFactory} from './DigitalTwinCodeGen/AnsiCCodeGeneratorFactory';
 import {ConfigHandler} from '../configHandler';
@@ -27,11 +27,6 @@ import {DialogResponses} from '../DialogResponses';
 import {CredentialStore} from '../credentialStore';
 import {RemoteExtension} from '../Models/RemoteExtension';
 import forEach = require('lodash.foreach');
-
-const constants = {
-  codeGenConfigFileName: '.codeGenConfigs',
-  defaultAppName: 'iot_application'
-};
 
 interface CodeGeneratorDownloadLocation {
   win32Md5: string;
@@ -53,7 +48,7 @@ interface CodeGeneratorConfig {
 }
 
 interface CodeGenExecutionItem {
-  capabilityModelPath: string;  // relative path of the Capability Model file
+  capabilityModelRelativePath: string;
   projectName: string;
   languageLabel: string;
   codeGenProjectType: CodeGenProjectType;
@@ -65,6 +60,12 @@ interface CodeGenExecutions {
   codeGenExecutionItems: CodeGenExecutionItem[];
 }
 
+enum ReGenResult {
+  Cancelled,
+  Succeeded,
+  Skipped
+}
+
 export class CodeGeneratorCore {
   async generateDeviceCodeStub(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
@@ -74,99 +75,49 @@ export class CodeGeneratorCore {
       return;
     }
 
-    // Step 0: update code generator
+    const rootPath = utils.checkOpenedFolder();
+    if (!rootPath) {
+      return;
+    }
+
+    // Check installation of Codegen CLI and update its bits if a new version is
+    // found
     if (!await this.installOrUpgradeCodeGenCli(context, channel)) {
       return;
     }
 
-    if (!(vscode.workspace.workspaceFolders &&
-          vscode.workspace.workspaceFolders.length > 0)) {
-      const message =
-          'You have not yet opened a folder in Visual Studio Code. Please select a folder first.';
-      vscode.window.showWarningMessage(message);
-      return;
-    }
-
-    const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-
-    // Retrieve all schema files
+    // Retrieve all DTDL Capability Model files and Interface files from current
+    // opened folder.
     const interfaceFiles: dtUtils.SchemaFileInfo[] = [];
     const dcmFiles: dtUtils.SchemaFileInfo[] = [];
     dtUtils.listAllPnPSchemaFilesSync(rootPath, dcmFiles, interfaceFiles);
 
-    // Choose Capability Model
-    const capabilityModelFileSelection =
-        await this.selectCapabilityFile(channel, dcmFiles, telemetryContext);
+    // Select Capability Model
+    const capabilityModelFileSelection = await this.selectCapabilityModelFile(
+        channel, dcmFiles, telemetryContext);
     if (!capabilityModelFileSelection) {
       utils.channelShowAndAppendLine(
           channel, `${DigitalTwinConstants.dtPrefix} Cancelled.`);
       return;
     }
 
-    // Prompt if old project exists for the same Capability Model file
     const capabilityModelFileName = capabilityModelFileSelection.label;
     const capabilityModelFilePath = path.join(
         capabilityModelFileSelection.description as string,
         capabilityModelFileName);
-    const capabilityModelPath =
+    const capabilityModelRelativePath =
         path.relative(rootPath, capabilityModelFilePath);
 
-    const codeGenConfigPath = path.join(
-        rootPath, FileNames.vscodeSettingsFolderName,
-        constants.codeGenConfigFileName);
-
-    let codeGenExecutionItem: CodeGenExecutionItem|undefined;
-    if (fs.existsSync(codeGenConfigPath)) {
-      try {
-        const codeGenExecutions: CodeGenExecutions =
-            JSON.parse(fs.readFileSync(codeGenConfigPath, 'utf8'));
-        if (codeGenExecutions) {
-          codeGenExecutionItem = codeGenExecutions.codeGenExecutionItems.find(
-              item => item.capabilityModelPath === capabilityModelPath);
-        }
-      } catch {
-        // just skip this if read file failed.
-      }
-
-      if (codeGenExecutionItem) {
-        const regenOptions: vscode.QuickPickItem[] = [];
-        // select the target of the code stub
-        regenOptions.push(
-            {
-              label: `Re-generate code for ${codeGenExecutionItem.projectName}`,
-              description: ''
-            },
-            {label: 'Create new project', description: ''});
-
-        const regenSelection = await vscode.window.showQuickPick(
-            regenOptions,
-            {ignoreFocusOut: true, placeHolder: 'Please select an option:'});
-
-        if (!regenSelection) {
-          telemetryContext.properties.errorMessage =
-              'Re-generate code selection cancelled.';
-          telemetryContext.properties.result = 'Cancelled';
-          return;
-        }
-
-        if (regenSelection.label !== 'Create new project') {
-          // Regen code
-          const projectPath =
-              path.join(rootPath, codeGenExecutionItem.projectName);
-          if (!await this.downloadAllIntefaceFiles(
-                  channel, rootPath, capabilityModelFilePath, projectPath,
-                  interfaceFiles)) {
-            return;
-          }
-          await this.generateDeviceCodeCore(
-              rootPath, codeGenExecutionItem, context, channel,
-              telemetryContext);
-          return;
-        }
-      }
+    // Prompt if old project exists for the same Capability Model file
+    const regenResult = await this.RegenCode(
+        rootPath, capabilityModelRelativePath, interfaceFiles, context, channel,
+        telemetryContext);
+    if (regenResult === ReGenResult.Succeeded ||
+        regenResult === ReGenResult.Cancelled) {
+      return;
     }
 
-    // Get project name
+    // Specify project name
     const codeGenProjectName = await this.getCodeGenProjectName(rootPath);
     if (!codeGenProjectName) {
       const message = `Project name is not specified, cancelled`;
@@ -214,7 +165,7 @@ export class CodeGeneratorCore {
     }
 
     const codeGenExecutionInfo: CodeGenExecutionItem = {
-      capabilityModelPath,
+      capabilityModelRelativePath,
       projectName: codeGenProjectName,
       languageLabel: 'ANSI C',
       codeGenProjectType,
@@ -222,31 +173,120 @@ export class CodeGeneratorCore {
       deviceConnectionType: connectionType
     };
 
-    try {
-      if (fs.existsSync(codeGenConfigPath)) {
-        const codeGenExecutions: CodeGenExecutions =
-            JSON.parse(fs.readFileSync(codeGenConfigPath, 'utf8'));
-
-        if (codeGenExecutions) {
-          codeGenExecutions.codeGenExecutionItems =
-              codeGenExecutions.codeGenExecutionItems.filter(
-                  item => item.capabilityModelPath !== capabilityModelPath);
-          codeGenExecutions.codeGenExecutionItems.push(codeGenExecutionInfo);
-          fs.writeFileSync(
-              codeGenConfigPath, JSON.stringify(codeGenExecutions, null, 4));
-        }
-      } else {
-        const codeGenExecutions:
-            CodeGenExecutions = {codeGenExecutionItems: [codeGenExecutionInfo]};
-        fs.writeFileSync(
-            codeGenConfigPath, JSON.stringify(codeGenExecutions, null, 4));
-      }
-    } catch {
-      // save config failure should not impact code gen.
-    }
+    this.saveCodeGenConfig(
+        rootPath, capabilityModelRelativePath, codeGenExecutionInfo);
 
     await this.generateDeviceCodeCore(
         rootPath, codeGenExecutionInfo, context, channel, telemetryContext);
+  }
+
+  private async selectCapabilityModelFile(
+      channel: vscode.OutputChannel, dcmFiles: dtUtils.SchemaFileInfo[],
+      telemetryContext: TelemetryContext):
+      Promise<vscode.QuickPickItem|undefined> {
+    if (dcmFiles.length === 0) {
+      const message =
+          'Unable to find Capability Model files in the folder. Please open a folder that contains Capability Model files.';
+      vscode.window.showWarningMessage(message);
+      return;
+    }
+
+    const dcmFileItems: vscode.QuickPickItem[] = [];
+
+    dcmFiles.forEach((dcmFile: dtUtils.SchemaFileInfo) => {
+      dcmFileItems.push({
+        label: path.basename(dcmFile.filePath),
+        description: path.dirname(dcmFile.filePath)
+      });
+    });
+
+    const fileSelection = await vscode.window.showQuickPick(dcmFileItems, {
+      ignoreFocusOut: true,
+      matchOnDescription: true,
+      matchOnDetail: true,
+      placeHolder:
+          `Select a ${DigitalTwinConstants.productName} Capability Model file`
+    });
+
+    if (!fileSelection) {
+      telemetryContext.properties.errorMessage =
+          'Capability Model file selection cancelled.';
+      telemetryContext.properties.result = 'Cancelled';
+      return;
+    }
+
+    return fileSelection;
+  }
+
+  private async RegenCode(
+      rootPath: string, capabilityModelRelativePath: string,
+      interfaceFiles: dtUtils.SchemaFileInfo[],
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext): Promise<ReGenResult> {
+    const codeGenConfigPath = path.join(
+        rootPath, FileNames.vscodeSettingsFolderName,
+        DigitalTwinFileNames.codeGenConfigFileName);
+
+    let codeGenExecutionItem: CodeGenExecutionItem|undefined;
+
+    // CodeGen configuration file not found, no need to regenerate code
+    if (!fs.existsSync(codeGenConfigPath)) {
+      return ReGenResult.Skipped;
+    }
+
+    try {
+      const codeGenExecutions: CodeGenExecutions =
+          JSON.parse(fs.readFileSync(codeGenConfigPath, 'utf8'));
+      if (codeGenExecutions) {
+        codeGenExecutionItem = codeGenExecutions.codeGenExecutionItems.find(
+            item => item.capabilityModelRelativePath ===
+                capabilityModelRelativePath);
+      }
+    } catch {
+      // just skip this if read file failed.
+    }
+
+    if (codeGenExecutionItem) {
+      const regenOptions: vscode.QuickPickItem[] = [];
+      // select the target of the code stub
+      regenOptions.push(
+          {
+            label: `Re-generate code for ${codeGenExecutionItem.projectName}`,
+            description: ''
+          },
+          {label: 'Create new project', description: ''});
+
+      const regenSelection = await vscode.window.showQuickPick(
+          regenOptions,
+          {ignoreFocusOut: true, placeHolder: 'Please select an option:'});
+
+      if (!regenSelection) {
+        telemetryContext.properties.errorMessage =
+            'Re-generate code selection cancelled.';
+        telemetryContext.properties.result = 'Cancelled';
+        return ReGenResult.Succeeded;
+      }
+
+      const dcmFilePath = path.join(rootPath, capabilityModelRelativePath);
+
+      // User select regenerate code
+      if (regenSelection.label !== 'Create new project') {
+        const projectPath =
+            path.join(rootPath, codeGenExecutionItem.projectName);
+        if (!await this.downloadAllIntefaceFiles(
+                channel, rootPath, dcmFilePath, projectPath, interfaceFiles)) {
+          return ReGenResult.Skipped;
+        }
+
+        await this.generateDeviceCodeCore(
+            rootPath, codeGenExecutionItem, context, channel, telemetryContext);
+        return ReGenResult.Succeeded;
+      } else {
+        return ReGenResult.Skipped;
+      }
+    } else {
+      return ReGenResult.Skipped;
+    }
   }
 
   private async getCodeGenProjectName(rootPath: string):
@@ -299,56 +339,19 @@ export class CodeGeneratorCore {
     return dtUtils.loadJsonConfiguration(codeGenConfigFilePath);
   }
 
-  private async selectCapabilityFile(
-      channel: vscode.OutputChannel, dcmFiles: dtUtils.SchemaFileInfo[],
-      telemetryContext: TelemetryContext):
-      Promise<vscode.QuickPickItem|undefined> {
-    if (dcmFiles.length === 0) {
-      const message =
-          'Unable to find Capability Model files in the folder. Please open a folder that contains Capability Model files.';
-      vscode.window.showWarningMessage(message);
-      return;
-    }
-
-    const metamodelItems: vscode.QuickPickItem[] = [];
-
-    dcmFiles.forEach((dcmFile: dtUtils.SchemaFileInfo) => {
-      metamodelItems.push({
-        label: path.basename(dcmFile.filePath),
-        description: path.dirname(dcmFile.filePath)
-      });
-    });
-
-    const fileSelection = await vscode.window.showQuickPick(metamodelItems, {
-      ignoreFocusOut: true,
-      matchOnDescription: true,
-      matchOnDetail: true,
-      placeHolder:
-          `Select a ${DigitalTwinConstants.productName} Capability Model file`
-    });
-
-    if (!fileSelection) {
-      telemetryContext.properties.errorMessage =
-          'Capability Model file selection cancelled.';
-      telemetryContext.properties.result = 'Cancelled';
-      return;
-    }
-
-    return fileSelection;
-  }
-
   private async selectLanguage(telemetryContext: TelemetryContext):
       Promise<string|undefined> {
     const languageItems: vscode.QuickPickItem[] = [];
     languageItems.push({label: CodeGenLanguage.ANSIC, description: ''});
 
-    const languageSelection = await vscode.window.showQuickPick(
-        languageItems,
-        {ignoreFocusOut: true, placeHolder: 'Please select a language:'});
+    const languageSelection = await vscode.window.showQuickPick(languageItems, {
+      ignoreFocusOut: true,
+      placeHolder: 'Select the language for generated code:'
+    });
 
     if (!languageSelection) {
       telemetryContext.properties.errorMessage =
-          'Language selection cancelled.';
+          'CodeGen language selection cancelled.';
       telemetryContext.properties.result = 'Cancelled';
       return;
     }
@@ -371,8 +374,7 @@ export class CodeGeneratorCore {
     const deviceConnectionSelection =
         await vscode.window.showQuickPick(connectionTypeItems, {
           ignoreFocusOut: true,
-          placeHolder:
-              'Please specify how will the device connect to Azure IoT?'
+          placeHolder: 'How will device connect to Azure IoT?'
         });
 
     if (!deviceConnectionSelection) {
@@ -421,11 +423,9 @@ export class CodeGeneratorCore {
               language} language.`);
     }
 
-    const projectTemplateSelection =
-        await vscode.window.showQuickPick(projectTemplateItems, {
-          ignoreFocusOut: true,
-          placeHolder: 'Please select a project template:'
-        });
+    const projectTemplateSelection = await vscode.window.showQuickPick(
+        projectTemplateItems,
+        {ignoreFocusOut: true, placeHolder: 'Select project template:'});
 
     if (!projectTemplateSelection) {
       telemetryContext.properties.errorMessage =
@@ -472,8 +472,7 @@ export class CodeGeneratorCore {
         const deviceConnectionSelection =
             await vscode.window.showQuickPick(sdkReferenceTypeItems, {
               ignoreFocusOut: true,
-              placeHolder:
-                  'Please specify how to reference the device SDK library?'
+              placeHolder: 'How will CMake include the Azure IoT Device SDK?'
             });
 
         if (!deviceConnectionSelection) {
@@ -524,7 +523,8 @@ export class CodeGeneratorCore {
 
     // Parse capabilityModel name from id
     const capabilityModel = JSON.parse(fs.readFileSync(
-        path.join(rootPath, codeGenExecutionInfo.capabilityModelPath), 'utf8'));
+        path.join(rootPath, codeGenExecutionInfo.capabilityModelRelativePath),
+        'utf8'));
 
     const capabilityModelId = capabilityModel['@id'];
     const capabilityModelIdStrings = capabilityModelId.split(':');
@@ -539,8 +539,8 @@ export class CodeGeneratorCore {
         async () => {
           const projectPath =
               path.join(rootPath, codeGenExecutionInfo.projectName);
-          const capabilityModelFilePath =
-              path.join(rootPath, codeGenExecutionInfo.capabilityModelPath);
+          const capabilityModelFilePath = path.join(
+              rootPath, codeGenExecutionInfo.capabilityModelRelativePath);
           const result = await codeGenerator.generateCode(
               projectPath, capabilityModelFilePath, capabilityModelName,
               capabilityModelId, rootPath);
@@ -550,6 +550,39 @@ export class CodeGeneratorCore {
           }
         });
     return true;
+  }
+
+  private saveCodeGenConfig(
+      rootPath: string, capabilityModelRelativePath: string,
+      codeGenExecutionInfo: CodeGenExecutionItem): void {
+    const codeGenConfigPath = path.join(
+        rootPath, FileNames.vscodeSettingsFolderName,
+        DigitalTwinFileNames.codeGenConfigFileName);
+
+    try {
+      if (fs.existsSync(codeGenConfigPath)) {
+        const codeGenExecutions: CodeGenExecutions =
+            JSON.parse(fs.readFileSync(codeGenConfigPath, 'utf8'));
+
+        if (codeGenExecutions) {
+          codeGenExecutions.codeGenExecutionItems =
+              codeGenExecutions.codeGenExecutionItems.filter(
+                  item => item.capabilityModelRelativePath !==
+                      capabilityModelRelativePath);
+          codeGenExecutions.codeGenExecutionItems.push(codeGenExecutionInfo);
+          fs.writeFileSync(
+              codeGenConfigPath, JSON.stringify(codeGenExecutions, null, 4));
+        }
+      } else {
+        const codeGenExecutions:
+            CodeGenExecutions = {codeGenExecutionItems: [codeGenExecutionInfo]};
+        fs.writeFileSync(
+            codeGenConfigPath, JSON.stringify(codeGenExecutions, null, 4));
+      }
+    } catch (error) {
+      // save config failure should not impact code gen.
+      console.log(error);
+    }
   }
 
   private async downloadInterfaceFile(

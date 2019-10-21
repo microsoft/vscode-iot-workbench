@@ -8,6 +8,7 @@ export class DigitalTwinFileNames {
   static readonly iotModelFileName = 'IoTModel.json';
   static readonly settingsJsonFileName = 'settings.json';
   static readonly vscodeSettingsFolderName = '.vscode';
+  static readonly codeGenConfigFileName = '.codeGenConfigs';
   static readonly sampleInterfaceName = 'sample.interface.json';
   static readonly sampleCapabilityModelName = 'sample.capabilitymodel.json';
   static readonly schemaFolderName = 'schemas';
