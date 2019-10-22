@@ -214,9 +214,12 @@ export abstract class ArduinoDeviceBase implements Device {
                 FileNames.resourcesFolderName, FileNames.templatesFolderName,
                 board.id, constants.cppPropertiesFileNameMac));
         const propertiesContentMac =
-            await FileUtility.readFile(type, propertiesFilePathMac).toString();
-        await FileUtility.writeFile(
-            type, cppPropertiesFilePath, propertiesContentMac);
+            await FileUtility.readFile(type, propertiesFilePathMac);
+        const propertiesContentMacString = propertiesContentMac.toString();
+        const versionPattern = /{VERSION}/g;
+        const replaceStr =
+            propertiesContentMacString.replace(versionPattern, this.version);
+        await FileUtility.writeFile(type, cppPropertiesFilePath, replaceStr);
       }
     } catch (error) {
       throw new Error(`Create cpp properties file failed: ${error.message}`);
