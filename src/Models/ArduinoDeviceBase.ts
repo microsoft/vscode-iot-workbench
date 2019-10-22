@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, DependentExtensions, FileNames, OperationType, ScaffoldType} from '../constants';
+import {ConfigKey, DependentExtensions, FileNames, OperationType, OSPlatform, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {IoTWorkbenchSettings} from '../IoTSettings';
 import {TelemetryContext} from '../telemetry';
@@ -23,6 +23,7 @@ const constants = {
   arduinoJsonFileName: 'arduino.json',
   cppPropertiesFileName: 'c_cpp_properties.json',
   cppPropertiesFileNameMac: 'c_cpp_properties_macos.json',
+  cppPropertiesFileNameLinux: 'c_cpp_properties_linux.json',
   cppPropertiesFileNameWin: 'c_cpp_properties_win32.json',
   outputPath: './.build',
   compileTaskName: 'Arduino Compile',
@@ -100,9 +101,10 @@ export abstract class ArduinoDeviceBase implements Device {
       return false;
     }
 
-    return await utils.fetchAndExecuteTask(
+    await utils.fetchAndExecuteTask(
         this.extensionContext, this.channel, this.telemetryContext,
         this.deviceFolder, OperationType.Compile, constants.compileTaskName);
+    return true;
   }
 
   async upload(): Promise<boolean> {
@@ -110,9 +112,10 @@ export abstract class ArduinoDeviceBase implements Device {
     if (!result) {
       return false;
     }
-    return await utils.fetchAndExecuteTask(
+    await utils.fetchAndExecuteTask(
         this.extensionContext, this.channel, this.telemetryContext,
         this.deviceFolder, OperationType.Upload, constants.uploadTaskName);
+    return true;
   }
 
 
@@ -156,6 +159,24 @@ export abstract class ArduinoDeviceBase implements Device {
 
   abstract get version(): string;
 
+  private async writeCppPropertiesFile(
+      rootPath: string, boardId: string, type: ScaffoldType,
+      cppPropertiesTemplateFileName: string,
+      cppPropertiesFilePath: string): Promise<void> {
+    const cppPropertiesTemplateFilePath =
+        this.extensionContext.asAbsolutePath(path.join(
+            FileNames.resourcesFolderName, FileNames.templatesFolderName,
+            boardId, cppPropertiesTemplateFileName));
+    const propertiesContent =
+        fs.readFileSync(cppPropertiesTemplateFilePath).toString();
+
+    const rootPathPattern = /{ROOTPATH}/g;
+    const versionPattern = /{VERSION}/g;
+    const content = propertiesContent.replace(rootPathPattern, rootPath)
+                        .replace(versionPattern, this.version);
+    await FileUtility.writeFile(type, cppPropertiesFilePath, content);
+  }
+
   async generateCppPropertiesFile(type: ScaffoldType, board: Board):
       Promise<void> {
     if (!await FileUtility.directoryExists(type, this.vscodeFolderPath)) {
@@ -172,26 +193,21 @@ export abstract class ArduinoDeviceBase implements Device {
 
     try {
       const plat = await IoTWorkbenchSettings.getPlatform();
+      let rootPath: string = await IoTWorkbenchSettings.getOs();
 
-      if (plat === 'win32') {
-        const propertiesFilePathWin32 =
-            this.extensionContext.asAbsolutePath(path.join(
-                FileNames.resourcesFolderName, FileNames.templatesFolderName,
-                board.id, constants.cppPropertiesFileNameWin));
-        const propertiesContentWin32 =
-            fs.readFileSync(propertiesFilePathWin32).toString();
-        const rootPathPattern = /{ROOTPATH}/g;
-        const versionPattern = /{VERSION}/g;
-        const homeDir = await IoTWorkbenchSettings.getOs();
-        const localAppData: string = path.join(homeDir, 'AppData', 'Local');
-        const replaceStr =
-            propertiesContentWin32
-                .replace(rootPathPattern, localAppData.replace(/\\/g, '\\\\'))
-                .replace(versionPattern, this.version);
-        await FileUtility.writeFile(type, cppPropertiesFilePath, replaceStr);
+      if (plat === OSPlatform.WIN32) {
+        rootPath =
+            path.join(rootPath, 'AppData', 'Local').replace(/\\/g, '\\\\');
+        await this.writeCppPropertiesFile(
+            rootPath, board.id, type, constants.cppPropertiesFileNameWin,
+            cppPropertiesFilePath);
+      } else if (plat === OSPlatform.LINUX) {
+        await this.writeCppPropertiesFile(
+            rootPath, board.id, type, constants.cppPropertiesFileNameLinux,
+            cppPropertiesFilePath);
       }
-      // TODO: Let's use the same file for Linux and MacOS for now. Need to
-      // revisit this part.
+      // TODO: Let's use the MacOS template file for OS that is not win32/linux.
+      // Revisit this part if want to support other OS.
       else {
         const propertiesFilePathMac =
             this.extensionContext.asAbsolutePath(path.join(

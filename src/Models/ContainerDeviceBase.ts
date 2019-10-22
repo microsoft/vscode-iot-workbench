@@ -5,7 +5,9 @@ import {Guid} from 'guid-typescript';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+import {CancelOperationError} from '../CancelOperationError';
 import {FileNames, OperationType, PlatformType, ScaffoldType, TemplateTag} from '../constants';
+import {DigitalTwinConstants} from '../DigitalTwin/DigitalTwinConstants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext} from '../telemetry';
 import * as utils from '../utils';
@@ -104,7 +106,7 @@ export abstract class ContainerDeviceBase implements Device {
     // Cannot use forEach here since it's async
     for (const fileInfo of templateFilesInfo) {
       // Replace binary name in CMakeLists.txt to project name
-      if (fileInfo.fileName === 'CMakeLists.txt') {
+      if (fileInfo.fileName === DigitalTwinConstants.cmakeListsFileName) {
         const pattern = '${project_name}';
         const projectName = path.basename(projectPath);
         if (fileInfo.fileContent) {
@@ -127,9 +129,10 @@ export abstract class ContainerDeviceBase implements Device {
         return false;
       }
     }
-    return await utils.fetchAndExecuteTask(
+    await utils.fetchAndExecuteTask(
         this.extensionContext, this.channel, this.telemetryContext,
         this.projectFolder, OperationType.Compile, constants.compileTaskName);
+    return true;
   }
 
   abstract async upload(): Promise<boolean>;
@@ -158,10 +161,10 @@ export abstract class ContainerDeviceBase implements Device {
     // Select container
     const containerSelection = await this.selectContainer(templateJson);
     if (!containerSelection) {
-      this.telemetryContext.properties.errorMessage =
-          'Container selection cancelled.';
+      const message = `Container selection cancelled.`;
+      this.telemetryContext.properties.errorMessage = message;
       this.telemetryContext.properties.result = 'Cancelled';
-      return false;
+      throw new CancelOperationError(message);
     }
     const templateName = containerSelection.label;
     if (!templateName) {

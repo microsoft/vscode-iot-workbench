@@ -9,7 +9,7 @@ import {ConfigHandler} from '../configHandler';
 import {ConfigKey, OperationType, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext} from '../telemetry';
-import {askAndOpenInRemote, channelShowAndAppendLine} from '../utils';
+import {askAndOpenInRemote, channelShowAndAppendLine, executeCommand} from '../utils';
 
 import {ContainerDeviceBase} from './ContainerDeviceBase';
 import {DeviceType} from './Interfaces/Device';
@@ -42,6 +42,31 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
         DeviceType.Raspberry_Pi, templateFilesInfo);
   }
 
+  private async getBinaryFileName(): Promise<string|undefined> {
+    // Parse binary name from CMakeLists.txt file
+    const cmakeFilePath = path.join(this.projectFolder, 'CMakeLists.txt');
+    if (!await FileUtility.fileExists(ScaffoldType.Workspace, cmakeFilePath)) {
+      return;
+    }
+    const getBinaryFileNameCmd = `cat ${
+        cmakeFilePath} | grep 'set(binary_name' | cut -d ' ' -f2 | sed -e 's/^"//' -e 's/"$//' | tr -d '\n'`;
+
+    const binaryName = await executeCommand(getBinaryFileNameCmd);
+    return binaryName;
+  }
+
+  private async enableBinaryExecutability(ssh: sdk.SSH, binaryName: string) {
+    if (!binaryName) {
+      return;
+    }
+
+    const chmodCmd = `cd ${RaspberryPiUploadConfig.projectPath} && [ -f ${
+        binaryName} ] && chmod +x ${binaryName}`;
+    await ssh.exec(chmodCmd);
+
+    return;
+  }
+
   async upload(): Promise<boolean> {
     const isRemote = RemoteExtension.isRemote(this.extensionContext);
     if (!isRemote) {
@@ -57,17 +82,22 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
               ScaffoldType.Workspace, this.outputPath)) {
         const message =
             `Output folder does not exist. Please compile device code first.`;
-        await vscode.window.showWarningMessage(message);
+        vscode.window.showWarningMessage(message);
+        channelShowAndAppendLine(this.channel, message);
         return false;
       }
 
       if (!RaspberryPiUploadConfig.updated) {
         const res = await this.configSSH();
         if (!res) {
-          vscode.window.showWarningMessage('Configure SSH cancelled.');
-          return true;
+          const message = `Configure SSH cancelled.`;
+          vscode.window.showWarningMessage(message);
+          channelShowAndAppendLine(this.channel, message);
+          return false;
         }
       }
+
+      const binaryName = await this.getBinaryFileName();
 
       const ssh = new sdk.SSH();
       await ssh.open(
@@ -85,12 +115,23 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
         throw new Error(message);
       }
 
+      // Just ignore if we cannot find binary file in the right place
+      if (binaryName) {
+        try {
+          await this.enableBinaryExecutability(ssh, binaryName);
+        } catch (error) {
+          throw new Error(
+              `Failed to enable binary executability. Error: ${error.message}`);
+        }
+      }
+
       try {
         await ssh.close();
       } catch (error) {
         throw new Error(
             `Failed to close SSH connection. Error: ${error.message}`);
       }
+
 
       const message =
           `Successfully deploy compiled files to Raspberry Pi board.`;

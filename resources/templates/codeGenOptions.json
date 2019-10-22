@@ -1,0 +1,56 @@
+{
+  "connectionTypes": [
+    {
+      "type": "DeviceConnectionString",
+      "name": "Via IoT Hub device connection string",
+      "detail": "To connect to Azure IoT Hub directly"
+    },
+    {
+      "type": "SymmetricKey",
+      "name": "Via DPS (Device Provisioning Service) symmetric key",
+      "detail": "To connect to Azure IoT Hub, Azure IoT Central or Azure IoT Certification Service"
+    }
+  ],
+  "projectTemplates": [
+    {
+      "language": "ANSI C",
+      "type": "CMakeWindows",
+      "name": "CMake Project on Windows",
+      "detail": "Generate CMake project can be built with Visual Studio MSBuild.",
+      "enabled": true
+    },
+    {
+      "language": "ANSI C",
+      "type": "CMakeLinux",
+      "name": "CMake Project on Linux",
+      "detail": "Generate CMake project can be built with gcc.",
+      "enabled": true
+    },
+    {
+      "language": "ANSI C",
+      "type": "IoTDevKit",
+      "name": "MXChip IoT DevKit Project",
+      "detail": "Generate Arduino project for MXChip IoT DevKit.",
+      "enabled" : true
+    },
+    {
+      "language": "ANSI C",
+      "type": "VisualStudio",
+      "name": "Visual Studio Project",
+      "detail": "Generate ANSI C code as Visual Studio (.vcxproj) project.",
+      "enabled": false
+    }
+  ],
+  "deviceSdkReferenceTypes": [
+    {
+      "type": "SourceCode",
+      "name": "Via Source Code",
+      "detail": "Include Azure IoT Device SDK as Source Code."
+    },
+    {
+      "type": "Vcpkg",
+      "name": "Via Vcpkg",
+      "detail": "Include Azure IoT Device SDK as Vcpkg."
+    }
+  ]
+}

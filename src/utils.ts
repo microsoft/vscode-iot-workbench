@@ -115,6 +115,18 @@ export interface FolderQuickPickItem<T = undefined> extends
   data: T;
 }
 
+export function checkOpenedFolder(): string|undefined {
+  if (!(vscode.workspace.workspaceFolders &&
+        vscode.workspace.workspaceFolders.length > 0) ||
+      !vscode.workspace.workspaceFolders[0].uri.fsPath) {
+    vscode.window.showWarningMessage(
+        'You have not yet opened a folder in Visual Studio Code. Please select a folder first.');
+    return;
+  }
+
+  return vscode.workspace.workspaceFolders[0].uri.fsPath;
+}
+
 export async function selectWorkspaceFolder(
     placeHolder: string,
     getSubPath?: (f: vscode.WorkspaceFolder) =>
@@ -179,6 +191,20 @@ export async function selectWorkspaceItem(
                                  (await showOpenDialog(options))[0].fsPath;
 }
 
+export function executeCommand(command: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    cp.exec(command, (error, stdout, stderr) => {
+      if (error) {
+        reject(error);
+      }
+      if (stderr) {
+        reject(stderr);
+      }
+      resolve(stdout);
+    });
+  });
+}
+
 export function runCommand(
     command: string, args: string[], workingDir: string,
     outputChannel: vscode.OutputChannel): Thenable<object> {
@@ -208,13 +234,15 @@ export function runCommand(
 /**
  * Pop out information window suggesting user to configure project environment
  * first.
- * @returns true - configure successfully; false - fail to configure or cancel
- * configuration.
  */
 export async function askToConfigureEnvironment(
     context: vscode.ExtensionContext, channel: vscode.OutputChannel,
     telemetryContext: TelemetryContext, platform: PlatformType,
-    rootPath: string, scaffoldType: ScaffoldType, operation: OperationType) {
+    rootPath: string, scaffoldType: ScaffoldType,
+    operation: OperationType): Promise<void> {
+  channelShowAndAppendLine(
+      channel,
+      `${operation} operation failed because the project environment needs configuring.`);
   const message = `${
       operation} operation failed because the project environment needs configuring. Do you want to configure project environment first?`;
   const result: vscode.MessageItem|undefined =
@@ -224,18 +252,38 @@ export async function askToConfigureEnvironment(
   if (result === DialogResponses.yes) {
     telemetryContext.properties.errorMessage =
         `${operation} operation failed and user configures project`;
-    const res =
-        await ProjectEnvironmentConfiger.configureProjectEnvironmentAsPlatform(
-            context, channel, telemetryContext, platform, rootPath,
-            scaffoldType);
+
+    let res: boolean;
+    try {
+      res = await ProjectEnvironmentConfiger
+                .configureProjectEnvironmentAsPlatform(
+                    context, channel, telemetryContext, platform, rootPath,
+                    scaffoldType);
+    } catch (error) {
+      if (error instanceof CancelOperationError) {
+        telemetryContext.properties.errorMessage =
+            `${operation} operation failed.`;
+        telemetryContext.properties.result = 'Cancelled';
+        channelShowAndAppendLine(channel, error.message);
+        vscode.window.showWarningMessage(error.message);
+        return;
+      } else {
+        throw error;
+      }
+    }
     if (res) {
       const message =
           `Configuration of project environmnet done. You can run the ${
               operation.toLocaleLowerCase()} operation now.`;
       channelShowAndAppendLine(channel, message);
+      vscode.window.showInformationMessage(message);
     }
   } else {
     telemetryContext.properties.errorMessage = `${operation} operation failed.`;
+    telemetryContext.properties.result = 'Cancelled';
+    const message = `Project development environment configuration cancelled.`;
+    channelShowAndAppendLine(channel, message);
+    vscode.window.showWarningMessage(message);
   }
 }
 
@@ -396,7 +444,7 @@ export async function getCodeGenTemplateFolderName(
       templateFileJson.templates.filter((template: ProjectTemplate) => {
         return (
             template.tag === TemplateTag.Digitaltwin &&
-            template.type === codeGenProjectType &&
+            template.type.includes(codeGenProjectType) &&
             template.connectionType === connectionType);
       });
 
@@ -486,10 +534,13 @@ export async function handleExternalProject(
           `Failed to add configuration files. Project environment configuration stopped.`);
     }
     await project.openProject(projectFileRootPath, false);
-  } else {
+  } else if (result === Choice.createNewProject) {
     telemetryContext.properties.errorMessage =
         'Operation failed and user creates new project';
     await vscode.commands.executeCommand('iotworkbench.initializeProject');
+  } else {
+    throw new CancelOperationError(
+        `Choose to configure external project Cancelled.`);
   }
 }
 
@@ -555,9 +606,17 @@ export async function constructAndLoadIoTProject(
       const isIncorrectlyOpenedIoTWorkspaceProject =
           await handleIncorrectlyOpenedIoTWorkspaceProject(telemetryContext);
       if (!isIncorrectlyOpenedIoTWorkspaceProject) {
-        await handleExternalProject(
-            context, channel, telemetryContext, scaffoldType,
-            projectFileRootPath);
+        try {
+          await handleExternalProject(
+              context, channel, telemetryContext, scaffoldType,
+              projectFileRootPath);
+        } catch (err) {
+          // Ignore if user cancel operation
+          if (!(err instanceof CancelOperationError)) {
+            throw new Error(
+                `Failed to handle external project. Error: ${err.message}`);
+          }
+        }
       }
       return;
     }
@@ -633,7 +692,6 @@ export async function askToOverwrite(
         path.join(projectPath, fileInfo.targetPath, fileInfo.fileName);
     if (await FileUtility.fileExists(scaffoldType, targetFilePath)) {
       const fileOverwrite = await askToOverwriteFile(fileInfo.fileName);
-
       return fileOverwrite.label === OverwriteLabel.YesToAll;
     }
   }
@@ -678,7 +736,7 @@ export async function askToOverwriteFile(fileName: string):
 export async function fetchAndExecuteTask(
     context: vscode.ExtensionContext, channel: vscode.OutputChannel,
     telemetryContext: TelemetryContext, projectPath: string,
-    operationType: OperationType, taskName: string): Promise<boolean> {
+    operationType: OperationType, taskName: string): Promise<void> {
   const scaffoldType = ScaffoldType.Workspace;
   if (!await FileUtility.directoryExists(scaffoldType, projectPath)) {
     throw new Error('Unable to find the project folder.');
@@ -692,7 +750,7 @@ export async function fetchAndExecuteTask(
     await askToConfigureEnvironment(
         context, channel, telemetryContext, PlatformType.Arduino, projectPath,
         scaffoldType, operationType);
-    return false;
+    return;
   }
 
   const operationTask = tasks.filter(task => {
@@ -706,7 +764,7 @@ export async function fetchAndExecuteTask(
     await askToConfigureEnvironment(
         context, channel, telemetryContext, PlatformType.Arduino, projectPath,
         scaffoldType, operationType);
-    return false;
+    return;
   }
 
   try {
@@ -715,7 +773,7 @@ export async function fetchAndExecuteTask(
     throw new Error(`Failed to execute task to ${
         operationType.toLowerCase()}: ${error.message}`);
   }
-  return true;
+  return;
 }
 
 /**
@@ -770,17 +828,15 @@ export async function getEnvTemplateFilesAndAskOverwrite(
     if (error instanceof CancelOperationError) {
       telemetryContext.properties.result = 'Cancelled';
       telemetryContext.properties.errorMessage = error.message;
-      return;
-    } else {
-      throw error;
     }
+    throw error;
   }
   if (!overwriteAll) {
     const message =
         'Do not overwrite configuration files and cancel configuration process.';
     telemetryContext.properties.errorMessage = message;
     telemetryContext.properties.result = 'Cancelled';
-    return;
+    throw new CancelOperationError(message);
   }
   return templateFilesInfo;
 }

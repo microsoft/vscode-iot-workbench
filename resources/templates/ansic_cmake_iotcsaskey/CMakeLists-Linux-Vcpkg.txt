@@ -34,21 +34,29 @@ set({PROJECT_NAME}_c_files
 )
 
 include_directories(.)
-include_directories(./utilities)
-include_directories(${PROJECT_SOURCE_DIR}/deps/parson)
-include_directories(${SHARED_UTIL_INC_FOLDER})
-include_directories(${IOTHUB_CLIENT_INC_FOLDER})
-include_directories(${DIGITALTWIN_CLIENT_INC_FOLDER})
 
 add_executable({PROJECT_NAME} ${{PROJECT_NAME}_c_files} ${{PROJECT_NAME}_h_files})
+
+# Find azure_iot_sdks Vcpkg package
+find_package(azure_iot_sdks REQUIRED)
+find_package(ZLIB REQUIRED)
+find_library(CURL NAMES curl-d curl)
 
 target_link_libraries({PROJECT_NAME}
 parson
 iothub_client_mqtt_transport
-iothub_client_mqtt_ws_transport
 iothub_client
 digitaltwin_client
+prov_device_ll_client
+prov_mqtt_transport
 prov_auth_client
 aziotsharedutil
 umqtt
-uuid)
+uuid
+${CURL}
+pthread
+ssl
+crypto
+m
+ZLIB::ZLIB
+)

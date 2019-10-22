@@ -12,6 +12,7 @@ import {ScaffoldType, PlatformType} from './constants';
 import {RemoteExtension} from './Models/RemoteExtension';
 import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
+import {CancelOperationError} from './CancelOperationError';
 
 const impor = require('impor')(__dirname);
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
@@ -31,15 +32,10 @@ export class ProjectEnvironmentConfiger {
     }
     const scaffoldType = ScaffoldType.Local;
 
-    if (!(vscode.workspace.workspaceFolders &&
-          vscode.workspace.workspaceFolders.length > 0)) {
-      const message =
-          'You have not yet opened a folder in Visual Studio Code. Please select a folder first.';
-      vscode.window.showWarningMessage(message);
+    const rootPath = utils.checkOpenedFolder();
+    if (!rootPath) {
       return;
     }
-
-    const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
 
     await vscode.window.withProgress(
         {
@@ -62,10 +58,24 @@ export class ProjectEnvironmentConfiger {
                 PlatformType, platformSelection.label);
           }
 
-          const res = await ProjectEnvironmentConfiger
-                          .configureProjectEnvironmentAsPlatform(
-                              context, channel, telemetryContext, platform,
-                              rootPath, scaffoldType);
+          let res: boolean;
+          try {
+            res = await ProjectEnvironmentConfiger
+                      .configureProjectEnvironmentAsPlatform(
+                          context, channel, telemetryContext, platform,
+                          rootPath, scaffoldType);
+          } catch (error) {
+            if (error instanceof CancelOperationError) {
+              const message =
+                  `Project development environment configuration cancelled.`;
+              utils.channelShowAndAppendLine(channel, message);
+              vscode.window.showWarningMessage(message);
+              return;
+            } else {
+              throw error;
+            }
+          }
+
           if (!res) {
             return;
           }
@@ -99,7 +109,7 @@ export class ProjectEnvironmentConfiger {
         const message =
             `This is not an iot workbench Arduino projects. You cannot configure it as Arduino platform.`;
         utils.channelShowAndAppendLine(channel, message);
-        vscode.window.showInformationMessage(message);
+        vscode.window.showWarningMessage(message);
         return false;
       }
     }
