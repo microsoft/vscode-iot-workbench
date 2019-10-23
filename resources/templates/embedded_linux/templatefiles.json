@@ -9,11 +9,6 @@
         "fileName": "main.c",
         "sourcePath" : ".",
         "targetPath" : "."
-    },
-    {
-        "fileName": "c_cpp_properties.json",
-        "sourcePath" : ".",
-        "targetPath" : "./.vscode"
     }
   ]
 }

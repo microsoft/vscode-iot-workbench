@@ -21,6 +21,11 @@
       "targetPath" : "./.vscode"
     },
     {
+        "fileName": "c_cpp_properties.json",
+        "sourcePath" : ".",
+        "targetPath" : "./.vscode"
+    },
+    {
       "fileName": "build.sh",
       "sourcePath" : ".",
       "targetPath" : "."
