@@ -160,20 +160,46 @@ export abstract class ArduinoDeviceBase implements Device {
   abstract get version(): string;
 
   private async writeCppPropertiesFile(
-      rootPath: string, boardId: string, type: ScaffoldType,
-      cppPropertiesTemplateFileName: string,
-      cppPropertiesFilePath: string): Promise<void> {
+      boardId: string, type: ScaffoldType, plat: string): Promise<void> {
+    const cppPropertiesFilePath =
+        path.join(this.vscodeFolderPath, constants.cppPropertiesFileName);
+
+    if (await FileUtility.directoryExists(type, cppPropertiesFilePath)) {
+      return;
+    }
+
+    let cppPropertiesTemplateFileName: string;
+    let changeRootPath = false;
+    let rootPath: string = await IoTWorkbenchSettings.getOs();
+    if (plat === OSPlatform.WIN32) {
+      rootPath = path.join(rootPath, 'AppData', 'Local').replace(/\\/g, '\\\\');
+      cppPropertiesTemplateFileName = constants.cppPropertiesFileNameWin;
+      changeRootPath = true;
+    } else if (plat === OSPlatform.LINUX) {
+      cppPropertiesTemplateFileName = constants.cppPropertiesFileNameLinux;
+      changeRootPath = true;
+    } else {
+      // TODO: Let's use the MacOS template file for OS that is not win32/linux.
+      // Revisit this part if want to support other OS.
+      cppPropertiesTemplateFileName = constants.cppPropertiesFileNameMac;
+    }
+
     const cppPropertiesTemplateFilePath =
         this.extensionContext.asAbsolutePath(path.join(
             FileNames.resourcesFolderName, FileNames.templatesFolderName,
             boardId, cppPropertiesTemplateFileName));
     const propertiesContent =
-        fs.readFileSync(cppPropertiesTemplateFilePath).toString();
+        await FileUtility.readFile(type, cppPropertiesTemplateFilePath);
+    const propertiesContentString = propertiesContent.toString();
 
-    const rootPathPattern = /{ROOTPATH}/g;
     const versionPattern = /{VERSION}/g;
-    const content = propertiesContent.replace(rootPathPattern, rootPath)
-                        .replace(versionPattern, this.version);
+    let content = propertiesContentString.replace(versionPattern, this.version);
+
+    if (changeRootPath) {
+      const rootPathPattern = /{ROOTPATH}/g;
+      content = content.replace(rootPathPattern, rootPath);
+    }
+
     await FileUtility.writeFile(type, cppPropertiesFilePath, content);
   }
 
@@ -184,43 +210,9 @@ export abstract class ArduinoDeviceBase implements Device {
     }
 
     // Create c_cpp_properties.json file
-    const cppPropertiesFilePath =
-        path.join(this.vscodeFolderPath, constants.cppPropertiesFileName);
-
-    if (await FileUtility.directoryExists(type, cppPropertiesFilePath)) {
-      return;
-    }
-
     try {
       const plat = await IoTWorkbenchSettings.getPlatform();
-      let rootPath: string = await IoTWorkbenchSettings.getOs();
-
-      if (plat === OSPlatform.WIN32) {
-        rootPath =
-            path.join(rootPath, 'AppData', 'Local').replace(/\\/g, '\\\\');
-        await this.writeCppPropertiesFile(
-            rootPath, board.id, type, constants.cppPropertiesFileNameWin,
-            cppPropertiesFilePath);
-      } else if (plat === OSPlatform.LINUX) {
-        await this.writeCppPropertiesFile(
-            rootPath, board.id, type, constants.cppPropertiesFileNameLinux,
-            cppPropertiesFilePath);
-      }
-      // TODO: Let's use the MacOS template file for OS that is not win32/linux.
-      // Revisit this part if want to support other OS.
-      else {
-        const propertiesFilePathMac =
-            this.extensionContext.asAbsolutePath(path.join(
-                FileNames.resourcesFolderName, FileNames.templatesFolderName,
-                board.id, constants.cppPropertiesFileNameMac));
-        const propertiesContentMac =
-            await FileUtility.readFile(type, propertiesFilePathMac);
-        const propertiesContentMacString = propertiesContentMac.toString();
-        const versionPattern = /{VERSION}/g;
-        const replaceStr =
-            propertiesContentMacString.replace(versionPattern, this.version);
-        await FileUtility.writeFile(type, cppPropertiesFilePath, replaceStr);
-      }
+      await this.writeCppPropertiesFile(board.id, type, plat);
     } catch (error) {
       throw new Error(`Create cpp properties file failed: ${error.message}`);
     }

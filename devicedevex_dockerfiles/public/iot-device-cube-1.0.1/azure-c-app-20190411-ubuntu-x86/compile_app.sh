@@ -5,7 +5,7 @@ application_name="iot_application"
 azure_c_sdk_directory="/work/azure-iot-sdk-c"
 cmake_directory="${azure_c_sdk_directory}/cmake"
 CMakeLists_file_path="${azure_c_sdk_directory}/CMakeLists.txt"
-CMakeLists_defaulit_file_path="${azure_c_sdk_directory}/default_CMakeLists.txt"
+CMakeLists_default_file_path="${azure_c_sdk_directory}/default_CMakeLists.txt"
 output_folder="/work/output"
 
 if [[ $# == 0 ]]; then
@@ -26,7 +26,7 @@ mkdir ${application_code_path}
 cp -rf ${srcFileFolder}/* ${application_code_path}
 
 # Refresh and configure CMakeLists.txt file
-cp ${CMakeLists_defaulit_file_path} ${CMakeLists_file_path}
+cp ${CMakeLists_default_file_path} ${CMakeLists_file_path}
 echo "add_subdirectory(${application_name})" >> ${CMakeLists_file_path}
 
 # Compile device code with azure-c-sdk
