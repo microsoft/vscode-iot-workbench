@@ -160,7 +160,7 @@ export abstract class ArduinoDeviceBase implements Device {
   abstract get version(): string;
 
   private async writeCppPropertiesFile(
-      boardId: string, type: ScaffoldType, plat: string): Promise<void> {
+      boardId: string, type: ScaffoldType, platform: string): Promise<void> {
     const cppPropertiesFilePath =
         path.join(this.vscodeFolderPath, constants.cppPropertiesFileName);
 
@@ -171,11 +171,11 @@ export abstract class ArduinoDeviceBase implements Device {
     let cppPropertiesTemplateFileName: string;
     let changeRootPath = false;
     let rootPath: string = await IoTWorkbenchSettings.getOs();
-    if (plat === OSPlatform.WIN32) {
+    if (platform === OSPlatform.WIN32) {
       rootPath = path.join(rootPath, 'AppData', 'Local').replace(/\\/g, '\\\\');
       cppPropertiesTemplateFileName = constants.cppPropertiesFileNameWin;
       changeRootPath = true;
-    } else if (plat === OSPlatform.LINUX) {
+    } else if (platform === OSPlatform.LINUX) {
       cppPropertiesTemplateFileName = constants.cppPropertiesFileNameLinux;
       changeRootPath = true;
     } else {
@@ -211,8 +211,8 @@ export abstract class ArduinoDeviceBase implements Device {
 
     // Create c_cpp_properties.json file
     try {
-      const plat = await IoTWorkbenchSettings.getPlatform();
-      await this.writeCppPropertiesFile(board.id, type, plat);
+      const platform = await IoTWorkbenchSettings.getPlatform();
+      await this.writeCppPropertiesFile(board.id, type, platform);
     } catch (error) {
       throw new Error(`Create cpp properties file failed: ${error.message}`);
     }
