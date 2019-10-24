@@ -36,7 +36,7 @@ cd ${cmake_directory} && \
 
 # Clean old binary file
 current_binary_name=`cat ${cmake_directory}/CMakeCache.txt | grep binary_name | cut -d "=" -f2`
-cd ${application_cmake_path} | find . -type f -executable -not -name "${current_binary_name}" | xargs rm
+cd ${application_cmake_path} | find . -type f -executable -not -name "${current_binary_name}" | xargs -r rm
 
 # Copy the compiled files to output folder
 rm -rf ${output_folder} && mkdir ${output_folder}
