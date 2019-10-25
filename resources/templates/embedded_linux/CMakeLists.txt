@@ -18,4 +18,8 @@ include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 add_executable(${binary_name} ${iothub_c_files})
 
 # List the libraries required by the link step
-target_link_libraries(${binary_name} iothub_client)
+target_link_libraries(${binary_name}
+iothub_client_mqtt_transport
+iothub_client
+umqtt
+)
