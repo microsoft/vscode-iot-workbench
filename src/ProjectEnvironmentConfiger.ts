@@ -122,8 +122,7 @@ export class ProjectEnvironmentConfiger {
 
       // If external project, construct as RaspberryPi Device based
       // container iot workbench project
-      const res =
-          await project.constructExternalProjectToIotProject(scaffoldType);
+      const res = await project.ConfigExternalProjectToIotProject(scaffoldType);
       if (!res) {
         return false;
       }
