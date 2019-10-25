@@ -9,6 +9,7 @@ import * as path from 'path';
 
 import {VSCExpress} from 'vscode-express';
 import {DigitalTwinFileNames, DigitalTwinConstants} from './DigitalTwinConstants';
+import {GlobalConstants} from '../constants';
 import {DigitalTwinMetamodelRepositoryClient} from './DigitalTwinApi/DigitalTwinMetamodelRepositoryClient';
 import * as utils from '../utils';
 import * as dtUtils from './Utilities';
