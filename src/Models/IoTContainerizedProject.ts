@@ -6,9 +6,10 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {CancelOperationError} from '../CancelOperationError';
-import {ConfigKey, DevelopEnvironment, EventNames, FileNames, ScaffoldType} from '../constants';
+import {ConfigKey, DevelopEnvironment, EventNames, FileNames, GlobalConstants, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext, TelemetryProperties, TelemetryWorker} from '../telemetry';
+import {channelShowAndAppendLine} from '../utils';
 
 import {ProjectHostType} from './Interfaces/ProjectHostType';
 import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
@@ -158,10 +159,10 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     // Step 2: Write project config into iot workbench project file
     if (await FileUtility.fileExists(
             createTimeScaffoldType, iotworkbenchprojectFile)) {
-      const indentationSpace = 4;
       FileUtility.writeFile(
           createTimeScaffoldType, iotworkbenchprojectFile,
-          JSON.stringify(projectConfig, null, indentationSpace));
+          JSON.stringify(
+              projectConfig, null, GlobalConstants.indentationSpace));
     } else {
       throw new Error(
           `Internal Error. Could not find iot workbench project file.`);
@@ -258,19 +259,32 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
   /**
    * Check if it is an external project.
-   * If external project, construct as RaspberryPi Device based container iot
+   * If external project, configure as RaspberryPi Device based container iot
    * workbench project.
    */
-  async constructExternalProjectToIotProject(scaffoldType: ScaffoldType) {
+  async configExternalProjectToIotProject(scaffoldType: ScaffoldType):
+      Promise<boolean> {
     if (!(vscode.workspace.workspaceFolders &&
           vscode.workspace.workspaceFolders.length > 0)) {
-      return;
+      return false;
     }
     const projectPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
 
     const iotworkbenchprojectFile =
         path.join(projectPath, FileNames.iotworkbenchprojectFileName);
+
+    // Check if cmake project
+    const cmakeFile = path.join(projectPath, FileNames.cmakeFileName);
+    if (!await FileUtility.fileExists(scaffoldType, cmakeFile)) {
+      const message = `Missing ${
+          FileNames.cmakeFileName} to be configured as Embedded Linux project.`;
+      channelShowAndAppendLine(this.channel, message);
+      vscode.window.showWarningMessage(message);
+      return false;
+    }
+
     if (!await FileUtility.fileExists(scaffoldType, iotworkbenchprojectFile)) {
+      // This is an external project since no iot workbench project file found.
       // Generate iot workbench project file
       await this.generateOrUpdateIotWorkbenchProjectFile(
           scaffoldType, projectPath);
@@ -285,10 +299,10 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
         raspberryPiDeviceModule.RaspberryPiDevice.boardId;
 
     // Step 2: Write project config into iot workbench project file
-    const indentationSpace = 4;
     await FileUtility.writeFile(
         scaffoldType, iotworkbenchprojectFile,
-        JSON.stringify(projectConfigJson, null, indentationSpace));
-    return;
+        JSON.stringify(
+            projectConfigJson, null, GlobalConstants.indentationSpace));
+    return true;
   }
 }

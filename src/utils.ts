@@ -519,7 +519,7 @@ export async function handleExternalProject(
 
     // If external project, construct as RaspberryPi Device based
     // container iot workbench project
-    await project.constructExternalProjectToIotProject(scaffoldType);
+    await project.configExternalProjectToIotProject(scaffoldType);
 
     let res = await project.load(scaffoldType);
     if (!res) {

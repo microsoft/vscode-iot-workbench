@@ -9,6 +9,7 @@ import * as path from 'path';
 
 import {VSCExpress} from 'vscode-express';
 import {DigitalTwinFileNames, DigitalTwinConstants} from './DigitalTwinConstants';
+import {GlobalConstants} from '../constants';
 import {DigitalTwinMetamodelRepositoryClient} from './DigitalTwinApi/DigitalTwinMetamodelRepositoryClient';
 import * as utils from '../utils';
 import * as dtUtils from './Utilities';
@@ -481,7 +482,9 @@ export class DeviceModelOperator {
 
           fs.writeFileSync(
               path.join(rootPath, candidateName),
-              JSON.stringify(fileMetaData.content, null, 4));
+              JSON.stringify(
+                  fileMetaData.content, null,
+                  GlobalConstants.indentationSpace));
           await vscode.window.showTextDocument(
               vscode.Uri.file(path.join(rootPath, candidateName)));
           const message = `${DigitalTwinConstants.dtPrefix} Downloading ${

@@ -14,7 +14,7 @@ import extractzip = require('extract-zip');
 
 import * as utils from '../utils';
 import * as dtUtils from './Utilities';
-import {FileNames, ConfigKey} from '../constants';
+import {FileNames, ConfigKey, GlobalConstants} from '../constants';
 import {TelemetryContext} from '../telemetry';
 import {DigitalTwinConstants, DigitalTwinFileNames} from './DigitalTwinConstants';
 import {CodeGenProjectType, DeviceConnectionType, CodeGenLanguage, DeviceSdkReferenceType} from './DigitalTwinCodeGen/Interfaces/CodeGenerator';
@@ -571,13 +571,17 @@ export class CodeGeneratorCore {
                       capabilityModelRelativePath);
           codeGenExecutions.codeGenExecutionItems.push(codeGenExecutionInfo);
           fs.writeFileSync(
-              codeGenConfigPath, JSON.stringify(codeGenExecutions, null, 4));
+              codeGenConfigPath,
+              JSON.stringify(
+                  codeGenExecutions, null, GlobalConstants.indentationSpace));
         }
       } else {
         const codeGenExecutions:
             CodeGenExecutions = {codeGenExecutionItems: [codeGenExecutionInfo]};
         fs.writeFileSync(
-            codeGenConfigPath, JSON.stringify(codeGenExecutions, null, 4));
+            codeGenConfigPath,
+            JSON.stringify(
+                codeGenExecutions, null, GlobalConstants.indentationSpace));
       }
     } catch (error) {
       // save config failure should not impact code gen.
@@ -608,7 +612,9 @@ export class CodeGeneratorCore {
         if (fileMetaData) {
           fs.writeFileSync(
               path.join(targetFolder, fileName),
-              JSON.stringify(fileMetaData.content, null, 4));
+              JSON.stringify(
+                  fileMetaData.content, null,
+                  GlobalConstants.indentationSpace));
           const message = `${DigitalTwinConstants.dtPrefix} Interface '${
               urnId}' (${
               fileName}) has been successfully downloaded from Company repository.`;
@@ -631,7 +637,9 @@ export class CodeGeneratorCore {
         if (fileMetaData) {
           fs.writeFileSync(
               path.join(targetFolder, fileName),
-              JSON.stringify(fileMetaData.content, null, 4));
+              JSON.stringify(
+                  fileMetaData.content, null,
+                  GlobalConstants.indentationSpace));
           const message = `${DigitalTwinConstants.dtPrefix} Interface '${
               urnId}' (${
               fileName}) has been successfully downloaded from Public repository.`;

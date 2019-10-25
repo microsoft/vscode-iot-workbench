@@ -65,6 +65,7 @@ export class FileNames {
   static readonly platformListFileName = 'platformlist.json';
   static readonly resourcesFolderName = 'resources';
   static readonly iotworkbenchprojectFileName = '.iotworkbenchproject';
+  static readonly cmakeFileName = 'CMakeLists.txt';
   static readonly settingsJsonFileName = 'settings.json';
   static readonly codeGenOptionsFileName = 'codeGenOptions.json';
   static readonly devcontainerFolderName = '.devcontainer';
@@ -101,6 +102,7 @@ export class AzureComponentsStorage {
 
 export class GlobalConstants {
   static readonly extensionId = 'vsciot-vscode.vscode-iot-workbench';
+  static readonly indentationSpace = 4;
 }
 
 export class DependentExtensions {

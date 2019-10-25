@@ -14,7 +14,7 @@ import {Provisionable} from './Interfaces/Provisionable';
 import {Deployable} from './Interfaces/Deployable';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, AzureFunctionsLanguage, AzureComponentsStorage, DependentExtensions, ScaffoldType} from '../constants';
+import {ConfigKey, AzureFunctionsLanguage, AzureComponentsStorage, DependentExtensions, ScaffoldType, GlobalConstants} from '../constants';
 
 import {ServiceClientCredentials} from 'ms-rest';
 import {AzureAccount, AzureResourceFilter} from '../azure-account.api';
@@ -357,7 +357,8 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
       };
       azureConfigs.componentConfigs.push(newAzureFunctionsConfig);
       fs.writeFileSync(
-          azureConfigFilePath, JSON.stringify(azureConfigs, null, 4));
+          azureConfigFilePath,
+          JSON.stringify(azureConfigs, null, GlobalConstants.indentationSpace));
     }
   }
 }
