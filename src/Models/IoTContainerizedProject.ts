@@ -262,7 +262,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
    * If external project, configure as RaspberryPi Device based container iot
    * workbench project.
    */
-  async ConfigExternalProjectToIotProject(scaffoldType: ScaffoldType):
+  async configExternalProjectToIotProject(scaffoldType: ScaffoldType):
       Promise<boolean> {
     if (!(vscode.workspace.workspaceFolders &&
           vscode.workspace.workspaceFolders.length > 0)) {
