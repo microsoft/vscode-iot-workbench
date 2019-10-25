@@ -9,6 +9,7 @@ import {CancelOperationError} from '../CancelOperationError';
 import {ConfigKey, DevelopEnvironment, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext, TelemetryProperties, TelemetryWorker} from '../telemetry';
+import {channelShowAndAppendLine} from '../utils';
 
 import {ProjectHostType} from './Interfaces/ProjectHostType';
 import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
@@ -261,16 +262,29 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
    * If external project, construct as RaspberryPi Device based container iot
    * workbench project.
    */
-  async constructExternalProjectToIotProject(scaffoldType: ScaffoldType) {
+  async constructExternalProjectToIotProject(scaffoldType: ScaffoldType):
+      Promise<boolean> {
     if (!(vscode.workspace.workspaceFolders &&
           vscode.workspace.workspaceFolders.length > 0)) {
-      return;
+      return false;
     }
     const projectPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
 
     const iotworkbenchprojectFile =
         path.join(projectPath, FileNames.iotworkbenchprojectFileName);
+
+    // Check if cmake project
+    const cmakeFile = path.join(projectPath, FileNames.cmakeFileName);
+    if (!await FileUtility.fileExists(scaffoldType, cmakeFile)) {
+      const message = `Missing ${
+          FileNames.cmakeFileName} to be configured as Embedded Linux project.`;
+      channelShowAndAppendLine(this.channel, message);
+      vscode.window.showWarningMessage(message);
+      return false;
+    }
+
     if (!await FileUtility.fileExists(scaffoldType, iotworkbenchprojectFile)) {
+      // This is an external project since no iot workbench project file found.
       // Generate iot workbench project file
       await this.generateOrUpdateIotWorkbenchProjectFile(
           scaffoldType, projectPath);
@@ -289,6 +303,6 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     await FileUtility.writeFile(
         scaffoldType, iotworkbenchprojectFile,
         JSON.stringify(projectConfigJson, null, indentationSpace));
-    return;
+    return true;
   }
 }

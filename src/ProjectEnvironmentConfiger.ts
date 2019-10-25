@@ -122,8 +122,11 @@ export class ProjectEnvironmentConfiger {
 
       // If external project, construct as RaspberryPi Device based
       // container iot workbench project
-      await project.constructExternalProjectToIotProject(scaffoldType);
-
+      const res =
+          await project.constructExternalProjectToIotProject(scaffoldType);
+      if (!res) {
+        return false;
+      }
     } else if (platform === PlatformType.Arduino) {
       telemetryContext.properties.projectHostType = 'Workspace';
       project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(

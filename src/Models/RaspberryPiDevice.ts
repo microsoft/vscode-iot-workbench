@@ -6,7 +6,7 @@ import * as vscode from 'vscode';
 import * as sdk from 'vscode-iot-device-cube-sdk';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, OperationType, ScaffoldType} from '../constants';
+import {ConfigKey, FileNames, OperationType, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext} from '../telemetry';
 import {askAndOpenInRemote, channelShowAndAppendLine, executeCommand} from '../utils';
@@ -44,7 +44,8 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
 
   private async getBinaryFileName(): Promise<string|undefined> {
     // Parse binary name from CMakeLists.txt file
-    const cmakeFilePath = path.join(this.projectFolder, 'CMakeLists.txt');
+    const cmakeFilePath =
+        path.join(this.projectFolder, FileNames.cmakeFileName);
     if (!await FileUtility.fileExists(ScaffoldType.Workspace, cmakeFilePath)) {
       return;
     }
