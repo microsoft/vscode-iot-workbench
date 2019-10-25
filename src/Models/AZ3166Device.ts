@@ -724,7 +724,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
     if (!fs.existsSync(arduinoPackagePath)) {
       throw new Error(
-          'Unable to locate Arduino IDE. Please install it from https://www.arduino.cc/en/main/software and configure the path in User Settings. Restart VS Code to apply to changes.');
+          'Unable to locate Arduino IDE. Please install it from https://www.arduino.cc/en/main/software and use "Arduino: Board Manager" to install your device packages. Restart VS Code to apply to changes.');
     }
 
     const files = fs.readdirSync(arduinoPackagePath);
