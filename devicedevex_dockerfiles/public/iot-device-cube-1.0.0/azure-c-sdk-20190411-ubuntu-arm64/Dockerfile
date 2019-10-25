@@ -1,6 +1,6 @@
 # devicedevex.azurecr.io/public/iot-device-cube:1.0.0-azure-c-sdk-20190411-ubuntu-arm64
 # Usage example:
-# docker build -t devicedevex.azurecr.io/public/iot-device-cube:1.0.0-azure-c-sdk-20190411-ubuntu-arm32 . --build-arg base_image_tag=1.0.0-ubuntu-arm32
+# docker build -t devicedevex.azurecr.io/public/iot-device-cube:1.0.0-azure-c-sdk-20190411-ubuntu-arm64 . --build-arg base_image_tag=1.0.0-ubuntu-arm64
 ARG base_image_tag=1.0.0-ubuntu-arm64
 FROM devicedevex.azurecr.io/internal/iot-device-cube:${base_image_tag}
 
