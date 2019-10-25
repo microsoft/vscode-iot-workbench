@@ -16,14 +16,14 @@
       "language": "ANSI C",
       "type": "CMakeWindows",
       "name": "CMake Project on Windows",
-      "detail": "Generate CMake project can be built with Visual Studio MSBuild.",
+      "detail": "Generate CMake project can be built with MSVC on Windows.",
       "enabled": true
     },
     {
       "language": "ANSI C",
       "type": "CMakeLinux",
       "name": "CMake Project on Linux",
-      "detail": "Generate CMake project can be built with gcc.",
+      "detail": "Generate CMake project can be built with GCC on Linux.",
       "enabled": true
     },
     {
