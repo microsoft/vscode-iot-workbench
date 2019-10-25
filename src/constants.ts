@@ -102,6 +102,7 @@ export class AzureComponentsStorage {
 
 export class GlobalConstants {
   static readonly extensionId = 'vsciot-vscode.vscode-iot-workbench';
+  static readonly indentationSpace = 4;
 }
 
 export class DependentExtensions {

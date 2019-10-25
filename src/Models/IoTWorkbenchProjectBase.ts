@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {CancelOperationError} from '../CancelOperationError';
-import {ConfigKey, FileNames, ScaffoldType} from '../constants';
+import {ConfigKey, FileNames, GlobalConstants, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext} from '../telemetry';
 import * as utils from '../utils';
@@ -338,10 +338,10 @@ export abstract class IoTWorkbenchProjectBase {
       const workbenchVersion = '1.0.0';
       projectConfig[`${ConfigKey.workbenchVersion}`] = workbenchVersion;
 
-      const indentationSpace = 4;
       await FileUtility.writeFile(
           type, iotworkbenchprojectFilePath,
-          JSON.stringify(projectConfig, null, indentationSpace));
+          JSON.stringify(
+              projectConfig, null, GlobalConstants.indentationSpace));
 
     } catch (error) {
       throw new Error(`Generate or update ${

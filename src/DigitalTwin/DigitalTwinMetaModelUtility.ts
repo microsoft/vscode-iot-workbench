@@ -2,7 +2,7 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {FileNames} from '../constants';
+import {FileNames, GlobalConstants} from '../constants';
 
 import {DigitalTwinFileNames} from './DigitalTwinConstants';
 import {DigitalTwinMetaModelGraph} from './DigitalTwinMetaModelGraph';
@@ -36,7 +36,8 @@ class BlobService {
     const etagObjCacheFilePath = this.context.asAbsolutePath(path.join(
         FileNames.cacheFolderName, DigitalTwinFileNames.etagCacheFileName));
     fs.writeFileSync(
-        etagObjCacheFilePath, JSON.stringify(etagObjCache, null, 2));
+        etagObjCacheFilePath,
+        JSON.stringify(etagObjCache, null, GlobalConstants.indentationSpace));
   }
   private getEtag(uri: string) {
     const etagObjCache = this.getEtagObjCache();

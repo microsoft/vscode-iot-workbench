@@ -14,7 +14,7 @@ import {ConfigHandler} from '../configHandler';
 import {getExtension} from './Apis';
 import {ExtensionName} from './Interfaces/Api';
 import {TelemetryWorker, TelemetryContext} from '../telemetry';
-import {EventNames} from '../constants';
+import {EventNames, GlobalConstants} from '../constants';
 
 export interface ARMParameters {
   [key: string]: {value: string|number|boolean|null};
@@ -533,7 +533,8 @@ export class AzureUtility {
         clearInterval(deployPending);
         channelShowAndAppendLine(AzureUtility._channel, '.');
         channelShowAndAppendLine(
-            AzureUtility._channel, JSON.stringify(deployment, null, 4));
+            AzureUtility._channel,
+            JSON.stringify(deployment, null, GlobalConstants.indentationSpace));
       }
       return deployment;
     } catch (error) {

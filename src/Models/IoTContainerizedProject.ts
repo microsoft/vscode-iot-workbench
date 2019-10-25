@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {CancelOperationError} from '../CancelOperationError';
-import {ConfigKey, DevelopEnvironment, EventNames, FileNames, ScaffoldType} from '../constants';
+import {ConfigKey, DevelopEnvironment, EventNames, FileNames, GlobalConstants, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext, TelemetryProperties, TelemetryWorker} from '../telemetry';
 import {channelShowAndAppendLine} from '../utils';
@@ -159,10 +159,10 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     // Step 2: Write project config into iot workbench project file
     if (await FileUtility.fileExists(
             createTimeScaffoldType, iotworkbenchprojectFile)) {
-      const indentationSpace = 4;
       FileUtility.writeFile(
           createTimeScaffoldType, iotworkbenchprojectFile,
-          JSON.stringify(projectConfig, null, indentationSpace));
+          JSON.stringify(
+              projectConfig, null, GlobalConstants.indentationSpace));
     } else {
       throw new Error(
           `Internal Error. Could not find iot workbench project file.`);
@@ -299,10 +299,10 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
         raspberryPiDeviceModule.RaspberryPiDevice.boardId;
 
     // Step 2: Write project config into iot workbench project file
-    const indentationSpace = 4;
     await FileUtility.writeFile(
         scaffoldType, iotworkbenchprojectFile,
-        JSON.stringify(projectConfigJson, null, indentationSpace));
+        JSON.stringify(
+            projectConfigJson, null, GlobalConstants.indentationSpace));
     return true;
   }
 }

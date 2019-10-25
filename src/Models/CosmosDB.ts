@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import request = require('request-promise');
 import rq = require('request');
 
-import {AzureComponentsStorage, FileNames, ScaffoldType} from '../constants';
+import {AzureComponentsStorage, FileNames, ScaffoldType, GlobalConstants} from '../constants';
 
 import {AzureComponentConfig, AzureConfigFileHandler, AzureConfigs, ComponentInfo, Dependency, DependencyConfig, DependencyType} from './AzureComponentConfig';
 import {ARMTemplate, AzureUtility} from './AzureUtility';
@@ -139,7 +139,9 @@ export class CosmosDB implements Component, Provisionable {
         throw new Error('Provision Cosmos DB failed.');
       }
       channelShowAndAppendLine(
-          this.channel, JSON.stringify(cosmosDBDeploy, null, 4));
+          this.channel,
+          JSON.stringify(
+              cosmosDBDeploy, null, GlobalConstants.indentationSpace));
 
       for (const dependency of this.dependencies) {
         const componentConfig = await this.azureConfigHandler.getComponentById(
@@ -166,7 +168,9 @@ export class CosmosDB implements Component, Provisionable {
       const cosmosDbDetail = this.getCosmosDbByNameFromCache(cosmosDbName);
       if (cosmosDbDetail) {
         channelShowAndAppendLine(
-            this.channel, JSON.stringify(cosmosDbDetail, null, 4));
+            this.channel,
+            JSON.stringify(
+                cosmosDbDetail, null, GlobalConstants.indentationSpace));
       }
       cosmosDbKey = await this.getCosmosDbKey(cosmosDbName);
     }
@@ -317,7 +321,9 @@ export class CosmosDB implements Component, Provisionable {
     });
 
     if (this.channel) {
-      channelShowAndAppendLine(this.channel, JSON.stringify(apiRes, null, 2));
+      channelShowAndAppendLine(
+          this.channel,
+          JSON.stringify(apiRes, null, GlobalConstants.indentationSpace));
     }
     return apiRes;
   }

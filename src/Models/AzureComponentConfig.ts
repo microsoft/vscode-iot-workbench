@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import {AzureComponentsStorage, ScaffoldType} from '../constants';
+import {AzureComponentsStorage, GlobalConstants, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 
 import {Component} from './Interfaces/Component';
@@ -64,7 +64,8 @@ export class AzureConfigFileHandler {
 
     if (!await FileUtility.fileExists(type, azureConfigFilePath)) {
       await FileUtility.writeFile(
-          type, azureConfigFilePath, JSON.stringify(azureConfigs, null, 4));
+          type, azureConfigFilePath,
+          JSON.stringify(azureConfigs, null, GlobalConstants.indentationSpace));
     }
   }
 
@@ -177,7 +178,8 @@ export class AzureConfigFileHandler {
           JSON.parse(azureConfigContent as string) as AzureConfigs;
       azureConfigs.componentConfigs.push(component);
       await FileUtility.writeFile(
-          type, this.configFilePath, JSON.stringify(azureConfigs, null, 4));
+          type, this.configFilePath,
+          JSON.stringify(azureConfigs, null, GlobalConstants.indentationSpace));
       return azureConfigs;
     } catch (error) {
       throw new Error('Invalid azure components config file.');
@@ -197,7 +199,8 @@ export class AzureConfigFileHandler {
       }
       component.componentInfo = componentInfo;
       await FileUtility.writeFile(
-          type, this.configFilePath, JSON.stringify(azureConfigs, null, 4));
+          type, this.configFilePath,
+          JSON.stringify(azureConfigs, null, GlobalConstants.indentationSpace));
       return azureConfigs;
     } catch (error) {
       throw new Error('Invalid azure components config file.');
