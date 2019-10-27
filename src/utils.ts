@@ -574,9 +574,9 @@ export async function handleIncorrectlyOpenedIoTWorkspaceProject(
 
 /**
  * Construct and load iot project.
- * If is at extension load time, just try to load project, ignore error and
- * return. If it is a workspace project not properly opened, prompt to open
- * workspace. If it is properly opened, load project
+ * @param extensionLoadTime If true, just try to load project, ignore error and
+ * return. If false, for worksapce project, prompt to
+ * open as workspace if not properly open. Load iot project.
  */
 export async function constructAndLoadIoTProject(
     context: vscode.ExtensionContext, channel: vscode.OutputChannel,
