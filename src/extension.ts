@@ -403,7 +403,7 @@ export async function activate(context: vscode.ExtensionContext) {
   // Load iot Project here and do not ask to new an iot project when no iot
   // project open since no command has been triggered yet.
   await constructAndLoadIoTProject(
-      context, outputChannel, telemetryContext, false);
+      context, outputChannel, telemetryContext, true);
   const deviceOperator = new DeviceOperator();
   const azureOperator = new AzureOperator();
   const exampleExplorer = new exampleExplorerModule.ExampleExplorer();
