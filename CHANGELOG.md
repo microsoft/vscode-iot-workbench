@@ -2,6 +2,27 @@
 
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
 
+## Version 0.10.16
+
+- Release data: October 28, 2019
+
+### Fixed
+
+- Resolve compatibility issue with VS Code 1.39.
+- Add c_cpp_properties.json for iot workbench example project.
+
+### Added
+
+- Support build with Vcpkg for PnP generated CMake project.
+- Include source code of Azure IoT Device C SDK as sub-directory of the generated project.
+- Update PnP CodeGen flow to allow configuring project template and IoT Device SDK reference type.
+- Support configuration of device development environment for Arduino / Embedded Linux project.
+- Support configuring an external cmake project to be an Embedded Linux IoT workbench project.
+- Support uploading entire application output folder to target device.
+- Support installing external libraries in development environment container.
+- Support rename executable file name.
+- Update docker images packaged with Azure IoT C SDK with Plug and Play feature.
+
 ## Version 0.10.15
 
 - Release data: September 26, 2019
@@ -32,17 +53,17 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 
 We are excited to announce Azure IoT Device Workbench extension for VS Code support IoT Plug and Play Preview that enables:
 
-* Create IoT Plug and Play *device capability model* and *interface* with sample schema, author with full IntelliSense features to support [Digital Twin Definition Language (DTDL) ](https://aka.ms/DTDL).
-* Interact with IoT Plug an Play public model repository and company model repository, easy to list, download and publish *device capability model* and *interface*.
-* Develop IoT hardware products more easily by generating skeleton ANSI C code and CMake projects from a *device capability model*.
+- Create IoT Plug and Play *device capability model* and *interface* with sample schema, author with full IntelliSense features to support [Digital Twin Definition Language (DTDL) ](https://aka.ms/DTDL).
+- Interact with IoT Plug an Play public model repository and company model repository, easy to list, download and publish *device capability model* and *interface*.
+- Develop IoT hardware products more easily by generating skeleton ANSI C code and CMake projects from a *device capability model*.
 
 Please check below topics for more information:
 
-* [What is IoT Plug and Play](https://docs.microsoft.com/azure/iot-pnp/overview-iot-plug-and-play) 
-* [Quickstart: Use a device capability model to create an IoT Plug and Play device](https://docs.microsoft.com/azure/iot-pnp/quickstart-create-pnp-device)
-* [Build an IoT Plug and Play Preview device that's ready for certification](https://docs.microsoft.com/azure/iot-pnp/tutorial-build-device-certification)
-* [Use Azure IoT Device Workbench extension in Visual Studio Code](https://docs.microsoft.com/azure/iot-pnp/howto-use-iot-device-workbench)
-* [Connect an MXChip IoT DevKit device to your Azure IoT Central application via IoT Plug and Play](https://docs.microsoft.com/azure/iot-central/howto-connect-devkit-pnp)
+- [What is IoT Plug and Play](https://docs.microsoft.com/azure/iot-pnp/overview-iot-plug-and-play)
+- [Quickstart: Use a device capability model to create an IoT Plug and Play device](https://docs.microsoft.com/azure/iot-pnp/quickstart-create-pnp-device)
+- [Build an IoT Plug and Play Preview device that's ready for certification](https://docs.microsoft.com/azure/iot-pnp/tutorial-build-device-certification)
+- [Use Azure IoT Device Workbench extension in Visual Studio Code](https://docs.microsoft.com/azure/iot-pnp/howto-use-iot-device-workbench)
+- [Connect an MXChip IoT DevKit device to your Azure IoT Central application via IoT Plug and Play](https://docs.microsoft.com/azure/iot-central/howto-connect-devkit-pnp)
 
 ## Version 0.10.10
 
