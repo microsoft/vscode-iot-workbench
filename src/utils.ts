@@ -574,13 +574,13 @@ export async function handleIncorrectlyOpenedIoTWorkspaceProject(
 
 /**
  * Construct and load iot project.
- * @param extensionLoadTime If true, just try to load project, ignore error and
- * return. If false, for worksapce project, prompt to
- * open as workspace if not properly open. Load iot project.
+ * If this function is triggered by extension load, load project and ignore any
+ * error. If this function is triggered by command execution, load project,
+ * check project validation and throw error if any.
  */
 export async function constructAndLoadIoTProject(
     context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-    telemetryContext: TelemetryContext, extensionLoadTime = false) {
+    telemetryContext: TelemetryContext, isTriggeredWhenExtensionLoad = false) {
   let projectHostType;
   const scaffoldType = ScaffoldType.Workspace;
   if (vscode.workspace.workspaceFolders &&
@@ -597,7 +597,7 @@ export async function constructAndLoadIoTProject(
           context, channel, telemetryContext);
     }
 
-    if (extensionLoadTime) {
+    if (isTriggeredWhenExtensionLoad) {
       if (iotProject) {
         try {
           await iotProject.load(scaffoldType);
@@ -611,8 +611,12 @@ export async function constructAndLoadIoTProject(
     // IoT Workspace Project improperly open as folder,
     // or external project.
     if (!iotProject) {
+      // If current folder is an IoT Workspace Project but not open correctly,
+      // ask to open properly.
       const isIncorrectlyOpenedIoTWorkspaceProject =
           await handleIncorrectlyOpenedIoTWorkspaceProject(telemetryContext);
+
+      // If external project
       if (!isIncorrectlyOpenedIoTWorkspaceProject) {
         try {
           await handleExternalProject(
