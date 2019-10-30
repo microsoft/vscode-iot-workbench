@@ -24,14 +24,14 @@ Install and configure Docker for your operating system
 
 1. Follow the official install instructions for Docker CE/EE for your distribution. If you are using Docker Compose, follow the Docker Compose directions as well. 
 
-1. Add your user to the docker group by using a terminal to run:
+2. Add your user to the docker group by using a terminal to run:
   ```bash
   sudo usermod -aG docker $USER 
   ```
 
-1. Sign out and back in again so your changes take effect. 
+3. Sign out and back in again so your changes take effect. 
 
-1. Check if Docker on your Linux use proper DNS. If output looks like below, there is a problem resolving DNS. Check FAQ: [Docker Setup on Linux](https://development.robinwinslow.uk/2016/06/23/fix-docker-networking-dns/) to fix the problem first. 
+4. Check if Docker on your Linux use proper DNS. If output looks like below, there is a problem resolving DNS. Check FAQ: [Docker Setup on Linux](https://development.robinwinslow.uk/2016/06/23/fix-docker-networking-dns/) to fix the problem first. 
   ```bash
   $ docker run busybox nslookup google.com 
   
