@@ -1,0 +1,21 @@
+name: Pickup issues that needs attention
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+
+jobs:
+  stale:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: blackchoey/stale@releases/v1.2
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        stale-issue-message: 'Collaborators, please take a look at this issue and provide updates for it.'
+        stale-issue-label: 'need attention'
+        days-before-stale: 3
+        last-updated-user-type: 'non-collaborator'
+        days-before-close: 999
+        operations-per-run: 150
