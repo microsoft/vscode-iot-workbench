@@ -19,3 +19,4 @@ jobs:
         only-labels: 'need more info'
         last-updated-user-type: 'collaborator'
         days-before-close: 3
+        operations-per-run: 150
