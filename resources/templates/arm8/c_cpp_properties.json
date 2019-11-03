@@ -4,13 +4,15 @@
             "name": "Linux",
             "includePath": [
                 "${CROSS_ROOT}/**",
-                "/work/azure-iot-sdk-c/**",
+                "/work/vcpkg/installed/aarch64-linux-custom/include/**",
+                "/work/vcpkg/installed/aarch64-linux-custom/include/azureiot/**",
                 "${workspaceFolder}/**"
             ],
             "defines": [],
             "cStandard": "c11",
             "cppStandard": "c++17",
-            "intelliSenseMode": "gcc-x64"
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "${CC}"
         }
     ],
     "version": 4
