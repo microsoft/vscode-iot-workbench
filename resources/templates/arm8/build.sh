@@ -4,5 +4,5 @@ set -x
 rm -rf cmake
 mkdir cmake
 cd cmake
-cmake .. -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} -DCMAKE_TOOLCHAIN_FILE=/work/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=aarch64-linux-custom -Duse_prov_client=ON -Dhsm_type_symm_key:BOOL=ON
+cmake .. -DCMAKE_TOOLCHAIN_FILE=/work/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=aarch64-linux-custom -Duse_prov_client=ON -Dhsm_type_symm_key:BOOL=ON
 cmake --build .
