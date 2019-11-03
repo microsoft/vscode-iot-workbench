@@ -10,7 +10,7 @@ set(iothub_c_files
 # Set up the include and library paths
 include_directories(.)
 
-add_executable(${binary_name} ${iothub_c_files})
+add_executable(${project_name} ${iothub_c_files})
 
 # Find azure_iot_sdks Vcpkg package
 find_package(azure_iot_sdks REQUIRED)
@@ -19,7 +19,7 @@ find_package(OpenSSL REQUIRED)
 find_library(CURL NAMES curl-d curl)
 
 # List the libraries required by the link step
-target_link_libraries(${binary_name}
+target_link_libraries(${project_name}
 parson
 iothub_client_mqtt_transport
 iothub_client
