@@ -107,7 +107,7 @@ export abstract class ContainerDeviceBase implements Device {
     for (const fileInfo of templateFilesInfo) {
       // Replace binary name in CMakeLists.txt to project name
       if (fileInfo.fileName === DigitalTwinConstants.cmakeListsFileName) {
-        const pattern = '${project_name}';
+        const pattern = /{project_name}/g;
         const projectName = path.basename(projectPath);
         if (fileInfo.fileContent) {
           fileInfo.fileContent =
