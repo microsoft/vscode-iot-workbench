@@ -125,7 +125,9 @@ export abstract class ArduinoDeviceBase implements Device {
   async load(): Promise<boolean> {
     const deviceFolderPath = this.deviceFolder;
 
-    if (!fs.existsSync(deviceFolderPath)) {
+    const loadTimeScaffoldType = ScaffoldType.Workspace;
+    if (!await FileUtility.directoryExists(
+            loadTimeScaffoldType, deviceFolderPath)) {
       throw new Error('Unable to find the device folder inside the project.');
     }
 
@@ -133,7 +135,7 @@ export abstract class ArduinoDeviceBase implements Device {
       throw new Error('Unable to find the board in the config file.');
     }
 
-    await this.generateCppPropertiesFile(ScaffoldType.Workspace, this.board);
+    await this.generateCppPropertiesFile(loadTimeScaffoldType, this.board);
     return true;
   }
 
