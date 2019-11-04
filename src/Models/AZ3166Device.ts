@@ -114,21 +114,6 @@ export class AZ3166Device extends ArduinoDeviceBase {
     return super.checkPrerequisites();
   }
 
-  async load(): Promise<boolean> {
-    const deviceFolderPath = this.deviceFolder;
-
-    if (!fs.existsSync(deviceFolderPath)) {
-      throw new Error('Unable to find the device folder inside the project.');
-    }
-
-    if (!this.board) {
-      throw new Error('Unable to find the board in the config file.');
-    }
-
-    await this.generateCppPropertiesFile(ScaffoldType.Workspace, this.board);
-    return true;
-  }
-
   async create(): Promise<boolean> {
     return this.createCore(this.board, this.templateFiles);
   }
