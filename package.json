@@ -183,10 +183,6 @@
           "IoTWorkbench.BoardId": {
             "type": "string"
           },
-          "IoTWorkbench.ShownHelpPage": {
-            "type": "boolean",
-            "default": false
-          },
           "IoTWorkbench.IoTPnPCodeGenVersion": {
             "type": "string"
           },

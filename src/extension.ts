@@ -602,31 +602,27 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const helpProvider = new VSCExpress(context, 'views');
 
-  const helpInit =
-      vscode.commands.registerCommand('iotworkbench.help', async () => {
-        const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
+  const helpInit = vscode.commands.registerCommand('iotworkbench.help', async () => {
+    const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
 
-        if (boardId) {
-          const boardListFolderPath = context.asAbsolutePath(path.join(
-              FileNames.resourcesFolderName, FileNames.templatesFolderName));
-          const boardProvider = new BoardProvider(boardListFolderPath);
-          const board = boardProvider.find({id: boardId});
+    if (boardId) {
+      const boardListFolderPath = context.asAbsolutePath(path.join(
+          FileNames.resourcesFolderName, FileNames.templatesFolderName));
+      const boardProvider = new BoardProvider(boardListFolderPath);
+      const board = boardProvider.find({id: boardId});
 
-          if (board && board.helpUrl) {
-            await vscode.commands.executeCommand(
-                'vscode.open', vscode.Uri.parse(board.helpUrl));
-            return;
-          }
-        }
-        helpProvider.open(
-            'help.html', 'Welcome - Azure IoT Device Workbench',
-            vscode.ViewColumn.One, {
-              enableScripts: true,
-              enableCommandUris: true,
-              retainContextWhenHidden: true
-            });
+      if (board && board.helpUrl) {
+        await vscode.commands.executeCommand(
+            'vscode.open', vscode.Uri.parse(board.helpUrl));
         return;
-      });
+      }
+    }
+    await vscode.commands.executeCommand(
+        'vscode.open',
+        vscode.Uri.parse(
+            'https://github.com/microsoft/vscode-iot-workbench/blob/master/README.md'));
+    return;
+  });
 
   const workbenchPath =
       vscode.commands.registerCommand('iotworkbench.workbench', async () => {
@@ -669,24 +665,6 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(httpRequest);
   context.subscriptions.push(getDisableAutoPopupLandingPage);
   context.subscriptions.push(setDisableAutoPopupLandingPage);
-
-  const shownHelpPage = ConfigHandler.get<boolean>(ConfigKey.shownHelpPage);
-  if (!shownHelpPage) {
-    const iotTools =
-        vscode.extensions.getExtension('vsciot-vscode.azure-iot-tools');
-    // If Azure IoT Tools has been installed, do not open help page
-    if (iotTools) {
-      return;
-    }
-    // Do not execute help command here
-    // Help command may open board help link
-    helpProvider.open(
-        'help.html', 'Welcome - Azure IoT Device Workbench',
-        vscode.ViewColumn.One);
-
-    ConfigHandler.update(
-        ConfigKey.shownHelpPage, true, vscode.ConfigurationTarget.Global);
-  }
 
   // IoT Plug and Play commands
   vscode.commands.registerCommand(
