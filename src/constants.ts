@@ -74,7 +74,7 @@ export class FileNames {
   static readonly iotworkbenchTempFolder = '.iotworkbenchtemp';
   static readonly workspaceExtensionName = '.code-workspace';
   static readonly cacheFolderName = 'cache';
-  static readonly outputPathName = '.build';
+  static readonly outputPathName = 'cmake';
   static readonly templatesFolderName = 'templates';
   static readonly templateFiles = 'templatefiles.json';
 }
