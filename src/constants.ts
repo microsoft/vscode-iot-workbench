@@ -11,7 +11,6 @@ export class ConfigKey {
   static readonly functionPath = 'FunctionPath';
   static readonly boardId = 'BoardId';
   static readonly asaPath = 'StreamAnalyticsPath';
-  static readonly shownHelpPage = 'ShownHelpPage';
   static readonly codeGeneratorVersion = 'IoTPnPCodeGenVersion';
   static readonly modelRepositoryKeyName = 'IoTPnPModelRepositoryKey';
   static readonly iotPnPPublicRepositoryUrl = 'IoTPnPPublicRepositoryUrl';
