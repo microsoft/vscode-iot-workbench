@@ -1,5 +1,4 @@
 # devicedevex.azurecr.io/internal/iot-device-cube:1.0.0-ubuntu-cross-toolchain-arm32
-# devicedevex.azurecr.io/internal/iot-device-cube:1.0.0-ubuntu-cross-toolchain-arm64
 # Usage example:
 # docker build -t devicedevex.azurecr.io/internal/iot-device-cube:1.0.0-ubuntu-cross-toolchain-arm32 .
 FROM ubuntu:18.04

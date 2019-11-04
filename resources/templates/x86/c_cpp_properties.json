@@ -4,7 +4,8 @@
             "name": "Linux",
             "includePath": [
                 "${CROSS_ROOT}/**",
-                "/work/azure-iot-sdk-c/**",
+                "/work/vcpkg/installed/x64-linux/include/**",
+                "/work/vcpkg/installed/x64-linux/include/azureiot/**",
                 "${workspaceFolder}/**"
             ],
             "defines": [],
