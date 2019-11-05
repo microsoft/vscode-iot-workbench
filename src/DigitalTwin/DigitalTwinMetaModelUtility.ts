@@ -99,7 +99,6 @@ export interface DigitalTwinMetaModelContext {
 }
 
 export class DigitalTwinMetaModelUtility {
-
   constructor(private context: vscode.ExtensionContext) {}
   async getGraph() {
     const graphFilePath = this.context.asAbsolutePath(path.join(
