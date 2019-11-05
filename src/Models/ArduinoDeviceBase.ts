@@ -179,7 +179,7 @@ export abstract class ArduinoDeviceBase implements Device {
     const cppPropertiesFilePath =
         path.join(this.vscodeFolderPath, constants.cppPropertiesFileName);
 
-    if (await FileUtility.directoryExists(type, cppPropertiesFilePath)) {
+    if (await FileUtility.fileExists(type, cppPropertiesFilePath)) {
       return;
     }
 
