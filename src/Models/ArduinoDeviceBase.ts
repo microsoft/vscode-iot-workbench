@@ -44,6 +44,7 @@ export abstract class ArduinoDeviceBase implements Device {
 
   abstract name: string;
   abstract id: string;
+  abstract board: Board|undefined;
 
   constructor(
       context: vscode.ExtensionContext, devicePath: string,
@@ -121,8 +122,22 @@ export abstract class ArduinoDeviceBase implements Device {
 
   abstract async configDeviceSettings(): Promise<boolean>;
 
-  abstract async load(): Promise<boolean>;
+  async load(): Promise<boolean> {
+    const deviceFolderPath = this.deviceFolder;
 
+    const loadTimeScaffoldType = ScaffoldType.Workspace;
+    if (!await FileUtility.directoryExists(
+            loadTimeScaffoldType, deviceFolderPath)) {
+      throw new Error('Unable to find the device folder inside the project.');
+    }
+
+    if (!this.board) {
+      throw new Error('Unable to find the board in the config file.');
+    }
+
+    await this.generateCppPropertiesFile(loadTimeScaffoldType, this.board);
+    return true;
+  }
 
   abstract async create(): Promise<boolean>;
 
