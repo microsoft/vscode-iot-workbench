@@ -50,7 +50,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       return;
     }
     const getBinaryFileNameCmd = `cat ${
-        cmakeFilePath} | grep 'set(binary_name' | cut -d ' ' -f2 | sed -e 's/^"//' -e 's/"$//' | tr -d '\n'`;
+        cmakeFilePath} | grep 'add_executable' | sed -e 's/^add_executable(//' | awk '{$1=$1};1' | cut -d ' ' -f1 | tr -d '\n'`;
 
     const binaryName = await executeCommand(getBinaryFileNameCmd);
     return binaryName;
@@ -79,10 +79,20 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     }
 
     try {
-      if (!await FileUtility.directoryExists(
-              ScaffoldType.Workspace, this.outputPath)) {
-        const message =
-            `Output folder does not exist. Please compile device code first.`;
+      const binaryName = await this.getBinaryFileName();
+      if (!binaryName) {
+        const message = `No executable file specified in ${
+            FileNames.cmakeFileName}. Nothing to upload to target machine.`;
+        vscode.window.showWarningMessage(message);
+        channelShowAndAppendLine(this.channel, message);
+        return false;
+      }
+
+      const binaryFilePath = path.join(this.outputPath, binaryName);
+      if (!await FileUtility.fileExists(
+              ScaffoldType.Workspace, binaryFilePath)) {
+        const message = `Executable file ${binaryName} does not exist under ${
+            this.outputPath}. Please compile device code first.`;
         vscode.window.showWarningMessage(message);
         channelShowAndAppendLine(this.channel, message);
         return false;
@@ -98,15 +108,14 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
         }
       }
 
-      const binaryName = await this.getBinaryFileName();
-
       const ssh = new sdk.SSH();
       await ssh.open(
           RaspberryPiUploadConfig.host, RaspberryPiUploadConfig.port,
           RaspberryPiUploadConfig.user, RaspberryPiUploadConfig.password);
+
       try {
-        await ssh.uploadFolder(
-            this.outputPath, RaspberryPiUploadConfig.projectPath);
+        await ssh.uploadFile(
+            binaryFilePath, RaspberryPiUploadConfig.projectPath);
       } catch (error) {
         const message =
             `SSH traffic is too busy. Please wait a second and retry. Error: ${
@@ -116,14 +125,11 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
         throw new Error(message);
       }
 
-      // Just ignore if we cannot find binary file in the right place
-      if (binaryName) {
-        try {
-          await this.enableBinaryExecutability(ssh, binaryName);
-        } catch (error) {
-          throw new Error(
-              `Failed to enable binary executability. Error: ${error.message}`);
-        }
+      try {
+        await this.enableBinaryExecutability(ssh, binaryName);
+      } catch (error) {
+        throw new Error(
+            `Failed to enable binary executability. Error: ${error.message}`);
       }
 
       try {
@@ -133,14 +139,13 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
             `Failed to close SSH connection. Error: ${error.message}`);
       }
 
-
       const message =
           `Successfully deploy compiled files to Raspberry Pi board.`;
       channelShowAndAppendLine(this.channel, message);
       vscode.window.showInformationMessage(message);
     } catch (error) {
       throw new Error(
-          `Upload device code to device ${RaspberryPiUploadConfig.user}@${
+          `Upload binary file to device ${RaspberryPiUploadConfig.user}@${
               RaspberryPiUploadConfig.host} failed. ${error}`);
     }
 
