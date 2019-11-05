@@ -25,13 +25,12 @@ install:
 - npm install
 
 script:
-- jq --version
-- if [[ $TRAVIS_TAG =~ $ISPRODTAG ]]; then jq '.codeGenConfigUrl = "https://aka.ms/iot-codegen-cli-for-workbench"' package.json > package_tmp.json; else jq '.codeGenConfigUrl = "https://aka.ms/iot-codegen-cli-for-workbench-staging"' package.json > package_tmp.json; fi
-- mv package_tmp.json package.json
 - tsc --version
 - gts --version
 - gts check
-- node genAiKey.js
+- node scripts/updateResourceLink.js
+- node scripts/genAiKey.js
+- node scripts/ChangePublisherIfRCVersion.js
 - vsce package
 - docker run -ti --rm -v $PWD:/mnt:ro dkhamsing/awesome_bot --allow-dupe --allow-redirect --skip-save-results `ls *.md`
 

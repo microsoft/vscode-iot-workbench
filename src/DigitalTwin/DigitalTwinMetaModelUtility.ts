@@ -99,84 +99,44 @@ export interface DigitalTwinMetaModelContext {
 }
 
 export class DigitalTwinMetaModelUtility {
-  private blobService: BlobService;
-  private graphUrl: string;
-  private interfaceUrl: string;
-  private capabilityModelUrl: string;
-  private iotModelUrl: string;
 
-  constructor(private context: vscode.ExtensionContext) {
-    this.blobService = new BlobService(this.context);
-    const extensionPackage = require(context.asAbsolutePath('./package.json'));
-    this.graphUrl = extensionPackage.graphUrl;
-    this.interfaceUrl = extensionPackage.interfaceUrl;
-    this.capabilityModelUrl = extensionPackage.capabilityModelUrl;
-    this.iotModelUrl = extensionPackage.iotModelUrl;
-  }
+  constructor(private context: vscode.ExtensionContext) {}
   async getGraph() {
-    // const graphFileFromRemote = await
-    // this.blobService.getFile(this.graphUrl);
     const graphFilePath = this.context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
         DigitalTwinFileNames.devicemodelTemplateFolderName,
         DigitalTwinFileNames.graphFileName));
     const dtGraphfaceString = fs.readFileSync(graphFilePath, 'utf8');
-    /*const dtGraphfaceString =
-        graphFileFromRemote || fs.readFileSync(graphFilePath, 'utf8');
-    if (graphFileFromRemote) {
-      fs.writeFileSync(graphFilePath, graphFileFromRemote);
-    }*/
     const dtGraph: DigitalTwinMetaModelGraph = JSON.parse(dtGraphfaceString);
     return dtGraph;
   }
   async getInterface() {
-    // const interfaceFileFromRemote =
-    //    await this.blobService.getFile(this.interfaceUrl);
     const interfaceFilePath = this.context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
         DigitalTwinFileNames.devicemodelTemplateFolderName,
         DigitalTwinFileNames.interfaceFileName));
     const dtInterfaceString = fs.readFileSync(interfaceFilePath, 'utf8');
-    /*const dtInterfaceString =
-        interfaceFileFromRemote || fs.readFileSync(interfaceFilePath, 'utf8');
-    if (interfaceFileFromRemote) {
-      fs.writeFileSync(interfaceFilePath, interfaceFileFromRemote);
-    }*/
     const dtInterface: DigitalTwinMetaModelContext =
         JSON.parse(dtInterfaceString);
     return dtInterface;
   }
   async getCapabilityModel() {
-    // const capabilityModelFileFromRemote =
-    //    await this.blobService.getFile(this.capabilityModelUrl);
     const capabilityModelFilePath = this.context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
         DigitalTwinFileNames.devicemodelTemplateFolderName,
         DigitalTwinFileNames.capabilityModelFileName));
     const dtCapabilityModelString =
         fs.readFileSync(capabilityModelFilePath, 'utf8');
-    /*const dtCapabilityModelString = capabilityModelFileFromRemote ||
-        fs.readFileSync(capabilityModelFilePath, 'utf8');
-    if (capabilityModelFileFromRemote) {
-      fs.writeFileSync(capabilityModelFilePath, capabilityModelFileFromRemote);
-    }*/
     const dtCapabilityModel: DigitalTwinMetaModelContext =
         JSON.parse(dtCapabilityModelString);
     return dtCapabilityModel;
   }
   async getIoTModel() {
-    // const iotModelFileFromRemote =
-    //    await this.blobService.getFile(this.iotModelUrl);
     const iotModelFilePath = this.context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
         DigitalTwinFileNames.devicemodelTemplateFolderName,
         DigitalTwinFileNames.iotModelFileName));
     const dtIoTModelString = fs.readFileSync(iotModelFilePath, 'utf8');
-    /*const dtIoTModelString =
-        iotModelFileFromRemote || fs.readFileSync(iotModelFilePath, 'utf8');
-    if (iotModelFileFromRemote) {
-      fs.writeFileSync(iotModelFilePath, iotModelFileFromRemote);
-    }*/
     const dtCapabilityModel: DigitalTwinMetaModelContext =
         JSON.parse(dtIoTModelString);
     return dtCapabilityModel;

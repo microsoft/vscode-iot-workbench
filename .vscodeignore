@@ -13,7 +13,7 @@ tsconfig.json
 cache/**
 node_modules/**
 webpack.config.js
-genAiKey.js
+scripts/genAiKey.js
 gts.cmd
 vendor/**
-copyVendor.js
+scripts/copyVendor.js
