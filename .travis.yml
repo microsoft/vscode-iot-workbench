@@ -18,6 +18,7 @@ branches:
 env:
   global:
     - ISPRODTAG=^v?[0-9]+\.[0-9]+\.[0-9]+$
+    - ISTESTTAG=^v?[0-9]+\.[0-9]+\.[0-9]+-[rR][cC]$
 
 install:
 - sudo apt-get install libsecret-1-dev
@@ -25,13 +26,12 @@ install:
 - npm install
 
 script:
-- jq --version
-- if [[ $TRAVIS_TAG =~ $ISPRODTAG ]]; then jq '.codeGenConfigUrl = "https://aka.ms/iot-codegen-cli-for-workbench"' package.json > package_tmp.json; else jq '.codeGenConfigUrl = "https://aka.ms/iot-codegen-cli-for-workbench-staging"' package.json > package_tmp.json; fi
-- mv package_tmp.json package.json
 - tsc --version
 - gts --version
 - gts check
-- node genAiKey.js
+- node scripts/modifyConfigIfRCVersion.js
+- node scripts/updateResourceLink.js
+- node scripts/genAiKey.js
 - vsce package
 - docker run -ti --rm -v $PWD:/mnt:ro dkhamsing/awesome_bot --allow-dupe --allow-redirect --skip-save-results `ls *.md`
 
@@ -54,3 +54,12 @@ deploy:
       all_branches: true
       # if it's a PROD tag (something like 1.0.0), then publish extension to market.
       condition: "$TRAVIS_TAG =~ $ISPRODTAG"
+  # deploy test version to vscode extension market
+  - provider: script
+    script: vsce publish -p $VSCE_TEST_TOKEN --packagePath *.vsix
+    skip_cleanup: true
+    on:
+      tags: true
+      all_branches: true
+      # if it's a test version tag (something like 1.0.0-rc), then publish test extension to market.
+      condition: "$TRAVIS_TAG =~ $ISTESTTAG"
