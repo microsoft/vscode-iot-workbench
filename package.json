@@ -206,8 +206,8 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile && webpack --mode production",
-    "compile": "tsc -p ./ && node copyVendor.js",
-    "watch": "tsc -watch -p ./ && node copyVendor.js",
+    "compile": "tsc -p ./ && node scripts/copyVendor.js",
+    "watch": "tsc -watch -p ./ && node scripts/copyVendor.js",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "test": "npm run compile && node ./node_modules/vscode/bin/test",
     "check": "gts check",
