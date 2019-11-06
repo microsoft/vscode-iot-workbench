@@ -16,10 +16,6 @@
   "license": "SEE LICENSE IN <LICENSE>",
   "aiKey": "5b869bc6-ca93-4f24-aa87-92871a3a616e",
   "codeGenConfigUrl": "https://aka.ms/iot-codegen-cli-for-workbench-staging",
-  "graphUrl": "https://aka.ms/iot-pnp-graph-staging",
-  "interfaceUrl": "https://aka.ms/iot-pnp-interface-staging",
-  "capabilityModelUrl": "https://aka.ms/iot-pnp-capability-model-staging",
-  "iotModelUrl": "https://aka.ms/iot-pnp-iot-model-staging",
   "engines": {
     "vscode": "^1.39.0"
   },
