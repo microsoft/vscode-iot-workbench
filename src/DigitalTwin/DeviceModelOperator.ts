@@ -287,7 +287,7 @@ export class DeviceModelOperator {
       const dtMetamodelRepositoryClient =
           new DigitalTwinMetamodelRepositoryClient();
       await dtMetamodelRepositoryClient.initialize(null);
-      await dtMetamodelRepositoryClient.searchInterfacesAsync(
+      return await dtMetamodelRepositoryClient.searchInterfacesAsync(
           searchString, continueToken, undefined, pageSize);
     } else {
       const connectionString =
@@ -304,7 +304,7 @@ export class DeviceModelOperator {
       const dtMetamodelRepositoryClient =
           new DigitalTwinMetamodelRepositoryClient();
       await dtMetamodelRepositoryClient.initialize(connectionString.toString());
-      await dtMetamodelRepositoryClient.searchInterfacesAsync(
+      return await dtMetamodelRepositoryClient.searchInterfacesAsync(
           searchString, continueToken, builder.repositoryIdValue, pageSize);
     }
   }

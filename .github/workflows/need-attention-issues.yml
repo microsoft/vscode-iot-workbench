@@ -13,7 +13,7 @@ jobs:
     - uses: blackchoey/stale@releases/v1.2
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
-        stale-issue-message: 'Collaborators, please take a look at this issue and provide updates for it.'
+        stale-issue-message: 'This issue has no recent activities, please take a look and provide updates for it.'
         stale-issue-label: 'need attention'
         days-before-stale: 3
         last-updated-user-type: 'non-collaborator'
