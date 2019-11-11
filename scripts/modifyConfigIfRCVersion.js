@@ -1,8 +1,8 @@
 const fs = require('fs');
 
 if (process.env.TRAVIS_TAG) {
-  const ISTESTVERSION = /^v?[0-9]+\.[0-9]+\.[0-9]+-[rR][cC]$/.test(process.env.TRAVIS_TAG || '');
-  if (ISTESTVERSION) {
+  const isTestVersion = /^v?[0-9]+\.[0-9]+\.[0-9]+-[rR][cC]$/.test(process.env.TRAVIS_TAG || '');
+  if (isTestVersion) {
     // 1. Modify package.json
     const packageJson = JSON.parse(fs.readFileSync('package.json'));
 
