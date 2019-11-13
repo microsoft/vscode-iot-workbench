@@ -166,7 +166,8 @@ export class CodeGeneratorCore {
     this.saveCodeGenConfig(
         rootPath, capabilityModelFilePath, codeGenExecutionInfo);
 
-    await this.generateDeviceCodeCore(codeGenExecutionInfo, context, channel);
+    await this.generateDeviceCodeCore(
+        codeGenExecutionInfo, context, channel, telemetryContext);
   }
 
   private async selectCapabilityModelFile(
@@ -266,7 +267,7 @@ export class CodeGeneratorCore {
         }
 
         await this.generateDeviceCodeCore(
-            codeGenExecutionItem, context, channel);
+            codeGenExecutionItem, context, channel, telemetryContext);
         return ReGenResult.Succeeded;
       } else {
         return ReGenResult.Skipped;
@@ -494,10 +495,11 @@ export class CodeGeneratorCore {
 
   private async generateDeviceCodeCore(
       codeGenExecutionInfo: CodeGenExecutionItem,
-      context: vscode.ExtensionContext,
-      channel: vscode.OutputChannel): Promise<boolean> {
+      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+      telemetryContext: TelemetryContext): Promise<boolean> {
     // We only support Ansi C
-    const codeGenFactory = new AnsiCCodeGeneratorFactory(context, channel);
+    const codeGenFactory =
+        new AnsiCCodeGeneratorFactory(context, channel, telemetryContext);
 
     const codeGenerator = codeGenFactory.createCodeGeneratorImpl(
         codeGenExecutionInfo.languageLabel);

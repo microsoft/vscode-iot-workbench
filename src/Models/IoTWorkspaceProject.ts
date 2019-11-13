@@ -454,11 +454,10 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     }
 
     // Open project
-    await this.openProject(deviceDir, openInNewWindow);
+    await this.openProject(this.projectRootPath, openInNewWindow);
   }
 
-  async openProject(deviceDir: string, openInNewWindow: boolean) {
-    const projectPath = path.join(deviceDir, '..');
+  async openProject(projectPath: string, openInNewWindow: boolean) {
     const workspaceConfigFileName =
         fs.readdirSync(projectPath)
             .filter(

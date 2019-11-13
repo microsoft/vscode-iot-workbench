@@ -2,24 +2,34 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+import {IoTWorkspaceProject} from '../../../Models/IoTWorkspaceProject';
+import {TelemetryContext} from '../../../telemetry';
 import * as utils from '../../../utils';
 import {DigitalTwinConstants} from '../../DigitalTwinConstants';
 
-import {CodeGenerator, CodeGenExecutionItem} from './CodeGenerator';
+import {CodeGenerator, CodeGenExecutionItem, CodeGenProjectType} from './CodeGenerator';
 
 export class AnsiCCodeGenerator implements CodeGenerator {
   constructor(
       protected context: vscode.ExtensionContext,
-      protected channel: vscode.OutputChannel) {}
+      protected channel: vscode.OutputChannel,
+      protected telemetryContext: TelemetryContext) {}
 
   async generateCode(codegenInfo: CodeGenExecutionItem): Promise<boolean> {
     // Invoke PnP toolset to generate the code
     const codegenSucceeded = await this.generateAnsiCCodeCore(codegenInfo);
 
     if (codegenSucceeded) {
-      await vscode.commands.executeCommand(
-          'vscode.openFolder', vscode.Uri.file(codegenInfo.outputDirectory),
-          true);
+      if (codegenInfo.codeGenProjectType === CodeGenProjectType.IoTDevKit) {
+        const project: IoTWorkspaceProject = new IoTWorkspaceProject(
+            this.context, this.channel, this.telemetryContext);
+        project.openProject(codegenInfo.outputDirectory, true);
+      } else {
+        await vscode.commands.executeCommand(
+            'vscode.openFolder', vscode.Uri.file(codegenInfo.outputDirectory),
+            true);
+      }
+
       return true;
     } else {
       vscode.window.showErrorMessage(
