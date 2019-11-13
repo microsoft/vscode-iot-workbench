@@ -178,6 +178,11 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
    * environment.
    */
   async openProject(projectPath: string, openInNewWindow: boolean) {
+    if (!FileUtility.directoryExists(ScaffoldType.Local, projectPath)) {
+      channelShowAndAppendLine(
+          this.channel, `Can not find project path ${projectPath}.`);
+      return;
+    }
     // 1. Ask to customize
     let customizeEnvironment = false;
     try {
@@ -268,13 +273,16 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
           vscode.workspace.workspaceFolders.length > 0)) {
       return false;
     }
-    const projectPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+
+    if (!this.projectRootPath) {
+      this.projectRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+    }
 
     const iotworkbenchprojectFile =
-        path.join(projectPath, FileNames.iotworkbenchprojectFileName);
+        path.join(this.projectRootPath, FileNames.iotworkbenchprojectFileName);
 
     // Check if cmake project
-    const cmakeFile = path.join(projectPath, FileNames.cmakeFileName);
+    const cmakeFile = path.join(this.projectRootPath, FileNames.cmakeFileName);
     if (!await FileUtility.fileExists(scaffoldType, cmakeFile)) {
       const message = `Missing ${
           FileNames.cmakeFileName} to be configured as Embedded Linux project.`;
@@ -287,7 +295,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       // This is an external project since no iot workbench project file found.
       // Generate iot workbench project file
       await this.generateOrUpdateIotWorkbenchProjectFile(
-          scaffoldType, projectPath);
+          scaffoldType, this.projectRootPath);
     }
 
     // Set board Id as default type Raspberry Pi

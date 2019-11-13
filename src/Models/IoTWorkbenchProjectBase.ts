@@ -279,12 +279,12 @@ export abstract class IoTWorkbenchProjectBase {
    * template files.
    */
   async configureProjectEnvironmentCore(
-      projectPath: string, scaffoldType: ScaffoldType): Promise<boolean> {
+      deviceRootPath: string, scaffoldType: ScaffoldType): Promise<boolean> {
     for (const component of this.componentList) {
       if (component.getComponentType() === ComponentType.Device) {
         const device = component as Device;
         const res =
-            await device.configDeviceEnvironment(projectPath, scaffoldType);
+            await device.configDeviceEnvironment(deviceRootPath, scaffoldType);
         if (!res) {
           return false;
         }
@@ -311,14 +311,14 @@ export abstract class IoTWorkbenchProjectBase {
    * Update project host type configuration in iot workbench project file.
    */
   async generateOrUpdateIotWorkbenchProjectFile(
-      type: ScaffoldType, projectFolder: string): Promise<void> {
-    if (!await FileUtility.directoryExists(type, projectFolder)) {
+      type: ScaffoldType, deviceRootPath: string): Promise<void> {
+    if (!await FileUtility.directoryExists(type, deviceRootPath)) {
       throw new Error('Unable to find the project folder.');
     }
 
     try {
       const iotworkbenchprojectFilePath =
-          path.join(projectFolder, FileNames.iotworkbenchprojectFileName);
+          path.join(deviceRootPath, FileNames.iotworkbenchprojectFileName);
 
       let projectConfig: {[key: string]: string} = {};
       if (await FileUtility.fileExists(type, iotworkbenchprojectFilePath)) {
