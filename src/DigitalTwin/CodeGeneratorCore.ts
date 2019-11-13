@@ -17,7 +17,7 @@ import * as dtUtils from './Utilities';
 import {FileNames, ConfigKey, GlobalConstants} from '../constants';
 import {TelemetryContext} from '../telemetry';
 import {DigitalTwinConstants, DigitalTwinFileNames} from './DigitalTwinConstants';
-import {CodeGenProjectType, DeviceConnectionType, CodeGenLanguage, DeviceSdkReferenceType} from './DigitalTwinCodeGen/Interfaces/CodeGenerator';
+import {CodeGenProjectType, DeviceConnectionType, CodeGenLanguage, DeviceSdkReferenceType, CodeGenExecutionItem} from './DigitalTwinCodeGen/Interfaces/CodeGenerator';
 import {AnsiCCodeGeneratorFactory} from './DigitalTwinCodeGen/AnsiCCodeGeneratorFactory';
 import {ConfigHandler} from '../configHandler';
 import {DigitalTwinMetamodelRepositoryClient} from './DigitalTwinApi/DigitalTwinMetamodelRepositoryClient';
@@ -26,7 +26,6 @@ import {PnpDeviceConnection, CodeGenProjectTemplate, DeviceSdkReference} from '.
 import {DialogResponses} from '../DialogResponses';
 import {CredentialStore} from '../credentialStore';
 import {RemoteExtension} from '../Models/RemoteExtension';
-import forEach = require('lodash.foreach');
 
 interface CodeGeneratorDownloadLocation {
   win32Md5: string;
@@ -45,15 +44,6 @@ interface CodeGeneratorConfigItem {
 
 interface CodeGeneratorConfig {
   codeGeneratorConfigItems: CodeGeneratorConfigItem[];
-}
-
-interface CodeGenExecutionItem {
-  capabilityModelRelativePath: string;
-  projectName: string;
-  languageLabel: string;
-  codeGenProjectType: CodeGenProjectType;
-  deviceSdkReferenceType: DeviceSdkReferenceType;
-  deviceConnectionType: DeviceConnectionType;
 }
 
 interface CodeGenExecutions {
@@ -105,12 +95,10 @@ export class CodeGeneratorCore {
     const capabilityModelFilePath = path.join(
         capabilityModelFileSelection.description as string,
         capabilityModelFileName);
-    const capabilityModelRelativePath =
-        path.relative(rootPath, capabilityModelFilePath);
 
     // Prompt if old project exists for the same Capability Model file
     const regenResult = await this.RegenCode(
-        rootPath, capabilityModelRelativePath, interfaceFiles, context, channel,
+        rootPath, capabilityModelFilePath, interfaceFiles, context, channel,
         telemetryContext);
     if (regenResult === ReGenResult.Succeeded ||
         regenResult === ReGenResult.Cancelled) {
@@ -165,19 +153,21 @@ export class CodeGeneratorCore {
     }
 
     const codeGenExecutionInfo: CodeGenExecutionItem = {
-      capabilityModelRelativePath,
+      outputDirectory: path.join(rootPath, codeGenProjectName),
+      capabilityModelFilePath,
+      interfaceDirecoty: rootPath,
       projectName: codeGenProjectName,
-      languageLabel: 'ANSI C',
+      languageLabel: CodeGenLanguage.ANSIC,
       codeGenProjectType,
       deviceSdkReferenceType: sdkReferenceType,
       deviceConnectionType: connectionType
     };
 
     this.saveCodeGenConfig(
-        rootPath, capabilityModelRelativePath, codeGenExecutionInfo);
+        rootPath, capabilityModelFilePath, codeGenExecutionInfo);
 
     await this.generateDeviceCodeCore(
-        rootPath, codeGenExecutionInfo, context, channel, telemetryContext);
+        codeGenExecutionInfo, context, channel, telemetryContext);
   }
 
   private async selectCapabilityModelFile(
@@ -219,7 +209,7 @@ export class CodeGeneratorCore {
   }
 
   private async RegenCode(
-      rootPath: string, capabilityModelRelativePath: string,
+      rootPath: string, capabilityModelFilePath: string,
       interfaceFiles: dtUtils.SchemaFileInfo[],
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext): Promise<ReGenResult> {
@@ -239,8 +229,7 @@ export class CodeGeneratorCore {
           JSON.parse(fs.readFileSync(codeGenConfigPath, 'utf8'));
       if (codeGenExecutions) {
         codeGenExecutionItem = codeGenExecutions.codeGenExecutionItems.find(
-            item => item.capabilityModelRelativePath ===
-                capabilityModelRelativePath);
+            item => item.capabilityModelFilePath === capabilityModelFilePath);
       }
     } catch {
       // just skip this if read file failed.
@@ -267,19 +256,18 @@ export class CodeGeneratorCore {
         return ReGenResult.Succeeded;
       }
 
-      const dcmFilePath = path.join(rootPath, capabilityModelRelativePath);
-
       // User select regenerate code
       if (regenSelection.label !== 'Create new project') {
         const projectPath =
             path.join(rootPath, codeGenExecutionItem.projectName);
         if (!await this.downloadAllIntefaceFiles(
-                channel, rootPath, dcmFilePath, projectPath, interfaceFiles)) {
+                channel, rootPath, capabilityModelFilePath, projectPath,
+                interfaceFiles)) {
           return ReGenResult.Skipped;
         }
 
         await this.generateDeviceCodeCore(
-            rootPath, codeGenExecutionItem, context, channel, telemetryContext);
+            codeGenExecutionItem, context, channel, telemetryContext);
         return ReGenResult.Succeeded;
       } else {
         return ReGenResult.Skipped;
@@ -506,7 +494,7 @@ export class CodeGeneratorCore {
   }
 
   private async generateDeviceCodeCore(
-      rootPath: string, codeGenExecutionInfo: CodeGenExecutionItem,
+      codeGenExecutionInfo: CodeGenExecutionItem,
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext): Promise<boolean> {
     // We only support Ansi C
@@ -514,46 +502,33 @@ export class CodeGeneratorCore {
         new AnsiCCodeGeneratorFactory(context, channel, telemetryContext);
 
     const codeGenerator = codeGenFactory.createCodeGeneratorImpl(
-        codeGenExecutionInfo.codeGenProjectType,
-        codeGenExecutionInfo.deviceSdkReferenceType,
-        codeGenExecutionInfo.deviceConnectionType);
+        codeGenExecutionInfo.languageLabel);
     if (!codeGenerator) {
       return false;
     }
 
     // Parse capabilityModel name from id
-    const capabilityModel = JSON.parse(fs.readFileSync(
-        path.join(rootPath, codeGenExecutionInfo.capabilityModelRelativePath),
-        'utf8'));
-
+    const capabilityModel = JSON.parse(
+        fs.readFileSync(codeGenExecutionInfo.capabilityModelFilePath, 'utf8'));
     const capabilityModelId = capabilityModel['@id'];
-    const capabilityModelIdStrings = capabilityModelId.split(':');
-    const capabilityModelName =
-        capabilityModelIdStrings[capabilityModelIdStrings.length - 2];
 
     await vscode.window.withProgress(
         {
           location: vscode.ProgressLocation.Notification,
-          title: `Generate code stub for ${capabilityModelName} ...`
+          title: `Generate PnP device code for ${capabilityModelId} ...`
         },
         async () => {
-          const projectPath =
-              path.join(rootPath, codeGenExecutionInfo.projectName);
-          const capabilityModelFilePath = path.join(
-              rootPath, codeGenExecutionInfo.capabilityModelRelativePath);
-          const result = await codeGenerator.generateCode(
-              projectPath, capabilityModelFilePath, capabilityModelName,
-              capabilityModelId, rootPath);
+          const result = await codeGenerator.generateCode(codeGenExecutionInfo);
           if (result) {
             vscode.window.showInformationMessage(
-                `Generate code stub for ${capabilityModelName} completed`);
+                `Generate PnP device code for ${capabilityModelId} completed`);
           }
         });
     return true;
   }
 
   private saveCodeGenConfig(
-      rootPath: string, capabilityModelRelativePath: string,
+      rootPath: string, capabilityModelFilePath: string,
       codeGenExecutionInfo: CodeGenExecutionItem): void {
     const codeGenConfigPath = path.join(
         rootPath, FileNames.vscodeSettingsFolderName,
@@ -567,8 +542,8 @@ export class CodeGeneratorCore {
         if (codeGenExecutions) {
           codeGenExecutions.codeGenExecutionItems =
               codeGenExecutions.codeGenExecutionItems.filter(
-                  item => item.capabilityModelRelativePath !==
-                      capabilityModelRelativePath);
+                  item =>
+                      item.capabilityModelFilePath !== capabilityModelFilePath);
           codeGenExecutions.codeGenExecutionItems.push(codeGenExecutionInfo);
           fs.writeFileSync(
               codeGenConfigPath,

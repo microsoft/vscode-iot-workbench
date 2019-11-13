@@ -3,14 +3,14 @@ export enum CodeGenLanguage {
 }
 
 export enum DeviceConnectionType {
-  DeviceConnectionString = 'DeviceConnectionString',
-  SymmetricKey = 'SymmetricKey',
+  ConnectionString = 'ConnectionString',
+  DpsSasKey = 'DpsSasKey',
   IoTCX509 = 'IoTCX509'
 }
 
 export enum CodeGenProjectType {
-  CMakeWindows = 'CMake-Windows',
-  CMakeLinux = 'CMake-Linux',
+  CMakeWindows = 'CMake_Windows',
+  CMakeLinux = 'CMake_Linux',
   VisualStudio = 'VisualStudio',
   IoTDevKit = 'IoTDevKit'
 }
@@ -27,8 +27,17 @@ export enum CodeGenPlatform {
   MacOS = 'MacOS'
 }
 
+export interface CodeGenExecutionItem {
+  outputDirectory: string;
+  capabilityModelFilePath: string;
+  interfaceDirecoty: string;
+  projectName: string;
+  languageLabel: string;
+  codeGenProjectType: CodeGenProjectType;
+  deviceSdkReferenceType: DeviceSdkReferenceType;
+  deviceConnectionType: DeviceConnectionType;
+}
+
 export interface CodeGenerator {
-  generateCode(
-      targetPath: string, filePath: string, capabilityModelName: string,
-      dcmId: string, interfaceDir: string): Promise<boolean>;
+  generateCode(codegenInfo: CodeGenExecutionItem): Promise<boolean>;
 }

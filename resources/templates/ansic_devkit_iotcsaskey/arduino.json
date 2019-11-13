@@ -1,6 +1,0 @@
-{
-    "board": "AZ3166:stm32f4:MXCHIP_AZ3166",
-    "sketch": "main.ino",
-    "configuration": "upload_method=OpenOCDMethod",
-    "output": "./.build"
-}

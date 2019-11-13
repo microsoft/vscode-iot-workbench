@@ -1,11 +1,8 @@
 import * as vscode from 'vscode';
 
 import {TelemetryContext} from '../../telemetry';
-
-import {AnsiCCodeGeneratorImplCMake} from './AnsiCCodeGeneratorImplCMake';
-import {AnsiCCodeGeneratorImplIoTDevKit} from './AnsiCCodeGeneratorImplIoTDevKit';
-import {AnsiCCodeGeneratorImplVS} from './AnsiCCodeGeneratorImplVS';
-import {CodeGenerator, CodeGenProjectType, DeviceConnectionType, DeviceSdkReferenceType} from './Interfaces/CodeGenerator';
+import {AnsiCCodeGenerator} from './Interfaces/AnsiCCodeGenerator';
+import {CodeGenerator, CodeGenLanguage} from './Interfaces/CodeGenerator';
 import {CodeGeneratorFactory} from './Interfaces/CodeGeneratorFactory';
 
 export class AnsiCCodeGeneratorFactory implements CodeGeneratorFactory {
@@ -13,22 +10,12 @@ export class AnsiCCodeGeneratorFactory implements CodeGeneratorFactory {
       private context: vscode.ExtensionContext,
       private channel: vscode.OutputChannel,
       private telemetryContext: TelemetryContext) {}
-  createCodeGeneratorImpl(
-      projectType: CodeGenProjectType, sdkReferenceType: DeviceSdkReferenceType,
-      connectionType: DeviceConnectionType): CodeGenerator|null {
-    if (projectType === CodeGenProjectType.CMakeWindows ||
-        projectType === CodeGenProjectType.CMakeLinux) {
-      return new AnsiCCodeGeneratorImplCMake(
-          projectType, sdkReferenceType, connectionType, this.context,
-          this.channel);
-    } else if (projectType === CodeGenProjectType.IoTDevKit) {
-      return new AnsiCCodeGeneratorImplIoTDevKit(
-          this.context, this.channel, this.telemetryContext, connectionType);
-    } else if (projectType === CodeGenProjectType.VisualStudio) {
-      return new AnsiCCodeGeneratorImplVS(
-          this.context, this.channel, this.telemetryContext, connectionType);
+  createCodeGeneratorImpl(language: string): CodeGenerator|null {
+    if (language === CodeGenLanguage.ANSIC.toString()) {
+      return new AnsiCCodeGenerator(
+          this.context, this.channel, this.telemetryContext);
+    } else {
+      return null;
     }
-
-    return null;
   }
 }

@@ -425,36 +425,6 @@ export async function getTemplateFilesInfo(templateFolder: string):
   return templateFilesInfo;
 }
 
-export async function getCodeGenTemplateFolderName(
-    context: vscode.ExtensionContext, codeGenProjectType: CodeGenProjectType,
-    connectionType: DeviceConnectionType): Promise<string|undefined> {
-  const templateFilePath = context.asAbsolutePath(path.join(
-      FileNames.resourcesFolderName, FileNames.templatesFolderName,
-      FileNames.templateFileName));
-  if (!(await FileUtility.fileExists(ScaffoldType.Local, templateFilePath))) {
-    throw new Error(`Template file ${templateFilePath} does not exist.`);
-  }
-
-  const templateFile =
-      (await FileUtility.readFile(
-          ScaffoldType.Local, templateFilePath, 'utf8')) as string;
-  const templateFileJson = JSON.parse(templateFile);
-
-  const result =
-      templateFileJson.templates.filter((template: ProjectTemplate) => {
-        return (
-            template.tag === TemplateTag.Digitaltwin &&
-            template.type.includes(codeGenProjectType) &&
-            template.connectionType === connectionType);
-      });
-
-  if (result && result.length > 0) {
-    return result[0].path;
-  } else {
-    return;
-  }
-}
-
 export async function generateTemplateFile(
     root: string, type: ScaffoldType, fileInfo: TemplateFileInfo) {
   const targetFolderPath = path.join(root, fileInfo.targetPath);

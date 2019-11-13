@@ -75,72 +75,66 @@
       "name": "Visual Studio Project Using ANSI C Via IoT Hub Device Connection String",
       "description": "",
       "detail": "Template for DigitalTwin Code Generator to generate ANSI C Visual Studio Project via IoT Hub device connection string.",
-      "path": "ansic_vs_connectionstring",
       "boardId": "",
       "type": "VisualStudio",
       "language": "ansic",
       "tag": "digitaltwin",
-      "connectionType": "DeviceConnectionString"
+      "connectionType": "ConnectionString"
     },
     {
       "platform": "",
       "name": "Visual Studio Project Using ANSI C Via DPS(Device Provisioning Service) symmetric key",
       "description": "",
       "detail": "Template for DigitalTwin Code Generator to generate ANSI C Visual Studio Project via DPS symmetric key.",
-      "path": "ansic_vs_iotcsaskey",
       "boardId": "",
       "type": "VisualStudio",
       "language": "ansic",
       "tag": "digitaltwin",
-      "connectionType": "SymmetricKey"
+      "connectionType": "DpsSasKey"
     },
     {
       "platform": "",
       "name": "CMake Project Using ANSI C Via IoT Hub Device Connection String",
       "description": "",
       "detail": "Template for DigitalTwin Code Generator to generate ANSI C CMake Project via IoT Hub device connection string.",
-      "path": "ansic_cmake_connectionstring",
       "boardId": "",
-      "type": ["CMake-Windows", "CMake-Linux"],
+      "type": ["CMake_Windows", "CMake_Linux"],
       "language": "ansic",
       "tag": "digitaltwin",
-      "connectionType": "DeviceConnectionString"
+      "connectionType": "ConnectionString"
     },
     {
       "platform": "",
       "name": "CMake Project Using ANSI C Via DPS(Device Provisioning Service) symmetric key",
       "description": "",
       "detail": "Template for DigitalTwin Code Generator to generate ANSI C CMake Project via DPS symmetric key.",
-      "path": "ansic_cmake_iotcsaskey",
       "boardId": "",
-      "type": ["CMake-Windows", "CMake-Linux"],
+      "type": ["CMake_Windows", "CMake_Linux"],
       "language": "ansic",
       "tag": "digitaltwin",
-      "connectionType": "SymmetricKey"
+      "connectionType": "DpsSasKey"
     },
     {
       "platform": "",
       "name": "IoT DevKit Project Using ANSI C Via IoT Hub Device Connection String",
       "description": "",
       "detail": "Template for DigitalTwin Code Generator to generate ANSI C IoT DevKit Project via IoT Hub device connection string.",
-      "path": "ansic_devkit_connectionstring",
       "boardId": "",
       "type": "IoTDevKit",
       "language": "ansic",
       "tag": "digitaltwin",
-      "connectionType": "DeviceConnectionString"
+      "connectionType": "ConnectionString"
     },
     {
       "platform": "",
       "name": "IoT DevKit Project Using ANSI C Via DPS(Device Provisioning Service) symmetric key",
       "description": "",
       "detail": "Template for DigitalTwin Code Generator to generate ANSI C IoT Dev Project via DPS symmetric key.",
-      "path": "ansic_devkit_iotcsaskey",
       "boardId": "",
       "type": "IoTDevKit",
       "language": "ansic",
       "tag": "digitaltwin",
-      "connectionType": "SymmetricKey"
+      "connectionType": "DpsSasKey"
     },
     {
       "platform": "Embedded Linux (Preview)",
