@@ -7,10 +7,9 @@
 import * as vscode from 'vscode';
 import * as utils from './utils';
 import * as path from 'path';
-import {ConfigHandler} from './configHandler';
 
 import {TelemetryContext} from './telemetry';
-import {ScaffoldType, PlatformType, ConfigKey} from './constants';
+import {ScaffoldType, PlatformType} from './constants';
 import {RemoteExtension} from './Models/RemoteExtension';
 import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
