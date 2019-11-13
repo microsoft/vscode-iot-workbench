@@ -315,9 +315,9 @@ export abstract class ArduinoDeviceBase implements Device {
     return true;
   }
 
-  async configDeviceEnvironment(deviceDir: string, scaffoldType: ScaffoldType):
-      Promise<boolean> {
-    if (!deviceDir) {
+  async configDeviceEnvironment(
+      deviceRootPath: string, scaffoldType: ScaffoldType): Promise<boolean> {
+    if (!deviceRootPath) {
       throw new Error(
           'Unable to find the project device path, please open the folder and initialize project again.');
     }
@@ -331,7 +331,7 @@ export abstract class ArduinoDeviceBase implements Device {
 
     // Configure project environment with template files
     for (const fileInfo of templateFilesInfo) {
-      await utils.generateTemplateFile(deviceDir, scaffoldType, fileInfo);
+      await utils.generateTemplateFile(deviceRootPath, scaffoldType, fileInfo);
     }
 
     const message = 'Arduino device configuration done.';
