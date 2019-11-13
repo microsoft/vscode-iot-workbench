@@ -11,7 +11,6 @@ import * as WinReg from 'winreg';
 import {CancelOperationError} from './CancelOperationError';
 import {AzureFunctionsLanguage, FileNames, GlobalConstants, OperationType, PlatformType, ScaffoldType, TemplateTag} from './constants';
 import {DialogResponses} from './DialogResponses';
-import {CodeGenProjectType, DeviceConnectionType} from './DigitalTwin/DigitalTwinCodeGen/Interfaces/CodeGenerator';
 import {FileUtility} from './FileUtility';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 import {ProjectTemplate, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
@@ -238,7 +237,7 @@ export function runCommand(
 export async function askToConfigureEnvironment(
     context: vscode.ExtensionContext, channel: vscode.OutputChannel,
     telemetryContext: TelemetryContext, platform: PlatformType,
-    rootPath: string, scaffoldType: ScaffoldType,
+    deviceRootPath: string, scaffoldType: ScaffoldType,
     operation: OperationType): Promise<void> {
   channelShowAndAppendLine(
       channel,
@@ -257,8 +256,8 @@ export async function askToConfigureEnvironment(
     try {
       res = await ProjectEnvironmentConfiger
                 .configureProjectEnvironmentAsPlatform(
-                    context, channel, telemetryContext, platform, rootPath,
-                    scaffoldType);
+                    context, channel, telemetryContext, platform,
+                    deviceRootPath, scaffoldType);
     } catch (error) {
       if (error instanceof CancelOperationError) {
         telemetryContext.properties.errorMessage =
@@ -466,7 +465,7 @@ export function channelShowAndAppendLine(
 export async function handleExternalProject(
     context: vscode.ExtensionContext, channel: vscode.OutputChannel,
     telemetryContext: TelemetryContext, scaffoldType: ScaffoldType,
-    projectFileRootPath: string) {
+    deviceRootPath: string) {
   const message =
       'An IoT project is needed to process the operation, do you want to configure current project to be an IoT Embedded Linux Project or create an IoT project?';
   class Choice {
@@ -500,12 +499,12 @@ export async function handleExternalProject(
     }
 
     res = await project.configureProjectEnvironmentCore(
-        projectFileRootPath, scaffoldType);
+        deviceRootPath, scaffoldType);
     if (!res) {
       throw new Error(
           `Failed to add configuration files. Project environment configuration stopped.`);
     }
-    await project.openProject(projectFileRootPath, false);
+    await project.openProject(deviceRootPath, false);
   } else if (result === Choice.createNewProject) {
     telemetryContext.properties.errorMessage =
         'Operation failed and user creates new project';
@@ -719,11 +718,11 @@ export async function askToOverwriteFile(fileName: string):
 
 export async function fetchAndExecuteTask(
     context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-    telemetryContext: TelemetryContext, projectPath: string,
+    telemetryContext: TelemetryContext, deviceRootPath: string,
     operationType: OperationType, taskName: string): Promise<void> {
   const scaffoldType = ScaffoldType.Workspace;
-  if (!await FileUtility.directoryExists(scaffoldType, projectPath)) {
-    throw new Error('Unable to find the project folder.');
+  if (!await FileUtility.directoryExists(scaffoldType, deviceRootPath)) {
+    throw new Error('Unable to find the device root folder.');
   }
 
   const tasks = await vscode.tasks.fetchTasks();
@@ -732,8 +731,8 @@ export async function fetchAndExecuteTask(
     channelShowAndAppendLine(channel, message);
 
     await askToConfigureEnvironment(
-        context, channel, telemetryContext, PlatformType.Arduino, projectPath,
-        scaffoldType, operationType);
+        context, channel, telemetryContext, PlatformType.Arduino,
+        deviceRootPath, scaffoldType, operationType);
     return;
   }
 
@@ -746,8 +745,8 @@ export async function fetchAndExecuteTask(
     channelShowAndAppendLine(channel, message);
 
     await askToConfigureEnvironment(
-        context, channel, telemetryContext, PlatformType.Arduino, projectPath,
-        scaffoldType, operationType);
+        context, channel, telemetryContext, PlatformType.Arduino,
+        deviceRootPath, scaffoldType, operationType);
     return;
   }
 
