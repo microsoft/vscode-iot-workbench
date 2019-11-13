@@ -2,6 +2,19 @@
 
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
 
+## Version 0.10.17
+
+- Release data: November 25, 2019
+
+### Fixed
+
+- Fix c_cpp_properties.json auto-refresh issue.
+
+### Added
+
+- Integrate vcpkg with container project
+
+
 ## Version 0.10.16
 
 - Release data: October 28, 2019
