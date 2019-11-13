@@ -418,7 +418,7 @@ export class IoTButtonDevice implements Device {
   }
 
   async configDeviceEnvironment(
-      projectPath: string, scaffoldType: ScaffoldType): Promise<boolean> {
+      deviceRootPath: string, scaffoldType: ScaffoldType): Promise<boolean> {
     return true;
   }
 }
