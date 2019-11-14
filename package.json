@@ -91,31 +91,6 @@
         "category": "Azure IoT Device Workbench"
       },
       {
-        "command": "iotworkbench.iotPnPOpenRepository",
-        "title": "Open Model Repository...",
-        "category": "IoT Plug and Play"
-      },
-      {
-        "command": "iotworkbench.iotPnPSignOutRepository",
-        "title": "Sign out Model Repository",
-        "category": "IoT Plug and Play"
-      },
-      {
-        "command": "iotworkbench.iotPnPCreateInterface",
-        "title": "Create Interface...",
-        "category": "IoT Plug and Play"
-      },
-      {
-        "command": "iotworkbench.iotPnPCreateCapabilityModel",
-        "title": "Create Capability Model...",
-        "category": "IoT Plug and Play"
-      },
-      {
-        "command": "iotworkbench.iotPnPSubmitFile",
-        "title": "Submit files to Model Repository...",
-        "category": "IoT Plug and Play"
-      },
-      {
         "command": "iotworkbench.iotPnPGenerateCode",
         "title": "Generate Device Code Stub...",
         "category": "IoT Plug and Play"
@@ -187,16 +162,6 @@
             "default": "https://repo.azureiotrepository.com"
           }
         }
-      }
-    ],
-    "jsonValidation": [
-      {
-        "fileMatch": "**/*.interface.json",
-        "url": "./resources/templates/devicemodel/EmptySchema.json"
-      },
-      {
-        "fileMatch": "**/*.capabilitymodel.json",
-        "url": "./resources/templates/devicemodel/EmptySchema.json"
       }
     ]
   },
@@ -270,6 +235,7 @@
   },
   "extensionDependencies": [
     "vsciot-vscode.azure-iot-toolkit",
-    "vsciot-vscode.vscode-iot-device-cube"
+    "vsciot-vscode.vscode-iot-device-cube",
+    "vsciot-vscode.azure-digital-twins"
   ]
 }
