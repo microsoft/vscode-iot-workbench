@@ -22,7 +22,7 @@ export class DigitalTwinUtility {
    * and init if available
    * @param channel output channel
    */
-  public static isAvailable(channel: vscode.OutputChannel): boolean {
+  static isAvailable(channel: vscode.OutputChannel): boolean {
     const digitalTwins = getExtension(ExtensionName.DigitalTwins);
     if (!digitalTwins) {
       utils.channelShowAndAppendLine(
@@ -37,7 +37,7 @@ export class DigitalTwinUtility {
   /**
    * select capability model
    */
-  public static async selectCapabilityModel(): Promise<string> {
+  static async selectCapabilityModel(): Promise<string> {
     let result: string = '';
     try {
       result = await DigitalTwinUtility.instance.selectCapabilityModel();
@@ -57,7 +57,7 @@ export class DigitalTwinUtility {
    * @param folder folder to download interface
    * @param capabilityModelFile capability model file path
    */
-  public static async downloadDependentInterface(folder: string, capabilityModelFile: string): Promise<boolean> {
+  static async downloadDependentInterface(folder: string, capabilityModelFile: string): Promise<boolean> {
     try {
       await DigitalTwinUtility.instance.downloadDependentInterface(folder, capabilityModelFile);
     } catch (error) {

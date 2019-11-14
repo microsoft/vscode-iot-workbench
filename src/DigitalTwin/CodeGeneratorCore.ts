@@ -13,10 +13,9 @@ import request = require('request-promise');
 import extractzip = require('extract-zip');
 
 import * as utils from '../utils';
-import * as dtUtils from './Utilities';
 import {FileNames, ConfigKey, GlobalConstants} from '../constants';
 import {TelemetryContext} from '../telemetry';
-import {DigitalTwinConstants, DigitalTwinFileNames} from './DigitalTwinConstants';
+import {DigitalTwinConstants} from './DigitalTwinConstants';
 import {CodeGenProjectType, DeviceConnectionType, CodeGenLanguage, DeviceSdkReferenceType, CodeGenExecutionItem} from './DigitalTwinCodeGen/Interfaces/CodeGenerator';
 import {AnsiCCodeGeneratorFactory} from './DigitalTwinCodeGen/AnsiCCodeGeneratorFactory';
 import {ConfigHandler} from '../configHandler';
@@ -162,7 +161,7 @@ export class CodeGeneratorCore {
       telemetryContext: TelemetryContext): Promise<ReGenResult> {
     const codeGenConfigPath = path.join(
         rootPath, FileNames.vscodeSettingsFolderName,
-        DigitalTwinFileNames.codeGenConfigFileName);
+        DigitalTwinConstants.codeGenConfigFileName);
 
     let codeGenExecutionItem: CodeGenExecutionItem|undefined;
 
@@ -268,8 +267,7 @@ export class CodeGeneratorCore {
     const codeGenConfigFilePath: string = context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
         FileNames.codeGenOptionsFileName));
-
-    return dtUtils.loadJsonConfiguration(codeGenConfigFilePath);
+    return JSON.parse(fs.readFileSync(codeGenConfigFilePath, 'utf8'));
   }
 
   private async selectLanguage(telemetryContext: TelemetryContext):
@@ -477,7 +475,7 @@ export class CodeGeneratorCore {
       codeGenExecutionInfo: CodeGenExecutionItem): void {
     const codeGenConfigPath = path.join(
         rootPath, FileNames.vscodeSettingsFolderName,
-        DigitalTwinFileNames.codeGenConfigFileName);
+        DigitalTwinConstants.codeGenConfigFileName);
 
     try {
       if (fs.existsSync(codeGenConfigPath)) {
