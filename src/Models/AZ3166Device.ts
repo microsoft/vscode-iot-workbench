@@ -14,7 +14,7 @@ import * as WinReg from 'winreg';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, ScaffoldType} from '../constants';
+import {ConfigKey} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 import {TelemetryContext} from '../telemetry';
 import {delay, getRegistryValues} from '../utils';
