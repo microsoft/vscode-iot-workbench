@@ -6,9 +6,9 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {CancelOperationError} from '../CancelOperationError';
-import {ConfigKey, DevelopEnvironment, EventNames, FileNames, GlobalConstants, ScaffoldType} from '../constants';
+import {ConfigKey, EventNames, FileNames, GlobalConstants, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
-import {TelemetryContext, TelemetryProperties, TelemetryWorker} from '../telemetry';
+import {TelemetryContext, TelemetryWorker} from '../telemetry';
 import {channelShowAndAppendLine} from '../utils';
 
 import {ProjectHostType} from './Interfaces/ProjectHostType';
@@ -51,26 +51,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
     // only send telemetry when the IoT project is load when VS Code opens
     if (initLoad) {
-      const properties: TelemetryProperties = {
-        result: 'Succeeded',
-        error: '',
-        errorMessage: ''
-      };
-      properties.developEnvironment =
-          RemoteExtension.isRemote(this.extensionContext) ?
-          DevelopEnvironment.Container :
-          DevelopEnvironment.LocalEnv;
-      properties.projectHostType = ProjectHostType[this.projectHostType];
-
-      const telemetryContext:
-          TelemetryContext = {properties, measurements: {duration: 0}};
-
-      try {
-        TelemetryWorker.sendEvent(
-            EventNames.projectLoadEvent, telemetryContext);
-      } catch {
-        // If sending telemetry failed, skip the error to avoid blocking user.
-      }
+      this.sendTelemetryIfLoadProjectWithVSCodeOpens();
     }
 
     if (this.projectRootPath !== undefined) {
