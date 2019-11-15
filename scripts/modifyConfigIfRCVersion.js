@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 if (process.env.TRAVIS_TAG) {
-  const isTestVersion = /^v?[0-9]+\.[0-9]+\.[0-9]+-[rR][cC]$/.test(process.env.TRAVIS_TAG || '');
+  const isTestVersion = /^v?[0-9]+\.[0-9]+\.[0-9]+-[rR][cC]/.test(process.env.TRAVIS_TAG || '');
   if (isTestVersion) {
     // 1. Modify package.json
     const packageJson = JSON.parse(fs.readFileSync('package.json'));
@@ -12,8 +12,11 @@ if (process.env.TRAVIS_TAG) {
     packageJson.name = testName;
     packageJson.displayName = testDisplayName;
     packageJson.publisher = testPublisher;
-    packageJson.version = packageJson.version.slice(0, -3);
 
+    const indexOfDash = packageJson.version.indexOf('-');
+    if (indexOfDash > 0) {
+      packageJson.version = packageJson.version.substring(0, indexOfDash);
+    }
     delete packageJson.icon;
     delete packageJson.aiKey;
 

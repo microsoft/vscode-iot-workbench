@@ -18,7 +18,8 @@ branches:
 env:
   global:
     - ISPRODTAG=^v?[0-9]+\.[0-9]+\.[0-9]+$
-    - ISTESTTAG=^v?[0-9]+\.[0-9]+\.[0-9]+-[rR][cC]$
+    - ISTESTTAG=^v?[0-9]+\.[0-9]+\.[0-9]+-[rR][cC]
+    - RC_EXTENSION_ID="iotdevexbuild.test-iot-workbench"
 
 install:
 - sudo apt-get install libsecret-1-dev
@@ -56,7 +57,7 @@ deploy:
       condition: "$TRAVIS_TAG =~ $ISPRODTAG"
   # deploy test version to vscode extension market
   - provider: script
-    script: vsce publish -p $VSCE_TEST_TOKEN --packagePath *.vsix
+    script: yes | vsce unpublish -p $VSCE_TEST_TOKEN $RC_EXTENSION_ID && vsce publish -p $VSCE_TEST_TOKEN --packagePath *.vsix
     skip_cleanup: true
     on:
       tags: true
