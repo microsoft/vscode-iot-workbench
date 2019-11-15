@@ -41,7 +41,8 @@ const constants = {
   cExtraFlag: 'compiler.c.extra_flags=-DCORRELATIONID="',
   cppExtraFlag: 'compiler.cpp.extra_flags=-DCORRELATIONID="',
   traceExtraFlag: ' -DENABLETRACE=',
-  informationPageUrl: 'https://aka.ms/AA35xln'
+  informationPageUrl: 'https://aka.ms/AA35xln',
+  serialportEnding: 'Both NL & CR'
 };
 
 enum ConfigDeviceOptions {
@@ -531,9 +532,10 @@ export class AZ3166Device extends ArduinoDeviceBase {
           // Configure serial port callbacks
           port.on('open', () => {
             // tslint:disable-next-line: no-any
-            port.write('\r\nhelp\r\n', (error: any) => {
-              if (rejectIfError(error)) return;
-            });
+            port.write(
+                '\r\nhelp\r\n', constants.serialportEnding, (error: any) => {
+                  if (rejectIfError(error)) return;
+                });
           });
 
           // tslint:disable-next-line: no-any
@@ -581,9 +583,11 @@ export class AZ3166Device extends ArduinoDeviceBase {
                       'Please hold down button A and then push and release the reset button to enter configuration mode.')
                   .then(() => {
                     // tslint:disable-next-line: no-any
-                    port.write('\r\nhelp\r\n', (error: any) => {
-                      rejectIfError(error);
-                    });
+                    port.write(
+                        '\r\nhelp\r\n', constants.serialportEnding,
+                        (error: any) => {
+                          rejectIfError(error);
+                        });
                   });
             }
           }, 10000);
@@ -655,7 +659,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
         (resolve: (value: boolean) => void, reject: (value: Error) => void) => {
           try {
             // tslint:disable-next-line: no-any
-            port.write(data, (err: any) => {
+            port.write(data, constants.serialportEnding, (err: any) => {
               if (err) {
                 reject(err);
               } else {
