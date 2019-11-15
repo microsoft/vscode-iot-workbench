@@ -531,8 +531,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
           // Configure serial port callbacks
           port.on('open', () => {
-            // tslint:disable-next-line: no-any
             port.write(
+                // tslint:disable-next-line: no-any
                 '\r\nhelp\r\n', constants.serialportEnding, (error: any) => {
                   if (rejectIfError(error)) return;
                 });
@@ -582,9 +582,9 @@ export class AZ3166Device extends ArduinoDeviceBase {
                   .showInformationMessage(
                       'Please hold down button A and then push and release the reset button to enter configuration mode.')
                   .then(() => {
-                    // tslint:disable-next-line: no-any
                     port.write(
                         '\r\nhelp\r\n', constants.serialportEnding,
+                        // tslint:disable-next-line: no-any
                         (error: any) => {
                           rejectIfError(error);
                         });
