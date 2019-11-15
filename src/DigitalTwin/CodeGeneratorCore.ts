@@ -22,7 +22,7 @@ import {ConfigHandler} from '../configHandler';
 import {PnpDeviceConnection, CodeGenProjectTemplate, DeviceSdkReference} from '../Models/Interfaces/ProjectTemplate';
 import {DialogResponses} from '../DialogResponses';
 import {RemoteExtension} from '../Models/RemoteExtension';
-import { DigitalTwinUtility } from './DigitalTwinUtility';
+import {DigitalTwinUtility} from './DigitalTwinUtility';
 
 interface CodeGeneratorDownloadLocation {
   win32Md5: string;
@@ -77,15 +77,15 @@ export class CodeGeneratorCore {
     if (!DigitalTwinUtility.init(channel)) {
       return;
     }
-    const capabilityModelFilePath: string = await DigitalTwinUtility.selectCapabilityModel();
+    const capabilityModelFilePath: string =
+        await DigitalTwinUtility.selectCapabilityModel();
     if (!capabilityModelFilePath) {
       return;
     }
 
     // Prompt if old project exists for the same Capability Model file
     const regenResult = await this.RegenCode(
-        rootPath, capabilityModelFilePath, context, channel,
-        telemetryContext);
+        rootPath, capabilityModelFilePath, context, channel, telemetryContext);
     if (regenResult === ReGenResult.Succeeded ||
         regenResult === ReGenResult.Cancelled) {
       return;
@@ -133,7 +133,8 @@ export class CodeGeneratorCore {
     }
 
     // Download dependent interface of capability model
-    if (!await DigitalTwinUtility.downloadDependentInterface(rootPath, capabilityModelFilePath)) {
+    if (!await DigitalTwinUtility.downloadDependentInterface(
+            rootPath, capabilityModelFilePath)) {
       return;
     }
 
@@ -204,9 +205,11 @@ export class CodeGeneratorCore {
 
       // User select regenerate code
       if (regenSelection.label !== 'Create new project') {
-        const projectPath = path.join(rootPath, codeGenExecutionItem.projectName);
+        const projectPath =
+            path.join(rootPath, codeGenExecutionItem.projectName);
         utils.mkdirRecursivelySync(projectPath);
-        if (!await DigitalTwinUtility.downloadDependentInterface(rootPath, capabilityModelFilePath)) {
+        if (!await DigitalTwinUtility.downloadDependentInterface(
+                rootPath, capabilityModelFilePath)) {
           return ReGenResult.Skipped;
         }
 

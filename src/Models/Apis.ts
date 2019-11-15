@@ -18,7 +18,8 @@ export function getExtension(name: ExtensionName) {
           'ms-vscode.azure-account');
       return azureAccount ? azureAccount.exports : undefined;
     case ExtensionName.DigitalTwins:
-      const digitalTwins = vscode.extensions.getExtension('vsciot-vscode.azure-digital-twins');
+      const digitalTwins =
+          vscode.extensions.getExtension('vsciot-vscode.azure-digital-twins');
       return digitalTwins ? digitalTwins.exports : undefined;
     default:
       return undefined;

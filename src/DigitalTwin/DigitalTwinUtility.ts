@@ -5,15 +5,16 @@
 
 import * as vscode from 'vscode';
 import * as utils from '../utils';
-import { getExtension } from '../Models/Apis';
-import { ExtensionName } from '../Models/Interfaces/Api';
-import { DigitalTwinConstants } from './DigitalTwinConstants';
+import {getExtension} from '../Models/Apis';
+import {ExtensionName} from '../Models/Interfaces/Api';
+import {DigitalTwinConstants} from './DigitalTwinConstants';
 
 /**
  * Digital Twin extension utility
  */
 export class DigitalTwinUtility {
-  private static readonly EXTENSION_NOT_INIT = 'Azure Digital Twin extension is not inititalized';
+  private static readonly EXTENSION_NOT_INIT =
+      'Azure Digital Twin extension is not inititalized';
   // tslint:disable-next-line: no-any
   private static extensionInstance: any;
   private static channel: vscode.OutputChannel;
@@ -26,7 +27,8 @@ export class DigitalTwinUtility {
     const digitalTwins = getExtension(ExtensionName.DigitalTwins);
     if (!digitalTwins) {
       utils.channelShowAndAppendLine(
-        channel, 'Azure Digital Twins extension is required, please install it from marketplace.');
+          channel,
+          'Azure Digital Twins extension is required, please install it from marketplace.');
       return false;
     }
     DigitalTwinUtility.extensionInstance = digitalTwins.apiProvider;
@@ -43,32 +45,37 @@ export class DigitalTwinUtility {
     }
     let result = '';
     try {
-      result = await DigitalTwinUtility.extensionInstance.selectCapabilityModel();
+      result =
+          await DigitalTwinUtility.extensionInstance.selectCapabilityModel();
     } catch {
       // skip for UserCancelledError
     }
     if (!result) {
       utils.channelShowAndAppendLine(
-        DigitalTwinUtility.channel, `${DigitalTwinConstants.dtPrefix} Cancelled.`);
+          DigitalTwinUtility.channel,
+          `${DigitalTwinConstants.dtPrefix} Cancelled.`);
     }
     return result;
   }
 
   /**
    * download dependent interface,
-   * return true if all interface is successfully downloaded, otherwise return false
+   * return true if all interface is successfully downloaded, otherwise false
    * @param folder folder to download interface
    * @param capabilityModelFile capability model file path
    */
-  static async downloadDependentInterface(folder: string, capabilityModelFile: string): Promise<boolean> {
+  static async downloadDependentInterface(
+      folder: string, capabilityModelFile: string): Promise<boolean> {
     if (!DigitalTwinUtility.extensionInstance) {
       throw new Error(DigitalTwinUtility.EXTENSION_NOT_INIT);
     }
     try {
-      await DigitalTwinUtility.extensionInstance.downloadDependentInterface(folder, capabilityModelFile);
+      await DigitalTwinUtility.extensionInstance.downloadDependentInterface(
+          folder, capabilityModelFile);
     } catch (error) {
       utils.channelShowAndAppendLine(
-        DigitalTwinUtility.channel, `${DigitalTwinConstants.dtPrefix} ${error.message}`);
+          DigitalTwinUtility.channel,
+          `${DigitalTwinConstants.dtPrefix} ${error.message}`);
       return false;
     }
     return true;
