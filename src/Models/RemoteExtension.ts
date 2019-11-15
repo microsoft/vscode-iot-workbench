@@ -49,7 +49,7 @@ export class RemoteExtension {
   static checkLocalBeforeRunCommand(context: vscode.ExtensionContext): boolean {
     if (RemoteExtension.isRemote(context)) {
       const message =
-          `The project is open in a Docker container now. Open a new window and run this command again.`;
+          `The command is not supported to be run in a remote environment. Open a new window and run this command again.`;
       vscode.window.showWarningMessage(message);
       return false;
     }
