@@ -6,8 +6,8 @@ if (process.env.TRAVIS_TAG) {
     // 1. Modify package.json
     const packageJson = JSON.parse(fs.readFileSync('package.json'));
 
-    const testName = "test-iot-workbench";
-    const testDisplayName = "Test IoT Workbench";
+    const testName = "test-owl-project";
+    const testDisplayName = "Test OWL Project";
     const testPublisher = "IoTDevExBuild";
     packageJson.name = testName;
     packageJson.displayName = testDisplayName;
@@ -25,7 +25,7 @@ if (process.env.TRAVIS_TAG) {
 
     // 2. Modify extensionId in files
     const extensionIdPattern = /vsciot-vscode.vscode-iot-workbench/g;
-    const rcExtensionId = 'iotdevexbuild.test-iot-workbench';
+    const rcExtensionId = 'iotdevexbuild.test-owl-project';
 
     const constantFilePath = "src/constants.ts";
     const arm7DevcontainerJsonFile = "resources/templates/arm7/devcontainer.json";
