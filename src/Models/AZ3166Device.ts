@@ -42,7 +42,6 @@ const constants = {
   cppExtraFlag: 'compiler.cpp.extra_flags=-DCORRELATIONID="',
   traceExtraFlag: ' -DENABLETRACE=',
   informationPageUrl: 'https://aka.ms/AA35xln',
-  serialportEnding: 'Both NL & CR'
 };
 
 enum ConfigDeviceOptions {
@@ -532,8 +531,9 @@ export class AZ3166Device extends ArduinoDeviceBase {
           // Configure serial port callbacks
           port.on('open', () => {
             port.write(
+                '\r\nhelp\r\n', AZ3166Device.serialport.endings.BothNLAndCR,
                 // tslint:disable-next-line: no-any
-                '\r\nhelp\r\n', constants.serialportEnding, (error: any) => {
+                (error: any) => {
                   if (rejectIfError(error)) return;
                 });
           });
@@ -583,7 +583,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
                       'Please hold down button A and then push and release the reset button to enter configuration mode.')
                   .then(() => {
                     port.write(
-                        '\r\nhelp\r\n', constants.serialportEnding,
+                        '\r\nhelp\r\n',
+                        AZ3166Device.serialport.endings.BothNLAndCR,
                         // tslint:disable-next-line: no-any
                         (error: any) => {
                           rejectIfError(error);
@@ -658,14 +659,16 @@ export class AZ3166Device extends ArduinoDeviceBase {
     return new Promise(
         (resolve: (value: boolean) => void, reject: (value: Error) => void) => {
           try {
-            // tslint:disable-next-line: no-any
-            port.write(data, constants.serialportEnding, (err: any) => {
-              if (err) {
-                reject(err);
-              } else {
-                port.drain(() => resolve(true));
-              }
-            });
+            port.write(
+                data, AZ3166Device.serialport.endings.BothNLAndCR,
+                // tslint:disable-next-line: no-any
+                (err: any) => {
+                  if (err) {
+                    reject(err);
+                  } else {
+                    port.drain(() => resolve(true));
+                  }
+                });
           } catch (err) {
             reject(err);
           }

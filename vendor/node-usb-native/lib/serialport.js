@@ -23,6 +23,11 @@ var STOPBITS = [1, 1.5, 2];
 var PARITY = ['none', 'even', 'mark', 'odd', 'space'];
 var FLOWCONTROLS = ['xon', 'xoff', 'xany', 'rtscts'];
 var SET_OPTIONS = ['brk', 'cts', 'dtr', 'dts', 'rts'];
+const endings = {
+  Newline: 'Newline',
+  CarriageReturn: 'Carriage return',
+  BothNLAndCR: 'Both NL & CR'
+} ;
 
 // Stuff from ReadStream, refactored for our usage:
 var kPoolSize = 40 * 1024;
@@ -227,13 +232,13 @@ SerialPort.prototype.write = function(buffer, ending, callback) {
   }
 
   switch (ending) {
-    case 'Newline':
+    case endings.Newline:
       buffer = Buffer.concat([buffer, Buffer.from('\n')]);
       break;
-    case 'Carriage return':
+    case endings.CarriageReturn:
       buffer = Buffer.concat([buffer, Buffer.from('\r')]);
       break;
-    case 'Both NL & CR':
+    case endings.BothNLAndCR:
       buffer = Buffer.concat([buffer, Buffer.from('\r\n')]);
       break;
     default:
@@ -486,6 +491,7 @@ SerialPort.prototype.drain = function(callback) {
 
 SerialPort.parsers = parsers;
 SerialPort.list = SerialPortBinding.list;
+SerialPort.endings = endings;
 
 // Write a depreciation warning once
 Object.defineProperty(SerialPort, 'SerialPort', {

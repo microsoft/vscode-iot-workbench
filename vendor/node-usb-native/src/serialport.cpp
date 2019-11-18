@@ -697,7 +697,7 @@ SerialPortStopBits NAN_INLINE(ToStopBitEnum(double stopBits)) {
 }
 
 extern "C" {
-  void init_serialport( v8::Local<v8::Object> target) {
+  void init_serialport(v8::Local<v8::Object> target) {
     Nan::HandleScope scope;
     Nan::SetMethod(target, "set", Set);
     Nan::SetMethod(target, "open", Open);
