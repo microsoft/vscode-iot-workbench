@@ -23,6 +23,11 @@ var STOPBITS = [1, 1.5, 2];
 var PARITY = ['none', 'even', 'mark', 'odd', 'space'];
 var FLOWCONTROLS = ['xon', 'xoff', 'xany', 'rtscts'];
 var SET_OPTIONS = ['brk', 'cts', 'dtr', 'dts', 'rts'];
+const endings = {
+  Newline: 'Newline',
+  CarriageReturn: 'Carriage return',
+  BothNLAndCR: 'Both NL & CR'
+} ;
 
 // Stuff from ReadStream, refactored for our usage:
 var kPoolSize = 40 * 1024;
@@ -216,7 +221,7 @@ SerialPort.prototype.isOpen = function() {
   return this.fd !== null && !this.closing;
 };
 
-SerialPort.prototype.write = function(buffer, callback) {
+SerialPort.prototype.write = function(buffer, ending, callback) {
   if (!this.isOpen()) {
     debug('write attempted, but port is not open');
     return this._error(new Error('Port is not open'), callback);
@@ -224,6 +229,20 @@ SerialPort.prototype.write = function(buffer, callback) {
 
   if (!Buffer.isBuffer(buffer)) {
     buffer = Buffer.from(buffer);
+  }
+
+  switch (ending) {
+    case endings.Newline:
+      buffer = Buffer.concat([buffer, Buffer.from('\n')]);
+      break;
+    case endings.CarriageReturn:
+      buffer = Buffer.concat([buffer, Buffer.from('\r')]);
+      break;
+    case endings.BothNLAndCR:
+      buffer = Buffer.concat([buffer, Buffer.from('\r\n')]);
+      break;
+    default:
+      break;
   }
 
   debug(`write ${buffer.length} bytes of data`);
@@ -472,6 +491,7 @@ SerialPort.prototype.drain = function(callback) {
 
 SerialPort.parsers = parsers;
 SerialPort.list = SerialPortBinding.list;
+SerialPort.endings = endings;
 
 // Write a depreciation warning once
 Object.defineProperty(SerialPort, 'SerialPort', {

@@ -14,7 +14,7 @@ import * as WinReg from 'winreg';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, ScaffoldType} from '../constants';
+import {ConfigKey} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 import {TelemetryContext} from '../telemetry';
 import {delay, getRegistryValues} from '../utils';
@@ -41,7 +41,7 @@ const constants = {
   cExtraFlag: 'compiler.c.extra_flags=-DCORRELATIONID="',
   cppExtraFlag: 'compiler.cpp.extra_flags=-DCORRELATIONID="',
   traceExtraFlag: ' -DENABLETRACE=',
-  informationPageUrl: 'https://aka.ms/AA35xln'
+  informationPageUrl: 'https://aka.ms/AA35xln',
 };
 
 enum ConfigDeviceOptions {
@@ -530,10 +530,12 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
           // Configure serial port callbacks
           port.on('open', () => {
-            // tslint:disable-next-line: no-any
-            port.write('\r\nhelp\r\n', (error: any) => {
-              if (rejectIfError(error)) return;
-            });
+            port.write(
+                '\r\nhelp\r\n', AZ3166Device.serialport.endings.BothNLAndCR,
+                // tslint:disable-next-line: no-any
+                (error: any) => {
+                  if (rejectIfError(error)) return;
+                });
           });
 
           // tslint:disable-next-line: no-any
@@ -580,10 +582,13 @@ export class AZ3166Device extends ArduinoDeviceBase {
                   .showInformationMessage(
                       'Please hold down button A and then push and release the reset button to enter configuration mode.')
                   .then(() => {
-                    // tslint:disable-next-line: no-any
-                    port.write('\r\nhelp\r\n', (error: any) => {
-                      rejectIfError(error);
-                    });
+                    port.write(
+                        '\r\nhelp\r\n',
+                        AZ3166Device.serialport.endings.BothNLAndCR,
+                        // tslint:disable-next-line: no-any
+                        (error: any) => {
+                          rejectIfError(error);
+                        });
                   });
             }
           }, 10000);
@@ -654,14 +659,16 @@ export class AZ3166Device extends ArduinoDeviceBase {
     return new Promise(
         (resolve: (value: boolean) => void, reject: (value: Error) => void) => {
           try {
-            // tslint:disable-next-line: no-any
-            port.write(data, (err: any) => {
-              if (err) {
-                reject(err);
-              } else {
-                port.drain(() => resolve(true));
-              }
-            });
+            port.write(
+                data, AZ3166Device.serialport.endings.BothNLAndCR,
+                // tslint:disable-next-line: no-any
+                (err: any) => {
+                  if (err) {
+                    reject(err);
+                  } else {
+                    port.drain(() => resolve(true));
+                  }
+                });
           } catch (err) {
             reject(err);
           }
