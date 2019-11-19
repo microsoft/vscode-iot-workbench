@@ -119,6 +119,11 @@ export class ProjectEnvironmentConfiger {
     let project;
     let projectRootPath = '';
     if (platform === PlatformType.EmbeddedLinux) {
+      const result = await RemoteExtension.checkRemoteExtension(channel);
+      if (!result) {
+        return false;
+      }
+
       telemetryContext.properties.projectHostType = 'Container';
       project = new ioTContainerizedProjectModule.IoTContainerizedProject(
           context, channel, telemetryContext);
