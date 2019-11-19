@@ -65,20 +65,19 @@ export class AnsiCCodeGenerator implements CodeGenerator {
         connectionTypeValue}" -r "${sdkReferenceTypeValue}" -l ansic -o "${
         outputDir}" -n "${projectName}"`;
 
-    let message = `${DigitalTwinConstants.dtPrefix} generate PnP device code.`;
-    utils.channelShowAndAppendLine(this.channel, message);
+    let message: string;
+
     try {
       await utils.runCommand(command, [], cmdPath, this.channel);
+      message = `${
+          DigitalTwinConstants.dtPrefix} generate PnP device code completed.`;
+      utils.channelShowAndAppendLine(this.channel, message);
+      return true;
     } catch {
       message =
-          `${DigitalTwinConstants.dtPrefix} generate PnP device codefailed.`;
+          `${DigitalTwinConstants.dtPrefix} generate PnP device code failed.`;
       utils.channelShowAndAppendLine(this.channel, message);
       return false;
     }
-
-    message =
-        `${DigitalTwinConstants.dtPrefix} generate PnP device code completed.`;
-    utils.channelShowAndAppendLine(this.channel, message);
-    return true;
   }
 }
