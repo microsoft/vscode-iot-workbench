@@ -3,7 +3,8 @@
 ## Preparation
 
 1. Follow the [setup guide](./embedded-linux-setup.md) to setup the prerequisite including Docker runtime.
-2. Prepare an IoT Hub
+2. Install [Remote Development](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack) extension in VS Code.
+3. Prepare an IoT Hub.
 
 ## Author Your Model
 
@@ -60,7 +61,7 @@ You use the built-in containerized toolchain to build the generated device code 
 
 5. Select **Azure IoT Device Workbench: Compile Device Code** to build device code. The cross-compiling of the code happens in the dev container. Once it's done, it shows the notification:
 
-    ![](../images/compile-success.png)
+    ![](../images/pnp-with-container-compile-success.png)
 
 6. Select **Azure IoT Device Workbench: Upload Device Code** to upload device code to your target machine. Select **Manual setup** and enter the `IP address`, `port`, `user name` and `password` to deploy the compiled binary via SSH to your target x86 Linux machine:
 
@@ -76,7 +77,7 @@ Navigate to your target x86 Linux machine, check the binary file is successfully
 
 You can see the target device starts sending telemetry data to the Azure IoT Hub:
 
-  ![](../images/result.png)
+  ![](../images/pnp-with-container-result.png)
 
 To verify the reception of the data, use Azure IoT Hub Toolkit, right click on the device and select **Start Monitoring Built-in Event Endpoint**. In the output window, you can see that IoT Hub gets telemetry data sent from Raspberry Pi:
 
