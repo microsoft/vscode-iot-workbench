@@ -510,10 +510,14 @@ export class AZ3166Device extends ArduinoDeviceBase {
           const executeSetAzIoTHub = async () => {
             try {
               const data = `${command} "${configValue}"\r\n`;
-              await this.sendDataViaSerialPort(port, data.slice(0, 120));
-              if (data.length > 120) {
+              // TODO: Remove this magic number
+              const maxDataLength = 160;
+              await this.sendDataViaSerialPort(
+                  port, data.slice(0, maxDataLength));
+              if (data.length > maxDataLength) {
                 await delay(1000);
-                await this.sendDataViaSerialPort(port, data.slice(120));
+                await this.sendDataViaSerialPort(
+                    port, data.slice(maxDataLength));
               }
 
               await delay(1000);
