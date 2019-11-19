@@ -43,7 +43,7 @@ Now that you have a DCM and its associated interfaces, you can generate the devi
 
 ![](../images/device-code.png)
 
-## Build Application in Contianerized Toolchain
+## Build Application in Containerized Toolchain
 
 You use the built-in containerized toolchain to build the generated device code stub. Currently you can compile code in one of these platform toolchains on the basis of your target device machine platform: `armv7`, `arm64` and `x86`. The application you build simulates a device that connects to an IoT hub. The application sends telemetry and properties and receives commands.
 
