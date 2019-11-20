@@ -81,4 +81,4 @@ You can see the target device starts sending telemetry data to the Azure IoT Hub
 
 To verify the reception of the data, use Azure IoT Hub Toolkit, right click on the device and select **Start Monitoring Built-in Event Endpoint**. In the output window, you can see that IoT Hub gets telemetry data sent from Raspberry Pi:
 
-  ![](../images/iothub-d2c.png)
+  ![](../images/pnp-wirh-container-iothub-d2c.png)
