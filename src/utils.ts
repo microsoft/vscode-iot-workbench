@@ -362,28 +362,6 @@ export async function takeNoDeviceSurvey(telemetryContext: TelemetryContext) {
   return;
 }
 
-export function generateInterfaceFileNameFromUrnId(
-    urnId: string, targetPath: string) {
-  const suffix = '.interface.json';
-  const names: string[] = urnId.split(':');
-  // at least the path should contain urn, namespace, name & version
-  if (names.length < 4) {
-    throw new Error(`The id of the file is not valid. id: ${urnId}`);
-  }
-
-  const displayName = names.join('_');
-  let counter = 0;
-  let candidateName = displayName + suffix;
-  while (true) {
-    const filePath = path.join(targetPath, candidateName);
-    if (!fileExistsSync(filePath)) {
-      break;
-    }
-    counter++;
-    candidateName = `${displayName}_${counter}${suffix}`;
-  }
-  return candidateName;
-}
 export class InternalConfig {
   static isInternal: boolean = InternalConfig.isInternalUser();
 

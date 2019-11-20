@@ -12,8 +12,6 @@ export class ConfigKey {
   static readonly boardId = 'BoardId';
   static readonly asaPath = 'StreamAnalyticsPath';
   static readonly codeGeneratorVersion = 'IoTPnPCodeGenVersion';
-  static readonly modelRepositoryKeyName = 'IoTPnPModelRepositoryKey';
-  static readonly iotPnPPublicRepositoryUrl = 'IoTPnPPublicRepositoryUrl';
   static readonly projectType = 'ProjectType';
   static readonly projectHostType = 'ProjectHostType';
   static readonly workbenchVersion = 'version';
@@ -41,21 +39,6 @@ export class EventNames {
   static readonly openTutorial = 'IoTWorkbench.OpenTutorial';
   static readonly projectLoadEvent = 'IoTWorkbench.ProjectLoadEvent';
   static readonly scaffoldDeviceStubEvent = 'IoTWorkbench.ScaffoldDeviceStub';
-  static readonly pnpGetInterfacesEvent = 'IoTWorkbench.IoTPnPGetInterfaces';
-  static readonly pnpGetCapabilityModelsEvent =
-      'IoTWorkbench.IoTPnPGetCapabilityModels';
-  static readonly pnpDeleteModelsEvent = 'IoTWorkbench.IoTPnPDeleteModels';
-  static readonly pnpEditModelsEvent = 'IoTWorkbench.IoTPnPEditModels';
-  static readonly pnpConnectModelRepoEvent =
-      'IoTWorkbench.IoTPnPConnectModelRepo';
-  static readonly pnpDisconnectModelRepoEvent =
-      'IoTWorkbench.IoTPnPDisconnectModelRepo';
-  static readonly pnpCreateInterfaceEvent =
-      'IoTWorkbench.IoTPnPCreateInterface';
-  static readonly pnpCreateCapabilityModelEvent =
-      'IoTWorkbench.IoTPnPCreateCapabilityModel';
-  static readonly pnpSubmitMetaModelFilesEvent =
-      'IoTWorkbench.IoTPnPSubmitMetaModelFiles';
 }
 
 export class FileNames {
@@ -123,21 +106,7 @@ export enum DevelopEnvironment {
 
 export enum TemplateTag {
   General = 'general',
-  Digitaltwin = 'digitaltwin',
   DevelopmentEnvironment = 'development_container'
-}
-
-export class ContextUris {
-  static readonly iotModel = 'http://azureiot.com/v1/contexts/IoTModel.json';
-  static readonly interface = 'http://azureiot.com/v1/contexts/Interface.json';
-  static readonly capabilityModel =
-      'http://azureiot.com/v1/contexts/CapabilityModel.json';
-}
-
-export enum ModelType {
-  Interface = 'Interface',
-  CapabilityModel = 'CapabilityModel',
-  InlineInterface = 'InterfaceInstance'
 }
 
 export enum OSPlatform {
