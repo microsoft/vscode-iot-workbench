@@ -46,13 +46,13 @@ Now that you have a DCM and its associated interfaces, you can generate the devi
 
 ## Build Application in Containerized Toolchain
 
-You use the built-in containerized toolchain to build the generated device code stub. Currently you can compile code in one of these platform toolchains on the basis of your target device machine platform: `armv7`, `arm64` and `x86`. The application you build simulates a device that connects to an IoT hub. The application sends telemetry and properties and receives commands.
+You use the built-in containerized toolchain to build the generated device code stub. Currently you can compile code in one of these platform toolchains on the basis of your target machine platform: `armv7`, `arm64` and `x86`. The application you build simulates a device that connects to an IoT hub. The application sends telemetry and properties and receives commands.
 
 1. Open Command Palette and select "**Azure IoT Device Workbench: Configure Project for Device Development Environment...**"
 
 2. Select **Embedded_Linux (Preview)** as platform type.
 
-3. Select **Azure IoT Device C SDK for x86 Linux** as your toolchain container for your device platform. Later we the built application will be able to be executed in x86 Linux machine.
+3. Select **Azure IoT Device C SDK for x86 Linux** as your toolchain container for your device platform. Later the built application will be able to be executed in x86 Linux machine.
 
 4. Select **No** to open the configured project in remote container.
 
@@ -63,7 +63,7 @@ You use the built-in containerized toolchain to build the generated device code 
 
     ![](../images/pnp-with-container-compile-success.png)
 
-6. Select **Azure IoT Device Workbench: Upload Device Code** to upload device code to your target machine. Select **Manual setup** and enter the `IP address`, `port`, `user name` and `password` to deploy the compiled binary via SSH to your target x86 Linux machine:
+6. Select **Azure IoT Device Workbench: Upload Device Code** to upload device code to your target machine. Select **Manual setup** and enter the `IP address`, `port`, `user name`, `password` and `project destinarion path` to deploy the compiled binary via SSH to your target x86 Linux machine:
 
     ![](../images/upload-options.png)
 
