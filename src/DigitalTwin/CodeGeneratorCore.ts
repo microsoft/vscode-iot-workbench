@@ -147,8 +147,7 @@ export class CodeGeneratorCore {
 
     // Download all interfaces
     if (!await this.downloadAllIntefaceFiles(
-            channel, rootPath, capabilityModelFilePath, projectPath,
-            interfaceFiles)) {
+            channel, rootPath, capabilityModelFilePath, interfaceFiles)) {
       return;
     }
 
@@ -258,11 +257,8 @@ export class CodeGeneratorCore {
 
       // User select regenerate code
       if (regenSelection.label !== 'Create new project') {
-        const projectPath =
-            path.join(rootPath, codeGenExecutionItem.projectName);
         if (!await this.downloadAllIntefaceFiles(
-                channel, rootPath, capabilityModelFilePath, projectPath,
-                interfaceFiles)) {
+                channel, rootPath, capabilityModelFilePath, interfaceFiles)) {
           return ReGenResult.Skipped;
         }
 
@@ -633,13 +629,12 @@ export class CodeGeneratorCore {
 
   private async downloadAllIntefaceFiles(
       channel: vscode.OutputChannel, rootPath: string,
-      capabilityModelFilePath: string, projectPath: string,
+      capabilityModelFilePath: string,
       interfaceFiles: dtUtils.SchemaFileInfo[]): Promise<boolean> {
     const capabilityModel =
         JSON.parse(fs.readFileSync(capabilityModelFilePath, 'utf8'));
 
     const implementedInterfaces = capabilityModel['implements'];
-    utils.mkdirRecursivelySync(projectPath);
 
     let connectionString: string|null = null;
     let credentialChecked = false;
