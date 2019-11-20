@@ -510,10 +510,13 @@ export class AZ3166Device extends ArduinoDeviceBase {
           const executeSetAzIoTHub = async () => {
             try {
               const data = `${command} "${configValue}"\r\n`;
-              await this.sendDataViaSerialPort(port, data.slice(0, 120));
-              if (data.length > 120) {
+              const maxDataLength = 256;
+              await this.sendDataViaSerialPort(
+                  port, data.slice(0, maxDataLength));
+              if (data.length > maxDataLength) {
                 await delay(1000);
-                await this.sendDataViaSerialPort(port, data.slice(120));
+                await this.sendDataViaSerialPort(
+                    port, data.slice(maxDataLength));
               }
 
               await delay(1000);
@@ -531,7 +534,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
           // Configure serial port callbacks
           port.on('open', () => {
             port.write(
-                '\r\nhelp\r\n', AZ3166Device.serialport.endings.BothNLAndCR,
+                '\r\nhelp\r\n',
                 // tslint:disable-next-line: no-any
                 (error: any) => {
                   if (rejectIfError(error)) return;
@@ -584,7 +587,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
                   .then(() => {
                     port.write(
                         '\r\nhelp\r\n',
-                        AZ3166Device.serialport.endings.BothNLAndCR,
+
                         // tslint:disable-next-line: no-any
                         (error: any) => {
                           rejectIfError(error);
@@ -660,7 +663,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
         (resolve: (value: boolean) => void, reject: (value: Error) => void) => {
           try {
             port.write(
-                data, AZ3166Device.serialport.endings.BothNLAndCR,
+                data,
                 // tslint:disable-next-line: no-any
                 (err: any) => {
                   if (err) {
