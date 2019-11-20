@@ -99,9 +99,6 @@ export class CodeGeneratorCore {
       return;
     }
 
-    const projectPath = path.join(rootPath, codeGenProjectName);
-    utils.mkdirRecursivelySync(projectPath);
-
     // Select language
     const codeGenLanguage = await this.selectLanguage(telemetryContext);
     if (!codeGenLanguage) {
@@ -205,9 +202,6 @@ export class CodeGeneratorCore {
 
       // User select regenerate code
       if (regenSelection.label !== 'Create new project') {
-        const projectPath =
-            path.join(rootPath, codeGenExecutionItem.projectName);
-        utils.mkdirRecursivelySync(projectPath);
         if (!await DigitalTwinUtility.downloadDependentInterface(
                 rootPath, capabilityModelFilePath)) {
           return ReGenResult.Skipped;
