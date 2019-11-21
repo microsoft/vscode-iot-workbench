@@ -1,12 +1,12 @@
 # devicedevex.azurecr.io/public/iot-device-cube:1.0.4-azure-c-sdk-public-preview-cross-toolchain-arm32
 FROM devicedevex.azurecr.io/internal/iot-device-cube:1.0.0-ubuntu-cross-toolchain-arm32
 
-ARG lib_openssl_uri=https://www.openssl.org/source/openssl-1.1.1c.tar.gz
-ARG lib_openssl_name=openssl-1.1.1c
-ARG lib_curl_uri=http://curl.haxx.se/download/curl-7.65.1.tar.gz
-ARG lib_curl_name=curl-7.65.1
-ARG lib_util_uri=https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.32/util-linux-2.32.1.tar.gz
-ARG lib_util_name=util-linux-2.32.1
+ARG lib_openssl_uri=https://www.openssl.org/source/openssl-1.0.2o.tar.gz
+ARG lib_openssl_name=openssl-1.0.2o
+ARG lib_curl_uri=http://curl.haxx.se/download/curl-7.60.0.tar.gz
+ARG lib_curl_name=curl-7.60.0
+ARG lib_util_uri=https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.32/util-linux-2.32-rc2.tar.gz
+ARG lib_util_name=util-linux-2.32-rc2
 
 WORKDIR /work
 COPY Toolchain.cmake /work/temp/Toolchain.cmake
