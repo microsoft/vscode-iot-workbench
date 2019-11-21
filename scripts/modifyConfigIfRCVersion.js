@@ -7,7 +7,7 @@ if (process.env.TRAVIS_TAG) {
     const packageJson = JSON.parse(fs.readFileSync('package.json'));
 
     const testName = "test-owl-project";
-    const testDisplayName = "Test OWL Project";
+    const testDisplayName = "Test OWL Project RC";
     const testPublisher = "IoTDevExBuild";
     packageJson.name = testName;
     packageJson.displayName = testDisplayName;
