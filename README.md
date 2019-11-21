@@ -45,6 +45,8 @@ Here are a set of tutorials to help you get started:
 
 - [Get Started connect Raspberry Pi to Azure IoT Hub](docs/embedded-linux/embedded-linux-get-started.md)
 
+- [Configure an external CMake project as Embedded Linux project](docs/embedded-linux/configure-external-cmake-project-as-embedded-linux-project.md)
+
 #### Arduino
 
 Currently, Device Workbench supports MXChip IoT DevKit and ESP32 DevKits using Arduino. For generic Arduino device, we recommend you use [Arduino extension in VS Code](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-arduino).
