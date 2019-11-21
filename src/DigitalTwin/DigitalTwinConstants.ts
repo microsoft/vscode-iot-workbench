@@ -3,7 +3,7 @@
 
 export class DigitalTwinConstants {
   static readonly dtPrefix = '[IoT Plug and Play]';
-  static readonly codeGenCli = 'IoT Plug and Play CodeGen Cli';
+  static readonly codeGenCli = 'IoT Plug and Play CodeGen CLI';
   static readonly codeGenCliFolder = 'iotpnp-codegen';
   static readonly codeGenCliApp = 'dtcodegen';
   static readonly codegenProjectNameRegex =

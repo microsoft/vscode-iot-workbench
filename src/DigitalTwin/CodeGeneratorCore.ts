@@ -7,10 +7,8 @@ import * as os from 'os';
 import * as vscode from 'vscode';
 import * as fs from 'fs-plus';
 import * as path from 'path';
-import * as crypto from 'crypto';
 
 import request = require('request-promise');
-import extractzip = require('extract-zip');
 
 import * as utils from '../utils';
 import {FileNames, ConfigKey, GlobalConstants} from '../constants';
@@ -23,6 +21,8 @@ import {PnpDeviceConnection, CodeGenProjectTemplate, DeviceSdkReference} from '.
 import {DialogResponses} from '../DialogResponses';
 import {RemoteExtension} from '../Models/RemoteExtension';
 import {DigitalTwinUtility} from './DigitalTwinUtility';
+import {CodeGenUtility} from './DigitalTwinCodeGen/CodeGenUtility';
+import {FileUtility} from '../FileUtility';
 
 interface CodeGeneratorDownloadLocation {
   win32Md5: string;
@@ -45,6 +45,12 @@ interface CodeGeneratorConfig {
 
 interface CodeGenExecutions {
   codeGenExecutionItems: CodeGenExecutionItem[];
+}
+
+enum CodeGenCliOperation {
+  None = 0,
+  Install,
+  Upgrade
 }
 
 enum ReGenResult {
@@ -79,12 +85,16 @@ export class CodeGeneratorCore {
     }
     const capabilityModelFilePath: string =
         await DigitalTwinUtility.selectCapabilityModel();
-    if (!capabilityModelFilePath) {
+    if (capabilityModelFilePath) {
+      utils.channelShowAndAppendLine(
+          channel,
+          `Selected device capability model file: ${capabilityModelFilePath}`);
+    } else {
       return;
     }
 
     // Prompt if old project exists for the same Capability Model file
-    const regenResult = await this.RegenCode(
+    const regenResult = await this.regenCode(
         rootPath, capabilityModelFilePath, context, channel, telemetryContext);
     if (regenResult === ReGenResult.Succeeded ||
         regenResult === ReGenResult.Cancelled) {
@@ -93,7 +103,10 @@ export class CodeGeneratorCore {
 
     // Specify project name
     const codeGenProjectName = await this.getCodeGenProjectName(rootPath);
-    if (!codeGenProjectName) {
+    if (codeGenProjectName) {
+      utils.channelShowAndAppendLine(
+          channel, `Input project name: ${codeGenProjectName}`);
+    } else {
       const message = `Project name is not specified, cancelled`;
       utils.channelShowAndAppendLine(channel, message);
       return;
@@ -101,7 +114,10 @@ export class CodeGeneratorCore {
 
     // Select language
     const codeGenLanguage = await this.selectLanguage(telemetryContext);
-    if (!codeGenLanguage) {
+    if (codeGenLanguage) {
+      utils.channelShowAndAppendLine(
+          channel, `Selected CodeGen language: ${codeGenLanguage}`);
+    } else {
       return;
     }
 
@@ -111,21 +127,30 @@ export class CodeGeneratorCore {
     // Select device connection string type
     const connectionType =
         await this.selectConnectionType(codeGenOptions, telemetryContext);
-    if (!connectionType) {
+    if (connectionType) {
+      utils.channelShowAndAppendLine(
+          channel, `Selected device connection type: ${connectionType}`);
+    } else {
       return;
     }
 
     // Select project template
     const codeGenProjectType = await this.selectProjectTemplate(
         codeGenLanguage, codeGenOptions, telemetryContext);
-    if (!codeGenProjectType) {
+    if (codeGenProjectType) {
+      utils.channelShowAndAppendLine(
+          channel, `Selected CodeGen project type: ${codeGenProjectType}`);
+    } else {
       return;
     }
 
     // Select Device SDK reference type for CMake project
     const sdkReferenceType = await this.selectDeviceSdkReferenceType(
         codeGenProjectType, codeGenOptions, telemetryContext);
-    if (!sdkReferenceType) {
+    if (sdkReferenceType) {
+      utils.channelShowAndAppendLine(
+          channel, `Selected device SDK reference type: ${sdkReferenceType}`);
+    } else {
       return;
     }
 
@@ -153,7 +178,7 @@ export class CodeGeneratorCore {
         codeGenExecutionInfo, context, channel, telemetryContext);
   }
 
-  private async RegenCode(
+  private async regenCode(
       rootPath: string, capabilityModelFilePath: string,
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext): Promise<ReGenResult> {
@@ -206,6 +231,11 @@ export class CodeGeneratorCore {
                 rootPath, capabilityModelFilePath)) {
           return ReGenResult.Skipped;
         }
+
+        utils.channelShowAndAppendLine(
+            channel,
+            `Regenerate device code using an existing CodeGen configure:`);
+        CodeGenUtility.printCodeGenConfig(codeGenExecutionItem, channel);
 
         await this.generateDeviceCodeCore(
             codeGenExecutionItem, context, channel, telemetryContext);
@@ -555,7 +585,7 @@ export class CodeGeneratorCore {
   }
 
   private async checkLocalCodeGenCli(): Promise<string|null> {
-    // Check version of existing CodeGen Cli
+    // Check version of existing CodeGen CLI
     const platform = os.platform();
     const currentVersion =
         ConfigHandler.get<string>(ConfigKey.codeGeneratorVersion);
@@ -569,7 +599,7 @@ export class CodeGeneratorCore {
       // Doen't exist
       return null;
     }
-    // TODO: should check the integrity of the CodeGen Cli
+    // TODO: should check the integrity of the CodeGen CLI
     return currentVersion;
   }
 
@@ -613,7 +643,7 @@ export class CodeGeneratorCore {
       // Validate hash code
       utils.channelShowAndAppend(
           channel, 'Step 2: Validating hash code for the package ...');
-      const hashvalue = await fileHash(filePath);
+      const hashvalue = await FileUtility.getFileHash(filePath);
       if (hashvalue !== md5value) {
         utils.channelShowAndAppendLine(
             channel,
@@ -639,7 +669,7 @@ export class CodeGeneratorCore {
       // Extract files
       const codeGenCommandPath = localCodeGenCliPath();
       utils.channelShowAndAppend(channel, `Step 3: Extracting files ...`);
-      await extract(filePath, codeGenCommandPath);
+      await FileUtility.extractZipFile(filePath, codeGenCommandPath);
       utils.channelShowAndAppendLine(channel, ' done.');
       // Update the config
       await ConfigHandler.update(
@@ -669,37 +699,38 @@ export class CodeGeneratorCore {
       return false;
     }
 
-    // Check version of existing CodeGen Cli
-    let installOrUpgrade = 0;
+    // Check version of existing CodeGen CLI
+    let installOrUpgrade: CodeGenCliOperation = CodeGenCliOperation.None;
     const currentVersion = await this.checkLocalCodeGenCli();
     if (currentVersion == null) {
-      installOrUpgrade = 1;
+      installOrUpgrade = CodeGenCliOperation.Install;
     } else {
       // Compare version
       if (compareVersion(
               targetConfigItem.codeGeneratorVersion, currentVersion) > 0) {
         // Upgrade
-        installOrUpgrade = 2;
+        installOrUpgrade = CodeGenCliOperation.Upgrade;
       }
     }
-    if (installOrUpgrade === 0) {
+    if (installOrUpgrade === CodeGenCliOperation.None) {
       // Already exists
       utils.channelShowAndAppendLine(
-          channel, ` v${currentVersion} is installed and ready to use.`);
+          channel,
+          `CodeGen CLI v${currentVersion} is installed and ready to use.`);
       return true;
     }
 
     const newVersion = targetConfigItem.codeGeneratorVersion;
     const processTitle =
-        (installOrUpgrade === 1 ?
+        (installOrUpgrade === CodeGenCliOperation.Install ?
              `Installing ${DigitalTwinConstants.codeGenCli} ...` :
              `Upgrading ${DigitalTwinConstants.codeGenCli} ...`);
-    const upgradeMessage =
-        (installOrUpgrade === 1 ?
-             ` not installed, start installing :` :
+    const message =
+        (installOrUpgrade === CodeGenCliOperation.Install ?
+             ` not installed, start installing:` :
              ` new version detected, start upgrading from ${
-                 currentVersion} to ${newVersion} :`);
-    utils.channelShowAndAppendLine(channel, upgradeMessage);
+                 currentVersion} to ${newVersion}:`);
+    utils.channelShowAndAppendLine(channel, message);
 
     // Start donwloading
     let result = false;
@@ -734,35 +765,4 @@ function compareVersion(verion1: string, verion2: string) {
     i++;
   }
   return 0;
-}
-
-async function fileHash(filename: string, algorithm = 'md5') {
-  const hash = crypto.createHash(algorithm);
-  const input = fs.createReadStream(filename);
-  let hashvalue = '';
-  return new Promise((resolve, reject) => {
-    input.on('readable', () => {
-      const data = input.read();
-      if (data) {
-        hash.update(data);
-      }
-    });
-    input.on('error', reject);
-    input.on('end', () => {
-      hashvalue = hash.digest('hex');
-      return resolve(hashvalue);
-    });
-  });
-}
-
-async function extract(sourceZip: string, targetFoder: string) {
-  return new Promise((resolve, reject) => {
-    extractzip(sourceZip, {dir: targetFoder}, err => {
-      if (err) {
-        return reject(err);
-      } else {
-        return resolve(true);
-      }
-    });
-  });
 }
