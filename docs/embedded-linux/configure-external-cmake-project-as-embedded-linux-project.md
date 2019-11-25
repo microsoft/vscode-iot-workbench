@@ -8,7 +8,7 @@ You can now configure an external CMake project to be an Embedded Linux IoT Proj
 
 2. Open command palette and select "**Azure IoT Device Workbench: Configure Project for Device Development Environment...**"
 
-3. Select **Embedded_Linux (Preview)** as platform type.
+3. Select **Embedded Linux (Preview)** as platform type.
 
 4. Select **Azure IoT Device C SDK for x86 Linux** as your toolchain container for your device platform. (Select **Azure IoT Device C SDK for armv7 Linux** or **Azure IoT Device C SDK for arm64 Linux** if you would like to cross-compile your application.) Later the built application will be able to be executed in x86 Linux machine.
 
