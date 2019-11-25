@@ -26,6 +26,7 @@ Learn how to get started with IoT Plug and Play and use the Device Workbench ext
 - [Build an IoT Plug and Play Preview device that's ready for certification](https://docs.microsoft.com/azure/iot-pnp/tutorial-build-device-certification)
 - [Use Azure IoT Device Workbench extension in Visual Studio Code](https://docs.microsoft.com/azure/iot-pnp/howto-use-iot-device-workbench)
 - [Connect an MXChip IoT DevKit device to your Azure IoT Central application via IoT Plug and Play](https://docs.microsoft.com/azure/iot-central/howto-connect-devkit-pnp)
+- [Generate PnP Device Code and Develop in Containerized Toolchain](docs/embedded-linux/generate-PnP-device-code-and-develop-in-containerized-toolchain.md)
 
 ### Develop on generic device
 
@@ -44,6 +45,8 @@ Follow the [setup guide](docs/embedded-linux/embedded-linux-setup.md) to setup t
 Here are a set of tutorials to help you get started:
 
 - [Get Started connect Raspberry Pi to Azure IoT Hub](docs/embedded-linux/embedded-linux-get-started.md)
+
+- [Configure an external CMake project as Embedded Linux project](docs/embedded-linux/configure-external-cmake-project-as-embedded-linux-project.md)
 
 #### Arduino
 

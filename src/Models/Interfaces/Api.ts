@@ -3,5 +3,6 @@
 
 export enum ExtensionName {
   Toolkit = 1,
-  AzureAccount
+  AzureAccount,
+  DigitalTwins
 }
