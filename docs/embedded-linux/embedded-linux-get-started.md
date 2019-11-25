@@ -25,7 +25,6 @@ This tutorial shows how to develop and compile a simple device app written in C 
 4. Select the dev container based on your target device, in this sample, select **32-bit Armv7 Cortex-A** for Raspberry Pi 3 Model B+ running [Raspbian](https://www.raspberrypi.org/downloads/raspbian/).
 
 5. The first time you use a container, it takes around 1 to 3 minutes to download and prepare the dev container. Click the **details** link on the notification for the progress:
-
     <img src="https://raw.githubusercontent.com/microsoft/vscode-iot-workbench/master/docs/images/prepare-dev-container.png" />
 
 6. Once the dev container is ready, you can see the status in the status bar and output window:
