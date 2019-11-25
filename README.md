@@ -26,7 +26,7 @@ Learn how to get started with IoT Plug and Play and use the Device Workbench ext
 - [Build an IoT Plug and Play Preview device that's ready for certification](https://docs.microsoft.com/azure/iot-pnp/tutorial-build-device-certification)
 - [Use Azure IoT Device Workbench extension in Visual Studio Code](https://docs.microsoft.com/azure/iot-pnp/howto-use-iot-device-workbench)
 - [Connect an MXChip IoT DevKit device to your Azure IoT Central application via IoT Plug and Play](https://docs.microsoft.com/azure/iot-central/howto-connect-devkit-pnp)
-- [Generate PnP device code and develop in containerized toolchain](docs/embedded-linux/generate-PnP-device-code-and-develop-in-containerized-toolchain.md)
+- [Generate PnP Device Code and Develop in Containerized Toolchain](docs/embedded-linux/generate-PnP-device-code-and-develop-in-containerized-toolchain.md)
 
 ### Develop on generic device
 
