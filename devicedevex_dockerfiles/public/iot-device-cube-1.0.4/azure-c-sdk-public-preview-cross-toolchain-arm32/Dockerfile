@@ -36,16 +36,14 @@ RUN apt-get update && \
     make install && \
     cd .. && \
     ls | grep -v temp | xargs rm -rf && \
-    git clone https://github.com/jspaith/vcpkg/ --branch iot-provisioning3 && \
+    git clone https://github.com/microsoft/vcpkg && \
     cd vcpkg && \
     cp /work/temp/Toolchain.cmake /work/vcpkg/scripts/toolchains/Toolchain.cmake && \
     cp /work/temp/arm-linux-custom.cmake /work/vcpkg/triplets/arm-linux-custom.cmake && \
     ln -s /usr/xcc/arm-linux-gnueabihf/arm-linux-gnueabihf/libc/lib/ld-linux-armhf.so.3 /lib/ld-linux-armhf.so.3 && \
-    export LD_LIBRARY_PATH="${LIBC_PREFIX}:${LIBC_PREFIX}/lib" && \
-    ./bootstrap-vcpkg.sh
-WORKDIR /work/vcpkg
-ENV LD_LIBRARY_PATH="${LIBC_PREFIX}:${LIBC_PREFIX}/lib:${LIBC_PREFIX}:${LIBC_PREFIX}/libc/lib"
-RUN ./vcpkg install azure-iot-sdk-c[public-preview,use_prov_client]:arm-linux-custom && \
+    export LD_LIBRARY_PATH="${LIBC_PREFIX}:${LIBC_PREFIX}/lib:${LIBC_PREFIX}:${LIBC_PREFIX}/libc/lib" && \
+    ./bootstrap-vcpkg.sh && \
+    ./vcpkg install azure-iot-sdk-c[public-preview,use_prov_client]:arm-linux-custom && \
     apt-get remove -y wget ca-certificates xz-utils git curl unzip && \
     apt-get clean  && \
     rm -rf /var/lib/apt/lists/*
