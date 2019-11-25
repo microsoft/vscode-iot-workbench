@@ -37,13 +37,12 @@ RUN apt-get update && \
     make install && \
     cd .. && \
     ls | grep -v temp | xargs rm -rf && \
-    git clone https://github.com/jspaith/vcpkg/ --branch iot-provisioning3 && \
+    git clone https://github.com/microsoft/vcpkg && \
     cd vcpkg && \
     cp /work/temp/Toolchain.cmake /work/vcpkg/scripts/toolchains/Toolchain.cmake && \
     cp /work/temp/aarch64-linux-custom.cmake /work/vcpkg/triplets/aarch64-linux-custom.cmake && \
-    ./bootstrap-vcpkg.sh
-WORKDIR /work/vcpkg
-RUN ./vcpkg install azure-iot-sdk-c[public-preview,use_prov_client]:aarch64-linux-custom && \
+    ./bootstrap-vcpkg.sh && \
+    ./vcpkg install azure-iot-sdk-c[public-preview,use_prov_client]:aarch64-linux-custom && \
     apt-get remove -y wget ca-certificates perl git unzip && \
     apt-get clean  && \
     rm -rf /var/lib/apt/lists/*
