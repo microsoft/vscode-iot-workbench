@@ -4,16 +4,23 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 
 ## Version 0.10.17
 
-- Release data: November 25, 2019
+- Release data: November 22, 2019
 
 ### Fixed
 
+- Fix serial port issue on configuring device settings.[[#829](https://github.com/microsoft/vscode-iot-workbench/issues/829)]
+- Fix incorrect intellisense squiggles in armv7 container project.
 - Fix c_cpp_properties.json auto-refresh issue.
+- Fix model repo UI for displaying interface list.[[#809](https://github.com/microsoft/vscode-iot-workbench/issues/809)]
 
 ### Added
 
-- Integrate vcpkg with container project
+- Enable Vcpkg on containerized toolchain.
 
+## Changes
+
+- Integrate [latest Device C SDK](https://github.com/Azure/azure-iot-sdk-c/pull/1340/commits/1d0402c80944ec7ec24ed24314457166fef98814) bits into containerized docker images.
+- Generate PnP code to send multiple telemetries defined in an interface in a single send.
 
 ## Version 0.10.16
 
