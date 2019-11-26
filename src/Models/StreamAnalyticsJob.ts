@@ -4,8 +4,8 @@ import {Guid} from 'guid-typescript';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {AzureComponentsStorage, FileNames, GlobalConstants, ScaffoldType} from '../constants';
-import {channelShowAndAppendLine} from '../utils';
+import {AzureComponentsStorage, FileNames, ScaffoldType} from '../constants';
+import {channelPrintJsonObject, channelShowAndAppendLine} from '../utils';
 
 import {AzureComponentConfig, AzureConfigFileHandler, AzureConfigs, ComponentInfo, Dependency, DependencyConfig, DependencyType} from './AzureComponentConfig';
 import {ARMTemplate, AzureUtility} from './AzureUtility';
@@ -234,9 +234,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
           !asaDeploy.properties.outputs.streamAnalyticsJobName) {
         throw new Error('Provision Stream Analytics Job failed.');
       }
-      channelShowAndAppendLine(
-          this.channel,
-          JSON.stringify(asaDeploy, null, GlobalConstants.indentationSpace));
+      channelPrintJsonObject(this.channel, asaDeploy);
 
       streamAnalyticsJobName =
           asaDeploy.properties.outputs.streamAnalyticsJobName.value;
@@ -249,9 +247,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
       const asaDetail =
           this.getStreamAnalyticsByNameFromCache(streamAnalyticsJobName);
       if (asaDetail) {
-        channelShowAndAppendLine(
-            this.channel,
-            JSON.stringify(asaDetail, null, GlobalConstants.indentationSpace));
+        channelPrintJsonObject(this.channel, asaDetail);
       }
     }
 
@@ -436,9 +432,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
       if (this.channel && deployPending) {
         clearInterval(deployPending);
         channelShowAndAppendLine(this.channel, '.');
-        channelShowAndAppendLine(
-            this.channel,
-            JSON.stringify(deployment, null, GlobalConstants.indentationSpace));
+        channelPrintJsonObject(this.channel, deployment);
         channelShowAndAppendLine(
             this.channel, 'Stream Analytics Job query deploy succeeded.');
       }

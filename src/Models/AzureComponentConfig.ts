@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import {AzureComponentsStorage, GlobalConstants, ScaffoldType} from '../constants';
+import {AzureComponentsStorage, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 
 import {Component} from './Interfaces/Component';
@@ -63,9 +63,7 @@ export class AzureConfigFileHandler {
         path.join(azureConfigFolderPath, AzureComponentsStorage.fileName);
 
     if (!await FileUtility.fileExists(type, azureConfigFilePath)) {
-      await FileUtility.writeFile(
-          type, azureConfigFilePath,
-          JSON.stringify(azureConfigs, null, GlobalConstants.indentationSpace));
+      await FileUtility.writeJsonFile(type, azureConfigFilePath, azureConfigs);
     }
   }
 
@@ -177,9 +175,7 @@ export class AzureConfigFileHandler {
       const azureConfigs =
           JSON.parse(azureConfigContent as string) as AzureConfigs;
       azureConfigs.componentConfigs.push(component);
-      await FileUtility.writeFile(
-          type, this.configFilePath,
-          JSON.stringify(azureConfigs, null, GlobalConstants.indentationSpace));
+      await FileUtility.writeJsonFile(type, this.configFilePath, azureConfigs);
       return azureConfigs;
     } catch (error) {
       throw new Error('Invalid azure components config file.');
@@ -198,9 +194,7 @@ export class AzureConfigFileHandler {
         throw new Error('Invalid index of componet list.');
       }
       component.componentInfo = componentInfo;
-      await FileUtility.writeFile(
-          type, this.configFilePath,
-          JSON.stringify(azureConfigs, null, GlobalConstants.indentationSpace));
+      await FileUtility.writeJsonFile(type, this.configFilePath, azureConfigs);
       return azureConfigs;
     } catch (error) {
       throw new Error('Invalid azure components config file.');

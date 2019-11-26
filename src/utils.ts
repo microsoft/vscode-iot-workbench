@@ -437,6 +437,14 @@ export function channelShowAndAppendLine(
   channel.appendLine(message);
 }
 
+export function channelPrintJsonObject(
+    // tslint:disable-next-line: no-any
+    channel: vscode.OutputChannel, data: any) {
+  const indentationSpace = 4;
+  const jsonString = JSON.stringify(data, null, indentationSpace);
+  channelShowAndAppendLine(channel, jsonString);
+}
+
 /**
  * If external project, ask whether to configure the project to be IoT Container
  * Project or create an IoT Project
