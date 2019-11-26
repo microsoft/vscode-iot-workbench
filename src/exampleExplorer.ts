@@ -218,7 +218,7 @@ export class ExampleExplorer {
       telemetryContext.properties.result = 'Cancelled';
       return;
     } else if (boardSelection.id === 'no_device') {
-      await utils.takeNoDeviceSurvey(telemetryContext);
+      await utils.takeNoDeviceSurvey(telemetryContext, context);
       return;
     } else {
       telemetryContext.properties.board = boardSelection.label;
