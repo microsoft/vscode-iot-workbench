@@ -7,25 +7,26 @@ export class WorkbenchExtension {
   // tslint:disable-next-line: no-any
   private static extension: vscode.Extension<any>|undefined;
 
-  private constructor(context: vscode.ExtensionContext) {
+  static getExtension(context: vscode.ExtensionContext):
+      // tslint:disable-next-line: no-any
+      vscode.Extension<any>|undefined {
+    if (!WorkbenchExtension.extension) {
+      const extensionId = WorkbenchExtension.getExtensionId(context);
+      WorkbenchExtension.extension =
+          vscode.extensions.getExtension(extensionId);
+    }
+    return WorkbenchExtension.extension;
+  }
+
+  private static getExtensionId(context: vscode.ExtensionContext): string {
     // Get extensionId from package.json
     const packageJsonPath = context.asAbsolutePath('./package.json');
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
     const extensionId = packageJson.publisher + '.' + packageJson.name;
 
     if (!extensionId) {
-      throw new Error('Fail to get extensionId from package.json.');
+      throw new Error('Fail to get extension id from package.json.');
     }
-    WorkbenchExtension.extension = vscode.extensions.getExtension(extensionId);
-  }
-
-  static getExtension(context: vscode.ExtensionContext):
-      // tslint:disable-next-line: no-any
-      vscode.Extension<any>|undefined {
-    if (!WorkbenchExtension.extension) {
-      // tslint:disable-next-line: no-unused-expression
-      new WorkbenchExtension(context);
-    }
-    return WorkbenchExtension.extension;
+    return extensionId;
   }
 }
