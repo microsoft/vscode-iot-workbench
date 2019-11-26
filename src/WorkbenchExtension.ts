@@ -19,8 +19,8 @@ export class WorkbenchExtension {
     WorkbenchExtension.extension = vscode.extensions.getExtension(extensionId);
   }
 
-  // tslint:disable-next-line: no-any
   static getExtension(context: vscode.ExtensionContext):
+      // tslint:disable-next-line: no-any
       vscode.Extension<any>|undefined {
     if (!WorkbenchExtension.extension) {
       // tslint:disable-next-line: no-unused-expression
