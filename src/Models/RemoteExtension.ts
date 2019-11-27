@@ -2,16 +2,18 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import {DependentExtensions, GlobalConstants} from '../constants';
+import {DependentExtensions} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 import {channelShowAndAppendLine} from '../utils';
+import {WorkbenchExtension} from '../WorkbenchExtension';
 
 export class RemoteExtension {
   static isRemote(context: vscode.ExtensionContext) {
-    // tslint:disable-next-line: no-any
-    return (vscode as any)
-               .extensions.getExtension(GlobalConstants.extensionId)
-               .extensionKind === vscode.ExtensionKind.Workspace;
+    const extension = WorkbenchExtension.getExtension(context);
+    if (!extension) {
+      throw new Error('Fail to get workbench extension.');
+    }
+    return extension.extensionKind === vscode.ExtensionKind.Workspace;
   }
 
   static async isAvailable(): Promise<boolean> {

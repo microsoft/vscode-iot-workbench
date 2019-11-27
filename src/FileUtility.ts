@@ -106,6 +106,20 @@ export class FileUtility {
     }
   }
 
+  /**
+   * Convert Json object to Json string and write into target file path.
+   * @param type Scaffold type
+   * @param filePath tartet file path
+   * @param data Json object
+   */
+  static async writeJsonFile(
+      // tslint:disable-next-line: no-any
+      type: ScaffoldType, filePath: string, data: any): Promise<void> {
+    const indentationSpace = 4;
+    const jsonString = JSON.stringify(data, null, indentationSpace);
+    await FileUtility.writeFile(type, filePath, jsonString);
+  }
+
   static async readFile(
       type: ScaffoldType, filePath: string,
       encoding?: string): Promise<string|Buffer> {

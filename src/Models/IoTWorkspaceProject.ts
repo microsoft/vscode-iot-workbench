@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, EventNames, FileNames, GlobalConstants, ScaffoldType} from '../constants';
+import {ConfigKey, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext, TelemetryWorker} from '../telemetry';
 import {channelShowAndAppendLine} from '../utils';
@@ -425,9 +425,8 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
         `${path.basename(this.projectRootPath)}${
             FileNames.workspaceExtensionName}`);
 
-    await FileUtility.writeFile(
-        createTimeScaffoldType, workspaceConfigFilePath,
-        JSON.stringify(workspace, null, GlobalConstants.indentationSpace));
+    await FileUtility.writeJsonFile(
+        createTimeScaffoldType, workspaceConfigFilePath, workspace);
 
     const vscodeFolderPath =
         path.join(this.projectRootPath, FileNames.vscodeSettingsFolderName);

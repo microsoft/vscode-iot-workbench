@@ -109,7 +109,7 @@ export class ProjectInitializer {
             } else {
               telemetryContext.properties.template = templateSelection.label;
               if (templateSelection.label === constants.noDeviceMessage) {
-                await utils.takeNoDeviceSurvey(telemetryContext);
+                await utils.takeNoDeviceSurvey(telemetryContext, context);
                 return;
               }
             }

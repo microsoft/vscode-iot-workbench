@@ -7,8 +7,8 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {AzureComponentsStorage, ConfigKey, GlobalConstants, ScaffoldType} from '../constants';
-import {channelShowAndAppendLine} from '../utils';
+import {AzureComponentsStorage, ConfigKey, ScaffoldType} from '../constants';
+import {channelPrintJsonObject, channelShowAndAppendLine} from '../utils';
 
 import {getExtension} from './Apis';
 import {AzureComponentConfig, AzureConfigFileHandler, AzureConfigs, ComponentInfo, DependencyConfig} from './AzureComponentConfig';
@@ -130,9 +130,7 @@ export class IoTHub implements Component, Provisionable {
 
     if (iothub && iothub.iotHubConnectionString) {
       if (this.channel) {
-        channelShowAndAppendLine(
-            this.channel,
-            JSON.stringify(iothub, null, GlobalConstants.indentationSpace));
+        channelPrintJsonObject(this.channel, iothub);
       }
 
       const sharedAccessKeyMatches =

@@ -3,9 +3,10 @@
 
 'use strict';
 
-import {commands, env, ExtensionContext, extensions, Uri, window} from 'vscode';
-import {EventNames, GlobalConstants} from './constants';
+import {commands, ExtensionContext, Uri, window} from 'vscode';
+import {EventNames} from './constants';
 import {TelemetryProperties, TelemetryContext, TelemetryWorker} from './telemetry';
+import {WorkbenchExtension} from './WorkbenchExtension';
 
 const NSAT_SURVEY_URL = 'https://aka.ms/vscode-iot-workbench-survey';
 const PROBABILITY = 1;
@@ -18,7 +19,8 @@ const SKIP_VERSION_KEY = 'nsat/skipVersion';
 const IS_CANDIDATE_KEY = 'nsat/isCandidate';
 
 export class NSAT {
-  static async takeSurvey({globalState}: ExtensionContext) {
+  static async takeSurvey(context: ExtensionContext) {
+    const globalState = context.globalState;
     const skipVersion = globalState.get(SKIP_VERSION_KEY, '');
     if (skipVersion) {
       return;
@@ -53,7 +55,7 @@ export class NSAT {
     const telemetryContext:
         TelemetryContext = {properties, measurements: {duration: 0}};
 
-    const extension = extensions.getExtension(GlobalConstants.extensionId);
+    const extension = WorkbenchExtension.getExtension(context);
     if (!extension) {
       return;
     }

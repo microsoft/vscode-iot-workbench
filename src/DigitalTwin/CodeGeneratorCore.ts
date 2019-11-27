@@ -11,7 +11,7 @@ import * as path from 'path';
 import request = require('request-promise');
 
 import * as utils from '../utils';
-import {FileNames, ConfigKey, GlobalConstants} from '../constants';
+import {FileNames, ConfigKey, ScaffoldType} from '../constants';
 import {TelemetryContext} from '../telemetry';
 import {DigitalTwinConstants} from './DigitalTwinConstants';
 import {CodeGenProjectType, DeviceConnectionType, CodeGenLanguage, DeviceSdkReferenceType, CodeGenExecutionItem} from './DigitalTwinCodeGen/Interfaces/CodeGenerator';
@@ -171,8 +171,9 @@ export class CodeGeneratorCore {
       deviceConnectionType: connectionType
     };
 
-    this.saveCodeGenConfig(
-        rootPath, capabilityModelFilePath, codeGenExecutionInfo);
+    const scaffoldType = ScaffoldType.Local;
+    await this.saveCodeGenConfig(
+        scaffoldType, rootPath, capabilityModelFilePath, codeGenExecutionInfo);
 
     await this.generateDeviceCodeCore(
         codeGenExecutionInfo, context, channel, telemetryContext);
@@ -497,17 +498,19 @@ export class CodeGeneratorCore {
     return true;
   }
 
-  private saveCodeGenConfig(
-      rootPath: string, capabilityModelFilePath: string,
-      codeGenExecutionInfo: CodeGenExecutionItem): void {
+  private async saveCodeGenConfig(
+      type: ScaffoldType, rootPath: string, capabilityModelFilePath: string,
+      codeGenExecutionInfo: CodeGenExecutionItem): Promise<void> {
     const codeGenConfigPath = path.join(
         rootPath, FileNames.vscodeSettingsFolderName,
         DigitalTwinConstants.codeGenConfigFileName);
 
     try {
-      if (fs.existsSync(codeGenConfigPath)) {
-        const codeGenExecutions: CodeGenExecutions =
-            JSON.parse(fs.readFileSync(codeGenConfigPath, 'utf8'));
+      let codeGenExecutions: CodeGenExecutions;
+      if (await FileUtility.fileExists(type, codeGenConfigPath)) {
+        const codeGenConfig =
+            await FileUtility.readFile(type, codeGenConfigPath, 'utf8');
+        codeGenExecutions = JSON.parse(codeGenConfig as string);
 
         if (codeGenExecutions) {
           codeGenExecutions.codeGenExecutionItems =
@@ -515,18 +518,13 @@ export class CodeGeneratorCore {
                   item =>
                       item.capabilityModelFilePath !== capabilityModelFilePath);
           codeGenExecutions.codeGenExecutionItems.push(codeGenExecutionInfo);
-          fs.writeFileSync(
-              codeGenConfigPath,
-              JSON.stringify(
-                  codeGenExecutions, null, GlobalConstants.indentationSpace));
         }
       } else {
-        const codeGenExecutions:
-            CodeGenExecutions = {codeGenExecutionItems: [codeGenExecutionInfo]};
-        fs.writeFileSync(
-            codeGenConfigPath,
-            JSON.stringify(
-                codeGenExecutions, null, GlobalConstants.indentationSpace));
+        codeGenExecutions = {codeGenExecutionItems: [codeGenExecutionInfo]};
+      }
+      if (codeGenExecutions) {
+        await FileUtility.writeJsonFile(
+            type, codeGenConfigPath, codeGenExecutions);
       }
     } catch (error) {
       // save config failure should not impact code gen.
