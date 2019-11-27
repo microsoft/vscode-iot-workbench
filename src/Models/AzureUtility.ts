@@ -3,7 +3,8 @@ import * as fs from 'fs-plus';
 import {HttpMethods, WebResource} from 'ms-rest';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import {channelShowAndAppendLine} from '../utils';
+
+import {channelPrintJsonObject, channelShowAndAppendLine} from '../utils';
 
 import request = require('request-promise');
 import rq = require('request');
@@ -532,8 +533,7 @@ export class AzureUtility {
       if (AzureUtility._channel && deployPending) {
         clearInterval(deployPending);
         channelShowAndAppendLine(AzureUtility._channel, '.');
-        channelShowAndAppendLine(
-            AzureUtility._channel, JSON.stringify(deployment, null));
+        channelPrintJsonObject(AzureUtility._channel, deployment);
       }
       return deployment;
     } catch (error) {

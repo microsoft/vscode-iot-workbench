@@ -357,8 +357,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
       };
       azureConfigs.componentConfigs.push(newAzureFunctionsConfig);
       await FileUtility.writeJsonFile(type, azureConfigFilePath, azureConfigs);
-      utils.channelShowAndAppendLine(
-          this.channel, JSON.stringify(azureConfigs, null));
+      utils.channelPrintJsonObject(this.channel, azureConfigs);
     }
   }
 }
