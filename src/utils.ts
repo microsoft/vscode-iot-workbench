@@ -9,7 +9,7 @@ import {MessageItem} from 'vscode';
 import * as WinReg from 'winreg';
 
 import {CancelOperationError} from './CancelOperationError';
-import {AzureFunctionsLanguage, FileNames, GlobalConstants, OperationType, PlatformType, ScaffoldType, TemplateTag} from './constants';
+import {AzureFunctionsLanguage, FileNames, OperationType, PlatformType, ScaffoldType, TemplateTag} from './constants';
 import {DialogResponses} from './DialogResponses';
 import {FileUtility} from './FileUtility';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
@@ -18,6 +18,7 @@ import {Platform} from './Models/Interfaces/ProjectTemplate';
 import {RemoteExtension} from './Models/RemoteExtension';
 import {ProjectEnvironmentConfiger} from './ProjectEnvironmentConfiger';
 import {TelemetryContext} from './telemetry';
+import {WorkbenchExtension} from './WorkbenchExtension';
 
 const impor = require('impor')(__dirname);
 import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
@@ -336,7 +337,8 @@ export async function askAndOpenInRemote(
 }
 const noDeviceSurveyUrl = 'https://www.surveymonkey.com/r/C7NY7KJ';
 
-export async function takeNoDeviceSurvey(telemetryContext: TelemetryContext) {
+export async function takeNoDeviceSurvey(
+    telemetryContext: TelemetryContext, context: vscode.ExtensionContext) {
   const message =
       'Could you help to take a quick survey about what IoT development kit(s) you want Azure IoT Device Workbench to support?';
   const result: vscode.MessageItem|undefined =
@@ -347,8 +349,7 @@ export async function takeNoDeviceSurvey(telemetryContext: TelemetryContext) {
     telemetryContext.properties.message = 'User takes no-device survey.';
     telemetryContext.properties.result = 'Succeeded';
 
-    const extension =
-        vscode.extensions.getExtension(GlobalConstants.extensionId);
+    const extension = WorkbenchExtension.getExtension(context);
     if (!extension) {
       return;
     }
@@ -434,6 +435,14 @@ export function channelShowAndAppendLine(
     channel: vscode.OutputChannel, message: string) {
   channel.show();
   channel.appendLine(message);
+}
+
+export function channelPrintJsonObject(
+    // tslint:disable-next-line: no-any
+    channel: vscode.OutputChannel, data: any) {
+  const indentationSpace = 4;
+  const jsonString = JSON.stringify(data, null, indentationSpace);
+  channelShowAndAppendLine(channel, jsonString);
 }
 
 /**

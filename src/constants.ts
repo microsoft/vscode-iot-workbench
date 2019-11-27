@@ -82,11 +82,6 @@ export class AzureComponentsStorage {
   static readonly fileName = 'azureconfig.json';
 }
 
-export class GlobalConstants {
-  static readonly extensionId = 'vsciot-vscode.vscode-iot-workbench';
-  static readonly indentationSpace = 4;
-}
-
 export class DependentExtensions {
   static readonly azureFunctions = 'ms-azuretools.vscode-azurefunctions';
   static readonly arduino = 'vsciot-vscode.vscode-arduino';

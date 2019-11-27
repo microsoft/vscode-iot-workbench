@@ -3,7 +3,8 @@ import * as fs from 'fs-plus';
 import {HttpMethods, WebResource} from 'ms-rest';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import {channelShowAndAppendLine} from '../utils';
+
+import {channelPrintJsonObject, channelShowAndAppendLine} from '../utils';
 
 import request = require('request-promise');
 import rq = require('request');
@@ -14,7 +15,7 @@ import {ConfigHandler} from '../configHandler';
 import {getExtension} from './Apis';
 import {ExtensionName} from './Interfaces/Api';
 import {TelemetryWorker, TelemetryContext} from '../telemetry';
-import {EventNames, GlobalConstants} from '../constants';
+import {EventNames} from '../constants';
 
 export interface ARMParameters {
   [key: string]: {value: string|number|boolean|null};
@@ -532,9 +533,7 @@ export class AzureUtility {
       if (AzureUtility._channel && deployPending) {
         clearInterval(deployPending);
         channelShowAndAppendLine(AzureUtility._channel, '.');
-        channelShowAndAppendLine(
-            AzureUtility._channel,
-            JSON.stringify(deployment, null, GlobalConstants.indentationSpace));
+        channelPrintJsonObject(AzureUtility._channel, deployment);
       }
       return deployment;
     } catch (error) {
