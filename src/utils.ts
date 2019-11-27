@@ -9,7 +9,7 @@ import {MessageItem} from 'vscode';
 import * as WinReg from 'winreg';
 
 import {CancelOperationError} from './CancelOperationError';
-import {AzureFunctionsLanguage, FileNames, GlobalConstants, OperationType, PlatformType, ScaffoldType, TemplateTag} from './constants';
+import {AzureFunctionsLanguage, FileNames, OperationType, PlatformType, ScaffoldType, TemplateTag} from './constants';
 import {DialogResponses} from './DialogResponses';
 import {FileUtility} from './FileUtility';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
