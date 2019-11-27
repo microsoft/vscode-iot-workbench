@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as copypaste from 'copy-paste';
+import * as clipboardy from 'clipboardy';
 import * as fs from 'fs-plus';
 import {Guid} from 'guid-typescript';
 import * as os from 'os';
@@ -123,7 +123,7 @@ export class Esp32Device extends ArduinoDeviceBase {
         throw new Error(
             'Unable to get the device connection string, please invoke the command of Azure Provision first.');
       }
-      copypaste.copy(deviceConnectionString);
+      clipboardy.writeSync(deviceConnectionString);
       return true;
     }
 
