@@ -181,7 +181,6 @@
   },
   "devDependencies": {
     "@types/adm-zip": "^0.4.31",
-    "@types/copy-paste": "1.1.30",
     "@types/crc": "^3.4.0",
     "@types/extract-zip": "^1.6.2",
     "@types/fs-plus": "^3.0.0",
@@ -207,7 +206,7 @@
     "azure-arm-resource": "^3.1.0-preview",
     "azure-arm-website": "^3.0.0-preview",
     "azure-iothub": "^1.11.0",
-    "copy-paste": "1.3.0",
+    "clipboardy": "^2.1.0",
     "crc": "^3.8.0",
     "eventemitter2": "^5.0.0",
     "extract-zip": "^1.6.7",
