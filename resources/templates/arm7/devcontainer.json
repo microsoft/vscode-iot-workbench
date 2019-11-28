@@ -1,6 +1,5 @@
 {
-  "image": "armv7",
-  "name": "armv7_container",
+  "name": "Azure IoT Device C SDK for armv7 Linux",
   "dockerFile": "Dockerfile",
   "extensions": [
     "ms-vscode.cpptools",
