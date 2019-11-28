@@ -147,8 +147,19 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
           `Internal Error. Could not find iot workbench project file.`);
     }
 
-    // Open project
     await this.openProject(this.projectRootPath, openInNewWindow);
+  }
+
+  async openFolderInContainer(folderPath: string) {
+    if (!await FileUtility.directoryExists(ScaffoldType.Local, folderPath)) {
+      throw new Error(
+          `Fail to open folder in container. ${folderPath} does not exist.`);
+    }
+
+    setTimeout(
+        () => vscode.commands.executeCommand(
+            'remote-containers.openFolder', vscode.Uri.file(folderPath)),
+        500);
   }
 
   /**
@@ -194,10 +205,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     if (!customizeEnvironment) {
       // If user does not want to customize develpment environment,
       //  we will open the project in remote directly for user.
-      setTimeout(
-          () => vscode.commands.executeCommand(
-              'iotcube.openInContainer', projectPath),
-          500);
+      await this.openFolderInContainer(projectPath);
     } else {
       // If user wants to customize development environment, open project
       // locally.
