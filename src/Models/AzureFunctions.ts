@@ -24,6 +24,7 @@ import {ExtensionName} from './Interfaces/Api';
 import {Guid} from 'guid-typescript';
 import {AzureComponentConfig, AzureConfigs, ComponentInfo, DependencyConfig, Dependency} from './AzureComponentConfig';
 import {FileUtility} from '../FileUtility';
+import {Commands} from '../common/Commands';
 
 const impor = require('impor')(__dirname);
 const azureUtilityModule =
@@ -96,7 +97,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
           'Yes', 'No');
       if (choice === 'Yes') {
         vscode.commands.executeCommand(
-            'vscode.open',
+            Commands.VscodeOpen,
             vscode.Uri.parse(
                 'vscode:extension/' + DependentExtensions.azureFunctions));
       }

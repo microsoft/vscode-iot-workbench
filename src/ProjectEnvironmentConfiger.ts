@@ -8,7 +8,7 @@ import * as vscode from 'vscode';
 import * as utils from './utils';
 import * as path from 'path';
 
-import {TelemetryContext} from './telemetry';
+import {TelemetryContext, TelemetryResult} from './telemetry';
 import {ScaffoldType, PlatformType} from './constants';
 import {RemoteExtension} from './Models/RemoteExtension';
 import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
@@ -52,7 +52,7 @@ export class ProjectEnvironmentConfiger {
           if (!platformSelection) {
             telemetryContext.properties.errorMessage =
                 'Platform selection cancelled.';
-            telemetryContext.properties.result = 'Cancelled';
+            telemetryContext.properties.result = TelemetryResult.Cancelled;
             return;
           } else {
             telemetryContext.properties.platform = platformSelection.label;

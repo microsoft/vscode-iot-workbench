@@ -8,7 +8,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as utils from './utils';
 
-import {TelemetryContext} from './telemetry';
+import {TelemetryContext, TelemetryResult} from './telemetry';
 import {FileNames, ScaffoldType, PlatformType, TemplateTag} from './constants';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import {FileUtility} from './FileUtility';
@@ -64,7 +64,7 @@ export class ProjectInitializer {
           if (!projectPath) {
             telemetryContext.properties.errorMessage =
                 'Project name input cancelled.';
-            telemetryContext.properties.result = 'Cancelled';
+            telemetryContext.properties.result = TelemetryResult.Cancelled;
             return;
           } else {
             telemetryContext.properties.projectPath = projectPath;
@@ -76,7 +76,7 @@ export class ProjectInitializer {
           if (!platformSelection) {
             telemetryContext.properties.errorMessage =
                 'Platform selection cancelled.';
-            telemetryContext.properties.result = 'Cancelled';
+            telemetryContext.properties.result = TelemetryResult.Cancelled;
             return;
           } else {
             telemetryContext.properties.platform = platformSelection.label;
@@ -104,7 +104,7 @@ export class ProjectInitializer {
             if (!templateSelection) {
               telemetryContext.properties.errorMessage =
                   'Project template selection cancelled.';
-              telemetryContext.properties.result = 'Cancelled';
+              telemetryContext.properties.result = TelemetryResult.Cancelled;
               return;
             } else {
               telemetryContext.properties.template = templateSelection.label;

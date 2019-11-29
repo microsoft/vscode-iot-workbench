@@ -10,7 +10,7 @@ import * as AdmZip from 'adm-zip';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import * as utils from './utils';
 import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
-import {TelemetryContext} from './telemetry';
+import {TelemetryContext, TelemetryResult} from './telemetry';
 import {FileNames} from './constants';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
@@ -215,7 +215,7 @@ export class ExampleExplorer {
 
     if (!boardSelection) {
       telemetryContext.properties.errorMessage = 'Board selection cancelled.';
-      telemetryContext.properties.result = 'Cancelled';
+      telemetryContext.properties.result = TelemetryResult.Cancelled;
       return;
     } else if (boardSelection.id === 'no_device') {
       await utils.takeNoDeviceSurvey(telemetryContext, context);

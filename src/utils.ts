@@ -17,11 +17,12 @@ import {ProjectTemplate, TemplateFileInfo} from './Models/Interfaces/ProjectTemp
 import {Platform} from './Models/Interfaces/ProjectTemplate';
 import {RemoteExtension} from './Models/RemoteExtension';
 import {ProjectEnvironmentConfiger} from './ProjectEnvironmentConfiger';
-import {TelemetryContext} from './telemetry';
+import {TelemetryContext, TelemetryResult} from './telemetry';
 import {WorkbenchExtension} from './WorkbenchExtension';
 
 const impor = require('impor')(__dirname);
 import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
+import {Commands} from './common/Commands';
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
     typeof import('./Models/IoTWorkspaceProject');
 const ioTContainerizedProjectModule =
@@ -263,7 +264,7 @@ export async function askToConfigureEnvironment(
       if (error instanceof CancelOperationError) {
         telemetryContext.properties.errorMessage =
             `${operation} operation failed.`;
-        telemetryContext.properties.result = 'Cancelled';
+        telemetryContext.properties.result = TelemetryResult.Cancelled;
         channelShowAndAppendLine(channel, error.message);
         vscode.window.showWarningMessage(error.message);
         return;
@@ -280,7 +281,7 @@ export async function askToConfigureEnvironment(
     }
   } else {
     telemetryContext.properties.errorMessage = `${operation} operation failed.`;
-    telemetryContext.properties.result = 'Cancelled';
+    telemetryContext.properties.result = TelemetryResult.Cancelled;
     const message = `Project development environment configuration cancelled.`;
     channelShowAndAppendLine(channel, message);
     vscode.window.showWarningMessage(message);
@@ -347,7 +348,7 @@ export async function takeNoDeviceSurvey(
   if (result === DialogResponses.yes) {
     // Open the survey page
     telemetryContext.properties.message = 'User takes no-device survey.';
-    telemetryContext.properties.result = 'Succeeded';
+    telemetryContext.properties.result = TelemetryResult.Succeeded;
 
     const extension = WorkbenchExtension.getExtension(context);
     if (!extension) {
@@ -355,23 +356,12 @@ export async function takeNoDeviceSurvey(
     }
     const extensionVersion = extension.packageJSON.version || 'unknown';
     await vscode.commands.executeCommand(
-        'vscode.open',
+        Commands.VscodeOpen,
         vscode.Uri.parse(
             `${noDeviceSurveyUrl}?o=${encodeURIComponent(process.platform)}&v=${
                 encodeURIComponent(extensionVersion)}`));
   }
   return;
-}
-
-export class InternalConfig {
-  static isInternal: boolean = InternalConfig.isInternalUser();
-
-  private static isInternalUser(): boolean {
-    const userDomain = process.env.USERDNSDOMAIN ?
-        process.env.USERDNSDOMAIN.toLowerCase() :
-        '';
-    return userDomain.endsWith('microsoft.com');
-  }
 }
 
 export async function getTemplateFilesInfo(templateFolder: string):
@@ -558,7 +548,7 @@ export async function constructAndLoadIoTProject(
     if (isTriggeredWhenExtensionLoad) {
       if (iotProject) {
         try {
-          await iotProject.load(scaffoldType);
+          await iotProject.load(scaffoldType, true);
         } catch (error) {
           // Just try to load the project at extension load time. Ignore error
         }
@@ -796,7 +786,7 @@ export async function getEnvTemplateFilesAndAskOverwrite(
         await askToOverwrite(scaffoldType, projectPath, templateFilesInfo);
   } catch (error) {
     if (error instanceof CancelOperationError) {
-      telemetryContext.properties.result = 'Cancelled';
+      telemetryContext.properties.result = TelemetryResult.Cancelled;
       telemetryContext.properties.errorMessage = error.message;
     }
     throw error;
@@ -805,7 +795,7 @@ export async function getEnvTemplateFilesAndAskOverwrite(
     const message =
         'Do not overwrite configuration files and cancel configuration process.';
     telemetryContext.properties.errorMessage = message;
-    telemetryContext.properties.result = 'Cancelled';
+    telemetryContext.properties.result = TelemetryResult.Cancelled;
     throw new CancelOperationError(message);
   }
   return templateFilesInfo;

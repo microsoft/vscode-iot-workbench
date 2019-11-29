@@ -2,6 +2,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+import {Commands} from '../../../common/Commands';
 import {IoTWorkspaceProject} from '../../../Models/IoTWorkspaceProject';
 import {TelemetryContext} from '../../../telemetry';
 import * as utils from '../../../utils';
@@ -26,8 +27,8 @@ export class AnsiCCodeGenerator implements CodeGenerator {
         project.openProject(codegenInfo.outputDirectory, true);
       } else {
         await vscode.commands.executeCommand(
-            'vscode.openFolder', vscode.Uri.file(codegenInfo.outputDirectory),
-            true);
+            Commands.VscodeOpenFolder,
+            vscode.Uri.file(codegenInfo.outputDirectory), true);
       }
 
       return true;

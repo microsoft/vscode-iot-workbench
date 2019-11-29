@@ -5,7 +5,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import {TelemetryContext} from './telemetry';
+import {TelemetryContext, TelemetryResult} from './telemetry';
 import {constructAndLoadIoTProject} from './utils';
 import {RemoteExtension} from './Models/RemoteExtension';
 import {CancelOperationError} from './CancelOperationError';
@@ -46,7 +46,7 @@ export class AzureOperator {
       } catch (error) {
         if (error instanceof CancelOperationError) {
           telemetryContext.properties.errorMessage = error.message;
-          telemetryContext.properties.result = 'Cancelled';
+          telemetryContext.properties.result = TelemetryResult.Cancelled;
           return;
         } else {
           throw error;

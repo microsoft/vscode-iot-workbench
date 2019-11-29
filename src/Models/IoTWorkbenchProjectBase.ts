@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import {CancelOperationError} from '../CancelOperationError';
 import {ConfigKey, DevelopEnvironment, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
-import {TelemetryContext, TelemetryProperties, TelemetryWorker} from '../telemetry';
+import {TelemetryContext, TelemetryResult, TelemetryWorker} from '../telemetry';
 import * as utils from '../utils';
 
 import {checkAzureLogin} from './Apis';
@@ -351,22 +351,14 @@ export abstract class IoTWorkbenchProjectBase {
   /**
    * Send telemetry when the IoT project is load when VS Code opens
    */
-  sendTelemetryIfLoadProjectWithVSCodeOpens() {
-    const properties: TelemetryProperties = {
-      result: 'Succeeded',
-      error: '',
-      errorMessage: ''
-    };
-    properties.developEnvironment =
-        RemoteExtension.isRemote(this.extensionContext) ?
-        DevelopEnvironment.Container :
-        DevelopEnvironment.LocalEnv;
-    properties.projectHostType = ProjectHostType[this.projectHostType];
-    const telemetryContext:
-        TelemetryContext = {properties, measurements: {duration: 0}};
+  sendLoadEventTelemetry(context: vscode.ExtensionContext) {
+    const telemetryWorker = new TelemetryWorker(context);
+    const telemetryContext = telemetryWorker.createContext();
+    telemetryContext.properties.projectHostType =
+        ProjectHostType[this.projectHostType];
 
     try {
-      TelemetryWorker.sendEvent(EventNames.projectLoadEvent, telemetryContext);
+      telemetryWorker.sendEvent(EventNames.projectLoadEvent, telemetryContext);
     } catch {
       // If sending telemetry failed, skip the error to avoid blocking user.
     }

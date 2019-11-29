@@ -14,260 +14,153 @@ import {IoTWorkbenchSettings} from './IoTSettings';
 import {ConfigHandler} from './configHandler';
 import {CodeGeneratorCore} from './DigitalTwin/CodeGeneratorCore';
 import {ConfigKey, EventNames, FileNames} from './constants';
-import {TelemetryContext, TelemetryProperties} from './telemetry';
+import {TelemetryContext, TelemetryWorker} from './telemetry';
 import {RemoteExtension} from './Models/RemoteExtension';
 import {constructAndLoadIoTProject} from './utils';
 import {ProjectEnvironmentConfiger} from './ProjectEnvironmentConfiger';
+import {WorkbenchExtension} from './WorkbenchExtension';
+import {Commands} from './common/Commands';
 
 const impor = require('impor')(__dirname);
 const exampleExplorerModule =
     impor('./exampleExplorer') as typeof import('./exampleExplorer');
-
-const telemetryModule = impor('./telemetry') as typeof import('./telemetry');
 const request = impor('request-promise') as typeof import('request-promise');
 
-let telemetryWorkerInitialized = false;
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
+// tslint:disable-next-line:no-any
+let telemetryWorker: any = undefined;
+
 export async function activate(context: vscode.ExtensionContext) {
-  // Use the console to output diagnostic information (console.log) and errors
-  // (console.error) This line of code will only be executed once when your
-  // extension is activated
-  console.log(
-      'Congratulations, your extension "vscode-iot-workbench" is now active!');
+  printHello(context);
 
+  const channelName = 'Azure IoT Device Workbench';
   const outputChannel: vscode.OutputChannel =
-      vscode.window.createOutputChannel('Azure IoT Device Workbench');
-
-  const telemetryContext: TelemetryContext = {
-    properties: {result: 'Succeeded', error: '', errorMessage: ''},
-    measurements: {duration: 0}
-  };
+      vscode.window.createOutputChannel(channelName);
+  telemetryWorker = new TelemetryWorker(context);
+  const telemetryContext = telemetryWorker.createContext();
 
   // Load iot Project here and do not ask to new an iot project when no iot
   // project open since no command has been triggered yet.
   await constructAndLoadIoTProject(
       context, outputChannel, telemetryContext, true);
+
   const deviceOperator = new DeviceOperator();
   const azureOperator = new AzureOperator();
   const exampleExplorer = new exampleExplorerModule.ExampleExplorer();
 
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with  registerCommand
-  // The commandId parameter must match the command field in package.json
+  initCommandWithTelemetry(
+      context, telemetryWorker, telemetryContext, outputChannel,
+      Commands.InitializeProject, EventNames.createNewProjectEvent, true,
+      async(): Promise<void> => {
+        const projectInitializer = new ProjectInitializer();
+        return projectInitializer.InitializeProject(
+            context, outputChannel, telemetryContext);
+      });
 
-  const projectInitProvider = async () => {
-    // Initialize Telemetry
-    if (!telemetryWorkerInitialized) {
-      telemetryModule.TelemetryWorker.initialize(context);
-      telemetryWorkerInitialized = true;
-    }
+  initCommandWithTelemetry(
+      context, telemetryWorker, telemetryContext, outputChannel,
+      Commands.ConfigureProjectEnvironment,
+      EventNames.configProjectEnvironmentEvent, true,
+      async(): Promise<void> => {
+        const projectEnvConfiger = new ProjectEnvironmentConfiger();
+        return projectEnvConfiger.configureProjectEnvironment(
+            context, outputChannel, telemetryContext);
+      });
 
-    const projectInitializer = new ProjectInitializer();
-    const projectInitializerBinder =
-        projectInitializer.InitializeProject.bind(projectInitializer);
-    telemetryModule.callWithTelemetry(
-        EventNames.createNewProjectEvent, outputChannel, true, context,
-        projectInitializerBinder);
-  };
+  initCommandWithTelemetry(
+      context, telemetryWorker, telemetryContext, outputChannel,
+      Commands.AzureProvision, EventNames.azureProvisionEvent, true,
+      async(): Promise<void> => {
+        return azureOperator.provision(
+            context, outputChannel, telemetryContext);
+      });
 
-  const projectEnvironmentConfigProvider = async () => {
-    // Initialize Telemetry
-    if (!telemetryWorkerInitialized) {
-      telemetryModule.TelemetryWorker.initialize(context);
-      telemetryWorkerInitialized = true;
-    }
+  initCommandWithTelemetry(
+      context, telemetryWorker, telemetryContext, outputChannel,
+      Commands.AzureDeploy, EventNames.azureDeployEvent, true,
+      async(): Promise<void> => {
+        return azureOperator.deploy(context, outputChannel, telemetryContext);
+      });
 
-    const projectEnvConfiger = new ProjectEnvironmentConfiger();
-    const projectEnvConfigBinder =
-        projectEnvConfiger.configureProjectEnvironment.bind(projectEnvConfiger);
-    telemetryModule.callWithTelemetry(
-        EventNames.configProjectEnvironmentEvent, outputChannel, true, context,
-        projectEnvConfigBinder);
-  };
+  initCommandWithTelemetry(
+      context, telemetryWorker, telemetryContext, outputChannel,
+      Commands.DeviceCompile, EventNames.deviceCompileEvent, true,
+      async(): Promise<void> => {
+        return deviceOperator.compile(context, outputChannel, telemetryContext);
+      });
 
-  const azureProvisionProvider = async () => {
-    // Initialize Telemetry
-    if (!telemetryWorkerInitialized) {
-      telemetryModule.TelemetryWorker.initialize(context);
-      telemetryWorkerInitialized = true;
-    }
+  initCommandWithTelemetry(
+      context, telemetryWorker, telemetryContext, outputChannel,
+      Commands.DeviceUpload, EventNames.deviceUploadEvent, true,
+      async(): Promise<void> => {
+        return deviceOperator.upload(context, outputChannel, telemetryContext);
+      });
 
-    const azureProvisionBinder = azureOperator.provision.bind(azureOperator);
-    telemetryModule.callWithTelemetry(
-        EventNames.azureProvisionEvent, outputChannel, true, context,
-        azureProvisionBinder);
-  };
+  initCommandWithTelemetry(
+      context, telemetryWorker, telemetryContext, outputChannel,
+      Commands.ConfigureDevice, EventNames.configDeviceSettingsEvent, true,
+      async(): Promise<void> => {
+        return deviceOperator.configDeviceSettings(
+            context, outputChannel, telemetryContext);
+      });
 
-  const azureDeployProvider = async () => {
-    // Initialize Telemetry
-    if (!telemetryWorkerInitialized) {
-      telemetryModule.TelemetryWorker.initialize(context);
-      telemetryWorkerInitialized = true;
-    }
+  initCommandWithTelemetry(
+      context, telemetryWorker, telemetryContext, outputChannel,
+      Commands.Examples, EventNames.openExamplePageEvent, true,
+      async(): Promise<void> => {
+        return exampleExplorer.selectBoard(
+            context, outputChannel, telemetryContext);
+      });
 
-    const azureDeployBinder = azureOperator.deploy.bind(azureOperator);
-    telemetryModule.callWithTelemetry(
-        EventNames.azureDeployEvent, outputChannel, true, context,
-        azureDeployBinder);
-  };
+  initCommandWithTelemetry(
+      context, telemetryWorker, telemetryContext, outputChannel,
+      Commands.ExampleInitialize, EventNames.loadExampleEvent, true,
+      async(
+          context, outputChannel, telemetryContext, name?: string, url?: string,
+          boardId?: string): Promise<void> => {
+        return exampleExplorer.initializeExample(
+            context, outputChannel, telemetryContext, name, url, boardId);
+      });
 
-  const deviceCompileProvider = async () => {
-    // Initialize Telemetry
-    if (!telemetryWorkerInitialized) {
-      telemetryModule.TelemetryWorker.initialize(context);
-      telemetryWorkerInitialized = true;
-    }
+  initCommandWithTelemetry(
+      context, telemetryWorker, telemetryContext, outputChannel,
+      Commands.SendTelemetry, EventNames.openTutorial, true, async () => {});
 
-    const deviceCompileBinder = deviceOperator.compile.bind(deviceOperator);
-    telemetryModule.callWithTelemetry(
-        EventNames.deviceCompileEvent, outputChannel, true, context,
-        deviceCompileBinder);
-  };
+  initCommandWithTelemetry(
+      context, telemetryWorker, telemetryContext, outputChannel,
+      Commands.IotPnPGenerateCode, EventNames.scaffoldDeviceStubEvent, true,
+      async(): Promise<void> => {
+        const codeGenerator = new CodeGeneratorCore();
+        codeGenerator.generateDeviceCodeStub(
+            context, outputChannel, telemetryContext);
+      });
 
-  const deviceUploadProvider = async () => {
-    // Initialize Telemetry
-    if (!telemetryWorkerInitialized) {
-      telemetryModule.TelemetryWorker.initialize(context);
-      telemetryWorkerInitialized = true;
-    }
+  initCommandWithTelemetry(
+      context, telemetryWorker, telemetryContext, outputChannel, Commands.Help,
+      EventNames.help, true, async () => {
+        const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
 
-    const deviceUploadBinder = deviceOperator.upload.bind(deviceOperator);
-    telemetryModule.callWithTelemetry(
-        EventNames.deviceUploadEvent, outputChannel, true, context,
-        deviceUploadBinder);
-  };
+        if (boardId) {
+          const boardListFolderPath = context.asAbsolutePath(path.join(
+              FileNames.resourcesFolderName, FileNames.templatesFolderName));
+          const boardProvider = new BoardProvider(boardListFolderPath);
+          const board = boardProvider.find({id: boardId});
 
-  const deviceSettingsConfigProvider = async () => {
-    // Initialize Telemetry
-    if (!telemetryWorkerInitialized) {
-      telemetryModule.TelemetryWorker.initialize(context);
-      telemetryWorkerInitialized = true;
-    }
-
-    const deviceConfigBinder =
-        deviceOperator.configDeviceSettings.bind(deviceOperator);
-    telemetryModule.callWithTelemetry(
-        EventNames.configDeviceSettingsEvent, outputChannel, true, context,
-        deviceConfigBinder);
-  };
-
-  const examplesProvider = async () => {
-    // Initialize Telemetry
-    if (!telemetryWorkerInitialized) {
-      telemetryModule.TelemetryWorker.initialize(context);
-      telemetryWorkerInitialized = true;
-    }
-
-    const exampleSelectBoardBinder =
-        exampleExplorer.selectBoard.bind(exampleExplorer);
-    telemetryModule.callWithTelemetry(
-        EventNames.openExamplePageEvent, outputChannel, true, context,
-        exampleSelectBoardBinder);
-  };
-
-  const examplesInitializeProvider =
-      async (name?: string, url?: string, boardId?: string) => {
-    // Initialize Telemetry
-    if (!telemetryWorkerInitialized) {
-      telemetryModule.TelemetryWorker.initialize(context);
-      telemetryWorkerInitialized = true;
-    }
-
-    const initializeExampleBinder =
-        exampleExplorer.initializeExample.bind(exampleExplorer);
-    telemetryModule.callWithTelemetry(
-        EventNames.loadExampleEvent, outputChannel, true, context,
-        initializeExampleBinder, {}, name, url, boardId);
-  };
-
-  const projectInit = vscode.commands.registerCommand(
-      'iotworkbench.initializeProject', projectInitProvider);
-
-  const configureContainer = vscode.commands.registerCommand(
-      'iotworkbench.configureProjectEnvironment',
-      projectEnvironmentConfigProvider);
-  const examples = vscode.commands.registerCommand(
-      'iotworkbench.examples', examplesProvider);
-
-  const exampleInitialize = vscode.commands.registerCommand(
-      'iotworkbench.exampleInitialize', examplesInitializeProvider);
-
-  const deviceCompile = vscode.commands.registerCommand(
-      'iotworkbench.deviceCompile', deviceCompileProvider);
-
-  const deviceUpload = vscode.commands.registerCommand(
-      'iotworkbench.deviceUpload', deviceUploadProvider);
-
-  const azureProvision = vscode.commands.registerCommand(
-      'iotworkbench.azureProvision', azureProvisionProvider);
-
-  const azureDeploy = vscode.commands.registerCommand(
-      'iotworkbench.azureDeploy', azureDeployProvider);
-
-  const configureDevice = vscode.commands.registerCommand(
-      'iotworkbench.configureDevice', deviceSettingsConfigProvider);
-
-  const sendTelemetry = vscode.commands.registerCommand(
-      'iotworkbench.sendTelemetry',
-      (additionalProperties: {[key: string]: string}) => {
-        const properties: TelemetryProperties = {
-          result: 'Succeeded',
-          error: '',
-          errorMessage: ''
-        };
-
-        for (const key of Object.keys(additionalProperties)) {
-          properties[key] = additionalProperties[key];
+          if (board && board.helpUrl) {
+            await vscode.commands.executeCommand(
+                Commands.VscodeOpen, vscode.Uri.parse(board.helpUrl));
+            return;
+          }
         }
-
-        const telemetryContext:
-            TelemetryContext = {properties, measurements: {duration: 0}};
-
-        // Initialize Telemetry
-        if (!telemetryWorkerInitialized) {
-          telemetryModule.TelemetryWorker.initialize(context);
-          telemetryWorkerInitialized = true;
-        }
-        telemetryModule.TelemetryWorker.sendEvent(
-            EventNames.openTutorial, telemetryContext);
-      });
-
-  const openUri =
-      vscode.commands.registerCommand('iotworkbench.openUri', (uri: string) => {
-        vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(uri));
-      });
-
-  const httpRequest = vscode.commands.registerCommand(
-      'iotworkbench.httpRequest', async (uri: string) => {
-        const res = await request(uri);
-        return res;
-      });
-
-  const helpInit = vscode.commands.registerCommand('iotworkbench.help', async () => {
-    const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
-
-    if (boardId) {
-      const boardListFolderPath = context.asAbsolutePath(path.join(
-          FileNames.resourcesFolderName, FileNames.templatesFolderName));
-      const boardProvider = new BoardProvider(boardListFolderPath);
-      const board = boardProvider.find({id: boardId});
-
-      if (board && board.helpUrl) {
+        const workbenchHelpUrl =
+            'https://github.com/microsoft/vscode-iot-workbench/blob/master/README.md';
         await vscode.commands.executeCommand(
-            'vscode.open', vscode.Uri.parse(board.helpUrl));
+            Commands.VscodeOpen, vscode.Uri.parse(workbenchHelpUrl));
         return;
-      }
-    }
-    await vscode.commands.executeCommand(
-        'vscode.open',
-        vscode.Uri.parse(
-            'https://github.com/microsoft/vscode-iot-workbench/blob/master/README.md'));
-    return;
-  });
+      });
 
-  const workbenchPath =
-      vscode.commands.registerCommand('iotworkbench.workbench', async () => {
+  initCommandWithTelemetry(
+      context, telemetryWorker, telemetryContext, outputChannel,
+      Commands.Workbench, EventNames.setProjectDefaultPath, true, async () => {
         const isLocal = RemoteExtension.checkLocalBeforeRunCommand(context);
         if (!isLocal) {
           return;
@@ -278,71 +171,89 @@ export async function activate(context: vscode.ExtensionContext) {
         return;
       });
 
-  const getDisableAutoPopupLandingPage = vscode.commands.registerCommand(
-      'iotworkbench.getDisableAutoPopupLandingPage', () => {
-        return ConfigHandler.get<boolean>('disableAutoPopupLandingPage');
-      });
+  initCommand(context, Commands.OpenUri, async (uri: string) => {
+    vscode.commands.executeCommand(Commands.VscodeOpen, vscode.Uri.parse(uri));
+  });
 
-  const setDisableAutoPopupLandingPage = vscode.commands.registerCommand(
-      'iotworkbench.setDisableAutoPopupLandingPage',
+  initCommand(context, Commands.HttpRequest, async (uri: string) => {
+    const res = await request(uri);
+    return res;
+  });
+
+
+  initCommand(context, Commands.GetDisableAutoPopupLandingPage, async () => {
+    return ConfigHandler.get<boolean>(ConfigKey.disableAutoPopupLandingPage);
+  });
+
+  initCommand(
+      context, Commands.SetDisableAutoPopupLandingPage,
       async (disableAutoPopupLandingPage: boolean) => {
         return ConfigHandler.update(
-            'disableAutoPopupLandingPage', disableAutoPopupLandingPage,
+            ConfigKey.disableAutoPopupLandingPage, disableAutoPopupLandingPage,
             vscode.ConfigurationTarget.Global);
       });
 
-  context.subscriptions.push(projectInit);
-  context.subscriptions.push(configureContainer);
-  context.subscriptions.push(examples);
-  context.subscriptions.push(exampleInitialize);
-  context.subscriptions.push(helpInit);
-  context.subscriptions.push(workbenchPath);
-  context.subscriptions.push(deviceCompile);
-  context.subscriptions.push(deviceUpload);
-  context.subscriptions.push(azureProvision);
-  context.subscriptions.push(azureDeploy);
-  context.subscriptions.push(configureDevice);
-  context.subscriptions.push(sendTelemetry);
-  context.subscriptions.push(openUri);
-  context.subscriptions.push(httpRequest);
-  context.subscriptions.push(getDisableAutoPopupLandingPage);
-  context.subscriptions.push(setDisableAutoPopupLandingPage);
-
-  context.subscriptions.push(vscode.commands.registerCommand(
-      'iotworkbench.iotPnPGenerateCode', async () => {
-        // Initialize Telemetry
-        if (!telemetryWorkerInitialized) {
-          telemetryModule.TelemetryWorker.initialize(context);
-          telemetryWorkerInitialized = true;
-        }
-
-        const codeGenerator = new CodeGeneratorCore();
-        const codeGeneratorBinder =
-            codeGenerator.generateDeviceCodeStub.bind(codeGenerator);
-
-        telemetryModule.callWithTelemetry(
-            EventNames.scaffoldDeviceStubEvent, outputChannel, true, context,
-            codeGeneratorBinder);
-      }));
-
   // delay to detect usb
   setTimeout(() => {
-    if (RemoteExtension.isRemote(context)) {
-      return;
-    }
-    // delay to detect usb
-    const usbDetectorModule =
-        impor('./usbDetector') as typeof import('./usbDetector');
-
-    const usbDetector =
-        new usbDetectorModule.UsbDetector(context, outputChannel);
-    usbDetector.startListening();
+    enableUsbDetector(context, outputChannel);
   }, 200);
 }
 
 // this method is called when your extension is deactivated
 export async function deactivate() {
-  if (telemetryWorkerInitialized) {
-    await telemetryModule.TelemetryWorker.dispose();
+  console.log('Workbench deactivating...');
+  if (telemetryWorker instanceof TelemetryWorker) {
+    await telemetryWorker.dispose();
   }
+}
+
+function enableUsbDetector(
+    context: vscode.ExtensionContext,
+    outputChannel: vscode.OutputChannel): void {
+  if (RemoteExtension.isRemote(context)) {
+    return;
+  }
+  // delay to detect usb
+  const usbDetectorModule =
+      impor('./usbDetector') as typeof import('./usbDetector');
+
+  const usbDetector = new usbDetectorModule.UsbDetector(context, outputChannel);
+  usbDetector.startListening();
+}
+
+function printHello(context: vscode.ExtensionContext) {
+  const extension = WorkbenchExtension.getExtension(context);
+  if (!extension) {
+    return;
+  }
+
+  const extensionId = extension.id;
+  console.log(`Congratulations, your extension ${extensionId} is now active!`);
+}
+
+
+function initCommandWithTelemetry(
+    context: vscode.ExtensionContext, telemetryWorker: TelemetryWorker,
+    telemetryContext: TelemetryContext, outputChannel: vscode.OutputChannel,
+    command: Commands, eventName: string, enableSurvey: boolean,
+    // tslint:disable-next-line:no-any
+    callback: (
+        context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
+        // tslint:disable-next-line:no-any
+        telemetrycontext: TelemetryContext, ...args: any[]) => any,
+    // tslint:disable-next-line:no-any
+    additionalProperties?: {[key: string]: string}): void {
+  context.subscriptions.push(vscode.commands.registerCommand(
+      command,
+      async (...commandArgs) => telemetryWorker.callCommandWithTelemetry(
+          context, telemetryContext, outputChannel, eventName, enableSurvey,
+          callback, additionalProperties, ...commandArgs)));
+}
+
+function initCommand(
+    context: vscode.ExtensionContext, command: Commands,
+    // tslint:disable-next-line:no-any
+    callback: (...args: any[]) => Promise<any>): void {
+  context.subscriptions.push(
+      vscode.commands.registerCommand(command, callback));
 }

@@ -14,7 +14,7 @@ import {ConfigHandler} from '../configHandler';
 
 import {getExtension} from './Apis';
 import {ExtensionName} from './Interfaces/Api';
-import {TelemetryWorker, TelemetryContext} from '../telemetry';
+import {TelemetryWorker, TelemetryContext, TelemetryResult} from '../telemetry';
 import {EventNames} from '../constants';
 
 export interface ARMParameters {
@@ -431,17 +431,16 @@ export class AzureUtility {
       return undefined;
     }
 
-    const telemetryContext: TelemetryContext = {
-      properties: {
-        result: 'Succeeded',
-        error: '',
-        errorMessage: '',
-        subscription: subscription.description
-      },
-      measurements: {duration: 0}
-    };
+    const telemetryWorker = new TelemetryWorker(AzureUtility._context);
+    const telemetryContext = telemetryWorker.createContext();
+    telemetryContext.properties.subscription = subscription.description;
 
-    TelemetryWorker.sendEvent(EventNames.selectSubscription, telemetryContext);
+    try {
+      telemetryWorker.sendEvent(
+          EventNames.selectSubscription, telemetryContext);
+    } catch {
+      // If sending telemetry failed, skip the error to avoid blocking user.
+    }
     return subscription.description;
   }
 

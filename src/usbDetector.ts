@@ -10,7 +10,7 @@ import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 import {ConfigHandler} from './configHandler';
 import {EventNames, FileNames} from './constants';
-import {callWithTelemetry} from './telemetry';
+import {TelemetryWorker} from './telemetry';
 
 export interface DeviceInfo {
   vendorId: number;
@@ -49,27 +49,15 @@ export class UsbDetector {
   }
 
   showLandingPage(device: DeviceInfo) {
-    // if current workspace is iot device workbench workspace
-    // we shouldn't popup landing page
-    // if (vscode.workspace.workspaceFolders &&
-    //     vscode.workspace.workspaceFolders.length) {
-    //   const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
-    //   if (devicePath) {
-    //     const deviceLocation = path.join(
-    //         vscode.workspace.workspaceFolders[0].uri.fsPath, '..',
-    //         devicePath, constants.iotworkbenchprojectFileName);
-    //     if (fs.existsSync(deviceLocation)) {
-    //       return;
-    //     }
-    //   }
-    // }
-
     const board = this.getBoardFromDeviceInfo(device);
 
     if (board) {
-      callWithTelemetry(
-          EventNames.detectBoard, this.channel, false,
-          this.context, async () => {
+      const telemetryWorker = new TelemetryWorker(this.context);
+      const telemetryContext = telemetryWorker.createContext();
+
+      telemetryWorker.callCommandWithTelemetry(
+          this.context, telemetryContext, this.channel, EventNames.detectBoard,
+          false, async () => {
             if (board.exampleUrl) {
               ArduinoPackageManager.installBoard(board);
 
@@ -87,7 +75,7 @@ export class UsbDetector {
                     retainContextWhenHidden: true
                   });
             }
-          }, {board: board.name});
+          }, {}, {board: board.name});
     }
   }
 

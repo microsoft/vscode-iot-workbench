@@ -6,6 +6,7 @@ import {DependentExtensions} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 import {channelShowAndAppendLine} from '../utils';
 import {WorkbenchExtension} from '../WorkbenchExtension';
+import {Commands} from '../common/Commands';
 
 export class RemoteExtension {
   static isRemote(context: vscode.ExtensionContext) {
@@ -24,7 +25,7 @@ export class RemoteExtension {
           message, DialogResponses.yes, DialogResponses.no);
       if (choice === DialogResponses.yes) {
         vscode.commands.executeCommand(
-            'vscode.open',
+            Commands.VscodeOpen,
             vscode.Uri.parse('vscode:extension/' + DependentExtensions.remote));
       }
       return false;

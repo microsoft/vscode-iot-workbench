@@ -6,9 +6,9 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, EventNames, FileNames, ScaffoldType} from '../constants';
+import {ConfigKey, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
-import {TelemetryContext, TelemetryWorker} from '../telemetry';
+import {TelemetryContext} from '../telemetry';
 import {channelShowAndAppendLine} from '../utils';
 
 import {Dependency} from './AzureComponentConfig';
@@ -70,7 +70,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
 
     // only send telemetry when the IoT project is load when VS Code opens
     if (initLoad) {
-      this.sendTelemetryIfLoadProjectWithVSCodeOpens();
+      this.sendLoadEventTelemetry(this.extensionContext);
     }
 
     const azureConfigFileHandler =
@@ -460,8 +460,8 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
       // If open in current window, VSCode will restart. Need to send telemetry
       // before VSCode restart to advoid data lost.
       try {
-        TelemetryWorker.sendEvent(
-            EventNames.createNewProjectEvent, this.telemetryContext);
+        // telemetryWorker.sendEvent(
+        //     EventNames.createNewProjectEvent, this.telemetryContext);
       } catch {
         // If sending telemetry failed, skip the error to avoid blocking user.
       }

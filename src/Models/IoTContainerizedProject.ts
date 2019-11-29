@@ -8,7 +8,7 @@ import * as vscode from 'vscode';
 import {CancelOperationError} from '../CancelOperationError';
 import {ConfigKey, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
-import {TelemetryContext, TelemetryWorker} from '../telemetry';
+import {TelemetryContext, TelemetryResult, TelemetryWorker} from '../telemetry';
 import {channelShowAndAppendLine} from '../utils';
 
 import {ProjectHostType} from './Interfaces/ProjectHostType';
@@ -51,7 +51,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
     // only send telemetry when the IoT project is load when VS Code opens
     if (initLoad) {
-      this.sendTelemetryIfLoadProjectWithVSCodeOpens();
+      this.sendLoadEventTelemetry(this.extensionContext);
     }
 
     if (this.projectRootPath !== undefined) {
@@ -169,7 +169,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     } catch (error) {
       if (error instanceof CancelOperationError) {
         this.telemetryContext.properties.errorMessage = error.message;
-        this.telemetryContext.properties.result = 'Cancelled';
+        this.telemetryContext.properties.result = TelemetryResult.Cancelled;
         return;
       } else {
         throw error;
@@ -183,7 +183,8 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       // If open in current window, VSCode will restart. Need to send telemetry
       // before VSCode restart to advoid data lost.
       try {
-        TelemetryWorker.sendEvent(
+        const telemetryWorker = new TelemetryWorker(this.extensionContext);
+        telemetryWorker.sendEvent(
             EventNames.createNewProjectEvent, this.telemetryContext);
       } catch {
         // If sending telemetry failed, skip the error to avoid blocking user.
