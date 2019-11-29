@@ -13,7 +13,7 @@ import {channelShowAndAppendLine} from '../utils';
 
 import {ProjectHostType} from './Interfaces/ProjectHostType';
 import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
-import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
+import {IoTWorkbenchProjectBase, OpenScenario} from './IoTWorkbenchProjectBase';
 import {RemoteExtension} from './RemoteExtension';
 
 const impor = require('impor')(__dirname);
@@ -148,7 +148,8 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     }
 
     // Open project
-    await this.openProject(this.projectRootPath, openInNewWindow);
+    await this.openProject(
+        this.projectRootPath, openInNewWindow, OpenScenario.createNewProject);
   }
 
   /**
@@ -156,7 +157,9 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
    * remote. If yes, stay local and open bash script for user to customize
    * environment.
    */
-  async openProject(projectPath: string, openInNewWindow: boolean) {
+  async openProject(
+      projectPath: string, openInNewWindow: boolean,
+      openScenario: OpenScenario) {
     if (!FileUtility.directoryExists(ScaffoldType.Local, projectPath)) {
       channelShowAndAppendLine(
           this.channel, `Can not find project path ${projectPath}.`);
@@ -184,8 +187,10 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       // before VSCode restart to advoid data lost.
       try {
         const telemetryWorker = new TelemetryWorker(this.extensionContext);
-        telemetryWorker.sendEvent(
-            EventNames.createNewProjectEvent, this.telemetryContext);
+        const eventNames = openScenario === OpenScenario.createNewProject ?
+            EventNames.createNewProjectEvent :
+            EventNames.configProjectEnvironmentEvent;
+        telemetryWorker.sendEvent(eventNames, this.telemetryContext);
       } catch {
         // If sending telemetry failed, skip the error to avoid blocking user.
       }

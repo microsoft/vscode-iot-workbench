@@ -21,7 +21,7 @@ import {TelemetryContext, TelemetryResult} from './telemetry';
 import {WorkbenchExtension} from './WorkbenchExtension';
 
 const impor = require('impor')(__dirname);
-import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
+import {IoTWorkbenchProjectBase, OpenScenario} from './Models/IoTWorkbenchProjectBase';
 import {Commands} from './common/Commands';
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
     typeof import('./Models/IoTWorkspaceProject');
@@ -481,7 +481,8 @@ export async function handleExternalProject(
       throw new Error(
           `Failed to add configuration files. Project environment configuration stopped.`);
     }
-    await project.openProject(deviceRootPath, false);
+    await project.openProject(
+        deviceRootPath, false, OpenScenario.configureProject);
   } else if (result === Choice.createNewProject) {
     telemetryContext.properties.errorMessage =
         'Operation failed and user creates new project';

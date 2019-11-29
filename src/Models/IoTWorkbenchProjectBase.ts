@@ -24,6 +24,10 @@ const impor = require('impor')(__dirname);
 const azureUtilityModule =
     impor('./AzureUtility') as typeof import('./AzureUtility');
 
+export enum OpenScenario {
+  createNewProject,
+  configureProject
+}
 export abstract class IoTWorkbenchProjectBase {
   protected componentList: Component[];
   protected projectRootPath = '';
@@ -293,8 +297,9 @@ export abstract class IoTWorkbenchProjectBase {
     return true;
   }
 
-  abstract async openProject(projectPath: string, openInNewWindow: boolean):
-      Promise<void>;
+  abstract async openProject(
+      projectPath: string, openInNewWindow: boolean,
+      openScenario: OpenScenario): Promise<void>;
 
   async configDeviceSettings(): Promise<boolean> {
     for (const component of this.componentList) {

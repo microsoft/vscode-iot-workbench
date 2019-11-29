@@ -6,9 +6,9 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, FileNames, ScaffoldType} from '../constants';
+import {ConfigKey, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
-import {TelemetryContext} from '../telemetry';
+import {TelemetryContext, TelemetryWorker} from '../telemetry';
 import {channelShowAndAppendLine} from '../utils';
 
 import {Dependency} from './AzureComponentConfig';
@@ -16,7 +16,7 @@ import {Component} from './Interfaces/Component';
 import {ProjectHostType} from './Interfaces/ProjectHostType';
 import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {Workspace} from './Interfaces/Workspace';
-import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
+import {IoTWorkbenchProjectBase, OpenScenario} from './IoTWorkbenchProjectBase';
 
 const impor = require('impor')(__dirname);
 const az3166DeviceModule =
@@ -437,10 +437,13 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     }
 
     // Open project
-    await this.openProject(this.projectRootPath, openInNewWindow);
+    await this.openProject(
+        this.projectRootPath, openInNewWindow, OpenScenario.createNewProject);
   }
 
-  async openProject(projectPath: string, openInNewWindow: boolean) {
+  async openProject(
+      projectPath: string, openInNewWindow: boolean,
+      openScenario: OpenScenario) {
     if (!FileUtility.directoryExists(ScaffoldType.Local, projectPath)) {
       channelShowAndAppendLine(
           this.channel, `Can not find project path ${projectPath}.`);
@@ -460,8 +463,11 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
       // If open in current window, VSCode will restart. Need to send telemetry
       // before VSCode restart to advoid data lost.
       try {
-        // telemetryWorker.sendEvent(
-        //     EventNames.createNewProjectEvent, this.telemetryContext);
+        const telemetryWorker = new TelemetryWorker(this.extensionContext);
+        const eventNames = openScenario === OpenScenario.createNewProject ?
+            EventNames.createNewProjectEvent :
+            EventNames.configProjectEnvironmentEvent;
+        telemetryWorker.sendEvent(eventNames, this.telemetryContext);
       } catch {
         // If sending telemetry failed, skip the error to avoid blocking user.
       }
