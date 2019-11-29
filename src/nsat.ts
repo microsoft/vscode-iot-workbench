@@ -5,7 +5,7 @@
 
 import {commands, ExtensionContext, Uri, window} from 'vscode';
 import {EventNames} from './constants';
-import {TelemetryContext, TelemetryWorker, TelemetryResult} from './telemetry';
+import {TelemetryWorker} from './telemetry';
 import {WorkbenchExtension} from './WorkbenchExtension';
 import {Commands} from './common/Commands';
 

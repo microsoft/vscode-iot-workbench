@@ -14,7 +14,7 @@ import {ConfigHandler} from '../configHandler';
 
 import {getExtension} from './Apis';
 import {ExtensionName} from './Interfaces/Api';
-import {TelemetryWorker, TelemetryContext, TelemetryResult} from '../telemetry';
+import {TelemetryWorker} from '../telemetry';
 import {EventNames} from '../constants';
 
 export interface ARMParameters {

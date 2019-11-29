@@ -5,9 +5,9 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {CancelOperationError} from '../CancelOperationError';
-import {ConfigKey, DevelopEnvironment, EventNames, FileNames, ScaffoldType} from '../constants';
+import {ConfigKey, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
-import {TelemetryContext, TelemetryResult, TelemetryWorker} from '../telemetry';
+import {TelemetryContext, TelemetryWorker} from '../telemetry';
 import * as utils from '../utils';
 
 import {checkAzureLogin} from './Apis';
@@ -19,7 +19,6 @@ import {ProjectHostType} from './Interfaces/ProjectHostType';
 import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
-import {RemoteExtension} from './RemoteExtension';
 
 const impor = require('impor')(__dirname);
 const azureUtilityModule =

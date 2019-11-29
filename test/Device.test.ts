@@ -1,13 +1,10 @@
 import * as assert from 'assert';
-import * as Path from 'path';
 import * as vscode from 'vscode';
 
-import {DeviceOperator} from '../src/DeviceOperator';
 import {AZ3166Device} from '../src/Models/AZ3166Device';
 import {ComponentType} from '../src/Models/Interfaces/Component';
-import {Device, DeviceType} from '../src/Models/Interfaces/Device';
-import {ProjectHostType} from '../src/Models/Interfaces/ProjectHostType';
-import {TelemetryContext, TelemetryResult, TelemetryWorker} from '../src/telemetry';
+import {DeviceType} from '../src/Models/Interfaces/Device';
+import {TelemetryContext, TelemetryWorker} from '../src/telemetry';
 
 import {TestExtensionContext} from './stub';
 
