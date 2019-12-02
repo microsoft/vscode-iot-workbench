@@ -48,7 +48,7 @@ export class NSAT {
 
     await globalState.update(IS_CANDIDATE_KEY, isCandidate);
 
-    const telemetryWorker = new TelemetryWorker(context);
+    const telemetryWorker = TelemetryWorker.getInstance(context);
     const telemetryContext = telemetryWorker.createContext();
 
     const extension = WorkbenchExtension.getExtension(context);

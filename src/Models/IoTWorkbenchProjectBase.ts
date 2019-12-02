@@ -356,7 +356,7 @@ export abstract class IoTWorkbenchProjectBase {
    * Send telemetry when the IoT project is load when VS Code opens
    */
   sendLoadEventTelemetry(context: vscode.ExtensionContext) {
-    const telemetryWorker = new TelemetryWorker(context);
+    const telemetryWorker = TelemetryWorker.getInstance(context);
     const telemetryContext = telemetryWorker.createContext();
     telemetryContext.properties.projectHostType =
         ProjectHostType[this.projectHostType];

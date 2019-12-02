@@ -38,8 +38,9 @@ export interface TelemetryContext {
 export class TelemetryWorker {
   private _reporter: TelemetryReporter|undefined;
   private extensionContext: vscode.ExtensionContext|undefined;
+  private static instance: TelemetryWorker|undefined;
 
-  constructor(context: vscode.ExtensionContext) {
+  private constructor(context: vscode.ExtensionContext) {
     this.extensionContext = context;
     const extensionInfo = this.getExtensionInfo(context);
     if (!extensionInfo) {
@@ -53,6 +54,13 @@ export class TelemetryWorker {
     }
     this._reporter = new TelemetryReporter(
         extensionInfo.name, extensionInfo.version, extensionInfo.aiKey);
+  }
+
+  static getInstance(context: vscode.ExtensionContext): TelemetryWorker {
+    if (!TelemetryWorker.instance) {
+      TelemetryWorker.instance = new TelemetryWorker(context);
+    }
+    return TelemetryWorker.instance;
   }
 
   /**

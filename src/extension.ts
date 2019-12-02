@@ -35,7 +35,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const channelName = 'Azure IoT Device Workbench';
   const outputChannel: vscode.OutputChannel =
       vscode.window.createOutputChannel(channelName);
-  telemetryWorker = new TelemetryWorker(context);
+  telemetryWorker = TelemetryWorker.getInstance(context);
   const telemetryContext = telemetryWorker.createContext();
 
   // Load iot Project here and do not ask to new an iot project when no iot

@@ -13,7 +13,7 @@ suite('IoT Device Workbench: Device', () => {
   test('property of device should be set correctly', function(done) {
     const context = new TestExtensionContext();
     const channel = vscode.window.createOutputChannel('IoT workbench test');
-    const telemetryWorker = new TelemetryWorker(context);
+    const telemetryWorker = TelemetryWorker.getInstance(context);
     const telemetryContext: TelemetryContext = telemetryWorker.createContext();
     const device = new AZ3166Device(context, channel, telemetryContext, '', []);
     assert.equal(device.getDeviceType(), DeviceType.MXChip_AZ3166);

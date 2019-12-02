@@ -186,7 +186,8 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       // If open in current window, VSCode will restart. Need to send telemetry
       // before VSCode restart to advoid data lost.
       try {
-        const telemetryWorker = new TelemetryWorker(this.extensionContext);
+        const telemetryWorker =
+            TelemetryWorker.getInstance(this.extensionContext);
         const eventNames = openScenario === OpenScenario.createNewProject ?
             EventNames.createNewProjectEvent :
             EventNames.configProjectEnvironmentEvent;

@@ -52,7 +52,7 @@ export class UsbDetector {
     const board = this.getBoardFromDeviceInfo(device);
 
     if (board) {
-      const telemetryWorker = new TelemetryWorker(this.context);
+      const telemetryWorker = TelemetryWorker.getInstance(this.context);
       const telemetryContext = telemetryWorker.createContext();
 
       telemetryWorker.callCommandWithTelemetry(

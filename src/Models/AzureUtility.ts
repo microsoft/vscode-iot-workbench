@@ -431,7 +431,7 @@ export class AzureUtility {
       return undefined;
     }
 
-    const telemetryWorker = new TelemetryWorker(AzureUtility._context);
+    const telemetryWorker = TelemetryWorker.getInstance(AzureUtility._context);
     const telemetryContext = telemetryWorker.createContext();
     telemetryContext.properties.subscription = subscription.description;
 
