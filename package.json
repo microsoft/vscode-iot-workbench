@@ -123,43 +123,39 @@
       {
         "title": "IoT Device Workbench Configuration",
         "properties": {
-          "IoTWorkbench.workbench": {
+          "vscode-iot-workbench.workbench": {
             "type": "string"
           },
-          "IoTWorkbench.DevicePath": {
+          "vscode-iot-workbench.devicePath": {
             "type": "string"
           },
-          "IoTWorkbench.FunctionPath": {
+          "vscode-iot-workbench.functionPath": {
             "type": "string"
           },
-          "IoTWorkbench.iothubConnectionString": {
+          "vscode-iot-workbench.iotHubConnectionString": {
             "type": "string"
           },
-          "IoTWorkbench.iothubDeviceConnectionString": {
+          "vscode-iot-workbench.iotHubDeviceConnectionString": {
             "type": "string"
           },
-          "IoTWorkbench.eventHubConnectionString": {
+          "vscode-iot-workbench.eventHubConnectionString": {
             "type": "string"
           },
-          "IoTWorkbench.eventHubConnectionPath": {
+          "vscode-iot-workbench.eventHubConnectionPath": {
             "type": "string"
           },
-          "IoTWorkbench.functionAppId": {
+          "vscode-iot-workbench.functionAppId": {
             "type": "string"
           },
-          "IoTWorkbench.disableAutoPopupLandingPage": {
+          "vscode-iot-workbench.disableAutoPopupLandingPage": {
             "type": "boolean",
             "default": false
           },
-          "IoTWorkbench.BoardId": {
+          "vscode-iot-workbench.boardId": {
             "type": "string"
           },
-          "IoTWorkbench.IoTPnPCodeGenVersion": {
+          "vscode-iot-workbench.iotPnpCodeGenVersion": {
             "type": "string"
-          },
-          "IoTWorkbench.IoTPnPPublicRepositoryUrl": {
-            "type": "string",
-            "default": "https://repo.azureiotrepository.com"
           }
         }
       }

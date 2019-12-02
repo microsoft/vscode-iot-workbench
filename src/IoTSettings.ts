@@ -6,7 +6,7 @@ import * as vscode from 'vscode';
 import * as sdk from 'vscode-iot-device-cube-sdk';
 
 import {ConfigHandler} from './configHandler';
-import {OSPlatform} from './constants';
+import {ConfigKey, OSPlatform} from './constants';
 import {PickWithData} from './Models/Interfaces/UI';
 
 export class IoTWorkbenchSettings {
@@ -59,20 +59,21 @@ export class IoTWorkbenchSettings {
   }
 
   async workbenchPath() {
-    const userWorkbenchPath = ConfigHandler.get<string>('workbench');
+    const userWorkbenchPath = ConfigHandler.get<string>(ConfigKey.workbench);
     if (userWorkbenchPath) {
       return userWorkbenchPath;
     } else {
       // Use the default value for workbenchPath.
       await ConfigHandler.update(
-          'workbench', this._workbenchPath, vscode.ConfigurationTarget.Global);
+          ConfigKey.workbench, this._workbenchPath,
+          vscode.ConfigurationTarget.Global);
       return this._workbenchPath;
     }
   }
 
   async setWorkbenchPath(showMessage = true) {
     let userWorkbenchPath: string|undefined =
-        ConfigHandler.get<string>('workbench') || this._workbenchPath;
+        ConfigHandler.get<string>(ConfigKey.workbench) || this._workbenchPath;
     const workbenchPicks: Array<PickWithData<string>> = [
       {label: userWorkbenchPath, description: '', data: userWorkbenchPath},
       {label: '$(file-directory) Browse...', description: '', data: '$'}
@@ -110,7 +111,8 @@ export class IoTWorkbenchSettings {
 
     if (userWorkbenchPath) {
       await ConfigHandler.update(
-          'workbench', userWorkbenchPath, vscode.ConfigurationTarget.Global);
+          ConfigKey.workbench, userWorkbenchPath,
+          vscode.ConfigurationTarget.Global);
       if (showMessage) {
         await vscode.window.showInformationMessage(
             'Change workbench successfully.');

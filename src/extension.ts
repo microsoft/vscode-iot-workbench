@@ -280,14 +280,15 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const getDisableAutoPopupLandingPage = vscode.commands.registerCommand(
       'iotworkbench.getDisableAutoPopupLandingPage', () => {
-        return ConfigHandler.get<boolean>('disableAutoPopupLandingPage');
+        return ConfigHandler.get<boolean>(
+            ConfigKey.disableAutoPopupLandingPage);
       });
 
   const setDisableAutoPopupLandingPage = vscode.commands.registerCommand(
       'iotworkbench.setDisableAutoPopupLandingPage',
       async (disableAutoPopupLandingPage: boolean) => {
         return ConfigHandler.update(
-            'disableAutoPopupLandingPage', disableAutoPopupLandingPage,
+            ConfigKey.disableAutoPopupLandingPage, disableAutoPopupLandingPage,
             vscode.ConfigurationTarget.Global);
       });
 

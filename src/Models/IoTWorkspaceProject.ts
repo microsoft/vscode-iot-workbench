@@ -281,10 +281,11 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     // }
 
     // Config through workspace
-    workspace.settings[`IoTWorkbench.${ConfigKey.boardId}`] = boardId;
+    workspace.settings[`${ConfigKey.extensionName}.${ConfigKey.boardId}`] =
+        boardId;
     this.componentList.push(device);
 
-    workspace.settings[`IoTWorkbench.${ConfigKey.devicePath}`] =
+    workspace.settings[`${ConfigKey.extensionName}.${ConfigKey.devicePath}`] =
         constants.deviceDefaultFolderName;
 
     switch (projectType) {
@@ -333,7 +334,8 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
           return;
         }
 
-        workspace.settings[`IoTWorkbench.${ConfigKey.functionPath}`] =
+        workspace
+            .settings[`${ConfigKey.extensionName}.${ConfigKey.functionPath}`] =
             constants.functionDefaultFolderName;
 
         this.componentList.push(iothub);
@@ -391,7 +393,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
         // }
 
         workspace.folders.push({path: constants.asaFolderName});
-        workspace.settings[`IoTWorkbench.${ConfigKey.asaPath}`] =
+        workspace.settings[`${ConfigKey.extensionName}.${ConfigKey.asaPath}`] =
             constants.asaFolderName;
 
         this.componentList.push(iothub);

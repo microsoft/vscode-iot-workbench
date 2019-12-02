@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 import * as vscode from 'vscode';
+import {ConfigKey} from './constants';
 
 export class ConfigHandler {
   static async update(
@@ -9,8 +10,7 @@ export class ConfigHandler {
     if (!key) {
       throw new Error('Key is empty.');
     }
-
-    return await vscode.workspace.getConfiguration('IoTWorkbench')
+    return await vscode.workspace.getConfiguration(ConfigKey.extensionName)
         .update(key, value, target);
   }
 
@@ -18,7 +18,7 @@ export class ConfigHandler {
     if (!key) {
       throw new Error('Key is empty.');
     }
-
-    return vscode.workspace.getConfiguration('IoTWorkbench').get<T>(key);
+    return vscode.workspace.getConfiguration(ConfigKey.extensionName)
+        .get<T>(key);
   }
 }

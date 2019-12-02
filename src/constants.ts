@@ -2,19 +2,21 @@
 // Licensed under the MIT License.
 
 export class ConfigKey {
-  static readonly devicePath = 'DevicePath';
-  static readonly iotHubConnectionString = 'iothubConnectionString';
-  static readonly iotHubDeviceConnectionString = 'iothubDeviceConnectionString';
+  static readonly extensionName = 'vscode-iot-workbench';
+  static readonly workbench = 'workbench';
+  static readonly devicePath = 'devicePath';
+  static readonly iotHubConnectionString = 'iotHubConnectionString';
+  static readonly iotHubDeviceConnectionString = 'iotHubDeviceConnectionString';
   static readonly eventHubConnectionString = 'eventHubConnectionString';
   static readonly eventHubConnectionPath = 'eventHubConnectionPath';
   static readonly functionAppId = 'functionAppId';
-  static readonly functionPath = 'FunctionPath';
-  static readonly boardId = 'BoardId';
+  static readonly functionPath = 'functionPath';
+  static readonly boardId = 'boardId';
   static readonly asaPath = 'StreamAnalyticsPath';
-  static readonly codeGeneratorVersion = 'IoTPnPCodeGenVersion';
-  static readonly projectType = 'ProjectType';
+  static readonly codeGeneratorVersion = 'iotPnpCodeGenVersion';
   static readonly projectHostType = 'ProjectHostType';
   static readonly workbenchVersion = 'version';
+  static readonly disableAutoPopupLandingPage = 'disableAutoPopupLandingPage';
 }
 
 export class EventNames {
