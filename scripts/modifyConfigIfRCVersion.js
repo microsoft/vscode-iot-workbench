@@ -18,7 +18,6 @@ if (process.env.TRAVIS_TAG) {
       packageJson.version = packageJson.version.substring(0, indexOfDash);
     }
     delete packageJson.icon;
-    delete packageJson.aiKey;
 
     fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2) + '\n');
 
