@@ -152,6 +152,21 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
         this.projectRootPath, openInNewWindow, OpenScenario.createNewProject);
   }
 
+  async openFolderInContainer(folderPath: string) {
+    if (!await FileUtility.directoryExists(ScaffoldType.Local, folderPath)) {
+      throw new Error(
+          `Fail to open folder in container: ${folderPath} does not exist.`);
+    }
+
+    const result = await RemoteExtension.checkRemoteExtension(this.channel);
+    if (!result) {
+      return;
+    }
+
+    vscode.commands.executeCommand(
+        'remote-containers.openFolder', vscode.Uri.file(folderPath));
+  }
+
   /**
    * Ask user whether to customize project environment. If no, open project in
    * remote. If yes, stay local and open bash script for user to customize
@@ -201,18 +216,13 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     if (!customizeEnvironment) {
       // If user does not want to customize develpment environment,
       //  we will open the project in remote directly for user.
-      setTimeout(
-          () => vscode.commands.executeCommand(
-              'iotcube.openInContainer', projectPath),
-          500);
+      await this.openFolderInContainer(projectPath);
     } else {
       // If user wants to customize development environment, open project
       // locally.
       // TODO: Open bash script in window
-      setTimeout(
-          () => vscode.commands.executeCommand(
-              'iotcube.openLocally', projectPath, openInNewWindow),
-          500);
+      vscode.commands.executeCommand(
+          'iotcube.openLocally', projectPath, openInNewWindow);
     }
   }
 
