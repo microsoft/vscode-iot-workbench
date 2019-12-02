@@ -37,6 +37,7 @@ export async function activate(context: vscode.ExtensionContext) {
       vscode.window.createOutputChannel(channelName);
   telemetryWorker = TelemetryWorker.getInstance(context);
   const telemetryContext = telemetryWorker.createContext();
+  context.subscriptions.push(telemetryWorker);
 
   // Load iot Project here and do not ask to new an iot project when no iot
   // project open since no command has been triggered yet.
@@ -200,12 +201,7 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 
 // this method is called when your extension is deactivated
-export async function deactivate() {
-  console.log('Deactivating Workbench...');
-  if (telemetryWorker instanceof TelemetryWorker) {
-    await telemetryWorker.dispose();
-  }
-}
+export async function deactivate() {}
 
 function enableUsbDetector(
     context: vscode.ExtensionContext,

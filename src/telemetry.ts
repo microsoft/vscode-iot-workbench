@@ -175,7 +175,6 @@ export class TelemetryWorker {
   async dispose() {
     if (this._reporter) {
       await this._reporter.dispose();
-      console.log('Disposing telemetry worker.');
     }
   }
 
