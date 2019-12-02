@@ -201,7 +201,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 // this method is called when your extension is deactivated
 export async function deactivate() {
-  console.log('Workbench deactivating...');
+  console.log('Deactivating Workbench...');
   if (telemetryWorker instanceof TelemetryWorker) {
     await telemetryWorker.dispose();
   }
