@@ -23,7 +23,6 @@
     "Azure",
     "Other"
   ],
-  "preview": true,
   "activationEvents": [
     "*",
     "workspaceContains:**/.iotworkbenchproject",
