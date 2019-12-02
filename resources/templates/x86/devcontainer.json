@@ -1,6 +1,5 @@
 {
-  "image": "x86",
-  "name": "x86_container",
+  "name": "Azure IoT Device C SDK for x86 Linux",
   "dockerFile": "Dockerfile",
   "extensions": [
     "ms-vscode.cpptools",
