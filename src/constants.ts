@@ -99,7 +99,7 @@ export enum PlatformType {
 }
 
 export enum DevelopEnvironment {
-  Container = 'in container',
+  RemoteEnv = 'in remote environment',
   LocalEnv = 'in local environment'
 }
 

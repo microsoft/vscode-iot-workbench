@@ -83,7 +83,7 @@ export class TelemetryWorker {
     if (this.extensionContext) {
       context.properties.developEnvironment =
           RemoteExtension.isRemote(this.extensionContext) ?
-          DevelopEnvironment.Container :
+          DevelopEnvironment.RemoteEnv :
           DevelopEnvironment.LocalEnv;
     }
     return context;
