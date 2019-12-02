@@ -95,8 +95,6 @@ export class TelemetryWorker {
    * @param telemetryContext telemetry context
    */
   sendEvent(eventName: string, telemetryContext: TelemetryContext): void {
-    console.log(`[debug] Sending Telemetry. Event name： ${
-        eventName}. context: ${telemetryContext}`);
     if (!this._reporter) {
       return;
     }
