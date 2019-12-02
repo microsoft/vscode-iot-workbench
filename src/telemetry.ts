@@ -37,11 +37,11 @@ export interface TelemetryContext {
 
 export class TelemetryWorker {
   private _reporter: TelemetryReporter|undefined;
-  private extensionContext: vscode.ExtensionContext|undefined;
-  private static instance: TelemetryWorker|undefined;
+  private _extensionContext: vscode.ExtensionContext|undefined;
+  private static _instance: TelemetryWorker|undefined;
 
   private constructor(context: vscode.ExtensionContext) {
-    this.extensionContext = context;
+    this._extensionContext = context;
     const packageInfo = this.getPackageInfo(context);
     if (!packageInfo) {
       console.log('Unable to initialize telemetry');
@@ -57,10 +57,10 @@ export class TelemetryWorker {
   }
 
   static getInstance(context: vscode.ExtensionContext): TelemetryWorker {
-    if (!TelemetryWorker.instance) {
-      TelemetryWorker.instance = new TelemetryWorker(context);
+    if (!TelemetryWorker._instance) {
+      TelemetryWorker._instance = new TelemetryWorker(context);
     }
-    return TelemetryWorker.instance;
+    return TelemetryWorker._instance;
   }
 
   /**
@@ -80,9 +80,9 @@ export class TelemetryWorker {
     const context: TelemetryContext = {properties: {}, measurements: {}};
     context.properties.result = TelemetryResult.Succeeded;
     context.properties.isInternal = TelemetryWorker.isInternalUser.toString();
-    if (this.extensionContext) {
+    if (this._extensionContext) {
       context.properties.developEnvironment =
-          RemoteExtension.isRemote(this.extensionContext) ?
+          RemoteExtension.isRemote(this._extensionContext) ?
           DevelopEnvironment.RemoteEnv :
           DevelopEnvironment.LocalEnv;
     }
