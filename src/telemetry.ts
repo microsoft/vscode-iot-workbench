@@ -12,7 +12,7 @@ import {NSAT} from './nsat';
 import {WorkbenchExtension} from './WorkbenchExtension';
 
 
-interface ExtensionInfo {
+interface PackageInfo {
   name: string;
   version: string;
   aiKey: string;
@@ -42,18 +42,18 @@ export class TelemetryWorker {
 
   private constructor(context: vscode.ExtensionContext) {
     this.extensionContext = context;
-    const extensionInfo = this.getExtensionInfo(context);
-    if (!extensionInfo) {
+    const packageInfo = this.getPackageInfo(context);
+    if (!packageInfo) {
       console.log('Unable to initialize telemetry');
       return;
     }
-    if (!extensionInfo.aiKey) {
+    if (!packageInfo.aiKey) {
       console.log(
           'Unable to initialize telemetry, please make sure AIKey is set in package.json');
       return;
     }
     this._reporter = new TelemetryReporter(
-        extensionInfo.name, extensionInfo.version, extensionInfo.aiKey);
+        packageInfo.name, packageInfo.version, packageInfo.aiKey);
   }
 
   static getInstance(context: vscode.ExtensionContext): TelemetryWorker {
@@ -181,18 +181,18 @@ export class TelemetryWorker {
   /**
    * Get extension information
    */
-  private getExtensionInfo(context: vscode.ExtensionContext): ExtensionInfo
+  private getPackageInfo(context: vscode.ExtensionContext): PackageInfo
       |undefined {
     const extension = WorkbenchExtension.getExtension(context);
     if (extension) {
       const extensionPackage = extension.packageJSON;
       if (extensionPackage) {
-        const extensionInfo: ExtensionInfo = {
+        const packageInfo: PackageInfo = {
           name: extensionPackage.name,
           version: extensionPackage.version,
           aiKey: extensionPackage.aiKey
         };
-        return extensionInfo;
+        return packageInfo;
       }
     }
     return undefined;
