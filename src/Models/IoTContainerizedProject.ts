@@ -153,7 +153,12 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
   async openFolderInContainer(folderPath: string) {
     if (!await FileUtility.directoryExists(ScaffoldType.Local, folderPath)) {
       throw new Error(
-          `Fail to open folder in container. ${folderPath} does not exist.`);
+          `Fail to open folder in container: ${folderPath} does not exist.`);
+    }
+
+    const result = await RemoteExtension.checkRemoteExtension(this.channel);
+    if (!result) {
+      return;
     }
 
     setTimeout(
