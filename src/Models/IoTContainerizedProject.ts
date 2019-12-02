@@ -161,10 +161,8 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       return;
     }
 
-    setTimeout(
-        () => vscode.commands.executeCommand(
-            'remote-containers.openFolder', vscode.Uri.file(folderPath)),
-        500);
+    vscode.commands.executeCommand(
+        'remote-containers.openFolder', vscode.Uri.file(folderPath));
   }
 
   /**
@@ -215,10 +213,8 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       // If user wants to customize development environment, open project
       // locally.
       // TODO: Open bash script in window
-      setTimeout(
-          () => vscode.commands.executeCommand(
-              'iotcube.openLocally', projectPath, openInNewWindow),
-          500);
+      vscode.commands.executeCommand(
+          'iotcube.openLocally', projectPath, openInNewWindow);
     }
   }
 

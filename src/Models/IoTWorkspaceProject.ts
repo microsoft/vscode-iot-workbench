@@ -469,9 +469,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
 
     const workspaceConfigFilePath =
         path.join(projectPath, workspaceConfigFileName[0]);
-    setTimeout(
-        () => vscode.commands.executeCommand(
-            'iotcube.openLocally', workspaceConfigFilePath, openInNewWindow),
-        500);
+    vscode.commands.executeCommand(
+        'iotcube.openLocally', workspaceConfigFilePath, openInNewWindow);
   }
 }
