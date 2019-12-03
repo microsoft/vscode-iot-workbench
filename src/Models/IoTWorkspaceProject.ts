@@ -5,6 +5,7 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+import {CancelOperationError} from '../CancelOperationError';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
@@ -415,8 +416,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
       if (!res) {
         // TODO: Remove this function and implement with sdk in FileUtility
         fs.removeSync(this.projectRootPath);
-        vscode.window.showWarningMessage('Project initialize cancelled.');
-        return;
+        throw new CancelOperationError('Project initialization cancelled.');
       }
     }
 

@@ -100,13 +100,11 @@ export class TelemetryWorker {
     if (!this._reporter) {
       return;
     }
-    if (telemetryContext) {
-      this._reporter.sendTelemetryEvent(
-          eventName, telemetryContext.properties,
-          telemetryContext.measurements);
-    } else {
-      this._reporter.sendTelemetryEvent(eventName);
+    if (!telemetryContext) {
+      telemetryContext = this.createContext();
     }
+    this._reporter.sendTelemetryEvent(
+        eventName, telemetryContext.properties, telemetryContext.measurements);
   }
 
   /**
@@ -143,18 +141,19 @@ export class TelemetryWorker {
     }
 
     try {
-      return await Promise.resolve(callback.apply(
-          null, [context, outputChannel, telemetryContext, ...commandArgs]));
-      // return await callback(context, outputChannel, telemetryContext,
-      // ...commandArgs);
+      return await callback(
+          context, outputChannel, telemetryContext, ...commandArgs);
     } catch (error) {
       telemetryContext.properties.errorMessage = error.message;
+      let isPopupErrorMsg = true;
       if (error instanceof CancelOperationError) {
         telemetryContext.properties.result = TelemetryResult.Cancelled;
+        isPopupErrorMsg = false;
       } else {
         telemetryContext.properties.result = TelemetryResult.Failed;
       }
-      ExceptionHelper.logError(outputChannel, error, true);
+      telemetryContext.properties.errorMessage = error.message;
+      ExceptionHelper.logError(outputChannel, error, isPopupErrorMsg);
     } finally {
       const end: number = Date.now();
       telemetryContext.measurements.duration = (end - start) / 1000;

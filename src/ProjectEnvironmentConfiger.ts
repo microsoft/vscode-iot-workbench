@@ -8,7 +8,7 @@ import * as vscode from 'vscode';
 import * as utils from './utils';
 import * as path from 'path';
 
-import {TelemetryContext, TelemetryResult} from './telemetry';
+import {TelemetryContext} from './telemetry';
 import {ScaffoldType, PlatformType} from './constants';
 import {RemoteExtension} from './Models/RemoteExtension';
 import {IoTWorkbenchProjectBase, OpenScenario} from './Models/IoTWorkbenchProjectBase';
@@ -50,10 +50,8 @@ export class ProjectEnvironmentConfiger {
               await utils.selectPlatform(scaffoldType, context);
           let platform: PlatformType;
           if (!platformSelection) {
-            telemetryContext.properties.errorMessage =
-                'Platform selection cancelled.';
-            telemetryContext.properties.result = TelemetryResult.Cancelled;
-            return;
+            throw new CancelOperationError(
+                'Project environment configuration process cancelled: Platform selection cancelled.');
           } else {
             telemetryContext.properties.platform = platformSelection.label;
             platform = utils.getEnumKeyByEnumValue(
@@ -61,22 +59,10 @@ export class ProjectEnvironmentConfiger {
           }
 
           let res: boolean;
-          try {
-            res = await ProjectEnvironmentConfiger
-                      .configureProjectEnvironmentAsPlatform(
-                          context, channel, telemetryContext, platform,
-                          deviceRootPath, scaffoldType);
-          } catch (error) {
-            if (error instanceof CancelOperationError) {
-              const message =
-                  `Project development environment configuration cancelled.`;
-              utils.channelShowAndAppendLine(channel, message);
-              vscode.window.showWarningMessage(message);
-              return;
-            } else {
-              throw error;
-            }
-          }
+          res = await ProjectEnvironmentConfiger
+                    .configureProjectEnvironmentAsPlatform(
+                        context, channel, telemetryContext, platform,
+                        deviceRootPath, scaffoldType);
 
           if (!res) {
             return;
@@ -119,12 +105,9 @@ export class ProjectEnvironmentConfiger {
     let project;
     let projectRootPath = '';
     if (platform === PlatformType.EmbeddedLinux) {
-      const result = await RemoteExtension.checkRemoteExtension(channel);
-      if (!result) {
-        return false;
-      }
+      await RemoteExtension.checkRemoteExtension();
 
-      telemetryContext.properties.projectHostType = 'Container';
+      telemetryContext.properties.projectHostType = ProjectHostType.Container;
       project = new ioTContainerizedProjectModule.IoTContainerizedProject(
           context, channel, telemetryContext);
 
@@ -135,7 +118,7 @@ export class ProjectEnvironmentConfiger {
       }
       projectRootPath = deviceRootPath;
     } else if (platform === PlatformType.Arduino) {
-      telemetryContext.properties.projectHostType = 'Workspace';
+      telemetryContext.properties.projectHostType = ProjectHostType.Workspace;
       project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
           context, channel, telemetryContext);
       projectRootPath = path.join(deviceRootPath, '..');
@@ -143,19 +126,14 @@ export class ProjectEnvironmentConfiger {
       throw new Error('unsupported platform');
     }
 
-    let res = await project.load(scaffoldType);
+    const res = await project.load(scaffoldType);
     if (!res) {
       throw new Error(
           `Failed to load project. Project environment configuration stopped.`);
     }
 
     // Add configuration files
-    res = await project.configureProjectEnvironmentCore(
-        deviceRootPath, scaffoldType);
-    if (!res) {
-      // User cancel configuration selection
-      return false;
-    }
+    await project.configureProjectEnvironmentCore(deviceRootPath, scaffoldType);
 
     await project.openProject(
         projectRootPath, false, OpenScenario.configureProject);

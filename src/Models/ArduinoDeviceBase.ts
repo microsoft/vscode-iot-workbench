@@ -5,6 +5,7 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+import {CancelOperationError} from '../CancelOperationError';
 import {Commands} from '../common/Commands';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, DependentExtensions, FileNames, OperationType, OSPlatform, ScaffoldType} from '../constants';
@@ -162,10 +163,10 @@ export abstract class ArduinoDeviceBase implements Device {
     await this.generateCppPropertiesFile(createTimeScaffoldType, board);
 
     // Configurate device environment
-    const res = await this.configDeviceEnvironment(
+    await this.configDeviceEnvironment(
         this.deviceFolder, createTimeScaffoldType);
 
-    return res;
+    return true;
   }
 
   // Backward compatibility: Check configuration
@@ -317,7 +318,7 @@ export abstract class ArduinoDeviceBase implements Device {
   }
 
   async configDeviceEnvironment(
-      deviceRootPath: string, scaffoldType: ScaffoldType): Promise<boolean> {
+      deviceRootPath: string, scaffoldType: ScaffoldType): Promise<void> {
     if (!deviceRootPath) {
       throw new Error(
           'Unable to find the project device path, please open the folder and initialize project again.');
@@ -326,9 +327,6 @@ export abstract class ArduinoDeviceBase implements Device {
     const templateFilesInfo = await utils.getEnvTemplateFilesAndAskOverwrite(
         this.extensionContext, this.telemetryContext, this.deviceFolder,
         scaffoldType, constants.environmentTemplateFolderName);
-    if (!templateFilesInfo) {
-      return false;
-    }
 
     // Configure project environment with template files
     for (const fileInfo of templateFilesInfo) {
@@ -337,7 +335,5 @@ export abstract class ArduinoDeviceBase implements Device {
 
     const message = 'Arduino device configuration done.';
     utils.channelShowAndAppendLine(this.channel, message);
-
-    return true;
   }
 }
