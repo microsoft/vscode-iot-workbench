@@ -39,6 +39,7 @@ export class TelemetryWorker {
   private _reporter: TelemetryReporter|undefined;
   private _extensionContext: vscode.ExtensionContext|undefined;
   private static _instance: TelemetryWorker|undefined;
+  private _isInternal = false;
 
   private constructor(context: vscode.ExtensionContext) {
     this._extensionContext = context;
@@ -54,6 +55,7 @@ export class TelemetryWorker {
     }
     this._reporter = new TelemetryReporter(
         packageInfo.name, packageInfo.version, packageInfo.aiKey);
+    this._isInternal = TelemetryWorker.isInternalUser();
   }
 
   static getInstance(context: vscode.ExtensionContext): TelemetryWorker {
@@ -79,7 +81,7 @@ export class TelemetryWorker {
   createContext(): TelemetryContext {
     const context: TelemetryContext = {properties: {}, measurements: {}};
     context.properties.result = TelemetryResult.Succeeded;
-    context.properties.isInternal = TelemetryWorker.isInternalUser.toString();
+    context.properties.isInternal = this._isInternal.toString();
     if (this._extensionContext) {
       context.properties.developEnvironment =
           RemoteExtension.isRemote(this._extensionContext) ?
