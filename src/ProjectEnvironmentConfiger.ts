@@ -8,10 +8,10 @@ import * as vscode from 'vscode';
 import * as utils from './utils';
 import * as path from 'path';
 
-import {TelemetryContext} from './telemetry';
+import {TelemetryContext, TelemetryResult} from './telemetry';
 import {ScaffoldType, PlatformType} from './constants';
 import {RemoteExtension} from './Models/RemoteExtension';
-import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
+import {IoTWorkbenchProjectBase, OpenScenario} from './Models/IoTWorkbenchProjectBase';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 import {CancelOperationError} from './CancelOperationError';
 
@@ -52,7 +52,7 @@ export class ProjectEnvironmentConfiger {
           if (!platformSelection) {
             telemetryContext.properties.errorMessage =
                 'Platform selection cancelled.';
-            telemetryContext.properties.result = 'Cancelled';
+            telemetryContext.properties.result = TelemetryResult.Cancelled;
             return;
           } else {
             telemetryContext.properties.platform = platformSelection.label;
@@ -157,7 +157,8 @@ export class ProjectEnvironmentConfiger {
       return false;
     }
 
-    await project.openProject(projectRootPath, false);
+    await project.openProject(
+        projectRootPath, false, OpenScenario.configureProject);
     return true;
   }
 }

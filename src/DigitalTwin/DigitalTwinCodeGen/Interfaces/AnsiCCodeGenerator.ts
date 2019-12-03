@@ -2,6 +2,8 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+import {Commands} from '../../../common/Commands';
+import {OpenScenario} from '../../../Models/IoTWorkbenchProjectBase';
 import {IoTWorkspaceProject} from '../../../Models/IoTWorkspaceProject';
 import {TelemetryContext} from '../../../telemetry';
 import * as utils from '../../../utils';
@@ -23,11 +25,12 @@ export class AnsiCCodeGenerator implements CodeGenerator {
       if (codegenInfo.codeGenProjectType === CodeGenProjectType.IoTDevKit) {
         const project: IoTWorkspaceProject = new IoTWorkspaceProject(
             this.context, this.channel, this.telemetryContext);
-        project.openProject(codegenInfo.outputDirectory, true);
+        project.openProject(
+            codegenInfo.outputDirectory, true, OpenScenario.createNewProject);
       } else {
         await vscode.commands.executeCommand(
-            'vscode.openFolder', vscode.Uri.file(codegenInfo.outputDirectory),
-            true);
+            Commands.VscodeOpenFolder,
+            vscode.Uri.file(codegenInfo.outputDirectory), true);
       }
 
       return true;

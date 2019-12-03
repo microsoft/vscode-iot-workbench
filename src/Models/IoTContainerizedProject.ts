@@ -8,12 +8,12 @@ import * as vscode from 'vscode';
 import {CancelOperationError} from '../CancelOperationError';
 import {ConfigKey, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
-import {TelemetryContext, TelemetryWorker} from '../telemetry';
+import {TelemetryContext, TelemetryResult, TelemetryWorker} from '../telemetry';
 import {channelShowAndAppendLine} from '../utils';
 
 import {ProjectHostType} from './Interfaces/ProjectHostType';
 import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
-import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
+import {IoTWorkbenchProjectBase, OpenScenario} from './IoTWorkbenchProjectBase';
 import {RemoteExtension} from './RemoteExtension';
 
 const impor = require('impor')(__dirname);
@@ -51,7 +51,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
     // only send telemetry when the IoT project is load when VS Code opens
     if (initLoad) {
-      this.sendTelemetryIfLoadProjectWithVSCodeOpens();
+      this.sendLoadEventTelemetry(this.extensionContext);
     }
 
     if (this.projectRootPath !== undefined) {
@@ -147,7 +147,9 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
           `Internal Error. Could not find iot workbench project file.`);
     }
 
-    await this.openProject(this.projectRootPath, openInNewWindow);
+    // Open project
+    await this.openProject(
+        this.projectRootPath, openInNewWindow, OpenScenario.createNewProject);
   }
 
   async openFolderInContainer(folderPath: string) {
@@ -170,7 +172,9 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
    * remote. If yes, stay local and open bash script for user to customize
    * environment.
    */
-  async openProject(projectPath: string, openInNewWindow: boolean) {
+  async openProject(
+      projectPath: string, openInNewWindow: boolean,
+      openScenario: OpenScenario) {
     if (!FileUtility.directoryExists(ScaffoldType.Local, projectPath)) {
       channelShowAndAppendLine(
           this.channel, `Can not find project path ${projectPath}.`);
@@ -183,7 +187,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     } catch (error) {
       if (error instanceof CancelOperationError) {
         this.telemetryContext.properties.errorMessage = error.message;
-        this.telemetryContext.properties.result = 'Cancelled';
+        this.telemetryContext.properties.result = TelemetryResult.Cancelled;
         return;
       } else {
         throw error;
@@ -197,8 +201,12 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       // If open in current window, VSCode will restart. Need to send telemetry
       // before VSCode restart to advoid data lost.
       try {
-        TelemetryWorker.sendEvent(
-            EventNames.createNewProjectEvent, this.telemetryContext);
+        const telemetryWorker =
+            TelemetryWorker.getInstance(this.extensionContext);
+        const eventNames = openScenario === OpenScenario.createNewProject ?
+            EventNames.createNewProjectEvent :
+            EventNames.configProjectEnvironmentEvent;
+        telemetryWorker.sendEvent(eventNames, this.telemetryContext);
       } catch {
         // If sending telemetry failed, skip the error to avoid blocking user.
       }

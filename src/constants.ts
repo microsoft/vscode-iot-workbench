@@ -15,6 +15,8 @@ export class ConfigKey {
   static readonly projectType = 'ProjectType';
   static readonly projectHostType = 'ProjectHostType';
   static readonly workbenchVersion = 'version';
+
+  static readonly disableAutoPopupLandingPage = 'disableAutoPopupLandingPage';
 }
 
 export class EventNames {
@@ -39,6 +41,8 @@ export class EventNames {
   static readonly openTutorial = 'IoTWorkbench.OpenTutorial';
   static readonly projectLoadEvent = 'IoTWorkbench.ProjectLoadEvent';
   static readonly scaffoldDeviceStubEvent = 'IoTWorkbench.ScaffoldDeviceStub';
+  static readonly help = 'IoTWorkbench.Help';
+  static readonly setProjectDefaultPath = 'IoTWorkbench.SetDefaultPath';
 }
 
 export class FileNames {
@@ -95,7 +99,7 @@ export enum PlatformType {
 }
 
 export enum DevelopEnvironment {
-  Container = 'in container',
+  RemoteEnv = 'in remote environment',
   LocalEnv = 'in local environment'
 }
 
