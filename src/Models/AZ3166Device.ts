@@ -14,14 +14,14 @@ import * as WinReg from 'winreg';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, ScaffoldType} from '../constants';
+import {ConfigKey, FileNames} from '../constants';
 import {DialogResponses} from '../DialogResponses';
 import {TelemetryContext} from '../telemetry';
 import {delay, getRegistryValues} from '../utils';
 
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
 import {DeviceType} from './Interfaces/Device';
-import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
+import {DeviceConfig, TemplateFileInfo} from './Interfaces/ProjectTemplate';
 
 const impor = require('impor')(__dirname);
 const forEach = impor('lodash.foreach') as typeof import('lodash.foreach');
@@ -149,30 +149,23 @@ export class AZ3166Device extends ArduinoDeviceBase {
   }
 
   async configDeviceSettings(): Promise<boolean> {
-    const configSelectionItems: vscode.QuickPickItem[] = [
-      {
-        label: 'Config Device Connection String',
-        description: 'Config IoT Hub Device Connection String',
-        detail: 'Config Connection String'
-      },
-      {
-        label: 'Config DPS Unique Device Secret (UDS)',
-        description:
-            'Config DPS Unique Device Secret (UDS) for X.509 certificates attestation',
-        detail: 'Config UDS'
-      },
-      {
-        label: 'Config DPS credentials',
-        description: 'Config DPS credentials for Symmetric Key attestation',
-        detail: 'Config DPS'
-      },
-      {
-        label: 'Generate CRC for OTA',
-        description:
-            'Generate Cyclic Redundancy Check(CRC) code for OTA Update',
-        detail: 'Config CRC'
-      }
-    ];
+    // Read options configuration JSON
+    const devciceConfigFilePath: string =
+        this.extensionContext.asAbsolutePath(path.join(
+            FileNames.resourcesFolderName, FileNames.templatesFolderName,
+            FileNames.configDeviceOptionsFileName));
+    const configSelectionItemsContent =
+        JSON.parse(fs.readFileSync(devciceConfigFilePath, 'utf8'));
+
+    const configSelectionItems: vscode.QuickPickItem[] = [];
+    configSelectionItemsContent.configSelectionItems.forEach(
+        (element: DeviceConfig) => {
+          configSelectionItems.push({
+            label: element.label,
+            description: element.description,
+            detail: element.detail
+          });
+        });
 
     const configSelection =
         await vscode.window.showQuickPick(configSelectionItems, {
@@ -195,46 +188,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
       let deviceConnectionString =
           ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
 
-      let hostName = '';
-      let deviceId = '';
-      if (deviceConnectionString) {
-        const hostnameMatches =
-            deviceConnectionString.match(/HostName=(.*?)(;|$)/);
-        if (hostnameMatches) {
-          hostName = hostnameMatches[0];
-        }
-
-        const deviceIDMatches =
-            deviceConnectionString.match(/DeviceId=(.*?)(;|$)/);
-        if (deviceIDMatches) {
-          deviceId = deviceIDMatches[0];
-        }
-      }
-
-      let deviceConnectionStringSelection: vscode.QuickPickItem[] = [];
-      if (deviceId && hostName) {
-        deviceConnectionStringSelection = [
-          {
-            label: 'Select IoT Hub Device Connection String',
-            description: '',
-            detail: `Device Information: ${hostName} ${deviceId}`
-          },
-          {
-            label: 'Input IoT Hub Device Connection String',
-            description: '',
-            detail: ''
-          }
-        ];
-      } else {
-        deviceConnectionStringSelection = [{
-          label: 'Input IoT Hub Device Connection String',
-          description: '',
-          detail: ''
-        }];
-      }
-
       const selection = await vscode.window.showQuickPick(
-          deviceConnectionStringSelection,
+          this.getDeviceConnectionStringOptions(deviceConnectionString),
           {ignoreFocusOut: true, placeHolder: 'Choose an option:'});
 
       if (!selection) {
@@ -281,23 +236,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
       console.log(deviceConnectionString);
 
-      // Try to close serial monitor
-      try {
-        await vscode.commands.executeCommand(
-            'arduino.closeSerialMonitor', null, false);
-      } catch (ignore) {
-      }
-
-      // Set selected connection string to device
-      let res: boolean;
-      const plat = os.platform();
-      if (plat === 'win32') {
-        res = await this.flushDeviceConfig(
-            deviceConnectionString, ConfigDeviceOptions.ConnectionString);
-      } else {
-        res = await this.flushDeviceConfigUnix(
-            deviceConnectionString, ConfigDeviceOptions.ConnectionString);
-      }
+      const res = await this.setDeviceConfig(
+          deviceConnectionString, ConfigDeviceOptions.ConnectionString);
 
       if (!res) {
         return false;
@@ -335,23 +275,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
       console.log(deviceConnectionString);
 
-      // Try to close serial monitor
-      try {
-        await vscode.commands.executeCommand(
-            'arduino.closeSerialMonitor', null, false);
-      } catch (ignore) {
-      }
-
-      // Set selected connection string to device
-      let res: boolean;
-      const plat = os.platform();
-      if (plat === 'win32') {
-        res = await this.flushDeviceConfig(
-            deviceConnectionString, ConfigDeviceOptions.DPS);
-      } else {
-        res = await this.flushDeviceConfigUnix(
-            deviceConnectionString, ConfigDeviceOptions.DPS);
-      }
+      const res = await this.setDeviceConfig(
+          deviceConnectionString, ConfigDeviceOptions.DPS);
 
       if (!res) {
         return false;
@@ -391,21 +316,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
       console.log(UDS);
 
-      // Try to close serial monitor
-      try {
-        await vscode.commands.executeCommand(
-            'arduino.closeSerialMonitor', null, false);
-      } catch (ignore) {
-      }
-
-      // Set selected connection string to device
-      let res: boolean;
-      const plat = os.platform();
-      if (plat === 'win32') {
-        res = await this.flushDeviceConfig(UDS, ConfigDeviceOptions.UDS);
-      } else {
-        res = await this.flushDeviceConfigUnix(UDS, ConfigDeviceOptions.UDS);
-      }
+      const res = await this.setDeviceConfig(UDS, ConfigDeviceOptions.UDS);
 
       if (!res) {
         return false;
@@ -414,6 +325,65 @@ export class AZ3166Device extends ArduinoDeviceBase {
             'Configure Unique Device String (UDS) completed successfully.');
         return true;
       }
+    }
+  }
+
+  private getDeviceConnectionStringOptions(deviceConnectionString: string|
+                                           undefined): vscode.QuickPickItem[] {
+    let hostName = '';
+    let deviceId = '';
+    if (deviceConnectionString) {
+      const hostnameMatches =
+          deviceConnectionString.match(/HostName=(.*?)(;|$)/);
+      if (hostnameMatches) {
+        hostName = hostnameMatches[0];
+      }
+
+      const deviceIDMatches =
+          deviceConnectionString.match(/DeviceId=(.*?)(;|$)/);
+      if (deviceIDMatches) {
+        deviceId = deviceIDMatches[0];
+      }
+    }
+
+    let deviceConnectionStringSelection: vscode.QuickPickItem[] = [];
+    if (deviceId && hostName) {
+      deviceConnectionStringSelection = [
+        {
+          label: 'Select IoT Hub Device Connection String',
+          description: '',
+          detail: `Device Information: ${hostName} ${deviceId}`
+        },
+        {
+          label: 'Input IoT Hub Device Connection String',
+          description: '',
+          detail: ''
+        }
+      ];
+    } else {
+      deviceConnectionStringSelection = [{
+        label: 'Input IoT Hub Device Connection String',
+        description: '',
+        detail: ''
+      }];
+    }
+    return deviceConnectionStringSelection;
+  }
+
+  async setDeviceConfig(configValue: string, option: number): Promise<boolean> {
+    // Try to close serial monitor
+    try {
+      await vscode.commands.executeCommand(
+          'arduino.closeSerialMonitor', null, false);
+    } catch (ignore) {
+    }
+
+    // Set selected connection string to device
+    const plat = os.platform();
+    if (plat === 'win32') {
+      return await this.flushDeviceConfig(configValue, option);
+    } else {
+      return await this.flushDeviceConfigUnix(configValue, option);
     }
   }
 
