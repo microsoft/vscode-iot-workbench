@@ -126,11 +126,12 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
     projectConfig[`${ConfigKey.boardId}`] = boardId;
 
-    const res = await device.create();
-    if (!res) {
+    try {
+      await device.create();
+    } catch (error) {
       // TODO: Add remove() in FileUtility class
       fs.removeSync(this.projectRootPath);
-      throw new CancelOperationError('Project initialization cancelled.');
+      throw error;
     }
 
     // Step 2: Write project config into iot workbench project file

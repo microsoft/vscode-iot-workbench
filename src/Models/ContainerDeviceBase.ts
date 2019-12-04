@@ -75,7 +75,7 @@ export abstract class ContainerDeviceBase implements Device {
     return true;
   }
 
-  async create(): Promise<boolean> {
+  async create(): Promise<void> {
     // ScaffoldType is local when creating a project
     const createTimeScaffoldType = ScaffoldType.Local;
     if (!await FileUtility.directoryExists(
@@ -88,8 +88,6 @@ export abstract class ContainerDeviceBase implements Device {
 
     await this.configDeviceEnvironment(
         this.projectFolder, createTimeScaffoldType);
-
-    return true;
   }
 
   async generateTemplateFiles(

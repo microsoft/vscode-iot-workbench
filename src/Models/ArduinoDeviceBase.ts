@@ -141,10 +141,10 @@ export abstract class ArduinoDeviceBase implements Device {
     return true;
   }
 
-  abstract async create(): Promise<boolean>;
+  abstract async create(): Promise<void>;
 
   async createCore(board: Board|undefined, templateFiles: TemplateFileInfo[]):
-      Promise<boolean> {
+      Promise<void> {
     // Generate template files
     const createTimeScaffoldType = ScaffoldType.Local;
     if (!await FileUtility.directoryExists(
@@ -165,8 +165,6 @@ export abstract class ArduinoDeviceBase implements Device {
     // Configurate device environment
     await this.configDeviceEnvironment(
         this.deviceFolder, createTimeScaffoldType);
-
-    return true;
   }
 
   // Backward compatibility: Check configuration

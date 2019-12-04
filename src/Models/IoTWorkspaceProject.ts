@@ -411,13 +411,14 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     //   await element.create();
     // });
 
-    for (let i = 0; i < this.componentList.length; i++) {
-      const res = await this.componentList[i].create();
-      if (!res) {
-        // TODO: Remove this function and implement with sdk in FileUtility
-        fs.removeSync(this.projectRootPath);
-        throw new CancelOperationError('Project initialization cancelled.');
+    try {
+      for (let i = 0; i < this.componentList.length; i++) {
+        await this.componentList[i].create();
       }
+    } catch (error) {
+      // TODO: Add remove() in FileUtility class
+      fs.removeSync(this.projectRootPath);
+      throw error;
     }
 
     const workspaceConfigFilePath = path.join(

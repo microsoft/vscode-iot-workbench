@@ -148,7 +148,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     return true;
   }
 
-  async create(): Promise<boolean> {
+  async create(): Promise<void> {
     const scaffoldType = ScaffoldType.Local;
     const azureFunctionsPath = this.azureFunctionsPath;
     console.log(azureFunctionsPath);
@@ -209,7 +209,6 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
 
     await this.updateConfigSettings(
         scaffoldType, {values: {functionLanguage: this.functionLanguage}});
-    return true;
   }
 
   async provision(): Promise<boolean> {

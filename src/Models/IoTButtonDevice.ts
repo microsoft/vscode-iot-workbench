@@ -74,7 +74,7 @@ export class IoTButtonDevice implements Device {
     return true;
   }
 
-  async create(): Promise<boolean> {
+  async create(): Promise<void> {
     const createTimeScaffoldType = ScaffoldType.Local;
     if (!await FileUtility.directoryExists(
             createTimeScaffoldType, this.deviceFolder)) {
@@ -85,7 +85,6 @@ export class IoTButtonDevice implements Device {
       await generateTemplateFile(
           this.deviceFolder, createTimeScaffoldType, fileInfo);
     }
-    return true;
   }
 
   async compile(): Promise<boolean> {
