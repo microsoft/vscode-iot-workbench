@@ -122,7 +122,7 @@ export abstract class ContainerDeviceBase implements Device {
     const isRemote = RemoteExtension.isRemote(this.extensionContext);
     if (!isRemote) {
       await utils.askAndOpenInRemote(
-          OperationType.Compile, this.channel, this.telemetryContext);
+          OperationType.Compile, this.telemetryContext);
       return false;
     }
 

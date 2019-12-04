@@ -72,8 +72,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
   async upload(): Promise<boolean> {
     const isRemote = RemoteExtension.isRemote(this.extensionContext);
     if (!isRemote) {
-      await askAndOpenInRemote(
-          OperationType.Upload, this.channel, this.telemetryContext);
+      await askAndOpenInRemote(OperationType.Upload, this.telemetryContext);
       return false;
     }
 

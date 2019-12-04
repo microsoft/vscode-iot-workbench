@@ -308,8 +308,7 @@ export async function askAndOpenProject(
  * @param telemetryContext telemetry context
  */
 export async function askAndOpenInRemote(
-    operation: OperationType, channel: vscode.OutputChannel,
-    telemetryContext: TelemetryContext) {
+    operation: OperationType, telemetryContext: TelemetryContext) {
   const message = `${
       operation} can only be executed in remote container. Do you want to reopen the IoT project in container?`;
   const result: vscode.MessageItem|undefined =
@@ -323,9 +322,6 @@ export async function askAndOpenInRemote(
 
     await vscode.commands.executeCommand('openindocker.reopenInContainer');
   }
-
-  throw new CancelOperationError(`${
-      operation} opetation failed because it can only be executed in remote container.`);
 }
 
 const noDeviceSurveyUrl = 'https://www.surveymonkey.com/r/C7NY7KJ';
