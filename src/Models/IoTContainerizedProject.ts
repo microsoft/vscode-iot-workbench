@@ -11,7 +11,6 @@ import {FileUtility} from '../FileUtility';
 import {TelemetryContext, TelemetryResult, TelemetryWorker} from '../telemetry';
 import {channelShowAndAppendLine, getFirstWorkspaceFolderPath} from '../utils';
 
-import {Component} from './Interfaces/Component';
 import {ProjectHostType} from './Interfaces/ProjectHostType';
 import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {IoTWorkbenchProjectBase, OpenScenario} from './IoTWorkbenchProjectBase';
@@ -40,37 +39,6 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
     this.iotWorkbenchProjectFilePath =
         path.join(this.projectRootPath, FileNames.iotworkbenchprojectFileName);
-  }
-
-  /**
-   * Create and load device component according to board id.
-   * Push device to component list.
-   * @param boardId board id
-   * @param scaffoldType scaffold type
-   * @param templateFilesInfo template files info to scaffold files for device
-   */
-  private async initDevice(
-      boardId: string, scaffoldType: ScaffoldType,
-      templateFilesInfo?: TemplateFileInfo[]): Promise<void> {
-    if (!await FileUtility.directoryExists(
-            scaffoldType, this.projectRootPath)) {
-      throw new Error(`Project root path ${
-          this.projectRootPath} does not exist. Please initialize the project first.`);
-    }
-
-    let device: Component;
-    if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
-      device = new raspberryPiDeviceModule.RaspberryPiDevice(
-          this.extensionContext, this.projectRootPath, this.channel,
-          this.telemetryContext, templateFilesInfo);
-    } else {
-      throw new Error(`The board ${boardId} is not supported.`);
-    }
-
-    if (device) {
-      this.componentList.push(device);
-      await device.load();
-    }
   }
 
   async load(scaffoldType: ScaffoldType, initLoad = false): Promise<void> {
@@ -160,21 +128,6 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
         createTimeScaffoldType, openInNewWindow, OpenScenario.createNewProject);
   }
 
-  async openFolderInContainer(folderPath: string) {
-    if (!await FileUtility.directoryExists(ScaffoldType.Local, folderPath)) {
-      throw new Error(
-          `Fail to open folder in container: ${folderPath} does not exist.`);
-    }
-
-    const result = await RemoteExtension.checkRemoteExtension(this.channel);
-    if (!result) {
-      return;
-    }
-
-    vscode.commands.executeCommand(
-        'remote-containers.openFolder', vscode.Uri.file(folderPath));
-  }
-
   /**
    * Ask user whether to customize project environment. If no, open project in
    * remote. If yes, stay local and open bash script for user to customize
@@ -236,38 +189,6 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
   }
 
   /**
-   * Ask whether to customize the development environment or not
-   * @returns true - want to customize; false - don't want to customize
-   */
-  private async askToCustomize(): Promise<boolean> {
-    const customizationOption: vscode.QuickPickItem[] = [];
-    customizationOption.push(
-        {
-          label: `No`,
-          detail: 'The project will be opened in container directly.'
-        },
-        {
-          label: `Yes`,
-          detail:
-              'The project will remain in local environment for you to customize the container.'
-        });
-
-    const customizationSelection =
-        await vscode.window.showQuickPick(customizationOption, {
-          ignoreFocusOut: true,
-          placeHolder:
-              `Do you want to customize the development environment container now?`
-        });
-
-    if (!customizationSelection) {
-      throw new CancelOperationError(
-          `Ask to customize development environment selection cancelled.`);
-    }
-
-    return customizationSelection.label === 'Yes';
-  }
-
-  /**
    * Check if it is an external project.
    * If external project, configure as RaspberryPi Device based container iot
    * workbench project.
@@ -314,5 +235,83 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     await FileUtility.writeJsonFile(
         scaffoldType, iotworkbenchprojectFile, projectConfigJson);
     return true;
+  }
+
+  private async openFolderInContainer(folderPath: string) {
+    if (!await FileUtility.directoryExists(ScaffoldType.Local, folderPath)) {
+      throw new Error(
+          `Fail to open folder in container: ${folderPath} does not exist.`);
+    }
+
+    const result = await RemoteExtension.checkRemoteExtension(this.channel);
+    if (!result) {
+      return;
+    }
+
+    vscode.commands.executeCommand(
+        'remote-containers.openFolder', vscode.Uri.file(folderPath));
+  }
+
+  /**
+   * Create and load device component according to board id.
+   * Push device to component list.
+   * @param boardId board id
+   * @param scaffoldType scaffold type
+   * @param templateFilesInfo template files info to scaffold files for device
+   */
+  private async initDevice(
+      boardId: string, scaffoldType: ScaffoldType,
+      templateFilesInfo?: TemplateFileInfo[]): Promise<void> {
+    if (!await FileUtility.directoryExists(
+            scaffoldType, this.projectRootPath)) {
+      throw new Error(`Project root path ${
+          this.projectRootPath} does not exist. Please initialize the project first.`);
+    }
+
+    let device: Component;
+    if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
+      device = new raspberryPiDeviceModule.RaspberryPiDevice(
+          this.extensionContext, this.projectRootPath, this.channel,
+          this.telemetryContext, templateFilesInfo);
+    } else {
+      throw new Error(`The board ${boardId} is not supported.`);
+    }
+
+    if (device) {
+      this.componentList.push(device);
+      await device.load();
+    }
+  }
+
+  /**
+   * Ask whether to customize the development environment or not
+   * @returns true - want to customize; false - don't want to customize
+   */
+  private async askToCustomize(): Promise<boolean> {
+    const customizationOption: vscode.QuickPickItem[] = [];
+    customizationOption.push(
+        {
+          label: `No`,
+          detail: 'The project will be opened in container directly.'
+        },
+        {
+          label: `Yes`,
+          detail:
+              'The project will remain in local environment for you to customize the container.'
+        });
+
+    const customizationSelection =
+        await vscode.window.showQuickPick(customizationOption, {
+          ignoreFocusOut: true,
+          placeHolder:
+              `Do you want to customize the development environment container now?`
+        });
+
+    if (!customizationSelection) {
+      throw new CancelOperationError(
+          `Ask to customize development environment selection cancelled.`);
+    }
+
+    return customizationSelection.label === 'Yes';
   }
 }
