@@ -16,7 +16,7 @@ import {Component} from './Interfaces/Component';
 import {ProjectHostType} from './Interfaces/ProjectHostType';
 import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {Workspace} from './Interfaces/Workspace';
-import {IoTWorkbenchProjectBase} from './IoTWorkbenchProjectBase';
+import {IoTWorkbenchProjectBase, OpenScenario} from './IoTWorkbenchProjectBase';
 
 const impor = require('impor')(__dirname);
 const az3166DeviceModule =
@@ -70,7 +70,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
 
     // only send telemetry when the IoT project is load when VS Code opens
     if (initLoad) {
-      this.sendTelemetryIfLoadProjectWithVSCodeOpens();
+      this.sendLoadEventTelemetry(this.extensionContext);
     }
 
     const azureConfigFileHandler =
@@ -437,10 +437,13 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     }
 
     // Open project
-    await this.openProject(this.projectRootPath, openInNewWindow);
+    await this.openProject(
+        this.projectRootPath, openInNewWindow, OpenScenario.createNewProject);
   }
 
-  async openProject(projectPath: string, openInNewWindow: boolean) {
+  async openProject(
+      projectPath: string, openInNewWindow: boolean,
+      openScenario: OpenScenario) {
     if (!FileUtility.directoryExists(ScaffoldType.Local, projectPath)) {
       channelShowAndAppendLine(
           this.channel, `Can not find project path ${projectPath}.`);
@@ -460,8 +463,12 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
       // If open in current window, VSCode will restart. Need to send telemetry
       // before VSCode restart to advoid data lost.
       try {
-        TelemetryWorker.sendEvent(
-            EventNames.createNewProjectEvent, this.telemetryContext);
+        const telemetryWorker =
+            TelemetryWorker.getInstance(this.extensionContext);
+        const eventNames = openScenario === OpenScenario.createNewProject ?
+            EventNames.createNewProjectEvent :
+            EventNames.configProjectEnvironmentEvent;
+        telemetryWorker.sendEvent(eventNames, this.telemetryContext);
       } catch {
         // If sending telemetry failed, skip the error to avoid blocking user.
       }
@@ -469,9 +476,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
 
     const workspaceConfigFilePath =
         path.join(projectPath, workspaceConfigFileName[0]);
-    setTimeout(
-        () => vscode.commands.executeCommand(
-            'iotcube.openLocally', workspaceConfigFilePath, openInNewWindow),
-        500);
+    vscode.commands.executeCommand(
+        'iotcube.openLocally', workspaceConfigFilePath, openInNewWindow);
   }
 }
