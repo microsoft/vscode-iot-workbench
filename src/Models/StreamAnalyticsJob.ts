@@ -163,7 +163,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     try {
       azureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, 'utf8'));
       const asaConfig = azureConfigs.componentConfigs.find(
-          config => config.type === ComponentType[this.componentType]);
+          config => config.type === this.componentType);
       if (asaConfig) {
         this.componentId = asaConfig.id;
         this.dependencies = asaConfig.dependencies;
@@ -198,7 +198,7 @@ export class StreamAnalyticsJob implements Component, Provisionable,
         folder: '',
         name: '',
         dependencies: this.dependencies,
-        type: ComponentType[this.componentType]
+        type: this.componentType
       };
       await this.azureConfigHandler.appendComponent(type, newAsaConfig);
     }

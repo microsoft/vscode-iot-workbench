@@ -68,7 +68,7 @@ export class CodeGeneratorCore {
       return;
     }
 
-    const rootPath = utils.checkOpenedFolder();
+    const rootPath = utils.getFirstWorkspaceFolderPath();
     if (!rootPath) {
       return;
     }

@@ -6,7 +6,6 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as utils from './utils';
-import * as path from 'path';
 
 import {TelemetryContext, TelemetryResult} from './telemetry';
 import {ScaffoldType, PlatformType} from './constants';
@@ -34,7 +33,7 @@ export class ProjectEnvironmentConfiger {
     const scaffoldType = ScaffoldType.Local;
 
     // projectFileRootPath is the root path containing .iotworkbenchproject file
-    const deviceRootPath = utils.checkOpenedFolder();
+    const deviceRootPath = utils.getFirstWorkspaceFolderPath();
     if (!deviceRootPath) {
       return;
     }
@@ -117,7 +116,6 @@ export class ProjectEnvironmentConfiger {
     }
 
     let project;
-    let projectRootPath = '';
     if (platform === PlatformType.EmbeddedLinux) {
       const result = await RemoteExtension.checkRemoteExtension(channel);
       if (!result) {
@@ -133,24 +131,18 @@ export class ProjectEnvironmentConfiger {
       if (!await project.configExternalProjectToIotProject(scaffoldType)) {
         return false;
       }
-      projectRootPath = deviceRootPath;
     } else if (platform === PlatformType.Arduino) {
       telemetryContext.properties.projectHostType = 'Workspace';
       project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
           context, channel, telemetryContext);
-      projectRootPath = path.join(deviceRootPath, '..');
     } else {
       throw new Error('unsupported platform');
     }
 
-    let res = await project.load(scaffoldType);
-    if (!res) {
-      throw new Error(
-          `Failed to load project. Project environment configuration stopped.`);
-    }
+    await project.load(scaffoldType);
 
     // Add configuration files
-    res = await project.configureProjectEnvironmentCore(
+    const res = await project.configureProjectEnvironmentCore(
         deviceRootPath, scaffoldType);
     if (!res) {
       // User cancel configuration selection
@@ -158,7 +150,7 @@ export class ProjectEnvironmentConfiger {
     }
 
     await project.openProject(
-        projectRootPath, false, OpenScenario.configureProject);
+        scaffoldType, false, OpenScenario.configureProject);
     return true;
   }
 }

@@ -60,7 +60,7 @@ export class IoTHub implements Component, Provisionable {
     try {
       azureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, 'utf8'));
       const iotHubConfig = azureConfigs.componentConfigs.find(
-          config => config.type === ComponentType[this.componentType]);
+          config => config.type === this.componentType);
       if (iotHubConfig) {
         this.componentId = iotHubConfig.id;
         this.dependencies = iotHubConfig.dependencies;
@@ -194,7 +194,7 @@ export class IoTHub implements Component, Provisionable {
         folder: '',
         name: '',
         dependencies: [],
-        type: ComponentType[this.componentType],
+        type: this.componentType,
         componentInfo
       };
       await this.azureConfigFileHandler.appendComponent(type, newIoTHubConfig);
