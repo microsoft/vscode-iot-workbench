@@ -11,6 +11,7 @@ import {FileUtility} from '../FileUtility';
 import {TelemetryContext, TelemetryResult, TelemetryWorker} from '../telemetry';
 import {channelShowAndAppendLine, getFirstWorkspaceFolderPath} from '../utils';
 
+import {Component} from './Interfaces/Component';
 import {ProjectHostType} from './Interfaces/ProjectHostType';
 import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {IoTWorkbenchProjectBase, OpenScenario} from './IoTWorkbenchProjectBase';

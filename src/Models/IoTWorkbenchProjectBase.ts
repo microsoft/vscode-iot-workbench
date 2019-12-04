@@ -317,7 +317,6 @@ export abstract class IoTWorkbenchProjectBase {
    * Update project host type configuration in iot workbench project file.
    * Create one if not exists.
    * @param type Scaffold type
-   * @param iotWorkbenchProjectFileRootDir
    */
   async updateIotWorkbenchProjectFile(type: ScaffoldType): Promise<void> {
     try {
