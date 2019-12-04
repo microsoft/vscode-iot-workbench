@@ -9,7 +9,7 @@ import {CancelOperationError} from '../CancelOperationError';
 import {FileNames, OperationType, PlatformType, ScaffoldType, TemplateTag} from '../constants';
 import {DigitalTwinConstants} from '../DigitalTwin/DigitalTwinConstants';
 import {FileUtility} from '../FileUtility';
-import {TelemetryContext} from '../telemetry';
+import {TelemetryContext, TelemetryResult} from '../telemetry';
 import * as utils from '../utils';
 
 import {ComponentType} from './Interfaces/Component';
@@ -163,7 +163,7 @@ export abstract class ContainerDeviceBase implements Device {
     if (!containerSelection) {
       const message = `Container selection cancelled.`;
       this.telemetryContext.properties.errorMessage = message;
-      this.telemetryContext.properties.result = 'Cancelled';
+      this.telemetryContext.properties.result = TelemetryResult.Cancelled;
       throw new CancelOperationError(message);
     }
     const templateName = containerSelection.label;

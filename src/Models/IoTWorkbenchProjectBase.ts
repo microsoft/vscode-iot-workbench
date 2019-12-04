@@ -5,9 +5,9 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {CancelOperationError} from '../CancelOperationError';
-import {ConfigKey, DevelopEnvironment, EventNames, FileNames, ScaffoldType} from '../constants';
+import {ConfigKey, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
-import {TelemetryContext, TelemetryProperties, TelemetryWorker} from '../telemetry';
+import {TelemetryContext, TelemetryWorker} from '../telemetry';
 import * as utils from '../utils';
 
 import {checkAzureLogin} from './Apis';
@@ -19,12 +19,15 @@ import {ProjectHostType} from './Interfaces/ProjectHostType';
 import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
-import {RemoteExtension} from './RemoteExtension';
 
 const impor = require('impor')(__dirname);
 const azureUtilityModule =
     impor('./AzureUtility') as typeof import('./AzureUtility');
 
+export enum OpenScenario {
+  createNewProject,
+  configureProject
+}
 export abstract class IoTWorkbenchProjectBase {
   protected componentList: Component[];
   protected projectRootPath = '';
@@ -294,8 +297,9 @@ export abstract class IoTWorkbenchProjectBase {
     return true;
   }
 
-  abstract async openProject(projectPath: string, openInNewWindow: boolean):
-      Promise<void>;
+  abstract async openProject(
+      projectPath: string, openInNewWindow: boolean,
+      openScenario: OpenScenario): Promise<void>;
 
   async configDeviceSettings(): Promise<boolean> {
     for (const component of this.componentList) {
@@ -351,22 +355,14 @@ export abstract class IoTWorkbenchProjectBase {
   /**
    * Send telemetry when the IoT project is load when VS Code opens
    */
-  sendTelemetryIfLoadProjectWithVSCodeOpens() {
-    const properties: TelemetryProperties = {
-      result: 'Succeeded',
-      error: '',
-      errorMessage: ''
-    };
-    properties.developEnvironment =
-        RemoteExtension.isRemote(this.extensionContext) ?
-        DevelopEnvironment.Container :
-        DevelopEnvironment.LocalEnv;
-    properties.projectHostType = ProjectHostType[this.projectHostType];
-    const telemetryContext:
-        TelemetryContext = {properties, measurements: {duration: 0}};
+  sendLoadEventTelemetry(context: vscode.ExtensionContext) {
+    const telemetryWorker = TelemetryWorker.getInstance(context);
+    const telemetryContext = telemetryWorker.createContext();
+    telemetryContext.properties.projectHostType =
+        ProjectHostType[this.projectHostType];
 
     try {
-      TelemetryWorker.sendEvent(EventNames.projectLoadEvent, telemetryContext);
+      telemetryWorker.sendEvent(EventNames.projectLoadEvent, telemetryContext);
     } catch {
       // If sending telemetry failed, skip the error to avoid blocking user.
     }

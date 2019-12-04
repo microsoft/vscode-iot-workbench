@@ -12,7 +12,7 @@ import request = require('request-promise');
 
 import * as utils from '../utils';
 import {FileNames, ConfigKey, ScaffoldType} from '../constants';
-import {TelemetryContext} from '../telemetry';
+import {TelemetryContext, TelemetryResult} from '../telemetry';
 import {DigitalTwinConstants} from './DigitalTwinConstants';
 import {CodeGenProjectType, DeviceConnectionType, CodeGenLanguage, DeviceSdkReferenceType, CodeGenExecutionItem} from './DigitalTwinCodeGen/Interfaces/CodeGenerator';
 import {AnsiCCodeGeneratorFactory} from './DigitalTwinCodeGen/AnsiCCodeGeneratorFactory';
@@ -222,7 +222,7 @@ export class CodeGeneratorCore {
       if (!regenSelection) {
         telemetryContext.properties.errorMessage =
             'Re-generate code selection cancelled.';
-        telemetryContext.properties.result = 'Cancelled';
+        telemetryContext.properties.result = TelemetryResult.Cancelled;
         return ReGenResult.Succeeded;
       }
 
@@ -311,7 +311,7 @@ export class CodeGeneratorCore {
     if (!languageSelection) {
       telemetryContext.properties.errorMessage =
           'CodeGen language selection cancelled.';
-      telemetryContext.properties.result = 'Cancelled';
+      telemetryContext.properties.result = TelemetryResult.Cancelled;
       return;
     }
 
@@ -339,7 +339,7 @@ export class CodeGeneratorCore {
     if (!deviceConnectionSelection) {
       telemetryContext.properties.errorMessage =
           'Connection type selection cancelled.';
-      telemetryContext.properties.result = 'Cancelled';
+      telemetryContext.properties.result = TelemetryResult.Cancelled;
       return;
     }
 
@@ -389,7 +389,7 @@ export class CodeGeneratorCore {
     if (!projectTemplateSelection) {
       telemetryContext.properties.errorMessage =
           'CodeGen project template selection cancelled.';
-      telemetryContext.properties.result = 'Cancelled';
+      telemetryContext.properties.result = TelemetryResult.Cancelled;
       return;
     }
 
@@ -437,7 +437,7 @@ export class CodeGeneratorCore {
         if (!deviceConnectionSelection) {
           telemetryContext.properties.errorMessage =
               'IoT Device SDK reference type selection cancelled.';
-          telemetryContext.properties.result = 'Cancelled';
+          telemetryContext.properties.result = TelemetryResult.Cancelled;
           return;
         }
 
