@@ -14,8 +14,9 @@ import * as WinReg from 'winreg';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, FileNames} from '../constants';
+import {ConfigKey, FileNames, OSPlatform, ScaffoldType} from '../constants';
 import {DialogResponses} from '../DialogResponses';
+import {FileUtility} from '../FileUtility';
 import {TelemetryContext} from '../telemetry';
 import {delay, getRegistryValues} from '../utils';
 
@@ -149,24 +150,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
   }
 
   async configDeviceSettings(): Promise<boolean> {
-    // Read options configuration JSON
-    const devciceConfigFilePath: string =
-        this.extensionContext.asAbsolutePath(path.join(
-            FileNames.resourcesFolderName, FileNames.templatesFolderName,
-            FileNames.configDeviceOptionsFileName));
-    const configSelectionItemsContent =
-        JSON.parse(fs.readFileSync(devciceConfigFilePath, 'utf8'));
-
-    const configSelectionItems: vscode.QuickPickItem[] = [];
-    configSelectionItemsContent.configSelectionItems.forEach(
-        (element: DeviceConfig) => {
-          configSelectionItems.push({
-            label: element.label,
-            description: element.description,
-            detail: element.detail
-          });
-        });
-
+    const configSelectionItems = this.getMainOptions();
     const configSelection =
         await vscode.window.showQuickPick(configSelectionItems, {
           ignoreFocusOut: true,
@@ -174,7 +158,6 @@ export class AZ3166Device extends ArduinoDeviceBase {
           matchOnDetail: true,
           placeHolder: 'Select an option',
         });
-
     if (!configSelection) {
       return false;
     }
@@ -187,35 +170,17 @@ export class AZ3166Device extends ArduinoDeviceBase {
       // Get IoT Hub device connection string from config
       let deviceConnectionString =
           ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
-
+      const deviceConnectionStringSelection =
+          this.getDeviceConnectionStringOptions(deviceConnectionString);
       const selection = await vscode.window.showQuickPick(
-          this.getDeviceConnectionStringOptions(deviceConnectionString),
+          deviceConnectionStringSelection,
           {ignoreFocusOut: true, placeHolder: 'Choose an option:'});
-
       if (!selection) {
         return false;
       }
 
       if (selection.label === 'Input IoT Hub Device Connection String') {
-        const option: vscode.InputBoxOptions = {
-          value:
-              'HostName=<Host Name>;DeviceId=<Device Name>;SharedAccessKey=<Device Key>',
-          prompt: `Please input device connection string here.`,
-          ignoreFocusOut: true,
-          validateInput: (deviceConnectionString: string) => {
-            if (!deviceConnectionString) {
-              return 'Please provide a valid device connection string.';
-            }
-
-            if ((deviceConnectionString.indexOf('HostName') === -1) ||
-                (deviceConnectionString.indexOf('DeviceId') === -1) ||
-                (deviceConnectionString.indexOf('SharedAccessKey') === -1)) {
-              return 'The format of the IoT Hub Device connection string is invalid.';
-            }
-            return;
-          }
-        };
-
+        const option = this.getInputDeviceConnectionStringOptions();
         deviceConnectionString = await vscode.window.showInputBox(option);
         if (!deviceConnectionString) {
           const message =
@@ -229,16 +194,13 @@ export class AZ3166Device extends ArduinoDeviceBase {
           return false;
         }
       }
-
       if (!deviceConnectionString) {
         return false;
       }
 
       console.log(deviceConnectionString);
-
       const res = await this.setDeviceConfig(
           deviceConnectionString, ConfigDeviceOptions.ConnectionString);
-
       if (!res) {
         return false;
       } else {
@@ -247,37 +209,15 @@ export class AZ3166Device extends ArduinoDeviceBase {
         return true;
       }
     } else if (configSelection.detail === 'Config DPS') {
-      const option: vscode.InputBoxOptions = {
-        value:
-            'DPSEndpoint=global.azure-devices-provisioning.net;IdScope=<Id Scope>;DeviceId=<Device Id>;SymmetricKey=<Symmetric Key>',
-        prompt: `Please input DPS credentials here.`,
-        ignoreFocusOut: true,
-        validateInput: (deviceConnectionString: string) => {
-          if (!deviceConnectionString) {
-            return 'Please provide a valid DPS credentials.';
-          }
-
-          if ((deviceConnectionString.indexOf('DPSEndpoint') === -1) ||
-              (deviceConnectionString.indexOf('IdScope') === -1) ||
-              (deviceConnectionString.indexOf('DeviceId') === -1) ||
-              (deviceConnectionString.indexOf('SymmetricKey') === -1)) {
-            return 'The format of the DPS credentials is invalid.';
-          }
-          return;
-        }
-      };
-
+      const option = this.getDPSConnectionStringOptions();
       const deviceConnectionString = await vscode.window.showInputBox(option);
-
       if (!deviceConnectionString) {
         return false;
       }
 
       console.log(deviceConnectionString);
-
       const res = await this.setDeviceConfig(
           deviceConnectionString, ConfigDeviceOptions.DPS);
-
       if (!res) {
         return false;
       } else {
@@ -287,37 +227,14 @@ export class AZ3166Device extends ArduinoDeviceBase {
       }
 
     } else {
-      function generateRandomHex(): string {
-        const chars = '0123456789abcdef'.split('');
-        let hexNum = '';
-        for (let i = 0; i < 64; i++) {
-          hexNum += chars[Math.floor(Math.random() * 16)];
-        }
-        return hexNum;
-      }
-
-      const option: vscode.InputBoxOptions = {
-        value: generateRandomHex(),
-        prompt: `Please input Unique Device String (UDS) here.`,
-        ignoreFocusOut: true,
-        validateInput: (UDS: string) => {
-          if (/^([0-9a-f]){64}$/i.test(UDS) === false) {
-            return 'The format of the UDS is invalid. Please provide a valid UDS.';
-          }
-          return '';
-        }
-      };
-
+      const option = this.getUDSStringOptions();
       const UDS = await vscode.window.showInputBox(option);
-
       if (!UDS) {
         return false;
       }
 
       console.log(UDS);
-
       const res = await this.setDeviceConfig(UDS, ConfigDeviceOptions.UDS);
-
       if (!res) {
         return false;
       } else {
@@ -326,6 +243,31 @@ export class AZ3166Device extends ArduinoDeviceBase {
         return true;
       }
     }
+  }
+
+  private async getMainOptions(): Promise<vscode.QuickPickItem[]> {
+    // Read options configuration JSON
+    const devciceConfigFilePath: string =
+        this.extensionContext.asAbsolutePath(path.join(
+            FileNames.resourcesFolderName, FileNames.templatesFolderName,
+            FileNames.configDeviceOptionsFileName));
+
+    const configSelectionItemsFilePath = await FileUtility.readFile(
+        ScaffoldType.Local, devciceConfigFilePath, 'utf8');
+    const configSelectionItemsContent =
+        JSON.parse(configSelectionItemsFilePath as string);
+
+    const configSelectionItems: vscode.QuickPickItem[] = [];
+    configSelectionItemsContent.configSelectionItems.forEach(
+        (element: DeviceConfig) => {
+          configSelectionItems.push({
+            label: element.label,
+            description: element.description,
+            detail: element.detail
+          });
+        });
+
+    return configSelectionItems;
   }
 
   private getDeviceConnectionStringOptions(deviceConnectionString: string|
@@ -370,6 +312,78 @@ export class AZ3166Device extends ArduinoDeviceBase {
     return deviceConnectionStringSelection;
   }
 
+  private getInputDeviceConnectionStringOptions(): vscode.InputBoxOptions {
+    const option: vscode.InputBoxOptions = {
+      value:
+          'HostName=<Host Name>;DeviceId=<Device Name>;SharedAccessKey=<Device Key>',
+      prompt: `Please input device connection string here.`,
+      ignoreFocusOut: true,
+      validateInput: (deviceConnectionString: string) => {
+        if (!deviceConnectionString) {
+          return 'Please provide a valid device connection string.';
+        }
+
+        if ((deviceConnectionString.indexOf('HostName') === -1) ||
+            (deviceConnectionString.indexOf('DeviceId') === -1) ||
+            (deviceConnectionString.indexOf('SharedAccessKey') === -1)) {
+          return 'The format of the IoT Hub Device connection string is invalid.';
+        }
+        return;
+      }
+    };
+
+    return option;
+  }
+
+  private getDPSConnectionStringOptions(): vscode.InputBoxOptions {
+    const option: vscode.InputBoxOptions = {
+      value:
+          'DPSEndpoint=global.azure-devices-provisioning.net;IdScope=<Id Scope>;DeviceId=<Device Id>;SymmetricKey=<Symmetric Key>',
+      prompt: `Please input DPS credentials here.`,
+      ignoreFocusOut: true,
+      validateInput: (deviceConnectionString: string) => {
+        if (!deviceConnectionString) {
+          return 'Please provide a valid DPS credentials.';
+        }
+
+        if ((deviceConnectionString.indexOf('DPSEndpoint') === -1) ||
+            (deviceConnectionString.indexOf('IdScope') === -1) ||
+            (deviceConnectionString.indexOf('DeviceId') === -1) ||
+            (deviceConnectionString.indexOf('SymmetricKey') === -1)) {
+          return 'The format of the DPS credentials is invalid.';
+        }
+        return;
+      }
+    };
+
+    return option;
+  }
+
+  private getUDSStringOptions(): vscode.InputBoxOptions {
+    function generateRandomHex(): string {
+      const chars = '0123456789abcdef'.split('');
+      let hexNum = '';
+      for (let i = 0; i < 64; i++) {
+        hexNum += chars[Math.floor(Math.random() * 16)];
+      }
+      return hexNum;
+    }
+
+    const option: vscode.InputBoxOptions = {
+      value: generateRandomHex(),
+      prompt: `Please input Unique Device String (UDS) here.`,
+      ignoreFocusOut: true,
+      validateInput: (UDS: string) => {
+        if (/^([0-9a-f]){64}$/i.test(UDS) === false) {
+          return 'The format of the UDS is invalid. Please provide a valid UDS.';
+        }
+        return '';
+      }
+    };
+    return option;
+  }
+
+
   async setDeviceConfig(configValue: string, option: number): Promise<boolean> {
     // Try to close serial monitor
     try {
@@ -380,14 +394,14 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
     // Set selected connection string to device
     const plat = os.platform();
-    if (plat === 'win32') {
+    if (plat === OSPlatform.WIN32) {
       return await this.flushDeviceConfig(configValue, option);
     } else {
-      return await this.flushDeviceConfigUnix(configValue, option);
+      return await this.flushDeviceConfigUnixAndMac(configValue, option);
     }
   }
 
-  async flushDeviceConfigUnix(configValue: string, option: number):
+  async flushDeviceConfigUnixAndMac(configValue: string, option: number):
       Promise<boolean> {
     return new Promise(
         async (
