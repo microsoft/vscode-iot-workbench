@@ -131,7 +131,7 @@ export async function activate(context: vscode.ExtensionContext) {
       Commands.IotPnPGenerateCode, EventNames.scaffoldDeviceStubEvent, true,
       async(): Promise<void> => {
         const codeGenerator = new CodeGeneratorCore();
-        codeGenerator.generateDeviceCodeStub(
+        return codeGenerator.generateDeviceCodeStub(
             context, outputChannel, telemetryContext);
       });
 

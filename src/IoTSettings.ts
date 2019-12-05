@@ -5,6 +5,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as sdk from 'vscode-iot-device-cube-sdk';
 
+import {CancelOperationError} from './CancelOperationError';
 import {ConfigHandler} from './configHandler';
 import {OSPlatform} from './constants';
 import {PickWithData} from './Models/Interfaces/UI';
@@ -98,7 +99,7 @@ export class IoTWorkbenchSettings {
         userWorkbenchPath = folderUri[0].fsPath;
       } else {
         if (showMessage) {
-          vscode.window.showWarningMessage('Change workbench cancelled.');
+          throw new CancelOperationError('Change workbench cancelled.');
         }
         return userWorkbenchPath;
       }

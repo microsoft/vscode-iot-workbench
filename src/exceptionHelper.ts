@@ -4,6 +4,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
+import * as utils from './utils';
 
 export class ExceptionHelper {
   static logError(
@@ -49,9 +50,8 @@ export class ExceptionHelper {
       } else {
         errorMessage = _error.toString();
       }
-      channel.append(errorMessage);
-    }
 
-    throw _error;
+      utils.channelShowAndAppendLine(channel, errorMessage);
+    }
   }
 }

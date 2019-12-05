@@ -208,8 +208,7 @@ export abstract class IoTWorkbenchProjectBase {
 
         const res = await item.provision();
         if (!res) {
-          vscode.window.showWarningMessage('Provision cancelled.');
-          return false;
+          throw new CancelOperationError('Provision cancelled.');
         }
       }
     }
@@ -283,18 +282,13 @@ export abstract class IoTWorkbenchProjectBase {
    * template files.
    */
   async configureProjectEnvironmentCore(
-      deviceRootPath: string, scaffoldType: ScaffoldType): Promise<boolean> {
+      deviceRootPath: string, scaffoldType: ScaffoldType): Promise<void> {
     for (const component of this.componentList) {
       if (component.getComponentType() === ComponentType.Device) {
         const device = component as Device;
-        const res =
-            await device.configDeviceEnvironment(deviceRootPath, scaffoldType);
-        if (!res) {
-          return false;
-        }
+        await device.configDeviceEnvironment(deviceRootPath, scaffoldType);
       }
     }
-    return true;
   }
 
   abstract async openProject(

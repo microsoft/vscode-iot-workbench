@@ -5,7 +5,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import {TelemetryContext, TelemetryResult} from './telemetry';
+import {TelemetryContext} from './telemetry';
 import {constructAndLoadIoTProject} from './utils';
 import {RemoteExtension} from './Models/RemoteExtension';
 import {CancelOperationError} from './CancelOperationError';
@@ -29,29 +29,16 @@ export class AzureOperator {
   async deploy(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    if (RemoteExtension.isRemote(context)) {
-      const message =
-          `The project is currently open in container now. 'Azure IoT Device Workbench: Depoly to Azure...' is not supported inside the container.`;
-      vscode.window.showWarningMessage(message);
-
-      telemetryContext.properties.errorMessage = message;
+    // Azure deploy command can be executed only in local environment
+    const isLocal = RemoteExtension.checkLocalBeforeRunCommand(context);
+    if (!isLocal) {
       return;
     }
 
     const iotProject =
         await constructAndLoadIoTProject(context, channel, telemetryContext);
     if (iotProject) {
-      try {
-        await iotProject.deploy();
-      } catch (error) {
-        if (error instanceof CancelOperationError) {
-          telemetryContext.properties.errorMessage = error.message;
-          telemetryContext.properties.result = TelemetryResult.Cancelled;
-          return;
-        } else {
-          throw error;
-        }
-      }
+      await iotProject.deploy();
     }
   }
 }
