@@ -12,7 +12,7 @@ import request = require('request-promise');
 
 import * as utils from '../utils';
 import {FileNames, ConfigKey, ScaffoldType} from '../constants';
-import {TelemetryContext, TelemetryResult} from '../telemetry';
+import {TelemetryContext} from '../telemetry';
 import {DigitalTwinConstants} from './DigitalTwinConstants';
 import {CodeGenProjectType, DeviceConnectionType, CodeGenLanguage, DeviceSdkReferenceType, CodeGenExecutionItem} from './DigitalTwinCodeGen/Interfaces/CodeGenerator';
 import {AnsiCCodeGeneratorFactory} from './DigitalTwinCodeGen/AnsiCCodeGeneratorFactory';
@@ -23,6 +23,7 @@ import {RemoteExtension} from '../Models/RemoteExtension';
 import {DigitalTwinUtility} from './DigitalTwinUtility';
 import {CodeGenUtility} from './DigitalTwinCodeGen/CodeGenUtility';
 import {FileUtility} from '../FileUtility';
+import {CancelOperationError} from '../CancelOperationError';
 
 interface CodeGeneratorDownloadLocation {
   win32Md5: string;
@@ -54,7 +55,6 @@ enum CodeGenCliOperation {
 }
 
 enum ReGenResult {
-  Cancelled,
   Succeeded,
   Skipped
 }
@@ -83,81 +83,43 @@ export class CodeGeneratorCore {
     if (!DigitalTwinUtility.init(channel)) {
       return;
     }
+
     const capabilityModelFilePath: string =
         await DigitalTwinUtility.selectCapabilityModel();
-    if (capabilityModelFilePath) {
-      utils.channelShowAndAppendLine(
-          channel,
-          `Selected device capability model file: ${capabilityModelFilePath}`);
-    } else {
-      return;
-    }
 
     // Prompt if old project exists for the same Capability Model file
     const regenResult = await this.regenCode(
         rootPath, capabilityModelFilePath, context, channel, telemetryContext);
-    if (regenResult === ReGenResult.Succeeded ||
-        regenResult === ReGenResult.Cancelled) {
+    if (regenResult === ReGenResult.Succeeded) {
       return;
     }
 
     // Specify project name
-    const codeGenProjectName = await this.getCodeGenProjectName(rootPath);
-    if (codeGenProjectName) {
-      utils.channelShowAndAppendLine(
-          channel, `Input project name: ${codeGenProjectName}`);
-    } else {
-      const message = `Project name is not specified, cancelled`;
-      utils.channelShowAndAppendLine(channel, message);
-      return;
-    }
+    const codeGenProjectName =
+        await this.getCodeGenProjectName(channel, rootPath);
 
     // Select language
-    const codeGenLanguage = await this.selectLanguage(telemetryContext);
-    if (codeGenLanguage) {
-      utils.channelShowAndAppendLine(
-          channel, `Selected CodeGen language: ${codeGenLanguage}`);
-    } else {
-      return;
-    }
+    const codeGenLanguage = await this.selectLanguage(channel);
 
     // Read CodeGen options configuration JSON
     const codeGenOptions = this.readCodeGenOptionsConfiguration(context);
 
     // Select device connection string type
     const connectionType =
-        await this.selectConnectionType(codeGenOptions, telemetryContext);
-    if (connectionType) {
-      utils.channelShowAndAppendLine(
-          channel, `Selected device connection type: ${connectionType}`);
-    } else {
-      return;
-    }
+        await this.selectConnectionType(channel, codeGenOptions);
 
     // Select project template
     const codeGenProjectType = await this.selectProjectTemplate(
-        codeGenLanguage, codeGenOptions, telemetryContext);
-    if (codeGenProjectType) {
-      utils.channelShowAndAppendLine(
-          channel, `Selected CodeGen project type: ${codeGenProjectType}`);
-    } else {
-      return;
-    }
+        channel, codeGenLanguage, codeGenOptions);
 
     // Select Device SDK reference type for CMake project
     const sdkReferenceType = await this.selectDeviceSdkReferenceType(
-        codeGenProjectType, codeGenOptions, telemetryContext);
-    if (sdkReferenceType) {
-      utils.channelShowAndAppendLine(
-          channel, `Selected device SDK reference type: ${sdkReferenceType}`);
-    } else {
-      return;
-    }
+        channel, codeGenProjectType, codeGenOptions);
 
     // Download dependent interface of capability model
     if (!await DigitalTwinUtility.downloadDependentInterface(
             rootPath, capabilityModelFilePath)) {
-      return;
+      throw new Error(`Failed to download dependent interface.`);
     }
 
     const codeGenExecutionInfo: CodeGenExecutionItem = {
@@ -220,10 +182,7 @@ export class CodeGeneratorCore {
           {ignoreFocusOut: true, placeHolder: 'Please select an option:'});
 
       if (!regenSelection) {
-        telemetryContext.properties.errorMessage =
-            'Re-generate code selection cancelled.';
-        telemetryContext.properties.result = TelemetryResult.Cancelled;
-        return ReGenResult.Succeeded;
+        throw new CancelOperationError('Re-generate code selection cancelled.');
       }
 
       // User select regenerate code
@@ -235,7 +194,9 @@ export class CodeGeneratorCore {
 
         utils.channelShowAndAppendLine(
             channel,
-            `Regenerate device code using an existing CodeGen configure:`);
+            `${
+                DigitalTwinConstants
+                    .dtPrefix} Regenerate device code using an existing CodeGen configure:`);
         CodeGenUtility.printCodeGenConfig(codeGenExecutionItem, channel);
 
         await this.generateDeviceCodeCore(
@@ -249,8 +210,8 @@ export class CodeGeneratorCore {
     }
   }
 
-  private async getCodeGenProjectName(rootPath: string):
-      Promise<string|undefined> {
+  private async getCodeGenProjectName(
+      channel: vscode.OutputChannel, rootPath: string): Promise<string> {
     // select the project name for code gen
     const codeGenProjectName = await vscode.window.showInputBox({
       placeHolder: 'Please input the project name here.',
@@ -268,7 +229,8 @@ export class CodeGeneratorCore {
     });
 
     if (!codeGenProjectName) {
-      return;
+      throw new CancelOperationError(
+          `Project name is not specified, cancelled.`);
     }
 
     const projectPath = path.join(rootPath, codeGenProjectName);
@@ -278,12 +240,14 @@ export class CodeGeneratorCore {
           projectPath} already exists. Do you want to overwrite the contents in this folder?`;
       const choice = await vscode.window.showWarningMessage(
           messge, DialogResponses.yes, DialogResponses.no);
-      if (choice === DialogResponses.yes) {
-        return codeGenProjectName;
-      } else {
-        return;
+      if (choice !== DialogResponses.yes) {
+        throw new CancelOperationError(
+            `Valid project name is not specified, cancelled.`);
       }
     }
+
+    utils.channelShowAndAppendLine(
+        channel, `Input project name: ${codeGenProjectName}`);
     return codeGenProjectName;
   }
 
@@ -298,8 +262,7 @@ export class CodeGeneratorCore {
     return JSON.parse(fs.readFileSync(codeGenConfigFilePath, 'utf8'));
   }
 
-  private async selectLanguage(telemetryContext: TelemetryContext):
-      Promise<string|undefined> {
+  private async selectLanguage(channel: vscode.OutputChannel): Promise<string> {
     const languageItems: vscode.QuickPickItem[] = [];
     languageItems.push({label: CodeGenLanguage.ANSIC, description: ''});
 
@@ -309,19 +272,18 @@ export class CodeGeneratorCore {
     });
 
     if (!languageSelection) {
-      telemetryContext.properties.errorMessage =
-          'CodeGen language selection cancelled.';
-      telemetryContext.properties.result = TelemetryResult.Cancelled;
-      return;
+      throw new CancelOperationError('CodeGen language selection cancelled.');
     }
 
+    utils.channelShowAndAppendLine(
+        channel, `Selected CodeGen language: ${languageSelection.label}`);
     return languageSelection.label;
   }
 
   private async selectConnectionType(
+      channel: vscode.OutputChannel,
       // tslint:disable-next-line: no-any
-      codegenOptionsConfig: any, telemetryContext: TelemetryContext):
-      Promise<DeviceConnectionType|undefined> {
+      codegenOptionsConfig: any): Promise<DeviceConnectionType> {
     // Load available Azure IoT connection types from JSON configuration
     const connectionTypeItems: vscode.QuickPickItem[] = [];
     codegenOptionsConfig.connectionTypes.forEach(
@@ -337,10 +299,7 @@ export class CodeGeneratorCore {
         });
 
     if (!deviceConnectionSelection) {
-      telemetryContext.properties.errorMessage =
-          'Connection type selection cancelled.';
-      telemetryContext.properties.result = TelemetryResult.Cancelled;
-      return;
+      throw new CancelOperationError('Connection type selection cancelled.');
     }
 
     const deviceConnection = codegenOptionsConfig.connectionTypes.find(
@@ -356,14 +315,16 @@ export class CodeGeneratorCore {
           `Failed to find an available device connection type with selection label '${
               deviceConnectionSelection.label}' from CodeGen configuration.`);
     }
+
+    utils.channelShowAndAppendLine(
+        channel, `Selected device connection type: ${connectionType}`);
     return connectionType;
   }
 
   private async selectProjectTemplate(
+      channel: vscode.OutputChannel, language: string,
       // tslint:disable-next-line: no-any
-      language: string, codegenOptionsConfig: any,
-      telemetryContext: TelemetryContext):
-      Promise<CodeGenProjectType|undefined> {
+      codegenOptionsConfig: any): Promise<CodeGenProjectType> {
     // Load available project templates from JSON configuration
     const projectTemplates = codegenOptionsConfig.projectTemplates.filter(
         (projectTemplate: CodeGenProjectTemplate) => {
@@ -387,10 +348,8 @@ export class CodeGeneratorCore {
         {ignoreFocusOut: true, placeHolder: 'Select project template:'});
 
     if (!projectTemplateSelection) {
-      telemetryContext.properties.errorMessage =
-          'CodeGen project template selection cancelled.';
-      telemetryContext.properties.result = TelemetryResult.Cancelled;
-      return;
+      throw new CancelOperationError(
+          'CodeGen project template selection cancelled.');
     }
 
     const projectTemplate =
@@ -407,17 +366,20 @@ export class CodeGeneratorCore {
               projectTemplateSelection.label}' from CodeGen configuration.`);
     }
 
+    utils.channelShowAndAppendLine(
+        channel, `Selected CodeGen project type: ${codeGenProjectType}`);
     return codeGenProjectType;
   }
 
   private async selectDeviceSdkReferenceType(
+      channel: vscode.OutputChannel, projectType: CodeGenProjectType,
       // tslint:disable-next-line: no-any
-      projectType: CodeGenProjectType, codegenOptionsConfig: any,
-      telemetryContext: TelemetryContext):
-      Promise<DeviceSdkReferenceType|undefined> {
+      codegenOptionsConfig: any): Promise<DeviceSdkReferenceType> {
+    let deviceSdkReferenceType = undefined;
     switch (projectType) {
       case CodeGenProjectType.IoTDevKit:
-        return DeviceSdkReferenceType.DevKitSDK;
+        deviceSdkReferenceType = DeviceSdkReferenceType.DevKitSDK;
+        break;
       case CodeGenProjectType.CMakeWindows:
       case CodeGenProjectType.CMakeLinux: {
         // Load available Azure IoT connection types from JSON configuration
@@ -435,10 +397,8 @@ export class CodeGeneratorCore {
             });
 
         if (!deviceConnectionSelection) {
-          telemetryContext.properties.errorMessage =
-              'IoT Device SDK reference type selection cancelled.';
-          telemetryContext.properties.result = TelemetryResult.Cancelled;
-          return;
+          throw new CancelOperationError(
+              'IoT Device SDK reference type selection cancelled.');
         }
 
         // Map selection to a DeviceSdkReferenceType enum
@@ -457,11 +417,17 @@ export class CodeGeneratorCore {
                       .label}' from CodeGen configuration.`);
         }
 
-        return sdkReferenceType;
+        deviceSdkReferenceType = sdkReferenceType;
+        break;
       }
       default:
-        return;
+        throw new Error(`projectType ${projectType} is not supported.`);
     }
+
+    utils.channelShowAndAppendLine(
+        channel,
+        `Selected device SDK reference type: ${deviceSdkReferenceType}`);
+    return deviceSdkReferenceType;
   }
 
   private async generateDeviceCodeCore(

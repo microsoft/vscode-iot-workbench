@@ -8,7 +8,7 @@ import * as vscode from 'vscode';
 import {CancelOperationError} from '../CancelOperationError';
 import {ConfigKey, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
-import {TelemetryContext, TelemetryResult, TelemetryWorker} from '../telemetry';
+import {TelemetryContext, TelemetryWorker} from '../telemetry';
 import {channelShowAndAppendLine, getFirstWorkspaceFolderPath} from '../utils';
 
 import {Component} from './Interfaces/Component';
@@ -72,11 +72,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       templateFilesInfo: TemplateFileInfo[], projectType: ProjectTemplateType,
       boardId: string, openInNewWindow: boolean): Promise<void> {
     // Can only create project locally
-    const isLocal =
-        RemoteExtension.checkLocalBeforeRunCommand(this.extensionContext);
-    if (!isLocal) {
-      return;
-    }
+    await RemoteExtension.checkRemoteExtension();
 
     const createTimeScaffoldType = ScaffoldType.Local;
 
@@ -114,14 +110,13 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     });
 
     // Create components
-    for (let i = 0; i < this.componentList.length; i++) {
-      const res = await this.componentList[i].create();
-      if (!res) {
-        // TODO: Remove this function and implement with sdk in FileUtility
-        fs.removeSync(this.projectRootPath);
-        vscode.window.showWarningMessage('Project initialization cancelled.');
-        return;
+    try {
+      for (let i = 0; i < this.componentList.length; i++) {
+        await this.componentList[i].create();
       }
+    } catch (error) {
+      fs.removeSync(this.projectRootPath);
+      throw error;
     }
 
     // Open project
@@ -145,17 +140,8 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
     // 1. Ask to customize
     let customizeEnvironment = false;
-    try {
-      customizeEnvironment = await this.askToCustomize();
-    } catch (error) {
-      if (error instanceof CancelOperationError) {
-        this.telemetryContext.properties.errorMessage = error.message;
-        this.telemetryContext.properties.result = TelemetryResult.Cancelled;
-        return;
-      } else {
-        throw error;
-      }
-    }
+    customizeEnvironment = await this.askToCustomize();
+
     this.telemetryContext.properties.customizeEnvironment =
         customizeEnvironment.toString();
 
@@ -244,10 +230,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
           `Fail to open folder in container: ${folderPath} does not exist.`);
     }
 
-    const result = await RemoteExtension.checkRemoteExtension(this.channel);
-    if (!result) {
-      return;
-    }
+    await RemoteExtension.checkRemoteExtension();
 
     vscode.commands.executeCommand(
         'remote-containers.openFolder', vscode.Uri.file(folderPath));

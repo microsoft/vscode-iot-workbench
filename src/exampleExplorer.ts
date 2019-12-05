@@ -10,12 +10,13 @@ import * as AdmZip from 'adm-zip';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import * as utils from './utils';
 import {Board, BoardQuickPickItem} from './Models/Interfaces/Board';
-import {TelemetryContext, TelemetryResult} from './telemetry';
+import {TelemetryContext} from './telemetry';
 import {FileNames} from './constants';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 import {VSCExpress} from 'vscode-express';
 import {RemoteExtension} from './Models/RemoteExtension';
+import {CancelOperationError} from './CancelOperationError';
 
 type OptionsWithUri = import('request-promise').OptionsWithUri;
 
@@ -214,9 +215,7 @@ export class ExampleExplorer {
     });
 
     if (!boardSelection) {
-      telemetryContext.properties.errorMessage = 'Board selection cancelled.';
-      telemetryContext.properties.result = TelemetryResult.Cancelled;
-      return;
+      throw new CancelOperationError('Board selection cancelled.');
     } else if (boardSelection.id === 'no_device') {
       await utils.takeNoDeviceSurvey(telemetryContext, context);
       return;
@@ -256,11 +255,11 @@ export class ExampleExplorer {
     const res = await this.initializeExampleInternal(
         context, channel, telemetryContext);
 
-    if (res) {
-      vscode.window.showInformationMessage('Example load successfully.');
-    } else {
-      vscode.window.showWarningMessage('Example load cancelled.');
+    if (!res) {
+      throw new CancelOperationError(`Example load cancelled.`);
     }
+
+    vscode.window.showInformationMessage('Example load successfully.');
   }
 
   setSelectedExample(name: string, url: string, boardId: string) {

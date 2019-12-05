@@ -80,8 +80,8 @@ export class Esp32Device extends ArduinoDeviceBase {
     return super.checkPrerequisites();
   }
 
-  async create(): Promise<boolean> {
-    return this.createCore(this.board, this.templateFiles);
+  async create(): Promise<void> {
+    this.createCore(this.board, this.templateFiles);
   }
 
   async configDeviceSettings(): Promise<boolean> {

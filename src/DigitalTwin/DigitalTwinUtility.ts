@@ -8,6 +8,7 @@ import * as utils from '../utils';
 import {getExtension} from '../Models/Apis';
 import {ExtensionName} from '../Models/Interfaces/Api';
 import {DigitalTwinConstants} from './DigitalTwinConstants';
+import {CancelOperationError} from '../CancelOperationError';
 
 /**
  * Digital Twin extension utility
@@ -51,10 +52,15 @@ export class DigitalTwinUtility {
       // skip for UserCancelledError
     }
     if (!result) {
-      utils.channelShowAndAppendLine(
-          DigitalTwinUtility.channel,
-          `${DigitalTwinConstants.dtPrefix} Cancelled.`);
+      throw new CancelOperationError(
+          `Selected device capability model file cancelled.`);
     }
+
+    utils.channelShowAndAppendLine(
+        DigitalTwinUtility.channel,
+        `${
+            DigitalTwinConstants
+                .dtPrefix} Selected device capability model file: ${result}`);
     return result;
   }
 

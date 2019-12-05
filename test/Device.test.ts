@@ -20,25 +20,4 @@ suite('IoT Device Workbench: Device', () => {
     assert.equal(device.getComponentType(), ComponentType.Device);
     done();
   });
-
-  /*test('should be able to run device compile', function(done) {
-    this.timeout(10 * 60 * 1000);
-    try {
-      const deviceOperator = new DeviceOperator(ProjectHostType.Workspace);
-      const contextMock = new TestExtensionContext();
-
-      const telemetryContext: TelemetryContext = {
-        properties: {result: TelemetryResult.Succeeded, error: '', errorMessage:
-  ''}, measurements: {duration: 0}
-      };
-      const outputChannel: vscode.OutputChannel =
-          vscode.window.createOutputChannel('Azure IoT Device Workbench Test');
-      deviceOperator.compile(contextMock, outputChannel, telemetryContext)
-          .then(() => {
-            done();
-          });
-    } catch (error) {
-      done(new Error(error));
-    }
-  });*/
 });

@@ -73,11 +73,8 @@ export class IoTHub implements Component, Provisionable {
   }
 
 
-  async create(): Promise<boolean> {
-    const createTimeScaffoldType = ScaffoldType.Local;
-
-    await this.updateConfigSettings(createTimeScaffoldType);
-    return true;
+  async create(): Promise<void> {
+    await this.updateConfigSettings(ScaffoldType.Local);
   }
 
   async provision(): Promise<boolean> {

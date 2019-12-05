@@ -7,12 +7,13 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as utils from './utils';
 
-import {TelemetryContext, TelemetryResult} from './telemetry';
+import {TelemetryContext} from './telemetry';
 import {FileNames, ScaffoldType, PlatformType, TemplateTag} from './constants';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import {FileUtility} from './FileUtility';
 import {ProjectTemplate, ProjectTemplateType, TemplatesType} from './Models/Interfaces/ProjectTemplate';
 import {RemoteExtension} from './Models/RemoteExtension';
+import {CancelOperationError} from './CancelOperationError';
 
 const impor = require('impor')(__dirname);
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
@@ -61,10 +62,8 @@ export class ProjectInitializer {
           // Step 1: Get project name
           const projectPath = await this.generateProjectFolder(scaffoldType);
           if (!projectPath) {
-            telemetryContext.properties.errorMessage =
-                'Project name input cancelled.';
-            telemetryContext.properties.result = TelemetryResult.Cancelled;
-            return;
+            throw new CancelOperationError(
+                `Project initialization cancelled: Project name input cancelled.`);
           } else {
             telemetryContext.properties.projectPath = projectPath;
           }
@@ -73,10 +72,8 @@ export class ProjectInitializer {
           const platformSelection =
               await utils.selectPlatform(scaffoldType, context);
           if (!platformSelection) {
-            telemetryContext.properties.errorMessage =
-                'Platform selection cancelled.';
-            telemetryContext.properties.result = TelemetryResult.Cancelled;
-            return;
+            throw new CancelOperationError(
+                `Project initialization cancelled: Platform selection cancelled.`);
           } else {
             telemetryContext.properties.platform = platformSelection.label;
           }
@@ -101,10 +98,8 @@ export class ProjectInitializer {
                 await this.selectTemplate(templateJson, PlatformType.Arduino);
 
             if (!templateSelection) {
-              telemetryContext.properties.errorMessage =
-                  'Project template selection cancelled.';
-              telemetryContext.properties.result = TelemetryResult.Cancelled;
-              return;
+              throw new CancelOperationError(
+                  `Project initialization cancelled: Project template selection cancelled.`);
             } else {
               telemetryContext.properties.template = templateSelection.label;
               if (templateSelection.label === constants.noDeviceMessage) {

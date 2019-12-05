@@ -259,23 +259,10 @@ export async function askToConfigureEnvironment(
         `${operation} operation failed and user configures project`;
 
     let res: boolean;
-    try {
-      res = await ProjectEnvironmentConfiger
-                .configureProjectEnvironmentAsPlatform(
-                    context, channel, telemetryContext, platform,
-                    deviceRootPath, scaffoldType);
-    } catch (error) {
-      if (error instanceof CancelOperationError) {
-        telemetryContext.properties.errorMessage =
-            `${operation} operation failed.`;
-        telemetryContext.properties.result = TelemetryResult.Cancelled;
-        channelShowAndAppendLine(channel, error.message);
-        vscode.window.showWarningMessage(error.message);
-        return;
-      } else {
-        throw error;
-      }
-    }
+    res =
+        await ProjectEnvironmentConfiger.configureProjectEnvironmentAsPlatform(
+            context, channel, telemetryContext, platform, deviceRootPath,
+            scaffoldType);
     if (res) {
       const message =
           `Configuration of project environmnet done. You can run the ${
@@ -284,17 +271,21 @@ export async function askToConfigureEnvironment(
       vscode.window.showInformationMessage(message);
     }
   } else {
-    telemetryContext.properties.errorMessage = `${operation} operation failed.`;
-    telemetryContext.properties.result = TelemetryResult.Cancelled;
-    const message = `Project development environment configuration cancelled.`;
-    channelShowAndAppendLine(channel, message);
-    vscode.window.showWarningMessage(message);
+    const message = `${
+        operation} operation failed since project development environment configuration cancelled.`;
+    throw new CancelOperationError(message);
   }
 }
 
+/**
+ * Ask user to open current IoT project folder as workspace.
+ * @param rootPath project root path
+ * @param workspaceFile iot workspace config file
+ * @param telemetryContext telemetry context
+ */
 export async function askAndOpenProject(
     rootPath: string, workspaceFile: string,
-    telemetryContext: TelemetryContext) {
+    telemetryContext: TelemetryContext): Promise<void> {
   const message =
       `Operation failed because the IoT project is not opened. Current folder contains an IoT project '${
           workspaceFile}', do you want to open it?`;
@@ -309,13 +300,19 @@ export async function askAndOpenProject(
     await vscode.commands.executeCommand(
         'iotcube.openLocally', workspaceFilePath, false);
   } else {
-    telemetryContext.properties.errorMessage = 'Operation failed.';
+    throw new CancelOperationError(
+        `Operation failed and user cancel to open current folder as IoT project.`);
   }
 }
 
+/**
+ * Ask user to open project in remote before operation execution.
+ * @param operation compile or upload device code operation
+ * @param channel output channel
+ * @param telemetryContext telemetry context
+ */
 export async function askAndOpenInRemote(
-    operation: OperationType, channel: vscode.OutputChannel,
-    telemetryContext: TelemetryContext): Promise<boolean> {
+    operation: OperationType, telemetryContext: TelemetryContext) {
   const message = `${
       operation} can only be executed in remote container. Do you want to reopen the IoT project in container?`;
   const result: vscode.MessageItem|undefined =
@@ -325,21 +322,12 @@ export async function askAndOpenInRemote(
   if (result === DialogResponses.yes) {
     telemetryContext.properties.errorMessage =
         `${operation} Operation failed and user opens project in container.`;
-    const res = await RemoteExtension.checkRemoteExtension(channel);
-    if (!res) {
-      telemetryContext.properties.errorMessage =
-          `${operation} operation failed on installing Remote Extension.`;
-      return false;
-    }
-    await vscode.commands.executeCommand('openindocker.reopenInContainer');
-  } else {
-    const message = `${operation} can only be executed in remote container.`;
-    channelShowAndAppendLine(channel, message);
-    telemetryContext.properties.errorMessage = `${operation} operation failed.`;
-  }
+    await RemoteExtension.checkRemoteExtension();
 
-  return false;
+    await vscode.commands.executeCommand('openindocker.reopenInContainer');
+  }
 }
+
 const noDeviceSurveyUrl = 'https://www.surveymonkey.com/r/C7NY7KJ';
 
 export async function takeNoDeviceSurvey(
@@ -475,12 +463,8 @@ export async function handleExternalProject(
 
     await project.load(scaffoldType);
 
-    const res = await project.configureProjectEnvironmentCore(
-        deviceRootPath, scaffoldType);
-    if (!res) {
-      throw new Error(
-          `Failed to add configuration files. Project environment configuration stopped.`);
-    }
+    await project.configureProjectEnvironmentCore(deviceRootPath, scaffoldType);
+
     await project.openProject(
         scaffoldType, false, OpenScenario.configureProject);
   } else if (result === Choice.createNewProject) {
@@ -494,9 +478,11 @@ export async function handleExternalProject(
 }
 
 /**
- * Check if current folder is an IoT Workspace Project but not open correctly.
- * If so, return true and ask to open project properly.
- * If not, return false.
+ * Check if current folder is an IoT workspace project but not open correctly.
+ * Ask to open as workspace if it is an IoT workspace project.
+ * @returns true - This is an IoT workspace project which is not correctly
+ * opened.
+ * @returns false - This is not an IoT workspace project.
  */
 export async function handleIncorrectlyOpenedIoTWorkspaceProject(
     telemetryContext: TelemetryContext): Promise<boolean> {
@@ -507,6 +493,7 @@ export async function handleIncorrectlyOpenedIoTWorkspaceProject(
   }
 
   const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+  // TODO: Remove the hardcode 'Device'. Use ConfigKey instead.
   const workbenchFileName =
       path.join(rootPath, 'Device', FileNames.iotworkbenchprojectFileName);
 
@@ -742,7 +729,7 @@ export async function fetchAndExecuteTask(
 export async function getEnvTemplateFilesAndAskOverwrite(
     context: vscode.ExtensionContext, telemetryContext: TelemetryContext,
     projectPath: string, scaffoldType: ScaffoldType,
-    templateName: string): Promise<TemplateFileInfo[]|undefined> {
+    templateName: string): Promise<TemplateFileInfo[]> {
   if (!projectPath) {
     throw new Error(
         'Unable to find the project path, please open the folder and initialize project again.');
@@ -780,22 +767,14 @@ export async function getEnvTemplateFilesAndAskOverwrite(
 
   // Ask overwrite or not
   let overwriteAll = false;
-  try {
-    overwriteAll =
-        await askToOverwrite(scaffoldType, projectPath, templateFilesInfo);
-  } catch (error) {
-    if (error instanceof CancelOperationError) {
-      telemetryContext.properties.result = TelemetryResult.Cancelled;
-      telemetryContext.properties.errorMessage = error.message;
-    }
-    throw error;
-  }
+  overwriteAll =
+      await askToOverwrite(scaffoldType, projectPath, templateFilesInfo);
+
   if (!overwriteAll) {
     const message =
         'Do not overwrite configuration files and cancel configuration process.';
-    telemetryContext.properties.errorMessage = message;
-    telemetryContext.properties.result = TelemetryResult.Cancelled;
     throw new CancelOperationError(message);
   }
+
   return templateFilesInfo;
 }
