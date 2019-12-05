@@ -8,7 +8,7 @@ import * as vscode from 'vscode';
 import {CancelOperationError} from '../CancelOperationError';
 import {ConfigKey, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
-import {TelemetryContext, TelemetryResult, TelemetryWorker} from '../telemetry';
+import {TelemetryContext, TelemetryWorker} from '../telemetry';
 import {channelShowAndAppendLine} from '../utils';
 
 import {ProjectHostType} from './Interfaces/ProjectHostType';
@@ -81,10 +81,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       openInNewWindow: boolean) {
     // Step 0: Check prerequisite
     // Can only create project locally
-    const result = await RemoteExtension.checkRemoteExtension(this.channel);
-    if (!result) {
-      return;
-    }
+    await RemoteExtension.checkRemoteExtension();
 
     const createTimeScaffoldType = ScaffoldType.Local;
     if (rootFolderPath !== undefined) {
@@ -129,12 +126,12 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
     projectConfig[`${ConfigKey.boardId}`] = boardId;
 
-    const res = await device.create();
-    if (!res) {
+    try {
+      await device.create();
+    } catch (error) {
       // TODO: Add remove() in FileUtility class
       fs.removeSync(this.projectRootPath);
-      vscode.window.showWarningMessage('Project initialize cancelled.');
-      return;
+      throw error;
     }
 
     // Step 2: Write project config into iot workbench project file
@@ -158,10 +155,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
           `Fail to open folder in container: ${folderPath} does not exist.`);
     }
 
-    const result = await RemoteExtension.checkRemoteExtension(this.channel);
-    if (!result) {
-      return;
-    }
+    await RemoteExtension.checkRemoteExtension();
 
     vscode.commands.executeCommand(
         'remote-containers.openFolder', vscode.Uri.file(folderPath));
@@ -182,17 +176,8 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     }
     // 1. Ask to customize
     let customizeEnvironment = false;
-    try {
-      customizeEnvironment = await this.askToCustomize();
-    } catch (error) {
-      if (error instanceof CancelOperationError) {
-        this.telemetryContext.properties.errorMessage = error.message;
-        this.telemetryContext.properties.result = TelemetryResult.Cancelled;
-        return;
-      } else {
-        throw error;
-      }
-    }
+    customizeEnvironment = await this.askToCustomize();
+
     this.telemetryContext.properties.customizeEnvironment =
         customizeEnvironment.toString();
 

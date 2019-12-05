@@ -67,8 +67,8 @@ export class FileNames {
 }
 
 export enum OperationType {
-  Compile = 'Compile device code',
-  Upload = 'Upload device code'
+  Compile = 'Device code compilation',
+  Upload = 'Device code upload'
 }
 
 export enum AzureFunctionsLanguage {
