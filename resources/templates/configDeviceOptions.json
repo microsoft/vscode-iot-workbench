@@ -1,0 +1,24 @@
+{
+  "configSelectionItems": [
+    {
+      "label": "Config Device Connection String",
+      "description": "Config IoT Hub Device Connection String",
+      "detail": "Config Connection String"
+    },
+    {
+      "label": "Config DPS Unique Device Secret (UDS)",
+      "description": "Config DPS Unique Device Secret (UDS) for X.509 certificates attestation",
+      "detail": "Config UDS"
+    },
+    {
+      "label": "Config DPS credentials",
+      "description": "Config DPS credentials for Symmetric Key attestation",
+      "detail": "Config DPS"
+    },
+    {
+      "label": "Generate CRC for OTA",
+      "description": "Generate Cyclic Redundancy Check(CRC) code for OTA Update",
+      "detail": "Config CRC"
+    }
+  ]
+}
