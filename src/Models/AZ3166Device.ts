@@ -245,7 +245,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
     }
   }
 
-  private async getConfigDeviceSettingsMainOptions(): Promise<vscode.QuickPickItem[]> {
+  private async getConfigDeviceSettingsMainOptions():
+      Promise<vscode.QuickPickItem[]> {
     // Read options configuration JSON
     const devciceConfigFilePath: string =
         this.extensionContext.asAbsolutePath(path.join(
