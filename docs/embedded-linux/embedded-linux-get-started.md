@@ -20,25 +20,27 @@ This tutorial shows how to develop and compile a simple device app written in C 
 
 2. Enter the name of your project.
 
-3. Select **Embedded Linux** from device platform list.
+3. Select **Embedded Linux (Preview)** from device platform list.
 
-4. Select the dev container based on your target device, in this sample, select **32-bit Armv7 Cortex-A** for Raspberry Pi 3 Model B+ running [Raspbian](https://www.raspberrypi.org/downloads/raspbian/).
+4. Select the dev container based on your target device, in this sample, select **Azure IoT Device C SDK for armv7 Linux** for Raspberry Pi 3 Model B+ running [Raspbian](https://www.raspberrypi.org/downloads/raspbian/).
 
-5. The first time you use a container, it takes around 1 to 3 minutes to download and prepare the dev container. Click the **details** link on the notification for the progress:
-    <img src="https://raw.githubusercontent.com/microsoft/vscode-iot-workbench/master/docs/images/prepare-dev-container.png" />
+5. Select **No** to open the configured project in remote container.
 
-6. Once the dev container is ready, you can see the status in the status bar and output window:
+6. The first time you use a container, it takes around 1 to 3 minutes to download and prepare the dev container. Click the **details** link on the notification for the progress:
+    <img src="../images/prepare-dev-container.png" />
+
+7. Once the dev container is ready, you can see the status in the status bar and output window:
     <img src="https://raw.githubusercontent.com/microsoft/vscode-iot-workbench/master/docs/images/dev-container-ready.png" />
 
 #### Compile the code
 
-1. The `iothub_sample.c` under the `src` subfolder is the source file that contains the application logic. You can modify or add your own code in this file:
-    <img src="https://raw.githubusercontent.com/microsoft/vscode-iot-workbench/master/docs/images/iothub-sample.png" />
+1. The `main.c` file is the source file that contains the application logic. You can modify or add your own code in this file:
+    <img src="../images/container-project.png" />
 
 2. To compile the code, press `F1`, type and select **Azure IoT Device Workbench: Compile Device Code** from the command palette.
 
 3. The cross-compiling of the code happens in the dev container. Once it's done, it shows the notification:
-    <img src="https://raw.githubusercontent.com/microsoft/vscode-iot-workbench/master/docs/images/compile-success.png" />
+    <img src="../images/compile-success.png" />
 
 4. The compiled binary file is located in the `.build` folder.
 
