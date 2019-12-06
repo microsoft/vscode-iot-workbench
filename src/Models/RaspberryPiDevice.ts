@@ -134,8 +134,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
             `Failed to close SSH connection. Error: ${error.message}`);
       }
 
-      const message =
-          `Successfully deploy compiled files to Raspberry Pi board.`;
+      const message = `Successfully deploy compiled files to device board.`;
       channelShowAndAppendLine(this.channel, message);
       vscode.window.showInformationMessage(message);
     } catch (error) {
@@ -314,7 +313,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     // Raspberry Pi path
     const raspiPathOption: vscode.InputBoxOptions = {
       value: RaspberryPiUploadConfig.projectPath,
-      prompt: `Please input Raspberry Pi path here.`,
+      prompt: `Please input project destination path here.`,
       ignoreFocusOut: true
     };
     let raspiPath = await vscode.window.showInputBox(raspiPathOption);
