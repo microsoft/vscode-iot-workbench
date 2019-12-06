@@ -54,6 +54,7 @@ export class FileNames {
   static readonly cmakeFileName = 'CMakeLists.txt';
   static readonly settingsJsonFileName = 'settings.json';
   static readonly codeGenOptionsFileName = 'codeGenOptions.json';
+  static readonly configDeviceOptionsFileName = 'configDeviceOptions.json';
   static readonly devcontainerFolderName = '.devcontainer';
   static readonly vscodeSettingsFolderName = '.vscode';
   static readonly workspaceConfigFilePath = 'project.code-workspace';
