@@ -353,7 +353,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
         folder: this.functionFolder,
         name: '',
         dependencies: this.dependencies,
-        type: ComponentType[this.componentType],
+        type: this.componentType,
         componentInfo
       };
       azureConfigs.componentConfigs.push(newAzureFunctionsConfig);

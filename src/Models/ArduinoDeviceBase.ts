@@ -94,7 +94,6 @@ export abstract class ArduinoDeviceBase implements Device {
     if (!isArduinoExtensionAvailable) {
       return false;
     }
-
     return true;
   }
 

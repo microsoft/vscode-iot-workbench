@@ -6,7 +6,6 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as utils from './utils';
-import * as path from 'path';
 
 import {TelemetryContext} from './telemetry';
 import {ScaffoldType, PlatformType} from './constants';
@@ -25,7 +24,7 @@ const ioTContainerizedProjectModule =
 export class ProjectEnvironmentConfiger {
   async configureProjectEnvironment(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext) {
+      telemetryContext: TelemetryContext): Promise<void> {
     // Only configure project when not in remote environment
     const isLocal = RemoteExtension.checkLocalBeforeRunCommand(context);
     if (!isLocal) {
@@ -34,7 +33,7 @@ export class ProjectEnvironmentConfiger {
     const scaffoldType = ScaffoldType.Local;
 
     // projectFileRootPath is the root path containing .iotworkbenchproject file
-    const deviceRootPath = utils.checkOpenedFolder();
+    const deviceRootPath = utils.getFirstWorkspaceFolderPath();
     if (!deviceRootPath) {
       return;
     }
@@ -103,7 +102,6 @@ export class ProjectEnvironmentConfiger {
     }
 
     let project;
-    let projectRootPath = '';
     if (platform === PlatformType.EmbeddedLinux) {
       await RemoteExtension.checkRemoteExtension();
 
@@ -116,27 +114,21 @@ export class ProjectEnvironmentConfiger {
       if (!await project.configExternalProjectToIotProject(scaffoldType)) {
         return false;
       }
-      projectRootPath = deviceRootPath;
     } else if (platform === PlatformType.Arduino) {
       telemetryContext.properties.projectHostType = ProjectHostType.Workspace;
       project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
           context, channel, telemetryContext);
-      projectRootPath = path.join(deviceRootPath, '..');
     } else {
       throw new Error('unsupported platform');
     }
 
-    const res = await project.load(scaffoldType);
-    if (!res) {
-      throw new Error(
-          `Failed to load project. Project environment configuration stopped.`);
-    }
+    await project.load(scaffoldType);
 
     // Add configuration files
     await project.configureProjectEnvironmentCore(deviceRootPath, scaffoldType);
 
     await project.openProject(
-        projectRootPath, false, OpenScenario.configureProject);
+        scaffoldType, false, OpenScenario.configureProject);
     return true;
   }
 }

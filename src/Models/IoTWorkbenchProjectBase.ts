@@ -29,11 +29,14 @@ export enum OpenScenario {
   configureProject
 }
 export abstract class IoTWorkbenchProjectBase {
-  protected componentList: Component[];
-  protected projectRootPath = '';
   protected extensionContext: vscode.ExtensionContext;
   protected channel: vscode.OutputChannel;
   protected telemetryContext: TelemetryContext;
+
+  protected projectRootPath = '';
+  protected iotWorkbenchProjectFilePath = '';
+
+  protected componentList: Component[];
   protected projectHostType: ProjectHostType = ProjectHostType.Unknown;
 
   /**
@@ -103,7 +106,11 @@ export abstract class IoTWorkbenchProjectBase {
   }
 
   abstract async load(scaffoldType: ScaffoldType, initLoad?: boolean):
-      Promise<boolean>;
+      Promise<void>;
+
+  abstract async create(
+      templateFilesInfo: TemplateFileInfo[], projectType: ProjectTemplateType,
+      boardId: string, openInNewWindow: boolean): Promise<void>;
 
   async compile(): Promise<boolean> {
     for (const item of this.componentList) {
@@ -272,11 +279,6 @@ export abstract class IoTWorkbenchProjectBase {
     vscode.window.showInformationMessage('Azure deploy succeeded.');
   }
 
-  abstract async create(
-      rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
-      projectType: ProjectTemplateType, boardId: string,
-      openInNewWindow: boolean): Promise<void>;
-
   /**
    * Configure project environment: Scaffold configuration files with the given
    * template files.
@@ -292,7 +294,7 @@ export abstract class IoTWorkbenchProjectBase {
   }
 
   abstract async openProject(
-      projectPath: string, openInNewWindow: boolean,
+      scaffoldType: ScaffoldType, openInNewWindow: boolean,
       openScenario: OpenScenario): Promise<void>;
 
   async configDeviceSettings(): Promise<boolean> {
@@ -306,30 +308,21 @@ export abstract class IoTWorkbenchProjectBase {
   }
 
   /**
-   * Generate iot workbench project file if not exists.
    * Update project host type configuration in iot workbench project file.
+   * Create one if not exists.
+   * @param type Scaffold type
    */
-  async generateOrUpdateIotWorkbenchProjectFile(
-      type: ScaffoldType, deviceRootPath: string): Promise<void> {
-    if (!await FileUtility.directoryExists(type, deviceRootPath)) {
-      throw new Error('Unable to find the project folder.');
-    }
-
+  async updateIotWorkbenchProjectFile(type: ScaffoldType): Promise<void> {
     try {
-      const iotworkbenchprojectFilePath =
-          path.join(deviceRootPath, FileNames.iotworkbenchprojectFileName);
-
-      let projectConfig: {[key: string]: string} = {};
-      if (await FileUtility.fileExists(type, iotworkbenchprojectFilePath)) {
-        const projectConfigContent =
-            (await FileUtility.readFile(
-                 type, iotworkbenchprojectFilePath, 'utf8') as string)
-                .trim();
-        if (projectConfigContent) {
-          projectConfig = JSON.parse(projectConfigContent);
-        }
+      if (!this.iotWorkbenchProjectFilePath) {
+        throw new Error(
+            `Iot workbench project file path is empty. Please initialize the project first.`);
       }
 
+      // Get original configs from config file
+      const projectConfig = await this.getProjectConfig(type);
+
+      // Update project host type
       projectConfig[`${ConfigKey.projectHostType}`] =
           ProjectHostType[this.projectHostType];
 
@@ -338,12 +331,31 @@ export abstract class IoTWorkbenchProjectBase {
       projectConfig[`${ConfigKey.workbenchVersion}`] = workbenchVersion;
 
       await FileUtility.writeJsonFile(
-          type, iotworkbenchprojectFilePath, projectConfig);
+          type, this.iotWorkbenchProjectFilePath, projectConfig);
     } catch (error) {
-      throw new Error(`Generate or update ${
-          FileNames.iotworkbenchprojectFileName} file failed: ${
-          error.message}`);
+      throw new Error(
+          `Update ${FileNames.iotworkbenchprojectFileName} file failed: ${
+              error.message}`);
     }
+  }
+
+  /**
+   * Get project configs from iot workbench project file
+   * @param type Scaffold type
+   */
+  // tslint:disable-next-line: no-any
+  async getProjectConfig(type: ScaffoldType): Promise<any> {
+    let projectConfig: {[key: string]: string} = {};
+    if (await FileUtility.fileExists(type, this.iotWorkbenchProjectFilePath)) {
+      const projectConfigContent =
+          (await FileUtility.readFile(
+               type, this.iotWorkbenchProjectFilePath, 'utf8') as string)
+              .trim();
+      if (projectConfigContent) {
+        projectConfig = JSON.parse(projectConfigContent);
+      }
+    }
+    return projectConfig;
   }
 
   /**
@@ -359,6 +371,18 @@ export abstract class IoTWorkbenchProjectBase {
       telemetryWorker.sendEvent(EventNames.projectLoadEvent, telemetryContext);
     } catch {
       // If sending telemetry failed, skip the error to avoid blocking user.
+    }
+  }
+
+  /**
+   * Validate whether project root path exists. If not, throw error.
+   * @param scaffoldType scaffold type
+   */
+  async validateProjectRootPath(scaffoldType: ScaffoldType): Promise<void> {
+    if (!await FileUtility.directoryExists(
+            scaffoldType, this.projectRootPath)) {
+      throw new Error(`Project root path ${
+          this.projectRootPath} does not exist. Please initialize the project first.`);
     }
   }
 }

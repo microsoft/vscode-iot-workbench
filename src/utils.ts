@@ -116,13 +116,17 @@ export interface FolderQuickPickItem<T = undefined> extends
   data: T;
 }
 
-export function checkOpenedFolder(): string|undefined {
+/**
+ * Check there is workspace opened in VS Code
+ * and get the first workspace folder path.
+ */
+export function getFirstWorkspaceFolderPath(): string {
   if (!(vscode.workspace.workspaceFolders &&
         vscode.workspace.workspaceFolders.length > 0) ||
       !vscode.workspace.workspaceFolders[0].uri.fsPath) {
     vscode.window.showWarningMessage(
         'You have not yet opened a folder in Visual Studio Code. Please select a folder first.');
-    return;
+    return '';
   }
 
   return vscode.workspace.workspaceFolders[0].uri.fsPath;
@@ -457,16 +461,12 @@ export async function handleExternalProject(
       return;
     }
 
-    const res = await project.load(scaffoldType);
-    if (!res) {
-      throw new Error(
-          `Failed to load project. Project environment configuration stopped.`);
-    }
+    await project.load(scaffoldType);
 
     await project.configureProjectEnvironmentCore(deviceRootPath, scaffoldType);
 
     await project.openProject(
-        deviceRootPath, false, OpenScenario.configureProject);
+        scaffoldType, false, OpenScenario.configureProject);
   } else if (result === Choice.createNewProject) {
     telemetryContext.properties.errorMessage =
         'Operation failed and user creates new project';
@@ -569,10 +569,8 @@ export async function constructAndLoadIoTProject(
       return;
     }
 
-    const result = await iotProject.load(scaffoldType);
-    if (!result) {
-      throw new Error(`Failed to load project.`);
-    }
+    await iotProject.load(scaffoldType);
+
     return iotProject;
   }
   return;

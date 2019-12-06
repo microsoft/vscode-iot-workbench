@@ -2,8 +2,7 @@
 // Licensed under the MIT License.
 
 'use strict';
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
+
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as utils from './utils';
@@ -137,17 +136,17 @@ export class ProjectInitializer {
           if (template.platform === PlatformType.EmbeddedLinux) {
             telemetryContext.properties.projectHostType = 'Container';
             project = new ioTContainerizedProjectModule.IoTContainerizedProject(
-                context, channel, telemetryContext);
+                context, channel, telemetryContext, projectPath);
           } else if (template.platform === PlatformType.Arduino) {
             telemetryContext.properties.projectHostType = 'Workspace';
             project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
-                context, channel, telemetryContext);
+                context, channel, telemetryContext, projectPath);
           } else {
             throw new Error('unsupported platform');
           }
           await project.create(
-              projectPath, templateFilesInfo, projectTemplateType,
-              template.boardId, openInNewWindow);
+              templateFilesInfo, projectTemplateType, template.boardId,
+              openInNewWindow);
         });
   }
 

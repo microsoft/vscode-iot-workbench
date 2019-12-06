@@ -69,7 +69,7 @@ export class CosmosDB implements Component, Provisionable {
     try {
       azureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, 'utf8'));
       const cosmosDBConfig = azureConfigs.componentConfigs.find(
-          config => config.type === ComponentType[this.componentType]);
+          config => config.type === this.componentType);
       if (cosmosDBConfig) {
         this.componentId = cosmosDBConfig.id;
         this.dependencies = cosmosDBConfig.dependencies;
@@ -101,7 +101,7 @@ export class CosmosDB implements Component, Provisionable {
         folder: '',
         name: '',
         dependencies: this.dependencies,
-        type: ComponentType[this.componentType]
+        type: this.componentType
       };
       await this.azureConfigHandler.appendComponent(type, newCosmosDBConfig);
     }
