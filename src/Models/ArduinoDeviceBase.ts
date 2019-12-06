@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {CancelOperationError} from '../CancelOperationError';
-import {Commands} from '../common/Commands';
+import {VscodeCommands, WorkbenchCommands} from '../common/Commands';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, DependentExtensions, FileNames, OperationType, OSPlatform, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
@@ -79,7 +79,7 @@ export abstract class ArduinoDeviceBase implements Device {
           'Yes', 'No');
       if (choice === 'Yes') {
         vscode.commands.executeCommand(
-            Commands.VscodeOpen,
+            VscodeCommands.VscodeOpen,
             vscode.Uri.parse(
                 'vscode:extension/' + DependentExtensions.arduino));
       }
