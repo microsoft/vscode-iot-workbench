@@ -5,6 +5,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as sdk from 'vscode-iot-device-cube-sdk';
 
+import {CancelOperationError} from '../CancelOperationError';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames, OperationType, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
@@ -71,11 +72,8 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
   async upload(): Promise<boolean> {
     const isRemote = RemoteExtension.isRemote(this.extensionContext);
     if (!isRemote) {
-      const res = await askAndOpenInRemote(
-          OperationType.Upload, this.channel, this.telemetryContext);
-      if (!res) {
-        return false;
-      }
+      await askAndOpenInRemote(OperationType.Upload, this.telemetryContext);
+      return false;
     }
 
     try {
@@ -101,10 +99,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       if (!RaspberryPiUploadConfig.updated) {
         const res = await this.configSSH();
         if (!res) {
-          const message = `Configure SSH cancelled.`;
-          vscode.window.showWarningMessage(message);
-          channelShowAndAppendLine(this.channel, message);
-          return false;
+          throw new CancelOperationError(`Configure SSH cancelled.`);
         }
       }
 

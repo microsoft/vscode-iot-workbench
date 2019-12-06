@@ -81,9 +81,8 @@ export class CosmosDB implements Component, Provisionable {
     return true;
   }
 
-  async create(): Promise<boolean> {
+  async create(): Promise<void> {
     await this.updateConfigSettings(ScaffoldType.Local);
-    return true;
   }
 
   async updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo):

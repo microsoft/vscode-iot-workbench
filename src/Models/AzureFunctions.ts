@@ -25,6 +25,7 @@ import {Guid} from 'guid-typescript';
 import {AzureComponentConfig, AzureConfigs, ComponentInfo, DependencyConfig, Dependency} from './AzureComponentConfig';
 import {FileUtility} from '../FileUtility';
 import {Commands} from '../common/Commands';
+import {CancelOperationError} from '../CancelOperationError';
 
 const impor = require('impor')(__dirname);
 const azureUtilityModule =
@@ -147,7 +148,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     return true;
   }
 
-  async create(): Promise<boolean> {
+  async create(): Promise<void> {
     const scaffoldType = ScaffoldType.Local;
     const azureFunctionsPath = this.azureFunctionsPath;
     console.log(azureFunctionsPath);
@@ -172,7 +173,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
       });
 
       if (!languageSelection) {
-        throw new Error(
+        throw new CancelOperationError(
             'Unable to get the language for Azure Functions. Creating project for Azure Functions cancelled.');
       }
       this.functionLanguage = languageSelection.label;
@@ -181,7 +182,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     const templateName =
         utils.getScriptTemplateNameFromLanguage(this.functionLanguage);
     if (!templateName) {
-      throw new Error(
+      throw new CancelOperationError(
           'Unable to get the template for Azure Functions.Creating project for Azure Functions cancelled.');
     }
 
@@ -208,7 +209,6 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
 
     await this.updateConfigSettings(
         scaffoldType, {values: {functionLanguage: this.functionLanguage}});
-    return true;
   }
 
   async provision(): Promise<boolean> {

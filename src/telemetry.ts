@@ -39,6 +39,7 @@ export class TelemetryWorker {
   private _reporter: TelemetryReporter|undefined;
   private _extensionContext: vscode.ExtensionContext|undefined;
   private static _instance: TelemetryWorker|undefined;
+  private _isInternal = false;
 
   private constructor(context: vscode.ExtensionContext) {
     this._extensionContext = context;
@@ -54,6 +55,7 @@ export class TelemetryWorker {
     }
     this._reporter = new TelemetryReporter(
         packageInfo.name, packageInfo.version, packageInfo.aiKey);
+    this._isInternal = TelemetryWorker.isInternalUser();
   }
 
   static getInstance(context: vscode.ExtensionContext): TelemetryWorker {
@@ -79,7 +81,7 @@ export class TelemetryWorker {
   createContext(): TelemetryContext {
     const context: TelemetryContext = {properties: {}, measurements: {}};
     context.properties.result = TelemetryResult.Succeeded;
-    context.properties.isInternal = TelemetryWorker.isInternalUser.toString();
+    context.properties.isInternal = this._isInternal.toString();
     if (this._extensionContext) {
       context.properties.developEnvironment =
           RemoteExtension.isRemote(this._extensionContext) ?
@@ -98,13 +100,11 @@ export class TelemetryWorker {
     if (!this._reporter) {
       return;
     }
-    if (telemetryContext) {
-      this._reporter.sendTelemetryEvent(
-          eventName, telemetryContext.properties,
-          telemetryContext.measurements);
-    } else {
-      this._reporter.sendTelemetryEvent(eventName);
+    if (!telemetryContext) {
+      telemetryContext = this.createContext();
     }
+    this._reporter.sendTelemetryEvent(
+        eventName, telemetryContext.properties, telemetryContext.measurements);
   }
 
   /**
@@ -141,18 +141,19 @@ export class TelemetryWorker {
     }
 
     try {
-      return await Promise.resolve(callback.apply(
-          null, [context, outputChannel, telemetryContext, ...commandArgs]));
-      // return await callback(context, outputChannel, telemetryContext,
-      // ...commandArgs);
+      return await callback(
+          context, outputChannel, telemetryContext, ...commandArgs);
     } catch (error) {
       telemetryContext.properties.errorMessage = error.message;
+      let isPopupErrorMsg = true;
       if (error instanceof CancelOperationError) {
         telemetryContext.properties.result = TelemetryResult.Cancelled;
+        isPopupErrorMsg = false;
       } else {
         telemetryContext.properties.result = TelemetryResult.Failed;
       }
-      ExceptionHelper.logError(outputChannel, error, true);
+      telemetryContext.properties.errorMessage = error.message;
+      ExceptionHelper.logError(outputChannel, error, isPopupErrorMsg);
     } finally {
       const end: number = Date.now();
       telemetryContext.measurements.duration = (end - start) / 1000;

@@ -175,11 +175,8 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     return true;
   }
 
-  async create(): Promise<boolean> {
-    const createTimeScaffoldType = ScaffoldType.Local;
-
-    await this.updateConfigSettings(createTimeScaffoldType);
-    return true;
+  async create(): Promise<void> {
+    await this.updateConfigSettings(ScaffoldType.Local);
   }
 
   async updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo):
