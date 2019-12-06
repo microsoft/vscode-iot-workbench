@@ -18,10 +18,10 @@ import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {RemoteExtension} from './RemoteExtension';
 
 class RaspberryPiUploadConfig {
-  static host = 'raspberrypi';
+  static host = 'hostname';
   static port = 22;
-  static user = 'pi';
-  static password = 'raspberry';
+  static user = 'username';
+  static password = 'password';
   static projectPath = 'IoTProject';
   static updated = false;
 }
@@ -263,7 +263,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     if (!raspiHost) {
       const raspiHostOption: vscode.InputBoxOptions = {
         value: RaspberryPiUploadConfig.host,
-        prompt: `Please input Raspberry Pi device ip or hostname here.`,
+        prompt: `Please input device ip or hostname here.`,
         ignoreFocusOut: true
       };
       raspiHost = await vscode.window.showInputBox(raspiHostOption);
@@ -276,7 +276,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     // Raspberry Pi SSH port
     const raspiPortOption: vscode.InputBoxOptions = {
       value: RaspberryPiUploadConfig.port.toString(),
-      prompt: `Please input Raspberry Pi SSH port here.`,
+      prompt: `Please input SSH port here.`,
       ignoreFocusOut: true
     };
     const raspiPortString = await vscode.window.showInputBox(raspiPortOption);
@@ -290,7 +290,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     // Raspberry Pi user name
     const raspiUserOption: vscode.InputBoxOptions = {
       value: RaspberryPiUploadConfig.user,
-      prompt: `Please input Raspberry Pi user name here.`,
+      prompt: `Please input user name here.`,
       ignoreFocusOut: true
     };
     let raspiUser = await vscode.window.showInputBox(raspiUserOption);
@@ -302,7 +302,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     // Raspberry Pi user password
     const raspiPasswordOption: vscode.InputBoxOptions = {
       value: RaspberryPiUploadConfig.password,
-      prompt: `Please input Raspberry Pi password here.`,
+      prompt: `Please input password here.`,
       ignoreFocusOut: true
     };
     let raspiPassword = await vscode.window.showInputBox(raspiPasswordOption);
