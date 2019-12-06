@@ -7,7 +7,7 @@ import {commands, ExtensionContext, Uri, window} from 'vscode';
 import {EventNames} from './constants';
 import {TelemetryWorker} from './telemetry';
 import {WorkbenchExtension} from './WorkbenchExtension';
-import {WorkbenchCommands, VscodeCommands} from './common/Commands';
+import {VscodeCommands} from './common/Commands';
 
 const NSAT_SURVEY_URL = 'https://aka.ms/vscode-iot-workbench-survey';
 const PROBABILITY = 1;

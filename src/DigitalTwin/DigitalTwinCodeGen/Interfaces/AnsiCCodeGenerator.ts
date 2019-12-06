@@ -2,7 +2,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {VscodeCommands, WorkbenchCommands} from '../../../common/Commands';
+import {VscodeCommands} from '../../../common/Commands';
 import {ScaffoldType} from '../../../constants';
 import {OpenScenario} from '../../../Models/IoTWorkbenchProjectBase';
 import {IoTWorkspaceProject} from '../../../Models/IoTWorkspaceProject';

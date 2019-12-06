@@ -24,7 +24,7 @@ import {ExtensionName} from './Interfaces/Api';
 import {Guid} from 'guid-typescript';
 import {AzureComponentConfig, AzureConfigs, ComponentInfo, DependencyConfig, Dependency} from './AzureComponentConfig';
 import {FileUtility} from '../FileUtility';
-import {WorkbenchCommands, VscodeCommands} from '../common/Commands';
+import {VscodeCommands} from '../common/Commands';
 import {CancelOperationError} from '../CancelOperationError';
 
 const impor = require('impor')(__dirname);

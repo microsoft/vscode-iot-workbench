@@ -5,8 +5,7 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {CancelOperationError} from '../CancelOperationError';
-import {VscodeCommands, WorkbenchCommands} from '../common/Commands';
+import {VscodeCommands} from '../common/Commands';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, DependentExtensions, FileNames, OperationType, OSPlatform, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';

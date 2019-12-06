@@ -4,9 +4,8 @@
 import * as vscode from 'vscode';
 import {DependentExtensions} from '../constants';
 import {DialogResponses} from '../DialogResponses';
-import {channelShowAndAppendLine} from '../utils';
 import {WorkbenchExtension} from '../WorkbenchExtension';
-import {WorkbenchCommands, VscodeCommands} from '../common/Commands';
+import {VscodeCommands} from '../common/Commands';
 import {CancelOperationError} from '../CancelOperationError';
 
 export class RemoteExtension {
