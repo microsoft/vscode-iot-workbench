@@ -150,7 +150,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
   }
 
   async configDeviceSettings(): Promise<boolean> {
-    const configSelectionItems = this.getMainOptions();
+    const configSelectionItems = this.getConfigDeviceSettingsMainOptions();
     const configSelection =
         await vscode.window.showQuickPick(configSelectionItems, {
           ignoreFocusOut: true,
@@ -245,7 +245,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
     }
   }
 
-  private async getMainOptions(): Promise<vscode.QuickPickItem[]> {
+  private async getConfigDeviceSettingsMainOptions(): Promise<vscode.QuickPickItem[]> {
     // Read options configuration JSON
     const devciceConfigFilePath: string =
         this.extensionContext.asAbsolutePath(path.join(
