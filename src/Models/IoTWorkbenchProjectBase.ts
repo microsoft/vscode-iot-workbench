@@ -343,7 +343,8 @@ export abstract class IoTWorkbenchProjectBase {
    * Get project configs from iot workbench project file
    * @param type Scaffold type
    */
-  async getProjectConfig(type: ScaffoldType): Promise<{[key: string]: string}> {
+  // tslint:disable-next-line: no-any
+  async getProjectConfig(type: ScaffoldType): Promise<any> {
     let projectConfig: {[key: string]: string} = {};
     if (await FileUtility.fileExists(type, this.iotWorkbenchProjectFilePath)) {
       const projectConfigContent =
@@ -370,6 +371,18 @@ export abstract class IoTWorkbenchProjectBase {
       telemetryWorker.sendEvent(EventNames.projectLoadEvent, telemetryContext);
     } catch {
       // If sending telemetry failed, skip the error to avoid blocking user.
+    }
+  }
+
+  /**
+   * Validate whether project root path exists. If not, throw error.
+   * @param scaffoldType scaffold type
+   */
+  async validateProjectRootPath(scaffoldType: ScaffoldType): Promise<void> {
+    if (!await FileUtility.directoryExists(
+            scaffoldType, this.projectRootPath)) {
+      throw new Error(`Project root path ${
+          this.projectRootPath} does not exist. Please initialize the project first.`);
     }
   }
 }

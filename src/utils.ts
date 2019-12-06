@@ -120,13 +120,13 @@ export interface FolderQuickPickItem<T = undefined> extends
  * Check there is workspace opened in VS Code
  * and get the first workspace folder path.
  */
-export function getFirstWorkspaceFolderPath(): string|undefined {
+export function getFirstWorkspaceFolderPath(): string {
   if (!(vscode.workspace.workspaceFolders &&
         vscode.workspace.workspaceFolders.length > 0) ||
       !vscode.workspace.workspaceFolders[0].uri.fsPath) {
     vscode.window.showWarningMessage(
         'You have not yet opened a folder in Visual Studio Code. Please select a folder first.');
-    return;
+    return '';
   }
 
   return vscode.workspace.workspaceFolders[0].uri.fsPath;

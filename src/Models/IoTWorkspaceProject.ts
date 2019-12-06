@@ -186,7 +186,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
       openScenario: OpenScenario): Promise<void> {
     if (!await FileUtility.fileExists(
             scaffoldType, this.workspaceConfigFilePath)) {
-      throw new Error(`Project root path ${
+      throw new Error(`Workspace config file ${
           this.workspaceConfigFilePath} does not exist. Please initialize the project first.`);
     }
 
@@ -254,11 +254,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
    */
   private async initAzureComponentsWithoutConfig(scaffoldType: ScaffoldType):
       Promise<void> {
-    if (!await FileUtility.directoryExists(
-            scaffoldType, this.projectRootPath)) {
-      throw new Error(`Project root path ${
-          this.projectRootPath} does not exist. Please initialize the project first.`);
-    }
+    this.validateProjectRootPath(scaffoldType);
 
     const iotHub = new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
     await iotHub.updateConfigSettings(scaffoldType);
@@ -291,11 +287,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
   private async initAzureComponentsWithConfig(
       scaffoldType: ScaffoldType,
       componentConfigs: AzureComponentConfig[]): Promise<void> {
-    if (!await FileUtility.directoryExists(
-            scaffoldType, this.projectRootPath)) {
-      throw new Error(`Project root path ${
-          this.projectRootPath} does not exist. Please initialize the project first.`);
-    }
+    this.validateProjectRootPath(scaffoldType);
 
     const components: {[key: string]: Component} = {};
     for (const componentConfig of componentConfigs) {
@@ -381,11 +373,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
    * @param scaffoldType scaffold type
    */
   private async initAzureConfig(scaffoldType: ScaffoldType): Promise<void> {
-    if (!await FileUtility.directoryExists(
-            scaffoldType, this.projectRootPath)) {
-      throw new Error(`Project root path ${
-          this.projectRootPath} does not exist. Please initialize the project first.`);
-    }
+    this.validateProjectRootPath(scaffoldType);
 
     const azureConfigFileHandler =
         new azureComponentConfigModule.AzureConfigFileHandler(
@@ -406,11 +394,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
   private async createAzureComponentsWithProjectType(
       projectType: ProjectTemplateType, scaffoldType: ScaffoldType,
       workspaceConfig: Workspace): Promise<void> {
-    if (!await FileUtility.directoryExists(
-            scaffoldType, this.projectRootPath)) {
-      throw new Error(`Project root path ${
-          this.projectRootPath} does not exist. Please initialize the project first.`);
-    }
+    this.validateProjectRootPath(scaffoldType);
 
     // initialize the storage for azure component settings
     const azureConfigFileHandler =

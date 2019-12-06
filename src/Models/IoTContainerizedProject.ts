@@ -28,14 +28,9 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     super(context, channel, telemetryContext);
     this.projectHostType = ProjectHostType.Container;
 
-    if (rootFolderPath) {
-      this.projectRootPath = rootFolderPath;
-    } else {
-      const firstWorkspaceFolder = getFirstWorkspaceFolderPath();
-      if (!firstWorkspaceFolder) {
-        throw new Error(`Fail to get first workspace folder.`);
-      }
-      this.projectRootPath = firstWorkspaceFolder;
+    this.projectRootPath = rootFolderPath || getFirstWorkspaceFolderPath();
+    if (!this.projectRootPath) {
+      throw new Error(`Fail to get root folder.`);
     }
 
     this.iotWorkbenchProjectFilePath =
@@ -43,11 +38,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
   }
 
   async load(scaffoldType: ScaffoldType, initLoad = false): Promise<void> {
-    if (!await FileUtility.directoryExists(
-            scaffoldType, this.projectRootPath)) {
-      throw new Error(`Project root path ${
-          this.projectRootPath} does not exist. Please initialize the project first.`);
-    }
+    this.validateProjectRootPath(scaffoldType);
 
     // 1. Update iot workbench project file.
     await this.updateIotWorkbenchProjectFile(scaffoldType);
@@ -105,7 +96,8 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     this.componentList.forEach(async item => {
       const res = await item.checkPrerequisites();
       if (!res) {
-        return;
+        throw new Error(
+            `Failed to create component because prerequisite is not met.`);
       }
     });
 
@@ -132,11 +124,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
   async openProject(
       scaffoldType: ScaffoldType, openInNewWindow: boolean,
       openScenario: OpenScenario): Promise<void> {
-    if (!await FileUtility.directoryExists(
-            scaffoldType, this.projectRootPath)) {
-      throw new Error(`Project root path ${
-          this.projectRootPath} does not exist. Please initialize the project first.`);
-    }
+    this.validateProjectRootPath(scaffoldType);
 
     // 1. Ask to customize
     let customizeEnvironment = false;
@@ -246,11 +234,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
   private async initDevice(
       boardId: string, scaffoldType: ScaffoldType,
       templateFilesInfo?: TemplateFileInfo[]): Promise<void> {
-    if (!await FileUtility.directoryExists(
-            scaffoldType, this.projectRootPath)) {
-      throw new Error(`Project root path ${
-          this.projectRootPath} does not exist. Please initialize the project first.`);
-    }
+    this.validateProjectRootPath(scaffoldType);
 
     let device: Component;
     if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {
