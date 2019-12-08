@@ -117,6 +117,11 @@ export class FileUtility {
       type: ScaffoldType, fileDestPath: string, data: any): Promise<void> {
     const indentationSpace = 4;
     const jsonString = JSON.stringify(data, null, indentationSpace);
+
+    const fileDir = path.dirname(fileDestPath);
+    if (!await FileUtility.directoryExists(type, fileDir)) {
+      await FileUtility.mkdirRecursively(type, fileDir);
+    }
     await FileUtility.writeFile(type, fileDestPath, jsonString);
   }
 
