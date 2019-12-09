@@ -19,7 +19,7 @@ import {RemoteExtension} from './Models/RemoteExtension';
 import {constructAndLoadIoTProject} from './utils';
 import {ProjectEnvironmentConfiger} from './ProjectEnvironmentConfiger';
 import {WorkbenchExtension} from './WorkbenchExtension';
-import {Commands} from './common/Commands';
+import {WorkbenchCommands, VscodeCommands} from './common/Commands';
 
 const impor = require('impor')(__dirname);
 const exampleExplorerModule =
@@ -50,8 +50,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
   initCommandWithTelemetry(
       context, telemetryWorker, telemetryContext, outputChannel,
-      Commands.InitializeProject, EventNames.createNewProjectEvent, true,
-      async(): Promise<void> => {
+      WorkbenchCommands.InitializeProject, EventNames.createNewProjectEvent,
+      true, async(): Promise<void> => {
         const projectInitializer = new ProjectInitializer();
         return projectInitializer.InitializeProject(
             context, outputChannel, telemetryContext);
@@ -59,7 +59,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   initCommandWithTelemetry(
       context, telemetryWorker, telemetryContext, outputChannel,
-      Commands.ConfigureProjectEnvironment,
+      WorkbenchCommands.ConfigureProjectEnvironment,
       EventNames.configProjectEnvironmentEvent, true,
       async(): Promise<void> => {
         const projectEnvConfiger = new ProjectEnvironmentConfiger();
@@ -69,7 +69,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   initCommandWithTelemetry(
       context, telemetryWorker, telemetryContext, outputChannel,
-      Commands.AzureProvision, EventNames.azureProvisionEvent, true,
+      WorkbenchCommands.AzureProvision, EventNames.azureProvisionEvent, true,
       async(): Promise<void> => {
         return azureOperator.provision(
             context, outputChannel, telemetryContext);
@@ -77,36 +77,36 @@ export async function activate(context: vscode.ExtensionContext) {
 
   initCommandWithTelemetry(
       context, telemetryWorker, telemetryContext, outputChannel,
-      Commands.AzureDeploy, EventNames.azureDeployEvent, true,
+      WorkbenchCommands.AzureDeploy, EventNames.azureDeployEvent, true,
       async(): Promise<void> => {
         return azureOperator.deploy(context, outputChannel, telemetryContext);
       });
 
   initCommandWithTelemetry(
       context, telemetryWorker, telemetryContext, outputChannel,
-      Commands.DeviceCompile, EventNames.deviceCompileEvent, true,
+      WorkbenchCommands.DeviceCompile, EventNames.deviceCompileEvent, true,
       async(): Promise<void> => {
         return deviceOperator.compile(context, outputChannel, telemetryContext);
       });
 
   initCommandWithTelemetry(
       context, telemetryWorker, telemetryContext, outputChannel,
-      Commands.DeviceUpload, EventNames.deviceUploadEvent, true,
+      WorkbenchCommands.DeviceUpload, EventNames.deviceUploadEvent, true,
       async(): Promise<void> => {
         return deviceOperator.upload(context, outputChannel, telemetryContext);
       });
 
   initCommandWithTelemetry(
       context, telemetryWorker, telemetryContext, outputChannel,
-      Commands.ConfigureDevice, EventNames.configDeviceSettingsEvent, true,
-      async(): Promise<void> => {
+      WorkbenchCommands.ConfigureDevice, EventNames.configDeviceSettingsEvent,
+      true, async(): Promise<void> => {
         return deviceOperator.configDeviceSettings(
             context, outputChannel, telemetryContext);
       });
 
   initCommandWithTelemetry(
       context, telemetryWorker, telemetryContext, outputChannel,
-      Commands.Examples, EventNames.openExamplePageEvent, true,
+      WorkbenchCommands.Examples, EventNames.openExamplePageEvent, true,
       async(): Promise<void> => {
         return exampleExplorer.selectBoard(
             context, outputChannel, telemetryContext);
@@ -114,7 +114,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   initCommandWithTelemetry(
       context, telemetryWorker, telemetryContext, outputChannel,
-      Commands.ExampleInitialize, EventNames.loadExampleEvent, true,
+      WorkbenchCommands.ExampleInitialize, EventNames.loadExampleEvent, true,
       async(
           context, outputChannel, telemetryContext, name?: string, url?: string,
           boardId?: string): Promise<void> => {
@@ -124,20 +124,21 @@ export async function activate(context: vscode.ExtensionContext) {
 
   initCommandWithTelemetry(
       context, telemetryWorker, telemetryContext, outputChannel,
-      Commands.SendTelemetry, EventNames.openTutorial, true, async () => {});
+      WorkbenchCommands.SendTelemetry, EventNames.openTutorial, true,
+      async () => {});
 
   initCommandWithTelemetry(
       context, telemetryWorker, telemetryContext, outputChannel,
-      Commands.IotPnPGenerateCode, EventNames.scaffoldDeviceStubEvent, true,
-      async(): Promise<void> => {
+      WorkbenchCommands.IotPnPGenerateCode, EventNames.scaffoldDeviceStubEvent,
+      true, async(): Promise<void> => {
         const codeGenerator = new CodeGeneratorCore();
         return codeGenerator.generateDeviceCodeStub(
             context, outputChannel, telemetryContext);
       });
 
   initCommandWithTelemetry(
-      context, telemetryWorker, telemetryContext, outputChannel, Commands.Help,
-      EventNames.help, true, async () => {
+      context, telemetryWorker, telemetryContext, outputChannel,
+      WorkbenchCommands.Help, EventNames.help, true, async () => {
         const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
 
         if (boardId) {
@@ -148,20 +149,21 @@ export async function activate(context: vscode.ExtensionContext) {
 
           if (board && board.helpUrl) {
             await vscode.commands.executeCommand(
-                Commands.VscodeOpen, vscode.Uri.parse(board.helpUrl));
+                VscodeCommands.VscodeOpen, vscode.Uri.parse(board.helpUrl));
             return;
           }
         }
         const workbenchHelpUrl =
             'https://github.com/microsoft/vscode-iot-workbench/blob/master/README.md';
         await vscode.commands.executeCommand(
-            Commands.VscodeOpen, vscode.Uri.parse(workbenchHelpUrl));
+            VscodeCommands.VscodeOpen, vscode.Uri.parse(workbenchHelpUrl));
         return;
       });
 
   initCommandWithTelemetry(
       context, telemetryWorker, telemetryContext, outputChannel,
-      Commands.Workbench, EventNames.setProjectDefaultPath, true, async () => {
+      WorkbenchCommands.Workbench, EventNames.setProjectDefaultPath, true,
+      async () => {
         const isLocal = RemoteExtension.checkLocalBeforeRunCommand(context);
         if (!isLocal) {
           return;
@@ -172,22 +174,25 @@ export async function activate(context: vscode.ExtensionContext) {
         return;
       });
 
-  initCommand(context, Commands.OpenUri, async (uri: string) => {
-    vscode.commands.executeCommand(Commands.VscodeOpen, vscode.Uri.parse(uri));
+  initCommand(context, WorkbenchCommands.OpenUri, async (uri: string) => {
+    vscode.commands.executeCommand(
+        VscodeCommands.VscodeOpen, vscode.Uri.parse(uri));
   });
 
-  initCommand(context, Commands.HttpRequest, async (uri: string) => {
+  initCommand(context, WorkbenchCommands.HttpRequest, async (uri: string) => {
     const res = await request(uri);
     return res;
   });
 
 
-  initCommand(context, Commands.GetDisableAutoPopupLandingPage, async () => {
-    return ConfigHandler.get<boolean>(ConfigKey.disableAutoPopupLandingPage);
-  });
+  initCommand(
+      context, WorkbenchCommands.GetDisableAutoPopupLandingPage, async () => {
+        return ConfigHandler.get<boolean>(
+            ConfigKey.disableAutoPopupLandingPage);
+      });
 
   initCommand(
-      context, Commands.SetDisableAutoPopupLandingPage,
+      context, WorkbenchCommands.SetDisableAutoPopupLandingPage,
       async (disableAutoPopupLandingPage: boolean) => {
         return ConfigHandler.update(
             ConfigKey.disableAutoPopupLandingPage, disableAutoPopupLandingPage,
@@ -231,7 +236,7 @@ function printHello(context: vscode.ExtensionContext) {
 function initCommandWithTelemetry(
     context: vscode.ExtensionContext, telemetryWorker: TelemetryWorker,
     telemetryContext: TelemetryContext, outputChannel: vscode.OutputChannel,
-    command: Commands, eventName: string, enableSurvey: boolean,
+    command: WorkbenchCommands, eventName: string, enableSurvey: boolean,
     // tslint:disable-next-line:no-any
     callback: (
         context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
@@ -247,7 +252,7 @@ function initCommandWithTelemetry(
 }
 
 function initCommand(
-    context: vscode.ExtensionContext, command: Commands,
+    context: vscode.ExtensionContext, command: WorkbenchCommands,
     // tslint:disable-next-line:no-any
     callback: (...args: any[]) => Promise<any>): void {
   context.subscriptions.push(

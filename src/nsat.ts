@@ -7,7 +7,7 @@ import {commands, ExtensionContext, Uri, window} from 'vscode';
 import {EventNames} from './constants';
 import {TelemetryWorker} from './telemetry';
 import {WorkbenchExtension} from './WorkbenchExtension';
-import {Commands} from './common/Commands';
+import {VscodeCommands} from './common/Commands';
 
 const NSAT_SURVEY_URL = 'https://aka.ms/vscode-iot-workbench-survey';
 const PROBABILITY = 1;
@@ -67,7 +67,7 @@ export class NSAT {
         telemetryContext.properties.message = 'nsat.survey/takeShortSurvey';
         telemetryWorker.sendEvent(EventNames.nsatsurvery, telemetryContext);
         commands.executeCommand(
-            Commands.VscodeOpen,
+            VscodeCommands.VscodeOpen,
             Uri.parse(`${NSAT_SURVEY_URL}?o=${
                 encodeURIComponent(process.platform)}&v=${
                 encodeURIComponent(extensionVersion)}`));
