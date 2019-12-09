@@ -1,4 +1,4 @@
-export enum Commands {
+export enum WorkbenchCommands {
   // workbench commands
   InitializeProject = 'iotworkbench.initializeProject',
   ConfigureProjectEnvironment = 'iotworkbench.configureProjectEnvironment',
@@ -19,10 +19,16 @@ export enum Commands {
   HttpRequest = 'iotworkbench.httpRequest',
   GetDisableAutoPopupLandingPage =
       'iotworkbench.getDisableAutoPopupLandingPage',
-  SetDisableAutoPopupLandingPage =
-      'iotworkbench.setDisableAutoPopupLandingPage',
+  SetDisableAutoPopupLandingPage = 'iotworkbench.setDisableAutoPopupLandingPage'
+}
 
+export enum VscodeCommands {
   // vscode commands
   VscodeOpen = 'vscode.open',
   VscodeOpenFolder = 'vscode.openFolder'
+}
+
+export enum RemoteContainersCommands {
+  // remote-containers commands
+  ReopenInContainer = 'remote-containers.reopenInContainer'
 }

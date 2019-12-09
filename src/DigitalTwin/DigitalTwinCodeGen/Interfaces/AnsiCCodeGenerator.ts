@@ -2,7 +2,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {Commands} from '../../../common/Commands';
+import {VscodeCommands} from '../../../common/Commands';
 import {ScaffoldType} from '../../../constants';
 import {OpenScenario} from '../../../Models/IoTWorkbenchProjectBase';
 import {IoTWorkspaceProject} from '../../../Models/IoTWorkspaceProject';
@@ -31,7 +31,7 @@ export class AnsiCCodeGenerator implements CodeGenerator {
             ScaffoldType.Local, true, OpenScenario.createNewProject);
       } else {
         await vscode.commands.executeCommand(
-            Commands.VscodeOpenFolder,
+            VscodeCommands.VscodeOpenFolder,
             vscode.Uri.file(codegenInfo.outputDirectory), true);
       }
 

@@ -22,7 +22,7 @@ import {WorkbenchExtension} from './WorkbenchExtension';
 
 const impor = require('impor')(__dirname);
 import {IoTWorkbenchProjectBase, OpenScenario} from './Models/IoTWorkbenchProjectBase';
-import {Commands} from './common/Commands';
+import {VscodeCommands, RemoteContainersCommands} from './common/Commands';
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
     typeof import('./Models/IoTWorkspaceProject');
 const ioTContainerizedProjectModule =
@@ -324,7 +324,8 @@ export async function askAndOpenInRemote(
         `${operation} Operation failed and user opens project in container.`;
     await RemoteExtension.checkRemoteExtension();
 
-    await vscode.commands.executeCommand('openindocker.reopenInContainer');
+    await vscode.commands.executeCommand(
+        RemoteContainersCommands.ReopenInContainer);
   }
 }
 
@@ -348,7 +349,7 @@ export async function takeNoDeviceSurvey(
     }
     const extensionVersion = extension.packageJSON.version || 'unknown';
     await vscode.commands.executeCommand(
-        Commands.VscodeOpen,
+        VscodeCommands.VscodeOpen,
         vscode.Uri.parse(
             `${noDeviceSurveyUrl}?o=${encodeURIComponent(process.platform)}&v=${
                 encodeURIComponent(extensionVersion)}`));
