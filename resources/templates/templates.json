@@ -139,21 +139,21 @@
     {
       "platform": "Embedded Linux (Preview)",
       "name": "Azure IoT Device C SDK for armv7 Linux",
-      "detail": "Develop with Azure IoT Device C SDK and cross compiling for generic armv7 Linux devices",
+      "detail": "Develop with Azure IoT Device C SDK (preview) Vcpkg",
       "tag": "development_container",
       "path": "arm7"
     },
     {
       "platform": "Embedded Linux (Preview)",
       "name": "Azure IoT Device C SDK for arm64 Linux",
-      "detail": "Develop with Azure IoT Device C SDK and cross compiling for generic arm64 Linux devices",
+      "detail": "Develop with Azure IoT Device C SDK (preview) Vcpkg",
       "tag": "development_container",
       "path": "arm8"
     },
     {
       "platform": "Embedded Linux (Preview)",
       "name": "Azure IoT Device C SDK for x86 Linux",
-      "detail": "Develop with Azure IoT Device C SDK and cross compiling for generic x86 Linux devices",
+      "detail": "Develop with Azure IoT Device C SDK (preview) Vcpkg",
       "tag": "development_container",
       "path": "x86"
     },

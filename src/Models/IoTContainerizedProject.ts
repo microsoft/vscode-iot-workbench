@@ -6,10 +6,11 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {CancelOperationError} from '../CancelOperationError';
+import {VscodeCommands} from '../common/Commands';
 import {ConfigKey, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext, TelemetryWorker} from '../telemetry';
-import {channelShowAndAppendLine, getFirstWorkspaceFolderPath} from '../utils';
+import {getFirstWorkspaceFolderPath, getProjectConfig, updateProjectHostTypeConfig} from '../utils';
 
 import {Component} from './Interfaces/Component';
 import {ProjectHostType} from './Interfaces/ProjectHostType';
@@ -41,7 +42,8 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     this.validateProjectRootPath(scaffoldType);
 
     // 1. Update iot workbench project file.
-    await this.updateIotWorkbenchProjectFile(scaffoldType);
+    await updateProjectHostTypeConfig(
+        scaffoldType, this.iotWorkbenchProjectFilePath, this.projectHostType);
 
     // 2. Send load project event telemetry only if the IoT project is loaded
     // when VS Code opens.
@@ -50,7 +52,8 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     }
 
     // 3. Init device
-    const projectConfigJson = await this.getProjectConfig(scaffoldType);
+    const projectConfigJson =
+        await getProjectConfig(scaffoldType, this.iotWorkbenchProjectFilePath);
     const boardId = projectConfigJson[`${ConfigKey.boardId}`];
     if (!boardId) {
       throw new Error(
@@ -75,9 +78,12 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     }
 
     // Update iot workbench project file
-    await this.updateIotWorkbenchProjectFile(createTimeScaffoldType);
+    await updateProjectHostTypeConfig(
+        createTimeScaffoldType, this.iotWorkbenchProjectFilePath,
+        this.projectHostType);
 
-    const projectConfig = await this.getProjectConfig(createTimeScaffoldType);
+    const projectConfig = await getProjectConfig(
+        createTimeScaffoldType, this.iotWorkbenchProjectFilePath);
 
     // Step 1: Create device
     await this.initDevice(boardId, createTimeScaffoldType, templateFilesInfo);
@@ -127,16 +133,14 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     this.validateProjectRootPath(scaffoldType);
 
     // 1. Ask to customize
-    let customizeEnvironment = false;
-    customizeEnvironment = await this.askToCustomize();
+    let openInContainer = false;
+    openInContainer = await this.askToOpenInContainer();
 
     this.telemetryContext.properties.customizeEnvironment =
-        customizeEnvironment.toString();
+        openInContainer.toString();
 
-    // Wait until all telemetry data is sent before restart the current window.
-    if (!openInNewWindow || !customizeEnvironment) {
-      // If open in current window, VSCode will restart. Need to send telemetry
-      // before VSCode restart to advoid data lost.
+    // Send all telemetry data before restart the current window.
+    if (!openInNewWindow || openInContainer) {
       try {
         const telemetryWorker =
             TelemetryWorker.getInstance(this.extensionContext);
@@ -150,66 +154,13 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     }
 
     // 2. open project
-    if (!customizeEnvironment) {
-      // If user does not want to customize develpment environment,
-      //  we will open the project in remote directly for user.
+    if (openInContainer) {
       await this.openFolderInContainer(this.projectRootPath);
     } else {
-      // If user wants to customize development environment, open project
-      // locally.
-      // TODO: Open bash script in window
-      vscode.commands.executeCommand(
-          'iotcube.openLocally', this.projectRootPath, openInNewWindow);
+      await vscode.commands.executeCommand(
+          VscodeCommands.VscodeOpenFolder,
+          vscode.Uri.file(this.projectRootPath), openInNewWindow);
     }
-  }
-
-  /**
-   * Check if it is an external project.
-   * If external project, configure as RaspberryPi Device based container iot
-   * workbench project.
-   */
-  async configExternalProjectToIotProject(scaffoldType: ScaffoldType):
-      Promise<boolean> {
-    if (!(vscode.workspace.workspaceFolders &&
-          vscode.workspace.workspaceFolders.length > 0)) {
-      return false;
-    }
-
-    if (!this.projectRootPath) {
-      this.projectRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    }
-
-    const iotworkbenchprojectFile =
-        path.join(this.projectRootPath, FileNames.iotworkbenchprojectFileName);
-
-    // Check if cmake project
-    const cmakeFile = path.join(this.projectRootPath, FileNames.cmakeFileName);
-    if (!await FileUtility.fileExists(scaffoldType, cmakeFile)) {
-      const message = `Missing ${
-          FileNames.cmakeFileName} to be configured as Embedded Linux project.`;
-      channelShowAndAppendLine(this.channel, message);
-      vscode.window.showWarningMessage(message);
-      return false;
-    }
-
-    if (!await FileUtility.fileExists(scaffoldType, iotworkbenchprojectFile)) {
-      // This is an external project since no iot workbench project file found.
-      // Generate iot workbench project file
-      await this.updateIotWorkbenchProjectFile(scaffoldType);
-    }
-
-    // Set board Id as default type Raspberry Pi
-    const projectConfigContent =
-        await FileUtility.readFile(
-            scaffoldType, iotworkbenchprojectFile, 'utf8') as string;
-    const projectConfigJson = JSON.parse(projectConfigContent);
-    projectConfigJson[`${ConfigKey.boardId}`] =
-        raspberryPiDeviceModule.RaspberryPiDevice.boardId;
-
-    // Step 2: Write project config into iot workbench project file
-    await FileUtility.writeJsonFile(
-        scaffoldType, iotworkbenchprojectFile, projectConfigJson);
-    return true;
   }
 
   private async openFolderInContainer(folderPath: string) {
@@ -252,34 +203,32 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
   }
 
   /**
-   * Ask whether to customize the development environment or not
-   * @returns true - want to customize; false - don't want to customize
+   * Ask whether to open the project in container
+   * @returns true - open in container; false - stay local
    */
-  private async askToCustomize(): Promise<boolean> {
-    const customizationOption: vscode.QuickPickItem[] = [];
-    customizationOption.push(
-        {
-          label: `No`,
-          detail: 'The project will be opened in container directly.'
-        },
+  private async askToOpenInContainer(): Promise<boolean> {
+    const openInContainerOption: vscode.QuickPickItem[] = [];
+    openInContainerOption.push(
         {
           label: `Yes`,
-          detail:
-              'The project will remain in local environment for you to customize the container.'
+          detail: 'I want to work on this project in container now.'
+        },
+        {
+          label: `No`,
+          detail: 'I need to customize my container first locally.'
         });
 
-    const customizationSelection =
-        await vscode.window.showQuickPick(customizationOption, {
+    const openInContainerSelection =
+        await vscode.window.showQuickPick(openInContainerOption, {
           ignoreFocusOut: true,
-          placeHolder:
-              `Do you want to customize the development environment container now?`
+          placeHolder: `Do you want to open in container?`
         });
 
-    if (!customizationSelection) {
+    if (!openInContainerSelection) {
       throw new CancelOperationError(
           `Ask to customize development environment selection cancelled.`);
     }
 
-    return customizationSelection.label === 'Yes';
+    return openInContainerSelection.label === 'Yes';
   }
 }

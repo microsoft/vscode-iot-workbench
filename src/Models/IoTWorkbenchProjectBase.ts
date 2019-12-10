@@ -149,14 +149,6 @@ export abstract class IoTWorkbenchProjectBase {
   }
 
   async provision(): Promise<boolean> {
-    // const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
-    // if (!devicePath) {
-    //   throw new Error(
-    //       'Cannot run IoT Device Workbench command in a non-IoTWorkbench
-    //       project. Please initialize an IoT Device Workbench project
-    //       first.');
-    // }
-
     const provisionItemList: string[] = [];
     for (const item of this.componentList) {
       if (this.canProvision(item)) {
@@ -305,57 +297,6 @@ export abstract class IoTWorkbenchProjectBase {
       }
     }
     return true;
-  }
-
-  /**
-   * Update project host type configuration in iot workbench project file.
-   * Create one if not exists.
-   * @param type Scaffold type
-   */
-  async updateIotWorkbenchProjectFile(type: ScaffoldType): Promise<void> {
-    try {
-      if (!this.iotWorkbenchProjectFilePath) {
-        throw new Error(
-            `Iot workbench project file path is empty. Please initialize the project first.`);
-      }
-
-      // Get original configs from config file
-      const projectConfig = await this.getProjectConfig(type);
-
-      // Update project host type
-      projectConfig[`${ConfigKey.projectHostType}`] =
-          ProjectHostType[this.projectHostType];
-
-      // Add config version for easier backward compatibility in the future.
-      const workbenchVersion = '1.0.0';
-      projectConfig[`${ConfigKey.workbenchVersion}`] = workbenchVersion;
-
-      await FileUtility.writeJsonFile(
-          type, this.iotWorkbenchProjectFilePath, projectConfig);
-    } catch (error) {
-      throw new Error(
-          `Update ${FileNames.iotworkbenchprojectFileName} file failed: ${
-              error.message}`);
-    }
-  }
-
-  /**
-   * Get project configs from iot workbench project file
-   * @param type Scaffold type
-   */
-  // tslint:disable-next-line: no-any
-  async getProjectConfig(type: ScaffoldType): Promise<any> {
-    let projectConfig: {[key: string]: string} = {};
-    if (await FileUtility.fileExists(type, this.iotWorkbenchProjectFilePath)) {
-      const projectConfigContent =
-          (await FileUtility.readFile(
-               type, this.iotWorkbenchProjectFilePath, 'utf8') as string)
-              .trim();
-      if (projectConfigContent) {
-        projectConfig = JSON.parse(projectConfigContent);
-      }
-    }
-    return projectConfig;
   }
 
   /**
