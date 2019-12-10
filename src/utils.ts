@@ -578,14 +578,8 @@ export async function getProjectConfig(
 export async function handleIncorrectlyOpenedIoTWorkspaceProject(
     telemetryContext: TelemetryContext): Promise<boolean> {
   const rootPath = getFirstWorkspaceFolderPath();
-
-  const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
-  if (!devicePath) {
-    throw new Error(
-        `Internal Error: Failed to get device path from configuration.`);
-  }
   const workbenchFileName =
-      path.join(rootPath, devicePath, FileNames.iotworkbenchprojectFileName);
+      path.join(rootPath, 'Device', FileNames.iotworkbenchprojectFileName);
 
   const workspaceFiles = fs.readdirSync(rootPath).filter(
       file => path.extname(file).endsWith(FileNames.workspaceExtensionName));
@@ -607,64 +601,60 @@ export async function handleIncorrectlyOpenedIoTWorkspaceProject(
 export async function constructAndLoadIoTProject(
     context: vscode.ExtensionContext, channel: vscode.OutputChannel,
     telemetryContext: TelemetryContext, isTriggeredWhenExtensionLoad = false) {
-  let projectHostType;
   const scaffoldType = ScaffoldType.Workspace;
 
-  if (vscode.workspace.workspaceFolders &&
-      vscode.workspace.workspaceFolders.length > 0) {
-    const projectFileRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    projectHostType = await IoTWorkbenchProjectBase.getProjectType(
-        scaffoldType, projectFileRootPath);
-    let iotProject;
-    if (projectHostType === ProjectHostType.Container) {
-      iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
-          context, channel, telemetryContext);
-    } else if (projectHostType === ProjectHostType.Workspace) {
-      iotProject = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
-          context, channel, telemetryContext);
-    }
+  const projectFileRootPath = getFirstWorkspaceFolderPath();
+  const projectHostType = await IoTWorkbenchProjectBase.getProjectType(
+      scaffoldType, projectFileRootPath);
 
-    if (isTriggeredWhenExtensionLoad) {
-      if (iotProject) {
-        try {
-          await iotProject.load(scaffoldType, true);
-        } catch (error) {
-          // Just try to load the project at extension load time. Ignore error
-        }
-      }
-      return;
-    }
-
-    // IoT Workspace Project improperly open as folder,
-    // or external project.
-    if (!iotProject) {
-      // If current folder is an IoT Workspace Project but not open correctly,
-      // ask to open properly.
-      const isIncorrectlyOpenedIoTWorkspaceProject =
-          await handleIncorrectlyOpenedIoTWorkspaceProject(telemetryContext);
-
-      // If external project
-      if (!isIncorrectlyOpenedIoTWorkspaceProject) {
-        try {
-          await handleExternalProject(
-              context, channel, telemetryContext, scaffoldType,
-              projectFileRootPath);
-        } catch (err) {
-          // Ignore if user cancel operation
-          if (!(err instanceof CancelOperationError)) {
-            throw new Error(
-                `Failed to handle external project. Error: ${err.message}`);
-          }
-        }
-      }
-      return;
-    }
-
-    await iotProject.load(scaffoldType);
-
-    return iotProject;
+  let iotProject;
+  if (projectHostType === ProjectHostType.Container) {
+    iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
+        context, channel, telemetryContext);
+  } else if (projectHostType === ProjectHostType.Workspace) {
+    iotProject = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
+        context, channel, telemetryContext);
   }
-  return;
+
+  if (isTriggeredWhenExtensionLoad) {
+    if (iotProject) {
+      try {
+        await iotProject.load(scaffoldType, true);
+      } catch (error) {
+        // Just try to load the project at extension load time. Ignore error
+      }
+    }
+    return;
+  }
+
+  // IoT Workspace Project improperly open as folder,
+  // or external project.
+  if (!iotProject) {
+    // If current folder is an IoT Workspace Project but not open correctly,
+    // ask to open properly.
+    const isIncorrectlyOpenedIoTWorkspaceProject =
+        await handleIncorrectlyOpenedIoTWorkspaceProject(telemetryContext);
+
+    // If external project
+    if (!isIncorrectlyOpenedIoTWorkspaceProject) {
+      try {
+        await handleExternalProject(
+            context, channel, telemetryContext, scaffoldType,
+            projectFileRootPath);
+      } catch (err) {
+        // Ignore if user cancel operation
+        if (!(err instanceof CancelOperationError)) {
+          throw new Error(
+              `Failed to handle external project. Error: ${err.message}`);
+        }
+      }
+    }
+    return;
+  }
+
+  await iotProject.load(scaffoldType);
+
+  return iotProject;
 }
 
 // tslint:disable-next-line: no-any

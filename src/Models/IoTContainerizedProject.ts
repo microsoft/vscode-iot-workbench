@@ -123,9 +123,8 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
   }
 
   /**
-   * Ask user whether to customize project environment. If no, open project in
-   * remote. If yes, stay local and open bash script for user to customize
-   * environment.
+   * Ask user whether to open project in container directly.
+   * If yes, open project in container. If not, stay local.
    */
   async openProject(
       scaffoldType: ScaffoldType, openInNewWindow: boolean,
@@ -136,7 +135,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     let openInContainer = false;
     openInContainer = await this.askToOpenInContainer();
 
-    this.telemetryContext.properties.customizeEnvironment =
+    this.telemetryContext.properties.openInContainer =
         openInContainer.toString();
 
     // Send all telemetry data before restart the current window.
@@ -160,6 +159,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       await vscode.commands.executeCommand(
           VscodeCommands.VscodeOpenFolder,
           vscode.Uri.file(this.projectRootPath), openInNewWindow);
+      // TODO: open install_packages.sh bash script.
     }
   }
 
