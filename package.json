@@ -14,7 +14,7 @@
   "publisher": "vsciot-vscode",
   "icon": "logo.png",
   "license": "SEE LICENSE IN <LICENSE>",
-  "aiKey": "25cf12e8-2dc7-4556-b54e-40fb9d1dfba1",
+  "aiKey": "[AIKEY PLACEHOLDER]",
   "codeGenConfigUrl": "https://aka.ms/iot-codegen-cli-for-workbench-staging",
   "engines": {
     "vscode": "^1.39.0"
