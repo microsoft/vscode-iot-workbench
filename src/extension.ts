@@ -402,8 +402,20 @@ export async function activate(context: vscode.ExtensionContext) {
 
   // Load iot Project here and do not ask to new an iot project when no iot
   // project open since no command has been triggered yet.
-  await constructAndLoadIoTProject(
-      context, outputChannel, telemetryContext, true);
+
+  if (vscode.workspace.workspaceFolders) {
+    try {
+      // Initialize Telemetry
+      if (!telemetryWorkerInitialized) {
+        telemetryModule.TelemetryWorker.initialize(context);
+        telemetryWorkerInitialized = true;
+      }
+      await constructAndLoadIoTProject(
+          context, outputChannel, telemetryContext, true);
+    } catch (error) {
+      // do nothing as we are not sure whether the project is initialized.
+    }
+  }
   const deviceOperator = new DeviceOperator();
   const azureOperator = new AzureOperator();
   const exampleExplorer = new exampleExplorerModule.ExampleExplorer();
