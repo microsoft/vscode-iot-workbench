@@ -5,6 +5,7 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+import {IoTCubeCommands} from '../common/Commands';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
@@ -209,7 +210,8 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     }
 
     vscode.commands.executeCommand(
-        'iotcube.openLocally', this.workspaceConfigFilePath, openInNewWindow);
+        IoTCubeCommands.OpenLocally, this.workspaceConfigFilePath,
+        openInNewWindow);
   }
 
   /**

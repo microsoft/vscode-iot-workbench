@@ -13,6 +13,7 @@ import * as vscode from 'vscode';
 import * as WinReg from 'winreg';
 
 import {BoardProvider} from '../boardProvider';
+import {ArduinoCommands} from '../common/Commands';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, FileNames, OSPlatform, ScaffoldType} from '../constants';
 import {DialogResponses} from '../DialogResponses';
@@ -389,7 +390,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
     // Try to close serial monitor
     try {
       await vscode.commands.executeCommand(
-          'arduino.closeSerialMonitor', null, false);
+          ArduinoCommands.CloseSerialMonitor, null, false);
     } catch (ignore) {
     }
 
