@@ -4,6 +4,7 @@
 import * as vscode from 'vscode';
 
 import {AzureAccount} from '../azure-account.api';
+import {AzureAccountCommands} from '../common/Commands';
 
 import {ExtensionName} from './Interfaces/Api';
 
@@ -35,7 +36,7 @@ export async function checkAzureLogin(): Promise<boolean> {
 
   // Sign in Azure
   if (azureAccount.status !== 'LoggedIn') {
-    await vscode.commands.executeCommand('azure-account.login');
+    await vscode.commands.executeCommand(AzureAccountCommands.Login);
   }
 
   return true;

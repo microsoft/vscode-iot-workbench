@@ -24,7 +24,7 @@ import {ExtensionName} from './Interfaces/Api';
 import {Guid} from 'guid-typescript';
 import {AzureComponentConfig, AzureConfigs, ComponentInfo, DependencyConfig, Dependency} from './AzureComponentConfig';
 import {FileUtility} from '../FileUtility';
-import {VscodeCommands} from '../common/Commands';
+import {VscodeCommands, AzureFunctionsCommands} from '../common/Commands';
 import {CancelOperationError} from '../CancelOperationError';
 
 const impor = require('impor')(__dirname);
@@ -188,7 +188,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
 
     if (this.functionLanguage === AzureFunctionsLanguage.CSharpLibrary) {
       await vscode.commands.executeCommand(
-          'azureFunctions.createNewProject', azureFunctionsPath,
+          AzureFunctionsCommands.CreateNewProject, azureFunctionsPath,
           this.functionLanguage, '~2', false /* openFolder */, templateName,
           'IoTHubTrigger1', {
             connection: 'eventHubConnectionString',
@@ -198,7 +198,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
           });
     } else {
       await vscode.commands.executeCommand(
-          'azureFunctions.createNewProject', azureFunctionsPath,
+          AzureFunctionsCommands.CreateNewProject, azureFunctionsPath,
           this.functionLanguage, '~1', false /* openFolder */, templateName,
           'IoTHubTrigger1', {
             connection: 'eventHubConnectionString',
@@ -224,7 +224,8 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
 
     const functionAppId: string|undefined =
         await vscode.commands.executeCommand<string>(
-            'azureFunctions.createFunctionApp', subscriptionId, resourceGroup);
+            AzureFunctionsCommands.CreateFunctionApp, subscriptionId,
+            resourceGroup);
     if (functionAppId) {
       await ConfigHandler.update(ConfigKey.functionAppId, functionAppId);
       const eventHubConnectionString =
@@ -306,12 +307,12 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
       if (this.functionLanguage !==
           AzureFunctionsLanguage.CSharpLibrary as string) {
         await vscode.commands.executeCommand(
-            'azureFunctions.deploy', azureFunctionsPath, functionAppId);
+            AzureFunctionsCommands.Deploy, azureFunctionsPath, functionAppId);
       } else {
         const subPath =
             path.join(azureFunctionsPath, 'bin/Release/netcoreapp2.1/publish');
         await vscode.commands.executeCommand(
-            'azureFunctions.deploy', subPath, functionAppId);
+            AzureFunctionsCommands.Deploy, subPath, functionAppId);
       }
       console.log(azureFunctionsPath, functionAppId);
 

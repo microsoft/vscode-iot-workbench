@@ -9,7 +9,7 @@ import {MessageItem} from 'vscode';
 import * as WinReg from 'winreg';
 
 import {CancelOperationError} from './CancelOperationError';
-import {RemoteContainersCommands, VscodeCommands} from './common/Commands';
+import {IoTCubeCommands, RemoteContainersCommands, VscodeCommands, WorkbenchCommands} from './common/Commands';
 import {ConfigHandler} from './configHandler';
 import {AzureFunctionsLanguage, ConfigKey, FileNames, OperationType, PlatformType, ScaffoldType, TemplateTag} from './constants';
 import {DialogResponses} from './DialogResponses';
@@ -301,7 +301,7 @@ export async function askAndOpenProject(
         'Operation failed and user opens project from folder.';
     const workspaceFilePath = path.join(rootPath, workspaceFile);
     await vscode.commands.executeCommand(
-        'iotcube.openLocally', workspaceFilePath, false);
+        IoTCubeCommands.OpenLocally, workspaceFilePath, false);
   } else {
     throw new CancelOperationError(
         `Operation failed and user cancel to open current folder as IoT project.`);
@@ -472,7 +472,7 @@ export async function handleExternalProject(
   } else if (result === Choice.createNewProject) {
     telemetryContext.properties.errorMessage =
         'Operation failed and user creates new project';
-    await vscode.commands.executeCommand('iotworkbench.initializeProject');
+    await vscode.commands.executeCommand(WorkbenchCommands.InitializeProject);
   } else {
     throw new CancelOperationError(
         `Choose to configure external project Cancelled.`);

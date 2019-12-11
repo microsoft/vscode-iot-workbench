@@ -3,6 +3,7 @@
 // Please refer to their documentation on https://mochajs.org/ for help.
 //
 import * as vscode from 'vscode';
+import {WorkbenchCommands} from '../src/common/Commands';
 
 suite('IoT Device Workbench: Commands Tests', () => {
   // tslint:disable-next-line: only-arrow-functions
@@ -32,7 +33,7 @@ suite('IoT Device Workbench: Commands Tests', () => {
       function(done) {
         this.timeout(60 * 1000);
         try {
-          vscode.commands.executeCommand('iotworkbench.exampleInitialize')
+          vscode.commands.executeCommand(WorkbenchCommands.InitializeProject)
               .then((result) => {
                 done();
               });
@@ -46,7 +47,7 @@ suite('IoT Device Workbench: Commands Tests', () => {
   test('should be able to run command: iotworkbench.help', function(done) {
     this.timeout(60 * 1000);
     try {
-      vscode.commands.executeCommand('iotworkbench.help').then((result) => {
+      vscode.commands.executeCommand(WorkbenchCommands.Help).then((result) => {
         done();
       });
 

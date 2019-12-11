@@ -17,6 +17,7 @@ import {BoardProvider} from './boardProvider';
 import {VSCExpress} from 'vscode-express';
 import {RemoteExtension} from './Models/RemoteExtension';
 import {CancelOperationError} from './CancelOperationError';
+import {IoTCubeCommands} from './common/Commands';
 
 type OptionsWithUri = import('request-promise').OptionsWithUri;
 
@@ -294,7 +295,7 @@ export class ExampleExplorer {
     const items = fs.listSync(fsPath, [FileNames.workspaceExtensionName]);
     if (items.length !== 0) {
       await vscode.commands.executeCommand(
-          'iotcube.openLocally', items[0], true);
+          IoTCubeCommands.OpenLocally, items[0], true);
       return true;
     }
 
@@ -308,7 +309,7 @@ export class ExampleExplorer {
           fs.listSync(fsPath, [FileNames.workspaceExtensionName]);
       if (workspaceFiles && workspaceFiles.length > 0) {
         await vscode.commands.executeCommand(
-            'iotcube.openLocally', workspaceFiles[0], true);
+            IoTCubeCommands.OpenLocally, workspaceFiles[0], true);
         return true;
       } else {
         // TODO: Add buttom to submit issue to iot-workbench repo.
