@@ -85,7 +85,7 @@ export class ProjectEnvironmentConfiger {
           context, channel, telemetryContext);
       if (!project) {
         // Ensure the project is correctly open.
-        await utils.handleIncorrectlyOpenedIoTWorkspaceProject(
+        await utils.ensureIoTWorkspaceProjectIsCorrectlyOpened(
             telemetryContext);
       }
       telemetryContext.properties.projectHostType = ProjectHostType.Workspace;

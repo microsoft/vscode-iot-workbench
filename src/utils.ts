@@ -488,7 +488,7 @@ export async function handleExternalProject(
 export async function configExternalCMakeProjectToIoTContainerProject(
     scaffoldType: ScaffoldType): Promise<void> {
   const projectRootPath = getFirstWorkspaceFolderPath();
-  // Check if cmake project
+  // Check if it is a cmake project
   const cmakeFile = path.join(projectRootPath, FileNames.cmakeFileName);
   if (!await FileUtility.fileExists(scaffoldType, cmakeFile)) {
     const message = `Missing ${
@@ -497,21 +497,21 @@ export async function configExternalCMakeProjectToIoTContainerProject(
     throw new CancelOperationError(message);
   }
 
-  const iotworkbenchprojectFile =
-      path.join(projectRootPath, FileNames.iotworkbenchprojectFileName);
+  const iotWorkbenchProjectFile =
+      path.join(projectRootPath, FileNames.iotWorkbenchProjectFileName);
 
   // Update project host type in IoT Workbench Project file
   await updateProjectHostTypeConfig(
-      scaffoldType, iotworkbenchprojectFile, ProjectHostType.Container);
+      scaffoldType, iotWorkbenchProjectFile, ProjectHostType.Container);
 
   // Update board Id as Raspberry Pi in IoT Workbench Project file
   const projectConfig =
-      await getProjectConfig(scaffoldType, iotworkbenchprojectFile);
+      await getProjectConfig(scaffoldType, iotWorkbenchProjectFile);
   projectConfig[`${ConfigKey.boardId}`] =
       raspberryPiDeviceModule.RaspberryPiDevice.boardId;
 
   await FileUtility.writeJsonFile(
-      scaffoldType, iotworkbenchprojectFile, projectConfig);
+      scaffoldType, iotWorkbenchProjectFile, projectConfig);
 }
 
 /**
@@ -537,13 +537,15 @@ export async function updateProjectHostTypeConfig(
 
     // Add config version for easier backward compatibility in the future.
     const workbenchVersion = '1.0.0';
-    projectConfig[`${ConfigKey.workbenchVersion}`] = workbenchVersion;
+    if (!projectConfig[`${ConfigKey.workbenchVersion}`]) {
+      projectConfig[`${ConfigKey.workbenchVersion}`] = workbenchVersion;
+    }
 
     await FileUtility.writeJsonFile(
         type, iotWorkbenchProjectFilePath, projectConfig);
   } catch (error) {
     throw new Error(`Update ${
-        FileNames.iotworkbenchprojectFileName} file failed: ${error.message}`);
+        FileNames.iotWorkbenchProjectFileName} file failed: ${error.message}`);
   }
 }
 
@@ -575,11 +577,11 @@ export async function getProjectConfig(
  * opened.
  * @returns false - This is not an IoT workspace project.
  */
-export async function handleIncorrectlyOpenedIoTWorkspaceProject(
+export async function ensureIoTWorkspaceProjectIsCorrectlyOpened(
     telemetryContext: TelemetryContext): Promise<boolean> {
   const rootPath = getFirstWorkspaceFolderPath();
   const workbenchFileName =
-      path.join(rootPath, 'Device', FileNames.iotworkbenchprojectFileName);
+      path.join(rootPath, 'Device', FileNames.iotWorkbenchProjectFileName);
 
   const workspaceFiles = fs.readdirSync(rootPath).filter(
       file => path.extname(file).endsWith(FileNames.workspaceExtensionName));
@@ -633,7 +635,7 @@ export async function constructAndLoadIoTProject(
     // If current folder is an IoT Workspace Project but not open correctly,
     // ask to open properly.
     const isIncorrectlyOpenedIoTWorkspaceProject =
-        await handleIncorrectlyOpenedIoTWorkspaceProject(telemetryContext);
+        await ensureIoTWorkspaceProjectIsCorrectlyOpened(telemetryContext);
 
     // If external project
     if (!isIncorrectlyOpenedIoTWorkspaceProject) {

@@ -50,7 +50,7 @@ export class FileNames {
   static readonly boardListFileName = 'boardlist.json';
   static readonly platformListFileName = 'platformlist.json';
   static readonly resourcesFolderName = 'resources';
-  static readonly iotworkbenchprojectFileName = '.iotworkbenchproject';
+  static readonly iotWorkbenchProjectFileName = '.iotworkbenchproject';
   static readonly cmakeFileName = 'CMakeLists.txt';
   static readonly settingsJsonFileName = 'settings.json';
   static readonly codeGenOptionsFileName = 'codeGenOptions.json';
@@ -64,6 +64,7 @@ export class FileNames {
   static readonly outputPathName = 'cmake';
   static readonly templatesFolderName = 'templates';
   static readonly templateFiles = 'templatefiles.json';
+  static readonly installPackagesFileName = 'install_packages.sh';
 }
 
 export enum OperationType {

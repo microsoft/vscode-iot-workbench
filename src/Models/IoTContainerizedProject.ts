@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {CancelOperationError} from '../CancelOperationError';
-import {VscodeCommands} from '../common/Commands';
+import {RemoteContainersCommands, VscodeCommands} from '../common/Commands';
 import {ConfigKey, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext, TelemetryWorker} from '../telemetry';
@@ -35,7 +35,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     }
 
     this.iotWorkbenchProjectFilePath =
-        path.join(this.projectRootPath, FileNames.iotworkbenchprojectFileName);
+        path.join(this.projectRootPath, FileNames.iotWorkbenchProjectFileName);
   }
 
   async load(scaffoldType: ScaffoldType, initLoad = false): Promise<void> {
@@ -171,8 +171,8 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
     await RemoteExtension.checkRemoteExtension();
 
-    vscode.commands.executeCommand(
-        'remote-containers.openFolder', vscode.Uri.file(folderPath));
+    await vscode.commands.executeCommand(
+        RemoteContainersCommands.OpenFolder, vscode.Uri.file(folderPath));
   }
 
   /**

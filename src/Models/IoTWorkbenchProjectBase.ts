@@ -51,16 +51,16 @@ export abstract class IoTWorkbenchProjectBase {
       return ProjectHostType.Unknown;
     }
     const iotWorkbenchProjectFile =
-        path.join(projectFileRootPath, FileNames.iotworkbenchprojectFileName);
+        path.join(projectFileRootPath, FileNames.iotWorkbenchProjectFileName);
     if (!await FileUtility.fileExists(scaffoldType, iotWorkbenchProjectFile)) {
       return ProjectHostType.Unknown;
     }
-    const iotworkbenchprojectFileString =
+    const iotWorkbenchProjectFileString =
         (await FileUtility.readFile(
              scaffoldType, iotWorkbenchProjectFile, 'utf8') as string)
             .trim();
-    if (iotworkbenchprojectFileString) {
-      const projectConfig = JSON.parse(iotworkbenchprojectFileString);
+    if (iotWorkbenchProjectFileString) {
+      const projectConfig = JSON.parse(iotWorkbenchProjectFileString);
       if (projectConfig &&
           projectConfig[`${ConfigKey.projectHostType}`] !== undefined) {
         const projectHostType: ProjectHostType = utils.getEnumKeyByEnumValue(

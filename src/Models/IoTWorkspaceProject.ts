@@ -85,7 +85,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     }
 
     this.iotWorkbenchProjectFilePath =
-        path.join(this.deviceRootPath, FileNames.iotworkbenchprojectFileName);
+        path.join(this.deviceRootPath, FileNames.iotWorkbenchProjectFileName);
 
     // Update iot workbench project file.
     await updateProjectHostTypeConfig(
@@ -126,7 +126,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
           createTimeScaffoldType, this.deviceRootPath);
     }
     this.iotWorkbenchProjectFilePath =
-        path.join(this.deviceRootPath, FileNames.iotworkbenchprojectFileName);
+        path.join(this.deviceRootPath, FileNames.iotWorkbenchProjectFileName);
 
     // Create vscode folder path
     if (!await FileUtility.directoryExists(
