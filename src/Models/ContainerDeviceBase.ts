@@ -167,8 +167,7 @@ export abstract class ContainerDeviceBase implements Device {
     }
 
     const templateFilesInfo = await utils.getEnvTemplateFilesAndAskOverwrite(
-        this.extensionContext, this.telemetryContext, this.projectFolder,
-        scaffoldType, templateName);
+        this.extensionContext, this.projectFolder, scaffoldType, templateName);
     if (templateFilesInfo.length === 0) {
       throw new Error(`Internal Error: template files info is empty.`);
     }

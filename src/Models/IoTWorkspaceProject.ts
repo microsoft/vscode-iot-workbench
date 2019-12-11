@@ -70,6 +70,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
             FileNames.workspaceExtensionName}`);
     this.vscodeFolderPath =
         path.join(this.projectRootPath, FileNames.vscodeSettingsFolderName);
+    this.telemetryContext.properties.projectHostType = this.projectHostType;
   }
 
   async load(scaffoldType: ScaffoldType, initLoad = false): Promise<void> {
