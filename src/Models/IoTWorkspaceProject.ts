@@ -9,7 +9,7 @@ import {ConfigHandler} from '../configHandler';
 import {ConfigKey, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext, TelemetryWorker} from '../telemetry';
-import {getFirstWorkspaceFolderPath} from '../utils';
+import {getFirstWorkspaceFolderPath, updateProjectHostTypeConfig} from '../utils';
 
 import {AzureComponentConfig, Dependency} from './AzureComponentConfig';
 import {Component, ComponentType} from './Interfaces/Component';
@@ -85,10 +85,11 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     }
 
     this.iotWorkbenchProjectFilePath =
-        path.join(this.deviceRootPath, FileNames.iotworkbenchprojectFileName);
+        path.join(this.deviceRootPath, FileNames.iotWorkbenchProjectFileName);
 
     // Update iot workbench project file.
-    await this.updateIotWorkbenchProjectFile(scaffoldType);
+    await updateProjectHostTypeConfig(
+        scaffoldType, this.iotWorkbenchProjectFilePath, this.projectHostType);
 
     // Send load project event telemetry only if the IoT project is loaded
     // when VS Code opens.
@@ -125,7 +126,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
           createTimeScaffoldType, this.deviceRootPath);
     }
     this.iotWorkbenchProjectFilePath =
-        path.join(this.deviceRootPath, FileNames.iotworkbenchprojectFileName);
+        path.join(this.deviceRootPath, FileNames.iotWorkbenchProjectFileName);
 
     // Create vscode folder path
     if (!await FileUtility.directoryExists(
@@ -135,7 +136,9 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     }
 
     // Update iot workbench project file.
-    await this.updateIotWorkbenchProjectFile(createTimeScaffoldType);
+    await updateProjectHostTypeConfig(
+        createTimeScaffoldType, this.iotWorkbenchProjectFilePath,
+        this.projectHostType);
 
     const workspace: Workspace = {folders: [], settings: {}};
 

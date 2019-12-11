@@ -30,5 +30,6 @@ export enum VscodeCommands {
 
 export enum RemoteContainersCommands {
   // remote-containers commands
-  ReopenInContainer = 'remote-containers.reopenInContainer'
+  ReopenInContainer = 'remote-containers.reopenInContainer',
+  OpenFolder = 'remote-containers.openFolder'
 }

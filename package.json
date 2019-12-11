@@ -47,7 +47,7 @@
       },
       {
         "command": "iotworkbench.configureProjectEnvironment",
-        "title": "Configure Project for Device Development Environment...",
+        "title": "Configure Development Container for CMake Project (preview)...",
         "category": "Azure IoT Device Workbench"
       },
       {
