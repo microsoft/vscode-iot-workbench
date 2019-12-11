@@ -465,7 +465,7 @@ export async function handleExternalProject(
     await vscode.commands.executeCommand(WorkbenchCommands.InitializeProject);
   } else {
     throw new CancelOperationError(
-        `Operation failed and user cancelled to configure external project.`);
+        `Operation failed and user cancels to configure external project.`);
   }
 }
 
