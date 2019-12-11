@@ -10,11 +10,11 @@
     "url": "https://github.com/Microsoft/vscode-iot-workbench/issues"
   },
   "homepage": "https://github.com/Microsoft/vscode-iot-workbench/blob/master/README.md",
-  "version": "0.10.17",
+  "version": "0.10.18-rc",
   "publisher": "vsciot-vscode",
   "icon": "logo.png",
   "license": "SEE LICENSE IN <LICENSE>",
-  "aiKey": "5b869bc6-ca93-4f24-aa87-92871a3a616e",
+  "aiKey": "25cf12e8-2dc7-4556-b54e-40fb9d1dfba1",
   "codeGenConfigUrl": "https://aka.ms/iot-codegen-cli-for-workbench-staging",
   "engines": {
     "vscode": "^1.39.0"

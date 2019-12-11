@@ -571,7 +571,7 @@ export async function constructAndLoadIoTProject(
     if (isTriggeredWhenExtensionLoad) {
       if (iotProject) {
         try {
-          await iotProject.load(scaffoldType);
+          await iotProject.load(scaffoldType, true);
         } catch (error) {
           // Just try to load the project at extension load time. Ignore error
         }

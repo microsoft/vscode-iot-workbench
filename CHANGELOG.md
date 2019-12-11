@@ -2,6 +2,14 @@
 
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
 
+## Version 0.10.18
+
+- Release data: December 11, 2019
+
+### Fixed
+
+- Fix BI telemetry for loading project
+
 ## Version 0.10.17
 
 - Release data: November 22, 2019
