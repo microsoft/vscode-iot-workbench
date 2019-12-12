@@ -31,7 +31,8 @@ Install and configure Docker for your operating system
 
 3. Sign out and back in again so your changes take effect. 
 
-4. Check if Docker on your Linux use proper DNS. If output looks like below, there is a problem resolving DNS. Check FAQ: [Docker Setup on Linux](https://development.robinwinslow.uk/2016/06/23/fix-docker-networking-dns/) to fix the problem first. 
+4. Check if Docker on your Linux use proper DNS. If output looks like below, there is a problem resolving DNS. Check FAQ: [Docker Setup on Linux](https://development.robinwinslow.uk/2016/06/23/fix-docker-networking-dns/) to fix the problem first.
+
   ```bash
   $ docker run busybox nslookup google.com 
   
