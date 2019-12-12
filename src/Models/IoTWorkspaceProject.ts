@@ -185,14 +185,38 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
         createTimeScaffoldType, openInNewWindow, OpenScenario.createNewProject);
   }
 
+  /**
+   * Validate workspace config file exists.
+   * Handles situation when workspace config file has a different name.
+   * @param scaffoldType
+   */
+  async validateWorkspaceConfigFilePath(scaffoldType: ScaffoldType):
+      Promise<void> {
+    if (!await FileUtility.fileExists(
+            scaffoldType, this.workspaceConfigFilePath)) {
+      // Handles situation when workspace config file has a different name.
+      const workspaceFiles = fs.readdirSync(this.projectRootPath)
+                                 .filter(
+                                     file => path.extname(file).endsWith(
+                                         FileNames.workspaceExtensionName));
+      if (workspaceFiles && workspaceFiles[0]) {
+        this.workspaceConfigFilePath =
+            path.join(this.projectRootPath, workspaceFiles[0]);
+        if (!await FileUtility.fileExists(
+                scaffoldType, this.workspaceConfigFilePath)) {
+          throw new Error(`Workspace config file ${
+              this.workspaceConfigFilePath} does not exist. Please initialize the project first.`);
+        }
+      } else {
+        throw new Error(`Workspace config file ${
+            this.workspaceConfigFilePath} does not exist. Please initialize the project first.`);
+      }
+    }
+  }
   async openProject(
       scaffoldType: ScaffoldType, openInNewWindow: boolean,
       openScenario: OpenScenario): Promise<void> {
-    if (!await FileUtility.fileExists(
-            scaffoldType, this.workspaceConfigFilePath)) {
-      throw new Error(`Workspace config file ${
-          this.workspaceConfigFilePath} does not exist. Please initialize the project first.`);
-    }
+    await this.validateWorkspaceConfigFilePath(scaffoldType);
 
     if (!openInNewWindow) {
       // If open in current window, VSCode will restart. Need to send telemetry
