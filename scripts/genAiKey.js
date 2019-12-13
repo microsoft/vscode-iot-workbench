@@ -5,6 +5,9 @@ if (process.env.TRAVIS_TAG) {
   const packageJson = JSON.parse(fs.readFileSync('package.json'));
   if (ISPROD) {
     packageJson.aiKey = process.env['PROD_AIKEY'];
-    fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2) + '\n');
+  } else {
+    packageJson.aiKey = process.env['TEST_AIKEY'];
   }
+
+  fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2) + '\n');
 }
