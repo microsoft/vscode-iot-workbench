@@ -1,7 +1,7 @@
 {
   "name": "vscode-iot-workbench",
   "displayName": "Azure IoT Device Workbench",
-  "description": "Integrated environment to enable easy development on IoT prototype devices (e.g. MXChip IoT DevKit, teXXmo IoT Button, ESP32 and Raspberry Pi) with multiple Azure services.",
+  "description": "This extension is now a part of Azure IoT Tools extension pack. We highly recommend installing Azure IoT Tools to get full capabilities for Azure IoT development.",
   "repository": {
     "type": "git",
     "url": "https://github.com/Microsoft/vscode-iot-workbench.git"
