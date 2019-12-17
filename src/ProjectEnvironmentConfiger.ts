@@ -22,7 +22,7 @@ const ioTContainerizedProjectModule =
     typeof import('./Models/IoTContainerizedProject');
 
 export class ProjectEnvironmentConfiger {
-  async configureProjectEnvironment(
+  async configureCmakeProjectEnvironment(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext): Promise<void> {
     // Only configure project when not in remote environment
@@ -78,8 +78,7 @@ export class ProjectEnvironmentConfiger {
           context, channel, telemetryContext);
       if (!project) {
         // Ensure the project is correctly open.
-        await utils.ensureIoTWorkspaceProjectIsCorrectlyOpened(
-            telemetryContext);
+        await utils.properlyOpenIoTWorkspaceProject(telemetryContext);
       }
     } else if (platform === PlatformType.EmbeddedLinux) {
       // If external cmake project, configure to be IoT Workbench container

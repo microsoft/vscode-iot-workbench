@@ -561,14 +561,22 @@ export async function getProjectConfig(
 }
 
 /**
- * Check if current folder is an IoT workspace project but not open correctly.
- * Ask to open as workspace if it is an IoT workspace project.
- * @returns true - This is an IoT workspace project which is not correctly
- * opened.
- * @returns false - This is not an IoT workspace project.
+ * Used when it is an IoT workspace project but not open correctly.
+ * Ask to open as workspace.
  */
-export async function ensureIoTWorkspaceProjectIsCorrectlyOpened(
-    telemetryContext: TelemetryContext): Promise<boolean> {
+export async function properlyOpenIoTWorkspaceProject(
+    telemetryContext: TelemetryContext): Promise<void> {
+  const rootPath = getFirstWorkspaceFolderPath();
+  const workbenchFileName =
+      path.join(rootPath, 'Device', FileNames.iotWorkbenchProjectFileName);
+  const workspaceFiles = fs.readdirSync(rootPath).filter(
+      file => path.extname(file).endsWith(FileNames.workspaceExtensionName));
+  if (fs.existsSync(workbenchFileName) && workspaceFiles && workspaceFiles[0]) {
+    await askAndOpenProject(rootPath, workspaceFiles[0], telemetryContext);
+  }
+}
+
+export function isWorkspaceProject(): boolean {
   const rootPath = getFirstWorkspaceFolderPath();
   const workbenchFileName =
       path.join(rootPath, 'Device', FileNames.iotWorkbenchProjectFileName);
@@ -577,10 +585,8 @@ export async function ensureIoTWorkspaceProjectIsCorrectlyOpened(
       file => path.extname(file).endsWith(FileNames.workspaceExtensionName));
 
   if (fs.existsSync(workbenchFileName) && workspaceFiles && workspaceFiles[0]) {
-    await askAndOpenProject(rootPath, workspaceFiles[0], telemetryContext);
     return true;
   }
-
   return false;
 }
 
@@ -622,13 +628,13 @@ export async function constructAndLoadIoTProject(
   // IoT Workspace Project improperly open as folder,
   // or external project.
   if (!iotProject) {
-    // If current folder is an IoT Workspace Project but not open correctly,
-    // ask to open properly.
-    const isIncorrectlyOpenedIoTWorkspaceProject =
-        await ensureIoTWorkspaceProjectIsCorrectlyOpened(telemetryContext);
-
-    // If external project
-    if (!isIncorrectlyOpenedIoTWorkspaceProject) {
+    const isIoTWorkspaceProject = isWorkspaceProject();
+    if (isIoTWorkspaceProject) {
+      // If current folder is an IoT Workspace Project but not open correctly,
+      // ask to open properly
+      await properlyOpenIoTWorkspaceProject(telemetryContext);
+    } else {
+      // If external project
       try {
         await handleExternalProject(telemetryContext);
       } catch (err) {
