@@ -2,21 +2,22 @@
 // Licensed under the MIT License.
 
 export class ConfigKey {
+  static readonly workbench = 'workbench';
   static readonly devicePath = 'DevicePath';
+  static readonly functionPath = 'FunctionPath';
   static readonly iotHubConnectionString = 'iothubConnectionString';
   static readonly iotHubDeviceConnectionString = 'iothubDeviceConnectionString';
   static readonly eventHubConnectionString = 'eventHubConnectionString';
   static readonly eventHubConnectionPath = 'eventHubConnectionPath';
   static readonly functionAppId = 'functionAppId';
-  static readonly functionPath = 'FunctionPath';
   static readonly boardId = 'BoardId';
-  static readonly asaPath = 'StreamAnalyticsPath';
   static readonly codeGeneratorVersion = 'IoTPnPCodeGenVersion';
+  static readonly disableAutoPopupLandingPage = 'disableAutoPopupLandingPage';
+
   static readonly projectType = 'ProjectType';
   static readonly projectHostType = 'ProjectHostType';
   static readonly workbenchVersion = 'version';
-
-  static readonly disableAutoPopupLandingPage = 'disableAutoPopupLandingPage';
+  static readonly asaPath = 'StreamAnalyticsPath';
 }
 
 export class EventNames {

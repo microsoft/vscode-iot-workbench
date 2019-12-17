@@ -3,47 +3,36 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
-import * as sdk from 'vscode-iot-device-cube-sdk';
 
 import {CancelOperationError} from './CancelOperationError';
 import {ConfigHandler} from './configHandler';
-import {OSPlatform} from './constants';
+import {ConfigKey, OSPlatform} from './constants';
 import {PickWithData} from './Models/Interfaces/UI';
+import {getHomeDir, getPlatform} from './utils';
 
 export class IoTWorkbenchSettings {
-  private _workbenchPath = '';
+  private workbenchPath = '';
+  private static instance: IoTWorkbenchSettings|undefined;
 
   private constructor() {}
 
-  static async createAsync() {
-    const iotWorkbenchSettings = new IoTWorkbenchSettings();
+  static async getInstance() {
+    if (!this.instance) {
+      this.instance = new IoTWorkbenchSettings();
+      this.instance.workbenchPath =
+          ConfigHandler.get<string>(ConfigKey.workbench) ||
+          (await this.getDefaultWorkbenchPath());
+      await ConfigHandler.update(
+          ConfigKey.workbench, this.instance.workbenchPath,
+          vscode.ConfigurationTarget.Global);
+    }
 
-    iotWorkbenchSettings._workbenchPath =
-        await IoTWorkbenchSettings.getWorkbenchPath();
-
-    return iotWorkbenchSettings;
+    return this.instance;
   }
 
-  static async getPlatform(): Promise<string> {
-    const localOs = sdk.Utility.require('os') as typeof import('os');
-    const getPlatform = await localOs.platform;
+  static async getDefaultWorkbenchPath(): Promise<string> {
     const platform = await getPlatform();
-    return platform;
-  }
-
-  static async getOs(): Promise<string> {
-    const localOs = sdk.Utility.require('os') as typeof import('os');
-    const getHomeDir = await localOs.homedir;
     const homeDir = await getHomeDir();
-    return homeDir;
-  }
-
-  static async getWorkbenchPath(): Promise<string> {
-    const localOs = sdk.Utility.require('os') as typeof import('os');
-    const getHomeDir = await localOs.homedir;
-    const homeDir = await getHomeDir();
-    const getPlatform = await localOs.platform;
-    const platform = await getPlatform();
 
     let _workbenchPath = '';
     if (platform === OSPlatform.WIN32) {
@@ -59,21 +48,12 @@ export class IoTWorkbenchSettings {
     return _workbenchPath;
   }
 
-  async workbenchPath() {
-    const userWorkbenchPath = ConfigHandler.get<string>('workbench');
-    if (userWorkbenchPath) {
-      return userWorkbenchPath;
-    } else {
-      // Use the default value for workbenchPath.
-      await ConfigHandler.update(
-          'workbench', this._workbenchPath, vscode.ConfigurationTarget.Global);
-      return this._workbenchPath;
-    }
+  getWorkbenchPath(): string {
+    return ConfigHandler.get<string>(ConfigKey.workbench) || this.workbenchPath;
   }
 
-  async setWorkbenchPath(showMessage = true) {
-    let userWorkbenchPath: string|undefined =
-        ConfigHandler.get<string>('workbench') || this._workbenchPath;
+  async setWorkbenchPath(showMessage = true): Promise<void> {
+    let userWorkbenchPath = this.getWorkbenchPath();
     const workbenchPicks: Array<PickWithData<string>> = [
       {label: userWorkbenchPath, description: '', data: userWorkbenchPath},
       {label: '$(file-directory) Browse...', description: '', data: '$'}
@@ -101,22 +81,22 @@ export class IoTWorkbenchSettings {
         if (showMessage) {
           throw new CancelOperationError('Change workbench cancelled.');
         }
-        return userWorkbenchPath;
+        return;
       }
     } else if (selection !== undefined) {
       userWorkbenchPath = selection.data;
     } else {
-      userWorkbenchPath = undefined;
+      userWorkbenchPath = '';
     }
 
     if (userWorkbenchPath) {
       await ConfigHandler.update(
-          'workbench', userWorkbenchPath, vscode.ConfigurationTarget.Global);
+          ConfigKey.workbench, userWorkbenchPath,
+          vscode.ConfigurationTarget.Global);
       if (showMessage) {
         await vscode.window.showInformationMessage(
             'Change workbench successfully.');
       }
     }
-    return userWorkbenchPath;
   }
 }

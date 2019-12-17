@@ -9,7 +9,6 @@ import {VscodeCommands} from '../common/Commands';
 import {ConfigHandler} from '../configHandler';
 import {ConfigKey, DependentExtensions, FileNames, OperationType, OSPlatform, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
-import {IoTWorkbenchSettings} from '../IoTSettings';
 import {TelemetryContext} from '../telemetry';
 import * as utils from '../utils';
 
@@ -183,7 +182,7 @@ export abstract class ArduinoDeviceBase implements Device {
 
     let cppPropertiesTemplateFileName: string;
     let changeRootPath = false;
-    let rootPath: string = await IoTWorkbenchSettings.getOs();
+    let rootPath: string = await utils.getHomeDir();
     if (platform === OSPlatform.WIN32) {
       rootPath = path.join(rootPath, 'AppData', 'Local').replace(/\\/g, '\\\\');
       cppPropertiesTemplateFileName = constants.cppPropertiesFileNameWin;
@@ -224,7 +223,7 @@ export abstract class ArduinoDeviceBase implements Device {
 
     // Create c_cpp_properties.json file
     try {
-      const platform = await IoTWorkbenchSettings.getPlatform();
+      const platform = await utils.getPlatform();
       await this.writeCppPropertiesFile(board.id, type, platform);
     } catch (error) {
       throw new Error(`Create cpp properties file failed: ${error.message}`);

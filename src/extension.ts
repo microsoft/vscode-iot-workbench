@@ -168,8 +168,7 @@ export async function activate(context: vscode.ExtensionContext) {
         if (!isLocal) {
           return;
         }
-        const settings: IoTWorkbenchSettings =
-            await IoTWorkbenchSettings.createAsync();
+        const settings = await IoTWorkbenchSettings.getInstance();
         await settings.setWorkbenchPath();
         return;
       });

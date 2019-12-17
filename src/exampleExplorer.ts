@@ -90,9 +90,8 @@ export class ExampleExplorer {
   }
 
   private async generateExampleFolder(exampleName: string) {
-    const settings: IoTWorkbenchSettings =
-        await IoTWorkbenchSettings.createAsync();
-    const workbench = await settings.workbenchPath();
+    const settings = await IoTWorkbenchSettings.getInstance();
+    const workbench = settings.getWorkbenchPath();
 
     if (!utils.directoryExistsSync(workbench)) {
       utils.mkdirRecursivelySync(workbench);

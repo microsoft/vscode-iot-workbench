@@ -10,8 +10,7 @@ import * as vscode from 'vscode';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, ScaffoldType} from '../constants';
-import {FileUtility} from '../FileUtility';
+import {ConfigKey} from '../constants';
 import {TelemetryContext} from '../telemetry';
 
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';

@@ -6,6 +6,7 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import {MessageItem} from 'vscode';
+import * as sdk from 'vscode-iot-device-cube-sdk';
 import * as WinReg from 'winreg';
 
 import {CancelOperationError} from './CancelOperationError';
@@ -860,4 +861,18 @@ export async function getEnvTemplateFilesAndAskOverwrite(
   }
 
   return templateFilesInfo;
+}
+
+export async function getPlatform(): Promise<string> {
+  const localOs = sdk.Utility.require('os') as typeof import('os');
+  const getPlatform = await localOs.platform;
+  const platform = await getPlatform();
+  return platform;
+}
+
+export async function getHomeDir(): Promise<string> {
+  const localOs = sdk.Utility.require('os') as typeof import('os');
+  const getHomeDir = await localOs.homedir;
+  const homeDir = await getHomeDir();
+  return homeDir;
 }
