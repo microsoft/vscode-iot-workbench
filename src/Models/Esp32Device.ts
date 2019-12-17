@@ -10,7 +10,7 @@ import * as vscode from 'vscode';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey} from '../constants';
+import {ConfigKey, OSPlatform} from '../constants';
 import {TelemetryContext} from '../telemetry';
 
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
@@ -41,7 +41,7 @@ export class Esp32Device extends ArduinoDeviceBase {
     let packageRootPath = '';
     let version = '0.0.1';
 
-    if (plat === 'win32') {
+    if (plat === OSPlatform.WIN32) {
       const homeDir = os.homedir();
       const localAppData: string = path.join(homeDir, 'AppData', 'Local');
       packageRootPath = path.join(

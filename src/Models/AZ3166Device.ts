@@ -732,7 +732,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
   private async stlinkDriverInstalled() {
     const plat = os.platform();
-    if (plat === 'win32') {
+    if (plat === OSPlatform.WIN32) {
       try {
         // The STlink driver would write to the following registry.
         const pathString = await getRegistryValues(
@@ -821,13 +821,13 @@ export class AZ3166Device extends ArduinoDeviceBase {
     let arduinoPackagePath = '';
     const homeDir = os.homedir();
 
-    if (plat === 'win32') {
+    if (plat === OSPlatform.WIN32) {
       arduinoPackagePath =
           path.join(homeDir, 'AppData', 'Local', 'Arduino15', 'packages');
-    } else if (plat === 'darwin') {
+    } else if (plat === OSPlatform.DARWIN) {
       arduinoPackagePath =
           path.join(homeDir, 'Library', 'Arduino15', 'packages');
-    } else if (plat === 'linux') {
+    } else if (plat === OSPlatform.LINUX) {
       arduinoPackagePath = path.join(homeDir, '.arduino15', 'packages');
     }
 

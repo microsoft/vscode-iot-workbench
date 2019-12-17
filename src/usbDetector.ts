@@ -9,7 +9,7 @@ import {VSCExpress} from 'vscode-express';
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 import {ConfigHandler} from './configHandler';
-import {EventNames, FileNames} from './constants';
+import {EventNames, FileNames, OSPlatform} from './constants';
 import {TelemetryWorker} from './telemetry';
 
 export interface DeviceInfo {
@@ -27,7 +27,7 @@ export class UsbDetector {
       private channel: vscode.OutputChannel) {
     const disableUSBDetection =
         ConfigHandler.get<boolean>('disableAutoPopupLandingPage');
-    if (os.platform() === 'linux' || disableUSBDetection) {
+    if (os.platform() === OSPlatform.LINUX || disableUSBDetection) {
       return;
     } else {
       // Only load detector module when not in remote
@@ -82,7 +82,7 @@ export class UsbDetector {
   async startListening() {
     const disableUSBDetection =
         ConfigHandler.get<boolean>('disableAutoPopupLandingPage');
-    if (os.platform() === 'linux' || disableUSBDetection) {
+    if (os.platform() === OSPlatform.LINUX || disableUSBDetection) {
       return;
     }
 

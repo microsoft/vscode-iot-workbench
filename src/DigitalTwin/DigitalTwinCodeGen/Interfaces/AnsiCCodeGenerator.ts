@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {VscodeCommands} from '../../../common/Commands';
-import {ScaffoldType} from '../../../constants';
+import {OSPlatform, ScaffoldType} from '../../../constants';
 import {OpenScenario} from '../../../Models/IoTWorkbenchProjectBase';
 import {IoTWorkspaceProject} from '../../../Models/IoTWorkspaceProject';
 import {TelemetryContext} from '../../../telemetry';
@@ -59,7 +59,7 @@ export class AnsiCCodeGenerator implements CodeGenerator {
     const homeDir = os.homedir();
     const cmdPath = path.join(homeDir, DigitalTwinConstants.codeGenCliFolder);
     let codeGenCommand = '';
-    if (platform === 'win32') {
+    if (platform === OSPlatform.WIN32) {
       codeGenCommand = `${DigitalTwinConstants.codeGenCliApp}.exe`;
     } else {
       codeGenCommand = `./${DigitalTwinConstants.codeGenCliApp}`;
