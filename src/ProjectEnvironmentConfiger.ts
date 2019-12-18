@@ -12,6 +12,7 @@ import {RemoteExtension} from './Models/RemoteExtension';
 import {IoTWorkbenchProjectBase, OpenScenario} from './Models/IoTWorkbenchProjectBase';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 import {configExternalCMakeProjectToIoTContainerProject} from './utils';
+import {CancelOperationError} from './CancelOperationError';
 
 const impor = require('impor')(__dirname);
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
@@ -21,7 +22,7 @@ const ioTContainerizedProjectModule =
     typeof import('./Models/IoTContainerizedProject');
 
 export class ProjectEnvironmentConfiger {
-  async configureProjectEnvironment(
+  async configureCmakeProjectEnvironment(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext): Promise<void> {
     // Only configure project when not in remote environment
@@ -43,16 +44,10 @@ export class ProjectEnvironmentConfiger {
           location: vscode.ProgressLocation.Window,
         },
         async () => {
-          let res: boolean;
-          res = await ProjectEnvironmentConfiger
-                    .configureProjectEnvironmentAsPlatform(
-                        context, channel, telemetryContext,
-                        PlatformType.EmbeddedLinux, projectRootPath,
-                        scaffoldType);
-
-          if (!res) {
-            return;
-          }
+          await ProjectEnvironmentConfiger
+              .configureProjectEnvironmentAsPlatform(
+                  context, channel, telemetryContext,
+                  PlatformType.EmbeddedLinux, projectRootPath, scaffoldType);
 
           const message =
               `Successfully configured development container for CMake project.`;
@@ -66,8 +61,7 @@ export class ProjectEnvironmentConfiger {
   static async configureProjectEnvironmentAsPlatform(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext, platform: PlatformType,
-      projectFileRootPath: string,
-      scaffoldType: ScaffoldType): Promise<boolean> {
+      projectFileRootPath: string, scaffoldType: ScaffoldType): Promise<void> {
     let project;
     if (platform === PlatformType.Arduino) {
       // Verify it is an iot workbench Arduino project
@@ -76,19 +70,16 @@ export class ProjectEnvironmentConfiger {
       if (projectHostType !== ProjectHostType.Workspace) {
         const message =
             `This is not an iot workbench Arduino project. You cannot configure it as Arduino platform.`;
-        utils.channelShowAndAppendLine(channel, message);
         vscode.window.showWarningMessage(message);
-        return false;
+        throw new CancelOperationError(message);
       }
 
       project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
           context, channel, telemetryContext);
       if (!project) {
         // Ensure the project is correctly open.
-        await utils.ensureIoTWorkspaceProjectIsCorrectlyOpened(
-            telemetryContext);
+        await utils.properlyOpenIoTWorkspaceProject(telemetryContext);
       }
-      telemetryContext.properties.projectHostType = ProjectHostType.Workspace;
     } else if (platform === PlatformType.EmbeddedLinux) {
       // If external cmake project, configure to be IoT Workbench container
       // project
@@ -96,7 +87,6 @@ export class ProjectEnvironmentConfiger {
 
       await RemoteExtension.checkRemoteExtension();
 
-      telemetryContext.properties.projectHostType = ProjectHostType.Container;
       project = new ioTContainerizedProjectModule.IoTContainerizedProject(
           context, channel, telemetryContext);
     } else {
@@ -111,6 +101,5 @@ export class ProjectEnvironmentConfiger {
 
     await project.openProject(
         scaffoldType, false, OpenScenario.configureProject);
-    return true;
   }
 }

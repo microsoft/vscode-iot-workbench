@@ -134,11 +134,9 @@ export class ProjectInitializer {
 
           let project;
           if (template.platform === PlatformType.EmbeddedLinux) {
-            telemetryContext.properties.projectHostType = 'Container';
             project = new ioTContainerizedProjectModule.IoTContainerizedProject(
                 context, channel, telemetryContext, projectPath);
           } else if (template.platform === PlatformType.Arduino) {
-            telemetryContext.properties.projectHostType = 'Workspace';
             project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
                 context, channel, telemetryContext, projectPath);
           } else {

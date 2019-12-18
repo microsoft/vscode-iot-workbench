@@ -108,7 +108,7 @@ export class TelemetryWorker {
   }
 
   /**
-   *
+   * Call command and send event telemetry.
    * @param context
    * @param telemetryContext
    * @param outputChannel
@@ -152,7 +152,6 @@ export class TelemetryWorker {
       } else {
         telemetryContext.properties.result = TelemetryResult.Failed;
       }
-      telemetryContext.properties.errorMessage = error.message;
       ExceptionHelper.logError(outputChannel, error, isPopupErrorMsg);
     } finally {
       const end: number = Date.now();

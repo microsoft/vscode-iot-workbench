@@ -63,7 +63,7 @@ export async function activate(context: vscode.ExtensionContext) {
       EventNames.configProjectEnvironmentEvent, true,
       async(): Promise<void> => {
         const projectEnvConfiger = new ProjectEnvironmentConfiger();
-        return projectEnvConfiger.configureProjectEnvironment(
+        return projectEnvConfiger.configureCmakeProjectEnvironment(
             context, outputChannel, telemetryContext);
       });
 

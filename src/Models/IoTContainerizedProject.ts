@@ -36,6 +36,8 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
     this.iotWorkbenchProjectFilePath =
         path.join(this.projectRootPath, FileNames.iotWorkbenchProjectFileName);
+
+    this.telemetryContext.properties.projectHostType = this.projectHostType;
   }
 
   async load(scaffoldType: ScaffoldType, initLoad = false): Promise<void> {
