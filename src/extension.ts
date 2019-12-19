@@ -183,21 +183,6 @@ export async function activate(context: vscode.ExtensionContext) {
     return res;
   });
 
-
-  initCommand(
-      context, WorkbenchCommands.GetDisableAutoPopupLandingPage, async () => {
-        return ConfigHandler.get<boolean>(
-            ConfigKey.disableAutoPopupLandingPage);
-      });
-
-  initCommand(
-      context, WorkbenchCommands.SetDisableAutoPopupLandingPage,
-      async (disableAutoPopupLandingPage: boolean) => {
-        return ConfigHandler.update(
-            ConfigKey.disableAutoPopupLandingPage, disableAutoPopupLandingPage,
-            vscode.ConfigurationTarget.Global);
-      });
-
   // delay to detect usb
   setTimeout(() => {
     enableUsbDetector(context, outputChannel);
@@ -218,7 +203,7 @@ function enableUsbDetector(
       impor('./usbDetector') as typeof import('./usbDetector');
 
   const usbDetector = new usbDetectorModule.UsbDetector(context, outputChannel);
-  usbDetector.startListening();
+  usbDetector.startListening(context);
 }
 
 function printHello(context: vscode.ExtensionContext) {

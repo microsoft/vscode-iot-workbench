@@ -876,3 +876,14 @@ export async function getHomeDir(): Promise<string> {
   const homeDir = await getHomeDir();
   return homeDir;
 }
+
+/**
+ * Whether to pop up landing page or not.
+ * If this is the first time user use workbench, then pop up landing page.
+ * If this is not the first time, don't pop up.
+ */
+export function shouldShowLandingPage(context: vscode.ExtensionContext):
+    boolean {
+  const hasPopUp = context.globalState.get<boolean>(ConfigKey.hasPopUp, false);
+  return !hasPopUp;
+}
