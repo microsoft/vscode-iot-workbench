@@ -320,8 +320,8 @@ export abstract class ArduinoDeviceBase implements Device {
     }
 
     const templateFilesInfo = await utils.getEnvTemplateFilesAndAskOverwrite(
-        this.extensionContext, this.telemetryContext, this.deviceFolder,
-        scaffoldType, constants.environmentTemplateFolderName);
+        this.extensionContext, this.deviceFolder, scaffoldType,
+        constants.environmentTemplateFolderName);
 
     // Configure project environment with template files
     for (const fileInfo of templateFilesInfo) {

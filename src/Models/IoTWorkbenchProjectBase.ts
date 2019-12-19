@@ -304,12 +304,9 @@ export abstract class IoTWorkbenchProjectBase {
    */
   sendLoadEventTelemetry(context: vscode.ExtensionContext) {
     const telemetryWorker = TelemetryWorker.getInstance(context);
-    const telemetryContext = telemetryWorker.createContext();
-    telemetryContext.properties.projectHostType =
-        ProjectHostType[this.projectHostType];
-
     try {
-      telemetryWorker.sendEvent(EventNames.projectLoadEvent, telemetryContext);
+      telemetryWorker.sendEvent(
+          EventNames.projectLoadEvent, this.telemetryContext);
     } catch {
       // If sending telemetry failed, skip the error to avoid blocking user.
     }
