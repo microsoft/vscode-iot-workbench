@@ -118,9 +118,8 @@ export class TelemetryWorker {
    * @param additionalProperties
    */
   async callCommandWithTelemetry(
-      context: vscode.ExtensionContext, telemetryContext: TelemetryContext,
-      outputChannel: vscode.OutputChannel, eventName: string,
-      enableSurvey: boolean,
+      context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
+      eventName: string, enableSurvey: boolean,
       // tslint:disable-next-line:no-any
       callback:
           (context: vscode.ExtensionContext,
@@ -131,6 +130,9 @@ export class TelemetryWorker {
       additionalProperties?: {[key: string]: string},
       // tslint:disable-next-line:no-any
       ...commandArgs: any[]): Promise<any> {
+    const telemetryWorker = TelemetryWorker.getInstance(context);
+    const telemetryContext = telemetryWorker.createContext();
+
     const start: number = Date.now();
     if (additionalProperties) {
       for (const key of Object.keys(additionalProperties)) {

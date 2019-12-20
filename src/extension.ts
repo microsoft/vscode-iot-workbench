@@ -36,11 +36,11 @@ export async function activate(context: vscode.ExtensionContext) {
   const outputChannel: vscode.OutputChannel =
       vscode.window.createOutputChannel(channelName);
   telemetryWorker = TelemetryWorker.getInstance(context);
-  const telemetryContext = telemetryWorker.createContext();
   context.subscriptions.push(telemetryWorker);
 
   // Load iot Project here and do not ask to new an iot project when no iot
   // project open since no command has been triggered yet.
+  const telemetryContext = telemetryWorker.createContext();
   await constructAndLoadIoTProject(
       context, outputChannel, telemetryContext, true);
 
@@ -49,96 +49,117 @@ export async function activate(context: vscode.ExtensionContext) {
   const exampleExplorer = new exampleExplorerModule.ExampleExplorer();
 
   initCommandWithTelemetry(
-      context, telemetryWorker, telemetryContext, outputChannel,
+      context, telemetryWorker, outputChannel,
       WorkbenchCommands.InitializeProject, EventNames.createNewProjectEvent,
-      true, async(): Promise<void> => {
+      true,
+      async(
+          context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
+          telemetryContext: TelemetryContext): Promise<void> => {
         const projectInitializer = new ProjectInitializer();
         return projectInitializer.InitializeProject(
             context, outputChannel, telemetryContext);
       });
 
   initCommandWithTelemetry(
-      context, telemetryWorker, telemetryContext, outputChannel,
+      context, telemetryWorker, outputChannel,
       WorkbenchCommands.ConfigureProjectEnvironment,
       EventNames.configProjectEnvironmentEvent, true,
-      async(): Promise<void> => {
+      async(
+          context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
+          telemetryContext: TelemetryContext): Promise<void> => {
         const projectEnvConfiger = new ProjectEnvironmentConfiger();
         return projectEnvConfiger.configureCmakeProjectEnvironment(
             context, outputChannel, telemetryContext);
       });
 
   initCommandWithTelemetry(
-      context, telemetryWorker, telemetryContext, outputChannel,
-      WorkbenchCommands.AzureProvision, EventNames.azureProvisionEvent, true,
-      async(): Promise<void> => {
+      context, telemetryWorker, outputChannel, WorkbenchCommands.AzureProvision,
+      EventNames.azureProvisionEvent, true,
+      async(
+          context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
+          telemetryContext: TelemetryContext): Promise<void> => {
         return azureOperator.provision(
             context, outputChannel, telemetryContext);
       });
 
   initCommandWithTelemetry(
-      context, telemetryWorker, telemetryContext, outputChannel,
-      WorkbenchCommands.AzureDeploy, EventNames.azureDeployEvent, true,
-      async(): Promise<void> => {
+      context, telemetryWorker, outputChannel, WorkbenchCommands.AzureDeploy,
+      EventNames.azureDeployEvent, true,
+      async(
+          context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
+          telemetryContext: TelemetryContext): Promise<void> => {
         return azureOperator.deploy(context, outputChannel, telemetryContext);
       });
 
   initCommandWithTelemetry(
-      context, telemetryWorker, telemetryContext, outputChannel,
-      WorkbenchCommands.DeviceCompile, EventNames.deviceCompileEvent, true,
-      async(): Promise<void> => {
+      context, telemetryWorker, outputChannel, WorkbenchCommands.DeviceCompile,
+      EventNames.deviceCompileEvent, true,
+      async(
+          context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
+          telemetryContext: TelemetryContext): Promise<void> => {
         return deviceOperator.compile(context, outputChannel, telemetryContext);
       });
 
   initCommandWithTelemetry(
-      context, telemetryWorker, telemetryContext, outputChannel,
-      WorkbenchCommands.DeviceUpload, EventNames.deviceUploadEvent, true,
-      async(): Promise<void> => {
+      context, telemetryWorker, outputChannel, WorkbenchCommands.DeviceUpload,
+      EventNames.deviceUploadEvent, true,
+      async(
+          context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
+          telemetryContext: TelemetryContext): Promise<void> => {
         return deviceOperator.upload(context, outputChannel, telemetryContext);
       });
 
   initCommandWithTelemetry(
-      context, telemetryWorker, telemetryContext, outputChannel,
+      context, telemetryWorker, outputChannel,
       WorkbenchCommands.ConfigureDevice, EventNames.configDeviceSettingsEvent,
-      true, async(): Promise<void> => {
+      true,
+      async(
+          context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
+          telemetryContext: TelemetryContext): Promise<void> => {
         return deviceOperator.configDeviceSettings(
             context, outputChannel, telemetryContext);
       });
 
   initCommandWithTelemetry(
-      context, telemetryWorker, telemetryContext, outputChannel,
-      WorkbenchCommands.Examples, EventNames.openExamplePageEvent, true,
-      async(): Promise<void> => {
+      context, telemetryWorker, outputChannel, WorkbenchCommands.Examples,
+      EventNames.openExamplePageEvent, true,
+      async(
+          context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
+          telemetryContext: TelemetryContext): Promise<void> => {
         return exampleExplorer.selectBoard(
             context, outputChannel, telemetryContext);
       });
 
   initCommandWithTelemetry(
-      context, telemetryWorker, telemetryContext, outputChannel,
+      context, telemetryWorker, outputChannel,
       WorkbenchCommands.ExampleInitialize, EventNames.loadExampleEvent, true,
       async(
-          context, outputChannel, telemetryContext, name?: string, url?: string,
+          context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
+          telemetryContext: TelemetryContext, name?: string, url?: string,
           boardId?: string): Promise<void> => {
         return exampleExplorer.initializeExample(
             context, outputChannel, telemetryContext, name, url, boardId);
       });
 
   initCommandWithTelemetry(
-      context, telemetryWorker, telemetryContext, outputChannel,
-      WorkbenchCommands.SendTelemetry, EventNames.openTutorial, true,
-      async () => {});
+      context, telemetryWorker, outputChannel, WorkbenchCommands.SendTelemetry,
+      EventNames.openTutorial, true, async () => {});
 
   initCommandWithTelemetry(
-      context, telemetryWorker, telemetryContext, outputChannel,
+      context, telemetryWorker, outputChannel,
       WorkbenchCommands.IotPnPGenerateCode, EventNames.scaffoldDeviceStubEvent,
-      true, async(): Promise<void> => {
+      true,
+      async(
+          context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
+          telemetryContext: TelemetryContext): Promise<void> => {
         const codeGenerator = new CodeGeneratorCore();
         return codeGenerator.generateDeviceCodeStub(
             context, outputChannel, telemetryContext);
       });
 
   initCommandWithTelemetry(
-      context, telemetryWorker, telemetryContext, outputChannel,
-      WorkbenchCommands.Help, EventNames.help, true, async () => {
+      context, telemetryWorker, outputChannel, WorkbenchCommands.Help,
+      EventNames.help, true, async () => {
         const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
 
         if (boardId) {
@@ -161,9 +182,8 @@ export async function activate(context: vscode.ExtensionContext) {
       });
 
   initCommandWithTelemetry(
-      context, telemetryWorker, telemetryContext, outputChannel,
-      WorkbenchCommands.Workbench, EventNames.setProjectDefaultPath, true,
-      async () => {
+      context, telemetryWorker, outputChannel, WorkbenchCommands.Workbench,
+      EventNames.setProjectDefaultPath, true, async () => {
         const isLocal = RemoteExtension.checkLocalBeforeRunCommand(context);
         if (!isLocal) {
           return;
@@ -219,8 +239,8 @@ function printHello(context: vscode.ExtensionContext) {
 
 function initCommandWithTelemetry(
     context: vscode.ExtensionContext, telemetryWorker: TelemetryWorker,
-    telemetryContext: TelemetryContext, outputChannel: vscode.OutputChannel,
-    command: WorkbenchCommands, eventName: string, enableSurvey: boolean,
+    outputChannel: vscode.OutputChannel, command: WorkbenchCommands,
+    eventName: string, enableSurvey: boolean,
     // tslint:disable-next-line:no-any
     callback: (
         context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
@@ -231,8 +251,8 @@ function initCommandWithTelemetry(
   context.subscriptions.push(vscode.commands.registerCommand(
       command,
       async (...commandArgs) => telemetryWorker.callCommandWithTelemetry(
-          context, telemetryContext, outputChannel, eventName, enableSurvey,
-          callback, additionalProperties, ...commandArgs)));
+          context, outputChannel, eventName, enableSurvey, callback,
+          additionalProperties, ...commandArgs)));
 }
 
 function initCommand(

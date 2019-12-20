@@ -52,10 +52,9 @@ export class UsbDetector {
 
     if (board) {
       const telemetryWorker = TelemetryWorker.getInstance(this.context);
-      const telemetryContext = telemetryWorker.createContext();
 
       telemetryWorker.callCommandWithTelemetry(
-          this.context, telemetryContext, this.channel, EventNames.detectBoard,
+          this.context, this.channel, EventNames.detectBoard,
           false, async () => {
             if (board.exampleUrl) {
               ArduinoPackageManager.installBoard(board);
