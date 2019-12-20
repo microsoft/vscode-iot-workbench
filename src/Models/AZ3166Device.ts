@@ -395,8 +395,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
     }
 
     // Set selected connection string to device
-    const plat = os.platform();
-    if (plat === OSPlatform.WIN32) {
+    const platform = os.platform();
+    if (platform === OSPlatform.WIN32) {
       return await this.flushDeviceConfig(configValue, option);
     } else {
       return await this.flushDeviceConfigUnixAndMac(configValue, option);
@@ -731,8 +731,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
   }
 
   private async stlinkDriverInstalled() {
-    const plat = os.platform();
-    if (plat === OSPlatform.WIN32) {
+    const platform = os.platform();
+    if (platform === OSPlatform.WIN32) {
       try {
         // The STlink driver would write to the following registry.
         const pathString = await getRegistryValues(
@@ -815,19 +815,19 @@ export class AZ3166Device extends ArduinoDeviceBase {
   }
 
   private getArduinoPackagePath() {
-    const plat = os.platform();
+    const platform = os.platform();
 
     // TODO: Currently, we do not support portable Arduino installation.
     let arduinoPackagePath = '';
     const homeDir = os.homedir();
 
-    if (plat === OSPlatform.WIN32) {
+    if (platform === OSPlatform.WIN32) {
       arduinoPackagePath =
           path.join(homeDir, 'AppData', 'Local', 'Arduino15', 'packages');
-    } else if (plat === OSPlatform.DARWIN) {
+    } else if (platform === OSPlatform.DARWIN) {
       arduinoPackagePath =
           path.join(homeDir, 'Library', 'Arduino15', 'packages');
-    } else if (plat === OSPlatform.LINUX) {
+    } else if (platform === OSPlatform.LINUX) {
       arduinoPackagePath = path.join(homeDir, '.arduino15', 'packages');
     }
 

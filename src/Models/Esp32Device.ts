@@ -37,11 +37,11 @@ export class Esp32Device extends ArduinoDeviceBase {
   }
 
   get version() {
-    const plat = os.platform();
+    const platform = os.platform();
     let packageRootPath = '';
     let version = '0.0.1';
 
-    if (plat === OSPlatform.WIN32) {
+    if (platform === OSPlatform.WIN32) {
       const homeDir = os.homedir();
       const localAppData: string = path.join(homeDir, 'AppData', 'Local');
       packageRootPath = path.join(
