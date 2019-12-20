@@ -181,9 +181,8 @@ export class ProjectInitializer {
   private async generateProjectFolder(scaffoldType: ScaffoldType):
       Promise<string|undefined> {
     // Get default workbench path.
-    const settings: IoTWorkbenchSettings =
-        await IoTWorkbenchSettings.createAsync();
-    const workbench = await settings.workbenchPath();
+    const settings = await IoTWorkbenchSettings.getInstance();
+    const workbench = settings.getWorkbenchPath();
 
     const projectRootPath = path.join(workbench, 'projects');
     if (!await FileUtility.directoryExists(scaffoldType, projectRootPath)) {

@@ -11,7 +11,7 @@ import * as path from 'path';
 import request = require('request-promise');
 
 import * as utils from '../utils';
-import {FileNames, ConfigKey, ScaffoldType} from '../constants';
+import {FileNames, ConfigKey, ScaffoldType, OSPlatform} from '../constants';
 import {TelemetryContext} from '../telemetry';
 import {DigitalTwinConstants} from './DigitalTwinConstants';
 import {CodeGenProjectType, DeviceConnectionType, CodeGenLanguage, DeviceSdkReferenceType, CodeGenExecutionItem} from './DigitalTwinCodeGen/Interfaces/CodeGenerator';
@@ -555,7 +555,7 @@ export class CodeGeneratorCore {
         ConfigHandler.get<string>(ConfigKey.codeGeneratorVersion);
     let codeGenCliAppPath =
         path.join(localCodeGenCliPath(), DigitalTwinConstants.codeGenCliApp);
-    if (platform === 'win32') {
+    if (platform === OSPlatform.WIN32) {
       codeGenCliAppPath += '.exe';
     }
 
@@ -573,10 +573,10 @@ export class CodeGeneratorCore {
     let packageUri: string;
     let md5value: string;
     const platform = os.platform();
-    if (platform === 'win32') {
+    if (platform === OSPlatform.WIN32) {
       packageUri = targetConfigItem.codeGeneratorLocation.win32PackageUrl;
       md5value = targetConfigItem.codeGeneratorLocation.win32Md5;
-    } else if (platform === 'darwin') {
+    } else if (platform === OSPlatform.DARWIN) {
       packageUri = targetConfigItem.codeGeneratorLocation.macOSPackageUrl;
       md5value = targetConfigItem.codeGeneratorLocation.macOSMd5;
     } else {

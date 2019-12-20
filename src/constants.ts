@@ -2,21 +2,25 @@
 // Licensed under the MIT License.
 
 export class ConfigKey {
+  // Keys for condifurations in User / Workspace settings
+  static readonly workbench = 'workbench';
   static readonly devicePath = 'DevicePath';
+  static readonly functionPath = 'FunctionPath';
   static readonly iotHubConnectionString = 'iothubConnectionString';
   static readonly iotHubDeviceConnectionString = 'iothubDeviceConnectionString';
   static readonly eventHubConnectionString = 'eventHubConnectionString';
   static readonly eventHubConnectionPath = 'eventHubConnectionPath';
   static readonly functionAppId = 'functionAppId';
-  static readonly functionPath = 'FunctionPath';
   static readonly boardId = 'BoardId';
-  static readonly asaPath = 'StreamAnalyticsPath';
   static readonly codeGeneratorVersion = 'IoTPnPCodeGenVersion';
-  static readonly projectType = 'ProjectType';
+  static readonly asaPath = 'StreamAnalyticsPath';
+
+  // Keys for configurations in iot workbench project config file
   static readonly projectHostType = 'ProjectHostType';
   static readonly workbenchVersion = 'version';
 
-  static readonly disableAutoPopupLandingPage = 'disableAutoPopupLandingPage';
+  // Keys for configurations in global state
+  static readonly hasPopUp = 'hasPopUp';
 }
 
 export class EventNames {

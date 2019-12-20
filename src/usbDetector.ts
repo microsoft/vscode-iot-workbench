@@ -8,9 +8,9 @@ import {VSCExpress} from 'vscode-express';
 
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
-import {ConfigHandler} from './configHandler';
-import {EventNames, FileNames} from './constants';
+import {ConfigKey, EventNames, FileNames, OSPlatform} from './constants';
 import {TelemetryWorker} from './telemetry';
+import {shouldShowLandingPage} from './utils';
 
 export interface DeviceInfo {
   vendorId: number;
@@ -25,9 +25,8 @@ export class UsbDetector {
   constructor(
       private context: vscode.ExtensionContext,
       private channel: vscode.OutputChannel) {
-    const disableUSBDetection =
-        ConfigHandler.get<boolean>('disableAutoPopupLandingPage');
-    if (os.platform() === 'linux' || disableUSBDetection) {
+    const enableUSBDetection = shouldShowLandingPage(context);
+    if (os.platform() === OSPlatform.LINUX || !enableUSBDetection) {
       return;
     } else {
       // Only load detector module when not in remote
@@ -77,12 +76,14 @@ export class UsbDetector {
             }
           }, {}, {board: board.name});
     }
+
+    // Will not auto pop up landing page next time.
+    this.context.globalState.update(ConfigKey.hasPopUp, true);
   }
 
-  async startListening() {
-    const disableUSBDetection =
-        ConfigHandler.get<boolean>('disableAutoPopupLandingPage');
-    if (os.platform() === 'linux' || disableUSBDetection) {
+  async startListening(context: vscode.ExtensionContext) {
+    const enableUSBDetection = shouldShowLandingPage(context);
+    if (os.platform() === OSPlatform.LINUX || !enableUSBDetection) {
       return;
     }
 

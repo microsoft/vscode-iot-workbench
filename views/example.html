@@ -540,6 +540,8 @@ body.vscode-dark .tutorial {
 <body>
 <div id="example">
 <div id="main" v-cloak>
+  <h3>To open this page, you can open command pallete and select "<b>IoT Device Workbench: open Example...</b>"</h2>
+
   <div id="featured" v-if="featuredExample">
     <span v-if="featuredExample.difficulty" v-bind:class="'difficulty ' + featuredExample.difficulty"></span>
     <img v-bind:src="featuredExample.image || '/images/no-image.jpg'">
@@ -592,11 +594,6 @@ body.vscode-dark .tutorial {
       </div>
     </li>
   </ul>
-  
-  <div class="disable-auto-popup-landing-page">
-    <input id="disableAutoPopup" type="checkbox" v-model="disableAutoPopupLandingPage.value" v-on:change="updateDisableAutoPopupLandingPage">
-    <label for="disableAutoPopup">Disable auto popup landing page</label>
-  </div>
 </div>
 <aside id="aside"></aside>
 </div>

@@ -147,10 +147,6 @@
           "IoTWorkbench.functionAppId": {
             "type": "string"
           },
-          "IoTWorkbench.disableAutoPopupLandingPage": {
-            "type": "boolean",
-            "default": false
-          },
           "IoTWorkbench.BoardId": {
             "type": "string"
           },

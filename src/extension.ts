@@ -168,8 +168,7 @@ export async function activate(context: vscode.ExtensionContext) {
         if (!isLocal) {
           return;
         }
-        const settings: IoTWorkbenchSettings =
-            await IoTWorkbenchSettings.createAsync();
+        const settings = await IoTWorkbenchSettings.getInstance();
         await settings.setWorkbenchPath();
         return;
       });
@@ -183,21 +182,6 @@ export async function activate(context: vscode.ExtensionContext) {
     const res = await request(uri);
     return res;
   });
-
-
-  initCommand(
-      context, WorkbenchCommands.GetDisableAutoPopupLandingPage, async () => {
-        return ConfigHandler.get<boolean>(
-            ConfigKey.disableAutoPopupLandingPage);
-      });
-
-  initCommand(
-      context, WorkbenchCommands.SetDisableAutoPopupLandingPage,
-      async (disableAutoPopupLandingPage: boolean) => {
-        return ConfigHandler.update(
-            ConfigKey.disableAutoPopupLandingPage, disableAutoPopupLandingPage,
-            vscode.ConfigurationTarget.Global);
-      });
 
   // delay to detect usb
   setTimeout(() => {
@@ -219,7 +203,7 @@ function enableUsbDetector(
       impor('./usbDetector') as typeof import('./usbDetector');
 
   const usbDetector = new usbDetectorModule.UsbDetector(context, outputChannel);
-  usbDetector.startListening();
+  usbDetector.startListening(context);
 }
 
 function printHello(context: vscode.ExtensionContext) {
