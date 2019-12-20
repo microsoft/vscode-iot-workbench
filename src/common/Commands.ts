@@ -16,10 +16,7 @@ export enum WorkbenchCommands {
   ExampleInitialize = 'iotworkbench.exampleInitialize',
   SendTelemetry = 'iotworkbench.sendTelemetry',
   OpenUri = 'iotworkbench.openUri',
-  HttpRequest = 'iotworkbench.httpRequest',
-  GetDisableAutoPopupLandingPage =
-      'iotworkbench.getDisableAutoPopupLandingPage',
-  SetDisableAutoPopupLandingPage = 'iotworkbench.setDisableAutoPopupLandingPage'
+  HttpRequest = 'iotworkbench.httpRequest'
 }
 
 export enum VscodeCommands {

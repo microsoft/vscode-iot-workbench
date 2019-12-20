@@ -100,7 +100,7 @@ export class IoTWorkbenchSettings {
     };
 
     const folderUri = await vscode.window.showOpenDialog(options);
-    if (!(folderUri && folderUri.length > 0)) {
+    if (!folderUri || folderUri.length === 0) {
       throw new CancelOperationError('Folder selection cancelled.');
     }
 
