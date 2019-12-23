@@ -5,10 +5,10 @@
 
 import * as vscode from 'vscode';
 import * as utils from '../utils';
-import {getExtension} from '../Models/Apis';
-import {ExtensionName} from '../Models/Interfaces/Api';
 import {DigitalTwinConstants} from './DigitalTwinConstants';
 import {CancelOperationError} from '../CancelOperationError';
+import {ModelRepositoryManager} from './pnp/src/modelRepository/modelRepositoryManager';
+import {ApiProvider} from './pnp/src/api/apiProvider';
 
 /**
  * Digital Twin extension utility
@@ -24,17 +24,12 @@ export class DigitalTwinUtility {
    * initialize utility for Digital Twin extension
    * @param channel output channel
    */
-  static init(channel: vscode.OutputChannel): boolean {
-    const digitalTwins = getExtension(ExtensionName.DigitalTwins);
-    if (!digitalTwins) {
-      utils.channelShowAndAppendLine(
-          channel,
-          'Azure Digital Twins extension is required, please install it from marketplace.');
-      return false;
-    }
-    DigitalTwinUtility.extensionInstance = digitalTwins.apiProvider;
+  static init(
+      modelRepositoryManager: ModelRepositoryManager,
+      channel: vscode.OutputChannel): void {
+    DigitalTwinUtility.extensionInstance =
+        new ApiProvider(modelRepositoryManager);
     DigitalTwinUtility.channel = channel;
-    return true;
   }
 
   /**
