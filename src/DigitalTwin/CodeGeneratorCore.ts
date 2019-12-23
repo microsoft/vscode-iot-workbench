@@ -80,10 +80,6 @@ export class CodeGeneratorCore {
     }
 
     // Select Capability Model
-    if (!DigitalTwinUtility.init(channel)) {
-      return;
-    }
-
     const capabilityModelFilePath: string =
         await DigitalTwinUtility.selectCapabilityModel();
 

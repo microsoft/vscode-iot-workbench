@@ -6,7 +6,8 @@
     "target": "es6",
     "outDir": "out",
     "lib": [
-        "es6"
+      "es6",
+      "es2017"
     ],
     "sourceMap": true,
     "rootDir": "."
@@ -19,6 +20,7 @@
   ],
   "exclude": [
     "node_modules",
-    ".vscode-test"
+    ".vscode-test",
+    "src/DigitalTwin/pnp"
   ]
 }

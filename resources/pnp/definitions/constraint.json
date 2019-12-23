@@ -1,0 +1,87 @@
+{
+  "@id": {
+    "minLength": 1,
+    "maxLength": 256,
+    "pattern": "^urn(:[a-zA-Z_][a-zA-Z0-9_]*){2,}:[0-9]+$"
+  },
+  "comment": {
+    "minLength": 1,
+    "maxLength": 512
+  },
+  "description": {
+    "minLength": 1,
+    "maxLength": 512
+  },
+  "displayName": {
+    "minLength": 1,
+    "maxLength": 64
+  },
+  "enumValues": {
+    "minItems": 1
+  },
+  "fields": {
+    "minItems": 1
+  },
+  "name": {
+    "minLength": 1,
+    "maxLength": 64,
+    "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+  },
+  "displayUnit": {
+    "minLength": 1,
+    "maxLength": 64
+  },
+  "contents": {
+    "minItems": 1,
+    "maxItems": 300
+  },
+  "schemas": {
+    "minItems": 1
+  },
+  "implements": {
+    "minItems": 1,
+    "maxItems": 30
+  },
+  "Interface": {
+    "required": ["@id", "@type", "@context"]
+  },
+  "Telemetry": {
+    "required": ["@type", "name", "schema"]
+  },
+  "Property": {
+    "required": ["@type", "name", "schema"]
+  },
+  "Command": {
+    "required": ["@type", "name"]
+  },
+  "Array": {
+    "required": ["@type", "elementSchema"]
+  },
+  "Enum": {
+    "required": ["@type", "enumValues", "valueSchema"]
+  },
+  "EnumValue": {
+    "required": ["name", "enumValue"]
+  },
+  "Map": {
+    "required": ["@type", "mapKey", "mapValue"]
+  },
+  "MapKey": {
+    "required": ["name", "schema"]
+  },
+  "MapValue": {
+    "required": ["name", "schema"]
+  },
+  "Object": {
+    "required": ["@type", "fields"]
+  },
+  "SchemaField": {
+    "required": ["name", "schema"]
+  },
+  "CapabilityModel": {
+    "required": ["@id", "@type", "@context", "implements"]
+  },
+  "InterfaceInstance": {
+    "required": ["name", "schema"]
+  }
+}
