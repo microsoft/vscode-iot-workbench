@@ -32,10 +32,7 @@ script:
 - tsc --version
 - gts --version
 - gts check
-- node scripts/modifyConfigIfRCVersion.js
-- node scripts/updateResourceLink.js
-- node scripts/genAiKey.js
-- node scripts/nightlyBuild.js
+- node scripts/updateConfig.js
 - vsce package
 - docker run -ti --rm -v $PWD:/mnt:ro dkhamsing/awesome_bot --allow-dupe --allow-redirect --skip-save-results `ls *.md`
 
