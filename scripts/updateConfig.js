@@ -1,5 +1,12 @@
 const fs = require('fs');
 
+/**
+ * If Nightly Build or Production release or RC release, modify package.json and related template files.
+ * If common PR, do no modification.
+ * TRAVIS_EVENT_TYPE === "cron" :                       Nightly Build
+ * TRAVIS_TAG =~ /^v?[0-9]+\.[0-9]+\.[0-9]+$/:          Production release (eg. v0.10.18)
+ * TRAVIS_TAG =~ /^v?[0-9]+\.[0-9]+\.[0-9]+-[rR][cC]/:  RC release (eg. v0.10.18-rc, v0.10.18-rc2, etc.)
+ */
 if (process.env.TRAVIS_EVENT_TYPE === "cron" || process.env.TRAVIS_TAG) {
   const packageJson = JSON.parse(fs.readFileSync('package.json'));
 
@@ -33,7 +40,6 @@ if (process.env.TRAVIS_EVENT_TYPE === "cron" || process.env.TRAVIS_TAG) {
       trimVersionNumer(packageJson);
 
       delete packageJson.icon;
-
 
       // Modify extensionId in template files
       const extensionIdPattern = /vsciot-vscode.vscode-iot-workbench/g;
