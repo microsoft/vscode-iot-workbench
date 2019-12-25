@@ -19,10 +19,10 @@ if (process.env.TRAVIS_EVENT_TYPE === "cron" || process.env.TRAVIS_TAG) {
     packageJson.aiKey = process.env['TEST_AIKEY'];
     trimVersionNumer(packageJson);
   } else if (process.env.TRAVIS_TAG) {
-    const isProdction = /^v?[0-9]+\.[0-9]+\.[0-9]+$/.test(process.env.TRAVIS_TAG || '');
+    const isProduction = /^v?[0-9]+\.[0-9]+\.[0-9]+$/.test(process.env.TRAVIS_TAG || '');
     const isTestVersion = /^v?[0-9]+\.[0-9]+\.[0-9]+-[rR][cC]/.test(process.env.TRAVIS_TAG || '');
 
-    if (isProdction) {
+    if (isProduction) {
       // Update resource link
       const codeGenUrl = "https://aka.ms/iot-codegen-cli-for-workbench";
       packageJson.codeGenConfigUrl = codeGenUrl;
