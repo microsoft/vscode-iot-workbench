@@ -123,12 +123,14 @@ export interface FolderQuickPickItem<T = undefined> extends
  * Check there is workspace opened in VS Code
  * and get the first workspace folder path.
  */
-export function getFirstWorkspaceFolderPath(): string {
+export function getFirstWorkspaceFolderPath(showWarningMessage = true): string {
   if (!(vscode.workspace.workspaceFolders &&
         vscode.workspace.workspaceFolders.length > 0) ||
       !vscode.workspace.workspaceFolders[0].uri.fsPath) {
-    vscode.window.showWarningMessage(
-        'You have not yet opened a folder in Visual Studio Code. Please select a folder first.');
+    if (showWarningMessage) {
+      vscode.window.showWarningMessage(
+          'You have not yet opened a folder in Visual Studio Code. Please select a folder first.');
+    }
     return '';
   }
 
@@ -608,7 +610,7 @@ export async function constructAndLoadIoTProject(
     telemetryContext: TelemetryContext, isTriggeredWhenExtensionLoad = false) {
   const scaffoldType = ScaffoldType.Workspace;
 
-  const projectFileRootPath = getFirstWorkspaceFolderPath();
+  const projectFileRootPath = getFirstWorkspaceFolderPath(false);
   const projectHostType = await IoTWorkbenchProjectBase.getProjectType(
       scaffoldType, projectFileRootPath);
 
