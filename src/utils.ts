@@ -609,10 +609,11 @@ export async function constructAndLoadIoTProject(
   let iotProject;
   if (projectHostType === ProjectHostType.Container) {
     iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
-        context, channel, telemetryContext);
+        context, channel, telemetryContext, projectFileRootPath);
   } else if (projectHostType === ProjectHostType.Workspace) {
+    const projectRootPath = path.join(projectFileRootPath, '..');
     iotProject = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
-        context, channel, telemetryContext);
+        context, channel, telemetryContext, projectRootPath);
   }
 
   if (isTriggeredWhenExtensionLoad) {
