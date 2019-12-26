@@ -5,6 +5,7 @@
 
 import * as vscode from 'vscode';
 import * as utils from './utils';
+import * as path from 'path';
 
 import {TelemetryContext} from './telemetry';
 import {ScaffoldType, PlatformType} from './constants';
@@ -74,8 +75,9 @@ export class ProjectEnvironmentConfiger {
         throw new CancelOperationError(message);
       }
 
+      const projectRootPath = path.join(projectFileRootPath, '..');
       project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
-          context, channel, telemetryContext);
+          context, channel, telemetryContext, projectRootPath);
       if (!project) {
         // Ensure the project is correctly open.
         await utils.properlyOpenIoTWorkspaceProject(telemetryContext);
@@ -88,7 +90,7 @@ export class ProjectEnvironmentConfiger {
       await RemoteExtension.checkRemoteExtension();
 
       project = new ioTContainerizedProjectModule.IoTContainerizedProject(
-          context, channel, telemetryContext);
+          context, channel, telemetryContext, projectFileRootPath);
     } else {
       throw new Error('unsupported platform');
     }

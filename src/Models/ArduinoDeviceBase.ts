@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 
 import {VscodeCommands} from '../common/Commands';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, DependentExtensions, FileNames, OperationType, OSPlatform, ScaffoldType} from '../constants';
+import {ConfigKey, DependentExtensions, FileNames, OperationType, OSPlatform, PlatformType, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext} from '../telemetry';
 import * as utils from '../utils';
@@ -103,7 +103,8 @@ export abstract class ArduinoDeviceBase implements Device {
 
     await utils.fetchAndExecuteTask(
         this.extensionContext, this.channel, this.telemetryContext,
-        this.deviceFolder, OperationType.Compile, constants.compileTaskName);
+        this.deviceFolder, OperationType.Compile, PlatformType.Arduino,
+        constants.compileTaskName);
     return true;
   }
 
@@ -114,7 +115,8 @@ export abstract class ArduinoDeviceBase implements Device {
     }
     await utils.fetchAndExecuteTask(
         this.extensionContext, this.channel, this.telemetryContext,
-        this.deviceFolder, OperationType.Upload, constants.uploadTaskName);
+        this.deviceFolder, OperationType.Upload, PlatformType.Arduino,
+        constants.uploadTaskName);
     return true;
   }
 

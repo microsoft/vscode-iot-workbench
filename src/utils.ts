@@ -609,10 +609,11 @@ export async function constructAndLoadIoTProject(
   let iotProject;
   if (projectHostType === ProjectHostType.Container) {
     iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
-        context, channel, telemetryContext);
+        context, channel, telemetryContext, projectFileRootPath);
   } else if (projectHostType === ProjectHostType.Workspace) {
+    const projectRootPath = path.join(projectFileRootPath, '..');
     iotProject = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
-        context, channel, telemetryContext);
+        context, channel, telemetryContext, projectRootPath);
   }
 
   if (isTriggeredWhenExtensionLoad) {
@@ -760,7 +761,8 @@ export async function askToOverwriteFile(fileName: string):
 export async function fetchAndExecuteTask(
     context: vscode.ExtensionContext, channel: vscode.OutputChannel,
     telemetryContext: TelemetryContext, deviceRootPath: string,
-    operationType: OperationType, taskName: string): Promise<void> {
+    operationType: OperationType, platform: PlatformType,
+    taskName: string): Promise<void> {
   const scaffoldType = ScaffoldType.Workspace;
   if (!await FileUtility.directoryExists(scaffoldType, deviceRootPath)) {
     throw new Error('Unable to find the device root folder.');
@@ -772,8 +774,8 @@ export async function fetchAndExecuteTask(
     channelShowAndAppendLine(channel, message);
 
     await askToConfigureEnvironment(
-        context, channel, telemetryContext, PlatformType.Arduino,
-        deviceRootPath, scaffoldType, operationType);
+        context, channel, telemetryContext, platform, deviceRootPath,
+        scaffoldType, operationType);
     return;
   }
 
@@ -786,8 +788,8 @@ export async function fetchAndExecuteTask(
     channelShowAndAppendLine(channel, message);
 
     await askToConfigureEnvironment(
-        context, channel, telemetryContext, PlatformType.Arduino,
-        deviceRootPath, scaffoldType, operationType);
+        context, channel, telemetryContext, platform, deviceRootPath,
+        scaffoldType, operationType);
     return;
   }
 

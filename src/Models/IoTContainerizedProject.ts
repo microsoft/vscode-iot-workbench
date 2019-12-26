@@ -10,7 +10,7 @@ import {RemoteContainersCommands, VscodeCommands} from '../common/Commands';
 import {ConfigKey, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext, TelemetryWorker} from '../telemetry';
-import {getFirstWorkspaceFolderPath, getProjectConfig, updateProjectHostTypeConfig} from '../utils';
+import {getProjectConfig, updateProjectHostTypeConfig} from '../utils';
 
 import {Component} from './Interfaces/Component';
 import {ProjectHostType} from './Interfaces/ProjectHostType';
@@ -25,18 +25,16 @@ const raspberryPiDeviceModule =
 export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
   constructor(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext, rootFolderPath?: string) {
+      telemetryContext: TelemetryContext, rootFolderPath: string) {
     super(context, channel, telemetryContext);
     this.projectHostType = ProjectHostType.Container;
-
-    this.projectRootPath = rootFolderPath || getFirstWorkspaceFolderPath();
-    if (!this.projectRootPath) {
-      throw new Error(`Fail to get root folder.`);
+    if (!rootFolderPath) {
+      throw new Error(
+          `Fail to construct iot workspace project: root folder path is empty.`);
     }
-
+    this.projectRootPath = rootFolderPath;
     this.iotWorkbenchProjectFilePath =
         path.join(this.projectRootPath, FileNames.iotWorkbenchProjectFileName);
-
     this.telemetryContext.properties.projectHostType = this.projectHostType;
   }
 

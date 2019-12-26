@@ -128,7 +128,8 @@ export abstract class ContainerDeviceBase implements Device {
 
     await utils.fetchAndExecuteTask(
         this.extensionContext, this.channel, this.telemetryContext,
-        this.projectFolder, OperationType.Compile, constants.compileTaskName);
+        this.projectFolder, OperationType.Compile, PlatformType.EmbeddedLinux,
+        constants.compileTaskName);
     return true;
   }
 
