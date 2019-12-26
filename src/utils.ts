@@ -561,6 +561,16 @@ export async function getProjectConfig(
   return projectConfig;
 }
 
+export function getWorkspaceFile(rootPath: string): string {
+  const workspaceFiles = fs.readdirSync(rootPath).filter(
+      file => path.extname(file).endsWith(FileNames.workspaceExtensionName));
+  if (workspaceFiles && workspaceFiles.length >= 0) {
+    return workspaceFiles[0];
+  } else {
+    return '';
+  }
+}
+
 /**
  * Used when it is an IoT workspace project but not open correctly.
  * Ask to open as workspace.
@@ -570,10 +580,9 @@ export async function properlyOpenIoTWorkspaceProject(
   const rootPath = getFirstWorkspaceFolderPath();
   const workbenchFileName =
       path.join(rootPath, 'Device', FileNames.iotWorkbenchProjectFileName);
-  const workspaceFiles = fs.readdirSync(rootPath).filter(
-      file => path.extname(file).endsWith(FileNames.workspaceExtensionName));
-  if (fs.existsSync(workbenchFileName) && workspaceFiles && workspaceFiles[0]) {
-    await askAndOpenProject(rootPath, workspaceFiles[0], telemetryContext);
+  const workspaceFile = getWorkspaceFile(rootPath);
+  if (fs.existsSync(workbenchFileName) && workspaceFile) {
+    await askAndOpenProject(rootPath, workspaceFile, telemetryContext);
   }
 }
 
@@ -581,11 +590,8 @@ export function isWorkspaceProject(): boolean {
   const rootPath = getFirstWorkspaceFolderPath();
   const workbenchFileName =
       path.join(rootPath, 'Device', FileNames.iotWorkbenchProjectFileName);
-
-  const workspaceFiles = fs.readdirSync(rootPath).filter(
-      file => path.extname(file).endsWith(FileNames.workspaceExtensionName));
-
-  if (fs.existsSync(workbenchFileName) && workspaceFiles && workspaceFiles[0]) {
+  const workspaceFile = getWorkspaceFile(rootPath);
+  if (fs.existsSync(workbenchFileName) && workspaceFile) {
     return true;
   }
   return false;

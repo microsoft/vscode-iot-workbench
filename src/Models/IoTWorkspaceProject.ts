@@ -10,7 +10,7 @@ import {ConfigHandler} from '../configHandler';
 import {ConfigKey, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 import {TelemetryContext, TelemetryWorker} from '../telemetry';
-import {updateProjectHostTypeConfig} from '../utils';
+import {getWorkspaceFile, updateProjectHostTypeConfig} from '../utils';
 
 import {AzureComponentConfig, Dependency} from './AzureComponentConfig';
 import {Component, ComponentType} from './Interfaces/Component';
@@ -80,13 +80,10 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
         scaffoldType, this.iotWorkbenchProjectFilePath, this.projectHostType);
 
     // Init workspace config file
-    const workspaceFiles = fs.readdirSync(this.projectRootPath)
-                               .filter(
-                                   file => path.extname(file).endsWith(
-                                       FileNames.workspaceExtensionName));
-    if (workspaceFiles && workspaceFiles.length >= 0) {
+    const workspaceFile = getWorkspaceFile(this.projectRootPath);
+    if (workspaceFile) {
       this.workspaceConfigFilePath =
-          path.join(this.projectRootPath, workspaceFiles[0]);
+          path.join(this.projectRootPath, workspaceFile);
     } else {
       throw new Error(
           `Fail to load iot workspace project: Cannot find workspace file under project root path: ${
