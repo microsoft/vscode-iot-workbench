@@ -12,12 +12,10 @@ if (process.env.TRAVIS_EVENT_TYPE === "cron" || process.env.TRAVIS_TAG) {
 
   // Nightly Build
   if (process.env.TRAVIS_EVENT_TYPE === "cron") {
-    const nightlyBuildName = "vscode-iot-workbench-nightly";
-    const nightlyBuildDisplayName = "Azure IoT Device Workbench (Nightly)";
-    packageJson.name = nightlyBuildName;
-    packageJson.displayName = nightlyBuildDisplayName;
-    packageJson.aiKey = process.env['TEST_AIKEY'];
-    trimVersionNumer(packageJson);
+    const nightlyBuildName = "test-owl-project-nightly";
+    const nightlyBuildDisplayName = "Test OWL Project (Nightly)";
+    const nightlyBuildPublisher = "IoTDevExBuild";
+    modifyPackageJsonForNonProduction(packageJson, nightlyBuildName, nightlyBuildDisplayName, nightlyBuildPublisher);
   } else if (process.env.TRAVIS_TAG) {
     const isProduction = /^v?[0-9]+\.[0-9]+\.[0-9]+$/.test(process.env.TRAVIS_TAG || '');
     const isTestVersion = /^v?[0-9]+\.[0-9]+\.[0-9]+-[rR][cC]/.test(process.env.TRAVIS_TAG || '');
@@ -33,13 +31,7 @@ if (process.env.TRAVIS_EVENT_TYPE === "cron" || process.env.TRAVIS_TAG) {
       const testName = "test-owl-project";
       const testDisplayName = "Test OWL Project RC";
       const testPublisher = "IoTDevExBuild";
-      packageJson.name = testName;
-      packageJson.displayName = testDisplayName;
-      packageJson.publisher = testPublisher;
-      packageJson.aiKey = process.env['TEST_AIKEY'];
-      trimVersionNumer(packageJson);
-
-      delete packageJson.icon;
+      modifyPackageJsonForNonProduction(packageJson, testName, testDisplayName, testPublisher);
 
       // Modify extensionId in template files
       const extensionIdPattern = /vsciot-vscode.vscode-iot-workbench/g;
@@ -61,12 +53,24 @@ if (process.env.TRAVIS_EVENT_TYPE === "cron" || process.env.TRAVIS_TAG) {
 }
 
 /**
- * Remove character after '-' in package json version number
- * @param {*} packageJson package json object
+ * Update package.json with test name, displayName, publisher, ai aky.
+ * Trim version number. Delete extension icon.
+ * @param {*} packageJson package json oject
+ * @param {*} testName test extension name
+ * @param {*} testDisplayName test extension displate name
+ * @param {*} testPublisher test publisher
  */
-function trimVersionNumer(packageJson) {
+function modifyPackageJsonForNonProduction(packageJson, testName, testDisplayName, testPublisher) {
+  packageJson.name = testName;
+  packageJson.displayName = testDisplayName;
+  packageJson.publisher = testPublisher;
+
+  packageJson.aiKey = process.env['TEST_AIKEY'];
+
   const indexOfDash = packageJson.version.indexOf('-');
   if (indexOfDash > 0) {
     packageJson.version = packageJson.version.substring(0, indexOfDash);
   }
+
+  delete packageJson.icon;
 }
