@@ -148,7 +148,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
         folderName.deviceDefaultFolderName;
 
     // Create azure components
-    this.createAzureComponentsWithProjectType(
+    await this.createAzureComponentsWithProjectType(
         projectType, createTimeScaffoldType, workspace);
 
     // Update workspace config to workspace config file
