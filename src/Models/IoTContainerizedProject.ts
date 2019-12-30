@@ -5,7 +5,7 @@ import * as fs from "fs-plus";
 import * as path from "path";
 import * as vscode from "vscode";
 
-import { CancelOperationError } from "../CancelOperationError";
+import { CancelOperationError } from "../common/CancelOperationError";
 import { RemoteContainersCommands, VscodeCommands } from "../common/Commands";
 import { ConfigKey, EventNames, FileNames, ScaffoldType } from "../constants";
 import { FileUtility } from "../FileUtility";

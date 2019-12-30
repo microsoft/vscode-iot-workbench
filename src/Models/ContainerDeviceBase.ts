@@ -5,7 +5,7 @@ import { Guid } from "guid-typescript";
 import * as path from "path";
 import * as vscode from "vscode";
 
-import { CancelOperationError } from "../CancelOperationError";
+import { CancelOperationError } from "../common/CancelOperationError";
 import { FileNames, OperationType, PlatformType, ScaffoldType, TemplateTag } from "../constants";
 import { DigitalTwinConstants } from "../DigitalTwin/DigitalTwinConstants";
 import { FileUtility } from "../FileUtility";

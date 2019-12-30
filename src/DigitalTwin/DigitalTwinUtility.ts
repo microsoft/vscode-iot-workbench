@@ -4,7 +4,7 @@
 import * as vscode from "vscode";
 import * as utils from "../utils";
 import { DigitalTwinConstants } from "./DigitalTwinConstants";
-import { CancelOperationError } from "../CancelOperationError";
+import { CancelOperationError } from "../common/CancelOperationError";
 import { ModelRepositoryManager } from "./pnp/src/modelRepository/modelRepositoryManager";
 import { ApiProvider } from "./pnp/src/api/apiProvider";
 

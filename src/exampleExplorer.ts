@@ -14,7 +14,7 @@ import { ArduinoPackageManager } from "./ArduinoPackageManager";
 import { BoardProvider } from "./boardProvider";
 import { VSCExpress } from "vscode-express";
 import { RemoteExtension } from "./Models/RemoteExtension";
-import { CancelOperationError } from "./CancelOperationError";
+import { CancelOperationError } from "./common/CancelOperationError";
 import { IoTCubeCommands } from "./common/Commands";
 
 type OptionsWithUri = import("request-promise").OptionsWithUri;

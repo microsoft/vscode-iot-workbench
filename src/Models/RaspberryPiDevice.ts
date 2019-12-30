@@ -5,7 +5,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import * as sdk from "vscode-iot-device-cube-sdk";
 
-import { CancelOperationError } from "../CancelOperationError";
+import { CancelOperationError } from "../common/CancelOperationError";
 import { ConfigHandler } from "../configHandler";
 import { ConfigKey, FileNames, OperationType, ScaffoldType } from "../constants";
 import { FileUtility } from "../FileUtility";

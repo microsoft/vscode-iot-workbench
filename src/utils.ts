@@ -10,7 +10,7 @@ import { MessageItem } from "vscode";
 import * as sdk from "vscode-iot-device-cube-sdk";
 import * as WinReg from "winreg";
 
-import { CancelOperationError } from "./CancelOperationError";
+import { CancelOperationError } from "./common/CancelOperationError";
 import { IoTCubeCommands, RemoteContainersCommands, VscodeCommands, WorkbenchCommands } from "./common/Commands";
 import {
   AzureFunctionsLanguage,

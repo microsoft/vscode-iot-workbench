@@ -4,7 +4,7 @@
 import * as path from "path";
 import * as vscode from "vscode";
 
-import { CancelOperationError } from "./CancelOperationError";
+import { CancelOperationError } from "./common/CancelOperationError";
 import { ConfigHandler } from "./configHandler";
 import { ConfigKey, OSPlatform } from "./constants";
 import { PickWithData } from "./Models/Interfaces/UI";

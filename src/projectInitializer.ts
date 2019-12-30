@@ -11,7 +11,7 @@ import { IoTWorkbenchSettings } from "./IoTSettings";
 import { FileUtility } from "./FileUtility";
 import { ProjectTemplate, ProjectTemplateType, TemplatesType } from "./Models/Interfaces/ProjectTemplate";
 import { RemoteExtension } from "./Models/RemoteExtension";
-import { CancelOperationError } from "./CancelOperationError";
+import { CancelOperationError } from "./common/CancelOperationError";
 
 const impor = require("impor")(__dirname);
 const ioTWorkspaceProjectModule = impor(

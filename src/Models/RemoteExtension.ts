@@ -3,7 +3,7 @@ import { DependentExtensions } from "../constants";
 import { DialogResponses } from "../DialogResponses";
 import { WorkbenchExtension } from "../WorkbenchExtension";
 import { VscodeCommands } from "../common/Commands";
-import { CancelOperationError } from "../CancelOperationError";
+import { CancelOperationError } from "../common/CancelOperationError";
 
 export class RemoteExtension {
   static isRemote(context: vscode.ExtensionContext): boolean {

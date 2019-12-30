@@ -4,7 +4,7 @@
 import * as path from "path";
 import * as vscode from "vscode";
 
-import { CancelOperationError } from "../CancelOperationError";
+import { CancelOperationError } from "../../src/common/CancelOperationError";
 import { ConfigKey, EventNames, FileNames, ScaffoldType } from "../constants";
 import { FileUtility } from "../FileUtility";
 import { TelemetryContext, TelemetryWorker } from "../telemetry";
