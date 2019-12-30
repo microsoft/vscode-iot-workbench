@@ -140,7 +140,7 @@ export abstract class ContainerDeviceBase implements Device {
 
   abstract async upload(): Promise<boolean>;
 
-  abstract async configDeviceSettings(): Promise<boolean>;
+  abstract async configDeviceSettings(): Promise<void>;
 
   async configDeviceEnvironment(projectPath: string, scaffoldType: ScaffoldType): Promise<void> {
     if (!projectPath) {

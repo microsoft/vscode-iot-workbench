@@ -7,10 +7,18 @@ import * as path from "path";
 import * as request from "request-promise";
 import * as vscode from "vscode";
 
+<<<<<<< fca992b89ab4fd466bcb2e68f11409f830fc3605
 import { ConfigHandler } from "../configHandler";
 import { ConfigKey, ScaffoldType } from "../constants";
 import { FileUtility } from "../FileUtility";
 import { generateTemplateFile } from "../utils";
+=======
+import {CancelOperationError} from '../common/CancelOperationError';
+import {ConfigHandler} from '../configHandler';
+import {ConfigKey, ScaffoldType} from '../constants';
+import {FileUtility} from '../FileUtility';
+import {generateTemplateFile} from '../utils';
+>>>>>>> Consolidate error handling for config device settings
 
 import { ComponentType } from "./Interfaces/Component";
 import { Device, DeviceType } from "./Interfaces/Device";
@@ -89,7 +97,7 @@ export class IoTButtonDevice implements Device {
     return true;
   }
 
-  async configDeviceSettings(): Promise<boolean> {
+  async configDeviceSettings(): Promise<void> {
     // TODO: try to connect to access point host of IoT button to detect the
     // connection.
     const configSelectionItems: vscode.QuickPickItem[] = [
@@ -128,7 +136,8 @@ export class IoTButtonDevice implements Device {
     });
 
     if (!configSelection) {
-      return false;
+      throw new CancelOperationError(
+          'IoT Button device setting type selection cancelled.');
     }
 
     if (configSelection.detail === "Config WiFi") {
@@ -176,8 +185,13 @@ export class IoTButtonDevice implements Device {
         // the action
       }
 
+<<<<<<< fca992b89ab4fd466bcb2e68f11409f830fc3605
       vscode.window.showInformationMessage("Shutdown IoT button completed.");
       return true;
+=======
+      vscode.window.showInformationMessage('Shutdown IoT button completed.');
+      return;
+>>>>>>> Consolidate error handling for config device settings
     }
 
     return await this.configDeviceSettings();

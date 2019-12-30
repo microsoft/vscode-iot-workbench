@@ -25,6 +25,7 @@ import { ComponentType } from "./Interfaces/Component";
 import { Device, DeviceType } from "./Interfaces/Device";
 import { TemplateFileInfo } from "./Interfaces/ProjectTemplate";
 import { OTA } from "./OTA";
+import { OperationCanceledError } from "../common/Error/InternalError";
 
 const constants = {
   defaultSketchFileName: "device.ino",
@@ -142,7 +143,8 @@ export abstract class ArduinoDeviceBase implements Device {
     return true;
   }
 
-  abstract async configDeviceSettings(): Promise<boolean>;
+
+  abstract async configDeviceSettings(): Promise<void>;
 
   async load(): Promise<boolean> {
     const deviceFolderPath = this.deviceFolder;
@@ -243,36 +245,26 @@ export abstract class ArduinoDeviceBase implements Device {
     }
   }
 
-  async generateCrc(channel: vscode.OutputChannel): Promise<boolean> {
-    if (!(vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0)) {
-      const message = "No workspace opened.";
-      vscode.window.showWarningMessage(message);
-      utils.channelShowAndAppendLine(channel, message);
-      return false;
+  async generateCrc(channel: vscode.OutputChannel): Promise<void> {
+    if (!(vscode.workspace.workspaceFolders &&
+          vscode.workspace.workspaceFolders.length > 0)) {
+      throw new Error('No workspace opened.');
     }
 
     const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
     if (!devicePath) {
-      const message = "No device path found in workspace configuration.";
-      vscode.window.showWarningMessage(message);
-      utils.channelShowAndAppendLine(channel, message);
-      return false;
+      throw new Error('No device path found in workspace configuration.');
     }
     const deviceBuildLocation = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, "..", devicePath, ".build");
 
     if (!deviceBuildLocation) {
-      const message = "No device compile output folder found.";
-      vscode.window.showWarningMessage(message);
-      utils.channelShowAndAppendLine(channel, message);
-      return false;
+      throw new Error('No device compile output folder found.');
     }
 
     const binFiles = fs.listSync(deviceBuildLocation, ["bin"]);
     if (!binFiles || !binFiles.length) {
-      const message = "No bin file found. Please run the command of Device Compile first.";
-      vscode.window.showWarningMessage(message);
-      utils.channelShowAndAppendLine(channel, message);
-      return false;
+      throw new Error(
+          'No bin file found. Please run the command of Device Compile first.');
     }
 
     let binFilePath = "";
@@ -294,14 +286,14 @@ export abstract class ArduinoDeviceBase implements Device {
       });
 
       if (!choice || !choice.description) {
-        return false;
+        throw new OperationCanceledError('Bin file selection cancelled.');
       }
 
       binFilePath = choice.description;
     }
 
     if (!binFilePath || !fs.existsSync(binFilePath)) {
-      return false;
+      throw new Error(`Bin file path does not exist: ${binFilePath}.`);
     }
 
     const res = OTA.generateCrc(binFilePath);
@@ -309,15 +301,13 @@ export abstract class ArduinoDeviceBase implements Device {
     vscode.window.showInformationMessage("Generate CRC succeeded.");
 
     channel.show();
-    channel.appendLine("========== CRC Information ==========");
-    channel.appendLine("");
-    channel.appendLine("fwPath: " + binFilePath);
-    channel.appendLine("fwPackageCheckValue: " + res.crc);
-    channel.appendLine("fwSize: " + res.size);
-    channel.appendLine("");
-    channel.appendLine("======================================");
-
-    return true;
+    channel.appendLine('========== CRC Information ==========');
+    channel.appendLine('');
+    channel.appendLine('fwPath: ' + binFilePath);
+    channel.appendLine('fwPackageCheckValue: ' + res.crc);
+    channel.appendLine('fwSize: ' + res.size);
+    channel.appendLine('');
+    channel.appendLine('======================================');
   }
 
   async configDeviceEnvironment(deviceRootPath: string, scaffoldType: ScaffoldType): Promise<void> {

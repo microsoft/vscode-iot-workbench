@@ -46,16 +46,13 @@ export class RemoteExtension {
   }
 
   /**
-   * Check we are not in remote context before running a command
-   * @return true - in local environment; false - in remote environment
+   * Ensure we are not in remote environment before running a command.
+   * If in remote environment, throw error.
    */
-  static checkLocalBeforeRunCommand(context: vscode.ExtensionContext): boolean {
+  static ensureLocalBeforeRunCommand(context: vscode.ExtensionContext): void {
     if (RemoteExtension.isRemote(context)) {
-      const message = `The command is not supported to be run in a remote environment. \
-      Open a new window and run this command again.`;
-      vscode.window.showWarningMessage(message);
-      return false;
+      throw new Error(
+          `The command is not supported to be run in a remote environment. Open a new window and run this command again.`);
     }
-    return true;
   }
 }

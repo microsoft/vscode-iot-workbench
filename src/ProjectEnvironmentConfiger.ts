@@ -28,17 +28,11 @@ export class ProjectEnvironmentConfiger {
     telemetryContext: TelemetryContext
   ): Promise<void> {
     // Only configure project when not in remote environment
-    const isLocal = RemoteExtension.checkLocalBeforeRunCommand(context);
-    if (!isLocal) {
-      return;
-    }
+    RemoteExtension.ensureLocalBeforeRunCommand(context);
 
     const scaffoldType = ScaffoldType.Local;
 
     const projectRootPath = utils.getFirstWorkspaceFolderPath();
-    if (!projectRootPath) {
-      throw new Error(`Fail to get project root path.`);
-    }
 
     await vscode.window.withProgress(
       {
