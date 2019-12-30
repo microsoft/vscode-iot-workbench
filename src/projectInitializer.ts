@@ -60,12 +60,11 @@ export class ProjectInitializer {
           const scaffoldType = ScaffoldType.Local;
 
           // Step 1: Get project name
-          const projectPath = await this.generateProjectFolder(scaffoldType);
+          const projectPath =
+              await this.generateProjectFolder(telemetryContext, scaffoldType);
           if (!projectPath) {
             throw new CancelOperationError(
                 `Project initialization cancelled: Project name input cancelled.`);
-          } else {
-            telemetryContext.properties.projectPath = projectPath;
           }
 
           // Step 2: Select platform
@@ -178,8 +177,9 @@ export class ProjectInitializer {
     return templateSelection;
   }
 
-  private async generateProjectFolder(scaffoldType: ScaffoldType):
-      Promise<string|undefined> {
+  private async generateProjectFolder(
+      telemetryContext: TelemetryContext,
+      scaffoldType: ScaffoldType): Promise<string|undefined> {
     // Get default workbench path.
     const settings = await IoTWorkbenchSettings.getInstance();
     const workbench = settings.getWorkbenchPath();
@@ -223,6 +223,10 @@ export class ProjectInitializer {
         }
       }
     });
+    if (projectName) {
+      const projectNameMd5 = utils.getHashFromString(projectName);
+      telemetryContext.properties.projectName = projectNameMd5;
+    }
 
     const projectPath =
         projectName ? path.join(projectRootPath, projectName) : undefined;
