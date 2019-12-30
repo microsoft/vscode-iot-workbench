@@ -21,7 +21,7 @@ env:
     - ISPRODTAG=^v?[0-9]+\.[0-9]+\.[0-9]+$
     - ISTESTTAG=^v?[0-9]+\.[0-9]+\.[0-9]+-[rR][cC]
     - RC_EXTENSION_ID="iotdevexbuild.test-owl-project"
-    - NIGHTLY_BUILD_ID="vsciot-vscode.vscode-iot-workbench-nightly"
+    - NIGHTLY_BUILD_ID="iotdevexbuild.vscode-iot-workbench-nightly"
     # Non production situation: RC or nightly build
     - IS_TEST=true
 
