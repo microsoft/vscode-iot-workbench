@@ -77,7 +77,7 @@ deploy:
       tags: true
       all_branches: true
       # if it's a PROD tag (something like 1.0.0), then publish extension to market.
-      condition: "$IS_PROD = true"
+      condition: "$TRAVIS_TAG =~ $ISPRODTAG"
   # deploy test version to vscode extension market
   - provider: script
     script: yes | vsce unpublish -p $VSCE_TEST_TOKEN $RC_EXTENSION_ID && vsce publish -p $VSCE_TEST_TOKEN --packagePath *.vsix
