@@ -591,7 +591,6 @@ export class CodeGeneratorCore {
     const tempPath = path.join(os.tmpdir(), FileNames.iotworkbenchTempFolder);
     const filePath = path.join(tempPath, `${md5value}.zip`);
     fs.writeFileSync(filePath, zipData);
-    // clearInterval(loading);
     utils.channelShowAndAppendLine(channel, ' download complete.');
 
     // Verify
@@ -604,7 +603,7 @@ export class CodeGeneratorCore {
           channel,
           `the downloaded ${DigitalTwinConstants.codeGenCli} v${
               newVersion} package has been corrupted.`);
-      if (installOrUpgrade === 1) {
+      if (installOrUpgrade === CodeGenCliOperation.Install) {
         utils.channelShowAndAppendLine(
             channel,
             `${
