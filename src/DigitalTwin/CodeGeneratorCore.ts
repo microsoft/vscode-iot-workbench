@@ -580,64 +580,56 @@ export class CodeGeneratorCore {
       md5value = targetConfigItem.codeGeneratorLocation.ubuntuMd5;
     }
 
-    const loading = setInterval(() => {
-      channel.append('.');
-    }, 1000);
+    // Download
+    utils.channelShowAndAppend(
+        channel,
+        `Step 1: Downloading ${DigitalTwinConstants.codeGenCli} v${
+            newVersion} package ...`);
+    const downloadOption: request
+        .OptionsWithUri = {method: 'GET', uri: packageUri, encoding: null};
+    const zipData = await request(downloadOption).promise();
+    const tempPath = path.join(os.tmpdir(), FileNames.iotworkbenchTempFolder);
+    const filePath = path.join(tempPath, `${md5value}.zip`);
+    fs.writeFileSync(filePath, zipData);
+    utils.channelShowAndAppendLine(channel, ' download complete.');
 
-    try {
-      // Download
-      utils.channelShowAndAppend(
+    // Verify
+    // Validate hash code
+    utils.channelShowAndAppend(
+        channel, 'Step 2: Validating hash code for the package ...');
+    const hashvalue = await FileUtility.getFileHash(filePath);
+    if (hashvalue !== md5value) {
+      utils.channelShowAndAppendLine(
           channel,
-          `Step 1: Downloading ${DigitalTwinConstants.codeGenCli} v${
-              newVersion} package ...`);
-      const downloadOption: request
-          .OptionsWithUri = {method: 'GET', uri: packageUri, encoding: null};
-      const zipData = await request(downloadOption).promise();
-      const tempPath = path.join(os.tmpdir(), FileNames.iotworkbenchTempFolder);
-      const filePath = path.join(tempPath, `${md5value}.zip`);
-      fs.writeFileSync(filePath, zipData);
-      clearInterval(loading);
-      utils.channelShowAndAppendLine(channel, ' download complete.');
-
-      // Verify
-      // Validate hash code
-      utils.channelShowAndAppend(
-          channel, 'Step 2: Validating hash code for the package ...');
-      const hashvalue = await FileUtility.getFileHash(filePath);
-      if (hashvalue !== md5value) {
+          `the downloaded ${DigitalTwinConstants.codeGenCli} v${
+              newVersion} package has been corrupted.`);
+      if (installOrUpgrade === CodeGenCliOperation.Install) {
         utils.channelShowAndAppendLine(
             channel,
-            `the downloaded ${DigitalTwinConstants.codeGenCli} v${
-                newVersion} package has been corrupted.`);
-        if (installOrUpgrade === 1) {
-          utils.channelShowAndAppendLine(
-              channel,
-              `${
-                  DigitalTwinConstants
-                      .dtPrefix} Abort generating device code stub.`);
-          return false;
-        } else {
-          utils.channelShowAndAppendLine(
-              channel,
-              `        Abort the installation and continue generating device code stub.`);
-          return true;
-        }
+            `${
+                DigitalTwinConstants
+                    .dtPrefix} Abort generating device code stub.`);
+        return false;
       } else {
-        utils.channelShowAndAppendLine(channel, ' passed.');
+        utils.channelShowAndAppendLine(
+            channel,
+            `        Abort the installation and continue generating device code stub.`);
+        return true;
       }
-
-      // Extract files
-      const codeGenCommandPath = localCodeGenCliPath();
-      utils.channelShowAndAppend(channel, `Step 3: Extracting files ...`);
-      await FileUtility.extractZipFile(filePath, codeGenCommandPath);
-      utils.channelShowAndAppendLine(channel, ' done.');
-      // Update the config
-      await ConfigHandler.update(
-          ConfigKey.codeGeneratorVersion, newVersion,
-          vscode.ConfigurationTarget.Global);
-    } finally {
-      clearInterval(loading);
+    } else {
+      utils.channelShowAndAppendLine(channel, ' passed.');
     }
+
+    // Extract files
+    const codeGenCommandPath = localCodeGenCliPath();
+    utils.channelShowAndAppend(channel, `Step 3: Extracting files ...`);
+    await FileUtility.extractZipFile(filePath, codeGenCommandPath);
+    utils.channelShowAndAppendLine(channel, ' done.');
+
+    // Update the config
+    await ConfigHandler.update(
+        ConfigKey.codeGeneratorVersion, newVersion,
+        vscode.ConfigurationTarget.Global);
 
     utils.channelShowAndAppendLine(
         channel,
@@ -683,8 +675,8 @@ export class CodeGeneratorCore {
     const newVersion = targetConfigItem.codeGeneratorVersion;
     const processTitle =
         (installOrUpgrade === CodeGenCliOperation.Install ?
-             `Installing ${DigitalTwinConstants.codeGenCli} ...` :
-             `Upgrading ${DigitalTwinConstants.codeGenCli} ...`);
+             `Installing ${DigitalTwinConstants.codeGenCli}` :
+             `Upgrading ${DigitalTwinConstants.codeGenCli}`);
     const message =
         (installOrUpgrade === CodeGenCliOperation.Install ?
              ` not installed, start installing:` :
@@ -696,7 +688,21 @@ export class CodeGeneratorCore {
     let result = false;
     await vscode.window.withProgress(
         {location: vscode.ProgressLocation.Notification, title: processTitle},
-        async () => {
+        async (progress) => {
+          progress.report({increment: 0});
+
+          setTimeout(() => {
+            progress.report({increment: 10, message: `still going...`});
+          }, 1000);
+
+          setTimeout(() => {
+            progress.report({increment: 40, message: `still going...`});
+          }, 5000);
+
+          setTimeout(() => {
+            progress.report({increment: 50, message: `almost done...`});
+          }, 10000);
+
           result = await this.downloadAndInstallCodeGenCli(
               channel, targetConfigItem as CodeGeneratorConfigItem,
               installOrUpgrade, newVersion);
