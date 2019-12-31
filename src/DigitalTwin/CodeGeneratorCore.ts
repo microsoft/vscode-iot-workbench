@@ -696,8 +696,7 @@ export class CodeGeneratorCore {
           }, 1000);
 
           setTimeout(() => {
-            progress.report(
-                {increment: 40, message: `still going...`});
+            progress.report({increment: 40, message: `still going...`});
           }, 5000);
 
           setTimeout(() => {
