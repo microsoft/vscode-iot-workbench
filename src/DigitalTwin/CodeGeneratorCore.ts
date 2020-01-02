@@ -24,7 +24,7 @@ import {DigitalTwinUtility} from './DigitalTwinUtility';
 import {CodeGenUtility} from './DigitalTwinCodeGen/CodeGenUtility';
 import {FileUtility} from '../FileUtility';
 import {CancelOperationError} from '../CancelOperationError';
-import { Utility } from './pnp/src/common/utility';
+import {Utility} from './pnp/src/common/utility';
 
 interface CodeGeneratorDownloadLocation {
   win32Md5: string;
@@ -442,7 +442,8 @@ export class CodeGeneratorCore {
     }
 
     // Parse capabilityModel name from id
-    const capabilityModel = await Utility.getJsonContent(codeGenExecutionInfo.capabilityModelFilePath);
+    const capabilityModel = await Utility.getJsonContent(
+        codeGenExecutionInfo.capabilityModelFilePath);
     const capabilityModelId = capabilityModel['@id'];
 
     await vscode.window.withProgress(
