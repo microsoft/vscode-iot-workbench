@@ -9,7 +9,7 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 ## Changes
 
 - Refine command flow of "**Azure IoT Device Workbench: Configure Development Container for CMake Project (preview)...**"
-- Refine example landing page automatically poping up behaviour.
+- Refine example landing page automatically popping up behaviour.
 - Automatically configure Arduino project.
 
 ## Version 0.10.17
