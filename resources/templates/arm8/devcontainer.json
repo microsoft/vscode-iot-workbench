@@ -1,6 +1,5 @@
 {
-  "image": "arm64",
-  "name": "arm64_container",
+  "name": "Azure IoT Device C SDK for arm64 Linux",
   "dockerFile": "Dockerfile",
   "extensions": [
     "ms-vscode.cpptools",

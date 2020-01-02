@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as copypaste from 'copy-paste';
+import * as clipboardy from 'clipboardy';
 import * as fs from 'fs-plus';
 import {Guid} from 'guid-typescript';
 import * as os from 'os';
@@ -10,8 +10,7 @@ import * as vscode from 'vscode';
 
 import {BoardProvider} from '../boardProvider';
 import {ConfigHandler} from '../configHandler';
-import {ConfigKey, ScaffoldType} from '../constants';
-import {FileUtility} from '../FileUtility';
+import {ConfigKey, OSPlatform} from '../constants';
 import {TelemetryContext} from '../telemetry';
 
 import {ArduinoDeviceBase} from './ArduinoDeviceBase';
@@ -38,11 +37,11 @@ export class Esp32Device extends ArduinoDeviceBase {
   }
 
   get version() {
-    const plat = os.platform();
+    const platform = os.platform();
     let packageRootPath = '';
     let version = '0.0.1';
 
-    if (plat === 'win32') {
+    if (platform === OSPlatform.WIN32) {
       const homeDir = os.homedir();
       const localAppData: string = path.join(homeDir, 'AppData', 'Local');
       packageRootPath = path.join(
@@ -80,8 +79,8 @@ export class Esp32Device extends ArduinoDeviceBase {
     return super.checkPrerequisites();
   }
 
-  async create(): Promise<boolean> {
-    return this.createCore(this.board, this.templateFiles);
+  async create(): Promise<void> {
+    this.createCore(this.board, this.templateFiles);
   }
 
   async configDeviceSettings(): Promise<boolean> {
@@ -123,7 +122,7 @@ export class Esp32Device extends ArduinoDeviceBase {
         throw new Error(
             'Unable to get the device connection string, please invoke the command of Azure Provision first.');
       }
-      copypaste.copy(deviceConnectionString);
+      clipboardy.writeSync(deviceConnectionString);
       return true;
     }
 

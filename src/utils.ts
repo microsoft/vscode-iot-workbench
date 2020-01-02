@@ -6,26 +6,31 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import {MessageItem} from 'vscode';
+import * as sdk from 'vscode-iot-device-cube-sdk';
 import * as WinReg from 'winreg';
 
 import {CancelOperationError} from './CancelOperationError';
-import {AzureFunctionsLanguage, FileNames, GlobalConstants, OperationType, PlatformType, ScaffoldType, TemplateTag} from './constants';
+import {IoTCubeCommands, RemoteContainersCommands, VscodeCommands, WorkbenchCommands} from './common/Commands';
+import {AzureFunctionsLanguage, ConfigKey, FileNames, OperationType, PlatformType, ScaffoldType, TemplateTag} from './constants';
 import {DialogResponses} from './DialogResponses';
 import {FileUtility} from './FileUtility';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 import {ProjectTemplate, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
 import {Platform} from './Models/Interfaces/ProjectTemplate';
+import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
 import {RemoteExtension} from './Models/RemoteExtension';
 import {ProjectEnvironmentConfiger} from './ProjectEnvironmentConfiger';
-import {TelemetryContext} from './telemetry';
+import {TelemetryContext, TelemetryResult} from './telemetry';
+import {WorkbenchExtension} from './WorkbenchExtension';
 
 const impor = require('impor')(__dirname);
-import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
     typeof import('./Models/IoTWorkspaceProject');
 const ioTContainerizedProjectModule =
     impor('./Models/IoTContainerizedProject') as
     typeof import('./Models/IoTContainerizedProject');
+const raspberryPiDeviceModule = impor('./Models/RaspberryPiDevice') as
+    typeof import('./Models/RaspberryPiDevice');
 
 export function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -114,13 +119,19 @@ export interface FolderQuickPickItem<T = undefined> extends
   data: T;
 }
 
-export function checkOpenedFolder(): string|undefined {
+/**
+ * Check there is workspace opened in VS Code
+ * and get the first workspace folder path.
+ */
+export function getFirstWorkspaceFolderPath(showWarningMessage = true): string {
   if (!(vscode.workspace.workspaceFolders &&
         vscode.workspace.workspaceFolders.length > 0) ||
       !vscode.workspace.workspaceFolders[0].uri.fsPath) {
-    vscode.window.showWarningMessage(
-        'You have not yet opened a folder in Visual Studio Code. Please select a folder first.');
-    return;
+    if (showWarningMessage) {
+      vscode.window.showWarningMessage(
+          'You have not yet opened a folder in Visual Studio Code. Please select a folder first.');
+    }
+    return '';
   }
 
   return vscode.workspace.workspaceFolders[0].uri.fsPath;
@@ -239,6 +250,8 @@ export async function askToConfigureEnvironment(
     telemetryContext: TelemetryContext, platform: PlatformType,
     deviceRootPath: string, scaffoldType: ScaffoldType,
     operation: OperationType): Promise<void> {
+  telemetryContext.properties.result = TelemetryResult.Failed;
+
   channelShowAndAppendLine(
       channel,
       `${operation} operation failed because the project environment needs configuring.`);
@@ -249,46 +262,35 @@ export async function askToConfigureEnvironment(
           message, DialogResponses.yes, DialogResponses.no);
 
   if (result === DialogResponses.yes) {
-    telemetryContext.properties.errorMessage =
-        `${operation} operation failed and user configures project`;
+    telemetryContext.properties.errorMessage = `${
+        operation} operation failed and user configures project environment.`;
 
-    let res: boolean;
-    try {
-      res = await ProjectEnvironmentConfiger
-                .configureProjectEnvironmentAsPlatform(
-                    context, channel, telemetryContext, platform,
-                    deviceRootPath, scaffoldType);
-    } catch (error) {
-      if (error instanceof CancelOperationError) {
-        telemetryContext.properties.errorMessage =
-            `${operation} operation failed.`;
-        telemetryContext.properties.result = 'Cancelled';
-        channelShowAndAppendLine(channel, error.message);
-        vscode.window.showWarningMessage(error.message);
-        return;
-      } else {
-        throw error;
-      }
-    }
-    if (res) {
-      const message =
-          `Configuration of project environmnet done. You can run the ${
-              operation.toLocaleLowerCase()} operation now.`;
-      channelShowAndAppendLine(channel, message);
-      vscode.window.showInformationMessage(message);
-    }
-  } else {
-    telemetryContext.properties.errorMessage = `${operation} operation failed.`;
-    telemetryContext.properties.result = 'Cancelled';
-    const message = `Project development environment configuration cancelled.`;
+    await ProjectEnvironmentConfiger.configureProjectEnvironmentAsPlatform(
+        context, channel, telemetryContext, platform, deviceRootPath,
+        scaffoldType);
+    const message =
+        `Configuration of project environmnet done. You can run the ${
+            operation.toLocaleLowerCase()} operation now.`;
     channelShowAndAppendLine(channel, message);
-    vscode.window.showWarningMessage(message);
+    vscode.window.showInformationMessage(message);
+  } else {
+    const message = `${
+        operation} operation failed and user cancels to configure project environment.`;
+    throw new CancelOperationError(message);
   }
 }
 
+/**
+ * Ask user to open current IoT project folder as workspace.
+ * @param rootPath project root path
+ * @param workspaceFile iot workspace config file
+ * @param telemetryContext telemetry context
+ */
 export async function askAndOpenProject(
     rootPath: string, workspaceFile: string,
-    telemetryContext: TelemetryContext) {
+    telemetryContext: TelemetryContext): Promise<void> {
+  telemetryContext.properties.result = TelemetryResult.Failed;
+
   const message =
       `Operation failed because the IoT project is not opened. Current folder contains an IoT project '${
           workspaceFile}', do you want to open it?`;
@@ -298,18 +300,26 @@ export async function askAndOpenProject(
 
   if (result === DialogResponses.yes) {
     telemetryContext.properties.errorMessage =
-        'Operation failed and user opens project from folder.';
+        'Operation failed and user opens project folder as workspace.';
     const workspaceFilePath = path.join(rootPath, workspaceFile);
     await vscode.commands.executeCommand(
-        'iotcube.openLocally', workspaceFilePath, false);
+        IoTCubeCommands.OpenLocally, workspaceFilePath, false);
   } else {
-    telemetryContext.properties.errorMessage = 'Operation failed.';
+    throw new CancelOperationError(
+        `Operation failed and user cancels to open current folder as workspace.`);
   }
 }
 
+/**
+ * Ask user to open project in remote before operation execution.
+ * @param operation compile or upload device code operation
+ * @param channel output channel
+ * @param telemetryContext telemetry context
+ */
 export async function askAndOpenInRemote(
-    operation: OperationType, channel: vscode.OutputChannel,
-    telemetryContext: TelemetryContext): Promise<boolean> {
+    operation: OperationType, telemetryContext: TelemetryContext) {
+  telemetryContext.properties.result = TelemetryResult.Failed;
+
   const message = `${
       operation} can only be executed in remote container. Do you want to reopen the IoT project in container?`;
   const result: vscode.MessageItem|undefined =
@@ -318,25 +328,21 @@ export async function askAndOpenInRemote(
 
   if (result === DialogResponses.yes) {
     telemetryContext.properties.errorMessage =
-        `${operation} Operation failed and user opens project in container.`;
-    const res = await RemoteExtension.checkRemoteExtension(channel);
-    if (!res) {
-      telemetryContext.properties.errorMessage =
-          `${operation} operation failed on installing Remote Extension.`;
-      return false;
-    }
-    await vscode.commands.executeCommand('openindocker.reopenInContainer');
-  } else {
-    const message = `${operation} can only be executed in remote container.`;
-    channelShowAndAppendLine(channel, message);
-    telemetryContext.properties.errorMessage = `${operation} operation failed.`;
-  }
+        `${operation} operation failed and user reopens project in container.`;
+    await RemoteExtension.checkRemoteExtension();
 
-  return false;
+    await vscode.commands.executeCommand(
+        RemoteContainersCommands.ReopenInContainer);
+  } else {
+    throw new CancelOperationError(`${
+        operation} operation failed and user cancels to reopen project in container.`);
+  }
 }
+
 const noDeviceSurveyUrl = 'https://www.surveymonkey.com/r/C7NY7KJ';
 
-export async function takeNoDeviceSurvey(telemetryContext: TelemetryContext) {
+export async function takeNoDeviceSurvey(
+    telemetryContext: TelemetryContext, context: vscode.ExtensionContext) {
   const message =
       'Could you help to take a quick survey about what IoT development kit(s) you want Azure IoT Device Workbench to support?';
   const result: vscode.MessageItem|undefined =
@@ -345,54 +351,20 @@ export async function takeNoDeviceSurvey(telemetryContext: TelemetryContext) {
   if (result === DialogResponses.yes) {
     // Open the survey page
     telemetryContext.properties.message = 'User takes no-device survey.';
-    telemetryContext.properties.result = 'Succeeded';
+    telemetryContext.properties.result = TelemetryResult.Succeeded;
 
-    const extension =
-        vscode.extensions.getExtension(GlobalConstants.extensionId);
+    const extension = WorkbenchExtension.getExtension(context);
     if (!extension) {
       return;
     }
     const extensionVersion = extension.packageJSON.version || 'unknown';
     await vscode.commands.executeCommand(
-        'vscode.open',
+        VscodeCommands.VscodeOpen,
         vscode.Uri.parse(
             `${noDeviceSurveyUrl}?o=${encodeURIComponent(process.platform)}&v=${
                 encodeURIComponent(extensionVersion)}`));
   }
   return;
-}
-
-export function generateInterfaceFileNameFromUrnId(
-    urnId: string, targetPath: string) {
-  const suffix = '.interface.json';
-  const names: string[] = urnId.split(':');
-  // at least the path should contain urn, namespace, name & version
-  if (names.length < 4) {
-    throw new Error(`The id of the file is not valid. id: ${urnId}`);
-  }
-
-  const displayName = names.join('_');
-  let counter = 0;
-  let candidateName = displayName + suffix;
-  while (true) {
-    const filePath = path.join(targetPath, candidateName);
-    if (!fileExistsSync(filePath)) {
-      break;
-    }
-    counter++;
-    candidateName = `${displayName}_${counter}${suffix}`;
-  }
-  return candidateName;
-}
-export class InternalConfig {
-  static isInternal: boolean = InternalConfig.isInternalUser();
-
-  private static isInternalUser(): boolean {
-    const userDomain = process.env.USERDNSDOMAIN ?
-        process.env.USERDNSDOMAIN.toLowerCase() :
-        '';
-    return userDomain.endsWith('microsoft.com');
-  }
 }
 
 export async function getTemplateFilesInfo(templateFolder: string):
@@ -458,14 +430,21 @@ export function channelShowAndAppendLine(
   channel.appendLine(message);
 }
 
+export function channelPrintJsonObject(
+    // tslint:disable-next-line: no-any
+    channel: vscode.OutputChannel, data: any) {
+  const indentationSpace = 4;
+  const jsonString = JSON.stringify(data, null, indentationSpace);
+  channelShowAndAppendLine(channel, jsonString);
+}
+
 /**
  * If external project, ask whether to configure the project to be IoT Container
  * Project or create an IoT Project
  */
 export async function handleExternalProject(
-    context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-    telemetryContext: TelemetryContext, scaffoldType: ScaffoldType,
-    deviceRootPath: string) {
+    telemetryContext: TelemetryContext) {
+  telemetryContext.properties.result = TelemetryResult.Failed;
   const message =
       'An IoT project is needed to process the operation, do you want to configure current project to be an IoT Embedded Linux Project or create an IoT project?';
   class Choice {
@@ -481,65 +460,142 @@ export async function handleExternalProject(
   if (result === Choice.configureAsContainerProject) {
     telemetryContext.properties.errorMessage =
         'Operation failed and user configures external project to be an IoT Embedded Linux Project';
-    telemetryContext.properties.projectHostType = 'Container';
-
-    const project = new ioTContainerizedProjectModule.IoTContainerizedProject(
-        context, channel, telemetryContext);
-
-    // If external project, construct as RaspberryPi Device based
-    // container iot workbench project
-    if (!await project.configExternalProjectToIotProject(scaffoldType)) {
-      return;
-    }
-
-    let res = await project.load(scaffoldType);
-    if (!res) {
-      throw new Error(
-          `Failed to load project. Project environment configuration stopped.`);
-    }
-
-    res = await project.configureProjectEnvironmentCore(
-        deviceRootPath, scaffoldType);
-    if (!res) {
-      throw new Error(
-          `Failed to add configuration files. Project environment configuration stopped.`);
-    }
-    await project.openProject(deviceRootPath, false);
+    await vscode.commands.executeCommand(
+        WorkbenchCommands.ConfigureProjectEnvironment);
   } else if (result === Choice.createNewProject) {
     telemetryContext.properties.errorMessage =
         'Operation failed and user creates new project';
-    await vscode.commands.executeCommand('iotworkbench.initializeProject');
+    await vscode.commands.executeCommand(WorkbenchCommands.InitializeProject);
   } else {
     throw new CancelOperationError(
-        `Choose to configure external project Cancelled.`);
+        `Operation failed and user cancels to configure external project.`);
   }
 }
 
 /**
- * Check if current folder is an IoT Workspace Project but not open correctly.
- * If so, return true and ask to open project properly.
- * If not, return false.
+ * Config External CMake Project config file as an IoT Workbench Container
+ * Project. Throw cancel operation error if not CMake project. Update project
+ * host type and board id in IoT Workbench project file.
+ * @param scaffoldType
  */
-export async function handleIncorrectlyOpenedIoTWorkspaceProject(
-    telemetryContext: TelemetryContext): Promise<boolean> {
-  if (!(vscode.workspace.workspaceFolders &&
-        vscode.workspace.workspaceFolders.length > 0) ||
-      !vscode.workspace.workspaceFolders[0]) {
-    return false;
+export async function configExternalCMakeProjectToIoTContainerProject(
+    scaffoldType: ScaffoldType): Promise<void> {
+  const projectRootPath = getFirstWorkspaceFolderPath();
+  // Check if it is a cmake project
+  const cmakeFile = path.join(projectRootPath, FileNames.cmakeFileName);
+  if (!await FileUtility.fileExists(scaffoldType, cmakeFile)) {
+    const message = `Missing ${
+        FileNames.cmakeFileName} to be configured as Embedded Linux project.`;
+    vscode.window.showWarningMessage(message);
+    throw new CancelOperationError(message);
   }
 
-  const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-  const workbenchFileName =
-      path.join(rootPath, 'Device', FileNames.iotworkbenchprojectFileName);
+  const iotWorkbenchProjectFile =
+      path.join(projectRootPath, FileNames.iotWorkbenchProjectFileName);
 
+  // Update project host type in IoT Workbench Project file
+  await updateProjectHostTypeConfig(
+      scaffoldType, iotWorkbenchProjectFile, ProjectHostType.Container);
+
+  // Update board Id as Raspberry Pi in IoT Workbench Project file
+  const projectConfig =
+      await getProjectConfig(scaffoldType, iotWorkbenchProjectFile);
+  projectConfig[`${ConfigKey.boardId}`] =
+      raspberryPiDeviceModule.RaspberryPiDevice.boardId;
+
+  await FileUtility.writeJsonFile(
+      scaffoldType, iotWorkbenchProjectFile, projectConfig);
+}
+
+/**
+ * Update project host type configuration in iot workbench project file.
+ * Create one if not exists.
+ * @param type Scaffold type
+ */
+export async function updateProjectHostTypeConfig(
+    type: ScaffoldType, iotWorkbenchProjectFilePath: string,
+    projectHostType: ProjectHostType): Promise<void> {
+  try {
+    if (!iotWorkbenchProjectFilePath) {
+      throw new Error(`Iot workbench project file path is empty.`);
+    }
+
+    // Get original configs from config file
+    const projectConfig =
+        await getProjectConfig(type, iotWorkbenchProjectFilePath);
+
+    // Update project host type
+    projectConfig[`${ConfigKey.projectHostType}`] =
+        ProjectHostType[projectHostType];
+
+    // Add config version for easier backward compatibility in the future.
+    const workbenchVersion = '1.0.0';
+    if (!projectConfig[`${ConfigKey.workbenchVersion}`]) {
+      projectConfig[`${ConfigKey.workbenchVersion}`] = workbenchVersion;
+    }
+
+    await FileUtility.writeJsonFile(
+        type, iotWorkbenchProjectFilePath, projectConfig);
+  } catch (error) {
+    throw new Error(`Update ${
+        FileNames.iotWorkbenchProjectFileName} file failed: ${error.message}`);
+  }
+}
+
+
+/**
+ * Get project configs from iot workbench project file
+ * @param type Scaffold type
+ */
+export async function getProjectConfig(
+    // tslint:disable-next-line: no-any
+    type: ScaffoldType, iotWorkbenchProjectFilePath: string): Promise<any> {
+  let projectConfig: {[key: string]: string} = {};
+  if (await FileUtility.fileExists(type, iotWorkbenchProjectFilePath)) {
+    const projectConfigContent =
+        (await FileUtility.readFile(
+             type, iotWorkbenchProjectFilePath, 'utf8') as string)
+            .trim();
+    if (projectConfigContent) {
+      projectConfig = JSON.parse(projectConfigContent);
+    }
+  }
+  return projectConfig;
+}
+
+export function getWorkspaceFile(rootPath: string): string {
   const workspaceFiles = fs.readdirSync(rootPath).filter(
       file => path.extname(file).endsWith(FileNames.workspaceExtensionName));
+  if (workspaceFiles && workspaceFiles.length >= 0) {
+    return workspaceFiles[0];
+  } else {
+    return '';
+  }
+}
 
-  if (fs.existsSync(workbenchFileName) && workspaceFiles && workspaceFiles[0]) {
-    await askAndOpenProject(rootPath, workspaceFiles[0], telemetryContext);
+/**
+ * Used when it is an IoT workspace project but not open correctly.
+ * Ask to open as workspace.
+ */
+export async function properlyOpenIoTWorkspaceProject(
+    telemetryContext: TelemetryContext): Promise<void> {
+  const rootPath = getFirstWorkspaceFolderPath();
+  const workbenchFileName =
+      path.join(rootPath, 'Device', FileNames.iotWorkbenchProjectFileName);
+  const workspaceFile = getWorkspaceFile(rootPath);
+  if (fs.existsSync(workbenchFileName) && workspaceFile) {
+    await askAndOpenProject(rootPath, workspaceFile, telemetryContext);
+  }
+}
+
+export function isWorkspaceProject(): boolean {
+  const rootPath = getFirstWorkspaceFolderPath();
+  const workbenchFileName =
+      path.join(rootPath, 'Device', FileNames.iotWorkbenchProjectFileName);
+  const workspaceFile = getWorkspaceFile(rootPath);
+  if (fs.existsSync(workbenchFileName) && workspaceFile) {
     return true;
   }
-
   return false;
 }
 
@@ -552,65 +608,59 @@ export async function handleIncorrectlyOpenedIoTWorkspaceProject(
 export async function constructAndLoadIoTProject(
     context: vscode.ExtensionContext, channel: vscode.OutputChannel,
     telemetryContext: TelemetryContext, isTriggeredWhenExtensionLoad = false) {
-  let projectHostType;
   const scaffoldType = ScaffoldType.Workspace;
-  if (vscode.workspace.workspaceFolders &&
-      vscode.workspace.workspaceFolders.length > 0) {
-    const projectFileRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
-    projectHostType = await IoTWorkbenchProjectBase.getProjectType(
-        scaffoldType, projectFileRootPath);
-    let iotProject;
-    if (projectHostType === ProjectHostType.Container) {
-      iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
-          context, channel, telemetryContext);
-    } else if (projectHostType === ProjectHostType.Workspace) {
-      iotProject = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
-          context, channel, telemetryContext);
-    }
 
-    if (isTriggeredWhenExtensionLoad) {
-      if (iotProject) {
-        try {
-          await iotProject.load(scaffoldType);
-        } catch (error) {
-          // Just try to load the project at extension load time. Ignore error
-        }
-      }
-      return;
-    }
+  const projectFileRootPath = getFirstWorkspaceFolderPath(false);
+  const projectHostType = await IoTWorkbenchProjectBase.getProjectType(
+      scaffoldType, projectFileRootPath);
 
-    // IoT Workspace Project improperly open as folder,
-    // or external project.
-    if (!iotProject) {
-      // If current folder is an IoT Workspace Project but not open correctly,
-      // ask to open properly.
-      const isIncorrectlyOpenedIoTWorkspaceProject =
-          await handleIncorrectlyOpenedIoTWorkspaceProject(telemetryContext);
-
-      // If external project
-      if (!isIncorrectlyOpenedIoTWorkspaceProject) {
-        try {
-          await handleExternalProject(
-              context, channel, telemetryContext, scaffoldType,
-              projectFileRootPath);
-        } catch (err) {
-          // Ignore if user cancel operation
-          if (!(err instanceof CancelOperationError)) {
-            throw new Error(
-                `Failed to handle external project. Error: ${err.message}`);
-          }
-        }
-      }
-      return;
-    }
-
-    const result = await iotProject.load(scaffoldType);
-    if (!result) {
-      throw new Error(`Failed to load project.`);
-    }
-    return iotProject;
+  let iotProject;
+  if (projectHostType === ProjectHostType.Container) {
+    iotProject = new ioTContainerizedProjectModule.IoTContainerizedProject(
+        context, channel, telemetryContext, projectFileRootPath);
+  } else if (projectHostType === ProjectHostType.Workspace) {
+    const projectRootPath = path.join(projectFileRootPath, '..');
+    iotProject = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
+        context, channel, telemetryContext, projectRootPath);
   }
-  return;
+
+  if (isTriggeredWhenExtensionLoad) {
+    if (iotProject) {
+      try {
+        await iotProject.load(scaffoldType, true);
+      } catch (error) {
+        // Just try to load the project at extension load time. Ignore error
+      }
+    }
+    return;
+  }
+
+  // IoT Workspace Project improperly open as folder,
+  // or external project.
+  if (!iotProject) {
+    const isIoTWorkspaceProject = isWorkspaceProject();
+    if (isIoTWorkspaceProject) {
+      // If current folder is an IoT Workspace Project but not open correctly,
+      // ask to open properly
+      await properlyOpenIoTWorkspaceProject(telemetryContext);
+    } else {
+      // If external project
+      try {
+        await handleExternalProject(telemetryContext);
+      } catch (err) {
+        // Ignore if user cancel operation
+        if (!(err instanceof CancelOperationError)) {
+          throw new Error(
+              `Failed to handle external project. Error: ${err.message}`);
+        }
+      }
+    }
+    return;
+  }
+
+  await iotProject.load(scaffoldType);
+
+  return iotProject;
 }
 
 // tslint:disable-next-line: no-any
@@ -719,7 +769,8 @@ export async function askToOverwriteFile(fileName: string):
 export async function fetchAndExecuteTask(
     context: vscode.ExtensionContext, channel: vscode.OutputChannel,
     telemetryContext: TelemetryContext, deviceRootPath: string,
-    operationType: OperationType, taskName: string): Promise<void> {
+    operationType: OperationType, platform: PlatformType,
+    taskName: string): Promise<void> {
   const scaffoldType = ScaffoldType.Workspace;
   if (!await FileUtility.directoryExists(scaffoldType, deviceRootPath)) {
     throw new Error('Unable to find the device root folder.');
@@ -731,8 +782,8 @@ export async function fetchAndExecuteTask(
     channelShowAndAppendLine(channel, message);
 
     await askToConfigureEnvironment(
-        context, channel, telemetryContext, PlatformType.Arduino,
-        deviceRootPath, scaffoldType, operationType);
+        context, channel, telemetryContext, platform, deviceRootPath,
+        scaffoldType, operationType);
     return;
   }
 
@@ -745,8 +796,8 @@ export async function fetchAndExecuteTask(
     channelShowAndAppendLine(channel, message);
 
     await askToConfigureEnvironment(
-        context, channel, telemetryContext, PlatformType.Arduino,
-        deviceRootPath, scaffoldType, operationType);
+        context, channel, telemetryContext, platform, deviceRootPath,
+        scaffoldType, operationType);
     return;
   }
 
@@ -764,9 +815,9 @@ export async function fetchAndExecuteTask(
  * overwrite files if any exists
  */
 export async function getEnvTemplateFilesAndAskOverwrite(
-    context: vscode.ExtensionContext, telemetryContext: TelemetryContext,
-    projectPath: string, scaffoldType: ScaffoldType,
-    templateName: string): Promise<TemplateFileInfo[]|undefined> {
+    context: vscode.ExtensionContext, projectPath: string,
+    scaffoldType: ScaffoldType,
+    templateName: string): Promise<TemplateFileInfo[]> {
   if (!projectPath) {
     throw new Error(
         'Unable to find the project path, please open the folder and initialize project again.');
@@ -804,22 +855,39 @@ export async function getEnvTemplateFilesAndAskOverwrite(
 
   // Ask overwrite or not
   let overwriteAll = false;
-  try {
-    overwriteAll =
-        await askToOverwrite(scaffoldType, projectPath, templateFilesInfo);
-  } catch (error) {
-    if (error instanceof CancelOperationError) {
-      telemetryContext.properties.result = 'Cancelled';
-      telemetryContext.properties.errorMessage = error.message;
-    }
-    throw error;
-  }
+  overwriteAll =
+      await askToOverwrite(scaffoldType, projectPath, templateFilesInfo);
+
   if (!overwriteAll) {
     const message =
         'Do not overwrite configuration files and cancel configuration process.';
-    telemetryContext.properties.errorMessage = message;
-    telemetryContext.properties.result = 'Cancelled';
     throw new CancelOperationError(message);
   }
+
   return templateFilesInfo;
+}
+
+export async function getPlatform(): Promise<string> {
+  const localOs = sdk.Utility.require('os') as typeof import('os');
+  const getPlatform = await localOs.platform;
+  const platform = await getPlatform();
+  return platform;
+}
+
+export async function getHomeDir(): Promise<string> {
+  const localOs = sdk.Utility.require('os') as typeof import('os');
+  const getHomeDir = await localOs.homedir;
+  const homeDir = await getHomeDir();
+  return homeDir;
+}
+
+/**
+ * Whether to pop up landing page or not.
+ * If this is the first time user use workbench, then pop up landing page.
+ * If this is not the first time, don't pop up.
+ */
+export function shouldShowLandingPage(context: vscode.ExtensionContext):
+    boolean {
+  const hasPopUp = context.globalState.get<boolean>(ConfigKey.hasPopUp, false);
+  return !hasPopUp;
 }

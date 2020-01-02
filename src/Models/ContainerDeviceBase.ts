@@ -75,7 +75,7 @@ export abstract class ContainerDeviceBase implements Device {
     return true;
   }
 
-  async create(): Promise<boolean> {
+  async create(): Promise<void> {
     // ScaffoldType is local when creating a project
     const createTimeScaffoldType = ScaffoldType.Local;
     if (!await FileUtility.directoryExists(
@@ -86,10 +86,8 @@ export abstract class ContainerDeviceBase implements Device {
     await this.generateTemplateFiles(
         createTimeScaffoldType, this.projectFolder, this.templateFilesInfo);
 
-    const res = await this.configDeviceEnvironment(
+    await this.configDeviceEnvironment(
         this.projectFolder, createTimeScaffoldType);
-
-    return res;
   }
 
   async generateTemplateFiles(
@@ -123,15 +121,15 @@ export abstract class ContainerDeviceBase implements Device {
     // Check remote
     const isRemote = RemoteExtension.isRemote(this.extensionContext);
     if (!isRemote) {
-      const res = await utils.askAndOpenInRemote(
-          OperationType.Compile, this.channel, this.telemetryContext);
-      if (!res) {
-        return false;
-      }
+      await utils.askAndOpenInRemote(
+          OperationType.Compile, this.telemetryContext);
+      return false;
     }
+
     await utils.fetchAndExecuteTask(
         this.extensionContext, this.channel, this.telemetryContext,
-        this.projectFolder, OperationType.Compile, constants.compileTaskName);
+        this.projectFolder, OperationType.Compile, PlatformType.EmbeddedLinux,
+        constants.compileTaskName);
     return true;
   }
 
@@ -140,7 +138,7 @@ export abstract class ContainerDeviceBase implements Device {
   abstract async configDeviceSettings(): Promise<boolean>;
 
   async configDeviceEnvironment(
-      projectPath: string, scaffoldType: ScaffoldType): Promise<boolean> {
+      projectPath: string, scaffoldType: ScaffoldType): Promise<void> {
     if (!projectPath) {
       throw new Error(
           'Unable to find the project path, please open the folder and initialize project again.');
@@ -161,10 +159,7 @@ export abstract class ContainerDeviceBase implements Device {
     // Select container
     const containerSelection = await this.selectContainer(templateJson);
     if (!containerSelection) {
-      const message = `Container selection cancelled.`;
-      this.telemetryContext.properties.errorMessage = message;
-      this.telemetryContext.properties.result = 'Cancelled';
-      throw new CancelOperationError(message);
+      throw new CancelOperationError(`Container selection cancelled.`);
     }
     const templateName = containerSelection.label;
     if (!templateName) {
@@ -173,10 +168,9 @@ export abstract class ContainerDeviceBase implements Device {
     }
 
     const templateFilesInfo = await utils.getEnvTemplateFilesAndAskOverwrite(
-        this.extensionContext, this.telemetryContext, this.projectFolder,
-        scaffoldType, templateName);
-    if (!templateFilesInfo) {
-      return false;
+        this.extensionContext, this.projectFolder, scaffoldType, templateName);
+    if (templateFilesInfo.length === 0) {
+      throw new Error(`Internal Error: template files info is empty.`);
     }
 
     // Configure project environment with template files
@@ -196,8 +190,6 @@ export abstract class ContainerDeviceBase implements Device {
 
     const message = 'Container device configuration done.';
     utils.channelShowAndAppendLine(this.channel, message);
-
-    return true;
   }
 
   private async selectContainer(templateListJson: TemplatesType):

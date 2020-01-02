@@ -55,3 +55,9 @@ export interface Platform {
   id: string;
   description: string;
 }
+
+export interface DeviceConfig {
+  label: string;
+  description: string;
+  detail: string;
+}

@@ -7,13 +7,13 @@ import * as vscode from 'vscode';
 import request = require('request-promise');
 import rq = require('request');
 
-import {AzureComponentsStorage, FileNames, ScaffoldType, GlobalConstants} from '../constants';
+import {AzureComponentsStorage, FileNames, ScaffoldType} from '../constants';
 
 import {AzureComponentConfig, AzureConfigFileHandler, AzureConfigs, ComponentInfo, Dependency, DependencyConfig, DependencyType} from './AzureComponentConfig';
 import {ARMTemplate, AzureUtility} from './AzureUtility';
 import {Component, ComponentType} from './Interfaces/Component';
 import {Provisionable} from './Interfaces/Provisionable';
-import {channelShowAndAppendLine} from '../utils';
+import {channelShowAndAppendLine, channelPrintJsonObject} from '../utils';
 
 export class CosmosDB implements Component, Provisionable {
   dependencies: DependencyConfig[] = [];
@@ -69,7 +69,7 @@ export class CosmosDB implements Component, Provisionable {
     try {
       azureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, 'utf8'));
       const cosmosDBConfig = azureConfigs.componentConfigs.find(
-          config => config.type === ComponentType[this.componentType]);
+          config => config.type === this.componentType);
       if (cosmosDBConfig) {
         this.componentId = cosmosDBConfig.id;
         this.dependencies = cosmosDBConfig.dependencies;
@@ -81,9 +81,8 @@ export class CosmosDB implements Component, Provisionable {
     return true;
   }
 
-  async create(): Promise<boolean> {
+  async create(): Promise<void> {
     await this.updateConfigSettings(ScaffoldType.Local);
-    return true;
   }
 
   async updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo):
@@ -102,7 +101,7 @@ export class CosmosDB implements Component, Provisionable {
         folder: '',
         name: '',
         dependencies: this.dependencies,
-        type: ComponentType[this.componentType]
+        type: this.componentType
       };
       await this.azureConfigHandler.appendComponent(type, newCosmosDBConfig);
     }
@@ -138,10 +137,7 @@ export class CosmosDB implements Component, Provisionable {
           !cosmosDBDeploy.properties.outputs.cosmosDBAccountKey) {
         throw new Error('Provision Cosmos DB failed.');
       }
-      channelShowAndAppendLine(
-          this.channel,
-          JSON.stringify(
-              cosmosDBDeploy, null, GlobalConstants.indentationSpace));
+      channelPrintJsonObject(this.channel, cosmosDBDeploy);
 
       for (const dependency of this.dependencies) {
         const componentConfig = await this.azureConfigHandler.getComponentById(
@@ -167,10 +163,7 @@ export class CosmosDB implements Component, Provisionable {
       cosmosDbName = cosmosDbNameChoose.label;
       const cosmosDbDetail = this.getCosmosDbByNameFromCache(cosmosDbName);
       if (cosmosDbDetail) {
-        channelShowAndAppendLine(
-            this.channel,
-            JSON.stringify(
-                cosmosDbDetail, null, GlobalConstants.indentationSpace));
+        channelPrintJsonObject(this.channel, cosmosDbDetail);
       }
       cosmosDbKey = await this.getCosmosDbKey(cosmosDbName);
     }
@@ -321,9 +314,7 @@ export class CosmosDB implements Component, Provisionable {
     });
 
     if (this.channel) {
-      channelShowAndAppendLine(
-          this.channel,
-          JSON.stringify(apiRes, null, GlobalConstants.indentationSpace));
+      channelPrintJsonObject(this.channel, apiRes);
     }
     return apiRes;
   }
