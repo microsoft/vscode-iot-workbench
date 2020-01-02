@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import {AzureComponentsStorage, GlobalConstants, ScaffoldType} from '../constants';
+import {AzureComponentsStorage, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
 
 import {Component} from './Interfaces/Component';
@@ -22,7 +22,7 @@ export interface DependencyConfig {
 
 export interface AzureComponentConfig {
   id: string;
-  type: string;
+  type: ComponentType;
   name: string;
   folder: string;
   dependencies: DependencyConfig[];
@@ -63,9 +63,7 @@ export class AzureConfigFileHandler {
         path.join(azureConfigFolderPath, AzureComponentsStorage.fileName);
 
     if (!await FileUtility.fileExists(type, azureConfigFilePath)) {
-      await FileUtility.writeFile(
-          type, azureConfigFilePath,
-          JSON.stringify(azureConfigs, null, GlobalConstants.indentationSpace));
+      await FileUtility.writeJsonFile(type, azureConfigFilePath, azureConfigs);
     }
   }
 
@@ -138,38 +136,6 @@ export class AzureConfigFileHandler {
     }
   }
 
-  async getComponentByType(
-      scaffoldType: ScaffoldType, type: ComponentType|string) {
-    try {
-      const azureConfigContent =
-          await FileUtility.readFile(scaffoldType, this.configFilePath, 'utf8');
-      const azureConfigs =
-          JSON.parse(azureConfigContent as string) as AzureConfigs;
-      const componentConfig = azureConfigs.componentConfigs.find(
-          config => config.type ===
-              (typeof type === 'string' ? type : ComponentType[type]));
-      return componentConfig;
-    } catch (error) {
-      throw new Error('Invalid azure components config file.');
-    }
-  }
-
-  async getComponentsByType(
-      scaffoldType: ScaffoldType, type: ComponentType|string) {
-    try {
-      const azureConfigContent =
-          await FileUtility.readFile(scaffoldType, this.configFilePath, 'utf8');
-      const azureConfigs =
-          JSON.parse(azureConfigContent as string) as AzureConfigs;
-      const componentConfig = azureConfigs.componentConfigs.filter(
-          config => config.type ===
-              (typeof type === 'string' ? type : ComponentType[type]));
-      return componentConfig;
-    } catch (error) {
-      throw new Error('Invalid azure components config file.');
-    }
-  }
-
   async appendComponent(type: ScaffoldType, component: AzureComponentConfig) {
     try {
       const azureConfigContent =
@@ -177,9 +143,7 @@ export class AzureConfigFileHandler {
       const azureConfigs =
           JSON.parse(azureConfigContent as string) as AzureConfigs;
       azureConfigs.componentConfigs.push(component);
-      await FileUtility.writeFile(
-          type, this.configFilePath,
-          JSON.stringify(azureConfigs, null, GlobalConstants.indentationSpace));
+      await FileUtility.writeJsonFile(type, this.configFilePath, azureConfigs);
       return azureConfigs;
     } catch (error) {
       throw new Error('Invalid azure components config file.');
@@ -198,9 +162,7 @@ export class AzureConfigFileHandler {
         throw new Error('Invalid index of componet list.');
       }
       component.componentInfo = componentInfo;
-      await FileUtility.writeFile(
-          type, this.configFilePath,
-          JSON.stringify(azureConfigs, null, GlobalConstants.indentationSpace));
+      await FileUtility.writeJsonFile(type, this.configFilePath, azureConfigs);
       return azureConfigs;
     } catch (error) {
       throw new Error('Invalid azure components config file.');

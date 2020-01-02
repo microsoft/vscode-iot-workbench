@@ -16,6 +16,8 @@ import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
 import {VSCExpress} from 'vscode-express';
 import {RemoteExtension} from './Models/RemoteExtension';
+import {CancelOperationError} from './CancelOperationError';
+import {IoTCubeCommands} from './common/Commands';
 
 type OptionsWithUri = import('request-promise').OptionsWithUri;
 
@@ -88,9 +90,8 @@ export class ExampleExplorer {
   }
 
   private async generateExampleFolder(exampleName: string) {
-    const settings: IoTWorkbenchSettings =
-        await IoTWorkbenchSettings.createAsync();
-    const workbench = await settings.workbenchPath();
+    const settings = await IoTWorkbenchSettings.getInstance();
+    const workbench = settings.getWorkbenchPath();
 
     if (!utils.directoryExistsSync(workbench)) {
       utils.mkdirRecursivelySync(workbench);
@@ -214,11 +215,9 @@ export class ExampleExplorer {
     });
 
     if (!boardSelection) {
-      telemetryContext.properties.errorMessage = 'Board selection cancelled.';
-      telemetryContext.properties.result = 'Cancelled';
-      return;
+      throw new CancelOperationError('Board selection cancelled.');
     } else if (boardSelection.id === 'no_device') {
-      await utils.takeNoDeviceSurvey(telemetryContext);
+      await utils.takeNoDeviceSurvey(telemetryContext, context);
       return;
     } else {
       telemetryContext.properties.board = boardSelection.label;
@@ -256,11 +255,11 @@ export class ExampleExplorer {
     const res = await this.initializeExampleInternal(
         context, channel, telemetryContext);
 
-    if (res) {
-      vscode.window.showInformationMessage('Example load successfully.');
-    } else {
-      vscode.window.showWarningMessage('Example load cancelled.');
+    if (!res) {
+      throw new CancelOperationError(`Example load cancelled.`);
     }
+
+    vscode.window.showInformationMessage('Example load successfully.');
   }
 
   setSelectedExample(name: string, url: string, boardId: string) {
@@ -295,7 +294,7 @@ export class ExampleExplorer {
     const items = fs.listSync(fsPath, [FileNames.workspaceExtensionName]);
     if (items.length !== 0) {
       await vscode.commands.executeCommand(
-          'iotcube.openLocally', items[0], true);
+          IoTCubeCommands.OpenLocally, items[0], true);
       return true;
     }
 
@@ -309,7 +308,7 @@ export class ExampleExplorer {
           fs.listSync(fsPath, [FileNames.workspaceExtensionName]);
       if (workspaceFiles && workspaceFiles.length > 0) {
         await vscode.commands.executeCommand(
-            'iotcube.openLocally', workspaceFiles[0], true);
+            IoTCubeCommands.OpenLocally, workspaceFiles[0], true);
         return true;
       } else {
         // TODO: Add buttom to submit issue to iot-workbench repo.

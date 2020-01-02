@@ -3,7 +3,9 @@
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as sdk from 'vscode-iot-device-cube-sdk';
+import * as crypto from 'crypto';
 import {ScaffoldType} from './constants';
+import extractzip = require('extract-zip');
 
 export class FileUtility {
   static async directoryExists(type: ScaffoldType, dirPath: string):
@@ -104,6 +106,25 @@ export class FileUtility {
     }
   }
 
+  /**
+   * Convert Json object to Json string and write into target file path.
+   * @param type Scaffold type
+   * @param fileDestPath tartet file path
+   * @param data Json object
+   */
+  static async writeJsonFile(
+      // tslint:disable-next-line: no-any
+      type: ScaffoldType, fileDestPath: string, data: any): Promise<void> {
+    const indentationSpace = 4;
+    const jsonString = JSON.stringify(data, null, indentationSpace);
+
+    const fileDir = path.dirname(fileDestPath);
+    if (!await FileUtility.directoryExists(type, fileDir)) {
+      await FileUtility.mkdirRecursively(type, fileDir);
+    }
+    await FileUtility.writeFile(type, fileDestPath, jsonString);
+  }
+
   static async readFile(
       type: ScaffoldType, filePath: string,
       encoding?: string): Promise<string|Buffer> {
@@ -122,5 +143,39 @@ export class FileUtility {
             });
           });
     }
+  }
+
+  static async extractZipFile(sourceZip: string, targetFoder: string):
+      Promise<boolean> {
+    return new Promise((resolve: (value: boolean) => void, reject) => {
+      extractzip(sourceZip, {dir: targetFoder}, err => {
+        if (err) {
+          return reject(err);
+        } else {
+          return resolve(true);
+        }
+      });
+    });
+  }
+
+  static async getFileHash(filename: string, algorithm = 'md5'):
+      Promise<string> {
+    const hash = crypto.createHash(algorithm);
+    const input = fs.createReadStream(filename);
+    let hashvalue = '';
+
+    return new Promise((resolve: (value: string) => void, reject) => {
+      input.on('readable', () => {
+        const data = input.read();
+        if (data) {
+          hash.update(data);
+        }
+      });
+      input.on('error', reject);
+      input.on('end', () => {
+        hashvalue = hash.digest('hex');
+        return resolve(hashvalue);
+      });
+    });
   }
 }

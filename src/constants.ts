@@ -2,21 +2,25 @@
 // Licensed under the MIT License.
 
 export class ConfigKey {
+  // Keys for condifurations in User / Workspace settings
+  static readonly workbench = 'workbench';
   static readonly devicePath = 'DevicePath';
+  static readonly functionPath = 'FunctionPath';
   static readonly iotHubConnectionString = 'iothubConnectionString';
   static readonly iotHubDeviceConnectionString = 'iothubDeviceConnectionString';
   static readonly eventHubConnectionString = 'eventHubConnectionString';
   static readonly eventHubConnectionPath = 'eventHubConnectionPath';
   static readonly functionAppId = 'functionAppId';
-  static readonly functionPath = 'FunctionPath';
   static readonly boardId = 'BoardId';
-  static readonly asaPath = 'StreamAnalyticsPath';
   static readonly codeGeneratorVersion = 'IoTPnPCodeGenVersion';
-  static readonly modelRepositoryKeyName = 'IoTPnPModelRepositoryKey';
-  static readonly iotPnPPublicRepositoryUrl = 'IoTPnPPublicRepositoryUrl';
-  static readonly projectType = 'ProjectType';
+  static readonly asaPath = 'StreamAnalyticsPath';
+
+  // Keys for configurations in iot workbench project config file
   static readonly projectHostType = 'ProjectHostType';
   static readonly workbenchVersion = 'version';
+
+  // Keys for configurations in global state
+  static readonly hasPopUp = 'hasPopUp';
 }
 
 export class EventNames {
@@ -41,21 +45,8 @@ export class EventNames {
   static readonly openTutorial = 'IoTWorkbench.OpenTutorial';
   static readonly projectLoadEvent = 'IoTWorkbench.ProjectLoadEvent';
   static readonly scaffoldDeviceStubEvent = 'IoTWorkbench.ScaffoldDeviceStub';
-  static readonly pnpGetInterfacesEvent = 'IoTWorkbench.IoTPnPGetInterfaces';
-  static readonly pnpGetCapabilityModelsEvent =
-      'IoTWorkbench.IoTPnPGetCapabilityModels';
-  static readonly pnpDeleteModelsEvent = 'IoTWorkbench.IoTPnPDeleteModels';
-  static readonly pnpEditModelsEvent = 'IoTWorkbench.IoTPnPEditModels';
-  static readonly pnpConnectModelRepoEvent =
-      'IoTWorkbench.IoTPnPConnectModelRepo';
-  static readonly pnpDisconnectModelRepoEvent =
-      'IoTWorkbench.IoTPnPDisconnectModelRepo';
-  static readonly pnpCreateInterfaceEvent =
-      'IoTWorkbench.IoTPnPCreateInterface';
-  static readonly pnpCreateCapabilityModelEvent =
-      'IoTWorkbench.IoTPnPCreateCapabilityModel';
-  static readonly pnpSubmitMetaModelFilesEvent =
-      'IoTWorkbench.IoTPnPSubmitMetaModelFiles';
+  static readonly help = 'IoTWorkbench.Help';
+  static readonly setProjectDefaultPath = 'IoTWorkbench.SetDefaultPath';
 }
 
 export class FileNames {
@@ -63,10 +54,11 @@ export class FileNames {
   static readonly boardListFileName = 'boardlist.json';
   static readonly platformListFileName = 'platformlist.json';
   static readonly resourcesFolderName = 'resources';
-  static readonly iotworkbenchprojectFileName = '.iotworkbenchproject';
+  static readonly iotWorkbenchProjectFileName = '.iotworkbenchproject';
   static readonly cmakeFileName = 'CMakeLists.txt';
   static readonly settingsJsonFileName = 'settings.json';
   static readonly codeGenOptionsFileName = 'codeGenOptions.json';
+  static readonly configDeviceOptionsFileName = 'configDeviceOptions.json';
   static readonly devcontainerFolderName = '.devcontainer';
   static readonly vscodeSettingsFolderName = '.vscode';
   static readonly workspaceConfigFilePath = 'project.code-workspace';
@@ -76,11 +68,12 @@ export class FileNames {
   static readonly outputPathName = 'cmake';
   static readonly templatesFolderName = 'templates';
   static readonly templateFiles = 'templatefiles.json';
+  static readonly installPackagesFileName = 'install_packages.sh';
 }
 
 export enum OperationType {
-  Compile = 'Compile device code',
-  Upload = 'Upload device code'
+  Compile = 'Device code compilation',
+  Upload = 'Device code upload'
 }
 
 export enum AzureFunctionsLanguage {
@@ -99,11 +92,6 @@ export class AzureComponentsStorage {
   static readonly fileName = 'azureconfig.json';
 }
 
-export class GlobalConstants {
-  static readonly extensionId = 'vsciot-vscode.vscode-iot-workbench';
-  static readonly indentationSpace = 4;
-}
-
 export class DependentExtensions {
   static readonly azureFunctions = 'ms-azuretools.vscode-azurefunctions';
   static readonly arduino = 'vsciot-vscode.vscode-arduino';
@@ -117,27 +105,13 @@ export enum PlatformType {
 }
 
 export enum DevelopEnvironment {
-  Container = 'in container',
+  RemoteEnv = 'in remote environment',
   LocalEnv = 'in local environment'
 }
 
 export enum TemplateTag {
   General = 'general',
-  Digitaltwin = 'digitaltwin',
   DevelopmentEnvironment = 'development_container'
-}
-
-export class ContextUris {
-  static readonly iotModel = 'http://azureiot.com/v1/contexts/IoTModel.json';
-  static readonly interface = 'http://azureiot.com/v1/contexts/Interface.json';
-  static readonly capabilityModel =
-      'http://azureiot.com/v1/contexts/CapabilityModel.json';
-}
-
-export enum ModelType {
-  Interface = 'Interface',
-  CapabilityModel = 'CapabilityModel',
-  InlineInterface = 'InterfaceInstance'
 }
 
 export enum OSPlatform {

@@ -2,8 +2,7 @@
 // Licensed under the MIT License.
 
 'use strict';
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
+
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as utils from './utils';
@@ -14,6 +13,7 @@ import {IoTWorkbenchSettings} from './IoTSettings';
 import {FileUtility} from './FileUtility';
 import {ProjectTemplate, ProjectTemplateType, TemplatesType} from './Models/Interfaces/ProjectTemplate';
 import {RemoteExtension} from './Models/RemoteExtension';
+import {CancelOperationError} from './CancelOperationError';
 
 const impor = require('impor')(__dirname);
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
@@ -62,10 +62,8 @@ export class ProjectInitializer {
           // Step 1: Get project name
           const projectPath = await this.generateProjectFolder(scaffoldType);
           if (!projectPath) {
-            telemetryContext.properties.errorMessage =
-                'Project name input cancelled.';
-            telemetryContext.properties.result = 'Cancelled';
-            return;
+            throw new CancelOperationError(
+                `Project initialization cancelled: Project name input cancelled.`);
           } else {
             telemetryContext.properties.projectPath = projectPath;
           }
@@ -74,10 +72,8 @@ export class ProjectInitializer {
           const platformSelection =
               await utils.selectPlatform(scaffoldType, context);
           if (!platformSelection) {
-            telemetryContext.properties.errorMessage =
-                'Platform selection cancelled.';
-            telemetryContext.properties.result = 'Cancelled';
-            return;
+            throw new CancelOperationError(
+                `Project initialization cancelled: Platform selection cancelled.`);
           } else {
             telemetryContext.properties.platform = platformSelection.label;
           }
@@ -102,14 +98,12 @@ export class ProjectInitializer {
                 await this.selectTemplate(templateJson, PlatformType.Arduino);
 
             if (!templateSelection) {
-              telemetryContext.properties.errorMessage =
-                  'Project template selection cancelled.';
-              telemetryContext.properties.result = 'Cancelled';
-              return;
+              throw new CancelOperationError(
+                  `Project initialization cancelled: Project template selection cancelled.`);
             } else {
               telemetryContext.properties.template = templateSelection.label;
               if (templateSelection.label === constants.noDeviceMessage) {
-                await utils.takeNoDeviceSurvey(telemetryContext);
+                await utils.takeNoDeviceSurvey(telemetryContext, context);
                 return;
               }
             }
@@ -140,19 +134,17 @@ export class ProjectInitializer {
 
           let project;
           if (template.platform === PlatformType.EmbeddedLinux) {
-            telemetryContext.properties.projectHostType = 'Container';
             project = new ioTContainerizedProjectModule.IoTContainerizedProject(
-                context, channel, telemetryContext);
+                context, channel, telemetryContext, projectPath);
           } else if (template.platform === PlatformType.Arduino) {
-            telemetryContext.properties.projectHostType = 'Workspace';
             project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
-                context, channel, telemetryContext);
+                context, channel, telemetryContext, projectPath);
           } else {
             throw new Error('unsupported platform');
           }
           await project.create(
-              projectPath, templateFilesInfo, projectTemplateType,
-              template.boardId, openInNewWindow);
+              templateFilesInfo, projectTemplateType, template.boardId,
+              openInNewWindow);
         });
   }
 
@@ -189,9 +181,8 @@ export class ProjectInitializer {
   private async generateProjectFolder(scaffoldType: ScaffoldType):
       Promise<string|undefined> {
     // Get default workbench path.
-    const settings: IoTWorkbenchSettings =
-        await IoTWorkbenchSettings.createAsync();
-    const workbench = await settings.workbenchPath();
+    const settings = await IoTWorkbenchSettings.getInstance();
+    const workbench = settings.getWorkbenchPath();
 
     const projectRootPath = path.join(workbench, 'projects');
     if (!await FileUtility.directoryExists(scaffoldType, projectRootPath)) {

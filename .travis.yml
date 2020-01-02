@@ -13,6 +13,7 @@ dist: trusty # using Ubuntu 14.04.5 LTS
 branches:
   only:
   - master
+  - develop
   - /v?[0-9]+\.[0-9]+\.[0-9]+(.*)?/
 
 env:
@@ -20,6 +21,9 @@ env:
     - ISPRODTAG=^v?[0-9]+\.[0-9]+\.[0-9]+$
     - ISTESTTAG=^v?[0-9]+\.[0-9]+\.[0-9]+-[rR][cC]
     - RC_EXTENSION_ID="iotdevexbuild.test-owl-project"
+    - NIGHTLY_BUILD_ID="iotdevexbuild.vscode-iot-workbench-nightly"
+    # Non production situation: RC or nightly build
+    - IS_TEST=true
 
 install:
 - sudo apt-get install libsecret-1-dev
@@ -30,9 +34,16 @@ script:
 - tsc --version
 - gts --version
 - gts check
-- node scripts/modifyConfigIfRCVersion.js
-- node scripts/updateResourceLink.js
-- node scripts/genAiKey.js
+- node scripts/updateConfig.js
+- if [[ $TRAVIS_TAG =~ $ISPRODTAG ]]; then export IS_TEST=false; fi
+- if [[ $TRAVIS_EVENT_TYPE == "cron" ]]; then
+    git config --local user.name $USER_NAME &&
+    git config --local user.email $USER_EMAIL &&
+    git remote set-url origin https://dilin-MS:$GIT_TOKEN@github.com/microsoft/vscode-iot-workbench.git &&
+    export TRAVIS_TAG="nightly-build" &&
+    nightlyBuildTagExists=`git ls-remote --exit-code origin refs/tags/$TRAVIS_TAG` && nightlyBuildCommit=`git rev-list -n 1 $TRAVIS_TAG` &&
+    if [[ $nightlyBuildTagExists && $nightlyBuildCommit != $TRAVIS_COMMIT ]]; then git push --delete origin $TRAVIS_TAG && git tag -f $TRAVIS_TAG && git push --tags -f; fi
+  fi
 - vsce package
 - docker run -ti --rm -v $PWD:/mnt:ro dkhamsing/awesome_bot --allow-dupe --allow-redirect --skip-save-results `ls *.md`
 
@@ -40,12 +51,24 @@ deploy:
   # deploy to github release
   - provider: releases
     api_key: $GIT_TOKEN
+    prerelease: $IS_TEST
     file_glob: true
     file: "*.vsix"
     skip_cleanup: true
     on:
       tags: true
       all_branches: true
+  # deploy nightly build to github release
+  - provider: releases
+    api_key: $GIT_TOKEN
+    prerelease: true
+    overwrite: true
+    file_glob: true
+    file: "*.vsix"
+    skip_cleanup: true
+    on:
+      branch: develop
+      condition: "$TRAVIS_EVENT_TYPE = 'cron'"
   # deploy to vscode extension market
   - provider: script  
     script: vsce publish -p $VSCE_TOKEN --packagePath *.vsix
@@ -64,3 +87,17 @@ deploy:
       all_branches: true
       # if it's a test version tag (something like 1.0.0-rc), then publish test extension to market.
       condition: "$TRAVIS_TAG =~ $ISTESTTAG"
+  # deploy nightly version to vscode extension market
+  - provider: script
+    script: yes | vsce unpublish -p $VSCE_TEST_TOKEN $NIGHTLY_BUILD_ID && vsce publish -p $VSCE_TEST_TOKEN --packagePath *.vsix
+    skip_cleanup: true
+    on:
+      branch: develop
+      condition: "$TRAVIS_EVENT_TYPE = 'cron'"
+
+notifications:
+  email:
+    recipients:
+      - ddexp@microsoft.com
+    on_success: always
+    on_failure: always

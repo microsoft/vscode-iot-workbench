@@ -3,7 +3,8 @@ import * as fs from 'fs-plus';
 import {HttpMethods, WebResource} from 'ms-rest';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import {channelShowAndAppendLine} from '../utils';
+
+import {channelPrintJsonObject, channelShowAndAppendLine} from '../utils';
 
 import request = require('request-promise');
 import rq = require('request');
@@ -13,8 +14,8 @@ import {ConfigHandler} from '../configHandler';
 
 import {getExtension} from './Apis';
 import {ExtensionName} from './Interfaces/Api';
-import {TelemetryWorker, TelemetryContext} from '../telemetry';
-import {EventNames, GlobalConstants} from '../constants';
+import {TelemetryWorker} from '../telemetry';
+import {EventNames} from '../constants';
 
 export interface ARMParameters {
   [key: string]: {value: string|number|boolean|null};
@@ -430,17 +431,16 @@ export class AzureUtility {
       return undefined;
     }
 
-    const telemetryContext: TelemetryContext = {
-      properties: {
-        result: 'Succeeded',
-        error: '',
-        errorMessage: '',
-        subscription: subscription.description
-      },
-      measurements: {duration: 0}
-    };
+    const telemetryWorker = TelemetryWorker.getInstance(AzureUtility._context);
+    const telemetryContext = telemetryWorker.createContext();
+    telemetryContext.properties.subscription = subscription.description;
 
-    TelemetryWorker.sendEvent(EventNames.selectSubscription, telemetryContext);
+    try {
+      telemetryWorker.sendEvent(
+          EventNames.selectSubscription, telemetryContext);
+    } catch {
+      // If sending telemetry failed, skip the error to avoid blocking user.
+    }
     return subscription.description;
   }
 
@@ -532,9 +532,7 @@ export class AzureUtility {
       if (AzureUtility._channel && deployPending) {
         clearInterval(deployPending);
         channelShowAndAppendLine(AzureUtility._channel, '.');
-        channelShowAndAppendLine(
-            AzureUtility._channel,
-            JSON.stringify(deployment, null, GlobalConstants.indentationSpace));
+        channelPrintJsonObject(AzureUtility._channel, deployment);
       }
       return deployment;
     } catch (error) {

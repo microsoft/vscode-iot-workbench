@@ -7,8 +7,8 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {ConfigHandler} from '../configHandler';
-import {AzureComponentsStorage, ConfigKey, GlobalConstants, ScaffoldType} from '../constants';
-import {channelShowAndAppendLine} from '../utils';
+import {AzureComponentsStorage, ConfigKey, ScaffoldType} from '../constants';
+import {channelPrintJsonObject, channelShowAndAppendLine} from '../utils';
 
 import {getExtension} from './Apis';
 import {AzureComponentConfig, AzureConfigFileHandler, AzureConfigs, ComponentInfo, DependencyConfig} from './AzureComponentConfig';
@@ -60,7 +60,7 @@ export class IoTHub implements Component, Provisionable {
     try {
       azureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, 'utf8'));
       const iotHubConfig = azureConfigs.componentConfigs.find(
-          config => config.type === ComponentType[this.componentType]);
+          config => config.type === this.componentType);
       if (iotHubConfig) {
         this.componentId = iotHubConfig.id;
         this.dependencies = iotHubConfig.dependencies;
@@ -73,11 +73,8 @@ export class IoTHub implements Component, Provisionable {
   }
 
 
-  async create(): Promise<boolean> {
-    const createTimeScaffoldType = ScaffoldType.Local;
-
-    await this.updateConfigSettings(createTimeScaffoldType);
-    return true;
+  async create(): Promise<void> {
+    await this.updateConfigSettings(ScaffoldType.Local);
   }
 
   async provision(): Promise<boolean> {
@@ -130,9 +127,7 @@ export class IoTHub implements Component, Provisionable {
 
     if (iothub && iothub.iotHubConnectionString) {
       if (this.channel) {
-        channelShowAndAppendLine(
-            this.channel,
-            JSON.stringify(iothub, null, GlobalConstants.indentationSpace));
+        channelPrintJsonObject(this.channel, iothub);
       }
 
       const sharedAccessKeyMatches =
@@ -196,7 +191,7 @@ export class IoTHub implements Component, Provisionable {
         folder: '',
         name: '',
         dependencies: [],
-        type: ComponentType[this.componentType],
+        type: this.componentType,
         componentInfo
       };
       await this.azureConfigFileHandler.appendComponent(type, newIoTHubConfig);
