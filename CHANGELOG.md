@@ -6,6 +6,10 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 
 - Release data: January 2nd, 2020
 
+## Fixed
+
+- Fix codegen error from model/interface file with UTF8-BOM encoding.[[#864](https://github.com/microsoft/vscode-iot-workbench/issues/864)]
+
 ## Changes
 
 - Refine command flow of "**Azure IoT Device Workbench: Configure Development Container for CMake Project (preview)...**"
