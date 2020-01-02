@@ -61,6 +61,8 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
   }
 
   async load(scaffoldType: ScaffoldType, initLoad = false): Promise<void> {
+    this.validateProjectRootPath(scaffoldType);
+
     // Init device root path
     const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
     if (!devicePath) {
@@ -80,15 +82,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
         scaffoldType, this.iotWorkbenchProjectFilePath, this.projectHostType);
 
     // Init workspace config file
-    const workspaceFile = getWorkspaceFile(this.projectRootPath);
-    if (workspaceFile) {
-      this.workspaceConfigFilePath =
-          path.join(this.projectRootPath, workspaceFile);
-    } else {
-      throw new Error(
-          `Fail to load iot workspace project: Cannot find workspace file under project root path: ${
-              this.projectRootPath}.`);
-    }
+    this.loadAndInitWorkspaceConfigFilePath(scaffoldType);
 
     // Send load project event telemetry only if the IoT project is loaded
     // when VS Code opens.
@@ -148,7 +142,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
         folderName.deviceDefaultFolderName;
 
     // Create azure components
-    this.createAzureComponentsWithProjectType(
+    await this.createAzureComponentsWithProjectType(
         projectType, createTimeScaffoldType, workspace);
 
     // Update workspace config to workspace config file
@@ -185,6 +179,8 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
   async openProject(
       scaffoldType: ScaffoldType, openInNewWindow: boolean,
       openScenario: OpenScenario): Promise<void> {
+    this.loadAndInitWorkspaceConfigFilePath(scaffoldType);
+
     if (!await FileUtility.fileExists(
             scaffoldType, this.workspaceConfigFilePath)) {
       throw new Error(`Workspace config file ${
@@ -484,6 +480,21 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
       }
       default:
         break;
+    }
+  }
+
+  // Init workspace config file path at load time
+  private async loadAndInitWorkspaceConfigFilePath(scaffoldType: ScaffoldType) {
+    this.validateProjectRootPath(scaffoldType);
+
+    const workspaceFile = getWorkspaceFile(this.projectRootPath);
+    if (workspaceFile) {
+      this.workspaceConfigFilePath =
+          path.join(this.projectRootPath, workspaceFile);
+    } else {
+      throw new Error(
+          `Fail to init iot project workspace file path: Cannot find workspace file under project root path: ${
+              this.projectRootPath}.`);
     }
   }
 }

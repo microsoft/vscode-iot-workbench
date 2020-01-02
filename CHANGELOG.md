@@ -2,6 +2,20 @@
 
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
 
+## Version 0.11.0
+
+- Release data: January 2nd, 2020
+
+## Fixed
+
+- Fix codegen error from model/interface file with UTF8-BOM encoding.[[#864](https://github.com/microsoft/vscode-iot-workbench/issues/864)]
+
+## Changes
+
+- Refine command flow of "**Azure IoT Device Workbench: Configure Development Container for CMake Project (preview)...**"
+- Refine example landing page automatically popping up behaviour.
+- Automatically configure Arduino project.
+
 ## Version 0.10.17
 
 - Release data: November 22, 2019
