@@ -12,18 +12,11 @@ import rq = require("request");
 import { AzureAccount, AzureResourceFilter, AzureSession } from "../azure-account.api";
 import { ConfigHandler } from "../configHandler";
 
-<<<<<<< bbbda130d6515e3d7f48de5c9ac57cc09ea22585
-import { getExtension } from "./Apis";
-import { ExtensionName } from "./Interfaces/Api";
-import { TelemetryWorker } from "../telemetry";
-import { EventNames } from "../constants";
-=======
 import {getExtension} from './Apis';
 import {ExtensionName} from './Interfaces/Api';
 import {TelemetryWorker} from '../telemetry';
 import {EventNames} from '../constants';
 import {DependentExtensionNotFoundError} from '../common/Error/Error';
->>>>>>> Define specific error type
 
 export interface ARMParameters {
   [key: string]: { value: string | number | boolean | null };
@@ -63,11 +56,7 @@ export class AzureUtility {
   private static async _getSubscriptionList(): Promise<vscode.QuickPickItem[]> {
     const subscriptionList: vscode.QuickPickItem[] = [];
     if (!AzureUtility._azureAccountExtension) {
-<<<<<<< bbbda130d6515e3d7f48de5c9ac57cc09ea22585
-      throw new Error("Azure account extension is not found.");
-=======
       throw new DependentExtensionNotFoundError(ExtensionName.AzureAccount);
->>>>>>> Define specific error type
     }
 
     const subscriptions = AzureUtility._azureAccountExtension.filters;
@@ -91,11 +80,7 @@ export class AzureUtility {
 
   private static _getSessionBySubscriptionId(subscriptionId: string): AzureSession | undefined {
     if (!AzureUtility._azureAccountExtension) {
-<<<<<<< bbbda130d6515e3d7f48de5c9ac57cc09ea22585
-      throw new Error("Azure account extension is not found.");
-=======
       throw new DependentExtensionNotFoundError(ExtensionName.AzureAccount);
->>>>>>> Define specific error type
     }
 
     const subscriptions: AzureResourceFilter[] = AzureUtility._azureAccountExtension.filters;
@@ -314,8 +299,9 @@ export class AzureUtility {
         inputValue = _value.label;
       } else if (key.substr(0, 2) === "$$") {
         // Read value from file
-        if (!(vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0)) {
-          inputValue = "";
+        if (!vscode.workspace.workspaceFolders ||
+            vscode.workspace.workspaceFolders.length === 0) {
+          inputValue = '';
         } else {
           const _key = key.substr(2);
           const filePath = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, "..", _key);

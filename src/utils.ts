@@ -19,6 +19,7 @@ import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
 import {ProjectTemplate, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
 import {Platform} from './Models/Interfaces/ProjectTemplate';
 import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
+import {IoTWorkspaceProject} from './Models/IoTWorkspaceProject';
 import {RemoteExtension} from './Models/RemoteExtension';
 import {ProjectEnvironmentConfiger} from './ProjectEnvironmentConfiger';
 import {TelemetryContext, TelemetryResult} from './telemetry';
@@ -130,10 +131,9 @@ export interface FolderQuickPickItem<T = undefined> extends vscode.QuickPickItem
  * and get the first workspace folder path.
  */
 export function getFirstWorkspaceFolderPath(showWarningMessage = true): string {
-  if (
-    !(vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ||
-    !vscode.workspace.workspaceFolders[0].uri.fsPath
-  ) {
+  if (!vscode.workspace.workspaceFolders ||
+      vscode.workspace.workspaceFolders.length === 0 ||
+      !vscode.workspace.workspaceFolders[0].uri.fsPath) {
     if (showWarningMessage) {
       vscode.window.showWarningMessage(
         "You have not yet opened a folder in Visual Studio Code. Please select a folder first."
@@ -577,7 +577,9 @@ export async function configExternalCMakeProjectToIoTContainerProject(scaffoldTy
  */
 export async function properlyOpenIoTWorkspaceProject(telemetryContext: TelemetryContext): Promise<void> {
   const rootPath = getFirstWorkspaceFolderPath();
-  const workbenchFileName = path.join(rootPath, "Device", FileNames.iotWorkbenchProjectFileName);
+  const workbenchFileName = path.join(
+      rootPath, IoTWorkspaceProject.folderName.deviceDefaultFolderName,
+      FileNames.iotWorkbenchProjectFileName);
   const workspaceFile = getWorkspaceFile(rootPath);
   if (fs.existsSync(workbenchFileName) && workspaceFile) {
     await askAndOpenProject(rootPath, workspaceFile, telemetryContext);
@@ -585,15 +587,14 @@ export async function properlyOpenIoTWorkspaceProject(telemetryContext: Telemetr
 }
 
 export function isWorkspaceProject(): boolean {
-  let rootPath = '';
-  try {
-    rootPath = getFirstWorkspaceFolderPath();
-  } catch (error) {
+  const rootPath = getFirstWorkspaceFolderPath();
+  if (!rootPath) {
     return false;
   }
 
-  const workbenchFileName =
-      path.join(rootPath, 'Device', FileNames.iotWorkbenchProjectFileName);
+  const workbenchFileName = path.join(
+      rootPath, IoTWorkspaceProject.folderName.deviceDefaultFolderName,
+      FileNames.iotWorkbenchProjectFileName);
   const workspaceFile = getWorkspaceFile(rootPath);
   if (fs.existsSync(workbenchFileName) && workspaceFile) {
     return true;
