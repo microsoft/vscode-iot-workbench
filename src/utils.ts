@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 import * as cp from 'child_process';
+import * as crypto from 'crypto';
 import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
@@ -890,4 +891,17 @@ export function shouldShowLandingPage(context: vscode.ExtensionContext):
     boolean {
   const hasPopUp = context.globalState.get<boolean>(ConfigKey.hasPopUp, false);
   return !hasPopUp;
+}
+
+/**
+ * Hash a string and get hash value.
+ * @param stringToHash string to hash
+ * @param algorithm hash algorithm
+ */
+export function getHashFromString(
+    stringToHash: string, algorithm = 'md5'): string {
+  const hash = crypto.createHash(algorithm);
+  hash.update(stringToHash);
+  const hashValue = hash.digest('hex');
+  return hashValue;
 }
