@@ -1,23 +1,23 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as clipboardy from "clipboardy";
-import * as fs from "fs-plus";
-import { Guid } from "guid-typescript";
-import * as os from "os";
-import * as path from "path";
-import * as vscode from "vscode";
+import * as clipboardy from 'clipboardy';
+import * as fs from 'fs-plus';
+import {Guid} from 'guid-typescript';
+import * as os from 'os';
+import * as path from 'path';
+import * as vscode from 'vscode';
 
-import { BoardProvider } from "../boardProvider";
-import { ConfigHandler } from "../configHandler";
-import { ConfigKey, OSPlatform } from "../constants";
-import { TelemetryContext } from "../telemetry";
+import {BoardProvider} from '../boardProvider';
+import {ConfigNotFoundError, OperationCanceledError, TypeNotSupportedError} from '../common/Error/Error';
+import {ConfigHandler} from '../configHandler';
+import {ConfigKey, OSPlatform} from '../constants';
+import {TelemetryContext} from '../telemetry';
+import {Board} from './Interfaces/Board';
 
-import { ArduinoDeviceBase } from "./ArduinoDeviceBase";
-import { DeviceType } from "./Interfaces/Device";
-import { TemplateFileInfo } from "./Interfaces/ProjectTemplate";
-import { Board } from "./Interfaces/Board";
-import { OperationCanceledError } from "../common/Error/InternalError";
+import {ArduinoDeviceBase} from './ArduinoDeviceBase';
+import {DeviceType} from './Interfaces/Device';
+import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
 
 enum ConfigDeviceSettings {
   Copy = 'Copy',
@@ -25,8 +25,7 @@ enum ConfigDeviceSettings {
 }
 
 export class Esp32Device extends ArduinoDeviceBase {
-  private templateFiles: TemplateFileInfo[] = [];
-  private static _boardId = "esp32";
+  private static _boardId = 'esp32';
 
   private componentId: string;
   get id(): string {
@@ -88,7 +87,7 @@ export class Esp32Device extends ArduinoDeviceBase {
   }
 
   async create(): Promise<void> {
-    this.createCore(this.board, this.templateFiles);
+    this.createCore();
   }
 
   async configDeviceSettings(): Promise<void> {
@@ -125,15 +124,15 @@ export class Esp32Device extends ArduinoDeviceBase {
           ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
 
       if (!deviceConnectionString) {
-        throw new Error(
-          "Unable to get the device connection string, please invoke the command of Azure Provision first."
-        );
+        throw new ConfigNotFoundError(
+            ConfigKey.iotHubDeviceConnectionString,
+            'Please provision Azure service first.');
       }
       clipboardy.writeSync(deviceConnectionString);
       return;
     } else {
-      throw new Error(
-          `Unsupported configuration type: ${configSelection.detail}.`);
+      throw new TypeNotSupportedError(
+          'configuration type', `${configSelection.detail}`);
     }
   }
 

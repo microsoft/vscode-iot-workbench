@@ -1,25 +1,26 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as vscode from "vscode";
-import * as utils from "./utils";
-import * as path from "path";
+'use strict';
 
-import { TelemetryContext } from "./telemetry";
-import { ScaffoldType, PlatformType } from "./constants";
-import { RemoteExtension } from "./Models/RemoteExtension";
-import { IoTWorkbenchProjectBase, OpenScenario } from "./Models/IoTWorkbenchProjectBase";
-import { ProjectHostType } from "./Models/Interfaces/ProjectHostType";
-import { configExternalCMakeProjectToIoTContainerProject } from "./utils";
-import { CancelOperationError } from "./common/CancelOperationError";
+import * as vscode from 'vscode';
+import * as utils from './utils';
+import * as path from 'path';
 
-const impor = require("impor")(__dirname);
-const ioTWorkspaceProjectModule = impor(
-  "./Models/IoTWorkspaceProject"
-) as typeof import("./Models/IoTWorkspaceProject");
-const ioTContainerizedProjectModule = impor(
-  "./Models/IoTContainerizedProject"
-) as typeof import("./Models/IoTContainerizedProject");
+import {TelemetryContext} from './telemetry';
+import {ScaffoldType, PlatformType} from './constants';
+import {RemoteExtension} from './Models/RemoteExtension';
+import {IoTWorkbenchProjectBase, OpenScenario} from './Models/IoTWorkbenchProjectBase';
+import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
+import {configExternalCMakeProjectToIoTContainerProject} from './utils';
+import {OperationCanceledError, TypeNotSupportedError} from './common/Error/Error';
+
+const impor = require('impor')(__dirname);
+const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
+    typeof import('./Models/IoTWorkspaceProject');
+const ioTContainerizedProjectModule =
+    impor('./Models/IoTContainerizedProject') as
+    typeof import('./Models/IoTContainerizedProject');
 
 export class ProjectEnvironmentConfiger {
   async configureCmakeProjectEnvironment(
@@ -73,7 +74,7 @@ export class ProjectEnvironmentConfiger {
       if (projectHostType !== ProjectHostType.Workspace) {
         const message = `This is not an iot workbench Arduino project. You cannot configure it as Arduino platform.`;
         vscode.window.showWarningMessage(message);
-        throw new CancelOperationError(message);
+        throw new OperationCanceledError(message);
       }
 
       const projectRootPath = path.join(projectFileRootPath, "..");
@@ -96,7 +97,7 @@ export class ProjectEnvironmentConfiger {
         projectFileRootPath
       );
     } else {
-      throw new Error("unsupported platform");
+      throw new TypeNotSupportedError('platform', `${platform}`);
     }
 
     await project.load(scaffoldType);

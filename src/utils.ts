@@ -1,47 +1,39 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as cp from "child_process";
-import * as crypto from "crypto";
-import * as fs from "fs-plus";
-import * as path from "path";
-import * as vscode from "vscode";
-import { MessageItem } from "vscode";
-import * as sdk from "vscode-iot-device-cube-sdk";
-import * as WinReg from "winreg";
+import * as cp from 'child_process';
+import * as crypto from 'crypto';
+import * as fs from 'fs-plus';
+import * as path from 'path';
+import * as vscode from 'vscode';
+import {MessageItem} from 'vscode';
+import * as sdk from 'vscode-iot-device-cube-sdk';
+import * as WinReg from 'winreg';
 
-import { CancelOperationError } from "./common/CancelOperationError";
-import { IoTCubeCommands, RemoteContainersCommands, VscodeCommands, WorkbenchCommands } from "./common/Commands";
-import {
-  AzureFunctionsLanguage,
-  ConfigKey,
-  FileNames,
-  OperationType,
-  PlatformType,
-  ScaffoldType,
-  TemplateTag
-} from "./constants";
-import { DialogResponses } from "./DialogResponses";
-import { FileUtility } from "./FileUtility";
-import { ProjectHostType } from "./Models/Interfaces/ProjectHostType";
-import { ProjectTemplate, TemplateFileInfo } from "./Models/Interfaces/ProjectTemplate";
-import { Platform } from "./Models/Interfaces/ProjectTemplate";
-import { IoTWorkbenchProjectBase } from "./Models/IoTWorkbenchProjectBase";
-import { RemoteExtension } from "./Models/RemoteExtension";
-import { ProjectEnvironmentConfiger } from "./ProjectEnvironmentConfiger";
-import { TelemetryContext, TelemetryResult } from "./telemetry";
-import { WorkbenchExtension } from "./WorkbenchExtension";
+import {IoTCubeCommands, RemoteContainersCommands, VscodeCommands, WorkbenchCommands} from './common/Commands';
+import {AugumentEmptyOrNullError, InternalError, OperationCanceledError, OperationFailedError, ResourceNotFoundError} from './common/Error/Error';
+import {AzureFunctionsLanguage, ConfigKey, FileNames, OperationType, PlatformType, ScaffoldType, TemplateTag} from './constants';
+import {DialogResponses} from './DialogResponses';
+import {FileUtility} from './FileUtility';
+import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
+import {ProjectTemplate, TemplateFileInfo} from './Models/Interfaces/ProjectTemplate';
+import {Platform} from './Models/Interfaces/ProjectTemplate';
+import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
+import {RemoteExtension} from './Models/RemoteExtension';
+import {ProjectEnvironmentConfiger} from './ProjectEnvironmentConfiger';
+import {TelemetryContext, TelemetryResult} from './telemetry';
+import {WorkbenchExtension} from './WorkbenchExtension';
 
-const impor = require("impor")(__dirname);
-const ioTWorkspaceProjectModule = impor(
-  "./Models/IoTWorkspaceProject"
-) as typeof import("./Models/IoTWorkspaceProject");
-const ioTContainerizedProjectModule = impor(
-  "./Models/IoTContainerizedProject"
-) as typeof import("./Models/IoTContainerizedProject");
-const raspberryPiDeviceModule = impor("./Models/RaspberryPiDevice") as typeof import("./Models/RaspberryPiDevice");
+const impor = require('impor')(__dirname);
+const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
+    typeof import('./Models/IoTWorkspaceProject');
+const ioTContainerizedProjectModule =
+    impor('./Models/IoTContainerizedProject') as
+    typeof import('./Models/IoTContainerizedProject');
+const raspberryPiDeviceModule = impor('./Models/RaspberryPiDevice') as
+    typeof import('./Models/RaspberryPiDevice');
 
-export function delay(ms: number): Promise<void> {
+export function delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -156,7 +148,7 @@ export async function showOpenDialog(options: vscode.OpenDialogOptions): Promise
   const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog(options);
 
   if (!result) {
-    throw new Error("User cancelled the operation.");
+    throw new OperationCanceledError('User cancelled the dialog');
   } else {
     return result;
   }
@@ -189,7 +181,8 @@ export async function selectWorkspaceItem(
     ignoreFocusOut: true
   });
   if (!folder) {
-    throw new Error("User cancelled the operation.");
+    throw new OperationCanceledError(
+        'User cancelled the workspace item selection process');
   }
 
   return folder && folder.data ? folder.data : (await showOpenDialog(options))[0].fsPath;
@@ -298,8 +291,9 @@ export async function askToConfigureEnvironment(
     channelShowAndAppendLine(channel, message);
     vscode.window.showInformationMessage(message);
   } else {
-    const message = `${operation} operation failed and user cancels to configure project environment.`;
-    throw new CancelOperationError(message);
+    const message = `${
+        operation} operation failed and user cancels to configure project environment.`;
+    throw new OperationCanceledError(message);
   }
 }
 
@@ -329,7 +323,8 @@ export async function askAndOpenProject(
     const workspaceFilePath = path.join(rootPath, workspaceFile);
     await vscode.commands.executeCommand(IoTCubeCommands.OpenLocally, workspaceFilePath, false);
   } else {
-    throw new CancelOperationError(`Operation failed and user cancels to open current folder as workspace.`);
+    throw new OperationCanceledError(
+        `Operation failed and user cancels to open current folder as workspace.`);
   }
 }
 
@@ -356,7 +351,8 @@ export async function askAndOpenInRemote(operation: OperationType, telemetryCont
 
     await vscode.commands.executeCommand(RemoteContainersCommands.ReopenInContainer);
   } else {
-    throw new CancelOperationError(`${operation} operation failed and user cancels to reopen project in container.`);
+    throw new OperationCanceledError(`${
+        operation} operation failed and user cancels to reopen project in container.`);
   }
 }
 
@@ -398,7 +394,8 @@ export async function getTemplateFilesInfo(templateFolder: string): Promise<Temp
 
   const templateFiles = path.join(templateFolder, FileNames.templateFiles);
   if (!(await FileUtility.fileExists(ScaffoldType.Local, templateFiles))) {
-    throw new Error(`Template file ${templateFiles} does not exist.`);
+    throw new ResourceNotFoundError(
+        'get template files info', `template files ${templateFiles}`);
   }
 
   const templateFilesJson = JSON.parse(fs.readFileSync(templateFiles, "utf8"));
@@ -430,13 +427,9 @@ export async function generateTemplateFile(
 
   const targetFilePath = path.join(targetFolderPath, fileInfo.fileName);
   if (fileInfo.fileContent) {
-    try {
-      const fileExist = await FileUtility.fileExists(type, targetFilePath);
-      if (fileInfo.overwrite || !fileExist) {
-        await FileUtility.writeFile(type, targetFilePath, fileInfo.fileContent);
-      }
-    } catch (error) {
-      throw new Error(`Failed to create sketch file ${fileInfo.fileName}: ${error.message}`);
+    const fileExist = await FileUtility.fileExists(type, targetFilePath);
+    if (fileInfo.overwrite || !fileExist) {
+      await FileUtility.writeFile(type, targetFilePath, fileInfo.fileContent);
     }
   }
   return;
@@ -481,7 +474,8 @@ export async function handleExternalProject(telemetryContext: TelemetryContext):
     telemetryContext.properties.errorMessage = "Operation failed and user creates new project";
     await vscode.commands.executeCommand(WorkbenchCommands.InitializeProject);
   } else {
-    throw new CancelOperationError(`Operation failed and user cancels to configure external project.`);
+    throw new OperationCanceledError(
+        `Operation failed and user cancels to configure external project.`);
   }
 }
 
@@ -525,31 +519,28 @@ export function getWorkspaceFile(rootPath: string): string {
  * @param type Scaffold type
  */
 export async function updateProjectHostTypeConfig(
-  type: ScaffoldType,
-  iotWorkbenchProjectFilePath: string,
-  projectHostType: ProjectHostType
-): Promise<void> {
-  try {
-    if (!iotWorkbenchProjectFilePath) {
-      throw new Error(`Iot workbench project file path is empty.`);
-    }
-
-    // Get original configs from config file
-    const projectConfig = await getProjectConfig(type, iotWorkbenchProjectFilePath);
-
-    // Update project host type
-    projectConfig[`${ConfigKey.projectHostType}`] = ProjectHostType[projectHostType];
-
-    // Add config version for easier backward compatibility in the future.
-    const workbenchVersion = "1.0.0";
-    if (!projectConfig[`${ConfigKey.workbenchVersion}`]) {
-      projectConfig[`${ConfigKey.workbenchVersion}`] = workbenchVersion;
-    }
-
-    await FileUtility.writeJsonFile(type, iotWorkbenchProjectFilePath, projectConfig);
-  } catch (error) {
-    throw new Error(`Update ${FileNames.iotWorkbenchProjectFileName} file failed: ${error.message}`);
+    type: ScaffoldType, iotWorkbenchProjectFilePath: string,
+    projectHostType: ProjectHostType): Promise<void> {
+  if (!iotWorkbenchProjectFilePath) {
+    throw new AugumentEmptyOrNullError('iot workbench project file path');
   }
+
+  // Get original configs from config file
+  const projectConfig =
+      await getProjectConfig(type, iotWorkbenchProjectFilePath);
+
+  // Update project host type
+  projectConfig[`${ConfigKey.projectHostType}`] =
+      ProjectHostType[projectHostType];
+
+  // Add config version for easier backward compatibility in the future.
+  const workbenchVersion = '1.0.0';
+  if (!projectConfig[`${ConfigKey.workbenchVersion}`]) {
+    projectConfig[`${ConfigKey.workbenchVersion}`] = workbenchVersion;
+  }
+
+  await FileUtility.writeJsonFile(
+      type, iotWorkbenchProjectFilePath, projectConfig);
 }
 
 /**
@@ -565,7 +556,7 @@ export async function configExternalCMakeProjectToIoTContainerProject(scaffoldTy
   if (!(await FileUtility.fileExists(scaffoldType, cmakeFile))) {
     const message = `Missing ${FileNames.cmakeFileName} to be configured as Embedded Linux project.`;
     vscode.window.showWarningMessage(message);
-    throw new CancelOperationError(message);
+    throw new OperationCanceledError(message);
   }
 
   const iotWorkbenchProjectFile = path.join(projectRootPath, FileNames.iotWorkbenchProjectFileName);
@@ -661,14 +652,7 @@ export async function constructAndLoadIoTProject(
       await properlyOpenIoTWorkspaceProject(telemetryContext);
     } else {
       // If external project
-      try {
-        await handleExternalProject(telemetryContext);
-      } catch (err) {
-        // Ignore if user cancel operation
-        if (!(err instanceof CancelOperationError)) {
-          throw new Error(`Failed to handle external project. Error: ${err.message}`);
-        }
-      }
+      await handleExternalProject(telemetryContext);
     }
     return;
   }
@@ -700,7 +684,8 @@ export async function selectPlatform(
   const platformListJson = JSON.parse(platformListJsonString);
 
   if (!platformListJson) {
-    throw new Error("Fail to load platform list.");
+    throw new OperationFailedError(
+        `load platform list ${FileNames.platformListFileName}`);
   }
 
   const platformList: vscode.QuickPickItem[] = [];
@@ -751,7 +736,7 @@ export async function askToOverwriteFile(fileName: string): Promise<vscode.Quick
 
   if (!overwriteSelection) {
     // Selection was cancelled
-    throw new CancelOperationError(`Ask to overwrite ${fileName} selection cancelled.`);
+    throw new OperationCanceledError(`Ask to overwrite ${fileName} selection cancelled.`);
   }
 
   return overwriteSelection;
@@ -791,8 +776,9 @@ export async function fetchAndExecuteTask(
   taskName: string
 ): Promise<void> {
   const scaffoldType = ScaffoldType.Workspace;
-  if (!(await FileUtility.directoryExists(scaffoldType, deviceRootPath))) {
-    throw new Error("Unable to find the device root folder.");
+  if (!await FileUtility.directoryExists(scaffoldType, deviceRootPath)) {
+    throw new ResourceNotFoundError(
+        'fetch and execute task', `device root folder ${deviceRootPath}`);
   }
 
   const tasks = await vscode.tasks.fetchTasks();
@@ -840,35 +826,49 @@ export async function fetchAndExecuteTask(
 }
 
 /**
+ * Get template list json object
+ */
+export async function getTemplateJson(
+    context: vscode.ExtensionContext,
+    // tslint:disable-next-line: no-any
+    scaffoldType: ScaffoldType): Promise<any> {
+  const templateJsonFilePath = context.asAbsolutePath(path.join(
+      FileNames.resourcesFolderName, FileNames.templatesFolderName,
+      FileNames.templateFileName));
+  const templateJsonFileString =
+      await FileUtility.readFile(scaffoldType, templateJsonFilePath, 'utf8') as
+      string;
+  const templateJson = JSON.parse(templateJsonFileString);
+  if (!templateJson) {
+    throw new InternalError('Fail to load template list.');
+  }
+
+  return templateJson;
+}
+
+/**
  * Get environment development template files with template name, and ask to
  * overwrite files if any exists
  */
 export async function getEnvTemplateFilesAndAskOverwrite(
-  context: vscode.ExtensionContext,
-  projectPath: string,
-  scaffoldType: ScaffoldType,
-  templateName: string
-): Promise<TemplateFileInfo[]> {
+    context: vscode.ExtensionContext, projectPath: string,
+    scaffoldType: ScaffoldType,
+    templateName: string): Promise<TemplateFileInfo[]> {
   if (!projectPath) {
-    throw new Error("Unable to find the project path, please open the folder and initialize project again.");
+    throw new AugumentEmptyOrNullError(
+        'project path', 'Please open the folder and initialize project again.');
   }
 
-  // Get template list json object
-  const templateJsonFilePath = context.asAbsolutePath(
-    path.join(FileNames.resourcesFolderName, FileNames.templatesFolderName, FileNames.templateFileName)
-  );
-  const templateJsonFileString = (await FileUtility.readFile(scaffoldType, templateJsonFilePath, "utf8")) as string;
-  const templateJson = JSON.parse(templateJsonFileString);
-  if (!templateJson) {
-    throw new Error("Fail to load template list.");
-  }
+  const templateJson = await getTemplateJson(context, scaffoldType);
 
   // Get environment template files
   const projectEnvTemplate: ProjectTemplate[] = templateJson.templates.filter((template: ProjectTemplate) => {
     return template.tag === TemplateTag.DevelopmentEnvironment && template.name === templateName;
   });
   if (projectEnvTemplate.length === 0) {
-    throw new Error(`Fail to get project development environment template files.`);
+    throw new OperationFailedError(
+        `get project development environment template files with template name ${
+            templateName}`);
   }
   const templateFolderName = projectEnvTemplate[0].path;
   const templateFolder = context.asAbsolutePath(
@@ -881,8 +881,9 @@ export async function getEnvTemplateFilesAndAskOverwrite(
   overwriteAll = await askToOverwrite(scaffoldType, projectPath, templateFilesInfo);
 
   if (!overwriteAll) {
-    const message = "Do not overwrite configuration files and cancel configuration process.";
-    throw new CancelOperationError(message);
+    const message =
+        'Do not overwrite configuration files and cancel configuration process.';
+    throw new OperationCanceledError(message);
   }
 
   return templateFilesInfo;

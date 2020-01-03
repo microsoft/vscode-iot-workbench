@@ -1,27 +1,28 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as path from "path";
-import * as vscode from "vscode";
+import * as path from 'path';
+import * as vscode from 'vscode';
 
-import { CancelOperationError } from "../../src/common/CancelOperationError";
-import { ConfigKey, EventNames, FileNames, ScaffoldType } from "../constants";
-import { FileUtility } from "../FileUtility";
-import { TelemetryContext, TelemetryWorker } from "../telemetry";
-import * as utils from "../utils";
+import {OperationCanceledError, OperationFailedError, ResourceNotFoundError} from '../common/Error/Error';
+import {ConfigKey, EventNames, FileNames, ScaffoldType} from '../constants';
+import {FileUtility} from '../FileUtility';
+import {TelemetryContext, TelemetryWorker} from '../telemetry';
+import * as utils from '../utils';
 
-import { checkAzureLogin } from "./Apis";
-import { Compilable } from "./Interfaces/Compilable";
-import { Component, ComponentType } from "./Interfaces/Component";
-import { Deployable } from "./Interfaces/Deployable";
-import { Device } from "./Interfaces/Device";
-import { ProjectHostType } from "./Interfaces/ProjectHostType";
-import { ProjectTemplateType, TemplateFileInfo } from "./Interfaces/ProjectTemplate";
-import { Provisionable } from "./Interfaces/Provisionable";
-import { Uploadable } from "./Interfaces/Uploadable";
+import {checkAzureLogin} from './Apis';
+import {Compilable} from './Interfaces/Compilable';
+import {Component, ComponentType} from './Interfaces/Component';
+import {Deployable} from './Interfaces/Deployable';
+import {Device} from './Interfaces/Device';
+import {ProjectHostType} from './Interfaces/ProjectHostType';
+import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
+import {Provisionable} from './Interfaces/Provisionable';
+import {Uploadable} from './Interfaces/Uploadable';
 
-const impor = require("impor")(__dirname);
-const azureUtilityModule = impor("./AzureUtility") as typeof import("./AzureUtility");
+const impor = require('impor')(__dirname);
+const azureUtilityModule =
+    impor('./AzureUtility') as typeof import('./AzureUtility');
 
 export enum OpenScenario {
   createNewProject,
@@ -206,7 +207,7 @@ export abstract class IoTWorkbenchProjectBase {
 
         const res = await item.provision();
         if (!res) {
-          throw new CancelOperationError("Provision cancelled.");
+          throw new OperationCanceledError('Provision cancelled.');
         }
       }
     }
@@ -261,12 +262,12 @@ export abstract class IoTWorkbenchProjectBase {
         );
 
         if (!selection) {
-          throw new CancelOperationError(`Component deployment cancelled.`);
+          throw new OperationCanceledError(`Component deployment cancelled.`);
         }
 
         const res = await item.deploy();
         if (!res) {
-          throw new Error(`The deployment of ${item.name} failed.`);
+          throw new OperationFailedError(`deploy ${item.name}`);
         }
       }
     }
@@ -320,8 +321,11 @@ export abstract class IoTWorkbenchProjectBase {
    * @param scaffoldType scaffold type
    */
   async validateProjectRootPath(scaffoldType: ScaffoldType): Promise<void> {
-    if (!(await FileUtility.directoryExists(scaffoldType, this.projectRootPath))) {
-      throw new Error(`Project root path ${this.projectRootPath} does not exist. Please initialize the project first.`);
+    if (!await FileUtility.directoryExists(
+            scaffoldType, this.projectRootPath)) {
+      throw new ResourceNotFoundError(
+          `project root path ${this.projectRootPath}`,
+          'Please initialize the project first.');
     }
   }
 }

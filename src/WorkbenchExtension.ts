@@ -18,6 +18,7 @@ export class WorkbenchExtension {
 
   private static getExtensionId(context: vscode.ExtensionContext): string {
     // Get extensionId from package.json
+<<<<<<< bbbda130d6515e3d7f48de5c9ac57cc09ea22585
     const packageJsonPath = context.asAbsolutePath("./package.json");
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
     const extensionId = packageJson.publisher + "." + packageJson.name;
@@ -25,6 +26,11 @@ export class WorkbenchExtension {
     if (!extensionId) {
       throw new Error("Fail to get extension id from package.json.");
     }
+=======
+    const packageJsonPath = context.asAbsolutePath('./package.json');
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+    const extensionId = packageJson.publisher + '.' + packageJson.name;
+>>>>>>> Define specific error type
     return extensionId;
   }
 }

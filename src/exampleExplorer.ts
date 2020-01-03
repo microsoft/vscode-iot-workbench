@@ -292,21 +292,15 @@ export class ExampleExplorer {
       return true;
     }
 
-    utils.channelShowAndAppendLine(channel, "Downloading example package...");
-    const res = await this.downloadExamplePackage(channel, url, fsPath);
-    if (res) {
-      // Follow the same pattern in Arduino extension to open examples in new
-      // VSCode instance
-      const workspaceFiles = fs.listSync(fsPath, [FileNames.workspaceExtensionName]);
-      if (workspaceFiles && workspaceFiles.length > 0) {
-        await vscode.commands.executeCommand(IoTCubeCommands.OpenLocally, workspaceFiles[0], true);
-        return true;
-      } else {
-        // TODO: Add buttom to submit issue to iot-workbench repo.
-        throw new Error("The example does not contain a project for Azure IoT Device Workbench.");
-      }
-    } else {
-      throw new Error("Downloading example package failed. Please check your network settings.");
+    utils.channelShowAndAppendLine(channel, 'Downloading example package...');
+    await this.downloadExamplePackage(channel, url, fsPath);
+    // Follow the same pattern in Arduino extension to open examples in new
+    // VSCode instance
+    const projectPath = utils.getWorkspaceFile(fsPath);
+    if (!projectPath) {
     }
+    await vscode.commands.executeCommand(
+        IoTCubeCommands.OpenLocally, projectPath, true);
+    return true;
   }
 }
