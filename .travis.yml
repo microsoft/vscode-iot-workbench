@@ -94,10 +94,3 @@ deploy:
     on:
       branch: develop
       condition: "$TRAVIS_EVENT_TYPE = 'cron'"
-
-notifications:
-  email:
-    recipients:
-      - ddexp@microsoft.com
-    on_success: always
-    on_failure: always
