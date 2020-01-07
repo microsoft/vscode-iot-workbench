@@ -22,8 +22,7 @@ if (process.env.DEPLOY_TO_MARKETPLACE === "true") {
     packageJson.codeGenConfigUrl = codeGenUrl;
 
     // Update production AI Key
-    packageJson.aiKey = process.env['PROD_AIKEY'];
-
+    packageJson.aiKey = process.env.PROD_AIKEY;
   } else if (process.env.IS_TEST) {
     const testName = "test-owl-project";
     const testDisplayName = "Test OWL Project RC";
@@ -61,7 +60,7 @@ function modifyPackageJsonForNonProduction(packageJson, testName, testDisplayNam
   packageJson.displayName = testDisplayName;
   packageJson.publisher = testPublisher;
 
-  packageJson.aiKey = process.env['TEST_AIKEY'];
+  packageJson.aiKey = process.env.TEST_AIKEY;
 
   const indexOfDash = packageJson.version.indexOf('-');
   if (indexOfDash > 0) {

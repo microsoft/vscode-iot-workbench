@@ -103,20 +103,24 @@ jobs:
     displayName: 'check gts error'
     failOnStderr: True
   - bash: |
-      echo "BUILD_SOURCEBRANCH: $BUILD_SOURCEBRANCH"
       is_prod_tag=^refs\/tags\/v?[0-9]+\.[0-9]+\.[0-9]+$
       is_test_tag=^refs\/tags\/v?[0-9]+\.[0-9]+\.[0-9]+-[rR][cC]
-      [[ $BUILD_SOURCEBRANCH =~ $is_prod_tag ]] && is_prod=true && marketplace_token=$DILIN_MARKETPLACE_TOKEN
-      [[ $BUILD_SOURCEBRANCH =~ $is_test_tag ]] && is_test=true && marketplace_token=$DILIN_TEST_MARKETPLACE_TOKEN
-      if [[ "$BUILD_REASON" == "Schedule" ]]; then marketplace_token=$DILIN_TEST_MARKETPLACE_TOKEN; fi
+      [[ $BUILD_SOURCEBRANCH =~ $is_prod_tag ]] && is_prod=true && marketplace_token=$PROD_MARKETPLACE_TOKEN
+      [[ $BUILD_SOURCEBRANCH =~ $is_test_tag ]] && is_test=true && marketplace_token=$TEST_MARKETPLACE_TOKEN
+      if [[ "$BUILD_REASON" == "Schedule" ]]; then marketplace_token=$TEST_MARKETPLACE_TOKEN; fi
       if [[ "$is_prod" == "true" || "$is_test" == "true" ]]; then deploy_to_github_release=true; fi
       if [[ "$is_prod" == "true" || "$is_test" == "true" || "$BUILD_REASON" == "Schedule" ]]; then deploy_to_marketplace=true; fi
 
       # Set job variable
       echo "##vso[task.setvariable variable=is_prod]$is_prod"
       echo "##vso[task.setvariable variable=is_test]$is_test"
+      echo "##vso[task.setvariable variable=marketplace_token]$marketplace_token"
       echo "##vso[task.setvariable variable=deploy_to_github_release]$deploy_to_github_release"
       echo "##vso[task.setvariable variable=deploy_to_marketplace]$deploy_to_marketplace"
+    env:
+      # Pass secret variable
+      PROD_MARKETPLACE_TOKEN: $(vsciot_marketplace_token)
+      TEST_MARKETPLACE_TOKEN: $(iotdevexbuild_marketplace_token)
   - script: node scripts/updateConfig.js
     displayName: 'Update configuration'
   - script: vsce package
@@ -133,23 +137,17 @@ jobs:
       artifactName: workbench-ubuntu-1604-drop
 
   # Deploy prod or rc to Github Release
-  - task: GitHubRelease@1
+  - task: GitHubRelease@0
     inputs:
-      gitHubConnection: 'dilin-ms-test'
+      gitHubConnection: 'pat_for_github_release_deployment'
       repositoryName: '$(Build.Repository.Name)'
       action: 'create'
       target: '$(Build.SourceVersion)'
-      tagSource: 'gitTag'
-      tagPattern: 'v?[0-9]+\.[0-9]+\.[0-9]+'
-      changeLogCompareToRelease: 'lastFullRelease'
-      changeLogType: 'commitBased'
-      isPreRelease: eq(variables['is_test'], true)
+      isPreRelease: $(is_test)
     condition: and(succeeded(), eq(variables['deploy_to_github_release'], 'true'))
 
   # Deploy to marketplace (prod / rc / nightly build)
-  - bash: vsce publish -p $MARKETPLACE_TOKEN --packagePath *.vsix
+  - bash: vsce publish -p $(marketplace_token) --packagePath *.vsix
     workingDirectory: '$(Build.ArtifactStagingDirectory)'
     displayName: 'Deploy to marketplace'
-    env:
-      MARKETPLACE_TOKEN: $(marketplace_token)
     condition: and(succeeded(), eq(variables['deploy_to_marketplace'], 'true'))
