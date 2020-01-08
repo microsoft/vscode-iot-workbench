@@ -7,31 +7,27 @@ const fs = require('fs');
  * TRAVIS_TAG =~ /^v?[0-9]+\.[0-9]+\.[0-9]+$/:          Production release (eg. v0.10.18)
  * TRAVIS_TAG =~ /^v?[0-9]+\.[0-9]+\.[0-9]+-[rR][cC]/:  RC release (eg. v0.10.18-rc, v0.10.18-rc2, etc.)
  */
-if (process.env.DEPLOY_TO_MARKETPLACE === "true") {
-  const packageJson = JSON.parse(fs.readFileSync('package.json'));
+const packageJson = JSON.parse(fs.readFileSync('package.json'));
 
-  // Nightly Build
-  if (process.env.BUILD_REASON === "Schedule") {
-    const nightlyBuildName = "test-owl-project-nightly";
-    const nightlyBuildDisplayName = "Test OWL Project (Nightly)";
-    const nightlyBuildPublisher = "IoTDevExBuild";
-    updateConfigForNonProduction(packageJson, nightlyBuildName, nightlyBuildDisplayName, nightlyBuildPublisher);
-  } else if (process.env.IS_PROD) {
-    // Update resource link
-    const codeGenUrl = "https://aka.ms/iot-codegen-cli-for-workbench";
-    packageJson.codeGenConfigUrl = codeGenUrl;
+// Nightly Build
+if (process.env.BUILD_REASON === "Schedule") {
+  const nightlyBuildName = "test-owl-project-nightly";
+  const nightlyBuildDisplayName = "Test OWL Project (Nightly)";
+  updateConfigForNonProduction(packageJson, nightlyBuildName, nightlyBuildDisplayName);
+} else if (process.env.IS_PROD) {
+  // Update resource link
+  const codeGenUrl = "https://aka.ms/iot-codegen-cli-for-workbench";
+  packageJson.codeGenConfigUrl = codeGenUrl;
 
-    // Update production AI Key
-    packageJson.aiKey = process.env.PROD_AIKEY;
-  } else if (process.env.IS_TEST) {
-    const testName = "test-owl-project";
-    const testDisplayName = "Test OWL Project RC";
-    const testPublisher = "IoTDevExBuild";
-    updateConfigForNonProduction(packageJson, testName, testDisplayName, testPublisher);
-  }
-
-  fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2) + '\n');
+  // Update production AI Key
+  packageJson.aiKey = process.env.PROD_AIKEY;
+} else if (process.env.IS_TEST) {
+  const testName = "test-owl-project";
+  const testDisplayName = "Test OWL Project RC";
+  updateConfigForNonProduction(packageJson, testName, testDisplayName);
 }
+
+fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2) + '\n');
 
 /**
  * Update package.json with test name, displayName, publisher, ai aky.
@@ -42,11 +38,11 @@ if (process.env.DEPLOY_TO_MARKETPLACE === "true") {
  * @param {*} testDisplayName test extension displate name
  * @param {*} testPublisher test publisher
  */
-function updateConfigForNonProduction(packageJson, testName, testDisplayName, testPublisher) {
+function updateConfigForNonProduction(packageJson, testName, testDisplayName) {
   // Update package.json
   packageJson.name = testName;
   packageJson.displayName = testDisplayName;
-  packageJson.publisher = testPublisher;
+  packageJson.publisher = "IoTDevExBuild";
 
   packageJson.aiKey = process.env.TEST_AIKEY;
 
@@ -59,7 +55,7 @@ function updateConfigForNonProduction(packageJson, testName, testDisplayName, te
 
   // Modify extensionId in template files
   const extensionIdPattern = /vsciot-vscode.vscode-iot-workbench/g;
-  const testExtensionId = testPublisher + '.' + testName;
+  const testExtensionId = 'iotdevexbuild.' + testName;
 
   const arm7DevcontainerJsonFile = "resources/templates/arm7/devcontainer.json";
   const arm8DevcontainerJsonFile = "resources/templates/arm8/devcontainer.json";

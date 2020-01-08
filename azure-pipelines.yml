@@ -7,147 +7,107 @@ trigger:
     include:
     - v*
 
-jobs:
-- job: Windows
-  pool:
-    name: Hosted VS2017
-    demands: npm
-  steps:
-  - task: Npm@1
-    displayName: 'Install dependencies'
-    inputs:
-      verbose: false
-  - task: Npm@1
-    displayName: 'Compile sources'
-    inputs:
-      command: custom
-      verbose: false
-      customCommand: 'run compile'
-  - script: npm install -g vsce
-    displayName: 'install vsce'
-  - script: gts check
-    displayName: 'check gts error'
-    failOnStderr: True
-  - script: node scripts/updateConfig.js
-    displayName: 'Update configuration'
-  - script: vsce package
-    displayName: 'Build VSIX package'
-  - task: CopyFiles@2
-    inputs:
-      SourceFolder: '$(System.DefaultWorkingDirectory)'
-      Contents: |
-        **\*.vsix
-      TargetFolder: '$(Build.ArtifactStagingDirectory)'
-  - task: PublishBuildArtifacts@1
-    inputs:
-      pathtoPublish: '$(Build.ArtifactStagingDirectory)'  
-      artifactName: workbench-windows-drop
+strategy:
+  matrix:
+    linux:
+      imageName: "ubuntu-16.04"
+    mac:
+      imageName: "macos-10.13"
+    windows:
+      imageName: "vs2017-win2016"
 
-- job: macOS
-  pool:
-    name: Hosted macOS
-    demands: npm
-  steps:
+pool:
+  vmImage: $(imageName)
+  demands: npm
+
+steps:
+
   - task: UseNode@1
     displayName: 'Install node version >=12.0.0'
     inputs:
       version: '>=12.0.0'
-  - task: Npm@1
-    displayName: 'Install dependencies'
-    inputs:
-      verbose: false
-  - task: Npm@1
-    displayName: 'Compile sources'
-    inputs:
-      command: custom
-      verbose: false
-      customCommand: 'run compile'
-  - script: sudo npm install -g vsce
-    displayName: 'install vsce'
-  - script: node node_modules/gts/build/src/cli.js check
-    displayName: 'check gts error'
-    failOnStderr: True
-  - script: node scripts/updateConfig.js
-    displayName: 'Update configuration'
-  - script: vsce package
-    displayName: 'Build VSIX package'
-  - task: CopyFiles@2
-    inputs:
-      SourceFolder: '$(System.DefaultWorkingDirectory)'
-      Contents: |
-        **/*.vsix
-      TargetFolder: '$(Build.ArtifactStagingDirectory)'
-  - task: PublishBuildArtifacts@1
-    inputs:
-      pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      artifactName: workbench-macos-drop
 
-- job: Linux
-  pool:
-    name: Hosted Ubuntu 1604
-    demands: npm
-  steps:
   - task: Npm@1
     displayName: 'Install dependencies'
     inputs:
       verbose: false
+
+  - script: node node_modules/gts/build/src/cli.js check
+    displayName: 'check gts error'
+    failOnStderr: True
+
   - task: Npm@1
     displayName: 'Compile sources'
     inputs:
       command: custom
       verbose: false
       customCommand: 'run compile'
-  - script: sudo npm install -g vsce
-    displayName: 'install vsce'
-  - script: node node_modules/gts/build/src/cli.js check
-    displayName: 'check gts error'
-    failOnStderr: True
+
   - bash: |
       is_prod_tag=^refs\/tags\/v?[0-9]+\.[0-9]+\.[0-9]+$
       is_test_tag=^refs\/tags\/v?[0-9]+\.[0-9]+\.[0-9]+-[rR][cC]
+
+      # Update marketplace token
       [[ $BUILD_SOURCEBRANCH =~ $is_prod_tag ]] && is_prod=true && marketplace_token=$PROD_MARKETPLACE_TOKEN
       [[ $BUILD_SOURCEBRANCH =~ $is_test_tag ]] && is_test=true && marketplace_token=$TEST_MARKETPLACE_TOKEN
-      if [[ "$BUILD_REASON" == "Schedule" ]]; then marketplace_token=$TEST_MARKETPLACE_TOKEN; fi
-      if [[ "$is_prod" == "true" || "$is_test" == "true" ]]; then deploy_to_github_release=true; fi
-      if [[ "$is_prod" == "true" || "$is_test" == "true" || "$BUILD_REASON" == "Schedule" ]]; then deploy_to_marketplace=true; fi
+      [[ "$BUILD_REASON" == "Schedule" ]] && marketplace_token=$TEST_MARKETPLACE_TOKEN
+      [[ $BUILD_SOURCEBRANCH =~ $is_test_tag || "$BUILD_REASON" == "Schedule" ]] && marketplace_token=$TEST_MARKETPLACE_TOKEN
+
+      [[ $BUILD_SOURCEBRANCH =~ $is_prod_tag || $BUILD_SOURCEBRANCH =~ $is_test_tag || "$BUILD_REASON" == "Schedule" ]] && deploy_to_marketplace=true
 
       # Set job variable
       echo "##vso[task.setvariable variable=is_prod]$is_prod"
       echo "##vso[task.setvariable variable=is_test]$is_test"
       echo "##vso[task.setvariable variable=marketplace_token]$marketplace_token"
-      echo "##vso[task.setvariable variable=deploy_to_github_release]$deploy_to_github_release"
       echo "##vso[task.setvariable variable=deploy_to_marketplace]$deploy_to_marketplace"
     env:
       # Pass secret variable
       PROD_MARKETPLACE_TOKEN: $(vsciot_marketplace_token)
       TEST_MARKETPLACE_TOKEN: $(iotdevexbuild_marketplace_token)
+    displayName: 'Define runtime variable'
+
+  - script: sudo npm install -g vsce
+    displayName: 'install vsce in Linux or MacOS'
+    condition: and(succeeded(), eq(variables['deploy_to_marketplace'], 'true'), ne(variables['Agent.OS'], 'Windows_NT'))
+
+  - script: npm install -g vsce
+    displayName: 'install vsce in Windows'
+    condition: and(succeeded(), eq(variables['deploy_to_marketplace'], 'true'), eq(variables['Agent.OS'], 'Windows_NT'))
+
   - script: node scripts/updateConfig.js
     displayName: 'Update configuration'
+    condition: and(succeeded(), eq(variables['deploy_to_marketplace'], 'true'))
+
   - script: vsce package
     displayName: 'Build VSIX package'
+    condition: and(succeeded(), eq(variables['deploy_to_marketplace'], 'true'))
+
   - task: CopyFiles@2
     inputs:
       SourceFolder: '$(System.DefaultWorkingDirectory)'
       Contents: |
         **/*.vsix
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    condition: and(succeeded(), eq(variables['deploy_to_marketplace'], 'true'))
+
   - task: PublishBuildArtifacts@1
     inputs:
       pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      artifactName: workbench-ubuntu-1604-drop
+      artifactName: $(Agent.OS)-drop
+    condition: and(succeeded(), eq(variables['deploy_to_marketplace'], 'true'))
 
-  # Deploy prod or rc to Github Release
   - task: GitHubRelease@0
+    displayName: 'Deploy production or RC candidate to GitHub Release'
     inputs:
       gitHubConnection: 'pat_for_github_release_deployment'
       repositoryName: '$(Build.Repository.Name)'
       action: 'create'
       target: '$(Build.SourceVersion)'
       isPreRelease: $(is_test)
-    condition: and(succeeded(), eq(variables['deploy_to_github_release'], 'true'))
+    condition: and(succeeded(), eq(variables['deploy_to_marketplace'], 'true'), ne(variables['Build.reason'], 'Schedule'), eq(variables['Agent.OS'], 'Linux'))
 
   # Deploy to marketplace (prod / rc / nightly build)
   - bash: vsce publish -p $(marketplace_token) --packagePath *.vsix
     workingDirectory: '$(Build.ArtifactStagingDirectory)'
     displayName: 'Deploy to marketplace'
-    condition: and(succeeded(), eq(variables['deploy_to_marketplace'], 'true'))
+    condition: and(succeeded(), eq(variables['deploy_to_marketplace'], 'true'), eq(variables['Agent.OS'], 'Linux'))
