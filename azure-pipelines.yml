@@ -111,7 +111,7 @@ steps:
     env:
       MARKETPLACE_TOKEN: $(iotdevexbuild_marketplace_token)
 
-  - bash: yes | vsce unpublish -p $MARKETPLACE_TOKEN $(nightly_build_id) && vsce publish -p MARKETPLACE_TOKEN --packagePath *.vsix
+  - bash: yes | vsce unpublish -p $MARKETPLACE_TOKEN $(nightly_build_id) && vsce publish -p $MARKETPLACE_TOKEN --packagePath *.vsix
     workingDirectory: '$(Build.ArtifactStagingDirectory)'
     displayName: 'Deploy nightly build candidate to marketplace'
     condition: and(succeeded(), eq(variables['Build.reason'], 'Schedule'), eq(variables['Agent.OS'], 'Linux'))
