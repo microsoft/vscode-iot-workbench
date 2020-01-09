@@ -36,7 +36,6 @@ fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2) + '\n');
  * @param {*} packageJson package json oject
  * @param {*} testName test extension name
  * @param {*} testDisplayName test extension displate name
- * @param {*} testPublisher test publisher
  */
 function updateConfigForNonProduction(packageJson, testName, testDisplayName) {
   // Update package.json

@@ -20,6 +20,10 @@ pool:
   vmImage: $(imageName)
   demands: npm
 
+variables:
+  nightly_build_id: iotdevexbuild.test-owl-project-nightly
+  rc_id: iotdevexbuild.test-owl-project
+
 steps:
 
   - task: UseNode@1
@@ -47,31 +51,19 @@ steps:
       is_prod_tag=^refs\/tags\/v?[0-9]+\.[0-9]+\.[0-9]+$
       is_test_tag=^refs\/tags\/v?[0-9]+\.[0-9]+\.[0-9]+-[rR][cC]
 
-      # Update marketplace token
-      [[ $BUILD_SOURCEBRANCH =~ $is_prod_tag ]] && is_prod=true && marketplace_token=$PROD_MARKETPLACE_TOKEN
-      [[ $BUILD_SOURCEBRANCH =~ $is_test_tag ]] && is_test=true && marketplace_token=$TEST_MARKETPLACE_TOKEN
-      [[ "$BUILD_REASON" == "Schedule" ]] && marketplace_token=$TEST_MARKETPLACE_TOKEN
-
+      [[ $BUILD_SOURCEBRANCH =~ $is_prod_tag ]] && is_prod=true
+      [[ $BUILD_SOURCEBRANCH =~ $is_test_tag ]] && is_test=true
       [[ $BUILD_SOURCEBRANCH =~ $is_prod_tag || $BUILD_SOURCEBRANCH =~ $is_test_tag || "$BUILD_REASON" == "Schedule" ]] && deploy_to_marketplace=true
 
       # Set job variable
       echo "##vso[task.setvariable variable=is_prod]$is_prod"
       echo "##vso[task.setvariable variable=is_test]$is_test"
-      echo "##vso[task.setvariable variable=marketplace_token]$marketplace_token"
       echo "##vso[task.setvariable variable=deploy_to_marketplace]$deploy_to_marketplace"
-    env:
-      # Pass secret variable
-      PROD_MARKETPLACE_TOKEN: $(vsciot_marketplace_token)
-      TEST_MARKETPLACE_TOKEN: $(iotdevexbuild_marketplace_token)
     displayName: 'Define runtime variable'
 
-  - script: sudo npm install -g vsce
-    displayName: 'install vsce in Linux or MacOS'
-    condition: and(succeeded(), eq(variables['deploy_to_marketplace'], 'true'), ne(variables['Agent.OS'], 'Windows_NT'))
-
   - script: npm install -g vsce
-    displayName: 'install vsce in Windows'
-    condition: and(succeeded(), eq(variables['deploy_to_marketplace'], 'true'), eq(variables['Agent.OS'], 'Windows_NT'))
+    displayName: 'install vsce'
+    condition: and(succeeded(), eq(variables['deploy_to_marketplace'], 'true'))
 
   - script: node scripts/updateConfig.js
     displayName: 'Update configuration'
@@ -105,8 +97,23 @@ steps:
       isPreRelease: $(is_test)
     condition: and(succeeded(), eq(variables['deploy_to_marketplace'], 'true'), ne(variables['Build.reason'], 'Schedule'), eq(variables['Agent.OS'], 'Linux'))
 
-  # Deploy to marketplace (prod / rc / nightly build)
-  - bash: vsce publish -p $(marketplace_token) --packagePath *.vsix
+  - bash: vsce publish -p $MARKETPLACE_TOKEN --packagePath *.vsix
     workingDirectory: '$(Build.ArtifactStagingDirectory)'
-    displayName: 'Deploy to marketplace'
-    condition: and(succeeded(), eq(variables['deploy_to_marketplace'], 'true'), eq(variables['Agent.OS'], 'Linux'))
+    displayName: 'Deploy production candidate to marketplace'
+    condition: and(succeeded(), eq(variables['is_prod'], 'true'), eq(variables['Agent.OS'], 'Linux'))
+    env:
+      MARKETPLACE_TOKEN: $(vsciot_marketplace_token)
+
+  - bash: yes | vsce unpublish -p $MARKETPLACE_TOKEN $(rc_id) && vsce publish -p $MARKETPLACE_TOKEN --packagePath *.vsix
+    workingDirectory: '$(Build.ArtifactStagingDirectory)'
+    displayName: 'Deploy RC candidate to marketplace'
+    condition: and(succeeded(), eq(variables['is_test'], 'true'), eq(variables['Agent.OS'], 'Linux'))
+    env:
+      MARKETPLACE_TOKEN: $(iotdevexbuild_marketplace_token)
+
+  - bash: yes | vsce unpublish -p $MARKETPLACE_TOKEN $(nightly_build_id) && vsce publish -p MARKETPLACE_TOKEN --packagePath *.vsix
+    workingDirectory: '$(Build.ArtifactStagingDirectory)'
+    displayName: 'Deploy nightly build candidate to marketplace'
+    condition: and(succeeded(), eq(variables['Build.reason'], 'Schedule'), eq(variables['Agent.OS'], 'Linux'))
+    env:
+      MARKETPLACE_TOKEN: $(iotdevexbuild_marketplace_token)
