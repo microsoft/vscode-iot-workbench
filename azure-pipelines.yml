@@ -51,7 +51,6 @@ steps:
       [[ $BUILD_SOURCEBRANCH =~ $is_prod_tag ]] && is_prod=true && marketplace_token=$PROD_MARKETPLACE_TOKEN
       [[ $BUILD_SOURCEBRANCH =~ $is_test_tag ]] && is_test=true && marketplace_token=$TEST_MARKETPLACE_TOKEN
       [[ "$BUILD_REASON" == "Schedule" ]] && marketplace_token=$TEST_MARKETPLACE_TOKEN
-      [[ $BUILD_SOURCEBRANCH =~ $is_test_tag || "$BUILD_REASON" == "Schedule" ]] && marketplace_token=$TEST_MARKETPLACE_TOKEN
 
       [[ $BUILD_SOURCEBRANCH =~ $is_prod_tag || $BUILD_SOURCEBRANCH =~ $is_test_tag || "$BUILD_REASON" == "Schedule" ]] && deploy_to_marketplace=true
 
