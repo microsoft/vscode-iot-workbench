@@ -1,21 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import {Guid} from 'guid-typescript';
+import { Guid } from 'guid-typescript';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {CancelOperationError} from '../CancelOperationError';
-import {FileNames, OperationType, PlatformType, ScaffoldType, TemplateTag} from '../constants';
-import {DigitalTwinConstants} from '../DigitalTwin/DigitalTwinConstants';
-import {FileUtility} from '../FileUtility';
-import {TelemetryContext} from '../telemetry';
+import { CancelOperationError } from '../CancelOperationError';
+import { FileNames, OperationType, PlatformType, ScaffoldType, TemplateTag } from '../constants';
+import { DigitalTwinConstants } from '../DigitalTwin/DigitalTwinConstants';
+import { FileUtility } from '../FileUtility';
+import { TelemetryContext } from '../telemetry';
 import * as utils from '../utils';
 
-import {ComponentType} from './Interfaces/Component';
-import {Device, DeviceType} from './Interfaces/Device';
-import {ProjectTemplate, TemplateFileInfo, TemplatesType} from './Interfaces/ProjectTemplate';
-import {RemoteExtension} from './RemoteExtension';
+import { ComponentType } from './Interfaces/Component';
+import { Device, DeviceType } from './Interfaces/Device';
+import { ProjectTemplate, TemplateFileInfo, TemplatesType } from './Interfaces/ProjectTemplate';
+import { RemoteExtension } from './RemoteExtension';
 
 const constants = {
   configFile: 'config.json',
@@ -24,7 +24,7 @@ const constants = {
 
 export abstract class ContainerDeviceBase implements Device {
   protected componentId: string;
-  get id() {
+  get id(): string {
     return this.componentId;
   }
   protected deviceType: DeviceType;
@@ -39,9 +39,9 @@ export abstract class ContainerDeviceBase implements Device {
   name = 'container base';
 
   constructor(
-      context: vscode.ExtensionContext, projectPath: string,
-      channel: vscode.OutputChannel, telemetryContext: TelemetryContext,
-      deviceType: DeviceType,
+    context: vscode.ExtensionContext, projectPath: string,
+    channel: vscode.OutputChannel, telemetryContext: TelemetryContext,
+    deviceType: DeviceType,
       protected templateFilesInfo: TemplateFileInfo[] = []) {
     this.deviceType = deviceType;
     this.componentType = ComponentType.Device;
@@ -79,20 +79,20 @@ export abstract class ContainerDeviceBase implements Device {
     // ScaffoldType is local when creating a project
     const createTimeScaffoldType = ScaffoldType.Local;
     if (!await FileUtility.directoryExists(
-            createTimeScaffoldType, this.projectFolder)) {
+      createTimeScaffoldType, this.projectFolder)) {
       throw new Error('Unable to find the project folder.');
     }
 
     await this.generateTemplateFiles(
-        createTimeScaffoldType, this.projectFolder, this.templateFilesInfo);
+      createTimeScaffoldType, this.projectFolder, this.templateFilesInfo);
 
     await this.configDeviceEnvironment(
-        this.projectFolder, createTimeScaffoldType);
+      this.projectFolder, createTimeScaffoldType);
   }
 
   async generateTemplateFiles(
-      type: ScaffoldType, projectPath: string,
-      templateFilesInfo: TemplateFileInfo[]): Promise<boolean> {
+    type: ScaffoldType, projectPath: string,
+    templateFilesInfo: TemplateFileInfo[]): Promise<boolean> {
     if (!templateFilesInfo) {
       throw new Error('No template file provided.');
     }
@@ -122,14 +122,14 @@ export abstract class ContainerDeviceBase implements Device {
     const isRemote = RemoteExtension.isRemote(this.extensionContext);
     if (!isRemote) {
       await utils.askAndOpenInRemote(
-          OperationType.Compile, this.telemetryContext);
+        OperationType.Compile, this.telemetryContext);
       return false;
     }
 
     await utils.fetchAndExecuteTask(
-        this.extensionContext, this.channel, this.telemetryContext,
-        this.projectFolder, OperationType.Compile, PlatformType.EmbeddedLinux,
-        constants.compileTaskName);
+      this.extensionContext, this.channel, this.telemetryContext,
+      this.projectFolder, OperationType.Compile, PlatformType.EmbeddedLinux,
+      constants.compileTaskName);
     return true;
   }
 
@@ -138,19 +138,19 @@ export abstract class ContainerDeviceBase implements Device {
   abstract async configDeviceSettings(): Promise<boolean>;
 
   async configDeviceEnvironment(
-      projectPath: string, scaffoldType: ScaffoldType): Promise<void> {
+    projectPath: string, scaffoldType: ScaffoldType): Promise<void> {
     if (!projectPath) {
       throw new Error(
-          'Unable to find the project path, please open the folder and initialize project again.');
+        'Unable to find the project path, please open the folder and initialize project again.');
     }
 
     // Get template list json object
     const templateJsonFilePath = this.extensionContext.asAbsolutePath(path.join(
-        FileNames.resourcesFolderName, FileNames.templatesFolderName,
-        FileNames.templateFileName));
+      FileNames.resourcesFolderName, FileNames.templatesFolderName,
+      FileNames.templateFileName));
     const templateJsonFileString =
         await FileUtility.readFile(
-            scaffoldType, templateJsonFilePath, 'utf8') as string;
+          scaffoldType, templateJsonFilePath, 'utf8') as string;
     const templateJson = JSON.parse(templateJsonFileString);
     if (!templateJson) {
       throw new Error('Fail to load template list.');
@@ -164,11 +164,11 @@ export abstract class ContainerDeviceBase implements Device {
     const templateName = containerSelection.label;
     if (!templateName) {
       throw new Error(
-          `Internal Error: Cannot get template name from template property.`);
+        `Internal Error: Cannot get template name from template property.`);
     }
 
     const templateFilesInfo = await utils.getEnvTemplateFilesAndAskOverwrite(
-        this.extensionContext, this.projectFolder, scaffoldType, templateName);
+      this.extensionContext, this.projectFolder, scaffoldType, templateName);
     if (templateFilesInfo.length === 0) {
       throw new Error(`Internal Error: template files info is empty.`);
     }
@@ -197,13 +197,13 @@ export abstract class ContainerDeviceBase implements Device {
     const containerTemplates =
         templateListJson.templates.filter((template: ProjectTemplate) => {
           return (
-              template.tag === TemplateTag.DevelopmentEnvironment &&
+            template.tag === TemplateTag.DevelopmentEnvironment &&
               template.platform === PlatformType.EmbeddedLinux);
         });
 
     const containerList: vscode.QuickPickItem[] = [];
     containerTemplates.forEach((container: ProjectTemplate) => {
-      containerList.push({label: container.name, detail: container.detail});
+      containerList.push({ label: container.name, detail: container.detail });
     });
 
     const containerSelection =

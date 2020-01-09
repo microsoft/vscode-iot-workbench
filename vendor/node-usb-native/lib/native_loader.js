@@ -7,10 +7,10 @@ const loadLibrary = function(parentFolder, libraryName) {
   const nodepregypFiles = glob(`${parentFolder.replace(/\\/g, '/')}/${libraryName}*${process.arch}*.node`, {
     sync: true
   });
-  var binding = null;
+  let binding = null;
   nodegypFiles.concat(nodepregypFiles).forEach((file) => {
     try {
-      var _temp = require(file);
+      const _temp = require(file);
       binding = _temp;
       console.log('using', file);
     } catch (e) {

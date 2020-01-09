@@ -3,40 +3,41 @@
 
 import * as clipboardy from 'clipboardy';
 import * as fs from 'fs-plus';
-import {Guid} from 'guid-typescript';
+import { Guid } from 'guid-typescript';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {BoardProvider} from '../boardProvider';
-import {ConfigHandler} from '../configHandler';
-import {ConfigKey, OSPlatform} from '../constants';
-import {TelemetryContext} from '../telemetry';
+import { BoardProvider } from '../boardProvider';
+import { ConfigHandler } from '../configHandler';
+import { ConfigKey, OSPlatform } from '../constants';
+import { TelemetryContext } from '../telemetry';
 
-import {ArduinoDeviceBase} from './ArduinoDeviceBase';
-import {DeviceType} from './Interfaces/Device';
-import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
+import { ArduinoDeviceBase } from './ArduinoDeviceBase';
+import { DeviceType } from './Interfaces/Device';
+import { TemplateFileInfo } from './Interfaces/ProjectTemplate';
+import { Board } from './Interfaces/Board';
 
 export class Esp32Device extends ArduinoDeviceBase {
   private templateFiles: TemplateFileInfo[] = [];
   private static _boardId = 'esp32';
 
   private componentId: string;
-  get id() {
+  get id(): string {
     return this.componentId;
   }
 
-  static get boardId() {
+  static get boardId(): string {
     return Esp32Device._boardId;
   }
 
-  get board() {
+  get board(): Board | undefined {
     const boardProvider = new BoardProvider(this.boardFolderPath);
-    const esp32 = boardProvider.find({id: Esp32Device._boardId});
+    const esp32 = boardProvider.find({ id: Esp32Device._boardId });
     return esp32;
   }
 
-  get version() {
+  get version(): string {
     const platform = os.platform();
     let packageRootPath = '';
     let version = '0.0.1';
@@ -45,7 +46,7 @@ export class Esp32Device extends ArduinoDeviceBase {
       const homeDir = os.homedir();
       const localAppData: string = path.join(homeDir, 'AppData', 'Local');
       packageRootPath = path.join(
-          localAppData, 'Arduino15', 'packages', 'esp32', 'hardware', 'esp32');
+        localAppData, 'Arduino15', 'packages', 'esp32', 'hardware', 'esp32');
     } else {
       packageRootPath = '~/Library/Arduino15/packages/esp32/hardware/esp32';
     }
@@ -63,11 +64,11 @@ export class Esp32Device extends ArduinoDeviceBase {
   name = 'Esp32Arduino';
 
   constructor(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext, devicePath: string,
-      templateFiles?: TemplateFileInfo[]) {
+    context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+    telemetryContext: TelemetryContext, devicePath: string,
+    templateFiles?: TemplateFileInfo[]) {
     super(
-        context, devicePath, channel, telemetryContext, DeviceType.IoT_Button);
+      context, devicePath, channel, telemetryContext, DeviceType.IoTButton);
     this.channel = channel;
     this.componentId = Guid.create().toString();
     if (templateFiles) {
@@ -112,7 +113,7 @@ export class Esp32Device extends ArduinoDeviceBase {
 
     if (configSelection.detail === 'Config CRC') {
       const retValue: boolean =
-          await this.generateCrc(this.extensionContext, this.channel);
+          await this.generateCrc(this.channel);
       return retValue;
     } else if (configSelection.detail === 'Copy') {
       const deviceConnectionString =
@@ -120,7 +121,7 @@ export class Esp32Device extends ArduinoDeviceBase {
 
       if (!deviceConnectionString) {
         throw new Error(
-            'Unable to get the device connection string, please invoke the command of Azure Provision first.');
+          'Unable to get the device connection string, please invoke the command of Azure Provision first.');
       }
       clipboardy.writeSync(deviceConnectionString);
       return true;

@@ -90,7 +90,7 @@ export class ModelRepositoryClient {
    * @param modelId model id
    * @param content content to update
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   static async updateModel(repoInfo: RepositoryInfo, modelId: string, content: any): Promise<string> {
     const options: request.OptionsWithUri = ModelRepositoryClient.createOptions(HttpMethod.Put, repoInfo, modelId);
     options.body = content;
@@ -132,12 +132,12 @@ export class ModelRepositoryClient {
    */
   private static convertToMetaModelType(type: ModelType): MetaModelType {
     switch (type) {
-      case ModelType.Interface:
-        return MetaModelType.Interface;
-      case ModelType.CapabilityModel:
-        return MetaModelType.CapabilityModel;
-      default:
-        return MetaModelType.None;
+    case ModelType.Interface:
+      return MetaModelType.Interface;
+    case ModelType.CapabilityModel:
+      return MetaModelType.CapabilityModel;
+    default:
+      return MetaModelType.None;
     }
   }
 
@@ -151,7 +151,7 @@ export class ModelRepositoryClient {
     const uri = modelId
       ? `${repoInfo.hostname}/models/${encodeURIComponent(modelId)}`
       : `${repoInfo.hostname}/models/search`;
-    // tslint:disable-next-line:no-any
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     const qs: any = { "api-version": repoInfo.apiVersion };
     if (repoInfo.repositoryId) {
       qs.repositoryId = repoInfo.repositoryId;

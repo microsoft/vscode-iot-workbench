@@ -21,7 +21,7 @@ export class Configuration {
    * @param name property name
    * @param value property value
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   static async setGlobalProperty(name: string, value: any): Promise<void> {
     await Configuration.instance.update(name, value, true);
   }
@@ -31,7 +31,7 @@ export class Configuration {
    * @param name property name
    * @param value property value
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   static async setWorkspaceProperty(name: string, value: any): Promise<void> {
     await Configuration.instance.update(name, value, false);
   }

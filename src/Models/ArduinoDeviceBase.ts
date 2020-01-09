@@ -5,18 +5,18 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {VscodeCommands} from '../common/Commands';
-import {ConfigHandler} from '../configHandler';
-import {ConfigKey, DependentExtensions, FileNames, OperationType, OSPlatform, PlatformType, ScaffoldType} from '../constants';
-import {FileUtility} from '../FileUtility';
-import {TelemetryContext} from '../telemetry';
+import { VscodeCommands } from '../common/Commands';
+import { ConfigHandler } from '../configHandler';
+import { ConfigKey, DependentExtensions, FileNames, OperationType, OSPlatform, PlatformType, ScaffoldType } from '../constants';
+import { FileUtility } from '../FileUtility';
+import { TelemetryContext } from '../telemetry';
 import * as utils from '../utils';
 
-import {Board} from './Interfaces/Board';
-import {ComponentType} from './Interfaces/Component';
-import {Device, DeviceType} from './Interfaces/Device';
-import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
-import {OTA} from './OTA';
+import { Board } from './Interfaces/Board';
+import { ComponentType } from './Interfaces/Component';
+import { Device, DeviceType } from './Interfaces/Device';
+import { TemplateFileInfo } from './Interfaces/ProjectTemplate';
+import { OTA } from './OTA';
 
 const constants = {
   defaultSketchFileName: 'device.ino',
@@ -47,9 +47,9 @@ export abstract class ArduinoDeviceBase implements Device {
   abstract board: Board|undefined;
 
   constructor(
-      context: vscode.ExtensionContext, devicePath: string,
-      channel: vscode.OutputChannel, telemetryContext: TelemetryContext,
-      deviceType: DeviceType) {
+    context: vscode.ExtensionContext, devicePath: string,
+    channel: vscode.OutputChannel, telemetryContext: TelemetryContext,
+    deviceType: DeviceType) {
     this.deviceType = deviceType;
     this.componentType = ComponentType.Device;
     this.deviceFolder = devicePath;
@@ -57,7 +57,7 @@ export abstract class ArduinoDeviceBase implements Device {
     this.vscodeFolderPath =
         path.join(this.deviceFolder, FileNames.vscodeSettingsFolderName);
     this.boardFolderPath = context.asAbsolutePath(path.join(
-        FileNames.resourcesFolderName, FileNames.templatesFolderName));
+      FileNames.resourcesFolderName, FileNames.templatesFolderName));
     this.telemetryContext = telemetryContext;
     this.channel = channel;
   }
@@ -73,13 +73,13 @@ export abstract class ArduinoDeviceBase implements Device {
   static async isAvailable(): Promise<boolean> {
     if (!vscode.extensions.getExtension(DependentExtensions.arduino)) {
       const choice = await vscode.window.showInformationMessage(
-          'Arduino extension is required for the current project. Do you want to install it from marketplace?',
-          'Yes', 'No');
+        'Arduino extension is required for the current project. Do you want to install it from marketplace?',
+        'Yes', 'No');
       if (choice === 'Yes') {
         vscode.commands.executeCommand(
-            VscodeCommands.VscodeOpen,
-            vscode.Uri.parse(
-                'vscode:extension/' + DependentExtensions.arduino));
+          VscodeCommands.VscodeOpen,
+          vscode.Uri.parse(
+            'vscode:extension/' + DependentExtensions.arduino));
       }
       return false;
     }
@@ -102,9 +102,9 @@ export abstract class ArduinoDeviceBase implements Device {
     }
 
     await utils.fetchAndExecuteTask(
-        this.extensionContext, this.channel, this.telemetryContext,
-        this.deviceFolder, OperationType.Compile, PlatformType.Arduino,
-        constants.compileTaskName);
+      this.extensionContext, this.channel, this.telemetryContext,
+      this.deviceFolder, OperationType.Compile, PlatformType.Arduino,
+      constants.compileTaskName);
     return true;
   }
 
@@ -114,9 +114,9 @@ export abstract class ArduinoDeviceBase implements Device {
       return false;
     }
     await utils.fetchAndExecuteTask(
-        this.extensionContext, this.channel, this.telemetryContext,
-        this.deviceFolder, OperationType.Upload, PlatformType.Arduino,
-        constants.uploadTaskName);
+      this.extensionContext, this.channel, this.telemetryContext,
+      this.deviceFolder, OperationType.Upload, PlatformType.Arduino,
+      constants.uploadTaskName);
     return true;
   }
 
@@ -128,7 +128,7 @@ export abstract class ArduinoDeviceBase implements Device {
 
     const loadTimeScaffoldType = ScaffoldType.Workspace;
     if (!await FileUtility.directoryExists(
-            loadTimeScaffoldType, deviceFolderPath)) {
+      loadTimeScaffoldType, deviceFolderPath)) {
       throw new Error('Unable to find the device folder inside the project.');
     }
 
@@ -147,7 +147,7 @@ export abstract class ArduinoDeviceBase implements Device {
     // Generate template files
     const createTimeScaffoldType = ScaffoldType.Local;
     if (!await FileUtility.directoryExists(
-            createTimeScaffoldType, this.deviceFolder)) {
+      createTimeScaffoldType, this.deviceFolder)) {
       throw new Error(`Internal error: Couldn't find the template folder.`);
     }
     if (!board) {
@@ -156,14 +156,14 @@ export abstract class ArduinoDeviceBase implements Device {
 
     for (const fileInfo of templateFiles) {
       await utils.generateTemplateFile(
-          this.deviceFolder, createTimeScaffoldType, fileInfo);
+        this.deviceFolder, createTimeScaffoldType, fileInfo);
     }
 
     await this.generateCppPropertiesFile(createTimeScaffoldType, board);
 
     // Configurate device environment
     await this.configDeviceEnvironment(
-        this.deviceFolder, createTimeScaffoldType);
+      this.deviceFolder, createTimeScaffoldType);
   }
 
   // Backward compatibility: Check configuration
@@ -174,7 +174,7 @@ export abstract class ArduinoDeviceBase implements Device {
   abstract get version(): string;
 
   private async writeCppPropertiesFile(
-      boardId: string, type: ScaffoldType, platform: string): Promise<void> {
+    boardId: string, type: ScaffoldType, platform: string): Promise<void> {
     const cppPropertiesFilePath =
         path.join(this.vscodeFolderPath, constants.cppPropertiesFileName);
 
@@ -200,8 +200,8 @@ export abstract class ArduinoDeviceBase implements Device {
 
     const cppPropertiesTemplateFilePath =
         this.extensionContext.asAbsolutePath(path.join(
-            FileNames.resourcesFolderName, FileNames.templatesFolderName,
-            boardId, cppPropertiesTemplateFileName));
+          FileNames.resourcesFolderName, FileNames.templatesFolderName,
+          boardId, cppPropertiesTemplateFileName));
     const propertiesContent =
         await FileUtility.readFile(type, cppPropertiesTemplateFilePath);
     const propertiesContentString = propertiesContent.toString();
@@ -232,8 +232,7 @@ export abstract class ArduinoDeviceBase implements Device {
     }
   }
 
-  async generateCrc(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel) {
+  async generateCrc(channel: vscode.OutputChannel): Promise<boolean> {
     if (!(vscode.workspace.workspaceFolders &&
           vscode.workspace.workspaceFolders.length > 0)) {
       const message = 'No workspace opened.';
@@ -250,8 +249,8 @@ export abstract class ArduinoDeviceBase implements Device {
       return false;
     }
     const deviceBuildLocation = path.join(
-        vscode.workspace.workspaceFolders[0].uri.fsPath, '..', devicePath,
-        '.build');
+      vscode.workspace.workspaceFolders[0].uri.fsPath, '..', devicePath,
+      '.build');
 
     if (!deviceBuildLocation) {
       const message = 'No device compile output folder found.';
@@ -277,7 +276,7 @@ export abstract class ArduinoDeviceBase implements Device {
       const binFilePickItems: vscode.QuickPickItem[] = [];
       for (const file of binFiles) {
         const fileName = path.basename(file);
-        binFilePickItems.push({label: fileName, description: file});
+        binFilePickItems.push({ label: fileName, description: file });
       }
 
       const choice = await vscode.window.showQuickPick(binFilePickItems, {
@@ -315,15 +314,15 @@ export abstract class ArduinoDeviceBase implements Device {
   }
 
   async configDeviceEnvironment(
-      deviceRootPath: string, scaffoldType: ScaffoldType): Promise<void> {
+    deviceRootPath: string, scaffoldType: ScaffoldType): Promise<void> {
     if (!deviceRootPath) {
       throw new Error(
-          'Unable to find the project device path, please open the folder and initialize project again.');
+        'Unable to find the project device path, please open the folder and initialize project again.');
     }
 
     const templateFilesInfo = await utils.getEnvTemplateFilesAndAskOverwrite(
-        this.extensionContext, this.deviceFolder, scaffoldType,
-        constants.environmentTemplateFolderName);
+      this.extensionContext, this.deviceFolder, scaffoldType,
+      constants.environmentTemplateFolderName);
 
     // Configure project environment with template files
     for (const fileInfo of templateFilesInfo) {

@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 'use strict';
-import {FileNames} from './constants';
-import {Board} from './Models/Interfaces/Board';
+import { FileNames } from './constants';
+import { Board } from './Models/Interfaces/Board';
 import * as path from 'path';
 
 interface BoardList {
@@ -25,14 +25,14 @@ export class BoardProvider {
     this.boardFolderPath = boardFolderPath;
   }
 
-  get list() {
+  get list(): Board[] {
     const boardList =
         path.join(this.boardFolderPath, FileNames.boardListFileName);
     const boardsJson: BoardList = require(boardList);
     return boardsJson.boards;
   }
 
-  find(option: BoardOption) {
+  find(option: BoardOption): Board|undefined {
     const list = this.list;
     return list.find(board => {
       for (const key of Object.keys(option)) {
@@ -49,8 +49,8 @@ export class BoardProvider {
 
         if (key === 'vendorId' || key === 'productId') {
           const optionId = typeof optionProperty.value === 'number' ?
-              optionProperty.value :
-              Number(`0x${optionProperty.value}`);
+            optionProperty.value :
+            Number(`0x${optionProperty.value}`);
           const boardId = Number(`0x${boardProperty.value}`);
           if (optionId !== boardId) {
             return false;

@@ -3,11 +3,11 @@
 
 'use strict';
 
-import {commands, ExtensionContext, Uri, window} from 'vscode';
-import {EventNames} from './constants';
-import {TelemetryWorker} from './telemetry';
-import {WorkbenchExtension} from './WorkbenchExtension';
-import {VscodeCommands} from './common/Commands';
+import { commands, ExtensionContext, Uri, window } from 'vscode';
+import { EventNames } from './constants';
+import { TelemetryWorker } from './telemetry';
+import { WorkbenchExtension } from './WorkbenchExtension';
+import { VscodeCommands } from './common/Commands';
 
 const NSAT_SURVEY_URL = 'https://aka.ms/vscode-iot-workbench-survey';
 const PROBABILITY = 1;
@@ -20,7 +20,7 @@ const SKIP_VERSION_KEY = 'nsat/skipVersion';
 const IS_CANDIDATE_KEY = 'nsat/isCandidate';
 
 export class NSAT {
-  static async takeSurvey(context: ExtensionContext) {
+  static async takeSurvey(context: ExtensionContext): Promise<void> {
     const globalState = context.globalState;
     const skipVersion = globalState.get(SKIP_VERSION_KEY, '');
     if (skipVersion) {
@@ -63,14 +63,14 @@ export class NSAT {
 
     const take = {
       title: 'Take Survey',
-      run: async () => {
+      run: async (): Promise<void> => {
         telemetryContext.properties.message = 'nsat.survey/takeShortSurvey';
         telemetryWorker.sendEvent(EventNames.nsatsurvery, telemetryContext);
         commands.executeCommand(
-            VscodeCommands.VscodeOpen,
-            Uri.parse(`${NSAT_SURVEY_URL}?o=${
-                encodeURIComponent(process.platform)}&v=${
-                encodeURIComponent(extensionVersion)}`));
+          VscodeCommands.VscodeOpen,
+          Uri.parse(`${NSAT_SURVEY_URL}?o=${
+            encodeURIComponent(process.platform)}&v=${
+            encodeURIComponent(extensionVersion)}`));
         await globalState.update(IS_CANDIDATE_KEY, false);
         await globalState.update(SKIP_VERSION_KEY, extensionVersion);
         await globalState.update(TAKE_SURVEY_DATE_KEY, date);
@@ -78,7 +78,7 @@ export class NSAT {
     };
     const remind = {
       title: 'Remind Me Later',
-      run: async () => {
+      run: async (): Promise<void> => {
         telemetryContext.properties.message = 'nsat.survey/remindMeLater';
         telemetryWorker.sendEvent(EventNames.nsatsurvery, telemetryContext);
         await globalState.update(SESSION_COUNT_KEY, 0);
@@ -86,7 +86,7 @@ export class NSAT {
     };
     const never = {
       title: 'Don\'t Show Again',
-      run: async () => {
+      run: async (): Promise<void> => {
         telemetryContext.properties.message = 'nsat.survey/dontShowAgain';
         telemetryWorker.sendEvent(EventNames.nsatsurvery, telemetryContext);
         await globalState.update(IS_CANDIDATE_KEY, false);
@@ -97,8 +97,8 @@ export class NSAT {
     telemetryContext.properties.message = 'nsat.survey/userAsked';
     telemetryWorker.sendEvent(EventNames.nsatsurvery, telemetryContext);
     const button = await window.showInformationMessage(
-        'Do you mind taking a quick feedback survey about the Azure IoT Device Workbench Extension for VS Code?',
-        take, remind, never);
+      'Do you mind taking a quick feedback survey about the Azure IoT Device Workbench Extension for VS Code?',
+      take, remind, never);
     await (button || remind).run();
   }
 }

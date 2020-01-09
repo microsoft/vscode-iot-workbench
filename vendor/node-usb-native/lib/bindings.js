@@ -1,9 +1,9 @@
 'use strict';
 const path = require('path');
 const bindings = require('./native_loader').load(path.join(__dirname, 'native'), 'usb-native');
-var listUnix = require('./list-unix');
+const listUnix = require('./list-unix');
 
-var linux = process.platform !== 'win32' && process.platform !== 'darwin';
+const linux = process.platform !== 'win32' && process.platform !== 'darwin';
 
 function listLinux(callback) {
   callback = callback || function(err) {
@@ -14,7 +14,7 @@ function listLinux(callback) {
   return listUnix(callback);
 }
 
-var platformOptions = {};
+let platformOptions = {};
 if (process.platform !== 'win32') {
   platformOptions = {
     vmin: 1,

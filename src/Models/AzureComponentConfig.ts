@@ -1,13 +1,13 @@
 import * as path from 'path';
 
-import {AzureComponentsStorage, ScaffoldType} from '../constants';
-import {FileUtility} from '../FileUtility';
+import { AzureComponentsStorage, ScaffoldType } from '../constants';
+import { FileUtility } from '../FileUtility';
 
-import {Component} from './Interfaces/Component';
-import {ComponentType} from './Interfaces/Component';
+import { Component } from './Interfaces/Component';
+import { ComponentType } from './Interfaces/Component';
 
 // TODO: need to check what value should be included here
-export interface ComponentInfo { values: {[key: string]: string}; }
+export interface ComponentInfo { values: {[key: string]: string} }
 
 export enum DependencyType {
   Other,
@@ -29,7 +29,7 @@ export interface AzureComponentConfig {
   componentInfo?: ComponentInfo;
 }
 
-export interface AzureConfigs { componentConfigs: AzureComponentConfig[]; }
+export interface AzureConfigs { componentConfigs: AzureComponentConfig[] }
 
 export interface Dependency {
   component: Component;
@@ -43,12 +43,12 @@ export class AzureConfigFileHandler {
   constructor(projectRoot: string) {
     this.projectRootPath = projectRoot;
     this.configFilePath = path.join(
-        this.projectRootPath, AzureComponentsStorage.folderName,
-        AzureComponentsStorage.fileName);
+      this.projectRootPath, AzureComponentsStorage.folderName,
+      AzureComponentsStorage.fileName);
   }
 
-  async createIfNotExists(type: ScaffoldType) {
-    const azureConfigs: AzureConfigs = {componentConfigs: []};
+  async createIfNotExists(type: ScaffoldType): Promise<void> {
+    const azureConfigs: AzureConfigs = { componentConfigs: [] };
     const azureConfigFolderPath =
         path.join(this.projectRootPath, AzureComponentsStorage.folderName);
     if (!await FileUtility.directoryExists(type, azureConfigFolderPath)) {
@@ -56,7 +56,7 @@ export class AzureConfigFileHandler {
         await FileUtility.mkdirRecursively(type, azureConfigFolderPath);
       } catch (error) {
         throw new Error(`Failed to create azure config folder. Error message: ${
-            error.message}`);
+          error.message}`);
       }
     }
     const azureConfigFilePath =
@@ -67,7 +67,7 @@ export class AzureConfigFileHandler {
     }
   }
 
-  async getSortedComponents(type: ScaffoldType) {
+  async getSortedComponents(type: ScaffoldType): Promise<AzureComponentConfig[]> {
     try {
       const azureConfigContent =
           await FileUtility.readFile(type, this.configFilePath, 'utf8');
@@ -108,7 +108,7 @@ export class AzureConfigFileHandler {
     }
   }
 
-  async getComponentIndexById(type: ScaffoldType, id: string) {
+  async getComponentIndexById(type: ScaffoldType, id: string): Promise<number> {
     try {
       const azureConfigContent =
           await FileUtility.readFile(type, this.configFilePath, 'utf8');
@@ -122,7 +122,7 @@ export class AzureConfigFileHandler {
     }
   }
 
-  async getComponentById(type: ScaffoldType, id: string) {
+  async getComponentById(type: ScaffoldType, id: string): Promise<AzureComponentConfig | undefined> {
     try {
       const azureConfigContent =
           await FileUtility.readFile(type, this.configFilePath, 'utf8');
@@ -136,7 +136,7 @@ export class AzureConfigFileHandler {
     }
   }
 
-  async appendComponent(type: ScaffoldType, component: AzureComponentConfig) {
+  async appendComponent(type: ScaffoldType, component: AzureComponentConfig): Promise<AzureConfigs> {
     try {
       const azureConfigContent =
           await FileUtility.readFile(type, this.configFilePath, 'utf8');
@@ -150,8 +150,7 @@ export class AzureConfigFileHandler {
     }
   }
 
-  async updateComponent(
-      type: ScaffoldType, index: number, componentInfo: ComponentInfo) {
+  async updateComponent(type: ScaffoldType, index: number, componentInfo: ComponentInfo): Promise<AzureConfigs> {
     try {
       const azureConfigContent =
           await FileUtility.readFile(type, this.configFilePath, 'utf8');

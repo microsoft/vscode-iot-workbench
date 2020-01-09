@@ -3,7 +3,7 @@
 // Please refer to their documentation on https://mochajs.org/ for help.
 //
 import * as vscode from 'vscode';
-import {WorkbenchCommands} from '../src/common/Commands';
+import { WorkbenchCommands } from '../src/common/Commands';
 
 suite('IoT Device Workbench: Commands Tests', () => {
   // tslint:disable-next-line: only-arrow-functions
@@ -16,12 +16,13 @@ suite('IoT Device Workbench: Commands Tests', () => {
       done('Failed to activate extension');
     } else if (!extension.isActive) {
       extension.activate().then(
-          (api) => {
-            done();
-          },
-          () => {
-            done('Failed to activate extension');
-          });
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        (_api) => {
+          done();
+        },
+        () => {
+          done('Failed to activate extension');
+        });
     } else {
       done();
     }
@@ -29,25 +30,25 @@ suite('IoT Device Workbench: Commands Tests', () => {
 
   // tslint:disable-next-line: only-arrow-functions
   test(
-      'should be able to run command: iotworkbench.exampleInitialize',
-      function(done) {
-        this.timeout(60 * 1000);
-        try {
-          vscode.commands.executeCommand(WorkbenchCommands.InitializeProject)
-              .then((result) => {
-                done();
-              });
+    'should be able to run command: iotworkbench.exampleInitialize',
+    function(done) {
+      this.timeout(60 * 1000);
+      try {
+        vscode.commands.executeCommand(WorkbenchCommands.InitializeProject)
+          .then(() => {
+            done();
+          });
 
-        } catch (error) {
-          done(new Error(error));
-        }
-      });
+      } catch (error) {
+        done(new Error(error));
+      }
+    });
 
   // tslint:disable-next-line: only-arrow-functions
   test('should be able to run command: iotworkbench.help', function(done) {
     this.timeout(60 * 1000);
     try {
-      vscode.commands.executeCommand(WorkbenchCommands.Help).then((result) => {
+      vscode.commands.executeCommand(WorkbenchCommands.Help).then(() => {
         done();
       });
 

@@ -2,15 +2,15 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {VscodeCommands} from '../../../common/Commands';
-import {OSPlatform, ScaffoldType} from '../../../constants';
-import {OpenScenario} from '../../../Models/IoTWorkbenchProjectBase';
-import {IoTWorkspaceProject} from '../../../Models/IoTWorkspaceProject';
-import {TelemetryContext} from '../../../telemetry';
+import { VscodeCommands } from '../../../common/Commands';
+import { OSPlatform, ScaffoldType } from '../../../constants';
+import { OpenScenario } from '../../../Models/IoTWorkbenchProjectBase';
+import { IoTWorkspaceProject } from '../../../Models/IoTWorkspaceProject';
+import { TelemetryContext } from '../../../telemetry';
 import * as utils from '../../../utils';
-import {DigitalTwinConstants} from '../../DigitalTwinConstants';
+import { DigitalTwinConstants } from '../../DigitalTwinConstants';
 
-import {CodeGenerator, CodeGenExecutionItem, CodeGenProjectType} from './CodeGenerator';
+import { CodeGenerator, CodeGenExecutionItem, CodeGenProjectType } from './CodeGenerator';
 
 export class AnsiCCodeGenerator implements CodeGenerator {
   constructor(
@@ -25,20 +25,20 @@ export class AnsiCCodeGenerator implements CodeGenerator {
     if (codegenSucceeded) {
       if (codegenInfo.codeGenProjectType === CodeGenProjectType.IoTDevKit) {
         const project: IoTWorkspaceProject = new IoTWorkspaceProject(
-            this.context, this.channel, this.telemetryContext,
-            codegenInfo.outputDirectory);
+          this.context, this.channel, this.telemetryContext,
+          codegenInfo.outputDirectory);
         project.openProject(
-            ScaffoldType.Local, true, OpenScenario.createNewProject);
+          ScaffoldType.Local, true, OpenScenario.createNewProject);
       } else {
         await vscode.commands.executeCommand(
-            VscodeCommands.VscodeOpenFolder,
-            vscode.Uri.file(codegenInfo.outputDirectory), true);
+          VscodeCommands.VscodeOpenFolder,
+          vscode.Uri.file(codegenInfo.outputDirectory), true);
       }
 
       return true;
     } else {
       vscode.window.showErrorMessage(
-          'Unable to generate code, please check output window for detail.');
+        'Unable to generate code, please check output window for detail.');
       return false;
     }
   }
@@ -66,16 +66,16 @@ export class AnsiCCodeGenerator implements CodeGenerator {
     }
 
     const command = `${codeGenCommand} generate -d "${dcmFilePath}" -i "${
-        interfaceDir}" -p "${projectTypeValue}" -c "${
-        connectionTypeValue}" -r "${sdkReferenceTypeValue}" -l ansic -o "${
-        outputDir}" -n "${projectName}"`;
+      interfaceDir}" -p "${projectTypeValue}" -c "${
+      connectionTypeValue}" -r "${sdkReferenceTypeValue}" -l ansic -o "${
+      outputDir}" -n "${projectName}"`;
 
     let message: string;
 
     try {
       await utils.runCommand(command, [], cmdPath, this.channel);
       message = `${
-          DigitalTwinConstants.dtPrefix} generate PnP device code completed.`;
+        DigitalTwinConstants.dtPrefix} generate PnP device code completed.`;
       utils.channelShowAndAppendLine(this.channel, message);
       return true;
     } catch {

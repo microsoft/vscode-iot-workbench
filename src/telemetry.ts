@@ -4,12 +4,12 @@
 import * as vscode from 'vscode';
 import TelemetryReporter from 'vscode-extension-telemetry';
 
-import {CancelOperationError} from './CancelOperationError';
-import {DevelopEnvironment} from './constants';
-import {ExceptionHelper} from './exceptionHelper';
-import {RemoteExtension} from './Models/RemoteExtension';
-import {NSAT} from './nsat';
-import {WorkbenchExtension} from './WorkbenchExtension';
+import { CancelOperationError } from './CancelOperationError';
+import { DevelopEnvironment } from './constants';
+import { ExceptionHelper } from './exceptionHelper';
+import { RemoteExtension } from './Models/RemoteExtension';
+import { NSAT } from './nsat';
+import { WorkbenchExtension } from './WorkbenchExtension';
 
 
 interface PackageInfo {
@@ -50,11 +50,11 @@ export class TelemetryWorker {
     }
     if (!packageInfo.aiKey) {
       console.log(
-          'Unable to initialize telemetry, please make sure AIKey is set in package.json');
+        'Unable to initialize telemetry, please make sure AIKey is set in package.json');
       return;
     }
     this._reporter = new TelemetryReporter(
-        packageInfo.name, packageInfo.version, packageInfo.aiKey);
+      packageInfo.name, packageInfo.version, packageInfo.aiKey);
     this._isInternal = TelemetryWorker.isInternalUser();
   }
 
@@ -70,8 +70,8 @@ export class TelemetryWorker {
    */
   private static isInternalUser(): boolean {
     const userDomain: string = process.env.USERDNSDOMAIN ?
-        process.env.USERDNSDOMAIN.toLowerCase() :
-        '';
+      process.env.USERDNSDOMAIN.toLowerCase() :
+      '';
     return userDomain.endsWith('microsoft.com');
   }
 
@@ -79,14 +79,14 @@ export class TelemetryWorker {
    * Create telemetry context
    */
   createContext(): TelemetryContext {
-    const context: TelemetryContext = {properties: {}, measurements: {}};
+    const context: TelemetryContext = { properties: {}, measurements: {} };
     context.properties.result = TelemetryResult.Succeeded;
     context.properties.isInternal = this._isInternal.toString();
     if (this._extensionContext) {
       context.properties.developEnvironment =
           RemoteExtension.isRemote(this._extensionContext) ?
-          DevelopEnvironment.RemoteEnv :
-          DevelopEnvironment.LocalEnv;
+            DevelopEnvironment.RemoteEnv :
+            DevelopEnvironment.LocalEnv;
     }
     return context;
   }
@@ -104,7 +104,7 @@ export class TelemetryWorker {
       telemetryContext = this.createContext();
     }
     this._reporter.sendTelemetryEvent(
-        eventName, telemetryContext.properties, telemetryContext.measurements);
+      eventName, telemetryContext.properties, telemetryContext.measurements);
   }
 
   /**
@@ -118,25 +118,25 @@ export class TelemetryWorker {
    * @param additionalProperties
    */
   async callCommandWithTelemetry(
-      context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
-      eventName: string, enableSurvey: boolean,
-      // tslint:disable-next-line:no-any
-      callback:
+    context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
+    eventName: string, enableSurvey: boolean,
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+    callback:
           (context: vscode.ExtensionContext,
            outputChannel: vscode.OutputChannel,
-           // tslint:disable-next-line:no-any
+      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
            telemetrycontext: TelemetryContext, ...args: any[]) => any,
-      // tslint:disable-next-line:no-any
-      additionalProperties?: {[key: string]: string},
-      // tslint:disable-next-line:no-any
-      ...commandArgs: any[]): Promise<any> {
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+    additionalProperties?: {[key: string]: string},
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+    ...commandArgs: any[]): Promise<any> {
     const telemetryWorker = TelemetryWorker.getInstance(context);
     const telemetryContext = telemetryWorker.createContext();
 
     const start: number = Date.now();
     if (additionalProperties) {
       for (const key of Object.keys(additionalProperties)) {
-        if (!telemetryContext.properties.hasOwnProperty(key)) {
+        if (!Object.prototype.hasOwnProperty.call(telemetryContext.properties, key)) {
           telemetryContext.properties[key] = additionalProperties[key];
         }
       }
@@ -144,7 +144,7 @@ export class TelemetryWorker {
 
     try {
       return await callback(
-          context, outputChannel, telemetryContext, ...commandArgs);
+        context, outputChannel, telemetryContext, ...commandArgs);
     } catch (error) {
       telemetryContext.properties.errorMessage = error.message;
       let isPopupErrorMsg = true;
@@ -172,7 +172,7 @@ export class TelemetryWorker {
   /**
    * dispose telemetry worker
    */
-  async dispose() {
+  async dispose(): Promise<void> {
     if (this._reporter) {
       await this._reporter.dispose();
     }

@@ -42,21 +42,21 @@ function getDependeciesFromNpm(mod) {
 
 /**@type {import('webpack').Configuration}*/
 const config = {
-    target: 'node',
+  target: 'node',
 
-    entry: getEntry(),
-    output: {
-        path: path.resolve(__dirname, 'out/node_modules'),
-        filename: '[name].js',
-        libraryTarget: "commonjs2",
-        devtoolModuleFilenameTemplate: "../[resource-path]",
-    },
-    externals: {
-        vscode: "commonjs vscode"
-    },
-    resolve: {
-        extensions: ['.js', '.json']
-    }
+  entry: getEntry(),
+  output: {
+    path: path.resolve(__dirname, 'out/node_modules'),
+    filename: '[name].js',
+    libraryTarget: "commonjs2",
+    devtoolModuleFilenameTemplate: "../[resource-path]",
+  },
+  externals: {
+    vscode: "commonjs vscode"
+  },
+  resolve: {
+    extensions: ['.js', '.json']
+  }
 }
 
 module.exports = config;

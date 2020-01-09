@@ -1,9 +1,10 @@
 {
   "extends": [
-    "standard"
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
   ],
   "plugins": [
-    "require-path-exists"
+    "@typescript-eslint/eslint-plugin"
   ],
   "env": {
     "node": true,
@@ -20,7 +21,6 @@
     "require-path-exists/notEmpty": 2,
     "require-path-exists/tooManyArguments": 2,
     "semi": [2, "always", {"omitLastInOneLineBlock": true}],
-    "space-before-function-paren": [2, "never"],
-    "standard/object-curly-even-spacing": 0
+    "space-before-function-paren": [2, "never"]
   }
 }

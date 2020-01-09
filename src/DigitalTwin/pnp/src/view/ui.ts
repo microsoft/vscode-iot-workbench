@@ -57,16 +57,16 @@ export class UI {
    */
   static showNotification(type: MessageType, message: string): void {
     switch (type) {
-      case MessageType.Info:
-        vscode.window.showInformationMessage(message);
-        break;
-      case MessageType.Warn:
-        vscode.window.showWarningMessage(message);
-        break;
-      case MessageType.Error:
-        vscode.window.showErrorMessage(message);
-        break;
-      default:
+    case MessageType.Info:
+      vscode.window.showInformationMessage(message);
+      break;
+    case MessageType.Warn:
+      vscode.window.showWarningMessage(message);
+      break;
+    case MessageType.Error:
+      vscode.window.showErrorMessage(message);
+      break;
+    default:
     }
   }
 
@@ -141,7 +141,7 @@ export class UI {
    */
   static async inputModelName(label: string, type: ModelType, folder: string): Promise<string> {
     const placeHolder = `${type} name`;
-    const validateInput = async (name: string) => {
+    const validateInput = async (name: string): Promise<string|undefined> => {
       return await Utility.validateModelName(name, type, folder);
     };
     return await UI.showInputBox(label, placeHolder, validateInput);
@@ -181,7 +181,7 @@ export class UI {
    * @param label label
    */
   static async inputConnectionString(label: string): Promise<string> {
-    const validateInput = (name: string) => {
+    const validateInput = (name: string): string|undefined => {
       return Utility.validateNotEmpty(name, "Connection string");
     };
     return await UI.showInputBox(label, UIConstants.REPOSITORY_CONNECTION_STRING_TEMPLATE, validateInput);

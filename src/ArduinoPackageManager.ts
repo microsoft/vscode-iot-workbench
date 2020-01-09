@@ -3,18 +3,18 @@
 
 import * as vscode from 'vscode';
 
-import {ArduinoCommands} from './common/Commands';
-import {Board, BoardInstallation} from './Models/Interfaces/Board';
+import { ArduinoCommands } from './common/Commands';
+import { Board, BoardInstallation } from './Models/Interfaces/Board';
 
 export class ArduinoPackageManager {
   private static INSTALLED_BOARDS: Board[] = [];
-  private static async setAdditionalUrl(url: string) {
+  private static async setAdditionalUrl(url: string): Promise<void> {
     const existedUrls =
         vscode.workspace.getConfiguration().get<string[]|string>(
-            'arduino.additionalUrls');
+          'arduino.additionalUrls');
     if (!existedUrls || existedUrls.length === 0) {
       await vscode.workspace.getConfiguration().update(
-          'arduino.additionalUrls', url, vscode.ConfigurationTarget.Global);
+        'arduino.additionalUrls', url, vscode.ConfigurationTarget.Global);
     } else {
       let _existedUrls: string[];
       if (typeof existedUrls === 'string') {
@@ -30,17 +30,17 @@ export class ArduinoPackageManager {
       _existedUrls.push(url);
       if (typeof existedUrls === 'string') {
         await vscode.workspace.getConfiguration().update(
-            'arduino.additionalUrls', _existedUrls.join(','),
-            vscode.ConfigurationTarget.Global);
+          'arduino.additionalUrls', _existedUrls.join(','),
+          vscode.ConfigurationTarget.Global);
       } else {
         await vscode.workspace.getConfiguration().update(
-            'arduino.additionalUrls', _existedUrls,
-            vscode.ConfigurationTarget.Global);
+          'arduino.additionalUrls', _existedUrls,
+          vscode.ConfigurationTarget.Global);
       }
     }
   }
 
-  static async installBoard(board: Board) {
+  static async installBoard(board: Board): Promise<void> {
     if (!board || !board.installation) {
       return;
     }
@@ -58,10 +58,10 @@ export class ArduinoPackageManager {
 
     try {
       await ArduinoPackageManager.setAdditionalUrl(
-          board.installation.additionalUrl);
+        board.installation.additionalUrl);
       await vscode.commands.executeCommand(
-          ArduinoCommands.InstallBoard, board.installation.packageName,
-          board.installation.architecture);
+        ArduinoCommands.InstallBoard, board.installation.packageName,
+        board.installation.architecture);
       ArduinoPackageManager.INSTALLED_BOARDS.push(board);
     } catch (ignore) {
       // If we failed to install board package,

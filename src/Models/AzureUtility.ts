@@ -1,21 +1,21 @@
-import {ResourceManagementClient, ResourceModels, SubscriptionClient} from 'azure-arm-resource';
+import { ResourceManagementClient, ResourceModels, SubscriptionClient, SubscriptionModels } from 'azure-arm-resource';
 import * as fs from 'fs-plus';
-import {HttpMethods, WebResource} from 'ms-rest';
+import { HttpMethods, WebResource } from 'ms-rest';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {channelPrintJsonObject, channelShowAndAppendLine} from '../utils';
+import { channelPrintJsonObject, channelShowAndAppendLine } from '../utils';
 
 import request = require('request-promise');
 import rq = require('request');
 
-import {AzureAccount, AzureResourceFilter, AzureSession} from '../azure-account.api';
-import {ConfigHandler} from '../configHandler';
+import { AzureAccount, AzureResourceFilter, AzureSession } from '../azure-account.api';
+import { ConfigHandler } from '../configHandler';
 
-import {getExtension} from './Apis';
-import {ExtensionName} from './Interfaces/Api';
-import {TelemetryWorker} from '../telemetry';
-import {EventNames} from '../constants';
+import { getExtension } from './Apis';
+import { ExtensionName } from './Interfaces/Api';
+import { TelemetryWorker } from '../telemetry';
+import { EventNames } from '../constants';
 
 export interface ARMParameters {
   [key: string]: {value: string|number|boolean|null};
@@ -35,7 +35,9 @@ export interface ARMParameterTemplate {
   [key: string]: ARMParameterTemplateValue;
 }
 
-export interface ARMTemplate { parameters: ARMParameterTemplate; }
+export interface ARMTemplate { 
+  parameters: ARMParameterTemplate;
+}
 
 export class AzureUtility {
   private static _context: vscode.ExtensionContext;
@@ -46,8 +48,8 @@ export class AzureUtility {
       getExtension(ExtensionName.AzureAccount);
 
   static init(
-      context: vscode.ExtensionContext, channel?: vscode.OutputChannel,
-      subscriptionId?: string) {
+    context: vscode.ExtensionContext, channel?: vscode.OutputChannel,
+    subscriptionId?: string): void {
     AzureUtility._context = context;
     AzureUtility._channel = channel;
     AzureUtility._subscriptionId = subscriptionId;
@@ -88,7 +90,7 @@ export class AzureUtility {
     const subscriptions: AzureResourceFilter[] =
         AzureUtility._azureAccountExtension.filters;
     const subscription = subscriptions.find(
-        sub => sub.subscription.subscriptionId === subscriptionId);
+      sub => sub.subscription.subscriptionId === subscriptionId);
     if (subscription) {
       return subscription.session;
     }
@@ -104,10 +106,10 @@ export class AzureUtility {
     }
 
     return AzureUtility._getSessionBySubscriptionId(
-        AzureUtility._subscriptionId);
+      AzureUtility._subscriptionId);
   }
 
-  private static async _getResourceClient() {
+  private static async _getResourceClient(): Promise<ResourceManagementClient | undefined> {
     AzureUtility._subscriptionId = await AzureUtility._getSubscription();
 
     if (!AzureUtility._subscriptionId) {
@@ -118,38 +120,37 @@ export class AzureUtility {
     if (session) {
       const credential = session.credentials;
       const client = new ResourceManagementClient(
-          credential, AzureUtility._subscriptionId,
-          session.environment.resourceManagerEndpointUrl);
+        credential, AzureUtility._subscriptionId,
+        session.environment.resourceManagerEndpointUrl);
       return client;
     }
     return undefined;
   }
 
-  private static _getSubscriptionClientBySubscriptionId(substriptionId:
-                                                            string) {
+  private static _getSubscriptionClientBySubscriptionId(substriptionId: string): ResourceManagementClient | undefined {
     const session = AzureUtility._getSessionBySubscriptionId(substriptionId);
     if (session) {
       const credential = session.credentials;
       const client = new ResourceManagementClient(
-          credential, substriptionId,
-          session.environment.resourceManagerEndpointUrl);
+        credential, substriptionId,
+        session.environment.resourceManagerEndpointUrl);
       return client;
     }
     return undefined;
   }
 
-  private static async _getSubscriptionClient() {
+  private static async _getSubscriptionClient(): Promise<SubscriptionClient | undefined> {
     const session = await AzureUtility._getSession();
     if (session) {
       const credential = session.credentials;
       const client = new SubscriptionClient(
-          credential, session.environment.resourceManagerEndpointUrl);
+        credential, session.environment.resourceManagerEndpointUrl);
       return client;
     }
     return undefined;
   }
 
-  private static async _getLocations() {
+  private static async _getLocations(): Promise<SubscriptionModels.LocationListResult | undefined> {
     AzureUtility._subscriptionId = await AzureUtility._getSubscription();
 
     if (!AzureUtility._subscriptionId) {
@@ -166,7 +167,7 @@ export class AzureUtility {
     return locations;
   }
 
-  private static async _createResouceGroup() {
+  private static async _createResouceGroup(): Promise<string | undefined> {
     const client = await AzureUtility._getResourceClient();
     if (!client) {
       return undefined;
@@ -176,7 +177,7 @@ export class AzureUtility {
       prompt: 'Input resouce group name',
       ignoreFocusOut: true,
       validateInput: async (name: string) => {
-        if (!/^[a-z0-9_\-\.]*[a-z0-9_\-]+$/.test(name)) {
+        if (!/^[a-z0-9_\-.]*[a-z0-9_-]+$/.test(name)) {
           return 'Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period.';
         }
 
@@ -206,33 +207,32 @@ export class AzureUtility {
     }
 
     const resourceGroupLocation = await vscode.window.showQuickPick(
-        locationList,
-        {placeHolder: 'Select Resource Group Location', ignoreFocusOut: true});
+      locationList,
+      { placeHolder: 'Select Resource Group Location', ignoreFocusOut: true });
     if (!resourceGroupLocation || !resourceGroupLocation.description) {
       return undefined;
     }
 
     const resourceGroup = await client.resourceGroups.createOrUpdate(
-        resourceGroupName, {location: resourceGroupLocation.description});
+      resourceGroupName, { location: resourceGroupLocation.description });
 
     return resourceGroup.name;
   }
 
-  private static _commonParameterCheck(
-      _value: string, parameter: ARMParameterTemplateValue) {
+  private static _commonParameterCheck(_value: string, parameter: ARMParameterTemplateValue): string {
     let value: string|number|boolean|null = null;
     switch (parameter.type.toLocaleLowerCase()) {
-      case 'string':
-        value = _value;
-        break;
-      case 'int':
-        value = Number(_value);
-        break;
-      case 'bool':
-        value = _value.toLocaleLowerCase() === 'true';
-        break;
-      default:
-        break;
+    case 'string':
+      value = _value;
+      break;
+    case 'int':
+      value = Number(_value);
+      break;
+    case 'bool':
+      value = _value.toLocaleLowerCase() === 'true';
+      break;
+    default:
+      break;
     }
 
     if (value === null) {
@@ -241,26 +241,26 @@ export class AzureUtility {
 
     if (typeof value === 'string' && parameter.minLength !== undefined &&
         parameter.minLength > value.length) {
-      return `The value does\'t meet requirement: minLength ${
-          parameter.minLength}.`;
+      return `The value does't meet requirement: minLength ${
+        parameter.minLength}.`;
     }
 
     if (typeof value === 'string' && parameter.maxLength !== undefined &&
         parameter.maxLength < value.length) {
-      return `The value does\'t meet requirement: maxLength ${
-          parameter.maxLength}.`;
+      return `The value does't meet requirement: maxLength ${
+        parameter.maxLength}.`;
     }
 
     if (typeof value === 'number' && parameter.minValue !== undefined &&
         parameter.minValue > value) {
-      return `The value does\'t meet requirement: minValue ${
-          parameter.minValue}.`;
+      return `The value does't meet requirement: minValue ${
+        parameter.minValue}.`;
     }
 
     if (typeof value === 'number' && parameter.maxValue !== undefined &&
         parameter.maxValue < value) {
-      return `The value does\'t meet requirement: maxValue ${
-          parameter.maxValue}.`;
+      return `The value does't meet requirement: maxValue ${
+        parameter.maxValue}.`;
     }
 
     if (typeof value === 'number' && isNaN(value)) {
@@ -270,18 +270,17 @@ export class AzureUtility {
     return '';
   }
 
-  private static _getKeyDisplayName(key: string) {
+  private static _getKeyDisplayName(key: string): string {
     key = key.replace(/^\$*/, '');
     const keyDisplayName = key.replace(/([A-Z][^A-Z])/g, ' $1')
-                               .replace(/([a-z])([A-Z])/g, '$1 $2');
+      .replace(/([a-z])([A-Z])/g, '$1 $2');
     return keyDisplayName.substr(0, 1).toUpperCase() + keyDisplayName.substr(1);
   }
 
-  private static async _getARMParameters(
-      parameterTemplate: ARMParameterTemplate, parameters?: ARMParameters) {
+  private static async _getARMParameters(parameterTemplate: ARMParameterTemplate, parameters?: ARMParameters): Promise<ARMParameters|undefined> {
     parameters = parameters || {} as ARMParameters;
     for (const key of Object.keys(parameterTemplate)) {
-      if (parameters.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(parameters, key)) {
         continue;
       }
 
@@ -294,7 +293,7 @@ export class AzureUtility {
         const values: vscode.QuickPickItem[] = [];
         for (const value of parameter.allowedValues) {
           if (value !== null) {
-            values.push({label: value.toString(), description: ''});
+            values.push({ label: value.toString(), description: '' });
           }
         }
 
@@ -315,7 +314,7 @@ export class AzureUtility {
         } else {
           const _key = key.substr(2);
           const filePath = path.join(
-              vscode.workspace.workspaceFolders[0].uri.fsPath, '..', _key);
+            vscode.workspace.workspaceFolders[0].uri.fsPath, '..', _key);
           AzureUtility._context.asAbsolutePath(_key);
           if (fs.existsSync(filePath)) {
             inputValue = fs.readFileSync(filePath, 'utf8');
@@ -331,62 +330,63 @@ export class AzureUtility {
             ConfigHandler.get<string>('iothubConnectionString');
 
         switch (_key) {
-          case 'iotHubName':
-            if (!iothubConnectionString) {
-              inputValue = '';
-            } else {
-              const iotHubNameMatches =
+        case 'iotHubName':
+          if (!iothubConnectionString) {
+            inputValue = '';
+          } else {
+            const iotHubNameMatches =
                   iothubConnectionString.match(/HostName=(.*?)\./);
-              if (!iotHubNameMatches) {
-                inputValue = '';
-              } else {
-                inputValue = iotHubNameMatches[1];
-              }
-            }
-            break;
-          case 'iotHubKeyName':
-            if (!iothubConnectionString) {
+            if (!iotHubNameMatches) {
               inputValue = '';
             } else {
-              const iotHubKeyNameMatches = iothubConnectionString.match(
-                  /SharedAccessKeyName=(.*?)(;|$)/);
-              if (!iotHubKeyNameMatches) {
-                inputValue = '';
-              } else {
-                inputValue = iotHubKeyNameMatches[1];
-              }
+              inputValue = iotHubNameMatches[1];
             }
-            break;
-          case 'iotHubKey':
-            if (!iothubConnectionString) {
+          }
+          break;
+        case 'iotHubKeyName':
+          if (!iothubConnectionString) {
+            inputValue = '';
+          } else {
+            const iotHubKeyNameMatches = iothubConnectionString.match(
+              /SharedAccessKeyName=(.*?)(;|$)/);
+            if (!iotHubKeyNameMatches) {
               inputValue = '';
             } else {
-              const iotHubKeyMatches =
+              inputValue = iotHubKeyNameMatches[1];
+            }
+          }
+          break;
+        case 'iotHubKey':
+          if (!iothubConnectionString) {
+            inputValue = '';
+          } else {
+            const iotHubKeyMatches =
                   iothubConnectionString.match(/SharedAccessKey=(.*?)(;|$)/);
-              if (!iotHubKeyMatches) {
-                inputValue = '';
-              } else {
-                inputValue = iotHubKeyMatches[1];
-              }
-            }
-            break;
-          case 'subscription':
-            inputValue = AzureUtility._subscriptionId || '';
-            break;
-          default:
-            const _value = ConfigHandler.get<string>(_key);
-            if (!_value) {
+            if (!iotHubKeyMatches) {
               inputValue = '';
             } else {
-              inputValue = _value;
+              inputValue = iotHubKeyMatches[1];
             }
+          }
+          break;
+        case 'subscription':
+          inputValue = AzureUtility._subscriptionId || '';
+          break;
+        default:{
+          const _value = ConfigHandler.get<string>(_key);
+          if (!_value) {
+            inputValue = '';
+          } else {
+            inputValue = _value;
+          }
+        }
         }
       } else {
         const _value = await vscode.window.showInputBox({
           prompt: `Input value for ${keyDisplayName}`,
           ignoreFocusOut: true,
           value: parameter.defaultValue ? parameter.defaultValue.toString() :
-                                          '',
+            '',
           validateInput: async (value: string) => {
             return AzureUtility._commonParameterCheck(value, parameter);
           }
@@ -400,33 +400,33 @@ export class AzureUtility {
       }
 
       switch (parameter.type.toLocaleLowerCase()) {
-        case 'string':
-          value = inputValue;
-          break;
-        case 'int':
-          value = Number(inputValue);
-          break;
-        case 'bool':
-          value = inputValue.toLocaleLowerCase() === 'true';
-          break;
-        default:
-          break;
+      case 'string':
+        value = inputValue;
+        break;
+      case 'int':
+        value = Number(inputValue);
+        break;
+      case 'bool':
+        value = inputValue.toLocaleLowerCase() === 'true';
+        break;
+      default:
+        break;
       }
 
-      parameters[key] = {value};
+      parameters[key] = { value };
     }
 
     return parameters;
   }
 
-  private static async _getSubscription() {
+  private static async _getSubscription(): Promise<string | undefined> {
     if (AzureUtility._subscriptionId) {
       return AzureUtility._subscriptionId;
     }
 
     const subscription = await vscode.window.showQuickPick(
-        AzureUtility._getSubscriptionList(),
-        {placeHolder: 'Select Subscription', ignoreFocusOut: true});
+      AzureUtility._getSubscriptionList(),
+      { placeHolder: 'Select Subscription', ignoreFocusOut: true });
     if (!subscription || !subscription.description) {
       return undefined;
     }
@@ -437,14 +437,14 @@ export class AzureUtility {
 
     try {
       telemetryWorker.sendEvent(
-          EventNames.selectSubscription, telemetryContext);
+        EventNames.selectSubscription, telemetryContext);
     } catch {
       // If sending telemetry failed, skip the error to avoid blocking user.
     }
     return subscription.description;
   }
 
-  private static async _getResourceGroupItems() {
+  private static async _getResourceGroupItems(): Promise<vscode.QuickPickItem[]> {
     const client = await AzureUtility._getResourceClient();
 
     if (!client) {
@@ -452,7 +452,7 @@ export class AzureUtility {
     }
 
     const resourceGrouplist: vscode.QuickPickItem[] =
-        [{label: '$(plus) Create Resource Group', description: '', detail: ''}];
+        [{ label: '$(plus) Create Resource Group', description: '', detail: '' }];
 
     const resourceGroups = await client.resourceGroups.list();
 
@@ -467,7 +467,7 @@ export class AzureUtility {
     return resourceGrouplist;
   }
 
-  static async getResourceGroup() {
+  static async getResourceGroup(): Promise<string | undefined> {
     const client = await AzureUtility._getResourceClient();
 
     if (!client) {
@@ -476,8 +476,8 @@ export class AzureUtility {
     }
 
     const choice = await vscode.window.showQuickPick(
-        AzureUtility._getResourceGroupItems(),
-        {placeHolder: 'Select Resource Group', ignoreFocusOut: true});
+      AzureUtility._getResourceGroupItems(),
+      { placeHolder: 'Select Resource Group', ignoreFocusOut: true });
 
     if (!choice) {
       AzureUtility._resourceGroup = undefined;
@@ -494,8 +494,7 @@ export class AzureUtility {
     }
   }
 
-  static async deployARMTemplate(
-      template: ARMTemplate, parameters?: ARMParameters) {
+  static async deployARMTemplate(template: ARMTemplate, parameters?: ARMParameters): Promise<ResourceModels.DeploymentExtended | undefined> {
     const client = await AzureUtility._getResourceClient();
     if (!client) {
       return undefined;
@@ -522,12 +521,12 @@ export class AzureUtility {
 
     const mode = 'Incremental';
     const deploymentParameters:
-        ResourceModels.Deployment = {properties: {parameters, template, mode}};
+        ResourceModels.Deployment = { properties: { parameters, template, mode } };
 
     try {
       const deployment = await client.deployments.createOrUpdate(
-          AzureUtility._resourceGroup,
-          `IoTWorkbecnhDeploy${new Date().getTime()}`, deploymentParameters);
+        AzureUtility._resourceGroup,
+        `IoTWorkbecnhDeploy${new Date().getTime()}`, deploymentParameters);
 
       if (AzureUtility._channel && deployPending) {
         clearInterval(deployPending);
@@ -545,21 +544,21 @@ export class AzureUtility {
     }
   }
 
-  static get subscriptionId() {
+  static get subscriptionId(): string|undefined {
     return AzureUtility._subscriptionId;
   }
 
-  static get resourceGroup() {
+  static get resourceGroup(): string|undefined {
     return AzureUtility._resourceGroup;
   }
 
-  static getClient() {
+  static getClient(): ResourceManagementClient |undefined {
     if (!AzureUtility._subscriptionId) {
       return undefined;
     }
 
     const client = AzureUtility._getSubscriptionClientBySubscriptionId(
-        AzureUtility._subscriptionId);
+      AzureUtility._subscriptionId);
     if (!client) {
       return undefined;
     }
@@ -567,9 +566,8 @@ export class AzureUtility {
     return client;
   }
 
-  static async request(
-      // tslint:disable-next-line: no-any
-      method: HttpMethods, resource: string, body: any = null) {
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+  static async request(method: HttpMethods, resource: string, body: any = null): Promise<unknown> {
     const session = await AzureUtility._getSession();
     if (!session) {
       return undefined;
@@ -589,7 +587,7 @@ export class AzureUtility {
     httpRequestOption.simple = false;
     httpRequestOption.json = true;
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       credential.signRequest(httpRequest, async err => {
         if (!err) {
           const res = await request(httpRequestOption);
@@ -601,12 +599,12 @@ export class AzureUtility {
     });
   }
 
-  // tslint:disable-next-line: no-any
-  static async postRequest(resource: string, body: any = null) {
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+  static async postRequest(resource: string, body: any = null): Promise<unknown> {
     return AzureUtility.request('POST', resource, body);
   }
 
-  static async getRequest(resource: string) {
+  static async getRequest(resource: string): Promise<unknown> {
     return AzureUtility.request('GET', resource);
   }
 }

@@ -4,11 +4,11 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 
 export class WorkbenchExtension {
-  // tslint:disable-next-line: no-any
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   private static extension: vscode.Extension<any>|undefined;
 
   static getExtension(context: vscode.ExtensionContext):
-      // tslint:disable-next-line: no-any
+      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
       vscode.Extension<any>|undefined {
     if (!WorkbenchExtension.extension) {
       const extensionId = WorkbenchExtension.getExtensionId(context);

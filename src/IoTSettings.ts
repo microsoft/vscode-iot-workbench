@@ -4,11 +4,11 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {CancelOperationError} from './CancelOperationError';
-import {ConfigHandler} from './configHandler';
-import {ConfigKey, OSPlatform} from './constants';
-import {PickWithData} from './Models/Interfaces/UI';
-import {getHomeDir, getPlatform} from './utils';
+import { CancelOperationError } from './CancelOperationError';
+import { ConfigHandler } from './configHandler';
+import { ConfigKey, OSPlatform } from './constants';
+import { PickWithData } from './Models/Interfaces/UI';
+import { getHomeDir, getPlatform } from './utils';
 
 export class IoTWorkbenchSettings {
   private workbenchPath = '';
@@ -23,8 +23,8 @@ export class IoTWorkbenchSettings {
           ConfigHandler.get<string>(ConfigKey.workbench) ||
           (await this.getDefaultWorkbenchPath());
       await ConfigHandler.update(
-          ConfigKey.workbench, IoTWorkbenchSettings.instance.workbenchPath,
-          vscode.ConfigurationTarget.Global);
+        ConfigKey.workbench, IoTWorkbenchSettings.instance.workbenchPath,
+        vscode.ConfigurationTarget.Global);
     }
 
     return IoTWorkbenchSettings.instance;
@@ -64,18 +64,18 @@ export class IoTWorkbenchSettings {
 
     if (userWorkbenchPath) {
       await ConfigHandler.update(
-          ConfigKey.workbench, userWorkbenchPath,
-          vscode.ConfigurationTarget.Global);
+        ConfigKey.workbench, userWorkbenchPath,
+        vscode.ConfigurationTarget.Global);
       await vscode.window.showInformationMessage(
-          'Change workbench successfully.');
+        'Change workbench successfully.');
     }
   }
 
   private async selectWorkbenchPath(): Promise<PickWithData<string>> {
     const userWorkbenchPath = this.getWorkbenchPath();
     const workbenchPicks: Array<PickWithData<string>> = [
-      {label: userWorkbenchPath, description: '', data: userWorkbenchPath},
-      {label: '$(file-directory) Browse...', description: '', data: '$'}
+      { label: userWorkbenchPath, description: '', data: userWorkbenchPath },
+      { label: '$(file-directory) Browse...', description: '', data: '$' }
     ];
 
     const selection = await vscode.window.showQuickPick(workbenchPicks, {

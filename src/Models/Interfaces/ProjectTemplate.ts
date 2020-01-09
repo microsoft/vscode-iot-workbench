@@ -16,7 +16,7 @@ export interface TemplateFileInfo {
   overwrite?: boolean;
 }
 
-export interface TemplatesType { templates: ProjectTemplate[]; }
+export interface TemplatesType { templates: ProjectTemplate[] }
 export interface ProjectTemplate {
   platform: string;
   name: string;

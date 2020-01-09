@@ -5,7 +5,7 @@ function command(cmd, callback) {
   if (!cmd) {
     return;
   }
-  let args = Array.from(arguments);
+  const args = Array.from(arguments);
   if (typeof args[args.length - 1] === 'function') {
     callback = args[args.length - 1];
     args.length = args.length - 1;

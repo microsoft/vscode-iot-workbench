@@ -5,17 +5,17 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as sdk from 'vscode-iot-device-cube-sdk';
 
-import {CancelOperationError} from '../CancelOperationError';
-import {ConfigHandler} from '../configHandler';
-import {ConfigKey, FileNames, OperationType, ScaffoldType} from '../constants';
-import {FileUtility} from '../FileUtility';
-import {TelemetryContext} from '../telemetry';
-import {askAndOpenInRemote, channelShowAndAppendLine, executeCommand} from '../utils';
+import { CancelOperationError } from '../CancelOperationError';
+import { ConfigHandler } from '../configHandler';
+import { ConfigKey, FileNames, OperationType, ScaffoldType } from '../constants';
+import { FileUtility } from '../FileUtility';
+import { TelemetryContext } from '../telemetry';
+import { askAndOpenInRemote, channelShowAndAppendLine, executeCommand } from '../utils';
 
-import {ContainerDeviceBase} from './ContainerDeviceBase';
-import {DeviceType} from './Interfaces/Device';
-import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
-import {RemoteExtension} from './RemoteExtension';
+import { ContainerDeviceBase } from './ContainerDeviceBase';
+import { DeviceType } from './Interfaces/Device';
+import { TemplateFileInfo } from './Interfaces/ProjectTemplate';
+import { RemoteExtension } from './RemoteExtension';
 
 class RaspberryPiUploadConfig {
   static host = 'hostname';
@@ -30,17 +30,17 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
   private static _boardId = 'raspberrypi';
   name = 'Raspberry Pi';
 
-  static get boardId() {
+  static get boardId(): string {
     return RaspberryPiDevice._boardId;
   }
 
   constructor(
-      context: vscode.ExtensionContext, projectPath: string,
-      channel: vscode.OutputChannel, telemetryContext: TelemetryContext,
-      templateFilesInfo: TemplateFileInfo[] = []) {
+    context: vscode.ExtensionContext, projectPath: string,
+    channel: vscode.OutputChannel, telemetryContext: TelemetryContext,
+    templateFilesInfo: TemplateFileInfo[] = []) {
     super(
-        context, projectPath, channel, telemetryContext,
-        DeviceType.Raspberry_Pi, templateFilesInfo);
+      context, projectPath, channel, telemetryContext,
+      DeviceType.RaspberryPi, templateFilesInfo);
   }
 
   private async getBinaryFileName(): Promise<string|undefined> {
@@ -51,19 +51,19 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       return;
     }
     const getBinaryFileNameCmd = `cat ${
-        cmakeFilePath} | grep 'add_executable' | sed -e 's/^add_executable(//' | awk '{$1=$1};1' | cut -d ' ' -f1 | tr -d '\n'`;
+      cmakeFilePath} | grep 'add_executable' | sed -e 's/^add_executable(//' | awk '{$1=$1};1' | cut -d ' ' -f1 | tr -d '\n'`;
 
     const binaryName = await executeCommand(getBinaryFileNameCmd);
     return binaryName;
   }
 
-  private async enableBinaryExecutability(ssh: sdk.SSH, binaryName: string) {
+  private async enableBinaryExecutability(ssh: sdk.SSH, binaryName: string): Promise<void> {
     if (!binaryName) {
       return;
     }
 
     const chmodCmd = `cd ${RaspberryPiUploadConfig.projectPath} && [ -f ${
-        binaryName} ] && chmod +x ${binaryName}`;
+      binaryName} ] && chmod +x ${binaryName}`;
     await ssh.exec(chmodCmd);
 
     return;
@@ -80,7 +80,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       const binaryName = await this.getBinaryFileName();
       if (!binaryName) {
         const message = `No executable file specified in ${
-            FileNames.cmakeFileName}. Nothing to upload to target machine.`;
+          FileNames.cmakeFileName}. Nothing to upload to target machine.`;
         vscode.window.showWarningMessage(message);
         channelShowAndAppendLine(this.channel, message);
         return false;
@@ -88,9 +88,9 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
 
       const binaryFilePath = path.join(this.outputPath, binaryName);
       if (!await FileUtility.fileExists(
-              ScaffoldType.Workspace, binaryFilePath)) {
+        ScaffoldType.Workspace, binaryFilePath)) {
         const message = `Executable file ${binaryName} does not exist under ${
-            this.outputPath}. Please compile device code first.`;
+          this.outputPath}. Please compile device code first.`;
         vscode.window.showWarningMessage(message);
         channelShowAndAppendLine(this.channel, message);
         return false;
@@ -105,16 +105,16 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
 
       const ssh = new sdk.SSH();
       await ssh.open(
-          RaspberryPiUploadConfig.host, RaspberryPiUploadConfig.port,
-          RaspberryPiUploadConfig.user, RaspberryPiUploadConfig.password);
+        RaspberryPiUploadConfig.host, RaspberryPiUploadConfig.port,
+        RaspberryPiUploadConfig.user, RaspberryPiUploadConfig.password);
 
       try {
         await ssh.uploadFile(
-            binaryFilePath, RaspberryPiUploadConfig.projectPath);
+          binaryFilePath, RaspberryPiUploadConfig.projectPath);
       } catch (error) {
         const message =
             `SSH traffic is too busy. Please wait a second and retry. Error: ${
-                error}.`;
+              error}.`;
         channelShowAndAppendLine(this.channel, message);
         console.log(error);
         throw new Error(message);
@@ -124,14 +124,14 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
         await this.enableBinaryExecutability(ssh, binaryName);
       } catch (error) {
         throw new Error(
-            `Failed to enable binary executability. Error: ${error.message}`);
+          `Failed to enable binary executability. Error: ${error.message}`);
       }
 
       try {
         await ssh.close();
       } catch (error) {
         throw new Error(
-            `Failed to close SSH connection. Error: ${error.message}`);
+          `Failed to close SSH connection. Error: ${error.message}`);
       }
 
       const message = `Successfully deploy compiled files to device board.`;
@@ -139,8 +139,8 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       vscode.window.showInformationMessage(message);
     } catch (error) {
       throw new Error(
-          `Upload binary file to device ${RaspberryPiUploadConfig.user}@${
-              RaspberryPiUploadConfig.host} failed. ${error}`);
+        `Upload binary file to device ${RaspberryPiUploadConfig.user}@${
+          RaspberryPiUploadConfig.host} failed. ${error}`);
     }
 
     return true;
@@ -199,14 +199,14 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     });
 
     sshDevicePickItems.push(
-        {
-          label: '$(sync) Discover again',
-          detail: 'Auto discover SSH enabled device in LAN'
-        },
-        {
-          label: '$(gear) Manual setup',
-          detail: 'Setup device SSH configuration manually'
-        });
+      {
+        label: '$(sync) Discover again',
+        detail: 'Auto discover SSH enabled device in LAN'
+      },
+      {
+        label: '$(gear) Manual setup',
+        detail: 'Setup device SSH configuration manually'
+      });
 
     return sshDevicePickItems;
   }
@@ -283,8 +283,8 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       return false;
     }
     const raspiPort = raspiPortString && !isNaN(Number(raspiPortString)) ?
-        Number(raspiPortString) :
-        RaspberryPiUploadConfig.port;
+      Number(raspiPortString) :
+      RaspberryPiUploadConfig.port;
 
     // Raspberry Pi user name
     const raspiUserOption: vscode.InputBoxOptions = {
@@ -335,7 +335,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     const projectFolderPath = this.projectFolder;
 
     if (!FileUtility.directoryExists(
-            ScaffoldType.Workspace, projectFolderPath)) {
+      ScaffoldType.Workspace, projectFolderPath)) {
       throw new Error('Unable to find the device folder inside the project.');
     }
 
@@ -358,13 +358,13 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
         ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
     if (!deviceConnectionString) {
       throw new Error(
-          'Unable to get the device connection string, please invoke the command of Azure Provision first.');
+        'Unable to get the device connection string, please invoke the command of Azure Provision first.');
     }
     const ssh = new sdk.SSH();
     await ssh.clipboardCopy(deviceConnectionString);
     await ssh.close();
     vscode.window.showInformationMessage(
-        'Device connection string has been copied.');
+      'Device connection string has been copied.');
     return true;
   }
 }

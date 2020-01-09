@@ -5,10 +5,10 @@
 
 import * as vscode from 'vscode';
 import * as utils from '../utils';
-import {DigitalTwinConstants} from './DigitalTwinConstants';
-import {CancelOperationError} from '../CancelOperationError';
-import {ModelRepositoryManager} from './pnp/src/modelRepository/modelRepositoryManager';
-import {ApiProvider} from './pnp/src/api/apiProvider';
+import { DigitalTwinConstants } from './DigitalTwinConstants';
+import { CancelOperationError } from '../CancelOperationError';
+import { ModelRepositoryManager } from './pnp/src/modelRepository/modelRepositoryManager';
+import { ApiProvider } from './pnp/src/api/apiProvider';
 
 /**
  * Digital Twin extension utility
@@ -16,7 +16,7 @@ import {ApiProvider} from './pnp/src/api/apiProvider';
 export class DigitalTwinUtility {
   private static readonly EXTENSION_NOT_INIT =
       'Azure Digital Twin extension is not inititalized';
-  // tslint:disable-next-line: no-any
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   private static extensionInstance: any;
   private static channel: vscode.OutputChannel;
 
@@ -25,8 +25,8 @@ export class DigitalTwinUtility {
    * @param channel output channel
    */
   static init(
-      modelRepositoryManager: ModelRepositoryManager,
-      channel: vscode.OutputChannel): void {
+    modelRepositoryManager: ModelRepositoryManager,
+    channel: vscode.OutputChannel): void {
     DigitalTwinUtility.extensionInstance =
         new ApiProvider(modelRepositoryManager);
     DigitalTwinUtility.channel = channel;
@@ -48,14 +48,14 @@ export class DigitalTwinUtility {
     }
     if (!result) {
       throw new CancelOperationError(
-          `Selected device capability model file cancelled.`);
+        `Selected device capability model file cancelled.`);
     }
 
     utils.channelShowAndAppendLine(
-        DigitalTwinUtility.channel,
-        `${
-            DigitalTwinConstants
-                .dtPrefix} Selected device capability model file: ${result}`);
+      DigitalTwinUtility.channel,
+      `${
+        DigitalTwinConstants
+          .dtPrefix} Selected device capability model file: ${result}`);
     return result;
   }
 
@@ -66,17 +66,17 @@ export class DigitalTwinUtility {
    * @param capabilityModelFile capability model file path
    */
   static async downloadDependentInterface(
-      folder: string, capabilityModelFile: string): Promise<boolean> {
+    folder: string, capabilityModelFile: string): Promise<boolean> {
     if (!DigitalTwinUtility.extensionInstance) {
       throw new Error(DigitalTwinUtility.EXTENSION_NOT_INIT);
     }
     try {
       await DigitalTwinUtility.extensionInstance.downloadDependentInterface(
-          folder, capabilityModelFile);
+        folder, capabilityModelFile);
     } catch (error) {
       utils.channelShowAndAppendLine(
-          DigitalTwinUtility.channel,
-          `${DigitalTwinConstants.dtPrefix} ${error.message}`);
+        DigitalTwinUtility.channel,
+        `${DigitalTwinConstants.dtPrefix} ${error.message}`);
       return false;
     }
     return true;

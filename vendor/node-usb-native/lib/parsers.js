@@ -13,12 +13,12 @@ module.exports = {
     if (typeof delimiter === 'undefined' || delimiter === null) { delimiter = '\r' }
     if (typeof encoding === 'undefined' || encoding === null) { encoding = 'utf8' }
     // Delimiter buffer saved in closure
-    var data = '';
+    let data = '';
     return function(emitter, buffer) {
       // Collect data
       data += buffer.toString(encoding);
       // Split collected data by delimiter
-      var parts = data.split(delimiter);
+      const parts = data.split(delimiter);
       data = parts.pop();
       parts.forEach((part) => {
         emitter.emit('data', part);
@@ -28,11 +28,11 @@ module.exports = {
 
   // Emit a data event every `length` bytes
   byteLength: function(length) {
-    var data = Buffer.alloc(0);
+    let data = Buffer.alloc(0);
     return function(emitter, buffer) {
       data = Buffer.concat([data, buffer]);
       while (data.length >= length) {
-        var out = data.slice(0, length);
+        const out = data.slice(0, length);
         data = data.slice(length);
         emitter.emit('data', out);
       }
@@ -45,10 +45,10 @@ module.exports = {
     if (Object.prototype.toString.call(delimiter) !== '[object Array]') {
       delimiter = [ delimiter ];
     }
-    var buf = [];
-    var nextDelimIndex = 0;
+    let buf = [];
+    let nextDelimIndex = 0;
     return function(emitter, buffer) {
-      for (var i = 0; i < buffer.length; i++) {
+      for (let i = 0; i < buffer.length; i++) {
         buf[buf.length] = buffer[i];
         if (buf[buf.length - 1] === delimiter[nextDelimIndex]) {
           nextDelimIndex++;

@@ -10,7 +10,10 @@
       "es2017"
     ],
     "sourceMap": true,
-    "rootDir": "."
+    "rootDir": ".",    
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strict": true // Enable several strict checks
   },
   "include": [
     "src/*.ts",

@@ -1,35 +1,6 @@
 const fs = require('fs');
 
 /**
- * If Nightly Build or Production release or RC release, modify package.json and related template files.
- * If common PR, do no modification.
- * TRAVIS_EVENT_TYPE === "cron" :                       Nightly Build
- * TRAVIS_TAG =~ /^v?[0-9]+\.[0-9]+\.[0-9]+$/:          Production release (eg. v0.10.18)
- * TRAVIS_TAG =~ /^v?[0-9]+\.[0-9]+\.[0-9]+-[rR][cC]/:  RC release (eg. v0.10.18-rc, v0.10.18-rc2, etc.)
- */
-const packageJson = JSON.parse(fs.readFileSync('package.json'));
-
-// Nightly Build
-if (process.env.BUILD_REASON === "Schedule") {
-  const nightlyBuildName = "test-owl-project-nightly";
-  const nightlyBuildDisplayName = "Test OWL Project (Nightly)";
-  updateConfigForNonProduction(packageJson, nightlyBuildName, nightlyBuildDisplayName);
-} else if (process.env.IS_PROD) {
-  // Update resource link
-  const codeGenUrl = "https://aka.ms/iot-codegen-cli-for-workbench";
-  packageJson.codeGenConfigUrl = codeGenUrl;
-
-  // Update production AI Key
-  packageJson.aiKey = process.env.PROD_AIKEY;
-} else if (process.env.IS_TEST) {
-  const testName = "test-owl-project";
-  const testDisplayName = "Test OWL Project RC";
-  updateConfigForNonProduction(packageJson, testName, testDisplayName);
-}
-
-fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2) + '\n');
-
-/**
  * Update package.json with test name, displayName, publisher, ai aky.
  * Trim version number. Delete extension icon.
  * Update extension id in template files.
@@ -66,3 +37,31 @@ function updateConfigForNonProduction(packageJson, testName, testDisplayName) {
     fs.writeFileSync(filePath, replaceJson);
   });
 }
+/**
+ * If Nightly Build or Production release or RC release, modify package.json and related template files.
+ * If common PR, do no modification.
+ * TRAVIS_EVENT_TYPE === "cron" :                       Nightly Build
+ * TRAVIS_TAG =~ /^v?[0-9]+\.[0-9]+\.[0-9]+$/:          Production release (eg. v0.10.18)
+ * TRAVIS_TAG =~ /^v?[0-9]+\.[0-9]+\.[0-9]+-[rR][cC]/:  RC release (eg. v0.10.18-rc, v0.10.18-rc2, etc.)
+ */
+const packageJson = JSON.parse(fs.readFileSync('package.json'));
+
+// Nightly Build
+if (process.env.BUILD_REASON === "Schedule") {
+  const nightlyBuildName = "test-owl-project-nightly";
+  const nightlyBuildDisplayName = "Test OWL Project (Nightly)";
+  updateConfigForNonProduction(packageJson, nightlyBuildName, nightlyBuildDisplayName);
+} else if (process.env.IS_PROD) {
+  // Update resource link
+  const codeGenUrl = "https://aka.ms/iot-codegen-cli-for-workbench";
+  packageJson.codeGenConfigUrl = codeGenUrl;
+
+  // Update production AI Key
+  packageJson.aiKey = process.env.PROD_AIKEY;
+} else if (process.env.IS_TEST) {
+  const testName = "test-owl-project";
+  const testDisplayName = "Test OWL Project RC";
+  updateConfigForNonProduction(packageJson, testName, testDisplayName);
+}
+
+fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2) + '\n');

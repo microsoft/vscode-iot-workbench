@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 
-import {TelemetryContext} from '../../telemetry';
-import {AnsiCCodeGenerator} from './Interfaces/AnsiCCodeGenerator';
-import {CodeGenerator, CodeGenLanguage} from './Interfaces/CodeGenerator';
-import {CodeGeneratorFactory} from './Interfaces/CodeGeneratorFactory';
+import { TelemetryContext } from '../../telemetry';
+import { AnsiCCodeGenerator } from './Interfaces/AnsiCCodeGenerator';
+import { CodeGenerator, CodeGenLanguage } from './Interfaces/CodeGenerator';
+import { CodeGeneratorFactory } from './Interfaces/CodeGeneratorFactory';
 
 export class AnsiCCodeGeneratorFactory implements CodeGeneratorFactory {
   constructor(
@@ -13,7 +13,7 @@ export class AnsiCCodeGeneratorFactory implements CodeGeneratorFactory {
   createCodeGeneratorImpl(language: string): CodeGenerator|null {
     if (language === CodeGenLanguage.ANSIC.toString()) {
       return new AnsiCCodeGenerator(
-          this.context, this.channel, this.telemetryContext);
+        this.context, this.channel, this.telemetryContext);
     } else {
       return null;
     }

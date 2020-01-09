@@ -1,8 +1,7 @@
 import * as assert from 'assert';
-import * as vscode from 'vscode';
 
-import {ConfigHandler} from '../src/configHandler';
-import {ConfigKey} from '../src/constants';
+import { ConfigHandler } from '../src/configHandler';
+import { ConfigKey } from '../src/constants';
 
 suite('IoT Device Workbench: Config', () => {
   test('should set and get config value correctly', async function() {

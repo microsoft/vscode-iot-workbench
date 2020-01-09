@@ -1,7 +1,8 @@
 const callbackStack = [];
+// eslint-disable-next-line no-undef
 const vscode = acquireVsCodeApi();
 
-var example = new Vue({
+const example = new Vue({
   el: '#main',
   data: {
     version: '',
@@ -18,8 +19,8 @@ var example = new Vue({
         'https://raw.githubusercontent.com/VSChina/azureiotdevkit_tools/gallery/workbench-example-devkit-v2.json';
     this.boardId = query.board || '';
     httpRequest(url, function(data) {
-      var examples = [];
-      var aside = [];
+      let examples = [];
+      let aside = [];
       try {
         if (data) {
           data = JSON.parse(data);
@@ -36,7 +37,7 @@ var example = new Vue({
         document.getElementById('main').className = 'no-aside';
       }
       
-      for (var i = 0; i < examples.length; i++) {
+      for (let i = 0; i < examples.length; i++) {
         examples[i].fullDescription = examples[i].description;
         if (examples[i].featured && !this.featuredExample) {
           this.featuredExample = examples.splice(i, 1)[0];
@@ -56,7 +57,7 @@ var example = new Vue({
       }
     
       if (example.name) {
-        let project_name = example.name.replace(/[^a-z0-9]/ig, '_').toLowerCase();
+        const project_name = example.name.replace(/[^a-z0-9]/ig, '_').toLowerCase();
         return project_name;
       }
     
@@ -79,7 +80,7 @@ function openLink(url, example) {
   }
   command('iotworkbench.openUri', url);
   if (example) {
-    command('iotworkbench.sendTelemetry', {example});
+    command('iotworkbench.sendTelemetry', { example });
   }
 }
 
@@ -98,7 +99,7 @@ function parseQuery(url) {
     return {};
   }
   const query = url.split('?')[1].split('&');
-  let res = {};
+  const res = {};
   query.forEach(q => {
     const item = q.split('=');
     res[item[0]] = item[1] ? decodeURIComponent(item[1]) : undefined;
@@ -108,14 +109,14 @@ function parseQuery(url) {
 }
 
 function generateSection(obj, className) {
-  let section = document.createElement('div');
+  const section = document.createElement('div');
   section.className = 'section';
   if (className) {
     section.className += ' ' + className;
   }
 
   if (obj.title) {
-    let title = document.createElement('h1');
+    const title = document.createElement('h1');
     title.innerText = obj.title;
     section.appendChild(title);
   }
@@ -123,12 +124,12 @@ function generateSection(obj, className) {
 }
 
 function generateLinks(obj) {
-  let section = generateSection(obj, 'quick-links');
+  const section = generateSection(obj, 'quick-links');
   if (obj.items && obj.items.length) {
-    let ulEl = document.createElement('ul');
+    const ulEl = document.createElement('ul');
     ulEl.className = 'links';
     obj.items.forEach((link) => {
-      let linkEl = document.createElement('li');
+      const linkEl = document.createElement('li');
       linkEl.innerText = link.text;
       linkEl.addEventListener('click', () => {
         openLink(link.url);
@@ -141,14 +142,14 @@ function generateLinks(obj) {
 }
 
 function generateTable(obj) {
-  let section = generateSection(obj, 'info');
+  const section = generateSection(obj, 'info');
   if (obj.rows && obj.rows.length) {
-    let tableEl = document.createElement('table');
+    const tableEl = document.createElement('table');
     obj.rows.forEach((row) => {
       if (row.length) {
-        let trEl = document.createElement('tr');
+        const trEl = document.createElement('tr');
         row.forEach((col) => {
-          let tdEl = document.createElement('td');
+          const tdEl = document.createElement('td');
           tdEl.innerText = col.text;
           if (col.url) {
             tdEl.className = 'link';
@@ -167,16 +168,16 @@ function generateTable(obj) {
 }
 
 function generateText(obj) {
-  let section = generateSection(obj);
-  let pEl = document.createElement('p');
+  const section = generateSection(obj);
+  const pEl = document.createElement('p');
   pEl.innerText = obj.text;
   section.appendChild(pEl);
   return section;
 }
 
 function generateImage(obj) {
-  let section = generateSection(obj);
-  let imgEl = document.createElement('img');
+  const section = generateSection(obj);
+  const imgEl = document.createElement('img');
   imgEl.src = obj.src;
   if (obj.url) {
     imgEl.className = 'link';
@@ -189,10 +190,10 @@ function generateImage(obj) {
 }
 
 function generateBadge(obj) {
-  let section = generateSection(obj, 'badge');
+  const section = generateSection(obj, 'badge');
   if (obj.items && obj.items.length) {
     obj.items.forEach((item) => {
-      let spanEl = document.createElement('span');
+      const spanEl = document.createElement('span');
       spanEl.className = item.icon;
       spanEl.innerText = item.text;
       if (item.url) {
@@ -208,33 +209,33 @@ function generateBadge(obj) {
 }
 
 function generateFeed(obj) {
-  let section = generateSection(obj, 'blog');
+  const section = generateSection(obj, 'blog');
   httpRequest(obj.url, function(data) {
-    let parser = new DOMParser();
-    let xmlDoc = parser.parseFromString(data,'text/xml');
-    let items = xmlDoc.getElementsByTagName('item');
-    let ulEl = document.createElement('ul');
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(data,'text/xml');
+    const items = xmlDoc.getElementsByTagName('item');
+    const ulEl = document.createElement('ul');
     ulEl.className = 'blog';
     for (let i = 0; i < Math.min(items.length, 3); i++) {
-      let title = items[i].getElementsByTagName('title')[0].textContent;
-      let link = items[i].getElementsByTagName('link')[0].textContent;
-      let date = new Date(items[i].getElementsByTagName('pubDate')[0].textContent).toISOString().slice(0, 10);
-      let description = items[i].getElementsByTagName('description')[0].textContent;
+      const title = items[i].getElementsByTagName('title')[0].textContent;
+      const link = items[i].getElementsByTagName('link')[0].textContent;
+      const date = new Date(items[i].getElementsByTagName('pubDate')[0].textContent).toISOString().slice(0, 10);
+      const description = items[i].getElementsByTagName('description')[0].textContent;
 
-      let liEl = document.createElement('li');
-      let h2El = document.createElement('h2');
+      const liEl = document.createElement('li');
+      const h2El = document.createElement('h2');
       h2El.innerText = title;
       h2El.addEventListener('click', () => {
         openLink(link);
       });
       liEl.appendChild(h2El);
 
-      let divEl = document.createElement('div');
+      const divEl = document.createElement('div');
       divEl.className = 'date';
       divEl.innerText = date;
       liEl.appendChild(divEl);
 
-      let pEl = document.createElement('p');
+      const pEl = document.createElement('p');
       pEl.innerHTML = description;
       pEl.innerText = pEl.innerText;
       liEl.appendChild(pEl);
@@ -253,26 +254,26 @@ function generateAside(data) {
     data.forEach(item => {
       let section;
       switch(item.type) {
-        case 'links':
-          section = generateLinks(item);
-          break;
-        case 'table':
-          section = generateTable(item);
-          break;
-        case 'text':
-          section = generateText(item);
-          break;
-        case 'image':
-          section = generateImage(item);
-          break;
-        case 'badge':
-          section = generateBadge(item);
-          break;
-        case 'feed':
-          section = generateFeed(item);
-          break;
-        default:
-          break;
+      case 'links':
+        section = generateLinks(item);
+        break;
+      case 'table':
+        section = generateTable(item);
+        break;
+      case 'text':
+        section = generateText(item);
+        break;
+      case 'image':
+        section = generateImage(item);
+        break;
+      case 'badge':
+        section = generateBadge(item);
+        break;
+      case 'feed':
+        section = generateFeed(item);
+        break;
+      default:
+        break;
       }
 
       if (section) {
@@ -286,7 +287,7 @@ function command(cmd, callback) {
   if (!cmd) {
     return;
   }
-  let args = Array.from(arguments);
+  const args = Array.from(arguments);
   if (typeof args[args.length - 1] === 'function') {
     callback = args[args.length - 1];
     args.length = args.length - 1;

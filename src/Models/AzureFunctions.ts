@@ -9,23 +9,23 @@ import * as vscode from 'vscode';
 
 import * as utils from '../utils';
 import WebSiteManagementClient = require('azure-arm-website');
-import {Component, ComponentType} from './Interfaces/Component';
-import {Provisionable} from './Interfaces/Provisionable';
-import {Deployable} from './Interfaces/Deployable';
+import { Component, ComponentType } from './Interfaces/Component';
+import { Provisionable } from './Interfaces/Provisionable';
+import { Deployable } from './Interfaces/Deployable';
 
-import {ConfigHandler} from '../configHandler';
-import {ConfigKey, AzureFunctionsLanguage, AzureComponentsStorage, DependentExtensions, ScaffoldType} from '../constants';
+import { ConfigHandler } from '../configHandler';
+import { ConfigKey, AzureFunctionsLanguage, AzureComponentsStorage, DependentExtensions, ScaffoldType } from '../constants';
 
-import {ServiceClientCredentials} from 'ms-rest';
-import {AzureAccount, AzureResourceFilter} from '../azure-account.api';
-import {StringDictionary} from 'azure-arm-website/lib/models';
-import {getExtension} from './Apis';
-import {ExtensionName} from './Interfaces/Api';
-import {Guid} from 'guid-typescript';
-import {AzureComponentConfig, AzureConfigs, ComponentInfo, DependencyConfig, Dependency} from './AzureComponentConfig';
-import {FileUtility} from '../FileUtility';
-import {VscodeCommands, AzureFunctionsCommands} from '../common/Commands';
-import {CancelOperationError} from '../CancelOperationError';
+import { ServiceClientCredentials } from 'ms-rest';
+import { AzureAccount, AzureResourceFilter } from '../azure-account.api';
+import { StringDictionary } from 'azure-arm-website/lib/models';
+import { getExtension } from './Apis';
+import { ExtensionName } from './Interfaces/Api';
+import { Guid } from 'guid-typescript';
+import { AzureComponentConfig, AzureConfigs, ComponentInfo, DependencyConfig, Dependency } from './AzureComponentConfig';
+import { FileUtility } from '../FileUtility';
+import { VscodeCommands, AzureFunctionsCommands } from '../common/Commands';
+import { CancelOperationError } from '../CancelOperationError';
 
 const impor = require('impor')(__dirname);
 const azureUtilityModule =
@@ -42,7 +42,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
   private functionFolder: string;
 
   private componentId: string;
-  get id() {
+  get id(): string {
     return this.componentId;
   }
 
@@ -69,9 +69,9 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
   }
 
   constructor(
-      azureFunctionsPath: string, functionFolder: string,
-      channel: vscode.OutputChannel, language: string|null = null,
-      dependencyComponents: Dependency[]|null = null) {
+    azureFunctionsPath: string, functionFolder: string,
+    channel: vscode.OutputChannel, language: string|null = null,
+    dependencyComponents: Dependency[]|null = null) {
     this.componentType = ComponentType.AzureFunctions;
     this.channel = channel;
     this.azureFunctionsPath = azureFunctionsPath;
@@ -80,8 +80,8 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     this.componentId = Guid.create().toString();
     if (dependencyComponents && dependencyComponents.length > 0) {
       dependencyComponents.forEach(
-          dependency => this.dependencies.push(
-              {id: dependency.component.id.toString(), type: dependency.type}));
+        dependency => this.dependencies.push(
+          { id: dependency.component.id.toString(), type: dependency.type }));
     }
   }
 
@@ -94,13 +94,13 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
   static async isAvailable(): Promise<boolean> {
     if (!vscode.extensions.getExtension(DependentExtensions.azureFunctions)) {
       const choice = await vscode.window.showInformationMessage(
-          'Azure Functions extension is required for the current project. Do you want to install it from marketplace?',
-          'Yes', 'No');
+        'Azure Functions extension is required for the current project. Do you want to install it from marketplace?',
+        'Yes', 'No');
       if (choice === 'Yes') {
         vscode.commands.executeCommand(
-            VscodeCommands.VscodeOpen,
-            vscode.Uri.parse(
-                'vscode:extension/' + DependentExtensions.azureFunctions));
+          VscodeCommands.VscodeOpen,
+          vscode.Uri.parse(
+            'vscode:extension/' + DependentExtensions.azureFunctions));
       }
       return false;
     }
@@ -118,8 +118,8 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
 
   async load(): Promise<boolean> {
     const azureConfigFilePath = path.join(
-        this.azureFunctionsPath, '..', AzureComponentsStorage.folderName,
-        AzureComponentsStorage.fileName);
+      this.azureFunctionsPath, '..', AzureComponentsStorage.folderName,
+      AzureComponentsStorage.fileName);
 
     if (!fs.existsSync(azureConfigFilePath)) {
       return false;
@@ -134,7 +134,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     }
 
     const azureFunctionsConfig = azureConfigs.componentConfigs.find(
-        config => config.folder === this.functionFolder);
+      config => config.folder === this.functionFolder);
     if (azureFunctionsConfig) {
       this.componentId = azureFunctionsConfig.id;
       this.dependencies = azureFunctionsConfig.dependencies;
@@ -155,14 +155,14 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
 
     if (!await FileUtility.directoryExists(scaffoldType, azureFunctionsPath)) {
       throw new Error(
-          'Unable to find the Azure Functions folder inside the project.');
+        'Unable to find the Azure Functions folder inside the project.');
     }
 
     if (!this.functionLanguage) {
       const picks: vscode.QuickPickItem[] = [
-        {label: AzureFunctionsLanguage.CSharpScript, description: ''},
-        {label: AzureFunctionsLanguage.JavaScript, description: ''},
-        {label: AzureFunctionsLanguage.CSharpLibrary, description: ''}
+        { label: AzureFunctionsLanguage.CSharpScript, description: '' },
+        { label: AzureFunctionsLanguage.JavaScript, description: '' },
+        { label: AzureFunctionsLanguage.CSharpLibrary, description: '' }
       ];
 
       const languageSelection = await vscode.window.showQuickPick(picks, {
@@ -174,7 +174,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
 
       if (!languageSelection) {
         throw new CancelOperationError(
-            'Unable to get the language for Azure Functions. Creating project for Azure Functions cancelled.');
+          'Unable to get the language for Azure Functions. Creating project for Azure Functions cancelled.');
       }
       this.functionLanguage = languageSelection.label;
     }
@@ -183,32 +183,32 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
         utils.getScriptTemplateNameFromLanguage(this.functionLanguage);
     if (!templateName) {
       throw new CancelOperationError(
-          'Unable to get the template for Azure Functions.Creating project for Azure Functions cancelled.');
+        'Unable to get the template for Azure Functions.Creating project for Azure Functions cancelled.');
     }
 
     if (this.functionLanguage === AzureFunctionsLanguage.CSharpLibrary) {
       await vscode.commands.executeCommand(
-          AzureFunctionsCommands.CreateNewProject, azureFunctionsPath,
-          this.functionLanguage, '~2', false /* openFolder */, templateName,
-          'IoTHubTrigger1', {
-            connection: 'eventHubConnectionString',
-            path: '%eventHubConnectionPath%',
-            consumerGroup: '$Default',
-            namespace: 'IoTWorkbench'
-          });
+        AzureFunctionsCommands.CreateNewProject, azureFunctionsPath,
+        this.functionLanguage, '~2', false /* openFolder */, templateName,
+        'IoTHubTrigger1', {
+          connection: 'eventHubConnectionString',
+          path: '%eventHubConnectionPath%',
+          consumerGroup: '$Default',
+          namespace: 'IoTWorkbench'
+        });
     } else {
       await vscode.commands.executeCommand(
-          AzureFunctionsCommands.CreateNewProject, azureFunctionsPath,
-          this.functionLanguage, '~1', false /* openFolder */, templateName,
-          'IoTHubTrigger1', {
-            connection: 'eventHubConnectionString',
-            path: '%eventHubConnectionPath%',
-            consumerGroup: '$Default'
-          });
+        AzureFunctionsCommands.CreateNewProject, azureFunctionsPath,
+        this.functionLanguage, '~1', false /* openFolder */, templateName,
+        'IoTHubTrigger1', {
+          connection: 'eventHubConnectionString',
+          path: '%eventHubConnectionPath%',
+          consumerGroup: '$Default'
+        });
     }
 
     await this.updateConfigSettings(
-        scaffoldType, {values: {functionLanguage: this.functionLanguage}});
+      scaffoldType, { values: { functionLanguage: this.functionLanguage } });
   }
 
   async provision(): Promise<boolean> {
@@ -224,8 +224,8 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
 
     const functionAppId: string|undefined =
         await vscode.commands.executeCommand<string>(
-            AzureFunctionsCommands.CreateFunctionApp, subscriptionId,
-            resourceGroup);
+          AzureFunctionsCommands.CreateFunctionApp, subscriptionId,
+          resourceGroup);
     if (functionAppId) {
       await ConfigHandler.update(ConfigKey.functionAppId, functionAppId);
       const eventHubConnectionString =
@@ -245,13 +245,13 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
       }
 
       const resourceGroupMatches =
-          functionAppId.match(/\/resourceGroups\/([^\/]*)/);
+          functionAppId.match(/\/resourceGroups\/([^/]*)/);
       if (!resourceGroupMatches || resourceGroupMatches.length < 2) {
         throw new Error('Cannot parse resource group from function app ID.');
       }
       const resourceGroup = resourceGroupMatches[1];
 
-      const siteNameMatches = functionAppId.match(/\/sites\/([^\/]*)/);
+      const siteNameMatches = functionAppId.match(/\/sites\/([^/]*)/);
       if (!siteNameMatches || siteNameMatches.length < 2) {
         throw new Error('Cannot parse function app name from function app ID.');
       }
@@ -282,12 +282,12 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
       appSettings.properties['WEBSITE_RUN_FROM_PACKAGE'] = '0';
 
       await client.webApps.updateApplicationSettings(
-          resourceGroup, siteName, appSettings);
+        resourceGroup, siteName, appSettings);
 
       return true;
     } else {
       throw new Error(
-          'Creating Azure Functions application failed. Please check the error log in output window.');
+        'Creating Azure Functions application failed. Please check the error log in output window.');
     }
   }
 
@@ -295,7 +295,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     let deployPending: NodeJS.Timer|null = null;
     if (this.channel) {
       utils.channelShowAndAppendLine(
-          this.channel, 'Deploying Azure Functions App...');
+        this.channel, 'Deploying Azure Functions App...');
       deployPending = setInterval(() => {
         this.channel.append('.');
       }, 1000);
@@ -307,18 +307,16 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
       if (this.functionLanguage !==
           AzureFunctionsLanguage.CSharpLibrary as string) {
         await vscode.commands.executeCommand(
-            AzureFunctionsCommands.Deploy, azureFunctionsPath, functionAppId);
+          AzureFunctionsCommands.Deploy, azureFunctionsPath, functionAppId);
       } else {
         const subPath =
             path.join(azureFunctionsPath, 'bin/Release/netcoreapp2.1/publish');
         await vscode.commands.executeCommand(
-            AzureFunctionsCommands.Deploy, subPath, functionAppId);
+          AzureFunctionsCommands.Deploy, subPath, functionAppId);
       }
       console.log(azureFunctionsPath, functionAppId);
 
       return true;
-    } catch (error) {
-      throw error;
     } finally {
       if (this.channel && deployPending) {
         clearInterval(deployPending);
@@ -330,10 +328,10 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
   async updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo):
       Promise<void> {
     const azureConfigFilePath = path.join(
-        this.azureFunctionsPath, '..', AzureComponentsStorage.folderName,
-        AzureComponentsStorage.fileName);
+      this.azureFunctionsPath, '..', AzureComponentsStorage.folderName,
+      AzureComponentsStorage.fileName);
 
-    let azureConfigs: AzureConfigs = {componentConfigs: []};
+    let azureConfigs: AzureConfigs = { componentConfigs: [] };
 
     try {
       const azureConfigContent =

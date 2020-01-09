@@ -102,22 +102,22 @@ export class DigitalTwinDiagnosticProvider {
   private static validateNode(jsonNode: parser.Node, digitalTwinNode: PropertyNode, problems: Problem[]): void {
     const nodeType: parser.NodeType = jsonNode.type;
     switch (nodeType) {
-      case JsonNodeType.Object:
-        DigitalTwinDiagnosticProvider.validateObjectNode(jsonNode, digitalTwinNode, problems);
-        break;
-      case JsonNodeType.Array:
-        DigitalTwinDiagnosticProvider.validateArrayNode(jsonNode, digitalTwinNode, problems);
-        break;
-      case JsonNodeType.String:
-        DigitalTwinDiagnosticProvider.validateStringNode(jsonNode, digitalTwinNode, problems);
-        break;
-      case JsonNodeType.Number:
-        DigitalTwinDiagnosticProvider.validateNumberNode(jsonNode, digitalTwinNode, problems);
-        break;
-      case JsonNodeType.Boolean:
-        DigitalTwinDiagnosticProvider.validateBooleanNode(jsonNode, digitalTwinNode, problems);
-        break;
-      default:
+    case JsonNodeType.Object:
+      DigitalTwinDiagnosticProvider.validateObjectNode(jsonNode, digitalTwinNode, problems);
+      break;
+    case JsonNodeType.Array:
+      DigitalTwinDiagnosticProvider.validateArrayNode(jsonNode, digitalTwinNode, problems);
+      break;
+    case JsonNodeType.String:
+      DigitalTwinDiagnosticProvider.validateStringNode(jsonNode, digitalTwinNode, problems);
+      break;
+    case JsonNodeType.Number:
+      DigitalTwinDiagnosticProvider.validateNumberNode(jsonNode, digitalTwinNode, problems);
+      break;
+    case JsonNodeType.Boolean:
+      DigitalTwinDiagnosticProvider.validateBooleanNode(jsonNode, digitalTwinNode, problems);
+      break;
+    default:
     }
   }
 
@@ -259,38 +259,38 @@ export class DigitalTwinDiagnosticProvider {
       // duplicate property name is handled by json validator
       exist.add(propertyName);
       switch (propertyName) {
-        case DigitalTwinConstants.ID:
-          // @id is available for each class
-          propertyNode = IntelliSenseUtility.getPropertyNode(propertyName);
-          if (propertyNode) {
-            DigitalTwinDiagnosticProvider.validateNode(propertyPair.value, propertyNode, problems);
-          }
-          break;
-        case DigitalTwinConstants.CONTEXT:
-          // @context is available when it is required
-          if (
-            classNode.constraint &&
+      case DigitalTwinConstants.ID:
+        // @id is available for each class
+        propertyNode = IntelliSenseUtility.getPropertyNode(propertyName);
+        if (propertyNode) {
+          DigitalTwinDiagnosticProvider.validateNode(propertyPair.value, propertyNode, problems);
+        }
+        break;
+      case DigitalTwinConstants.CONTEXT:
+        // @context is available when it is required
+        if (
+          classNode.constraint &&
             classNode.constraint.required &&
             classNode.constraint.required.includes(propertyName)
-          ) {
-            if (!IntelliSenseUtility.isDigitalTwinContext(propertyPair.value)) {
-              DigitalTwinDiagnosticProvider.addProblem(propertyPair.value, problems, DiagnosticMessage.InvalidContext);
-            }
-          } else {
-            DigitalTwinDiagnosticProvider.addProblemOfUnexpectedProperty(propertyPair.name, problems);
+        ) {
+          if (!IntelliSenseUtility.isDigitalTwinContext(propertyPair.value)) {
+            DigitalTwinDiagnosticProvider.addProblem(propertyPair.value, problems, DiagnosticMessage.InvalidContext);
           }
-          break;
-        case DigitalTwinConstants.TYPE:
-          // skip since @type is already validated
-          break;
-        default:
-          // validate expected property
-          propertyNode = expectedProperties.get(propertyName);
-          if (!propertyNode) {
-            DigitalTwinDiagnosticProvider.addProblemOfUnexpectedProperty(propertyPair.name, problems);
-          } else {
-            DigitalTwinDiagnosticProvider.validateNode(propertyPair.value, propertyNode, problems);
-          }
+        } else {
+          DigitalTwinDiagnosticProvider.addProblemOfUnexpectedProperty(propertyPair.name, problems);
+        }
+        break;
+      case DigitalTwinConstants.TYPE:
+        // skip since @type is already validated
+        break;
+      default:
+        // validate expected property
+        propertyNode = expectedProperties.get(propertyName);
+        if (!propertyNode) {
+          DigitalTwinDiagnosticProvider.addProblemOfUnexpectedProperty(propertyPair.name, problems);
+        } else {
+          DigitalTwinDiagnosticProvider.validateNode(propertyPair.value, propertyNode, problems);
+        }
       }
     }
   }

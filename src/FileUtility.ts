@@ -4,7 +4,7 @@ import * as fs from 'fs-plus';
 import * as path from 'path';
 import * as sdk from 'vscode-iot-device-cube-sdk';
 import * as crypto from 'crypto';
-import {ScaffoldType} from './constants';
+import { ScaffoldType } from './constants';
 import extractzip = require('extract-zip');
 
 export class FileUtility {
@@ -57,7 +57,7 @@ export class FileUtility {
     if (type === ScaffoldType.Local) {
       return await sdk.FileSystem.mkDir(dirPath);
     } else {
-      return new Promise(async (resolve: (value?: void) => void, reject) => {
+      return new Promise((resolve: (value?: void) => void, reject) => {
         fs.mkdir(dirPath, (error) => {
           if (error) {
             reject(error);
@@ -88,13 +88,13 @@ export class FileUtility {
 
   // Make sure filepath's parent directory exists
   static async writeFile(
-      type: ScaffoldType, filePath: string,
-      data: string|Buffer): Promise<void> {
+    type: ScaffoldType, filePath: string,
+    data: string|Buffer): Promise<void> {
     if (type === ScaffoldType.Local) {
       return await sdk.FileSystem.writeFile(filePath, data);
     } else {
-      return new Promise(async (resolve: (value?: void) => void, reject) => {
-        await fs.writeFile(filePath, data, (err) => {
+      return new Promise((resolve: (value?: void) => void, reject) => {
+        fs.writeFile(filePath, data, (err) => {
           if (err) {
             reject(err);
             return;
@@ -113,8 +113,8 @@ export class FileUtility {
    * @param data Json object
    */
   static async writeJsonFile(
-      // tslint:disable-next-line: no-any
-      type: ScaffoldType, fileDestPath: string, data: any): Promise<void> {
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+    type: ScaffoldType, fileDestPath: string, data: any): Promise<void> {
     const indentationSpace = 4;
     const jsonString = JSON.stringify(data, null, indentationSpace);
 
@@ -126,29 +126,29 @@ export class FileUtility {
   }
 
   static async readFile(
-      type: ScaffoldType, filePath: string,
-      encoding?: string): Promise<string|Buffer> {
+    type: ScaffoldType, filePath: string,
+    encoding?: string): Promise<string|Buffer> {
     if (type === ScaffoldType.Local) {
       return await sdk.FileSystem.readFile(filePath, encoding);
     } else {
       return new Promise(
-          async (resolve: (data: string|Buffer) => void, reject) => {
-            await fs.readFile(filePath, encoding, (err, data) => {
-              if (err) {
-                reject(err);
-                return;
-              }
-              resolve(data);
+        (resolve: (data: string|Buffer) => void, reject) => {
+          fs.readFile(filePath, encoding, (err, data) => {
+            if (err) {
+              reject(err);
               return;
-            });
+            }
+            resolve(data);
+            return;
           });
+        });
     }
   }
 
   static async extractZipFile(sourceZip: string, targetFoder: string):
       Promise<boolean> {
     return new Promise((resolve: (value: boolean) => void, reject) => {
-      extractzip(sourceZip, {dir: targetFoder}, err => {
+      extractzip(sourceZip, { dir: targetFoder }, err => {
         if (err) {
           return reject(err);
         } else {

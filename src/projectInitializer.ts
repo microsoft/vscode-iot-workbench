@@ -7,13 +7,13 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as utils from './utils';
 
-import {TelemetryContext} from './telemetry';
-import {FileNames, ScaffoldType, PlatformType, TemplateTag} from './constants';
-import {IoTWorkbenchSettings} from './IoTSettings';
-import {FileUtility} from './FileUtility';
-import {ProjectTemplate, ProjectTemplateType, TemplatesType} from './Models/Interfaces/ProjectTemplate';
-import {RemoteExtension} from './Models/RemoteExtension';
-import {CancelOperationError} from './CancelOperationError';
+import { TelemetryContext } from './telemetry';
+import { FileNames, ScaffoldType, PlatformType, TemplateTag } from './constants';
+import { IoTWorkbenchSettings } from './IoTSettings';
+import { FileUtility } from './FileUtility';
+import { ProjectTemplate, ProjectTemplateType, TemplatesType } from './Models/Interfaces/ProjectTemplate';
+import { RemoteExtension } from './Models/RemoteExtension';
+import { CancelOperationError } from './CancelOperationError';
 
 const impor = require('impor')(__dirname);
 const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
@@ -30,8 +30,8 @@ const constants = {
 
 export class ProjectInitializer {
   async InitializeProject(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext) {
+    context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+    telemetryContext: TelemetryContext): Promise<void> {
     // Only create project when not in remote environment
     const isLocal = RemoteExtension.checkLocalBeforeRunCommand(context);
     if (!isLocal) {
@@ -48,103 +48,102 @@ export class ProjectInitializer {
 
     // Initial project
     await vscode.window.withProgress(
-        {
-          title: 'Project initialization',
-          location: vscode.ProgressLocation.Window,
-        },
-        async (progress) => {
-          progress.report({
-            message: 'Updating a list of available template',
-          });
+      {
+        title: 'Project initialization',
+        location: vscode.ProgressLocation.Window,
+      },
+      async (progress) => {
+        progress.report({
+          message: 'Updating a list of available template',
+        });
 
-          const scaffoldType = ScaffoldType.Local;
+        const scaffoldType = ScaffoldType.Local;
 
-          // Step 1: Get project name
-          const projectPath =
+        // Step 1: Get project name
+        const projectPath =
               await this.generateProjectFolder(telemetryContext, scaffoldType);
-          if (!projectPath) {
-            throw new CancelOperationError(
-                `Project initialization cancelled: Project name input cancelled.`);
-          }
+        if (!projectPath) {
+          throw new CancelOperationError(
+            `Project initialization cancelled: Project name input cancelled.`);
+        }
 
-          // Step 2: Select platform
-          const platformSelection =
+        // Step 2: Select platform
+        const platformSelection =
               await utils.selectPlatform(scaffoldType, context);
-          if (!platformSelection) {
-            throw new CancelOperationError(
-                `Project initialization cancelled: Platform selection cancelled.`);
-          } else {
-            telemetryContext.properties.platform = platformSelection.label;
-          }
+        if (!platformSelection) {
+          throw new CancelOperationError(
+            `Project initialization cancelled: Platform selection cancelled.`);
+        } else {
+          telemetryContext.properties.platform = platformSelection.label;
+        }
 
-          // Step 3: Select template
-          let template: ProjectTemplate|undefined;
-          const resourceRootPath = context.asAbsolutePath(path.join(
-              FileNames.resourcesFolderName, FileNames.templatesFolderName));
-          const templateJsonFilePath =
+        // Step 3: Select template
+        const resourceRootPath = context.asAbsolutePath(path.join(
+          FileNames.resourcesFolderName, FileNames.templatesFolderName));
+        const templateJsonFilePath =
               path.join(resourceRootPath, FileNames.templateFileName);
-          const templateJsonFileString =
+        const templateJsonFileString =
               await FileUtility.readFile(
-                  scaffoldType, templateJsonFilePath, 'utf8') as string;
-          const templateJson = JSON.parse(templateJsonFileString);
-          if (!templateJson) {
-            throw new Error(`Fail to load template json.`);
-          }
+                scaffoldType, templateJsonFilePath, 'utf8') as string;
+        const templateJson = JSON.parse(templateJsonFileString);
+        if (!templateJson) {
+          throw new Error(`Fail to load template json.`);
+        }
 
-          let templateName: string|undefined;
-          if (platformSelection.label === PlatformType.Arduino) {
-            const templateSelection =
+        let templateName: string|undefined;
+        if (platformSelection.label === PlatformType.Arduino) {
+          const templateSelection =
                 await this.selectTemplate(templateJson, PlatformType.Arduino);
 
-            if (!templateSelection) {
-              throw new CancelOperationError(
-                  `Project initialization cancelled: Project template selection cancelled.`);
-            } else {
-              telemetryContext.properties.template = templateSelection.label;
-              if (templateSelection.label === constants.noDeviceMessage) {
-                await utils.takeNoDeviceSurvey(telemetryContext, context);
-                return;
-              }
-            }
-            templateName = templateSelection.label;
+          if (!templateSelection) {
+            throw new CancelOperationError(
+              `Project initialization cancelled: Project template selection cancelled.`);
           } else {
-            // If choose Embedded Linux platform, generate C project template
-            // directly
-            templateName = constants.embeddedLinuxProjectName;
+            telemetryContext.properties.template = templateSelection.label;
+            if (templateSelection.label === constants.noDeviceMessage) {
+              await utils.takeNoDeviceSurvey(telemetryContext, context);
+              return;
+            }
           }
+          templateName = templateSelection.label;
+        } else {
+          // If choose Embedded Linux platform, generate C project template
+          // directly
+          templateName = constants.embeddedLinuxProjectName;
+        }
 
-          template =
+        const template =
               templateJson.templates.find((template: ProjectTemplate) => {
                 return template.platform === platformSelection.label &&
                     template.name === templateName;
               });
-          if (!template) {
-            throw new Error(
-                `Fail to find the wanted project template in template json file.`);
-          }
+        if (!template) {
+          throw new Error(
+            `Fail to find the wanted project template in template json file.`);
+        }
 
-          // Step 4: Load the list of template files
-          const projectTemplateType: ProjectTemplateType =
+        // Step 4: Load the list of template files
+        const projectTemplateType: ProjectTemplateType =
               utils.getEnumKeyByEnumValue(ProjectTemplateType, template.type);
 
-          const templateFolder = path.join(resourceRootPath, template.path);
-          const templateFilesInfo =
+        const templateFolder = path.join(resourceRootPath, template.path);
+        const templateFilesInfo =
               await utils.getTemplateFilesInfo(templateFolder);
 
-          let project;
-          if (template.platform === PlatformType.EmbeddedLinux) {
-            project = new ioTContainerizedProjectModule.IoTContainerizedProject(
-                context, channel, telemetryContext, projectPath);
-          } else if (template.platform === PlatformType.Arduino) {
-            project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
-                context, channel, telemetryContext, projectPath);
-          } else {
-            throw new Error('unsupported platform');
-          }
-          await project.create(
-              templateFilesInfo, projectTemplateType, template.boardId,
-              openInNewWindow);
-        });
+        let project;
+        if (template.platform === PlatformType.EmbeddedLinux) {
+          project = new ioTContainerizedProjectModule.IoTContainerizedProject(
+            context, channel, telemetryContext, projectPath);
+        } else if (template.platform === PlatformType.Arduino) {
+          project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
+            context, channel, telemetryContext, projectPath);
+        } else {
+          throw new Error('unsupported platform');
+        }
+        await project.create(
+          templateFilesInfo, projectTemplateType, template.boardId,
+          openInNewWindow);
+      });
   }
 
   private async selectTemplate(templateJson: TemplatesType, platform: string):
@@ -152,7 +151,7 @@ export class ProjectInitializer {
     const result =
         templateJson.templates.filter((template: ProjectTemplate) => {
           return (
-              template.platform === platform &&
+            template.platform === platform &&
               template.tag === TemplateTag.General);
         });
 
@@ -178,8 +177,8 @@ export class ProjectInitializer {
   }
 
   private async generateProjectFolder(
-      telemetryContext: TelemetryContext,
-      scaffoldType: ScaffoldType): Promise<string|undefined> {
+    telemetryContext: TelemetryContext,
+    scaffoldType: ScaffoldType): Promise<string|undefined> {
     // Get default workbench path.
     const settings = await IoTWorkbenchSettings.getInstance();
     const workbench = settings.getWorkbenchPath();
@@ -192,6 +191,7 @@ export class ProjectInitializer {
     let counter = 0;
     const name = constants.defaultProjectName;
     let candidateName = name;
+    /*eslint no-constant-condition: ["error", { "checkLoops": false }]*/
     while (true) {
       const projectPath = path.join(projectRootPath, candidateName);
       const isValid = await this.isProjectPathValid(scaffoldType, projectPath);
@@ -209,7 +209,7 @@ export class ProjectInitializer {
       ignoreFocusOut: true,
       validateInput: async (projectName: string) => {
         if (!/^([a-z0-9_]|[a-z0-9_][-a-z0-9_.]*[a-z0-9_])(\.ino)?$/i.test(
-                projectName)) {
+          projectName)) {
           return 'Project name can only contain letters, numbers, "-" and ".", and cannot start or end with "-" or ".".';
         }
 
@@ -237,7 +237,7 @@ export class ProjectInitializer {
   }
 
   private async isProjectPathValid(
-      scaffoldType: ScaffoldType, projectPath: string): Promise<boolean> {
+    scaffoldType: ScaffoldType, projectPath: string): Promise<boolean> {
     const projectPathExists =
         await FileUtility.fileExists(scaffoldType, projectPath);
     const projectDirectoryExists =

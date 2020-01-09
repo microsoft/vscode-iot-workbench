@@ -325,7 +325,7 @@ export class ModelRepositoryManager {
     const repoInfos: RepositoryInfo[] = await ModelRepositoryManager.getAvailableRepositoryInfo();
     const fileInfos: ModelFileInfo[] = await UI.findModelFiles(ModelType.Interface);
     const exist = new Set<string>(fileInfos.map(f => f.id));
-    // tslint:disable-next-line:no-any
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     let schema: any;
     let found: boolean;
     let message: string;
@@ -512,13 +512,13 @@ export class ModelRepositoryManager {
       succeedCount += value.length;
       hashId = value.map(id => Utility.hash(id)).join(Constants.DEFAULT_SEPARATOR);
       switch (key) {
-        case ModelType.Interface:
-          telemetryContext.properties.interfaceId = hashId;
-          break;
-        case ModelType.CapabilityModel:
-          telemetryContext.properties.capabilityModelId = hashId;
-          break;
-        default:
+      case ModelType.Interface:
+        telemetryContext.properties.interfaceId = hashId;
+        break;
+      case ModelType.CapabilityModel:
+        telemetryContext.properties.capabilityModelId = hashId;
+        break;
+      default:
       }
     }
     telemetryContext.measurements.totalCount = totalCount;

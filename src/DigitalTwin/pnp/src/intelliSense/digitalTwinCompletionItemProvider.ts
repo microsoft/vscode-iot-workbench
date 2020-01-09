@@ -106,13 +106,13 @@ export class DigitalTwinCompletionItemProvider implements vscode.CompletionItemP
     scanner.setPosition(offset);
     const token: parser.SyntaxKind = scanner.scan();
     switch (token) {
-      case parser.SyntaxKind.CommaToken:
-      case parser.SyntaxKind.CloseBraceToken:
-      case parser.SyntaxKind.CloseBracketToken:
-      case parser.SyntaxKind.EOF:
-        return Constants.EMPTY_STRING;
-      default:
-        return Constants.DEFAULT_SEPARATOR;
+    case parser.SyntaxKind.CommaToken:
+    case parser.SyntaxKind.CloseBraceToken:
+    case parser.SyntaxKind.CloseBracketToken:
+    case parser.SyntaxKind.EOF:
+      return Constants.EMPTY_STRING;
+    default:
+      return Constants.DEFAULT_SEPARATOR;
     }
   }
 
@@ -345,16 +345,16 @@ export class DigitalTwinCompletionItemProvider implements vscode.CompletionItemP
         value = "{$1}";
       } else if (!classNode.label) {
         switch (classNode.id) {
-          case ValueSchema.String:
-            value = '"$1"';
-            break;
-          case ValueSchema.Int:
-            value = "${1:0}";
-            break;
-          case ValueSchema.Boolean:
-            value = "${1:false}";
-            break;
-          default:
+        case ValueSchema.String:
+          value = '"$1"';
+          break;
+        case ValueSchema.Int:
+          value = "${1:0}";
+          break;
+        case ValueSchema.Boolean:
+          value = "${1:false}";
+          break;
+        default:
         }
       }
     }
@@ -453,11 +453,8 @@ export class DigitalTwinCompletionItemProvider implements vscode.CompletionItemP
    * @param token cancellation token
    * @param context completion context
    */
-  provideCompletionItems(
-    document: vscode.TextDocument,
-    position: vscode.Position,
-    token: vscode.CancellationToken,
-    context: vscode.CompletionContext,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, _token: vscode.CancellationToken, _context: vscode.CompletionContext,
   ): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList> {
     const text: string = DigitalTwinCompletionItemProvider.getTextForParse(document, position);
     const jsonNode: parser.Node | undefined = IntelliSenseUtility.parseDigitalTwinModel(text);

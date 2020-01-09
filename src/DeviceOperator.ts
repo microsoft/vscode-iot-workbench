@@ -6,13 +6,11 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-import {TelemetryContext} from './telemetry';
-import {constructAndLoadIoTProject} from './utils';
+import { TelemetryContext } from './telemetry';
+import { constructAndLoadIoTProject } from './utils';
 
 export class DeviceOperator {
-  async compile(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext) {
+  async compile(context: vscode.ExtensionContext, channel: vscode.OutputChannel, telemetryContext: TelemetryContext): Promise<void> {
     const iotProject =
         await constructAndLoadIoTProject(context, channel, telemetryContext);
     if (!iotProject) {
@@ -21,9 +19,7 @@ export class DeviceOperator {
     await iotProject.compile();
   }
 
-  async upload(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext) {
+  async upload(context: vscode.ExtensionContext, channel: vscode.OutputChannel, telemetryContext: TelemetryContext): Promise<void> {
     const iotProject =
         await constructAndLoadIoTProject(context, channel, telemetryContext);
     if (!iotProject) {
@@ -32,9 +28,7 @@ export class DeviceOperator {
     await iotProject.upload();
   }
 
-  async configDeviceSettings(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext) {
+  async configDeviceSettings(context: vscode.ExtensionContext, channel: vscode.OutputChannel, telemetryContext: TelemetryContext): Promise<void> {
     const iotProject =
         await constructAndLoadIoTProject(context, channel, telemetryContext);
     if (!iotProject) {

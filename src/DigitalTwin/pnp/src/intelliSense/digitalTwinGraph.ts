@@ -153,7 +153,7 @@ export class DigitalTwinGraph {
    * check if json object is a valid constraint node
    * @param object object data
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   private static isConstraintNode(object: any): object is ConstraintNode {
     return (
       object.minItems || object.maxItems || object.minLength || object.maxLength || object.pattern || object.required
@@ -164,7 +164,7 @@ export class DigitalTwinGraph {
    * check if it is a valid edge
    * @param edge edge data
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   private static isValidEdge(edge: any): boolean {
     return edge.SourceNode && edge.TargetNode && edge.Label;
   }
@@ -173,20 +173,20 @@ export class DigitalTwinGraph {
    * resolve container type
    * @param object object data
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   private static resolveContainerType(object: any): ContainerType {
     const container = object[DigitalTwinConstants.CONTAINER];
     if (!container || typeof container !== "string") {
       return ContainerType.None;
     }
     switch (container) {
-      case DigitalTwinConstants.LIST:
-      case DigitalTwinConstants.SET:
-        return ContainerType.Array;
-      case DigitalTwinConstants.LANGUAGE:
-        return ContainerType.Language;
-      default:
-        return ContainerType.None;
+    case DigitalTwinConstants.LIST:
+    case DigitalTwinConstants.SET:
+      return ContainerType.Array;
+    case DigitalTwinConstants.LANGUAGE:
+      return ContainerType.Language;
+    default:
+      return ContainerType.None;
     }
   }
 
@@ -203,7 +203,7 @@ export class DigitalTwinGraph {
    * @param context extension context
    * @param fileName file name
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   private static async resolveDefinition(context: vscode.ExtensionContext, fileName: string): Promise<any> {
     const filePath: string = context.asAbsolutePath(
       path.join(Constants.RESOURCE_FOLDER, Constants.DEFINITION_FOLDER, fileName),
@@ -285,7 +285,7 @@ export class DigitalTwinGraph {
    * build context nodes by id and reversed index
    * @param contextJson json object of context definition
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   private buildContext(contextJson: any): void {
     let id: string;
     const context = contextJson[DigitalTwinConstants.CONTEXT];
@@ -311,7 +311,7 @@ export class DigitalTwinGraph {
    * build constraint nodes by name
    * @param constraintJson json object of constraint definition
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   private buildConstraint(constraintJson: any): void {
     for (const key in constraintJson) {
       if (DigitalTwinGraph.isConstraintNode(constraintJson[key])) {
@@ -324,7 +324,7 @@ export class DigitalTwinGraph {
    * build DigitalTwin graph on definitions of context, constraint and graph
    * @param graphJson json object of graph definition
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   private buildGraph(graphJson: any): void {
     for (const edge of graphJson.Edges) {
       if (DigitalTwinGraph.isValidEdge(edge)) {
@@ -340,28 +340,28 @@ export class DigitalTwinGraph {
    * handle data of edge
    * @param edge edge data
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   private handleEdge(edge: any): void {
     switch (edge.Label) {
-      case EdgeType.Type:
-        this.handleEdgeOfType(edge);
-        break;
-      case EdgeType.Label:
-        this.handleEdgeOfLabel(edge);
-        break;
-      case EdgeType.Domain:
-        this.handleEdgeOfDomain(edge);
-        break;
-      case EdgeType.Range:
-        this.handleEdgeOfRange(edge);
-        break;
-      case EdgeType.SubClassOf:
-        this.handleEdgeOfSubClassOf(edge);
-        break;
-      case EdgeType.Comment:
-        this.handleEdgeOfComment(edge);
-        break;
-      default:
+    case EdgeType.Type:
+      this.handleEdgeOfType(edge);
+      break;
+    case EdgeType.Label:
+      this.handleEdgeOfLabel(edge);
+      break;
+    case EdgeType.Domain:
+      this.handleEdgeOfDomain(edge);
+      break;
+    case EdgeType.Range:
+      this.handleEdgeOfRange(edge);
+      break;
+    case EdgeType.SubClassOf:
+      this.handleEdgeOfSubClassOf(edge);
+      break;
+    case EdgeType.Comment:
+      this.handleEdgeOfComment(edge);
+      break;
+    default:
     }
   }
 
@@ -371,26 +371,27 @@ export class DigitalTwinGraph {
    * 2. add enum value to enum node
    * @param edge edge data
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   private handleEdgeOfType(edge: any): void {
     const id: string = edge.SourceNode.Id as string;
     const type: string = edge.TargetNode.Id as string;
     switch (type) {
-      case NodeType.Class:
-        this.ensureClassNode(id);
-        break;
-      case NodeType.Property:
-        this.ensurePropertyNode(id);
-        break;
-      default:
-        // mark target class as enum node
-        const contextNode: ContextNode | undefined = this.contextNodes.get(id);
-        const enumValue: string = contextNode ? contextNode.name : id;
-        const enumNode: ClassNode = this.ensureClassNode(type);
-        if (!enumNode.enums) {
-          enumNode.enums = [];
-        }
-        enumNode.enums.push(enumValue);
+    case NodeType.Class:
+      this.ensureClassNode(id);
+      break;
+    case NodeType.Property:
+      this.ensurePropertyNode(id);
+      break;
+    default:{
+      // mark target class as enum node
+      const contextNode: ContextNode | undefined = this.contextNodes.get(id);
+      const enumValue: string = contextNode ? contextNode.name : id;
+      const enumNode: ClassNode = this.ensureClassNode(type);
+      if (!enumNode.enums) {
+        enumNode.enums = [];
+      }
+      enumNode.enums.push(enumValue);
+    }
     }
   }
 
@@ -400,7 +401,7 @@ export class DigitalTwinGraph {
    * 2. set label and constraint if not defined
    * @param edge edge data
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   private handleEdgeOfLabel(edge: any): void {
     const id: string = edge.SourceNode.Id as string;
     const label: string = edge.TargetNode.Value as string;
@@ -424,7 +425,7 @@ export class DigitalTwinGraph {
    * 1. add property to class node
    * @param edge edge data
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   private handleEdgeOfDomain(edge: any): void {
     const id: string = edge.SourceNode.Id as string;
     const classId: string = edge.TargetNode.Id as string;
@@ -441,7 +442,7 @@ export class DigitalTwinGraph {
    * 1. add range to property node
    * @param edge edge data
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   private handleEdgeOfRange(edge: any): void {
     const id: string = edge.SourceNode.Id as string;
     const classId: string = edge.TargetNode.Id as string;
@@ -458,7 +459,7 @@ export class DigitalTwinGraph {
    * 1. add children to base class node
    * @param edge edge data
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   private handleEdgeOfSubClassOf(edge: any): void {
     const id: string = edge.SourceNode.Id as string;
     const baseId: string = edge.TargetNode.Id as string;
@@ -475,7 +476,7 @@ export class DigitalTwinGraph {
    * 1. set comment of property node
    * @param edge edge data
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   private handleEdgeOfComment(edge: any): void {
     const id: string = edge.SourceNode.Id as string;
     const comment: string = edge.TargetNode.Value as string;

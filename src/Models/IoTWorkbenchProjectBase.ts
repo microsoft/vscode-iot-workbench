@@ -4,21 +4,21 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-import {CancelOperationError} from '../CancelOperationError';
-import {ConfigKey, EventNames, FileNames, ScaffoldType} from '../constants';
-import {FileUtility} from '../FileUtility';
-import {TelemetryContext, TelemetryWorker} from '../telemetry';
+import { CancelOperationError } from '../CancelOperationError';
+import { ConfigKey, EventNames, FileNames, ScaffoldType } from '../constants';
+import { FileUtility } from '../FileUtility';
+import { TelemetryContext, TelemetryWorker } from '../telemetry';
 import * as utils from '../utils';
 
-import {checkAzureLogin} from './Apis';
-import {Compilable} from './Interfaces/Compilable';
-import {Component, ComponentType} from './Interfaces/Component';
-import {Deployable} from './Interfaces/Deployable';
-import {Device} from './Interfaces/Device';
-import {ProjectHostType} from './Interfaces/ProjectHostType';
-import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
-import {Provisionable} from './Interfaces/Provisionable';
-import {Uploadable} from './Interfaces/Uploadable';
+import { checkAzureLogin } from './Apis';
+import { Compilable } from './Interfaces/Compilable';
+import { Component, ComponentType } from './Interfaces/Component';
+import { Deployable } from './Interfaces/Deployable';
+import { Device } from './Interfaces/Device';
+import { ProjectHostType } from './Interfaces/ProjectHostType';
+import { ProjectTemplateType, TemplateFileInfo } from './Interfaces/ProjectTemplate';
+import { Provisionable } from './Interfaces/Provisionable';
+import { Uploadable } from './Interfaces/Uploadable';
 
 const impor = require('impor')(__dirname);
 const azureUtilityModule =
@@ -45,8 +45,8 @@ export abstract class IoTWorkbenchProjectBase {
    * @param projectFileRootPath
    */
   static async getProjectType(
-      scaffoldType: ScaffoldType,
-      projectFileRootPath: string|undefined): Promise<ProjectHostType> {
+    scaffoldType: ScaffoldType,
+    projectFileRootPath: string|undefined): Promise<ProjectHostType> {
     if (!projectFileRootPath) {
       return ProjectHostType.Unknown;
     }
@@ -57,14 +57,14 @@ export abstract class IoTWorkbenchProjectBase {
     }
     const iotWorkbenchProjectFileString =
         (await FileUtility.readFile(
-             scaffoldType, iotWorkbenchProjectFile, 'utf8') as string)
-            .trim();
+          scaffoldType, iotWorkbenchProjectFile, 'utf8') as string)
+          .trim();
     if (iotWorkbenchProjectFileString) {
       const projectConfig = JSON.parse(iotWorkbenchProjectFileString);
       if (projectConfig &&
           projectConfig[`${ConfigKey.projectHostType}`] !== undefined) {
         const projectHostType: ProjectHostType = utils.getEnumKeyByEnumValue(
-            ProjectHostType, projectConfig[`${ConfigKey.projectHostType}`]);
+          ProjectHostType, projectConfig[`${ConfigKey.projectHostType}`]);
         return projectHostType;
       }
     }
@@ -73,7 +73,7 @@ export abstract class IoTWorkbenchProjectBase {
     const devcontainerFolderPath =
         path.join(projectFileRootPath, FileNames.devcontainerFolderName);
     if (await FileUtility.directoryExists(
-            scaffoldType, devcontainerFolderPath)) {
+      scaffoldType, devcontainerFolderPath)) {
       return ProjectHostType.Container;
     } else {
       return ProjectHostType.Workspace;
@@ -97,8 +97,8 @@ export abstract class IoTWorkbenchProjectBase {
   }
 
   constructor(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext) {
+    context: vscode.ExtensionContext, channel: vscode.OutputChannel,
+    telemetryContext: TelemetryContext) {
     this.componentList = [];
     this.extensionContext = context;
     this.channel = channel;
@@ -123,7 +123,7 @@ export abstract class IoTWorkbenchProjectBase {
         const res = await item.compile();
         if (!res) {
           vscode.window.showErrorMessage(
-              'Unable to compile the device code, please check output window for detail.');
+            'Unable to compile the device code, please check output window for detail.');
         }
       }
     }
@@ -141,7 +141,7 @@ export abstract class IoTWorkbenchProjectBase {
         const res = await item.upload();
         if (!res) {
           vscode.window.showErrorMessage(
-              'Unable to upload the sketch, please check output window for detail.');
+            'Unable to upload the sketch, please check output window for detail.');
         }
       }
     }
@@ -164,7 +164,7 @@ export abstract class IoTWorkbenchProjectBase {
     if (provisionItemList.length === 0) {
       // nothing to provision:
       vscode.window.showInformationMessage(
-          'Congratulations! There is no Azure service to provision in this project.');
+        'Congratulations! There is no Azure service to provision in this project.');
       return false;
     }
 
@@ -194,12 +194,12 @@ export abstract class IoTWorkbenchProjectBase {
           }
         }
         const selection = await vscode.window.showQuickPick(
-            [{
-              label: _provisionItemList.join('   -   '),
-              description: '',
-              detail: 'Click to continue'
-            }],
-            {ignoreFocusOut: true, placeHolder: 'Provision process'});
+          [{
+            label: _provisionItemList.join('   -   '),
+            description: '',
+            detail: 'Click to continue'
+          }],
+          { ignoreFocusOut: true, placeHolder: 'Provision process' });
 
         if (!selection) {
           return false;
@@ -214,7 +214,7 @@ export abstract class IoTWorkbenchProjectBase {
     return true;
   }
 
-  async deploy() {
+  async deploy(): Promise<void> {
     let azureLoggedIn = false;
 
     const deployItemList: string[] = [];
@@ -231,7 +231,7 @@ export abstract class IoTWorkbenchProjectBase {
 
     if (deployItemList && deployItemList.length <= 0) {
       await vscode.window.showInformationMessage(
-          'Congratulations! The project does not contain any Azure components to be deployed.');
+        'Congratulations! The project does not contain any Azure components to be deployed.');
       return;
     }
 
@@ -250,12 +250,12 @@ export abstract class IoTWorkbenchProjectBase {
           }
         }
         const selection = await vscode.window.showQuickPick(
-            [{
-              label: _deployItemList.join('   -   '),
-              description: '',
-              detail: 'Click to continue'
-            }],
-            {ignoreFocusOut: true, placeHolder: 'Deploy process'});
+          [{
+            label: _deployItemList.join('   -   '),
+            description: '',
+            detail: 'Click to continue'
+          }],
+          { ignoreFocusOut: true, placeHolder: 'Deploy process' });
 
         if (!selection) {
           throw new CancelOperationError(`Component deployment cancelled.`);
@@ -276,7 +276,7 @@ export abstract class IoTWorkbenchProjectBase {
    * template files.
    */
   async configureProjectEnvironmentCore(
-      deviceRootPath: string, scaffoldType: ScaffoldType): Promise<void> {
+    deviceRootPath: string, scaffoldType: ScaffoldType): Promise<void> {
     for (const component of this.componentList) {
       if (component.getComponentType() === ComponentType.Device) {
         const device = component as Device;
@@ -302,11 +302,11 @@ export abstract class IoTWorkbenchProjectBase {
   /**
    * Send telemetry when the IoT project is load when VS Code opens
    */
-  sendLoadEventTelemetry(context: vscode.ExtensionContext) {
+  sendLoadEventTelemetry(context: vscode.ExtensionContext): void {
     const telemetryWorker = TelemetryWorker.getInstance(context);
     try {
       telemetryWorker.sendEvent(
-          EventNames.projectLoadEvent, this.telemetryContext);
+        EventNames.projectLoadEvent, this.telemetryContext);
     } catch {
       // If sending telemetry failed, skip the error to avoid blocking user.
     }
@@ -318,9 +318,9 @@ export abstract class IoTWorkbenchProjectBase {
    */
   async validateProjectRootPath(scaffoldType: ScaffoldType): Promise<void> {
     if (!await FileUtility.directoryExists(
-            scaffoldType, this.projectRootPath)) {
+      scaffoldType, this.projectRootPath)) {
       throw new Error(`Project root path ${
-          this.projectRootPath} does not exist. Please initialize the project first.`);
+        this.projectRootPath} does not exist. Please initialize the project first.`);
     }
   }
 }

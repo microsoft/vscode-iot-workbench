@@ -1,7 +1,7 @@
-var detection = require('./bindings');
-var EventEmitter2 = require('eventemitter2').EventEmitter2;
+const detection = require('./bindings');
+const EventEmitter2 = require('eventemitter2').EventEmitter2;
 
-var detector = new EventEmitter2({
+const detector = new EventEmitter2({
   wildcard: true,
   delimiter: ':',
   maxListeners: 1000 // default would be 10!
@@ -20,7 +20,7 @@ detector.find = (vid, pid, callback) => {
 
   return new Promise((resolve, reject) => {
     // Assemble the optional args into something we can use with `apply`
-    var args = [];
+    let args = [];
     if (vid) {
       args = args.concat(vid);
     }
@@ -71,7 +71,7 @@ if (detection.registerAdded) {
     detector.emit('change', device);
   });
 
-  var started = true;
+  let started = true;
 
   detector.startMonitoring = () => {
     if (started) {

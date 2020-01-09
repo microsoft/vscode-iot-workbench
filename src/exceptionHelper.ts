@@ -20,8 +20,8 @@ export class ExceptionHelper {
       channel: vscode.OutputChannel|undefined, errorMsg: string,
       isPopupErrorMsg: boolean): void;
   static logError(
-      channel: vscode.OutputChannel|undefined, errorValue: string|Error,
-      popupValue: string|boolean): void {
+    channel: vscode.OutputChannel|undefined, errorValue: string|Error,
+    popupValue: string|boolean): void {
     let _error: Error;
     let _message: string;
 
@@ -43,9 +43,9 @@ export class ExceptionHelper {
       let errorMessage: string;
       if (_error.message) {
         errorMessage = _error.message;
-        // tslint:disable-next-line: no-any
+        // eslint-disable-next-line  @typescript-eslint/no-explicit-any
       } else if ((_error as any).body && (_error as any).body.message) {
-        // tslint:disable-next-line: no-any
+        // eslint-disable-next-line  @typescript-eslint/no-explicit-any
         errorMessage = (_error as any).body.message;
       } else {
         errorMessage = _error.toString();

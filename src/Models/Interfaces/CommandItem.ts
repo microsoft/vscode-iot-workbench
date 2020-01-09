@@ -7,7 +7,7 @@ export interface CommandItem extends vscode.QuickPickItem {
   /**
    * Click action of the menu item
    */
-  // tslint:disable-next-line: no-any
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   click?: (...args: any[]) => any;
   /**
    * Submenu of the menu item

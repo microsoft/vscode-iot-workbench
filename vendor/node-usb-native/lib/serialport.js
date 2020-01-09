@@ -9,26 +9,26 @@ const debug = (message) => {
 
 // shims
 // Internal Dependencies
-var SerialPortBinding = require('./bindings');
-var parsers = require('./parsers');
+const SerialPortBinding = require('./bindings');
+const parsers = require('./parsers');
 
 // Built-ins Dependencies
-var fs = require('fs');
-var stream = require('stream');
-var util = require('util');
+const fs = require('fs');
+const stream = require('stream');
+const util = require('util');
 
 //  VALIDATION ARRAYS
-var DATABITS = [5, 6, 7, 8];
-var STOPBITS = [1, 1.5, 2];
-var PARITY = ['none', 'even', 'mark', 'odd', 'space'];
-var FLOWCONTROLS = ['xon', 'xoff', 'xany', 'rtscts'];
-var SET_OPTIONS = ['brk', 'cts', 'dtr', 'dts', 'rts'];
+const DATABITS = [5, 6, 7, 8];
+const STOPBITS = [1, 1.5, 2];
+const PARITY = ['none', 'even', 'mark', 'odd', 'space'];
+const FLOWCONTROLS = ['xon', 'xoff', 'xany', 'rtscts'];
+const SET_OPTIONS = ['brk', 'cts', 'dtr', 'dts', 'rts'];
 
 // Stuff from ReadStream, refactored for our usage:
-var kPoolSize = 40 * 1024;
-var kMinPoolSpace = 128;
+const kPoolSize = 40 * 1024;
+const kMinPoolSpace = 128;
 
-var defaultSettings = {
+const defaultSettings = {
   baudRate: 9600,
   autoOpen: true,
   parity: 'none',
@@ -45,7 +45,7 @@ var defaultSettings = {
   platformOptions: SerialPortBinding.platformOptions
 };
 
-var defaultSetFlags = {
+const defaultSetFlags = {
   brk: false,
   cts: false,
   dtr: true,
@@ -54,7 +54,7 @@ var defaultSetFlags = {
 };
 
 // deprecate the lowercase version of these options next major release
-var LOWERCASE_OPTIONS = [
+const LOWERCASE_OPTIONS = [
   'baudRate',
   'dataBits',
   'stopBits',
@@ -64,9 +64,9 @@ var LOWERCASE_OPTIONS = [
 
 function correctOptions(options) {
   LOWERCASE_OPTIONS.forEach((name) => {
-    var lowerName = name.toLowerCase();
+    const lowerName = name.toLowerCase();
     if (options.hasOwnProperty(lowerName)) {
-      var value = options[lowerName];
+      const value = options[lowerName];
       delete options[lowerName];
       options[name] = value;
     }
@@ -94,8 +94,8 @@ function SerialPort(path, options, callback) {
 
   this.path = path;
 
-  var correctedOptions = correctOptions(options);
-  var settings = Object.assign({}, defaultSettings, correctedOptions);
+  const correctedOptions = correctOptions(options);
+  const settings = Object.assign({}, defaultSettings, correctedOptions);
 
   if (typeof settings.baudRate !== 'number') {
     throw new TypeError(`Invalid "baudRate" must be a number got: ${settings.baudRate}`);
@@ -198,8 +198,8 @@ SerialPort.prototype.update = function(options, callback) {
     return this._error(new Error('Port is not open'), callback);
   }
 
-  var correctedOptions = correctOptions(options);
-  var settings = Object.assign({}, defaultSettings, correctedOptions);
+  const correctedOptions = correctOptions(options);
+  const settings = Object.assign({}, defaultSettings, correctedOptions);
   this.options.baudRate = settings.baudRate;
 
   SerialPortBinding.update(this.fd, this.options, (err) => {
@@ -256,10 +256,10 @@ if (process.platform !== 'win32') {
     // Grab another reference to the pool in the case that while we're in the
     // thread pool another read() finishes up the pool, and allocates a new
     // one.
-    var toRead = Math.min(this.pool.length - this.pool.used, ~~this.bufferSize);
-    var start = this.pool.used;
+    const toRead = Math.min(this.pool.length - this.pool.used, ~~this.bufferSize);
+    const start = this.pool.used;
 
-    var _afterRead = (err, bytesRead, readPool, bytesRequested) => {
+    const _afterRead = (err, bytesRead, readPool, bytesRequested) => {
       this.reading = false;
       if (err) {
         if (err.code && err.code === 'EAGAIN') {
@@ -286,7 +286,7 @@ if (process.platform !== 'win32') {
           this.serialPoller.start();
         }
       } else {
-        var b = this.pool.slice(start, start + bytesRead);
+        const b = this.pool.slice(start, start + bytesRead);
 
         // do not emit events if the stream is paused
         if (this.paused) {
@@ -307,8 +307,8 @@ if (process.platform !== 'win32') {
     };
 
     fs.read(this.fd, this.pool, this.pool.used, toRead, null, (err, bytesRead) => {
-      var readPool = this.pool;
-      var bytesRequested = toRead;
+      const readPool = this.pool;
+      const bytesRequested = toRead;
       _afterRead(err, bytesRead, readPool, bytesRequested);
     });
 
@@ -327,7 +327,7 @@ if (process.platform !== 'win32') {
     this.paused = false;
 
     if (this.buffer) {
-      var buffer = this.buffer;
+      const buffer = this.buffer;
       this.buffer = null;
       this._emitData(buffer);
     }
@@ -432,9 +432,9 @@ SerialPort.prototype.set = function(options, callback) {
     options = {};
   }
 
-  var settings = {};
-  for (var i = SET_OPTIONS.length - 1; i >= 0; i--) {
-    var flag = SET_OPTIONS[i];
+  const settings = {};
+  for (let i = SET_OPTIONS.length - 1; i >= 0; i--) {
+    const flag = SET_OPTIONS[i];
     if (options[flag] !== undefined) {
       settings[flag] = options[flag];
     } else {

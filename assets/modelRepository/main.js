@@ -4,7 +4,7 @@ const IS_PUBLIC_URL = "?public";
 const VALUE = "value";
 const ALL = "All";
 
-var repository = new Vue({
+const repository = new Vue({
   el: "#main",
   data: {
     companyName: _location.search === IS_PUBLIC_URL ? "Public repository" : "Company repository",

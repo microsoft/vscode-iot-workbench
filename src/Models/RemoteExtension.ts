@@ -2,14 +2,14 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import {DependentExtensions} from '../constants';
-import {DialogResponses} from '../DialogResponses';
-import {WorkbenchExtension} from '../WorkbenchExtension';
-import {VscodeCommands} from '../common/Commands';
-import {CancelOperationError} from '../CancelOperationError';
+import { DependentExtensions } from '../constants';
+import { DialogResponses } from '../DialogResponses';
+import { WorkbenchExtension } from '../WorkbenchExtension';
+import { VscodeCommands } from '../common/Commands';
+import { CancelOperationError } from '../CancelOperationError';
 
 export class RemoteExtension {
-  static isRemote(context: vscode.ExtensionContext) {
+  static isRemote(context: vscode.ExtensionContext): boolean {
     const extension = WorkbenchExtension.getExtension(context);
     if (!extension) {
       throw new Error('Fail to get workbench extension.');
@@ -28,11 +28,11 @@ export class RemoteExtension {
       const message =
           'Remote extension is required for the current project. Do you want to install it from marketplace?';
       const choice = await vscode.window.showInformationMessage(
-          message, DialogResponses.yes, DialogResponses.no);
+        message, DialogResponses.yes, DialogResponses.no);
       if (choice === DialogResponses.yes) {
         vscode.commands.executeCommand(
-            VscodeCommands.VscodeOpen,
-            vscode.Uri.parse('vscode:extension/' + DependentExtensions.remote));
+          VscodeCommands.VscodeOpen,
+          vscode.Uri.parse('vscode:extension/' + DependentExtensions.remote));
       }
       return false;
     }
@@ -43,8 +43,8 @@ export class RemoteExtension {
     const res = await RemoteExtension.isAvailable();
     if (!res) {
       throw new CancelOperationError(
-          `Remote extension is not available. Please install ${
-              DependentExtensions.remote} first.`);
+        `Remote extension is not available. Please install ${
+          DependentExtensions.remote} first.`);
     }
   }
 
