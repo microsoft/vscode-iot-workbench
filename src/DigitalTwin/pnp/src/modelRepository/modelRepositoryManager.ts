@@ -11,7 +11,10 @@ import { CredentialStore } from "../common/credentialStore";
 import { ProcessError } from "../common/processError";
 import { UserCancelledError } from "../common/userCancelledError";
 import { Utility } from "../common/utility";
-import { DeviceModelManager, ModelType } from "../deviceModel/deviceModelManager";
+import {
+  DeviceModelManager,
+  ModelType
+} from "../deviceModel/deviceModelManager";
 import { DigitalTwinConstants } from "../intelliSense/digitalTwinConstants";
 import { ChoiceType, MessageType, UI } from "../view/ui";
 import { UIConstants } from "../view/uiConstants";
@@ -62,10 +65,14 @@ export class ModelRepositoryManager {
    * create repository info
    * @param publicRepository identify if it is public repository
    */
-  private static async createRepositoryInfo(publicRepository: boolean): Promise<RepositoryInfo> {
+  private static async createRepositoryInfo(
+    publicRepository: boolean
+  ): Promise<RepositoryInfo> {
     if (publicRepository) {
       // get public repository connection from configuration
-      const url: string | undefined = Configuration.getProperty<string>(Constants.PUBLIC_REPOSITORY_URL);
+      const url: string | undefined = Configuration.getProperty<string>(
+        Constants.PUBLIC_REPOSITORY_URL
+      );
       if (!url) {
         throw new Error(Constants.PUBLIC_REPOSITORY_URL_NOT_FOUND_MSG);
       }
@@ -75,7 +82,9 @@ export class ModelRepositoryManager {
       };
     } else {
       // get company repository connection from credential store
-      const connectionString: string | null = await CredentialStore.get(Constants.MODEL_REPOSITORY_CONNECTION_KEY);
+      const connectionString: string | null = await CredentialStore.get(
+        Constants.MODEL_REPOSITORY_CONNECTION_KEY
+      );
       if (!connectionString) {
         throw new Error(Constants.CONNECTION_STRING_NOT_FOUND_MSG);
       }
@@ -88,9 +97,13 @@ export class ModelRepositoryManager {
    */
   private static async getAvailableRepositoryInfo(): Promise<RepositoryInfo[]> {
     const repoInfos: RepositoryInfo[] = [];
-    const connectionString: string | null = await CredentialStore.get(Constants.MODEL_REPOSITORY_CONNECTION_KEY);
+    const connectionString: string | null = await CredentialStore.get(
+      Constants.MODEL_REPOSITORY_CONNECTION_KEY
+    );
     if (connectionString) {
-      repoInfos.push(ModelRepositoryManager.getCompanyRepositoryInfo(connectionString));
+      repoInfos.push(
+        ModelRepositoryManager.getCompanyRepositoryInfo(connectionString)
+      );
     }
     repoInfos.push(await ModelRepositoryManager.createRepositoryInfo(true));
     return repoInfos;
@@ -101,16 +114,31 @@ export class ModelRepositoryManager {
    */
   private static async setupConnection(): Promise<void> {
     let newConnection = false;
-    let connectionString: string | null = await CredentialStore.get(Constants.MODEL_REPOSITORY_CONNECTION_KEY);
+    let connectionString: string | null = await CredentialStore.get(
+      Constants.MODEL_REPOSITORY_CONNECTION_KEY
+    );
     if (!connectionString) {
-      connectionString = await UI.inputConnectionString(UIConstants.INPUT_REPOSITORY_CONNECTION_STRING_LABEL);
+      connectionString = await UI.inputConnectionString(
+        UIConstants.INPUT_REPOSITORY_CONNECTION_STRING_LABEL
+      );
       newConnection = true;
     }
-    const repoInfo: RepositoryInfo = ModelRepositoryManager.getCompanyRepositoryInfo(connectionString);
+    const repoInfo: RepositoryInfo = ModelRepositoryManager.getCompanyRepositoryInfo(
+      connectionString
+    );
     // test connection by calling searchModel
-    await ModelRepositoryClient.searchModel(repoInfo, ModelType.Interface, Constants.EMPTY_STRING, 1, null);
+    await ModelRepositoryClient.searchModel(
+      repoInfo,
+      ModelType.Interface,
+      Constants.EMPTY_STRING,
+      1,
+      null
+    );
     if (newConnection) {
-      await CredentialStore.set(Constants.MODEL_REPOSITORY_CONNECTION_KEY, connectionString);
+      await CredentialStore.set(
+        Constants.MODEL_REPOSITORY_CONNECTION_KEY,
+        connectionString
+      );
     }
   }
 
@@ -118,8 +146,12 @@ export class ModelRepositoryManager {
    * get company repository info
    * @param connectionString connection string
    */
-  private static getCompanyRepositoryInfo(connectionString: string): RepositoryInfo {
-    const connection: ModelRepositoryConnection = ModelRepositoryConnection.parse(connectionString);
+  private static getCompanyRepositoryInfo(
+    connectionString: string
+  ): RepositoryInfo {
+    const connection: ModelRepositoryConnection = ModelRepositoryConnection.parse(
+      connectionString
+    );
     return {
       hostname: Utility.enforceHttps(connection.hostName),
       apiVersion: Constants.MODEL_REPOSITORY_API_VERSION,
@@ -140,7 +172,11 @@ export class ModelRepositoryManager {
 
   private readonly express: VSCExpress;
   private readonly component: string;
-  constructor(context: vscode.ExtensionContext, filePath: string, private readonly outputChannel: ColorizedChannel) {
+  constructor(
+    context: vscode.ExtensionContext,
+    filePath: string,
+    private readonly outputChannel: ColorizedChannel
+  ) {
     this.express = new VSCExpress(context, filePath);
     this.component = Constants.MODEL_REPOSITORY_COMPONENT;
   }
@@ -149,8 +185,14 @@ export class ModelRepositoryManager {
    * sign in model repository
    */
   async signIn(): Promise<void> {
-    const items: vscode.QuickPickItem[] = [{ label: RepositoryType.Public }, { label: RepositoryType.Company }];
-    const selected: vscode.QuickPickItem = await UI.showQuickPick(UIConstants.SELECT_REPOSITORY_LABEL, items);
+    const items: vscode.QuickPickItem[] = [
+      { label: RepositoryType.Public },
+      { label: RepositoryType.Company }
+    ];
+    const selected: vscode.QuickPickItem = await UI.showQuickPick(
+      UIConstants.SELECT_REPOSITORY_LABEL,
+      items
+    );
     const operation = `Connect to ${selected.label}`;
     this.outputChannel.start(operation, this.component);
 
@@ -168,12 +210,22 @@ export class ModelRepositoryManager {
 
     // open web view
     const uri: string =
-      selected.label === RepositoryType.Company ? Constants.COMPANY_REPOSITORY_PAGE : Constants.PUBLIC_REPOSITORY_PAGE;
-    this.express.open(uri, UIConstants.MODEL_REPOSITORY_TITLE, vscode.ViewColumn.Two, {
-      retainContextWhenHidden: true,
-      enableScripts: true
-    });
-    UI.showNotification(MessageType.Info, ColorizedChannel.formatMessage(operation));
+      selected.label === RepositoryType.Company
+        ? Constants.COMPANY_REPOSITORY_PAGE
+        : Constants.PUBLIC_REPOSITORY_PAGE;
+    this.express.open(
+      uri,
+      UIConstants.MODEL_REPOSITORY_TITLE,
+      vscode.ViewColumn.Two,
+      {
+        retainContextWhenHidden: true,
+        enableScripts: true
+      }
+    );
+    UI.showNotification(
+      MessageType.Info,
+      ColorizedChannel.formatMessage(operation)
+    );
     this.outputChannel.end(operation, this.component);
   }
 
@@ -190,7 +242,10 @@ export class ModelRepositoryManager {
     if (this.express) {
       this.express.close(Constants.COMPANY_REPOSITORY_PAGE);
     }
-    UI.showNotification(MessageType.Info, ColorizedChannel.formatMessage(operation));
+    UI.showNotification(
+      MessageType.Info,
+      ColorizedChannel.formatMessage(operation)
+    );
     this.outputChannel.end(operation, this.component);
   }
 
@@ -199,7 +254,9 @@ export class ModelRepositoryManager {
    * @param telemetryContext telemetry context
    */
   async submitFiles(telemetryContext: TelemetryContext): Promise<void> {
-    const files: string[] = await UI.selectModelFiles(UIConstants.SELECT_MODELS_LABEL);
+    const files: string[] = await UI.selectModelFiles(
+      UIConstants.SELECT_MODELS_LABEL
+    );
     if (files.length === 0) {
       return;
     }
@@ -211,12 +268,18 @@ export class ModelRepositoryManager {
       if (error instanceof UserCancelledError) {
         throw error;
       } else {
-        throw new ProcessError(`Connect to ${RepositoryType.Company}`, error, this.component);
+        throw new ProcessError(
+          `Connect to ${RepositoryType.Company}`,
+          error,
+          this.component
+        );
       }
     }
 
     try {
-      const repoInfo: RepositoryInfo = await ModelRepositoryManager.createRepositoryInfo(false);
+      const repoInfo: RepositoryInfo = await ModelRepositoryManager.createRepositoryInfo(
+        false
+      );
       await this.doSubmitLoopSilently(repoInfo, files, telemetryContext);
     } catch (error) {
       const operation = `Submit models to ${RepositoryType.Company}`;
@@ -254,8 +317,16 @@ export class ModelRepositoryManager {
 
     let result: SearchResult;
     try {
-      const repoInfo: RepositoryInfo = await ModelRepositoryManager.createRepositoryInfo(publicRepository);
-      result = await ModelRepositoryClient.searchModel(repoInfo, type, keyword, pageSize, continuationToken);
+      const repoInfo: RepositoryInfo = await ModelRepositoryManager.createRepositoryInfo(
+        publicRepository
+      );
+      result = await ModelRepositoryClient.searchModel(
+        repoInfo,
+        type,
+        keyword,
+        pageSize,
+        continuationToken
+      );
     } catch (error) {
       throw new ProcessError(operation, error, this.component);
     }
@@ -271,14 +342,21 @@ export class ModelRepositoryManager {
    * @param publicRepository identify if it is public repository
    * @param modelIds model id list
    */
-  async deleteModels(publicRepository: boolean, modelIds: string[]): Promise<void> {
+  async deleteModels(
+    publicRepository: boolean,
+    modelIds: string[]
+  ): Promise<void> {
     if (publicRepository) {
-      throw new BadRequestError(`${RepositoryType.Public} not support delete operation`);
+      throw new BadRequestError(
+        `${RepositoryType.Public} not support delete operation`
+      );
     }
     ModelRepositoryManager.validateModelIds(modelIds);
 
     try {
-      const repoInfo: RepositoryInfo = await ModelRepositoryManager.createRepositoryInfo(publicRepository);
+      const repoInfo: RepositoryInfo = await ModelRepositoryManager.createRepositoryInfo(
+        publicRepository
+      );
       await this.doDeleteLoopSilently(repoInfo, modelIds);
     } catch (error) {
       const operation = `Delete models from ${RepositoryType.Company}`;
@@ -291,16 +369,25 @@ export class ModelRepositoryManager {
    * @param publicRepository identify if it is public repository
    * @param modelIds model id list
    */
-  async downloadModels(publicRepository: boolean, modelIds: string[]): Promise<void> {
+  async downloadModels(
+    publicRepository: boolean,
+    modelIds: string[]
+  ): Promise<void> {
     ModelRepositoryManager.validateModelIds(modelIds);
 
-    const folder: string = await UI.selectRootFolder(UIConstants.SELECT_ROOT_FOLDER_LABEL);
+    const folder: string = await UI.selectRootFolder(
+      UIConstants.SELECT_ROOT_FOLDER_LABEL
+    );
 
     try {
-      const repoInfo: RepositoryInfo = await ModelRepositoryManager.createRepositoryInfo(publicRepository);
+      const repoInfo: RepositoryInfo = await ModelRepositoryManager.createRepositoryInfo(
+        publicRepository
+      );
       await this.doDownloadLoopSilently([repoInfo], modelIds, folder);
     } catch (error) {
-      const operation = `Download models from ${publicRepository ? RepositoryType.Public : RepositoryType.Company}`;
+      const operation = `Download models from ${
+        publicRepository ? RepositoryType.Public : RepositoryType.Company
+      }`;
       throw new ProcessError(operation, error, this.component);
     }
   }
@@ -310,20 +397,29 @@ export class ModelRepositoryManager {
    * @param folder folder to download interface
    * @param capabilityModelFile capability model file path
    */
-  async downloadDependentInterface(folder: string, capabilityModelFile: string): Promise<void> {
+  async downloadDependentInterface(
+    folder: string,
+    capabilityModelFile: string
+  ): Promise<void> {
     if (!folder || !capabilityModelFile) {
-      throw new BadRequestError(`folder and capabilityModelFile ${Constants.NOT_EMPTY_MSG}`);
+      throw new BadRequestError(
+        `folder and capabilityModelFile ${Constants.NOT_EMPTY_MSG}`
+      );
     }
     // get implemented interface of capability model
     const content = await Utility.getJsonContent(capabilityModelFile);
     const implementedInterface = content[DigitalTwinConstants.IMPLEMENTS];
     if (!implementedInterface || implementedInterface.length === 0) {
-      throw new BadRequestError("no implemented interface found in capability model");
+      throw new BadRequestError(
+        "no implemented interface found in capability model"
+      );
     }
 
     // get existing interface file in workspace
     const repoInfos: RepositoryInfo[] = await ModelRepositoryManager.getAvailableRepositoryInfo();
-    const fileInfos: ModelFileInfo[] = await UI.findModelFiles(ModelType.Interface);
+    const fileInfos: ModelFileInfo[] = await UI.findModelFiles(
+      ModelType.Interface
+    );
     const exist = new Set<string>(fileInfos.map(f => f.id));
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     let schema: any;
@@ -351,7 +447,11 @@ export class ModelRepositoryManager {
    * @param modelIds model id list
    * @param folder folder to download models
    */
-  private async doDownloadLoopSilently(repoInfos: RepositoryInfo[], modelIds: string[], folder: string): Promise<void> {
+  private async doDownloadLoopSilently(
+    repoInfos: RepositoryInfo[],
+    modelIds: string[],
+    folder: string
+  ): Promise<void> {
     for (const modelId of modelIds) {
       const operation = `Download model by id ${modelId}`;
       this.outputChannel.start(operation, this.component);
@@ -371,7 +471,11 @@ export class ModelRepositoryManager {
    * @param modelId model id
    * @param folder folder to download model
    */
-  private async doDownloadModel(repoInfos: RepositoryInfo[], modelId: string, folder: string): Promise<boolean> {
+  private async doDownloadModel(
+    repoInfos: RepositoryInfo[],
+    modelId: string,
+    folder: string
+  ): Promise<boolean> {
     let result: GetResult | undefined;
     for (const repoInfo of repoInfos) {
       try {
@@ -379,7 +483,9 @@ export class ModelRepositoryManager {
         break;
       } catch (error) {
         if (error.statusCode === Constants.NOT_FOUND_CODE) {
-          this.outputChannel.warn(`Model ${modelId} is not found from ${repoInfo.hostname}`);
+          this.outputChannel.warn(
+            `Model ${modelId} is not found from ${repoInfo.hostname}`
+          );
         } else {
           this.outputChannel.error(
             `Fail to get model ${modelId} from ${repoInfo.hostname}, statusCode: ${error.statusCode}`
@@ -399,7 +505,10 @@ export class ModelRepositoryManager {
    * @param repoInfo repository info
    * @param modelIds model id list
    */
-  private async doDeleteLoopSilently(repoInfo: RepositoryInfo, modelIds: string[]): Promise<void> {
+  private async doDeleteLoopSilently(
+    repoInfo: RepositoryInfo,
+    modelIds: string[]
+  ): Promise<void> {
     for (const modelId of modelIds) {
       const operation = `Delete model by id ${modelId}`;
       this.outputChannel.start(operation, this.component);
@@ -456,7 +565,9 @@ export class ModelRepositoryManager {
   ): Promise<void> {
     const content = await Utility.getJsonContent(filePath);
     const modelId: string = content[DigitalTwinConstants.ID];
-    const modelType: ModelType = DeviceModelManager.convertToModelType(content[DigitalTwinConstants.TYPE]);
+    const modelType: ModelType = DeviceModelManager.convertToModelType(
+      content[DigitalTwinConstants.TYPE]
+    );
     let result: GetResult | undefined;
     try {
       result = await ModelRepositoryClient.getModel(repoInfo, modelId, true);
@@ -470,7 +581,9 @@ export class ModelRepositoryManager {
     if (result) {
       if (!option.overwrite) {
         const message = `Model ${modelId} already exist, ${UIConstants.ASK_TO_OVERWRITE_MSG}`;
-        const choice: string | undefined = await vscode.window.showWarningMessage(
+        const choice:
+          | string
+          | undefined = await vscode.window.showWarningMessage(
           message,
           ChoiceType.All,
           ChoiceType.Yes,
@@ -510,15 +623,17 @@ export class ModelRepositoryManager {
     let hashId: string;
     for (const [key, value] of usageData) {
       succeedCount += value.length;
-      hashId = value.map(id => Utility.hash(id)).join(Constants.DEFAULT_SEPARATOR);
+      hashId = value
+        .map(id => Utility.hash(id))
+        .join(Constants.DEFAULT_SEPARATOR);
       switch (key) {
-      case ModelType.Interface:
-        telemetryContext.properties.interfaceId = hashId;
-        break;
-      case ModelType.CapabilityModel:
-        telemetryContext.properties.capabilityModelId = hashId;
-        break;
-      default:
+        case ModelType.Interface:
+          telemetryContext.properties.interfaceId = hashId;
+          break;
+        case ModelType.CapabilityModel:
+          telemetryContext.properties.capabilityModelId = hashId;
+          break;
+        default:
       }
     }
     telemetryContext.measurements.totalCount = totalCount;

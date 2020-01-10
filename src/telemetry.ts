@@ -1,16 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as vscode from 'vscode';
-import TelemetryReporter from 'vscode-extension-telemetry';
+import * as vscode from "vscode";
+import TelemetryReporter from "vscode-extension-telemetry";
 
-import { CancelOperationError } from './CancelOperationError';
-import { DevelopEnvironment } from './constants';
-import { ExceptionHelper } from './exceptionHelper';
-import { RemoteExtension } from './Models/RemoteExtension';
-import { NSAT } from './nsat';
-import { WorkbenchExtension } from './WorkbenchExtension';
-
+import { CancelOperationError } from "./CancelOperationError";
+import { DevelopEnvironment } from "./constants";
+import { ExceptionHelper } from "./exceptionHelper";
+import { RemoteExtension } from "./Models/RemoteExtension";
+import { NSAT } from "./nsat";
+import { WorkbenchExtension } from "./WorkbenchExtension";
 
 interface PackageInfo {
   name: string;
@@ -22,39 +21,43 @@ interface PackageInfo {
  * Operation result of telemetry
  */
 export enum TelemetryResult {
-  Succeeded = 'Succeeded',
-  Failed = 'Failed',
-  Cancelled = 'Cancelled',
+  Succeeded = "Succeeded",
+  Failed = "Failed",
+  Cancelled = "Cancelled"
 }
 
 /**
  * Context of telemetry
  */
 export interface TelemetryContext {
-  properties: {[key: string]: string};
-  measurements: {[key: string]: number};
+  properties: { [key: string]: string };
+  measurements: { [key: string]: number };
 }
 
 export class TelemetryWorker {
-  private _reporter: TelemetryReporter|undefined;
-  private _extensionContext: vscode.ExtensionContext|undefined;
-  private static _instance: TelemetryWorker|undefined;
+  private _reporter: TelemetryReporter | undefined;
+  private _extensionContext: vscode.ExtensionContext | undefined;
+  private static _instance: TelemetryWorker | undefined;
   private _isInternal = false;
 
   private constructor(context: vscode.ExtensionContext) {
     this._extensionContext = context;
     const packageInfo = this.getPackageInfo(context);
     if (!packageInfo) {
-      console.log('Unable to initialize telemetry');
+      console.log("Unable to initialize telemetry");
       return;
     }
     if (!packageInfo.aiKey) {
       console.log(
-        'Unable to initialize telemetry, please make sure AIKey is set in package.json');
+        "Unable to initialize telemetry, please make sure AIKey is set in package.json"
+      );
       return;
     }
     this._reporter = new TelemetryReporter(
-      packageInfo.name, packageInfo.version, packageInfo.aiKey);
+      packageInfo.name,
+      packageInfo.version,
+      packageInfo.aiKey
+    );
     this._isInternal = TelemetryWorker.isInternalUser();
   }
 
@@ -69,10 +72,10 @@ export class TelemetryWorker {
    * check if it is Microsoft internal user
    */
   private static isInternalUser(): boolean {
-    const userDomain: string = process.env.USERDNSDOMAIN ?
-      process.env.USERDNSDOMAIN.toLowerCase() :
-      '';
-    return userDomain.endsWith('microsoft.com');
+    const userDomain: string = process.env.USERDNSDOMAIN
+      ? process.env.USERDNSDOMAIN.toLowerCase()
+      : "";
+    return userDomain.endsWith("microsoft.com");
   }
 
   /**
@@ -83,10 +86,11 @@ export class TelemetryWorker {
     context.properties.result = TelemetryResult.Succeeded;
     context.properties.isInternal = this._isInternal.toString();
     if (this._extensionContext) {
-      context.properties.developEnvironment =
-          RemoteExtension.isRemote(this._extensionContext) ?
-            DevelopEnvironment.RemoteEnv :
-            DevelopEnvironment.LocalEnv;
+      context.properties.developEnvironment = RemoteExtension.isRemote(
+        this._extensionContext
+      )
+        ? DevelopEnvironment.RemoteEnv
+        : DevelopEnvironment.LocalEnv;
     }
     return context;
   }
@@ -104,7 +108,10 @@ export class TelemetryWorker {
       telemetryContext = this.createContext();
     }
     this._reporter.sendTelemetryEvent(
-      eventName, telemetryContext.properties, telemetryContext.measurements);
+      eventName,
+      telemetryContext.properties,
+      telemetryContext.measurements
+    );
   }
 
   /**
@@ -118,25 +125,37 @@ export class TelemetryWorker {
    * @param additionalProperties
    */
   async callCommandWithTelemetry(
-    context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
-    eventName: string, enableSurvey: boolean,
+    context: vscode.ExtensionContext,
+    outputChannel: vscode.OutputChannel,
+    eventName: string,
+    enableSurvey: boolean,
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-    callback:
-          (context: vscode.ExtensionContext,
-           outputChannel: vscode.OutputChannel,
+    callback: (
+      context: vscode.ExtensionContext,
+      outputChannel: vscode.OutputChannel,
+      telemetrycontext: TelemetryContext,
       // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-           telemetrycontext: TelemetryContext, ...args: any[]) => any,
+      ...args: any[]
+    ) => // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+    any,
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-    additionalProperties?: {[key: string]: string},
+    additionalProperties?: { [key: string]: string },
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-    ...commandArgs: any[]): Promise<any> {
+    ...commandArgs: any[]
+  ): // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+  Promise<any> {
     const telemetryWorker = TelemetryWorker.getInstance(context);
     const telemetryContext = telemetryWorker.createContext();
 
     const start: number = Date.now();
     if (additionalProperties) {
       for (const key of Object.keys(additionalProperties)) {
-        if (!Object.prototype.hasOwnProperty.call(telemetryContext.properties, key)) {
+        if (
+          !Object.prototype.hasOwnProperty.call(
+            telemetryContext.properties,
+            key
+          )
+        ) {
           telemetryContext.properties[key] = additionalProperties[key];
         }
       }
@@ -144,7 +163,11 @@ export class TelemetryWorker {
 
     try {
       return await callback(
-        context, outputChannel, telemetryContext, ...commandArgs);
+        context,
+        outputChannel,
+        telemetryContext,
+        ...commandArgs
+      );
     } catch (error) {
       telemetryContext.properties.errorMessage = error.message;
       let isPopupErrorMsg = true;
@@ -181,8 +204,9 @@ export class TelemetryWorker {
   /**
    * Get extension information
    */
-  private getPackageInfo(context: vscode.ExtensionContext): PackageInfo
-      |undefined {
+  private getPackageInfo(
+    context: vscode.ExtensionContext
+  ): PackageInfo | undefined {
     const extension = WorkbenchExtension.getExtension(context);
     if (extension) {
       const extensionPackage = extension.packageJSON;

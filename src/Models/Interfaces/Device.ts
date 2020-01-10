@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { ScaffoldType } from '../../constants';
+import { ScaffoldType } from "../../constants";
 
-import { Compilable } from './Compilable';
-import { Component } from './Component';
-import { Uploadable } from './Uploadable';
+import { Compilable } from "./Compilable";
+import { Component } from "./Component";
+import { Uploadable } from "./Uploadable";
 
 export enum DeviceType {
   MXChipAZ3166 = 1,
@@ -17,6 +17,8 @@ export enum DeviceType {
 export interface Device extends Component, Compilable, Uploadable {
   getDeviceType(): DeviceType;
   configDeviceSettings(): Promise<boolean>;
-  configDeviceEnvironment(deviceRootPath: string, scaffoldType: ScaffoldType):
-      Promise<void>;
+  configDeviceEnvironment(
+    deviceRootPath: string,
+    scaffoldType: ScaffoldType
+  ): Promise<void>;
 }

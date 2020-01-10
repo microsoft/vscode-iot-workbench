@@ -37,7 +37,7 @@ export class Configuration {
   }
 
   private static readonly instance: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(
-    Constants.EXTENSION_NAME,
+    Constants.EXTENSION_NAME
   );
   private constructor() {}
 }

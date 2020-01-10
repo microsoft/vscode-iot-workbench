@@ -240,5 +240,5 @@ export const LANGUAGE_CODE = new Set<string>([
   "zh-SG",
   "zh-TW",
   "zu",
-  "zu-ZA",
+  "zu-ZA"
 ]);

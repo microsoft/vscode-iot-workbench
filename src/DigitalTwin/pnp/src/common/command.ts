@@ -13,5 +13,5 @@ export enum Command {
   SearchCapabilityModel = "azure-digital-twins.searchCapabilityModel",
   SubmitFiles = "azure-digital-twins.submitFiles",
   DeleteModels = "azure-digital-twins.deleteModels",
-  DownloadModels = "azure-digital-twins.downloadModels",
+  DownloadModels = "azure-digital-twins.downloadModels"
 }

@@ -1,9 +1,9 @@
-const detection = require('./bindings');
-const EventEmitter2 = require('eventemitter2').EventEmitter2;
+const detection = require("./bindings");
+const EventEmitter2 = require("eventemitter2").EventEmitter2;
 
 const detector = new EventEmitter2({
   wildcard: true,
-  delimiter: ':',
+  delimiter: ":",
   maxListeners: 1000 // default would be 10!
 });
 
@@ -53,22 +53,22 @@ if (detection.registerAdded) {
     detector.emit(`insert:${device.vendorId}:${device.productId}`, device);
     detector.emit(`add:${device.vendorId}`, device);
     detector.emit(`insert:${device.vendorId}`, device);
-    detector.emit('add', device);
-    detector.emit('insert', device);
+    detector.emit("add", device);
+    detector.emit("insert", device);
 
     detector.emit(`change:${device.vendorId}:${device.productId}`, device);
     detector.emit(`change:${device.vendorId}`, device);
-    detector.emit('change', device);
+    detector.emit("change", device);
   });
 
   detection.registerRemoved((device) => {
     detector.emit(`remove:${device.vendorId}:${device.productId}`, device);
     detector.emit(`remove:${device.vendorId}`, device);
-    detector.emit('remove', device);
+    detector.emit("remove", device);
 
     detector.emit(`change:${device.vendorId}:${device.productId}`, device);
     detector.emit(`change:${device.vendorId}`, device);
-    detector.emit('change', device);
+    detector.emit("change", device);
   });
 
   let started = true;

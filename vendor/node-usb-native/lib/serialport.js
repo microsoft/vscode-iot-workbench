@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 // Copyright 2011 Chris Williams <chris@iterativedesigns.com>
 
@@ -9,20 +9,20 @@ const debug = (message) => {
 
 // shims
 // Internal Dependencies
-const SerialPortBinding = require('./bindings');
-const parsers = require('./parsers');
+const SerialPortBinding = require("./bindings");
+const parsers = require("./parsers");
 
 // Built-ins Dependencies
-const fs = require('fs');
-const stream = require('stream');
-const util = require('util');
+const fs = require("fs");
+const stream = require("stream");
+const util = require("util");
 
 //  VALIDATION ARRAYS
 const DATABITS = [5, 6, 7, 8];
 const STOPBITS = [1, 1.5, 2];
-const PARITY = ['none', 'even', 'mark', 'odd', 'space'];
-const FLOWCONTROLS = ['xon', 'xoff', 'xany', 'rtscts'];
-const SET_OPTIONS = ['brk', 'cts', 'dtr', 'dts', 'rts'];
+const PARITY = ["none", "even", "mark", "odd", "space"];
+const FLOWCONTROLS = ["xon", "xoff", "xany", "rtscts"];
+const SET_OPTIONS = ["brk", "cts", "dtr", "dts", "rts"];
 
 // Stuff from ReadStream, refactored for our usage:
 const kPoolSize = 40 * 1024;
@@ -31,7 +31,7 @@ const kMinPoolSpace = 128;
 const defaultSettings = {
   baudRate: 9600,
   autoOpen: true,
-  parity: 'none',
+  parity: "none",
   xon: false,
   xoff: false,
   xany: false,
@@ -55,11 +55,11 @@ const defaultSetFlags = {
 
 // deprecate the lowercase version of these options next major release
 const LOWERCASE_OPTIONS = [
-  'baudRate',
-  'dataBits',
-  'stopBits',
-  'bufferSize',
-  'platformOptions'
+  "baudRate",
+  "dataBits",
+  "stopBits",
+  "bufferSize",
+  "platformOptions"
 ];
 
 function correctOptions(options) {
@@ -75,11 +75,13 @@ function correctOptions(options) {
 }
 
 function SerialPort(path, options, callback) {
-  if (typeof callback === 'boolean') {
-    throw new TypeError('`openImmediately` is now called `autoOpen` and is a property of options');
+  if (typeof callback === "boolean") {
+    throw new TypeError(
+      "`openImmediately` is now called `autoOpen` and is a property of options"
+    );
   }
 
-  if (typeof options === 'function') {
+  if (typeof options === "function") {
     callback = options;
     options = {};
   }
@@ -89,7 +91,7 @@ function SerialPort(path, options, callback) {
   stream.Stream.call(this);
 
   if (!path) {
-    throw new TypeError('No path specified');
+    throw new TypeError("No path specified");
   }
 
   this.path = path;
@@ -97,8 +99,10 @@ function SerialPort(path, options, callback) {
   const correctedOptions = correctOptions(options);
   const settings = Object.assign({}, defaultSettings, correctedOptions);
 
-  if (typeof settings.baudRate !== 'number') {
-    throw new TypeError(`Invalid "baudRate" must be a number got: ${settings.baudRate}`);
+  if (typeof settings.baudRate !== "number") {
+    throw new TypeError(
+      `Invalid "baudRate" must be a number got: ${settings.baudRate}`
+    );
   }
 
   if (DATABITS.indexOf(settings.dataBits) === -1) {
@@ -114,7 +118,7 @@ function SerialPort(path, options, callback) {
   }
 
   FLOWCONTROLS.forEach((control) => {
-    if (typeof settings[control] !== 'boolean') {
+    if (typeof settings[control] !== "boolean") {
       throw new TypeError(`Invalid "${control}" is not boolean`);
     }
   });
@@ -127,7 +131,7 @@ function SerialPort(path, options, callback) {
   this.opening = false;
   this.closing = false;
 
-  if (process.platform !== 'win32') {
+  if (process.platform !== "win32") {
     this.bufferSize = settings.bufferSize;
     this.readable = true;
     this.reading = false;
@@ -147,17 +151,17 @@ SerialPort.prototype._error = function(error, callback) {
   if (callback) {
     callback.call(this, error);
   } else {
-    this.emit('error', error);
+    this.emit("error", error);
   }
 };
 
 SerialPort.prototype.open = function(callback) {
   if (this.isOpen()) {
-    return this._error(new Error('Port is already open'), callback);
+    return this._error(new Error("Port is already open"), callback);
   }
 
   if (this.opening) {
-    return this._error(new Error('Port is opening'), callback);
+    return this._error(new Error("Port is opening"), callback);
   }
 
   this.paused = true;
@@ -168,24 +172,27 @@ SerialPort.prototype.open = function(callback) {
   SerialPortBinding.open(this.path, this.options, (err, fd) => {
     this.opening = false;
     if (err) {
-      debug('SerialPortBinding.open had an error', err);
+      debug("SerialPortBinding.open had an error", err);
       return this._error(err, callback);
     }
     this.fd = fd;
     this.paused = false;
 
-    if (process.platform !== 'win32') {
-      this.serialPoller = new SerialPortBinding.SerialportPoller(this.fd, (err) => {
-        if (!err) {
-          this._read();
-        } else {
-          this._disconnected(err);
+    if (process.platform !== "win32") {
+      this.serialPoller = new SerialPortBinding.SerialportPoller(
+        this.fd,
+        (err) => {
+          if (!err) {
+            this._read();
+          } else {
+            this._disconnected(err);
+          }
         }
-      });
+      );
       this.serialPoller.start();
     }
 
-    this.emit('open');
+    this.emit("open");
     if (callback) {
       callback.call(this, null);
     }
@@ -194,8 +201,8 @@ SerialPort.prototype.open = function(callback) {
 
 SerialPort.prototype.update = function(options, callback) {
   if (!this.isOpen()) {
-    debug('update attempted, but port is not open');
-    return this._error(new Error('Port is not open'), callback);
+    debug("update attempted, but port is not open");
+    return this._error(new Error("Port is not open"), callback);
   }
 
   const correctedOptions = correctOptions(options);
@@ -218,8 +225,8 @@ SerialPort.prototype.isOpen = function() {
 
 SerialPort.prototype.write = function(buffer, callback) {
   if (!this.isOpen()) {
-    debug('write attempted, but port is not open');
-    return this._error(new Error('Port is not open'), callback);
+    debug("write attempted, but port is not open");
+    return this._error(new Error("Port is not open"), callback);
   }
 
   if (!Buffer.isBuffer(buffer)) {
@@ -229,7 +236,7 @@ SerialPort.prototype.write = function(buffer, callback) {
   debug(`write ${buffer.length} bytes of data`);
   SerialPortBinding.write(this.fd, buffer, (err) => {
     if (err) {
-      debug('SerialPortBinding.write had an error', err);
+      debug("SerialPortBinding.write had an error", err);
       return this._error(err, callback);
     }
     if (callback) {
@@ -238,7 +245,7 @@ SerialPort.prototype.write = function(buffer, callback) {
   });
 };
 
-if (process.platform !== 'win32') {
+if (process.platform !== "win32") {
   SerialPort.prototype._read = function() {
     if (!this.readable || this.paused || this.reading || this.closing) {
       return;
@@ -256,23 +263,32 @@ if (process.platform !== 'win32') {
     // Grab another reference to the pool in the case that while we're in the
     // thread pool another read() finishes up the pool, and allocates a new
     // one.
-    const toRead = Math.min(this.pool.length - this.pool.used, ~~this.bufferSize);
+    const toRead = Math.min(
+      this.pool.length - this.pool.used,
+      ~~this.bufferSize
+    );
     const start = this.pool.used;
 
     const _afterRead = (err, bytesRead, readPool, bytesRequested) => {
       this.reading = false;
       if (err) {
-        if (err.code && err.code === 'EAGAIN') {
+        if (err.code && err.code === "EAGAIN") {
           if (this.isOpen()) {
             this.serialPoller.start();
           }
           // handle edge case were mac/unix doesn't clearly know the error.
-        } else if (err.code && (err.code === 'EBADF' || err.code === 'ENXIO' || (err.errno === -1 || err.code === 'UNKNOWN'))) {
+        } else if (
+          err.code &&
+          (err.code === "EBADF" ||
+            err.code === "ENXIO" ||
+            err.errno === -1 ||
+            err.code === "UNKNOWN")
+        ) {
           this._disconnected(err);
         } else {
           this.fd = null;
           this.readable = false;
-          this.emit('error', err);
+          this.emit("error", err);
         }
         return;
       }
@@ -306,11 +322,18 @@ if (process.platform !== 'win32') {
       }
     };
 
-    fs.read(this.fd, this.pool, this.pool.used, toRead, null, (err, bytesRead) => {
-      const readPool = this.pool;
-      const bytesRequested = toRead;
-      _afterRead(err, bytesRead, readPool, bytesRequested);
-    });
+    fs.read(
+      this.fd,
+      this.pool,
+      this.pool.used,
+      toRead,
+      null,
+      (err, bytesRead) => {
+        const readPool = this.pool;
+        const bytesRequested = toRead;
+        _afterRead(err, bytesRead, readPool, bytesRequested);
+      }
+    );
 
     this.pool.used += toRead;
   };
@@ -343,7 +366,7 @@ if (process.platform !== 'win32') {
 
 SerialPort.prototype._disconnected = function(err) {
   this.paused = true;
-  this.emit('disconnect', err);
+  this.emit("disconnect", err);
   if (this.closing) {
     return;
   }
@@ -353,7 +376,7 @@ SerialPort.prototype._disconnected = function(err) {
   }
 
   this.closing = true;
-  if (process.platform !== 'win32') {
+  if (process.platform !== "win32") {
     this.readable = false;
     this.serialPoller.close();
   }
@@ -361,10 +384,10 @@ SerialPort.prototype._disconnected = function(err) {
   SerialPortBinding.close(this.fd, (err) => {
     this.closing = false;
     if (err) {
-      debug('Disconnect close completed with error: ', err);
+      debug("Disconnect close completed with error: ", err);
     }
     this.fd = null;
-    this.emit('close');
+    this.emit("close");
   });
 };
 
@@ -372,31 +395,31 @@ SerialPort.prototype.close = function(callback) {
   this.paused = true;
 
   if (this.closing) {
-    debug('close attempted, but port is already closing');
-    return this._error(new Error('Port is not open'), callback);
+    debug("close attempted, but port is already closing");
+    return this._error(new Error("Port is not open"), callback);
   }
 
   if (!this.isOpen()) {
-    debug('close attempted, but port is not open');
-    return this._error(new Error('Port is not open'), callback);
+    debug("close attempted, but port is not open");
+    return this._error(new Error("Port is not open"), callback);
   }
 
   this.closing = true;
 
   // Stop polling before closing the port.
-  if (process.platform !== 'win32') {
+  if (process.platform !== "win32") {
     this.readable = false;
     this.serialPoller.close();
   }
   SerialPortBinding.close(this.fd, (err) => {
     this.closing = false;
     if (err) {
-      debug('SerialPortBinding.close had an error', err);
+      debug("SerialPortBinding.close had an error", err);
       return this._error(err, callback);
     }
 
     this.fd = null;
-    this.emit('close');
+    this.emit("close");
     if (callback) {
       callback.call(this, null);
     }
@@ -405,13 +428,13 @@ SerialPort.prototype.close = function(callback) {
 
 SerialPort.prototype.flush = function(callback) {
   if (!this.isOpen()) {
-    debug('flush attempted, but port is not open');
-    return this._error(new Error('Port is not open'), callback);
+    debug("flush attempted, but port is not open");
+    return this._error(new Error("Port is not open"), callback);
   }
 
   SerialPortBinding.flush(this.fd, (err, result) => {
     if (err) {
-      debug('SerialPortBinding.flush had an error', err);
+      debug("SerialPortBinding.flush had an error", err);
       return this._error(err, callback);
     }
     if (callback) {
@@ -422,12 +445,12 @@ SerialPort.prototype.flush = function(callback) {
 
 SerialPort.prototype.set = function(options, callback) {
   if (!this.isOpen()) {
-    debug('set attempted, but port is not open');
-    return this._error(new Error('Port is not open'), callback);
+    debug("set attempted, but port is not open");
+    return this._error(new Error("Port is not open"), callback);
   }
 
   options = options || {};
-  if (!callback && typeof options === 'function') {
+  if (!callback && typeof options === "function") {
     callback = options;
     options = {};
   }
@@ -444,7 +467,7 @@ SerialPort.prototype.set = function(options, callback) {
 
   SerialPortBinding.set(this.fd, settings, (err) => {
     if (err) {
-      debug('SerialPortBinding.set had an error', err);
+      debug("SerialPortBinding.set had an error", err);
       return this._error(err, callback);
     }
     if (callback) {
@@ -455,13 +478,13 @@ SerialPort.prototype.set = function(options, callback) {
 
 SerialPort.prototype.drain = function(callback) {
   if (!this.isOpen()) {
-    debug('drain attempted, but port is not open');
-    return this._error(new Error('Port is not open'), callback);
+    debug("drain attempted, but port is not open");
+    return this._error(new Error("Port is not open"), callback);
   }
 
   SerialPortBinding.drain(this.fd, (err) => {
     if (err) {
-      debug('SerialPortBinding.drain had an error', err);
+      debug("SerialPortBinding.drain had an error", err);
       return this._error(err, callback);
     }
     if (callback) {
@@ -474,10 +497,10 @@ SerialPort.parsers = parsers;
 SerialPort.list = SerialPortBinding.list;
 
 // Write a depreciation warning once
-Object.defineProperty(SerialPort, 'SerialPort', {
+Object.defineProperty(SerialPort, "SerialPort", {
   get: function() {
     // console.warn('DEPRECATION: Please use `require(\'serialport\')` instead of `require(\'serialport\').SerialPort`');
-    Object.defineProperty(SerialPort, 'SerialPort', {
+    Object.defineProperty(SerialPort, "SerialPort", {
       value: SerialPort
     });
     return SerialPort;

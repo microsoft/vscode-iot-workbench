@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 export interface CommandItem extends vscode.QuickPickItem {
   /**
@@ -18,7 +18,7 @@ export interface CommandItem extends vscode.QuickPickItem {
    * workspace configuration contains
    * the specific field.
    */
-  only?: string|string[];
+  only?: string | string[];
   /**
    * Show the menu item when only the
    * deviceId of current workspace is in

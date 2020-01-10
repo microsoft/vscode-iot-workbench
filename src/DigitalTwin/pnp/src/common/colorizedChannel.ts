@@ -14,7 +14,8 @@ export class ColorizedChannel {
    */
   static formatMessage(operation: string, error?: Error): string {
     if (error) {
-      const message: string = operation.charAt(0).toLowerCase() + operation.slice(1);
+      const message: string =
+        operation.charAt(0).toLowerCase() + operation.slice(1);
       return `Fail to ${message}. Error: ${error.message}`;
     } else {
       return `${operation} successfully`;
@@ -51,7 +52,9 @@ export class ColorizedChannel {
    */
   end(operation: string, component?: string): void {
     const tag: string = ColorizedChannel.createTag(component);
-    this.channel.appendLine(`[Done]${tag} ${ColorizedChannel.formatMessage(operation)}`);
+    this.channel.appendLine(
+      `[Done]${tag} ${ColorizedChannel.formatMessage(operation)}`
+    );
   }
 
   /**
@@ -80,7 +83,9 @@ export class ColorizedChannel {
    */
   error(operation: string, component?: string, error?: Error): void {
     const tag: string = ColorizedChannel.createTag(component);
-    const message: string = error ? ColorizedChannel.formatMessage(operation, error) : operation;
+    const message: string = error
+      ? ColorizedChannel.formatMessage(operation, error)
+      : operation;
     this.channel.appendLine(`[Error]${tag} ${message}`);
   }
 

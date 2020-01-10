@@ -1,8 +1,8 @@
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 class DummyMemento implements vscode.Memento {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  get<T>(_key: string): Promise<T|undefined> {
+  get<T>(_key: string): Promise<T | undefined> {
     return Promise.resolve(undefined);
   }
 
@@ -14,19 +14,18 @@ class DummyMemento implements vscode.Memento {
 
 // mock of the extension context for vscode
 class TestExtensionContext implements vscode.ExtensionContext {
-  globalStoragePath = '';
-  subscriptions: Array<{dispose(): {}}> = [];
+  globalStoragePath = "";
+  subscriptions: Array<{ dispose(): {} }> = [];
   workspaceState: vscode.Memento = new DummyMemento();
   globalState: vscode.Memento = new DummyMemento();
-  extensionPath = '';
-  storagePath = '';
-  logPath = '';
+  extensionPath = "";
+  storagePath = "";
+  logPath = "";
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   asAbsolutePath(_relativePath: string): string {
-    return '';
+    return "";
   }
 }
-
 
 export { DummyMemento, TestExtensionContext };

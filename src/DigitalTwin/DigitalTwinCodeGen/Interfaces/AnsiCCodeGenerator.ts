@@ -1,22 +1,27 @@
-import * as os from 'os';
-import * as path from 'path';
-import * as vscode from 'vscode';
+import * as os from "os";
+import * as path from "path";
+import * as vscode from "vscode";
 
-import { VscodeCommands } from '../../../common/Commands';
-import { OSPlatform, ScaffoldType } from '../../../constants';
-import { OpenScenario } from '../../../Models/IoTWorkbenchProjectBase';
-import { IoTWorkspaceProject } from '../../../Models/IoTWorkspaceProject';
-import { TelemetryContext } from '../../../telemetry';
-import * as utils from '../../../utils';
-import { DigitalTwinConstants } from '../../DigitalTwinConstants';
+import { VscodeCommands } from "../../../common/Commands";
+import { OSPlatform, ScaffoldType } from "../../../constants";
+import { OpenScenario } from "../../../Models/IoTWorkbenchProjectBase";
+import { IoTWorkspaceProject } from "../../../Models/IoTWorkspaceProject";
+import { TelemetryContext } from "../../../telemetry";
+import * as utils from "../../../utils";
+import { DigitalTwinConstants } from "../../DigitalTwinConstants";
 
-import { CodeGenerator, CodeGenExecutionItem, CodeGenProjectType } from './CodeGenerator';
+import {
+  CodeGenerator,
+  CodeGenExecutionItem,
+  CodeGenProjectType
+} from "./CodeGenerator";
 
 export class AnsiCCodeGenerator implements CodeGenerator {
   constructor(
-      protected context: vscode.ExtensionContext,
-      protected channel: vscode.OutputChannel,
-      protected telemetryContext: TelemetryContext) {}
+    protected context: vscode.ExtensionContext,
+    protected channel: vscode.OutputChannel,
+    protected telemetryContext: TelemetryContext
+  ) {}
 
   async generateCode(codegenInfo: CodeGenExecutionItem): Promise<boolean> {
     // Invoke PnP toolset to generate the code
@@ -25,26 +30,36 @@ export class AnsiCCodeGenerator implements CodeGenerator {
     if (codegenSucceeded) {
       if (codegenInfo.codeGenProjectType === CodeGenProjectType.IoTDevKit) {
         const project: IoTWorkspaceProject = new IoTWorkspaceProject(
-          this.context, this.channel, this.telemetryContext,
-          codegenInfo.outputDirectory);
+          this.context,
+          this.channel,
+          this.telemetryContext,
+          codegenInfo.outputDirectory
+        );
         project.openProject(
-          ScaffoldType.Local, true, OpenScenario.createNewProject);
+          ScaffoldType.Local,
+          true,
+          OpenScenario.createNewProject
+        );
       } else {
         await vscode.commands.executeCommand(
           VscodeCommands.VscodeOpenFolder,
-          vscode.Uri.file(codegenInfo.outputDirectory), true);
+          vscode.Uri.file(codegenInfo.outputDirectory),
+          true
+        );
       }
 
       return true;
     } else {
       vscode.window.showErrorMessage(
-        'Unable to generate code, please check output window for detail.');
+        "Unable to generate code, please check output window for detail."
+      );
       return false;
     }
   }
 
-  async generateAnsiCCodeCore(codegenInfo: CodeGenExecutionItem):
-      Promise<boolean> {
+  async generateAnsiCCodeCore(
+    codegenInfo: CodeGenExecutionItem
+  ): Promise<boolean> {
     // Invoke DigitalTwinCodeGen toolset to generate the code
     const projectTypeValue = codegenInfo.codeGenProjectType.toString();
     const connectionTypeValue = codegenInfo.deviceConnectionType.toString();
@@ -58,29 +73,26 @@ export class AnsiCCodeGenerator implements CodeGenerator {
     const platform = os.platform();
     const homeDir = os.homedir();
     const cmdPath = path.join(homeDir, DigitalTwinConstants.codeGenCliFolder);
-    let codeGenCommand = '';
+    let codeGenCommand = "";
     if (platform === OSPlatform.WIN32) {
       codeGenCommand = `${DigitalTwinConstants.codeGenCliApp}.exe`;
     } else {
       codeGenCommand = `./${DigitalTwinConstants.codeGenCliApp}`;
     }
 
-    const command = `${codeGenCommand} generate -d "${dcmFilePath}" -i "${
-      interfaceDir}" -p "${projectTypeValue}" -c "${
-      connectionTypeValue}" -r "${sdkReferenceTypeValue}" -l ansic -o "${
-      outputDir}" -n "${projectName}"`;
+    const command = `${codeGenCommand} generate -d "${dcmFilePath}" -i "${interfaceDir}" \
+    -p "${projectTypeValue}" -c "${connectionTypeValue}" \
+    -r "${sdkReferenceTypeValue}" -l ansic -o "${outputDir}" -n "${projectName}"`;
 
     let message: string;
 
     try {
       await utils.runCommand(command, [], cmdPath, this.channel);
-      message = `${
-        DigitalTwinConstants.dtPrefix} generate PnP device code completed.`;
+      message = `${DigitalTwinConstants.dtPrefix} generate PnP device code completed.`;
       utils.channelShowAndAppendLine(this.channel, message);
       return true;
     } catch {
-      message =
-          `${DigitalTwinConstants.dtPrefix} generate PnP device code failed.`;
+      message = `${DigitalTwinConstants.dtPrefix} generate PnP device code failed.`;
       utils.channelShowAndAppendLine(this.channel, message);
       return false;
     }

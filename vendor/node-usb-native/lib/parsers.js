@@ -1,19 +1,23 @@
-'use strict';
+"use strict";
 
 // Copyright 2011 Chris Williams <chris@iterativedesigns.com>
 
 module.exports = {
   raw: function(emitter, buffer) {
-    emitter.emit('data', buffer);
+    emitter.emit("data", buffer);
   },
 
   // encoding: ascii utf8 utf16le ucs2 base64 binary hex
   // More: http://nodejs.org/api/buffer.html#buffer_buffer
   readline: function(delimiter, encoding) {
-    if (typeof delimiter === 'undefined' || delimiter === null) { delimiter = '\r' }
-    if (typeof encoding === 'undefined' || encoding === null) { encoding = 'utf8' }
+    if (typeof delimiter === "undefined" || delimiter === null) {
+      delimiter = "\r";
+    }
+    if (typeof encoding === "undefined" || encoding === null) {
+      encoding = "utf8";
+    }
     // Delimiter buffer saved in closure
-    let data = '';
+    let data = "";
     return function(emitter, buffer) {
       // Collect data
       data += buffer.toString(encoding);
@@ -21,7 +25,7 @@ module.exports = {
       const parts = data.split(delimiter);
       data = parts.pop();
       parts.forEach((part) => {
-        emitter.emit('data', part);
+        emitter.emit("data", part);
       });
     };
   },
@@ -34,7 +38,7 @@ module.exports = {
       while (data.length >= length) {
         const out = data.slice(0, length);
         data = data.slice(length);
-        emitter.emit('data', out);
+        emitter.emit("data", out);
       }
     };
   },
@@ -42,8 +46,8 @@ module.exports = {
   // Emit a data event each time a byte sequence (delimiter is an array of byte) is found
   // Sample usage : byteDelimiter([10, 13])
   byteDelimiter: function(delimiter) {
-    if (Object.prototype.toString.call(delimiter) !== '[object Array]') {
-      delimiter = [ delimiter ];
+    if (Object.prototype.toString.call(delimiter) !== "[object Array]") {
+      delimiter = [delimiter];
     }
     let buf = [];
     let nextDelimIndex = 0;
@@ -54,7 +58,7 @@ module.exports = {
           nextDelimIndex++;
         }
         if (nextDelimIndex === delimiter.length) {
-          emitter.emit('data', buf);
+          emitter.emit("data", buf);
           buf = [];
           nextDelimIndex = 0;
         }

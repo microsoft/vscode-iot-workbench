@@ -15,7 +15,7 @@ export enum JsonNodeType {
   String = "string",
   Number = "number",
   Boolean = "boolean",
-  Property = "property",
+  Property = "property"
 }
 
 /**
@@ -49,7 +49,9 @@ export class IntelliSenseUtility {
    * get entry node of DigitalTwin model
    */
   static getEntryNode(): PropertyNode | undefined {
-    return IntelliSenseUtility.graph.getPropertyNode(DigitalTwinConstants.ENTRY_NODE);
+    return IntelliSenseUtility.graph.getPropertyNode(
+      DigitalTwinConstants.ENTRY_NODE
+    );
   }
 
   /**
@@ -76,7 +78,10 @@ export class IntelliSenseUtility {
     // skip checking errors in order to do IntelliSense at best effort
     const jsonNode: parser.Node = parser.parseTree(text);
     const contextPath: string[] = [DigitalTwinConstants.CONTEXT];
-    const contextNode: parser.Node | undefined = parser.findNodeAtLocation(jsonNode, contextPath);
+    const contextNode: parser.Node | undefined = parser.findNodeAtLocation(
+      jsonNode,
+      contextPath
+    );
     if (contextNode && IntelliSenseUtility.isDigitalTwinContext(contextNode)) {
       return jsonNode;
     }
@@ -108,7 +113,11 @@ export class IntelliSenseUtility {
    * @param node json node
    */
   static parseProperty(node: parser.Node): PropertyPair | undefined {
-    if (node.type !== JsonNodeType.Property || !node.children || node.children.length !== 2) {
+    if (
+      node.type !== JsonNodeType.Property ||
+      !node.children ||
+      node.children.length !== 2
+    ) {
       return undefined;
     }
     return { name: node.children[0], value: node.children[1] };
@@ -119,8 +128,14 @@ export class IntelliSenseUtility {
    * @param document text document
    * @param node json node
    */
-  static getNodeRange(document: vscode.TextDocument, node: parser.Node): vscode.Range {
-    return new vscode.Range(document.positionAt(node.offset), document.positionAt(node.offset + node.length));
+  static getNodeRange(
+    document: vscode.TextDocument,
+    node: parser.Node
+  ): vscode.Range {
+    return new vscode.Range(
+      document.positionAt(node.offset),
+      document.positionAt(node.offset + node.length)
+    );
   }
 
   /**
@@ -182,7 +197,9 @@ export class IntelliSenseUtility {
     // get outer object node
     if (node.parent && node.parent.parent) {
       node = node.parent.parent;
-      const outPropertyPair: PropertyPair | undefined = IntelliSenseUtility.getOuterPropertyPair(node);
+      const outPropertyPair:
+        | PropertyPair
+        | undefined = IntelliSenseUtility.getOuterPropertyPair(node);
       if (outPropertyPair) {
         const name: string = outPropertyPair.name.value as string;
         if (name === DigitalTwinConstants.IMPLEMENTS) {
@@ -205,7 +222,9 @@ export class IntelliSenseUtility {
     if (outerProperty && outerProperty.type === JsonNodeType.Array) {
       outerProperty = outerProperty.parent;
     }
-    return outerProperty ? IntelliSenseUtility.parseProperty(outerProperty) : undefined;
+    return outerProperty
+      ? IntelliSenseUtility.parseProperty(outerProperty)
+      : undefined;
   }
 
   private static graph: DigitalTwinGraph;

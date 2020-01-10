@@ -29,24 +29,30 @@ export class Constants {
 
   static readonly DEVICE_MODEL_COMPONENT = "Device Model";
   static readonly MODEL_REPOSITORY_COMPONENT = "Model Repository";
-  static readonly MODEL_REPOSITORY_CONNECTION_KEY = "ModelRepositoryConnectionKey";
+  static readonly MODEL_REPOSITORY_CONNECTION_KEY =
+    "ModelRepositoryConnectionKey";
   static readonly MODEL_REPOSITORY_API_VERSION = "2019-07-01-Preview";
   static readonly URL_PROTOCAL_REGEX = new RegExp("^[a-zA-Z]+://");
   static readonly HTTPS_PROTOCAL = "https://";
   static readonly MODEL_NAME_REGEX = new RegExp("^[a-zA-Z_][a-zA-Z0-9_]*$");
-  static readonly MODEL_NAME_REGEX_DESCRIPTION = "alphanumeric and underscore, not start with number";
+  static readonly MODEL_NAME_REGEX_DESCRIPTION =
+    "alphanumeric and underscore, not start with number";
   static readonly DIGITAL_TWIN_ID_PLACEHOLDER = "{DigitalTwinIdentifier}";
 
   static readonly EXTENSION_ACTIVATED_MSG = "extensionActivated";
   static readonly NOT_EMPTY_MSG = "could not be empty";
   static readonly CONNECTION_STRING_NOT_FOUND_MSG =
     "Company repository connection string is not found. Please sign out and sign in with a valid connection string";
-  static readonly PUBLIC_REPOSITORY_URL_NOT_FOUND_MSG = "Public repository url is not found";
-  static readonly CONNECTION_STRING_INVALID_FORMAT_MSG = "Invalid connection string format";
+  static readonly PUBLIC_REPOSITORY_URL_NOT_FOUND_MSG =
+    "Public repository url is not found";
+  static readonly CONNECTION_STRING_INVALID_FORMAT_MSG =
+    "Invalid connection string format";
   static readonly MODEL_TYPE_INVALID_MSG = "Invalid model type";
-  static readonly NEED_OPEN_COMPANY_REPOSITORY_MSG = "Please open company repository and try again";
+  static readonly NEED_OPEN_COMPANY_REPOSITORY_MSG =
+    "Please open company repository and try again";
 
-  static readonly NSAT_SURVEY_URL = "https://aka.ms/vscode-iot-workbench-survey";
+  static readonly NSAT_SURVEY_URL =
+    "https://aka.ms/vscode-iot-workbench-survey";
   static readonly WEB_VIEW_PATH = "assets/modelRepository";
   static readonly COMPANY_REPOSITORY_PAGE = "index.html";
   static readonly PUBLIC_REPOSITORY_PAGE = "index.html?public";

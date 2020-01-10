@@ -1,27 +1,26 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as fs from 'fs-plus';
-import { Guid } from 'guid-typescript';
-import * as path from 'path';
-import * as request from 'request-promise';
-import * as vscode from 'vscode';
+import * as fs from "fs-plus";
+import { Guid } from "guid-typescript";
+import * as path from "path";
+import * as request from "request-promise";
+import * as vscode from "vscode";
 
-import { ConfigHandler } from '../configHandler';
-import { ConfigKey, ScaffoldType } from '../constants';
-import { FileUtility } from '../FileUtility';
-import { generateTemplateFile } from '../utils';
+import { ConfigHandler } from "../configHandler";
+import { ConfigKey, ScaffoldType } from "../constants";
+import { FileUtility } from "../FileUtility";
+import { generateTemplateFile } from "../utils";
 
-import { ComponentType } from './Interfaces/Component';
-import { Device, DeviceType } from './Interfaces/Device';
-import { TemplateFileInfo } from './Interfaces/ProjectTemplate';
+import { ComponentType } from "./Interfaces/Component";
+import { Device, DeviceType } from "./Interfaces/Device";
+import { TemplateFileInfo } from "./Interfaces/ProjectTemplate";
 
 const constants = {
   timeout: 10000,
-  accessEndpoint: 'http://192.168.4.1',
-  userjsonFilename: 'userdata.json'
+  accessEndpoint: "http://192.168.4.1",
+  userjsonFilename: "userdata.json"
 };
-
 
 export class IoTButtonDevice implements Device {
   private deviceType: DeviceType;
@@ -33,21 +32,23 @@ export class IoTButtonDevice implements Device {
     return this.componentId;
   }
 
-  private static _boardId = 'iotbutton';
+  private static _boardId = "iotbutton";
 
   static get boardId(): string {
     return IoTButtonDevice._boardId;
   }
 
-  constructor(devicePath: string, private templateFilesInfo: TemplateFileInfo[] = []) {
+  constructor(
+    devicePath: string,
+    private templateFilesInfo: TemplateFileInfo[] = []
+  ) {
     this.deviceType = DeviceType.IoTButton;
     this.componentType = ComponentType.Device;
     this.deviceFolder = devicePath;
     this.componentId = Guid.create().toString();
   }
 
-  name = 'IoTButton';
-
+  name = "IoTButton";
 
   getDeviceType(): DeviceType {
     return this.deviceType;
@@ -65,33 +66,42 @@ export class IoTButtonDevice implements Device {
     const deviceFolderPath = this.deviceFolder;
 
     if (!fs.existsSync(deviceFolderPath)) {
-      throw new Error('Unable to find the device folder inside the project.');
+      throw new Error("Unable to find the device folder inside the project.");
     }
     return true;
   }
 
   async create(): Promise<void> {
     const createTimeScaffoldType = ScaffoldType.Local;
-    if (!await FileUtility.directoryExists(
-      createTimeScaffoldType, this.deviceFolder)) {
+    if (
+      !(await FileUtility.directoryExists(
+        createTimeScaffoldType,
+        this.deviceFolder
+      ))
+    ) {
       throw new Error(`Internal error: Couldn't find the template folder.`);
     }
 
     for (const fileInfo of this.templateFilesInfo) {
       await generateTemplateFile(
-        this.deviceFolder, createTimeScaffoldType, fileInfo);
+        this.deviceFolder,
+        createTimeScaffoldType,
+        fileInfo
+      );
     }
   }
 
   async compile(): Promise<boolean> {
     vscode.window.showInformationMessage(
-      'Congratulations! There is no device code to compile in this project.');
+      "Congratulations! There is no device code to compile in this project."
+    );
     return true;
   }
 
   async upload(): Promise<boolean> {
     vscode.window.showInformationMessage(
-      'Congratulations! There is no device code to upload in this project.');
+      "Congratulations! There is no device code to upload in this project."
+    );
     return true;
   }
 
@@ -100,82 +110,87 @@ export class IoTButtonDevice implements Device {
     // connection.
     const configSelectionItems: vscode.QuickPickItem[] = [
       {
-        label: 'Config WiFi of IoT button',
-        description: 'Config WiFi of IoT button',
-        detail: 'Config WiFi'
+        label: "Config WiFi of IoT button",
+        description: "Config WiFi of IoT button",
+        detail: "Config WiFi"
       },
       {
-        label: 'Config connection of IoT Hub Device',
-        description: 'Config connection of IoT Hub Device',
-        detail: 'Config IoT Hub Device'
+        label: "Config connection of IoT Hub Device",
+        description: "Config connection of IoT Hub Device",
+        detail: "Config IoT Hub Device"
       },
       {
-        label: 'Config time server of IoT button',
-        description: 'Config time server of IoT button',
-        detail: 'Config Time Server'
+        label: "Config time server of IoT button",
+        description: "Config time server of IoT button",
+        detail: "Config Time Server"
       },
       {
-        label: 'Config JSON data to append to message',
-        description: 'Config JSON data to append to message',
-        detail: 'Config User Json Data'
+        label: "Config JSON data to append to message",
+        description: "Config JSON data to append to message",
+        detail: "Config User Json Data"
       },
       {
-        label: 'Shutdown IoT button',
-        description: 'Shutdown IoT button',
-        detail: 'Shutdown'
+        label: "Shutdown IoT button",
+        description: "Shutdown IoT button",
+        detail: "Shutdown"
       }
     ];
 
-    const configSelection =
-        await vscode.window.showQuickPick(configSelectionItems, {
-          ignoreFocusOut: true,
-          matchOnDescription: true,
-          matchOnDetail: true,
-          placeHolder: 'Select an option',
-        });
+    const configSelection = await vscode.window.showQuickPick(
+      configSelectionItems,
+      {
+        ignoreFocusOut: true,
+        matchOnDescription: true,
+        matchOnDetail: true,
+        placeHolder: "Select an option"
+      }
+    );
 
     if (!configSelection) {
       return false;
     }
 
-    if (configSelection.detail === 'Config WiFi') {
+    if (configSelection.detail === "Config WiFi") {
       try {
         const res = await this.configWifi();
         if (res) {
-          vscode.window.showInformationMessage('Config WiFi successfully.');
+          vscode.window.showInformationMessage("Config WiFi successfully.");
         }
       } catch (error) {
-        vscode.window.showWarningMessage('Config WiFi failed.');
+        vscode.window.showWarningMessage("Config WiFi failed.");
       }
-    } else if (configSelection.detail === 'Config IoT Hub Device') {
+    } else if (configSelection.detail === "Config IoT Hub Device") {
       try {
         const res = await this.configHub();
         if (res) {
           vscode.window.showInformationMessage(
-            'Config Azure IoT Hub successfully.');
+            "Config Azure IoT Hub successfully."
+          );
         }
       } catch (error) {
-        vscode.window.showWarningMessage('Config IoT Hub failed.');
+        vscode.window.showWarningMessage("Config IoT Hub failed.");
       }
-    } else if (configSelection.detail === 'Config Time Server') {
+    } else if (configSelection.detail === "Config Time Server") {
       try {
         const res = await this.configNtp();
         if (res) {
           vscode.window.showInformationMessage(
-            'Config time server successfully.');
+            "Config time server successfully."
+          );
         }
       } catch (error) {
-        vscode.window.showWarningMessage('Config IoT Hub failed.');
+        vscode.window.showWarningMessage("Config IoT Hub failed.");
       }
-    } else if (configSelection.detail === 'Config User Json Data') {
+    } else if (configSelection.detail === "Config User Json Data") {
       try {
         const res = await this.configUserData();
         if (res) {
           vscode.window.showInformationMessage(
-            'Config user data successfully.');
+            "Config user data successfully."
+          );
         }
       } catch (error) {
-        vscode.window.showWarningMessage('Config user data failed.');
+        vscode.window.showWarningMessage("Config user data failed.");
       }
     } else {
       try {
@@ -186,7 +201,7 @@ export class IoTButtonDevice implements Device {
         // the action
       }
 
-      vscode.window.showInformationMessage('Shutdown IoT button completed.');
+      vscode.window.showInformationMessage("Shutdown IoT button completed.");
       return true;
     }
 
@@ -195,13 +210,17 @@ export class IoTButtonDevice implements Device {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async setConfig(uri: string, data: {}): Promise<any> {
-    const option =
-        { uri, method: 'POST', timeout: constants.timeout, form: data };
+    const option = {
+      uri,
+      method: "POST",
+      timeout: constants.timeout,
+      form: data
+    };
 
     const res = await request(option);
 
     if (!res) {
-      throw new Error('Empty response.');
+      throw new Error("Empty response.");
     }
 
     return res;
@@ -214,7 +233,7 @@ export class IoTButtonDevice implements Device {
       ignoreFocusOut: true,
       validateInput: (ssid: string) => {
         if (!ssid) {
-          return 'WiFi SSID cannot be empty.';
+          return "WiFi SSID cannot be empty.";
         } else {
           return;
         }
@@ -225,8 +244,11 @@ export class IoTButtonDevice implements Device {
       return false;
     }
 
-    const password = await vscode.window.showInputBox(
-      { prompt: `WiFi Password`, password: true, ignoreFocusOut: true });
+    const password = await vscode.window.showInputBox({
+      prompt: `WiFi Password`,
+      password: true,
+      ignoreFocusOut: true
+    });
 
     if (!password) {
       return false;
@@ -241,20 +263,23 @@ export class IoTButtonDevice implements Device {
   }
 
   async configHub(): Promise<boolean> {
-    let deviceConnectionString =
-        ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
+    let deviceConnectionString = ConfigHandler.get<string>(
+      ConfigKey.iotHubDeviceConnectionString
+    );
 
-    let hostName = '';
-    let deviceId = '';
+    let hostName = "";
+    let deviceId = "";
     if (deviceConnectionString) {
-      const hostnameMatches =
-          deviceConnectionString.match(/HostName=(.*?)(;|$)/);
+      const hostnameMatches = deviceConnectionString.match(
+        /HostName=(.*?)(;|$)/
+      );
       if (hostnameMatches) {
         hostName = hostnameMatches[0];
       }
 
-      const deviceIDMatches =
-          deviceConnectionString.match(/DeviceId=(.*?)(;|$)/);
+      const deviceIDMatches = deviceConnectionString.match(
+        /DeviceId=(.*?)(;|$)/
+      );
       if (deviceIDMatches) {
         deviceId = deviceIDMatches[0];
       }
@@ -264,43 +289,47 @@ export class IoTButtonDevice implements Device {
     if (deviceId && hostName) {
       deviceConnectionStringSelection = [
         {
-          label: 'Select IoT Hub Device Connection String',
-          description: '',
+          label: "Select IoT Hub Device Connection String",
+          description: "",
           detail: `Device Information: ${hostName} ${deviceId}`
         },
         {
-          label: 'Input IoT Hub Device Connection String',
-          description: '',
-          detail: 'Input another...'
+          label: "Input IoT Hub Device Connection String",
+          description: "",
+          detail: "Input another..."
         }
       ];
     } else {
-      deviceConnectionStringSelection = [{
-        label: 'Input IoT Hub Device Connection String',
-        description: '',
-        detail: 'Input another...'
-      }];
+      deviceConnectionStringSelection = [
+        {
+          label: "Input IoT Hub Device Connection String",
+          description: "",
+          detail: "Input another..."
+        }
+      ];
     }
 
-    const selection =
-        await vscode.window.showQuickPick(deviceConnectionStringSelection, {
-          ignoreFocusOut: true,
-          placeHolder: 'Choose IoT Hub Device Connection String'
-        });
+    const selection = await vscode.window.showQuickPick(
+      deviceConnectionStringSelection,
+      {
+        ignoreFocusOut: true,
+        placeHolder: "Choose IoT Hub Device Connection String"
+      }
+    );
 
     if (!selection) {
       return false;
     }
 
-    if (selection.detail === 'Input another...') {
+    if (selection.detail === "Input another...") {
       const option: vscode.InputBoxOptions = {
         value:
-            'HostName=<Host Name>;DeviceId=<Device Name>;SharedAccessKey=<Device Key>',
+          "HostName=<Host Name>;DeviceId=<Device Name>;SharedAccessKey=<Device Key>",
         prompt: `Please input device connection string here.`,
         ignoreFocusOut: true,
         validateInput: (connectionString: string) => {
           if (!connectionString) {
-            return 'Connection string cannot be empty.';
+            return "Connection string cannot be empty.";
           } else {
             return;
           }
@@ -312,11 +341,14 @@ export class IoTButtonDevice implements Device {
         return false;
       }
 
-      if ((deviceConnectionString.indexOf('HostName') === -1) ||
-          (deviceConnectionString.indexOf('DeviceId') === -1) ||
-          (deviceConnectionString.indexOf('SharedAccessKey') === -1)) {
+      if (
+        deviceConnectionString.indexOf("HostName") === -1 ||
+        deviceConnectionString.indexOf("DeviceId") === -1 ||
+        deviceConnectionString.indexOf("SharedAccessKey") === -1
+      ) {
         throw new Error(
-          'The format of the IoT Hub Device connection string is invalid. Please provide a valid Device connection string.');
+          "The format of the IoT Hub Device connection string is invalid. Please provide a valid Device connection string."
+        );
       }
     }
 
@@ -327,13 +359,20 @@ export class IoTButtonDevice implements Device {
     console.log(deviceConnectionString);
 
     const iothubMatches = deviceConnectionString.match(/HostName=(.*?)(;|$)/);
-    const iotdevicenameMatches =
-        deviceConnectionString.match(/DeviceId=(.*?)(;|$)/);
-    const iotdevicesecretMatches =
-        deviceConnectionString.match(/SharedAccessKey=(.*?)(;|$)/);
-    if (!iothubMatches || !iothubMatches[1] || !iotdevicenameMatches ||
-        !iotdevicenameMatches[1] || !iotdevicesecretMatches ||
-        !iotdevicesecretMatches[1]) {
+    const iotdevicenameMatches = deviceConnectionString.match(
+      /DeviceId=(.*?)(;|$)/
+    );
+    const iotdevicesecretMatches = deviceConnectionString.match(
+      /SharedAccessKey=(.*?)(;|$)/
+    );
+    if (
+      !iothubMatches ||
+      !iothubMatches[1] ||
+      !iotdevicenameMatches ||
+      !iotdevicenameMatches[1] ||
+      !iotdevicesecretMatches ||
+      !iotdevicesecretMatches[1]
+    ) {
       return false;
     }
 
@@ -354,20 +393,22 @@ export class IoTButtonDevice implements Device {
     const deviceFolderPath = this.deviceFolder;
 
     if (!fs.existsSync(deviceFolderPath)) {
-      throw new Error('Unable to find the device folder inside the project.');
+      throw new Error("Unable to find the device folder inside the project.");
     }
 
-    const userjsonFilePath =
-        path.join(deviceFolderPath, constants.userjsonFilename);
+    const userjsonFilePath = path.join(
+      deviceFolderPath,
+      constants.userjsonFilename
+    );
 
     if (!fs.existsSync(userjsonFilePath)) {
-      throw new Error('The user json file does not exist.');
+      throw new Error("The user json file does not exist.");
     }
 
     let userjson = {};
 
     try {
-      userjson = JSON.parse(fs.readFileSync(userjsonFilePath, 'utf8'));
+      userjson = JSON.parse(fs.readFileSync(userjsonFilePath, "utf8"));
     } catch (error) {
       userjson = {};
     }
@@ -383,12 +424,12 @@ export class IoTButtonDevice implements Device {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async configNtp(): Promise<any> {
     const timeserver = await vscode.window.showInputBox({
-      value: 'pool.ntp.org',
+      value: "pool.ntp.org",
       prompt: `Time Server`,
       ignoreFocusOut: true,
       validateInput: (timeserver: string) => {
         if (!timeserver) {
-          return 'Time Server cannot be empty.';
+          return "Time Server cannot be empty.";
         } else {
           return;
         }
@@ -409,7 +450,7 @@ export class IoTButtonDevice implements Device {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async configSaveAndShutdown(): Promise<any> {
-    const data = { action: 'shutdown' };
+    const data = { action: "shutdown" };
     const uri = constants.accessEndpoint;
 
     const res = await this.setConfig(uri, data);
@@ -417,8 +458,12 @@ export class IoTButtonDevice implements Device {
     return res;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async configDeviceEnvironment(_deviceRootPath: string, _scaffoldType: ScaffoldType): Promise<void> {
+  async configDeviceEnvironment(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _deviceRootPath: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _scaffoldType: ScaffoldType
+  ): Promise<void> {
     // Do nothing.
   }
 }

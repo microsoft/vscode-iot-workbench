@@ -2,12 +2,12 @@
 // Licensed under the MIT License.
 
 export enum ComponentType {
-  Device = 'Device',
-  IoTHub = 'IoTHub',
-  AzureFunctions = 'AzureFunctions',
-  IoTHubDevice = 'IoTHubDevice',
-  StreamAnalyticsJob = 'StreamAnalyticsJob',
-  CosmosDB = 'CosmosDB'
+  Device = "Device",
+  IoTHub = "IoTHub",
+  AzureFunctions = "AzureFunctions",
+  IoTHubDevice = "IoTHubDevice",
+  StreamAnalyticsJob = "StreamAnalyticsJob",
+  CosmosDB = "CosmosDB"
 }
 
 export interface Component {

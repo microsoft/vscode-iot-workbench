@@ -11,7 +11,8 @@ export class UIConstants {
   static readonly SELECT_REPOSITORY_LABEL = "Select model repository";
   static readonly SELECT_MODELS_LABEL = "Select device models";
   static readonly SELECT_CAPABILITY_MODEL_LABEL = "Select a capability model";
-  static readonly INPUT_REPOSITORY_CONNECTION_STRING_LABEL = "Input company repository connection string";
+  static readonly INPUT_REPOSITORY_CONNECTION_STRING_LABEL =
+    "Input company repository connection string";
   static readonly SAVE_FILE_CHANGE_LABEL = "Save file change";
   static readonly MODEL_REPOSITORY_TITLE = "IoT Plug and Play Model Repository";
   static readonly MODEL_FILE_GLOB = "**/*.json";
@@ -20,6 +21,7 @@ export class UIConstants {
     "SharedAccessKeyName=<Shared AccessKey Name>;SharedAccessKey=<access Key>";
   static readonly MODELS_NOT_FOUND_MSG =
     "No device model is found in current workspace. Please open the folder that contains models and try again";
-  static readonly ASK_TO_SAVE_MSG = "The following files contain unsaved changes, do you want to save them?";
+  static readonly ASK_TO_SAVE_MSG =
+    "The following files contain unsaved changes, do you want to save them?";
   static readonly ASK_TO_OVERWRITE_MSG = "do you want to overwrite it?";
 }

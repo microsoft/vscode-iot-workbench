@@ -1,7 +1,7 @@
 export class InternalError extends Error {
-  constructor (errorMessage: string) {
+  constructor(errorMessage: string) {
     super(`Internal Error: ${errorMessage}.`);
-    this.name = 'InternalError';
+    this.name = "InternalError";
   }
 }
 /*
@@ -10,15 +10,15 @@ export class InternalError extends Error {
 */
 
 export class UserError extends Error {
-  constructor (operation: string, suggestedOperation?: string) {
+  constructor(operation: string, suggestedOperation?: string) {
     super(`Failed to ${operation}. ${suggestedOperation}`);
-    this.name = 'UserError';
+    this.name = "UserError";
   }
 }
 
 export class OperationCanceledError extends UserError {
-  constructor (message: string) {
+  constructor(message: string) {
     super(`Operation cancelled: ${message}`);
-    this.name = 'CancelOperationError';
+    this.name = "CancelOperationError";
   }
 }
