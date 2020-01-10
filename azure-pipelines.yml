@@ -40,6 +40,12 @@ steps:
     displayName: 'check gts error'
     failOnStderr: True
 
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@2
+    displayName: 'Run CredScan'
+    inputs:
+      debugMode: false
+    condition: eq(variables['Agent.OS'], 'Windows_NT')
+
   - task: Npm@1
     displayName: 'Compile sources'
     inputs:
