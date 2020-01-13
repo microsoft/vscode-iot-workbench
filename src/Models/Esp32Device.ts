@@ -9,8 +9,8 @@ import * as path from "path";
 import * as vscode from "vscode";
 
 import { BoardProvider } from "../boardProvider";
-import { ConfigNotFoundError } from "../common/Error/ConfigNotFoundError";
-import { TypeNotSupportedError } from "../common/Error/TypeNotSupportedError";
+import { ConfigNotFoundError } from "../common/Error/SystemErrors/ConfigNotFoundError";
+import { TypeNotSupportedError } from "../common/Error/SystemErrors/TypeNotSupportedError";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
 import { ConfigHandler } from "../configHandler";
 import { ConfigKey, OSPlatform } from "../constants";

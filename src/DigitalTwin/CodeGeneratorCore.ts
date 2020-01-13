@@ -29,6 +29,7 @@ import { CodeGenUtility } from "./DigitalTwinCodeGen/CodeGenUtility";
 import { FileUtility } from "../FileUtility";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
 import { Utility } from "./pnp/src/common/utility";
+import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
 
 interface CodeGeneratorDownloadLocation {
   win32Md5: string;
@@ -130,7 +131,7 @@ export class CodeGeneratorCore {
 
     // Download dependent interface of capability model
     if (!(await DigitalTwinUtility.downloadDependentInterface(rootPath, capabilityModelFilePath))) {
-      throw new Error(`Failed to download dependent interface.`);
+      throw new OperationFailedError(`Failed to download dependent interface.`);
     }
 
     const codeGenExecutionInfo: CodeGenExecutionItem = {

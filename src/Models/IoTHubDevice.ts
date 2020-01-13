@@ -8,8 +8,8 @@ import * as vscode from "vscode";
 import { ConfigHandler } from "../configHandler";
 import { ConfigKey, ScaffoldType } from "../constants";
 
-import { DependentExtensionNotFoundError } from "../common/Error/Error";
-import { ConfigNotFoundError } from "../common/Error/ConfigNotFoundError";
+import { DependentExtensionNotFoundError } from "../common/Error/OperationFailedErrors/DependentExtensionNotFoundError";
+import { ConfigNotFoundError } from "../common/Error/SystemErrors/ConfigNotFoundError";
 
 import { getExtension } from "./Apis";
 import { ComponentInfo, DependencyConfig } from "./AzureComponentConfig";

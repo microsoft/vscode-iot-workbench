@@ -4,9 +4,9 @@ import { Guid } from "guid-typescript";
 import * as path from "path";
 import * as vscode from "vscode";
 
-import { ResourceNotFoundError } from "../common/Error/Error";
-import { TypeNotSupportedError } from "../common/Error/TypeNotSupportedError";
-import { OperationFailedError } from "../common/Error/OperationFailedError";
+import { ResourceNotFoundError } from "../common/Error/OperationFailedErrors/ResourceNotFoundError";
+import { TypeNotSupportedError } from "../common/Error/SystemErrors/TypeNotSupportedError";
+import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
 import { AzureComponentsStorage, FileNames, ScaffoldType } from "../constants";
 import { channelPrintJsonObject, channelShowAndAppendLine } from "../utils";
 

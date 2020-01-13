@@ -6,10 +6,11 @@ import * as path from "path";
 import * as vscode from "vscode";
 
 import { IoTCubeCommands } from "../common/Commands";
-import { AugumentEmptyOrNullError, ResourceNotFoundError } from "../common/Error/Error";
-import { ConfigNotFoundError } from "../common/Error/ConfigNotFoundError";
-import { TypeNotSupportedError } from "../common/Error/TypeNotSupportedError";
-import { OperationFailedError } from "../common/Error/OperationFailedError";
+import { ResourceNotFoundError } from "../common/Error/OperationFailedErrors/ResourceNotFoundError";
+import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
+import { ConfigNotFoundError } from "../common/Error/SystemErrors/ConfigNotFoundError";
+import { TypeNotSupportedError } from "../common/Error/SystemErrors/TypeNotSupportedError";
+import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
 import { ConfigHandler } from "../configHandler";
 import { ConfigKey, EventNames, FileNames, ScaffoldType } from "../constants";
 import { FileUtility } from "../FileUtility";
@@ -53,7 +54,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     super(context, channel, telemetryContext);
     this.projectHostType = ProjectHostType.Workspace;
     if (!rootFolderPath) {
-      throw new AugumentEmptyOrNullError("root folder path");
+      throw new ArgumentEmptyOrNullError("root folder path");
     }
     this.projectRootPath = rootFolderPath;
     this.telemetryContext.properties.projectHostType = this.projectHostType;
@@ -140,7 +141,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
 
     // Update workspace config to workspace config file
     if (!this.workspaceConfigFilePath) {
-      throw new AugumentEmptyOrNullError("workspace configuration file path", "Please initialize the project first.");
+      throw new ArgumentEmptyOrNullError("workspace configuration file path", "Please initialize the project first.");
     }
     await FileUtility.writeJsonFile(createTimeScaffoldType, this.workspaceConfigFilePath, workspace);
 

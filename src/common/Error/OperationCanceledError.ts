@@ -1,9 +1,13 @@
 /**
- * Error class used when user cancel operation.
+ * Used when user cancel operation.
  */
 export class OperationCanceledError extends Error {
-  constructor(message: string) {
-    super(`Operation cancelled: ${message}`);
+  /**
+   * Construct operation canceled error.
+   * @param errorMessage failure reason
+   */
+  constructor(errorMessage: string) {
+    super(`Operation cancelled: ${errorMessage}`);
     this.name = "CancelOperationError";
   }
 }

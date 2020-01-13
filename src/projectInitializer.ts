@@ -13,9 +13,9 @@ import { IoTWorkbenchSettings } from "./IoTSettings";
 import { FileUtility } from "./FileUtility";
 import { ProjectTemplate, ProjectTemplateType, TemplatesType } from "./Models/Interfaces/ProjectTemplate";
 import { RemoteExtension } from "./Models/RemoteExtension";
-import { ResourceNotFoundError } from "./common/Error/Error";
+import { ResourceNotFoundError } from "./common/Error/OperationFailedErrors/ResourceNotFoundError";
 import { OperationCanceledError } from "./common/Error/OperationCanceledError";
-import { TypeNotSupportedError } from "./common/Error/TypeNotSupportedError";
+import { TypeNotSupportedError } from "./common/Error/SystemErrors/TypeNotSupportedError";
 
 const impor = require("impor")(__dirname);
 const ioTWorkspaceProjectModule = impor(

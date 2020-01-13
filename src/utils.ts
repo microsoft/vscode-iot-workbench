@@ -11,9 +11,11 @@ import * as sdk from "vscode-iot-device-cube-sdk";
 import * as WinReg from "winreg";
 
 import { IoTCubeCommands, RemoteContainersCommands, VscodeCommands, WorkbenchCommands } from "./common/Commands";
-import { AugumentEmptyOrNullError, InternalError, ResourceNotFoundError } from "./common/Error/Error";
+import { ResourceNotFoundError } from "./common/Error/OperationFailedErrors/ResourceNotFoundError";
+import { ArgumentEmptyOrNullError } from "./common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
 import { OperationCanceledError } from "./common/Error/OperationCanceledError";
-import { OperationFailedError } from "./common/Error/OperationFailedError";
+import { OperationFailedError } from "./common/Error/OperationFailedErrors/OperationFailedError";
+import { SystemError } from "./common/Error/SystemErrors/SystemError";
 import {
   AzureFunctionsLanguage,
   ConfigKey,
@@ -530,7 +532,7 @@ export async function updateProjectHostTypeConfig(
   projectHostType: ProjectHostType
 ): Promise<void> {
   if (!iotWorkbenchProjectFilePath) {
-    throw new AugumentEmptyOrNullError("iot workbench project file path");
+    throw new ArgumentEmptyOrNullError("iot workbench project file path");
   }
 
   // Get original configs from config file
@@ -847,7 +849,7 @@ export async function getTemplateJson(
   const templateJsonFileString = (await FileUtility.readFile(scaffoldType, templateJsonFilePath, "utf8")) as string;
   const templateJson = JSON.parse(templateJsonFileString);
   if (!templateJson) {
-    throw new InternalError("Fail to load template list.");
+    throw new SystemError("Fail to load template list.");
   }
 
   return templateJson;
@@ -864,7 +866,7 @@ export async function getEnvTemplateFilesAndAskOverwrite(
   templateName: string
 ): Promise<TemplateFileInfo[]> {
   if (!projectPath) {
-    throw new AugumentEmptyOrNullError("project path", "Please open the folder and initialize project again.");
+    throw new ArgumentEmptyOrNullError("project path", "Please open the folder and initialize project again.");
   }
 
   const templateJson = await getTemplateJson(context, scaffoldType);

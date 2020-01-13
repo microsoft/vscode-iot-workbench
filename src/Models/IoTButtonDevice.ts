@@ -7,9 +7,10 @@ import * as path from "path";
 import * as request from "request-promise";
 import * as vscode from "vscode";
 
-import { AugumentInvalidError, ResourceNotFoundError } from "../common/Error/Error";
+import { ResourceNotFoundError } from "../common/Error/OperationFailedErrors/ResourceNotFoundError";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
-import { OperationFailedError } from "../common/Error/OperationFailedError";
+import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
+import { ArgumentInvalidError } from "../common/Error/OperationFailedErrors/ArgumentInvalidError";
 import { ConfigHandler } from "../configHandler";
 import { ConfigKey, ScaffoldType } from "../constants";
 import { FileUtility } from "../FileUtility";
@@ -309,7 +310,7 @@ export class IoTButtonDevice implements Device {
         deviceConnectionString.indexOf("DeviceId") === -1 ||
         deviceConnectionString.indexOf("SharedAccessKey") === -1
       ) {
-        throw new AugumentInvalidError(
+        throw new ArgumentInvalidError(
           "The format of IoT Hub Device connection string",
           "Please provide a valid Device connection string."
         );

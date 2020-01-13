@@ -6,10 +6,11 @@ import * as path from "path";
 import * as vscode from "vscode";
 
 import { RemoteContainersCommands, VscodeCommands } from "../common/Commands";
-import { AugumentEmptyOrNullError, PrerequisiteNotMetError, ResourceNotFoundError } from "../common/Error/Error";
-import { TypeNotSupportedError } from "../common/Error/TypeNotSupportedError";
+import { ResourceNotFoundError } from "../common/Error/OperationFailedErrors/ResourceNotFoundError";
+import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
+import { TypeNotSupportedError } from "../common/Error/SystemErrors/TypeNotSupportedError";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
-import { OperationFailedError } from "../common/Error/OperationFailedError";
+import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
 import { ConfigKey, EventNames, FileNames, ScaffoldType } from "../constants";
 import { FileUtility } from "../FileUtility";
 import { TelemetryContext, TelemetryWorker } from "../telemetry";
@@ -34,7 +35,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     super(context, channel, telemetryContext);
     this.projectHostType = ProjectHostType.Container;
     if (!rootFolderPath) {
-      throw new AugumentEmptyOrNullError("root folder path");
+      throw new ArgumentEmptyOrNullError("root folder path");
     }
     this.projectRootPath = rootFolderPath;
     this.iotWorkbenchProjectFilePath = path.join(this.projectRootPath, FileNames.iotWorkbenchProjectFileName);
@@ -91,7 +92,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
     // Update workspace config to workspace config file
     if (!this.iotWorkbenchProjectFilePath) {
-      throw new AugumentEmptyOrNullError("iot workbench project file", "Please initialize the project first.");
+      throw new ArgumentEmptyOrNullError("iot workbench project file", "Please initialize the project first.");
     }
     await FileUtility.writeJsonFile(createTimeScaffoldType, this.iotWorkbenchProjectFilePath, projectConfig);
 
@@ -99,7 +100,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     this.componentList.forEach(async item => {
       const res = await item.checkPrerequisites();
       if (!res) {
-        throw new PrerequisiteNotMetError("create component");
+        throw new OperationFailedError("create component");
       }
     });
 

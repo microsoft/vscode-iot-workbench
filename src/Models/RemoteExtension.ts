@@ -3,9 +3,9 @@ import { DependentExtensions } from "../constants";
 import { DialogResponses } from "../DialogResponses";
 import { WorkbenchExtension } from "../WorkbenchExtension";
 import { VscodeCommands } from "../common/Commands";
-import { RemoteEnvNotSupportedError } from "../common/Error/Error";
+import { RemoteEnvNotSupportedError } from "../common/Error/OperationFailedErrors/RemoteEnvNotSupportedError";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
-import { OperationFailedError } from "../common/Error/OperationFailedError";
+import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
 
 export class RemoteExtension {
   static isRemote(context: vscode.ExtensionContext): boolean {
@@ -53,8 +53,7 @@ export class RemoteExtension {
    */
   static ensureLocalBeforeRunCommand(context: vscode.ExtensionContext): void {
     if (RemoteExtension.isRemote(context)) {
-      const message = "Open a new window and run this command again.";
-      throw new RemoteEnvNotSupportedError(message);
+      throw new RemoteEnvNotSupportedError();
     }
   }
 }

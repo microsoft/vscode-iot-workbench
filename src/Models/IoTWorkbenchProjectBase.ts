@@ -4,9 +4,9 @@
 import * as path from "path";
 import * as vscode from "vscode";
 
-import { ResourceNotFoundError } from "../common/Error/Error";
+import { ResourceNotFoundError } from "../common/Error/OperationFailedErrors/ResourceNotFoundError";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
-import { OperationFailedError } from "../common/Error/OperationFailedError";
+import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
 import { ConfigKey, EventNames, FileNames, ScaffoldType } from "../constants";
 import { FileUtility } from "../FileUtility";
 import { TelemetryContext, TelemetryWorker } from "../telemetry";

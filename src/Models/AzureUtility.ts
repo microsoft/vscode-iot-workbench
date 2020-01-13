@@ -16,7 +16,7 @@ import { getExtension } from "./Apis";
 import { ExtensionName } from "./Interfaces/Api";
 import { TelemetryWorker } from "../telemetry";
 import { EventNames } from "../constants";
-import { DependentExtensionNotFoundError } from "../common/Error/Error";
+import { DependentExtensionNotFoundError } from "../common/Error/OperationFailedErrors/DependentExtensionNotFoundError";
 
 export interface ARMParameters {
   [key: string]: { value: string | number | boolean | null };

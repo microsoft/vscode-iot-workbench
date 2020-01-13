@@ -13,7 +13,7 @@ import { RemoteExtension } from "./Models/RemoteExtension";
 import { IoTWorkbenchProjectBase, OpenScenario } from "./Models/IoTWorkbenchProjectBase";
 import { ProjectHostType } from "./Models/Interfaces/ProjectHostType";
 import { configExternalCMakeProjectToIoTContainerProject } from "./utils";
-import { TypeNotSupportedError } from "./common/Error/TypeNotSupportedError";
+import { TypeNotSupportedError } from "./common/Error/SystemErrors/TypeNotSupportedError";
 import { OperationCanceledError } from "./common/Error/OperationCanceledError";
 
 const impor = require("impor")(__dirname);

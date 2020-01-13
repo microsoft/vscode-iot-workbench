@@ -5,8 +5,8 @@ import { Guid } from "guid-typescript";
 import * as path from "path";
 import * as vscode from "vscode";
 
-import { DependentExtensionNotFoundError } from "../common/Error/Error";
-import { OperationFailedError } from "../common/Error/OperationFailedError";
+import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
+import { DependentExtensionNotFoundError } from "../common/Error/OperationFailedErrors/DependentExtensionNotFoundError";
 import { ConfigHandler } from "../configHandler";
 import { AzureComponentsStorage, ConfigKey, ScaffoldType } from "../constants";
 import { channelPrintJsonObject, channelShowAndAppendLine } from "../utils";

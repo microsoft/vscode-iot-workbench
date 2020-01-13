@@ -1,6 +1,6 @@
 import * as path from "path";
 
-import { AugumentInvalidError } from "../common/Error/Error";
+import { ArgumentInvalidError } from "../common/Error/OperationFailedErrors/ArgumentInvalidError";
 import { AzureComponentsStorage, ScaffoldType } from "../constants";
 import { FileUtility } from "../FileUtility";
 
@@ -73,7 +73,7 @@ export class AzureConfigFileHandler {
       const azureConfigs = JSON.parse(azureConfigContent as string) as AzureConfigs;
       return azureConfigs;
     } catch {
-      throw new AugumentInvalidError(`azure component configuration file ${configFilePath}`);
+      throw new ArgumentInvalidError(`azure component configuration file ${configFilePath}`);
     }
   }
 
@@ -133,7 +133,7 @@ export class AzureConfigFileHandler {
     const azureConfigs = await AzureConfigFileHandler.loadAzureConfigs(type, this.configFilePath);
     const component = azureConfigs.componentConfigs[index];
     if (!component) {
-      throw new AugumentInvalidError(`index of component list ${index}.`);
+      throw new ArgumentInvalidError(`index of component list ${index}.`);
     }
     component.componentInfo = componentInfo;
     await FileUtility.writeJsonFile(type, this.configFilePath, azureConfigs);

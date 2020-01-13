@@ -5,7 +5,7 @@ import * as vscode from "vscode";
 
 import { AzureAccount } from "../azure-account.api";
 import { AzureAccountCommands } from "../common/Commands";
-import { DependentExtensionNotFoundError } from "../common/Error/Error";
+import { DependentExtensionNotFoundError } from "../common/Error/OperationFailedErrors/DependentExtensionNotFoundError";
 
 import { ExtensionName } from "./Interfaces/Api";
 

@@ -14,11 +14,11 @@ import * as WinReg from "winreg";
 
 import { BoardProvider } from "../boardProvider";
 import { ArduinoCommands } from "../common/Commands";
-import { BoardNotFoundError } from "../common/Error/BoardNotFoundError";
-import { TypeNotSupportedError } from "../common/Error/TypeNotSupportedError";
-import { ResourceNotFoundError } from "../common/Error/Error";
+import { BoardNotFoundError } from "../common/Error/SystemErrors/BoardNotFoundError";
+import { TypeNotSupportedError } from "../common/Error/SystemErrors/TypeNotSupportedError";
+import { ResourceNotFoundError } from "../common/Error/OperationFailedErrors/ResourceNotFoundError";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
-import { OperationFailedError } from "../common/Error/OperationFailedError";
+import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
 import { ConfigHandler } from "../configHandler";
 import { ConfigKey, FileNames, OSPlatform, ScaffoldType } from "../constants";
 import { DialogResponses } from "../DialogResponses";

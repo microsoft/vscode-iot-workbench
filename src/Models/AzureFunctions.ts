@@ -35,14 +35,12 @@ import {
 } from "./AzureComponentConfig";
 import { FileUtility } from "../FileUtility";
 import { VscodeCommands, AzureFunctionsCommands } from "../common/Commands";
-import {
-  DependentExtensionNotFoundError,
-  AugumentEmptyOrNullError,
-  ResourceNotFoundError
-} from "../common/Error/Error";
+import { ResourceNotFoundError } from "../common/Error/OperationFailedErrors/ResourceNotFoundError";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
-import { OperationFailedError } from "../common/Error/OperationFailedError";
-import { ConfigNotFoundError } from "../common/Error/ConfigNotFoundError";
+import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
+import { DependentExtensionNotFoundError } from "../common/Error/OperationFailedErrors/DependentExtensionNotFoundError";
+import { ConfigNotFoundError } from "../common/Error/SystemErrors/ConfigNotFoundError";
+import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
 
 const impor = require("impor")(__dirname);
 const azureUtilityModule = impor("./AzureUtility") as typeof import("./AzureUtility");
@@ -67,7 +65,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     }
 
     if (!subscriptionId) {
-      throw new AugumentEmptyOrNullError("subscription ID");
+      throw new ArgumentEmptyOrNullError("subscription ID");
     }
 
     const subscriptions: AzureResourceFilter[] = this.azureAccountExtension.filters;

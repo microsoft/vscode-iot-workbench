@@ -21,7 +21,7 @@ import { ARMTemplate, AzureUtility } from "./AzureUtility";
 import { Component, ComponentType } from "./Interfaces/Component";
 import { Provisionable } from "./Interfaces/Provisionable";
 import { channelShowAndAppendLine, channelPrintJsonObject } from "../utils";
-import { OperationFailedError } from "../common/Error/OperationFailedError";
+import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
 
 export class CosmosDB implements Component, Provisionable {
   dependencies: DependencyConfig[] = [];

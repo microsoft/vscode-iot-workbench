@@ -5,8 +5,10 @@ import { Guid } from "guid-typescript";
 import * as path from "path";
 import * as vscode from "vscode";
 
-import { AugumentEmptyOrNullError, InternalError, ResourceNotFoundError } from "../common/Error/Error";
+import { ResourceNotFoundError } from "../common/Error/OperationFailedErrors/ResourceNotFoundError";
+import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
+import { SystemError } from "../common/Error/SystemErrors/SystemError";
 import { FileNames, OperationType, PlatformType, ScaffoldType, TemplateTag } from "../constants";
 import { DigitalTwinConstants } from "../DigitalTwin/DigitalTwinConstants";
 import { FileUtility } from "../FileUtility";
@@ -93,11 +95,11 @@ export abstract class ContainerDeviceBase implements Device {
     templateFilesInfo: TemplateFileInfo[]
   ): Promise<boolean> {
     if (!templateFilesInfo) {
-      throw new AugumentEmptyOrNullError("template files");
+      throw new ArgumentEmptyOrNullError("template files");
     }
 
     if (!projectPath) {
-      throw new AugumentEmptyOrNullError("project path");
+      throw new ArgumentEmptyOrNullError("project path");
     }
 
     // Cannot use forEach here since it's async
@@ -141,7 +143,7 @@ export abstract class ContainerDeviceBase implements Device {
 
   async configDeviceEnvironment(projectPath: string, scaffoldType: ScaffoldType): Promise<void> {
     if (!projectPath) {
-      throw new AugumentEmptyOrNullError("project path", "Please open the folder and initialize project again.");
+      throw new ArgumentEmptyOrNullError("project path", "Please open the folder and initialize project again.");
     }
 
     // Get template list json object
@@ -154,7 +156,7 @@ export abstract class ContainerDeviceBase implements Device {
     }
     const templateName = containerSelection.label;
     if (!templateName) {
-      throw new InternalError("Cannot get template name from template property");
+      throw new SystemError("Cannot get template name from template property");
     }
 
     const templateFilesInfo = await utils.getEnvTemplateFilesAndAskOverwrite(
@@ -164,7 +166,7 @@ export abstract class ContainerDeviceBase implements Device {
       templateName
     );
     if (templateFilesInfo.length === 0) {
-      throw new InternalError("template files info is empty.");
+      throw new SystemError("template files info is empty.");
     }
 
     // Configure project environment with template files

@@ -6,10 +6,12 @@ import * as path from "path";
 import * as vscode from "vscode";
 
 import { VscodeCommands } from "../common/Commands";
-import { AugumentEmptyOrNullError, ResourceNotFoundError, WorkspaceNotOpenError } from "../common/Error/Error";
+import { ResourceNotFoundError } from "../common/Error/OperationFailedErrors/ResourceNotFoundError";
+import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
+import { WorkspaceNotOpenError } from "../common/Error/OperationFailedErrors/WorkspaceNotOpenError";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
-import { BoardNotFoundError } from "../common/Error/BoardNotFoundError";
-import { ConfigNotFoundError } from "../common/Error/ConfigNotFoundError";
+import { BoardNotFoundError } from "../common/Error/SystemErrors/BoardNotFoundError";
+import { ConfigNotFoundError } from "../common/Error/SystemErrors/ConfigNotFoundError";
 import { ConfigHandler } from "../configHandler";
 import {
   ConfigKey,
@@ -311,7 +313,7 @@ export abstract class ArduinoDeviceBase implements Device {
 
   async configDeviceEnvironment(deviceRootPath: string, scaffoldType: ScaffoldType): Promise<void> {
     if (!deviceRootPath) {
-      throw new AugumentEmptyOrNullError("device root path", "Please open the folder and initialize project again.");
+      throw new ArgumentEmptyOrNullError("device root path", "Please open the folder and initialize project again.");
     }
 
     const templateFilesInfo = await utils.getEnvTemplateFilesAndAskOverwrite(
