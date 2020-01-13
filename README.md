@@ -1,7 +1,7 @@
 # Azure IoT Device Workbench for Visual Studio Code
 
 [![Gitter](https://img.shields.io/badge/chat-on%20gitter-blue.svg)](https://gitter.im/Microsoft/vscode-iot-workbench)
-[![Travis CI](https://travis-ci.org/Microsoft/vscode-iot-workbench.svg?branch=master)](https://travis-ci.org/Microsoft/vscode-iot-workbench)
+[![Build Status](https://dev.azure.com/mseng/VSIoT/_apis/build/status/vscode-iot-workbench-github?branchName=master)](https://dev.azure.com/mseng/VSIoT/_build/latest?definitionId=9768&branchName=master)
 
 ***[Azure IoT Device Workbench extension](https://aka.ms/iot-workbench) is now part of [Azure IoT Tools](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-tools) extension pack. We highly recommend installing [Azure IoT Tools](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-tools) extension pack, which makes it easy to discover and interact with Azure IoT Hub that power your IoT Edge and device applications.** This extension pack can help you:*
 
