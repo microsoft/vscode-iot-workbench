@@ -46,6 +46,12 @@ steps:
       debugMode: false
     condition: eq(variables['Agent.OS'], 'Windows_NT')
 
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@1
+    displayName: 'Run PoliCheck'
+    inputs:
+      targetType: F
+    condition: eq(variables['Agent.OS'], 'Windows_NT')
+
   - task: Npm@1
     displayName: 'Compile sources'
     inputs:
