@@ -25,11 +25,9 @@
     "max-len": ["error", {"code": 120, "ignorePattern": "^import\\s.+\\sfrom\\s.+;$", "ignoreStrings": true}],
     "no-unused-vars": "off",
     "@typescript-eslint/no-var-requires": "off",
-    "no-dupe-class-members": "off",
     "@typescript-eslint/no-empty-function": ["error", { "allow": ["constructors"] }],
     "object-curly-spacing": ["error", "always"],
-    "@typescript-eslint/explicit-function-return-type": "off",
-    "@typescript-eslint/no-use-before-define": "off"
+    "@typescript-eslint/explicit-function-return-type": "off"
   },
   "overrides": [
     {

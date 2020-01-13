@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-"use strict";
 import { FileNames } from "./constants";
 import { Board } from "./Models/Interfaces/Board";
 import * as path from "path";

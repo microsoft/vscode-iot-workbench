@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-"use strict";
-
 import * as fs from "fs-plus";
 import * as path from "path";
 import * as vscode from "vscode";

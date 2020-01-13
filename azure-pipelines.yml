@@ -37,7 +37,7 @@ steps:
       verbose: false
 
   - script: npm run check
-    displayName: 'Run check eslint'
+    displayName: 'Run eslint check'
     failOnStderr: True
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@2

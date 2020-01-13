@@ -1,5 +1,3 @@
-"use strict";
-
 import * as vscode from "vscode";
 import { DependentExtensions } from "../constants";
 import { DialogResponses } from "../DialogResponses";

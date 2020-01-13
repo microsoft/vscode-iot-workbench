@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-"use strict";
-
 import * as utils from "../../utils";
 import * as vscode from "vscode";
 import { CodeGenExecutionItem } from "./Interfaces/CodeGenerator";

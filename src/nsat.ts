@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-"use strict";
-
 import { commands, ExtensionContext, Uri, window } from "vscode";
 import { EventNames } from "./constants";
 import { TelemetryWorker } from "./telemetry";

@@ -1,8 +1,19 @@
-"use strict";
-
 const path = require("path");
 const cp = require("child_process");
 const fs = require("fs-plus");
+
+function getDependeciesFromNpm(mod) {
+  let list = [];
+  const deps = mod.dependencies;
+  if (!deps) {
+    return list;
+  }
+  for (const m of Object.keys(deps)) {
+    list.push(m);
+    list = list.concat(getDependeciesFromNpm(deps[m]));
+  }
+  return list;
+}
 
 function getEntry() {
   const entry = {};
@@ -25,19 +36,6 @@ function getEntry() {
   }
 
   return entry;
-}
-
-function getDependeciesFromNpm(mod) {
-  let list = [];
-  const deps = mod.dependencies;
-  if (!deps) {
-    return list;
-  }
-  for (const m of Object.keys(deps)) {
-    list.push(m);
-    list = list.concat(getDependeciesFromNpm(deps[m]));
-  }
-  return list;
 }
 
 /**@type {import('webpack').Configuration}*/
