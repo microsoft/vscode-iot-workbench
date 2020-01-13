@@ -6,9 +6,7 @@ export class DigitalTwinConstants {
   static readonly codeGenCli = "IoT Plug and Play CodeGen CLI";
   static readonly codeGenCliFolder = "iotpnp-codegen";
   static readonly codeGenCliApp = "dtcodegen";
-  static readonly codegenProjectNameRegex = new RegExp(
-    "^[a-zA-Z_][-a-zA-Z0-9_]*$"
-  );
+  static readonly codegenProjectNameRegex = new RegExp("^[a-zA-Z_][-a-zA-Z0-9_]*$");
   static readonly codegenProjectNameRegexDescription =
     "alphanumeric, underscore and dash character, and cannot start with number and dash character";
   static readonly codeGenProjectTypeSeperator = "-";

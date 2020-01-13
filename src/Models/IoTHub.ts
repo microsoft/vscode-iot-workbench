@@ -67,9 +67,7 @@ export class IoTHub implements Component, Provisionable {
 
     try {
       azureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, "utf8"));
-      const iotHubConfig = azureConfigs.componentConfigs.find(
-        config => config.type === this.componentType
-      );
+      const iotHubConfig = azureConfigs.componentConfigs.find(config => config.type === this.componentType);
       if (iotHubConfig) {
         this.componentId = iotHubConfig.id;
         this.dependencies = iotHubConfig.dependencies;
@@ -98,10 +96,10 @@ export class IoTHub implements Component, Provisionable {
         detail: "create"
       }
     ];
-    const selection = await vscode.window.showQuickPick(
-      provisionIothubSelection,
-      { ignoreFocusOut: true, placeHolder: "Provision IoT Hub" }
-    );
+    const selection = await vscode.window.showQuickPick(provisionIothubSelection, {
+      ignoreFocusOut: true,
+      placeHolder: "Provision IoT Hub"
+    });
 
     if (!selection) {
       return false;
@@ -109,9 +107,7 @@ export class IoTHub implements Component, Provisionable {
 
     const toolkit = getExtension(ExtensionName.Toolkit);
     if (!toolkit) {
-      throw new Error(
-        "Azure IoT Hub Toolkit is not installed. Please install it from Marketplace."
-      );
+      throw new Error("Azure IoT Hub Toolkit is not installed. Please install it from Marketplace.");
     }
 
     let iothub = null;
@@ -120,21 +116,14 @@ export class IoTHub implements Component, Provisionable {
 
     switch (selection.detail) {
       case "select":
-        iothub = await toolkit.azureIoTExplorer.selectIoTHub(
-          this.channel,
-          subscriptionId
-        );
+        iothub = await toolkit.azureIoTExplorer.selectIoTHub(this.channel, subscriptionId);
         break;
       case "create":
         if (this.channel) {
           channelShowAndAppendLine(this.channel, "Creating new IoT Hub...");
         }
 
-        iothub = await toolkit.azureIoTExplorer.createIoTHub(
-          this.channel,
-          subscriptionId,
-          resourceGroup
-        );
+        iothub = await toolkit.azureIoTExplorer.createIoTHub(this.channel, subscriptionId, resourceGroup);
         break;
       default:
         break;
@@ -145,34 +134,20 @@ export class IoTHub implements Component, Provisionable {
         channelPrintJsonObject(this.channel, iothub);
       }
 
-      const sharedAccessKeyMatches = iothub.iotHubConnectionString.match(
-        /SharedAccessKey=([^;]*)/
-      );
+      const sharedAccessKeyMatches = iothub.iotHubConnectionString.match(/SharedAccessKey=([^;]*)/);
       if (!sharedAccessKeyMatches || sharedAccessKeyMatches.length < 2) {
-        throw new Error(
-          "Cannot parse shared access key from IoT Hub connection string. Please retry Azure Provision."
-        );
+        throw new Error("Cannot parse shared access key from IoT Hub connection string. Please retry Azure Provision.");
       }
 
       const sharedAccessKey = sharedAccessKeyMatches[1];
 
       const eventHubConnectionString = `Endpoint=${iothub.properties.eventHubEndpoints.events.endpoint};\
       SharedAccessKeyName=iothubowner;SharedAccessKey=${sharedAccessKey}`;
-      const eventHubConnectionPath =
-        iothub.properties.eventHubEndpoints.events.path;
+      const eventHubConnectionPath = iothub.properties.eventHubEndpoints.events.path;
 
-      await ConfigHandler.update(
-        ConfigKey.iotHubConnectionString,
-        iothub.iotHubConnectionString
-      );
-      await ConfigHandler.update(
-        ConfigKey.eventHubConnectionString,
-        eventHubConnectionString
-      );
-      await ConfigHandler.update(
-        ConfigKey.eventHubConnectionPath,
-        eventHubConnectionPath
-      );
+      await ConfigHandler.update(ConfigKey.iotHubConnectionString, iothub.iotHubConnectionString);
+      await ConfigHandler.update(ConfigKey.eventHubConnectionString, eventHubConnectionString);
+      await ConfigHandler.update(ConfigKey.eventHubConnectionPath, eventHubConnectionPath);
 
       const scaffoldType = ScaffoldType.Workspace;
       await this.updateConfigSettings(scaffoldType, {
@@ -190,30 +165,18 @@ export class IoTHub implements Component, Provisionable {
     } else if (!iothub) {
       return false;
     } else {
-      throw new Error(
-        "IoT Hub provision failed. Please check output window for detail."
-      );
+      throw new Error("IoT Hub provision failed. Please check output window for detail.");
     }
   }
 
-  async updateConfigSettings(
-    type: ScaffoldType,
-    componentInfo?: ComponentInfo
-  ): Promise<void> {
-    const iotHubComponentIndex = await this.azureConfigFileHandler.getComponentIndexById(
-      type,
-      this.id
-    );
+  async updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo): Promise<void> {
+    const iotHubComponentIndex = await this.azureConfigFileHandler.getComponentIndexById(type, this.id);
 
     if (iotHubComponentIndex > -1) {
       if (!componentInfo) {
         return;
       }
-      await this.azureConfigFileHandler.updateComponent(
-        type,
-        iotHubComponentIndex,
-        componentInfo
-      );
+      await this.azureConfigFileHandler.updateComponent(type, iotHubComponentIndex, componentInfo);
     } else {
       const newIoTHubConfig: AzureComponentConfig = {
         id: this.id,

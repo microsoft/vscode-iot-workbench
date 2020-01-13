@@ -44,9 +44,7 @@ export class DeviceModelManager {
    * @param type model type
    */
   static generateModelFileName(name: string, type: ModelType): string {
-    const fileType: string = type
-      .replace(/\s+/g, Constants.EMPTY_STRING)
-      .toLowerCase();
+    const fileType: string = type.replace(/\s+/g, Constants.EMPTY_STRING).toLowerCase();
     return `${name}.${fileType}.json`;
   }
 
@@ -55,17 +53,11 @@ export class DeviceModelManager {
    * @param type model type
    */
   static getTemplateFileName(type: ModelType): string {
-    return DeviceModelManager.generateModelFileName(
-      Constants.SAMPLE_FILE_NAME,
-      type
-    );
+    return DeviceModelManager.generateModelFileName(Constants.SAMPLE_FILE_NAME, type);
   }
 
   private readonly component: string;
-  constructor(
-    private readonly context: vscode.ExtensionContext,
-    private readonly outputChannel: ColorizedChannel
-  ) {
+  constructor(private readonly context: vscode.ExtensionContext, private readonly outputChannel: ColorizedChannel) {
     this.component = Constants.DEVICE_MODEL_COMPONENT;
   }
 
@@ -74,14 +66,8 @@ export class DeviceModelManager {
    * @param type model type
    */
   async createModel(type: ModelType): Promise<void> {
-    const folder: string = await UI.selectRootFolder(
-      UIConstants.SELECT_ROOT_FOLDER_LABEL
-    );
-    const name: string = await UI.inputModelName(
-      UIConstants.INPUT_MODEL_NAME_LABEL,
-      type,
-      folder
-    );
+    const folder: string = await UI.selectRootFolder(UIConstants.SELECT_ROOT_FOLDER_LABEL);
+    const name: string = await UI.inputModelName(UIConstants.INPUT_MODEL_NAME_LABEL, type, folder);
     const operation = `Create ${type} ${name} in folder ${folder}`;
     this.outputChannel.start(operation, this.component);
 
@@ -93,10 +79,7 @@ export class DeviceModelManager {
     }
 
     await UI.openAndShowTextDocument(filePath);
-    UI.showNotification(
-      MessageType.Info,
-      ColorizedChannel.formatMessage(operation)
-    );
+    UI.showNotification(MessageType.Info, ColorizedChannel.formatMessage(operation));
     this.outputChannel.end(operation, this.component);
   }
 
@@ -106,22 +89,11 @@ export class DeviceModelManager {
    * @param folder root folder
    * @param name model name
    */
-  private async doCreateModel(
-    type: ModelType,
-    folder: string,
-    name: string
-  ): Promise<string> {
+  private async doCreateModel(type: ModelType, folder: string, name: string): Promise<string> {
     const modelId: string = DeviceModelManager.generateModelId(name);
-    const filePath: string = path.join(
-      folder,
-      DeviceModelManager.generateModelFileName(name, type)
-    );
+    const filePath: string = path.join(folder, DeviceModelManager.generateModelFileName(name, type));
     const templatePath: string = this.context.asAbsolutePath(
-      path.join(
-        Constants.RESOURCE_FOLDER,
-        Constants.TEMPLATE_FOLDER,
-        DeviceModelManager.getTemplateFileName(type)
-      )
+      path.join(Constants.RESOURCE_FOLDER, Constants.TEMPLATE_FOLDER, DeviceModelManager.getTemplateFileName(type))
     );
     const replacement = new Map<string, string>();
     replacement.set(Constants.DIGITAL_TWIN_ID_PLACEHOLDER, modelId);

@@ -8,11 +8,7 @@ import { ServiceClientCredentials } from "ms-rest";
 import { AzureEnvironment } from "ms-rest-azure";
 import { SubscriptionModels } from "azure-arm-resource";
 
-export type AzureLoginStatus =
-  | "Initializing"
-  | "LoggingIn"
-  | "LoggedIn"
-  | "LoggedOut";
+export type AzureLoginStatus = "Initializing" | "LoggingIn" | "LoggedIn" | "LoggedOut";
 
 export interface AzureAccount {
   readonly status: AzureLoginStatus;

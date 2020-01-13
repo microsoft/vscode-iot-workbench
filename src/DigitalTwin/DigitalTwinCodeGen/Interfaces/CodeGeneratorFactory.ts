@@ -1,9 +1,4 @@
-import {
-  CodeGenerator,
-  CodeGenProjectType,
-  DeviceConnectionType,
-  DeviceSdkReferenceType
-} from "./CodeGenerator";
+import { CodeGenerator, CodeGenProjectType, DeviceConnectionType, DeviceSdkReferenceType } from "./CodeGenerator";
 
 export interface CodeGeneratorFactory {
   createCodeGeneratorImpl(

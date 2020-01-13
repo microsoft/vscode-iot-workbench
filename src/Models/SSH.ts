@@ -19,12 +19,7 @@ export class SSH {
     }
   }
 
-  async connect(
-    host: string,
-    port: number,
-    username: string,
-    password: string
-  ): Promise<boolean> {
+  async connect(host: string, port: number, username: string, password: string): Promise<boolean> {
     return new Promise((resolve: (value: boolean) => void) => {
       const conn = this._client;
       conn
@@ -56,10 +51,7 @@ export class SSH {
 
       filePath = filePath.replace(/[\\/]+/g, "/");
 
-      const rootPath = (fs.isDirectorySync(filePath)
-        ? filePath
-        : path.dirname(filePath)
-      ).replace(/\/$/, "");
+      const rootPath = (fs.isDirectorySync(filePath) ? filePath : path.dirname(filePath)).replace(/\/$/, "");
       const files = fs.listTreeSync(filePath);
 
       if (this._channel) {
@@ -87,10 +79,7 @@ export class SSH {
           );
           if (overwriteOption === "Cancel") {
             if (this._channel) {
-              channelShowAndAppendLine(
-                this._channel,
-                "Device upload cancelled."
-              );
+              channelShowAndAppendLine(this._channel, "Device upload cancelled.");
             }
             vscode.window.showWarningMessage("Device upload cancelled.");
             return resolve(true);
@@ -114,10 +103,7 @@ export class SSH {
           const rmDirRes = await this.shell(`rm -rf ${remoteRootPath}`);
           if (!rmDirRes) {
             if (this._channel) {
-              channelShowAndAppendLine(
-                this._channel,
-                `Directory Error: remove ${remoteRootPath} failed.`
-              );
+              channelShowAndAppendLine(this._channel, `Directory Error: remove ${remoteRootPath} failed.`);
             }
             return resolve(false);
           }
@@ -127,22 +113,14 @@ export class SSH {
 
         if (!rootPathCreated) {
           if (this._channel) {
-            channelShowAndAppendLine(
-              this._channel,
-              `Directory Error: ${remoteRootPath}`
-            );
+            channelShowAndAppendLine(this._channel, `Directory Error: ${remoteRootPath}`);
             channelShowAndAppendLine(this._channel, err);
           }
           return resolve(false);
         }
 
         for (const file of files) {
-          const res = await this.uploadSingleFile(
-            sftp,
-            file,
-            rootPath,
-            remoteRootPath
-          );
+          const res = await this.uploadSingleFile(sftp, file, rootPath, remoteRootPath);
           if (!res) {
             return resolve(false);
           }
@@ -153,10 +131,7 @@ export class SSH {
     });
   }
 
-  private async isExist(
-    sftp: ssh2.SFTPWrapper,
-    remotePath: string
-  ): Promise<boolean> {
+  private async isExist(sftp: ssh2.SFTPWrapper, remotePath: string): Promise<boolean> {
     return new Promise((resolve: (value: boolean) => void) => {
       sftp.readdir(remotePath, err => {
         if (err) {
@@ -167,10 +142,7 @@ export class SSH {
     });
   }
 
-  private async ensureDir(
-    sftp: ssh2.SFTPWrapper,
-    remotePath: string
-  ): Promise<boolean> {
+  private async ensureDir(sftp: ssh2.SFTPWrapper, remotePath: string): Promise<boolean> {
     return new Promise(
       // eslint-disable-next-line no-async-promise-executor
       async (resolve: (value: boolean) => void) => {
@@ -198,9 +170,7 @@ export class SSH {
     return new Promise(
       // eslint-disable-next-line no-async-promise-executor
       async (resolve: (value: boolean) => void) => {
-        const relativePath = filePath
-          .replace(/[\\/]+/g, "/")
-          .substr(rootPath.length + 1);
+        const relativePath = filePath.replace(/[\\/]+/g, "/").substr(rootPath.length + 1);
         if (
           /(^|\/)node_modules(\/|$)/.test(relativePath) ||
           /(^|\/).vscode(\/|$)/.test(relativePath) ||
@@ -209,18 +179,13 @@ export class SSH {
           return resolve(true);
         }
 
-        const remotePath = path
-          .join(remoteRootPath, relativePath)
-          .replace(/[\\/]+/g, "/");
+        const remotePath = path.join(remoteRootPath, relativePath).replace(/[\\/]+/g, "/");
 
         if (fs.isDirectorySync(filePath)) {
           const pathCreated = await this.ensureDir(sftp, remotePath);
           if (!pathCreated) {
             if (this._channel) {
-              channelShowAndAppendLine(
-                this._channel,
-                `Directory Error: ${relativePath}`
-              );
+              channelShowAndAppendLine(this._channel, `Directory Error: ${relativePath}`);
             }
             return resolve(false);
           }
@@ -229,20 +194,14 @@ export class SSH {
           sftp.fastPut(filePath, remotePath, err => {
             if (err) {
               if (this._channel) {
-                channelShowAndAppendLine(
-                  this._channel,
-                  `File Error: ${relativePath}`
-                );
+                channelShowAndAppendLine(this._channel, `File Error: ${relativePath}`);
               }
 
               return resolve(false);
             }
 
             if (this._channel) {
-              channelShowAndAppendLine(
-                this._channel,
-                `File Uploaded: ${relativePath}`
-              );
+              channelShowAndAppendLine(this._channel, `File Uploaded: ${relativePath}`);
             }
             return resolve(true);
           });

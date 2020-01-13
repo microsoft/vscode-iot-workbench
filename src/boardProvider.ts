@@ -26,10 +26,7 @@ export class BoardProvider {
   }
 
   get list(): Board[] {
-    const boardList = path.join(
-      this.boardFolderPath,
-      FileNames.boardListFileName
-    );
+    const boardList = path.join(this.boardFolderPath, FileNames.boardListFileName);
     const boardsJson: BoardList = require(boardList);
     return boardsJson.boards;
   }
@@ -51,9 +48,7 @@ export class BoardProvider {
 
         if (key === "vendorId" || key === "productId") {
           const optionId =
-            typeof optionProperty.value === "number"
-              ? optionProperty.value
-              : Number(`0x${optionProperty.value}`);
+            typeof optionProperty.value === "number" ? optionProperty.value : Number(`0x${optionProperty.value}`);
           const boardId = Number(`0x${boardProperty.value}`);
           if (optionId !== boardId) {
             return false;

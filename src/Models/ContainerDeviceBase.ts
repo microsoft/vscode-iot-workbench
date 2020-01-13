@@ -6,13 +6,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 
 import { CancelOperationError } from "../CancelOperationError";
-import {
-  FileNames,
-  OperationType,
-  PlatformType,
-  ScaffoldType,
-  TemplateTag
-} from "../constants";
+import { FileNames, OperationType, PlatformType, ScaffoldType, TemplateTag } from "../constants";
 import { DigitalTwinConstants } from "../DigitalTwin/DigitalTwinConstants";
 import { FileUtility } from "../FileUtility";
 import { TelemetryContext } from "../telemetry";
@@ -20,11 +14,7 @@ import * as utils from "../utils";
 
 import { ComponentType } from "./Interfaces/Component";
 import { Device, DeviceType } from "./Interfaces/Device";
-import {
-  ProjectTemplate,
-  TemplateFileInfo,
-  TemplatesType
-} from "./Interfaces/ProjectTemplate";
+import { ProjectTemplate, TemplateFileInfo, TemplatesType } from "./Interfaces/ProjectTemplate";
 import { RemoteExtension } from "./RemoteExtension";
 
 const constants = {
@@ -81,9 +71,7 @@ export abstract class ContainerDeviceBase implements Device {
   async load(): Promise<boolean> {
     // ScaffoldType is Workspace when loading a project
     const scaffoldType = ScaffoldType.Workspace;
-    if (
-      !(await FileUtility.directoryExists(scaffoldType, this.projectFolder))
-    ) {
+    if (!(await FileUtility.directoryExists(scaffoldType, this.projectFolder))) {
       throw new Error("Unable to find the project folder.");
     }
 
@@ -93,25 +81,13 @@ export abstract class ContainerDeviceBase implements Device {
   async create(): Promise<void> {
     // ScaffoldType is local when creating a project
     const createTimeScaffoldType = ScaffoldType.Local;
-    if (
-      !(await FileUtility.directoryExists(
-        createTimeScaffoldType,
-        this.projectFolder
-      ))
-    ) {
+    if (!(await FileUtility.directoryExists(createTimeScaffoldType, this.projectFolder))) {
       throw new Error("Unable to find the project folder.");
     }
 
-    await this.generateTemplateFiles(
-      createTimeScaffoldType,
-      this.projectFolder,
-      this.templateFilesInfo
-    );
+    await this.generateTemplateFiles(createTimeScaffoldType, this.projectFolder, this.templateFilesInfo);
 
-    await this.configDeviceEnvironment(
-      this.projectFolder,
-      createTimeScaffoldType
-    );
+    await this.configDeviceEnvironment(this.projectFolder, createTimeScaffoldType);
   }
 
   async generateTemplateFiles(
@@ -134,10 +110,7 @@ export abstract class ContainerDeviceBase implements Device {
         const pattern = /{project_name}/g;
         const projectName = path.basename(projectPath);
         if (fileInfo.fileContent) {
-          fileInfo.fileContent = fileInfo.fileContent.replace(
-            pattern,
-            projectName
-          );
+          fileInfo.fileContent = fileInfo.fileContent.replace(pattern, projectName);
         }
       }
       await utils.generateTemplateFile(this.projectFolder, type, fileInfo);
@@ -149,10 +122,7 @@ export abstract class ContainerDeviceBase implements Device {
     // Check remote
     const isRemote = RemoteExtension.isRemote(this.extensionContext);
     if (!isRemote) {
-      await utils.askAndOpenInRemote(
-        OperationType.Compile,
-        this.telemetryContext
-      );
+      await utils.askAndOpenInRemote(OperationType.Compile, this.telemetryContext);
       return false;
     }
 
@@ -172,29 +142,16 @@ export abstract class ContainerDeviceBase implements Device {
 
   abstract async configDeviceSettings(): Promise<boolean>;
 
-  async configDeviceEnvironment(
-    projectPath: string,
-    scaffoldType: ScaffoldType
-  ): Promise<void> {
+  async configDeviceEnvironment(projectPath: string, scaffoldType: ScaffoldType): Promise<void> {
     if (!projectPath) {
-      throw new Error(
-        "Unable to find the project path, please open the folder and initialize project again."
-      );
+      throw new Error("Unable to find the project path, please open the folder and initialize project again.");
     }
 
     // Get template list json object
     const templateJsonFilePath = this.extensionContext.asAbsolutePath(
-      path.join(
-        FileNames.resourcesFolderName,
-        FileNames.templatesFolderName,
-        FileNames.templateFileName
-      )
+      path.join(FileNames.resourcesFolderName, FileNames.templatesFolderName, FileNames.templateFileName)
     );
-    const templateJsonFileString = (await FileUtility.readFile(
-      scaffoldType,
-      templateJsonFilePath,
-      "utf8"
-    )) as string;
+    const templateJsonFileString = (await FileUtility.readFile(scaffoldType, templateJsonFilePath, "utf8")) as string;
     const templateJson = JSON.parse(templateJsonFileString);
     if (!templateJson) {
       throw new Error("Fail to load template list.");
@@ -207,9 +164,7 @@ export abstract class ContainerDeviceBase implements Device {
     }
     const templateName = containerSelection.label;
     if (!templateName) {
-      throw new Error(
-        `Internal Error: Cannot get template name from template property.`
-      );
+      throw new Error(`Internal Error: Cannot get template name from template property.`);
     }
 
     const templateFilesInfo = await utils.getEnvTemplateFilesAndAskOverwrite(
@@ -229,10 +184,7 @@ export abstract class ContainerDeviceBase implements Device {
         const pattern = "${project_name}";
         const projectName = path.basename(projectPath);
         if (fileInfo.fileContent) {
-          fileInfo.fileContent = fileInfo.fileContent.replace(
-            pattern,
-            projectName
-          );
+          fileInfo.fileContent = fileInfo.fileContent.replace(pattern, projectName);
         }
       }
 
@@ -243,32 +195,22 @@ export abstract class ContainerDeviceBase implements Device {
     utils.channelShowAndAppendLine(this.channel, message);
   }
 
-  private async selectContainer(
-    templateListJson: TemplatesType
-  ): Promise<vscode.QuickPickItem | undefined> {
-    const containerTemplates = templateListJson.templates.filter(
-      (template: ProjectTemplate) => {
-        return (
-          template.tag === TemplateTag.DevelopmentEnvironment &&
-          template.platform === PlatformType.EmbeddedLinux
-        );
-      }
-    );
+  private async selectContainer(templateListJson: TemplatesType): Promise<vscode.QuickPickItem | undefined> {
+    const containerTemplates = templateListJson.templates.filter((template: ProjectTemplate) => {
+      return template.tag === TemplateTag.DevelopmentEnvironment && template.platform === PlatformType.EmbeddedLinux;
+    });
 
     const containerList: vscode.QuickPickItem[] = [];
     containerTemplates.forEach((container: ProjectTemplate) => {
       containerList.push({ label: container.name, detail: container.detail });
     });
 
-    const containerSelection = await vscode.window.showQuickPick(
-      containerList,
-      {
-        ignoreFocusOut: true,
-        matchOnDescription: true,
-        matchOnDetail: true,
-        placeHolder: "Select a toolchain container for your device platform"
-      }
-    );
+    const containerSelection = await vscode.window.showQuickPick(containerList, {
+      ignoreFocusOut: true,
+      matchOnDescription: true,
+      matchOnDetail: true,
+      placeHolder: "Select a toolchain container for your device platform"
+    });
 
     return containerSelection;
   }

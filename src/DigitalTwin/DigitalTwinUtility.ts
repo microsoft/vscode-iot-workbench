@@ -14,8 +14,7 @@ import { ApiProvider } from "./pnp/src/api/apiProvider";
  * Digital Twin extension utility
  */
 export class DigitalTwinUtility {
-  private static readonly EXTENSION_NOT_INIT =
-    "Azure Digital Twin extension is not inititalized";
+  private static readonly EXTENSION_NOT_INIT = "Azure Digital Twin extension is not inititalized";
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   private static extensionInstance: any;
   private static channel: vscode.OutputChannel;
@@ -24,13 +23,8 @@ export class DigitalTwinUtility {
    * initialize utility for Digital Twin extension
    * @param channel output channel
    */
-  static init(
-    modelRepositoryManager: ModelRepositoryManager,
-    channel: vscode.OutputChannel
-  ): void {
-    DigitalTwinUtility.extensionInstance = new ApiProvider(
-      modelRepositoryManager
-    );
+  static init(modelRepositoryManager: ModelRepositoryManager, channel: vscode.OutputChannel): void {
+    DigitalTwinUtility.extensionInstance = new ApiProvider(modelRepositoryManager);
     DigitalTwinUtility.channel = channel;
   }
 
@@ -48,9 +42,7 @@ export class DigitalTwinUtility {
       // skip for UserCancelledError
     }
     if (!result) {
-      throw new CancelOperationError(
-        `Selected device capability model file cancelled.`
-      );
+      throw new CancelOperationError(`Selected device capability model file cancelled.`);
     }
 
     utils.channelShowAndAppendLine(
@@ -66,23 +58,14 @@ export class DigitalTwinUtility {
    * @param folder folder to download interface
    * @param capabilityModelFile capability model file path
    */
-  static async downloadDependentInterface(
-    folder: string,
-    capabilityModelFile: string
-  ): Promise<boolean> {
+  static async downloadDependentInterface(folder: string, capabilityModelFile: string): Promise<boolean> {
     if (!DigitalTwinUtility.extensionInstance) {
       throw new Error(DigitalTwinUtility.EXTENSION_NOT_INIT);
     }
     try {
-      await DigitalTwinUtility.extensionInstance.downloadDependentInterface(
-        folder,
-        capabilityModelFile
-      );
+      await DigitalTwinUtility.extensionInstance.downloadDependentInterface(folder, capabilityModelFile);
     } catch (error) {
-      utils.channelShowAndAppendLine(
-        DigitalTwinUtility.channel,
-        `${DigitalTwinConstants.dtPrefix} ${error.message}`
-      );
+      utils.channelShowAndAppendLine(DigitalTwinUtility.channel, `${DigitalTwinConstants.dtPrefix} ${error.message}`);
       return false;
     }
     return true;

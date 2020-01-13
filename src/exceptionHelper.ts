@@ -7,26 +7,10 @@ import * as vscode from "vscode";
 import * as utils from "./utils";
 
 export class ExceptionHelper {
-  static logError(
-    channel: vscode.OutputChannel | undefined,
-    error: Error,
-    popupErrorMsg: string
-  ): void;
-  static logError(
-    channel: vscode.OutputChannel | undefined,
-    errorMsg: string,
-    popupErrorMsg: string
-  ): void;
-  static logError(
-    channel: vscode.OutputChannel | undefined,
-    error: Error,
-    isPopupErrorMsg: boolean
-  ): void;
-  static logError(
-    channel: vscode.OutputChannel | undefined,
-    errorMsg: string,
-    isPopupErrorMsg: boolean
-  ): void;
+  static logError(channel: vscode.OutputChannel | undefined, error: Error, popupErrorMsg: string): void;
+  static logError(channel: vscode.OutputChannel | undefined, errorMsg: string, popupErrorMsg: string): void;
+  static logError(channel: vscode.OutputChannel | undefined, error: Error, isPopupErrorMsg: boolean): void;
+  static logError(channel: vscode.OutputChannel | undefined, errorMsg: string, isPopupErrorMsg: boolean): void;
   static logError(
     channel: vscode.OutputChannel | undefined,
     errorValue: string | Error,

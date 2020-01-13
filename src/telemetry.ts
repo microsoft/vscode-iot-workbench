@@ -48,16 +48,10 @@ export class TelemetryWorker {
       return;
     }
     if (!packageInfo.aiKey) {
-      console.log(
-        "Unable to initialize telemetry, please make sure AIKey is set in package.json"
-      );
+      console.log("Unable to initialize telemetry, please make sure AIKey is set in package.json");
       return;
     }
-    this._reporter = new TelemetryReporter(
-      packageInfo.name,
-      packageInfo.version,
-      packageInfo.aiKey
-    );
+    this._reporter = new TelemetryReporter(packageInfo.name, packageInfo.version, packageInfo.aiKey);
     this._isInternal = TelemetryWorker.isInternalUser();
   }
 
@@ -72,9 +66,7 @@ export class TelemetryWorker {
    * check if it is Microsoft internal user
    */
   private static isInternalUser(): boolean {
-    const userDomain: string = process.env.USERDNSDOMAIN
-      ? process.env.USERDNSDOMAIN.toLowerCase()
-      : "";
+    const userDomain: string = process.env.USERDNSDOMAIN ? process.env.USERDNSDOMAIN.toLowerCase() : "";
     return userDomain.endsWith("microsoft.com");
   }
 
@@ -86,9 +78,7 @@ export class TelemetryWorker {
     context.properties.result = TelemetryResult.Succeeded;
     context.properties.isInternal = this._isInternal.toString();
     if (this._extensionContext) {
-      context.properties.developEnvironment = RemoteExtension.isRemote(
-        this._extensionContext
-      )
+      context.properties.developEnvironment = RemoteExtension.isRemote(this._extensionContext)
         ? DevelopEnvironment.RemoteEnv
         : DevelopEnvironment.LocalEnv;
     }
@@ -107,11 +97,7 @@ export class TelemetryWorker {
     if (!telemetryContext) {
       telemetryContext = this.createContext();
     }
-    this._reporter.sendTelemetryEvent(
-      eventName,
-      telemetryContext.properties,
-      telemetryContext.measurements
-    );
+    this._reporter.sendTelemetryEvent(eventName, telemetryContext.properties, telemetryContext.measurements);
   }
 
   /**
@@ -150,24 +136,14 @@ export class TelemetryWorker {
     const start: number = Date.now();
     if (additionalProperties) {
       for (const key of Object.keys(additionalProperties)) {
-        if (
-          !Object.prototype.hasOwnProperty.call(
-            telemetryContext.properties,
-            key
-          )
-        ) {
+        if (!Object.prototype.hasOwnProperty.call(telemetryContext.properties, key)) {
           telemetryContext.properties[key] = additionalProperties[key];
         }
       }
     }
 
     try {
-      return await callback(
-        context,
-        outputChannel,
-        telemetryContext,
-        ...commandArgs
-      );
+      return await callback(context, outputChannel, telemetryContext, ...commandArgs);
     } catch (error) {
       telemetryContext.properties.errorMessage = error.message;
       let isPopupErrorMsg = true;
@@ -204,9 +180,7 @@ export class TelemetryWorker {
   /**
    * Get extension information
    */
-  private getPackageInfo(
-    context: vscode.ExtensionContext
-  ): PackageInfo | undefined {
+  private getPackageInfo(context: vscode.ExtensionContext): PackageInfo | undefined {
     const extension = WorkbenchExtension.getExtension(context);
     if (extension) {
       const extensionPackage = extension.packageJSON;

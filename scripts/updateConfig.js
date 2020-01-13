@@ -30,17 +30,10 @@ function updateConfigForNonProduction(packageJson, testName, testDisplayName) {
   const arm7DevcontainerJsonFile = "resources/templates/arm7/devcontainer.json";
   const arm8DevcontainerJsonFile = "resources/templates/arm8/devcontainer.json";
   const x86DevcontainerJsonFile = "resources/templates/x86/devcontainer.json";
-  const files = [
-    arm7DevcontainerJsonFile,
-    arm8DevcontainerJsonFile,
-    x86DevcontainerJsonFile
-  ];
+  const files = [arm7DevcontainerJsonFile, arm8DevcontainerJsonFile, x86DevcontainerJsonFile];
   files.forEach(filePath => {
     const originalJsonFile = fs.readFileSync(filePath).toString();
-    const replaceJson = originalJsonFile.replace(
-      extensionIdPattern,
-      testExtensionId.toLowerCase()
-    );
+    const replaceJson = originalJsonFile.replace(extensionIdPattern, testExtensionId.toLowerCase());
     fs.writeFileSync(filePath, replaceJson);
   });
 }
@@ -57,11 +50,7 @@ const packageJson = JSON.parse(fs.readFileSync("package.json"));
 if (process.env.BUILD_REASON === "Schedule") {
   const nightlyBuildName = "test-owl-project-nightly";
   const nightlyBuildDisplayName = "Test OWL Project (Nightly)";
-  updateConfigForNonProduction(
-    packageJson,
-    nightlyBuildName,
-    nightlyBuildDisplayName
-  );
+  updateConfigForNonProduction(packageJson, nightlyBuildName, nightlyBuildDisplayName);
 } else if (process.env.IS_PROD) {
   // Update resource link
   const codeGenUrl = "https://aka.ms/iot-codegen-cli-for-workbench";

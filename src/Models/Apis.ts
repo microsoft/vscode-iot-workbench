@@ -12,21 +12,15 @@ import { ExtensionName } from "./Interfaces/Api";
 export function getExtension(name: ExtensionName): any {
   switch (name) {
     case ExtensionName.Toolkit: {
-      const toolkit = vscode.extensions.getExtension(
-        "vsciot-vscode.azure-iot-toolkit"
-      );
+      const toolkit = vscode.extensions.getExtension("vsciot-vscode.azure-iot-toolkit");
       return toolkit ? toolkit.exports : undefined;
     }
     case ExtensionName.AzureAccount: {
-      const azureAccount = vscode.extensions.getExtension<AzureAccount>(
-        "ms-vscode.azure-account"
-      );
+      const azureAccount = vscode.extensions.getExtension<AzureAccount>("ms-vscode.azure-account");
       return azureAccount ? azureAccount.exports : undefined;
     }
     case ExtensionName.DigitalTwins: {
-      const digitalTwins = vscode.extensions.getExtension(
-        "vsciot-vscode.azure-digital-twins"
-      );
+      const digitalTwins = vscode.extensions.getExtension("vsciot-vscode.azure-digital-twins");
       return digitalTwins ? digitalTwins.exports : undefined;
     }
     default:
@@ -37,9 +31,7 @@ export function getExtension(name: ExtensionName): any {
 export async function checkAzureLogin(): Promise<boolean> {
   const azureAccount = getExtension(ExtensionName.AzureAccount);
   if (!azureAccount) {
-    throw new Error(
-      "Azure account extension is not found. Please install it from Marketplace."
-    );
+    throw new Error("Azure account extension is not found. Please install it from Marketplace.");
   }
 
   // Sign in Azure

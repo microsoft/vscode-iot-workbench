@@ -16,17 +16,12 @@ import { Component, ComponentType } from "./Interfaces/Component";
 import { Deployable } from "./Interfaces/Deployable";
 import { Device } from "./Interfaces/Device";
 import { ProjectHostType } from "./Interfaces/ProjectHostType";
-import {
-  ProjectTemplateType,
-  TemplateFileInfo
-} from "./Interfaces/ProjectTemplate";
+import { ProjectTemplateType, TemplateFileInfo } from "./Interfaces/ProjectTemplate";
 import { Provisionable } from "./Interfaces/Provisionable";
 import { Uploadable } from "./Interfaces/Uploadable";
 
 const impor = require("impor")(__dirname);
-const azureUtilityModule = impor(
-  "./AzureUtility"
-) as typeof import("./AzureUtility");
+const azureUtilityModule = impor("./AzureUtility") as typeof import("./AzureUtility");
 
 export enum OpenScenario {
   createNewProject,
@@ -55,13 +50,8 @@ export abstract class IoTWorkbenchProjectBase {
     if (!projectFileRootPath) {
       return ProjectHostType.Unknown;
     }
-    const iotWorkbenchProjectFile = path.join(
-      projectFileRootPath,
-      FileNames.iotWorkbenchProjectFileName
-    );
-    if (
-      !(await FileUtility.fileExists(scaffoldType, iotWorkbenchProjectFile))
-    ) {
+    const iotWorkbenchProjectFile = path.join(projectFileRootPath, FileNames.iotWorkbenchProjectFileName);
+    if (!(await FileUtility.fileExists(scaffoldType, iotWorkbenchProjectFile))) {
       return ProjectHostType.Unknown;
     }
     const iotWorkbenchProjectFileString = ((await FileUtility.readFile(
@@ -71,10 +61,7 @@ export abstract class IoTWorkbenchProjectBase {
     )) as string).trim();
     if (iotWorkbenchProjectFileString) {
       const projectConfig = JSON.parse(iotWorkbenchProjectFileString);
-      if (
-        projectConfig &&
-        projectConfig[`${ConfigKey.projectHostType}`] !== undefined
-      ) {
+      if (projectConfig && projectConfig[`${ConfigKey.projectHostType}`] !== undefined) {
         const projectHostType: ProjectHostType = utils.getEnumKeyByEnumValue(
           ProjectHostType,
           projectConfig[`${ConfigKey.projectHostType}`]
@@ -84,13 +71,8 @@ export abstract class IoTWorkbenchProjectBase {
     }
 
     // TODO: For backward compatibility, will remove later
-    const devcontainerFolderPath = path.join(
-      projectFileRootPath,
-      FileNames.devcontainerFolderName
-    );
-    if (
-      await FileUtility.directoryExists(scaffoldType, devcontainerFolderPath)
-    ) {
+    const devcontainerFolderPath = path.join(projectFileRootPath, FileNames.devcontainerFolderName);
+    if (await FileUtility.directoryExists(scaffoldType, devcontainerFolderPath)) {
       return ProjectHostType.Container;
     } else {
       return ProjectHostType.Workspace;
@@ -113,21 +95,14 @@ export abstract class IoTWorkbenchProjectBase {
     return (comp as Uploadable).upload !== undefined;
   }
 
-  constructor(
-    context: vscode.ExtensionContext,
-    channel: vscode.OutputChannel,
-    telemetryContext: TelemetryContext
-  ) {
+  constructor(context: vscode.ExtensionContext, channel: vscode.OutputChannel, telemetryContext: TelemetryContext) {
     this.componentList = [];
     this.extensionContext = context;
     this.channel = channel;
     this.telemetryContext = telemetryContext;
   }
 
-  abstract async load(
-    scaffoldType: ScaffoldType,
-    initLoad?: boolean
-  ): Promise<void>;
+  abstract async load(scaffoldType: ScaffoldType, initLoad?: boolean): Promise<void>;
 
   abstract async create(
     templateFilesInfo: TemplateFileInfo[],
@@ -146,9 +121,7 @@ export abstract class IoTWorkbenchProjectBase {
 
         const res = await item.compile();
         if (!res) {
-          vscode.window.showErrorMessage(
-            "Unable to compile the device code, please check output window for detail."
-          );
+          vscode.window.showErrorMessage("Unable to compile the device code, please check output window for detail.");
         }
       }
     }
@@ -165,9 +138,7 @@ export abstract class IoTWorkbenchProjectBase {
 
         const res = await item.upload();
         if (!res) {
-          vscode.window.showErrorMessage(
-            "Unable to upload the sketch, please check output window for detail."
-          );
+          vscode.window.showErrorMessage("Unable to upload the sketch, please check output window for detail.");
         }
       }
     }
@@ -189,9 +160,7 @@ export abstract class IoTWorkbenchProjectBase {
 
     if (provisionItemList.length === 0) {
       // nothing to provision:
-      vscode.window.showInformationMessage(
-        "Congratulations! There is no Azure service to provision in this project."
-      );
+      vscode.window.showInformationMessage("Congratulations! There is no Azure service to provision in this project.");
       return false;
     }
 
@@ -309,10 +278,7 @@ export abstract class IoTWorkbenchProjectBase {
    * Configure project environment: Scaffold configuration files with the given
    * template files.
    */
-  async configureProjectEnvironmentCore(
-    deviceRootPath: string,
-    scaffoldType: ScaffoldType
-  ): Promise<void> {
+  async configureProjectEnvironmentCore(deviceRootPath: string, scaffoldType: ScaffoldType): Promise<void> {
     for (const component of this.componentList) {
       if (component.getComponentType() === ComponentType.Device) {
         const device = component as Device;
@@ -343,10 +309,7 @@ export abstract class IoTWorkbenchProjectBase {
   sendLoadEventTelemetry(context: vscode.ExtensionContext): void {
     const telemetryWorker = TelemetryWorker.getInstance(context);
     try {
-      telemetryWorker.sendEvent(
-        EventNames.projectLoadEvent,
-        this.telemetryContext
-      );
+      telemetryWorker.sendEvent(EventNames.projectLoadEvent, this.telemetryContext);
     } catch {
       // If sending telemetry failed, skip the error to avoid blocking user.
     }
@@ -357,12 +320,8 @@ export abstract class IoTWorkbenchProjectBase {
    * @param scaffoldType scaffold type
    */
   async validateProjectRootPath(scaffoldType: ScaffoldType): Promise<void> {
-    if (
-      !(await FileUtility.directoryExists(scaffoldType, this.projectRootPath))
-    ) {
-      throw new Error(
-        `Project root path ${this.projectRootPath} does not exist. Please initialize the project first.`
-      );
+    if (!(await FileUtility.directoryExists(scaffoldType, this.projectRootPath))) {
+      throw new Error(`Project root path ${this.projectRootPath} does not exist. Please initialize the project first.`);
     }
   }
 }

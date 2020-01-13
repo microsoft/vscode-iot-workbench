@@ -45,14 +45,7 @@ export class Esp32Device extends ArduinoDeviceBase {
     if (platform === OSPlatform.WIN32) {
       const homeDir = os.homedir();
       const localAppData: string = path.join(homeDir, "AppData", "Local");
-      packageRootPath = path.join(
-        localAppData,
-        "Arduino15",
-        "packages",
-        "esp32",
-        "hardware",
-        "esp32"
-      );
+      packageRootPath = path.join(localAppData, "Arduino15", "packages", "esp32", "hardware", "esp32");
     } else {
       packageRootPath = "~/Library/Arduino15/packages/esp32/hardware/esp32";
     }
@@ -101,21 +94,17 @@ export class Esp32Device extends ArduinoDeviceBase {
       },
       {
         label: "Generate CRC for OTA",
-        description:
-          "Generate Cyclic Redundancy Check(CRC) code for OTA Update",
+        description: "Generate Cyclic Redundancy Check(CRC) code for OTA Update",
         detail: "Config CRC"
       }
     ];
 
-    const configSelection = await vscode.window.showQuickPick(
-      configSelectionItems,
-      {
-        ignoreFocusOut: true,
-        matchOnDescription: true,
-        matchOnDetail: true,
-        placeHolder: "Select an option"
-      }
-    );
+    const configSelection = await vscode.window.showQuickPick(configSelectionItems, {
+      ignoreFocusOut: true,
+      matchOnDescription: true,
+      matchOnDetail: true,
+      placeHolder: "Select an option"
+    });
 
     if (!configSelection) {
       return false;
@@ -125,9 +114,7 @@ export class Esp32Device extends ArduinoDeviceBase {
       const retValue: boolean = await this.generateCrc(this.channel);
       return retValue;
     } else if (configSelection.detail === "Copy") {
-      const deviceConnectionString = ConfigHandler.get<string>(
-        ConfigKey.iotHubDeviceConnectionString
-      );
+      const deviceConnectionString = ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
 
       if (!deviceConnectionString) {
         throw new Error(

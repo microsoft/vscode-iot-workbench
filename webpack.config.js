@@ -10,25 +10,14 @@ function getEntry() {
     encoding: "utf8"
   });
   const mod = JSON.parse(npmListRes);
-  const unbundledModule = [
-    "impor",
-    "eachr",
-    "extract-opts",
-    "getmac",
-    "typechecker",
-    "keytar"
-  ];
+  const unbundledModule = ["impor", "eachr", "extract-opts", "getmac", "typechecker", "keytar"];
   for (const mod of unbundledModule) {
     const p = "node_modules/" + mod;
     fs.copySync(p, "out/node_modules/" + mod);
   }
   const list = getDependeciesFromNpm(mod);
   const moduleList = list.filter((value, index, self) => {
-    return (
-      self.indexOf(value) === index &&
-      unbundledModule.indexOf(value) === -1 &&
-      !/^@types\//.test(value)
-    );
+    return self.indexOf(value) === index && unbundledModule.indexOf(value) === -1 && !/^@types\//.test(value);
   });
 
   for (const mod of moduleList) {

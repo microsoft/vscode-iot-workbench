@@ -23,10 +23,7 @@ export class UsbDetector {
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   private static _usbDetector: any;
 
-  constructor(
-    private context: vscode.ExtensionContext,
-    private channel: vscode.OutputChannel
-  ) {
+  constructor(private context: vscode.ExtensionContext, private channel: vscode.OutputChannel) {
     const enableUSBDetection = shouldShowLandingPage(context);
     if (os.platform() === OSPlatform.LINUX || !enableUSBDetection) {
       return;
@@ -67,13 +64,8 @@ export class UsbDetector {
           if (board.exampleUrl) {
             ArduinoPackageManager.installBoard(board);
 
-            const exampleUrl =
-              "example.html?board=" +
-              board.id +
-              "&url=" +
-              encodeURIComponent(board.exampleUrl || "");
-            UsbDetector._vscexpress =
-              UsbDetector._vscexpress || new VSCExpress(this.context, "views");
+            const exampleUrl = "example.html?board=" + board.id + "&url=" + encodeURIComponent(board.exampleUrl || "");
+            UsbDetector._vscexpress = UsbDetector._vscexpress || new VSCExpress(this.context, "views");
             UsbDetector._vscexpress.open(
               exampleUrl,
               board.examplePageName + " samples - Azure IoT Device Workbench",
@@ -105,20 +97,14 @@ export class UsbDetector {
       return;
     }
 
-    const devices:
-      | DeviceInfo[]
-      | undefined = await UsbDetector._usbDetector.find();
+    const devices: DeviceInfo[] | undefined = await UsbDetector._usbDetector.find();
 
     if (devices) {
       const uniqueDevices: DeviceInfo[] = [];
 
       devices.forEach(device => {
         if (
-          uniqueDevices.findIndex(
-            item =>
-              item.vendorId === device.vendorId &&
-              item.productId === device.productId
-          ) < 0
+          uniqueDevices.findIndex(item => item.vendorId === device.vendorId && item.productId === device.productId) < 0
         ) {
           uniqueDevices.push(device);
         }

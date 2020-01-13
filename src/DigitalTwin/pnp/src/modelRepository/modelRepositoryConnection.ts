@@ -47,13 +47,10 @@ export class ModelRepositoryConnection {
   private static readonly PROPERTY_COUNT = 4;
   private static readonly HOSTNAME_PROPERTY = "HostName";
   private static readonly REPOSITORY_ID_PROPERTY = "RepositoryId";
-  private static readonly SHARED_ACCESS_KEY_NAME_PROPERTY =
-    "SharedAccessKeyName";
+  private static readonly SHARED_ACCESS_KEY_NAME_PROPERTY = "SharedAccessKeyName";
   private static readonly SHARED_ACCESS_KEY_PROPERTY = "SharedAccessKey";
   private static readonly HOSTNAME_REGEX = new RegExp("[a-zA-Z0-9_\\-\\.]+$");
-  private static readonly SHARED_ACCESS_KEY_NAME_REGEX = new RegExp(
-    "^[a-zA-Z0-9_\\-@\\.]+$"
-  );
+  private static readonly SHARED_ACCESS_KEY_NAME_REGEX = new RegExp("^[a-zA-Z0-9_\\-@\\.]+$");
   private static readonly EXPIRY_IN_MINUTES = 30;
 
   private readonly expiry: string;
@@ -64,10 +61,7 @@ export class ModelRepositoryConnection {
     readonly sharedAccessKey: string
   ) {
     const now: number = new Date().getTime();
-    this.expiry = (
-      Math.round(now / 1000) +
-      ModelRepositoryConnection.EXPIRY_IN_MINUTES * 60
-    ).toString();
+    this.expiry = (Math.round(now / 1000) + ModelRepositoryConnection.EXPIRY_IN_MINUTES * 60).toString();
   }
 
   /**
@@ -75,13 +69,7 @@ export class ModelRepositoryConnection {
    */
   generateAccessToken(): string {
     const endpoint: string = encodeURIComponent(this.hostName);
-    const payload: string = [
-      encodeURIComponent(this.repositoryId),
-      endpoint,
-      this.expiry
-    ]
-      .join("\n")
-      .toLowerCase();
+    const payload: string = [encodeURIComponent(this.repositoryId), endpoint, this.expiry].join("\n").toLowerCase();
     const signature: Buffer = Buffer.from(payload, Constants.UTF8);
     const secret: Buffer = Buffer.from(this.sharedAccessKey, Constants.BASE64);
     const hash: string = encodeURIComponent(
@@ -99,10 +87,7 @@ export class ModelRepositoryConnection {
    * validate model repository connection
    */
   private validate(): void {
-    if (
-      !this.hostName ||
-      !ModelRepositoryConnection.HOSTNAME_REGEX.test(this.hostName)
-    ) {
+    if (!this.hostName || !ModelRepositoryConnection.HOSTNAME_REGEX.test(this.hostName)) {
       throw new Error(
         `${Constants.CONNECTION_STRING_INVALID_FORMAT_MSG} on property ${ModelRepositoryConnection.HOSTNAME_PROPERTY}`
       );
@@ -115,9 +100,7 @@ export class ModelRepositoryConnection {
     }
     if (
       !this.sharedAccessKeyName ||
-      !ModelRepositoryConnection.SHARED_ACCESS_KEY_NAME_REGEX.test(
-        this.sharedAccessKeyName
-      )
+      !ModelRepositoryConnection.SHARED_ACCESS_KEY_NAME_REGEX.test(this.sharedAccessKeyName)
     ) {
       throw new Error(
         `${Constants.CONNECTION_STRING_INVALID_FORMAT_MSG} on \

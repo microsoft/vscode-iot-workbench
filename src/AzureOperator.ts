@@ -15,11 +15,7 @@ export class AzureOperator {
     channel: vscode.OutputChannel,
     telemetryContext: TelemetryContext
   ): Promise<void> {
-    const iotProject = await constructAndLoadIoTProject(
-      context,
-      channel,
-      telemetryContext
-    );
+    const iotProject = await constructAndLoadIoTProject(context, channel, telemetryContext);
     if (!iotProject) {
       return;
     }
@@ -40,11 +36,7 @@ export class AzureOperator {
       return;
     }
 
-    const iotProject = await constructAndLoadIoTProject(
-      context,
-      channel,
-      telemetryContext
-    );
+    const iotProject = await constructAndLoadIoTProject(context, channel, telemetryContext);
     if (iotProject) {
       await iotProject.deploy();
     }

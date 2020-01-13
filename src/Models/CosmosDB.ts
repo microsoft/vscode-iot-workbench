@@ -83,9 +83,7 @@ export class CosmosDB implements Component, Provisionable {
 
     try {
       azureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, "utf8"));
-      const cosmosDBConfig = azureConfigs.componentConfigs.find(
-        config => config.type === this.componentType
-      );
+      const cosmosDBConfig = azureConfigs.componentConfigs.find(config => config.type === this.componentType);
       if (cosmosDBConfig) {
         this.componentId = cosmosDBConfig.id;
         this.dependencies = cosmosDBConfig.dependencies;
@@ -101,23 +99,13 @@ export class CosmosDB implements Component, Provisionable {
     await this.updateConfigSettings(ScaffoldType.Local);
   }
 
-  async updateConfigSettings(
-    type: ScaffoldType,
-    componentInfo?: ComponentInfo
-  ): Promise<void> {
-    const cosmosDBComponentIndex = await this.azureConfigHandler.getComponentIndexById(
-      type,
-      this.id
-    );
+  async updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo): Promise<void> {
+    const cosmosDBComponentIndex = await this.azureConfigHandler.getComponentIndexById(type, this.id);
     if (cosmosDBComponentIndex > -1) {
       if (!componentInfo) {
         return;
       }
-      await this.azureConfigHandler.updateComponent(
-        type,
-        cosmosDBComponentIndex,
-        componentInfo
-      );
+      await this.azureConfigHandler.updateComponent(type, cosmosDBComponentIndex, componentInfo);
     } else {
       const newCosmosDBConfig: AzureComponentConfig = {
         id: this.id,
@@ -151,13 +139,9 @@ export class CosmosDB implements Component, Provisionable {
       const cosmosDBArmTemplatePath = this.extensionContext.asAbsolutePath(
         path.join(FileNames.resourcesFolderName, "arm", "cosmosdb.json")
       );
-      const cosmosDBArmTemplate = JSON.parse(
-        fs.readFileSync(cosmosDBArmTemplatePath, "utf8")
-      ) as ARMTemplate;
+      const cosmosDBArmTemplate = JSON.parse(fs.readFileSync(cosmosDBArmTemplatePath, "utf8")) as ARMTemplate;
 
-      const cosmosDBDeploy = await AzureUtility.deployARMTemplate(
-        cosmosDBArmTemplate
-      );
+      const cosmosDBDeploy = await AzureUtility.deployARMTemplate(cosmosDBArmTemplate);
       if (
         !cosmosDBDeploy ||
         !cosmosDBDeploy.properties ||
@@ -170,10 +154,7 @@ export class CosmosDB implements Component, Provisionable {
       channelPrintJsonObject(this.channel, cosmosDBDeploy);
 
       for (const dependency of this.dependencies) {
-        const componentConfig = await this.azureConfigHandler.getComponentById(
-          scaffoldType,
-          dependency.id
-        );
+        const componentConfig = await this.azureConfigHandler.getComponentById(scaffoldType, dependency.id);
         if (!componentConfig) {
           throw new Error(`Cannot find component with id ${dependency.id}.`);
         }
@@ -184,8 +165,7 @@ export class CosmosDB implements Component, Provisionable {
         }
       }
 
-      cosmosDbName =
-        cosmosDBDeploy.properties.outputs.cosmosDBAccountName.value;
+      cosmosDbName = cosmosDBDeploy.properties.outputs.cosmosDBAccountName.value;
       cosmosDbKey = cosmosDBDeploy.properties.outputs.cosmosDBAccountKey.value;
     } else {
       if (this.channel) {
@@ -231,11 +211,7 @@ export class CosmosDB implements Component, Provisionable {
         return false;
       }
       database = database.trim();
-      const cosmosDBApiRes = await this.ensureDatabase(
-        cosmosDbName,
-        cosmosDbKey,
-        database
-      );
+      const cosmosDBApiRes = await this.ensureDatabase(cosmosDbName, cosmosDbKey, database);
       if (!cosmosDBApiRes) {
         throw new Error("Error occurred when create database.");
       }
@@ -243,11 +219,7 @@ export class CosmosDB implements Component, Provisionable {
       database = databaseChoose.label;
     }
 
-    const collectionList = this.getCollections(
-      cosmosDbName,
-      cosmosDbKey,
-      database
-    );
+    const collectionList = this.getCollections(cosmosDbName, cosmosDbKey, database);
     const collectionChoose = await vscode.window.showQuickPick(collectionList, {
       placeHolder: "Select Collection",
       ignoreFocusOut: true
@@ -278,12 +250,7 @@ export class CosmosDB implements Component, Provisionable {
         return false;
       }
       collection = collection.trim();
-      const cosmosDBApiRes = await this.ensureCollection(
-        cosmosDbName,
-        cosmosDbKey,
-        database,
-        collection
-      );
+      const cosmosDBApiRes = await this.ensureCollection(cosmosDbName, cosmosDbKey, database, collection);
       if (!cosmosDBApiRes) {
         throw new Error("Error occurred when create collection.");
       }
@@ -327,9 +294,7 @@ export class CosmosDB implements Component, Provisionable {
     const masterToken = "master";
     const tokenVersion = "1.0";
 
-    return encodeURIComponent(
-      `type=${masterToken}&ver=${tokenVersion}&sig=${signature}`
-    );
+    return encodeURIComponent(`type=${masterToken}&ver=${tokenVersion}&sig=${signature}`);
   }
 
   private _getRestHeaders(
@@ -340,13 +305,7 @@ export class CosmosDB implements Component, Provisionable {
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   ): any {
     const date = new Date().toUTCString();
-    const authorization = this._getCosmosDBAuthorizationToken(
-      key,
-      verb,
-      date,
-      resourceType,
-      resourceId
-    );
+    const authorization = this._getCosmosDBAuthorizationToken(key, verb, date, resourceType, resourceId);
     const headers = {
       Authorization: authorization,
       "Content-Type": "application/json",
@@ -385,24 +344,12 @@ export class CosmosDB implements Component, Provisionable {
     return apiRes;
   }
 
-  async getDatabases(
-    account: string,
-    key: string
-  ): Promise<vscode.QuickPickItem[]> {
-    const getDatabasesRes = await this._apiRequest(
-      account,
-      key,
-      "GET",
-      "dbs",
-      "dbs",
-      ""
-    );
+  async getDatabases(account: string, key: string): Promise<vscode.QuickPickItem[]> {
+    const getDatabasesRes = await this._apiRequest(account, key, "GET", "dbs", "dbs", "");
     const listRes = getDatabasesRes.body as {
       Databases: Array<{ id: string }>;
     };
-    const databaseList: vscode.QuickPickItem[] = [
-      { label: "$(plus) Create New Database", description: "" }
-    ];
+    const databaseList: vscode.QuickPickItem[] = [{ label: "$(plus) Create New Database", description: "" }];
     for (const item of listRes.Databases) {
       databaseList.push({ label: item.id, description: account });
     }
@@ -410,32 +357,13 @@ export class CosmosDB implements Component, Provisionable {
     return databaseList;
   }
 
-  async ensureDatabase(
-    account: string,
-    key: string,
-    database: string
-  ): Promise<boolean> {
-    const getDatabaseRes = await this._apiRequest(
-      account,
-      key,
-      "GET",
-      `dbs/${database}`,
-      "dbs",
-      `dbs/${database}`
-    );
+  async ensureDatabase(account: string, key: string, database: string): Promise<boolean> {
+    const getDatabaseRes = await this._apiRequest(account, key, "GET", `dbs/${database}`, "dbs", `dbs/${database}`);
     if (getDatabaseRes.statusCode === 200) {
       return true;
     }
 
-    const createDatabaseRes = await this._apiRequest(
-      account,
-      key,
-      "POST",
-      "dbs",
-      "dbs",
-      "",
-      { id: database }
-    );
+    const createDatabaseRes = await this._apiRequest(account, key, "POST", "dbs", "dbs", "", { id: database });
     if (createDatabaseRes.statusCode === 201) {
       return true;
     }
@@ -443,11 +371,7 @@ export class CosmosDB implements Component, Provisionable {
     return false;
   }
 
-  async getCollections(
-    account: string,
-    key: string,
-    database: string
-  ): Promise<vscode.QuickPickItem[]> {
+  async getCollections(account: string, key: string, database: string): Promise<vscode.QuickPickItem[]> {
     const getDCollectionsRes = await this._apiRequest(
       account,
       key,
@@ -459,9 +383,7 @@ export class CosmosDB implements Component, Provisionable {
     const listRes = getDCollectionsRes.body as {
       DocumentCollections: Array<{ id: string }>;
     };
-    const collectionList: vscode.QuickPickItem[] = [
-      { label: "$(plus) Create New Collection", description: "" }
-    ];
+    const collectionList: vscode.QuickPickItem[] = [{ label: "$(plus) Create New Collection", description: "" }];
     for (const item of listRes.DocumentCollections) {
       collectionList.push({
         label: item.id,
@@ -472,12 +394,7 @@ export class CosmosDB implements Component, Provisionable {
     return collectionList;
   }
 
-  async ensureCollection(
-    account: string,
-    key: string,
-    database: string,
-    collection: string
-  ): Promise<boolean> {
+  async ensureCollection(account: string, key: string, database: string, collection: string): Promise<boolean> {
     const getCollectionRes = await this._apiRequest(
       account,
       key,
@@ -506,9 +423,7 @@ export class CosmosDB implements Component, Provisionable {
     return false;
   }
 
-  private getCosmosDbByNameFromCache(
-    name: string
-  ): { name: string } | undefined {
+  private getCosmosDbByNameFromCache(name: string): { name: string } | undefined {
     return this.catchedCosmosDbList.find(item => item.name === name);
   }
 
@@ -518,9 +433,7 @@ export class CosmosDB implements Component, Provisionable {
     const cosmosDbListRes = (await AzureUtility.getRequest(resource)) as {
       value: Array<{ name: string; location: string }>;
     };
-    const cosmosDbList: vscode.QuickPickItem[] = [
-      { label: "$(plus) Create New Cosmos DB", description: "" }
-    ];
+    const cosmosDbList: vscode.QuickPickItem[] = [{ label: "$(plus) Create New Cosmos DB", description: "" }];
     for (const item of cosmosDbListRes.value) {
       cosmosDbList.push({ label: item.name, description: item.location });
     }

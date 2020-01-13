@@ -10,11 +10,7 @@ import { TelemetryContext } from "../../../telemetry";
 import * as utils from "../../../utils";
 import { DigitalTwinConstants } from "../../DigitalTwinConstants";
 
-import {
-  CodeGenerator,
-  CodeGenExecutionItem,
-  CodeGenProjectType
-} from "./CodeGenerator";
+import { CodeGenerator, CodeGenExecutionItem, CodeGenProjectType } from "./CodeGenerator";
 
 export class AnsiCCodeGenerator implements CodeGenerator {
   constructor(
@@ -35,11 +31,7 @@ export class AnsiCCodeGenerator implements CodeGenerator {
           this.telemetryContext,
           codegenInfo.outputDirectory
         );
-        project.openProject(
-          ScaffoldType.Local,
-          true,
-          OpenScenario.createNewProject
-        );
+        project.openProject(ScaffoldType.Local, true, OpenScenario.createNewProject);
       } else {
         await vscode.commands.executeCommand(
           VscodeCommands.VscodeOpenFolder,
@@ -50,16 +42,12 @@ export class AnsiCCodeGenerator implements CodeGenerator {
 
       return true;
     } else {
-      vscode.window.showErrorMessage(
-        "Unable to generate code, please check output window for detail."
-      );
+      vscode.window.showErrorMessage("Unable to generate code, please check output window for detail.");
       return false;
     }
   }
 
-  async generateAnsiCCodeCore(
-    codegenInfo: CodeGenExecutionItem
-  ): Promise<boolean> {
+  async generateAnsiCCodeCore(codegenInfo: CodeGenExecutionItem): Promise<boolean> {
     // Invoke DigitalTwinCodeGen toolset to generate the code
     const projectTypeValue = codegenInfo.codeGenProjectType.toString();
     const connectionTypeValue = codegenInfo.deviceConnectionType.toString();

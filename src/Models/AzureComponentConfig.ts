@@ -55,41 +55,25 @@ export class AzureConfigFileHandler {
 
   async createIfNotExists(type: ScaffoldType): Promise<void> {
     const azureConfigs: AzureConfigs = { componentConfigs: [] };
-    const azureConfigFolderPath = path.join(
-      this.projectRootPath,
-      AzureComponentsStorage.folderName
-    );
+    const azureConfigFolderPath = path.join(this.projectRootPath, AzureComponentsStorage.folderName);
     if (!(await FileUtility.directoryExists(type, azureConfigFolderPath))) {
       try {
         await FileUtility.mkdirRecursively(type, azureConfigFolderPath);
       } catch (error) {
-        throw new Error(
-          `Failed to create azure config folder. Error message: ${error.message}`
-        );
+        throw new Error(`Failed to create azure config folder. Error message: ${error.message}`);
       }
     }
-    const azureConfigFilePath = path.join(
-      azureConfigFolderPath,
-      AzureComponentsStorage.fileName
-    );
+    const azureConfigFilePath = path.join(azureConfigFolderPath, AzureComponentsStorage.fileName);
 
     if (!(await FileUtility.fileExists(type, azureConfigFilePath))) {
       await FileUtility.writeJsonFile(type, azureConfigFilePath, azureConfigs);
     }
   }
 
-  async getSortedComponents(
-    type: ScaffoldType
-  ): Promise<AzureComponentConfig[]> {
+  async getSortedComponents(type: ScaffoldType): Promise<AzureComponentConfig[]> {
     try {
-      const azureConfigContent = await FileUtility.readFile(
-        type,
-        this.configFilePath,
-        "utf8"
-      );
-      const azureConfigs = JSON.parse(
-        azureConfigContent as string
-      ) as AzureConfigs;
+      const azureConfigContent = await FileUtility.readFile(type, this.configFilePath, "utf8");
+      const azureConfigs = JSON.parse(azureConfigContent as string) as AzureConfigs;
       const components: AzureComponentConfig[] = [];
       const componentConfigs = azureConfigs.componentConfigs;
       const sortedComponentIds: string[] = [];
@@ -117,10 +101,7 @@ export class AzureConfigFileHandler {
           sortedComponentIds.push(componentConfig.id);
           components.push(componentConfig);
         }
-      } while (
-        lastSortedCount < componentConfigs.length &&
-        lastSortedCount < components.length
-      );
+      } while (lastSortedCount < componentConfigs.length && lastSortedCount < components.length);
       return components;
     } catch (error) {
       throw new Error("Invalid azure components config file.");
@@ -129,58 +110,30 @@ export class AzureConfigFileHandler {
 
   async getComponentIndexById(type: ScaffoldType, id: string): Promise<number> {
     try {
-      const azureConfigContent = await FileUtility.readFile(
-        type,
-        this.configFilePath,
-        "utf8"
-      );
-      const azureConfigs = JSON.parse(
-        azureConfigContent as string
-      ) as AzureConfigs;
-      const componentIndex = azureConfigs.componentConfigs.findIndex(
-        config => config.id === id
-      );
+      const azureConfigContent = await FileUtility.readFile(type, this.configFilePath, "utf8");
+      const azureConfigs = JSON.parse(azureConfigContent as string) as AzureConfigs;
+      const componentIndex = azureConfigs.componentConfigs.findIndex(config => config.id === id);
       return componentIndex;
     } catch (error) {
       throw new Error("Invalid azure components config file.");
     }
   }
 
-  async getComponentById(
-    type: ScaffoldType,
-    id: string
-  ): Promise<AzureComponentConfig | undefined> {
+  async getComponentById(type: ScaffoldType, id: string): Promise<AzureComponentConfig | undefined> {
     try {
-      const azureConfigContent = await FileUtility.readFile(
-        type,
-        this.configFilePath,
-        "utf8"
-      );
-      const azureConfigs = JSON.parse(
-        azureConfigContent as string
-      ) as AzureConfigs;
-      const componentConfig = azureConfigs.componentConfigs.find(
-        config => config.id === id
-      );
+      const azureConfigContent = await FileUtility.readFile(type, this.configFilePath, "utf8");
+      const azureConfigs = JSON.parse(azureConfigContent as string) as AzureConfigs;
+      const componentConfig = azureConfigs.componentConfigs.find(config => config.id === id);
       return componentConfig;
     } catch (error) {
       throw new Error("Invalid azure components config file.");
     }
   }
 
-  async appendComponent(
-    type: ScaffoldType,
-    component: AzureComponentConfig
-  ): Promise<AzureConfigs> {
+  async appendComponent(type: ScaffoldType, component: AzureComponentConfig): Promise<AzureConfigs> {
     try {
-      const azureConfigContent = await FileUtility.readFile(
-        type,
-        this.configFilePath,
-        "utf8"
-      );
-      const azureConfigs = JSON.parse(
-        azureConfigContent as string
-      ) as AzureConfigs;
+      const azureConfigContent = await FileUtility.readFile(type, this.configFilePath, "utf8");
+      const azureConfigs = JSON.parse(azureConfigContent as string) as AzureConfigs;
       azureConfigs.componentConfigs.push(component);
       await FileUtility.writeJsonFile(type, this.configFilePath, azureConfigs);
       return azureConfigs;
@@ -189,20 +142,10 @@ export class AzureConfigFileHandler {
     }
   }
 
-  async updateComponent(
-    type: ScaffoldType,
-    index: number,
-    componentInfo: ComponentInfo
-  ): Promise<AzureConfigs> {
+  async updateComponent(type: ScaffoldType, index: number, componentInfo: ComponentInfo): Promise<AzureConfigs> {
     try {
-      const azureConfigContent = await FileUtility.readFile(
-        type,
-        this.configFilePath,
-        "utf8"
-      );
-      const azureConfigs = JSON.parse(
-        azureConfigContent as string
-      ) as AzureConfigs;
+      const azureConfigContent = await FileUtility.readFile(type, this.configFilePath, "utf8");
+      const azureConfigs = JSON.parse(azureConfigContent as string) as AzureConfigs;
       const component = azureConfigs.componentConfigs[index];
       if (!component) {
         throw new Error("Invalid index of componet list.");

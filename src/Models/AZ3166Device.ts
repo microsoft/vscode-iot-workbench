@@ -29,9 +29,7 @@ import { reject } from "bluebird";
 
 const impor = require("impor")(__dirname);
 const forEach = impor("lodash.foreach") as typeof import("lodash.foreach");
-const trimStart = impor(
-  "lodash.trimstart"
-) as typeof import("lodash.trimstart");
+const trimStart = impor("lodash.trimstart") as typeof import("lodash.trimstart");
 
 interface SerialPortInfo {
   comName: string;
@@ -86,13 +84,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
     devicePath: string,
     templateFiles?: TemplateFileInfo[]
   ) {
-    super(
-      context,
-      devicePath,
-      channel,
-      telemetryContext,
-      DeviceType.MXChipAZ3166
-    );
+    super(context, devicePath, channel, telemetryContext, DeviceType.MXChipAZ3166);
     this.channel = channel;
     this.componentId = Guid.create().toString();
     if (templateFiles) {
@@ -138,11 +130,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
   async preUploadAction(): Promise<boolean> {
     const isStlinkInstalled = await this.stlinkDriverInstalled();
     if (!isStlinkInstalled) {
-      const message =
-        "The ST-LINK driver for DevKit is not installed. Install now?";
-      const result:
-        | vscode.MessageItem
-        | undefined = await vscode.window.showWarningMessage(
+      const message = "The ST-LINK driver for DevKit is not installed. Install now?";
+      const result: vscode.MessageItem | undefined = await vscode.window.showWarningMessage(
         message,
         DialogResponses.yes,
         DialogResponses.skipForNow,
@@ -150,8 +139,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
       );
       if (result === DialogResponses.yes) {
         // Open the download page
-        const installUri =
-          "http://www.st.com/en/development-tools/stsw-link009.html";
+        const installUri = "http://www.st.com/en/development-tools/stsw-link009.html";
         opn(installUri);
         return true;
       } else if (result !== DialogResponses.cancel) {
@@ -165,15 +153,12 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
   async configDeviceSettings(): Promise<boolean> {
     const configSelectionItems = this.getConfigDeviceSettingsMainOptions();
-    const configSelection = await vscode.window.showQuickPick(
-      configSelectionItems,
-      {
-        ignoreFocusOut: true,
-        matchOnDescription: true,
-        matchOnDetail: true,
-        placeHolder: "Select an option"
-      }
-    );
+    const configSelection = await vscode.window.showQuickPick(configSelectionItems, {
+      ignoreFocusOut: true,
+      matchOnDescription: true,
+      matchOnDetail: true,
+      placeHolder: "Select an option"
+    });
     if (!configSelection) {
       return false;
     }
@@ -183,16 +168,12 @@ export class AZ3166Device extends ArduinoDeviceBase {
       return retValue;
     } else if (configSelection.detail === "Config Connection String") {
       // Get IoT Hub device connection string from config
-      let deviceConnectionString = ConfigHandler.get<string>(
-        ConfigKey.iotHubDeviceConnectionString
-      );
-      const deviceConnectionStringSelection = this.getDeviceConnectionStringOptions(
-        deviceConnectionString
-      );
-      const selection = await vscode.window.showQuickPick(
-        deviceConnectionStringSelection,
-        { ignoreFocusOut: true, placeHolder: "Choose an option:" }
-      );
+      let deviceConnectionString = ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
+      const deviceConnectionStringSelection = this.getDeviceConnectionStringOptions(deviceConnectionString);
+      const selection = await vscode.window.showQuickPick(deviceConnectionStringSelection, {
+        ignoreFocusOut: true,
+        placeHolder: "Choose an option:"
+      });
       if (!selection) {
         return false;
       }
@@ -201,11 +182,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
         const option = this.getInputDeviceConnectionStringOptions();
         deviceConnectionString = await vscode.window.showInputBox(option);
         if (!deviceConnectionString) {
-          const message =
-            "Need more information on how to get device connection string?";
-          const result:
-            | vscode.MessageItem
-            | undefined = await vscode.window.showWarningMessage(
+          const message = "Need more information on how to get device connection string?";
+          const result: vscode.MessageItem | undefined = await vscode.window.showWarningMessage(
             message,
             DialogResponses.yes,
             DialogResponses.no
@@ -221,16 +199,11 @@ export class AZ3166Device extends ArduinoDeviceBase {
       }
 
       console.log(deviceConnectionString);
-      const res = await this.setDeviceConfig(
-        deviceConnectionString,
-        ConfigDeviceOptions.ConnectionString
-      );
+      const res = await this.setDeviceConfig(deviceConnectionString, ConfigDeviceOptions.ConnectionString);
       if (!res) {
         return false;
       } else {
-        vscode.window.showInformationMessage(
-          "Configure Device connection string completely."
-        );
+        vscode.window.showInformationMessage("Configure Device connection string completely.");
         return true;
       }
     } else if (configSelection.detail === "Config DPS") {
@@ -241,16 +214,11 @@ export class AZ3166Device extends ArduinoDeviceBase {
       }
 
       console.log(deviceConnectionString);
-      const res = await this.setDeviceConfig(
-        deviceConnectionString,
-        ConfigDeviceOptions.DPS
-      );
+      const res = await this.setDeviceConfig(deviceConnectionString, ConfigDeviceOptions.DPS);
       if (!res) {
         return false;
       } else {
-        vscode.window.showInformationMessage(
-          "Config DPS credentials completely."
-        );
+        vscode.window.showInformationMessage("Config DPS credentials completely.");
         return true;
       }
     } else {
@@ -265,65 +233,43 @@ export class AZ3166Device extends ArduinoDeviceBase {
       if (!res) {
         return false;
       } else {
-        vscode.window.showInformationMessage(
-          "Configure Unique Device String (UDS) completed successfully."
-        );
+        vscode.window.showInformationMessage("Configure Unique Device String (UDS) completed successfully.");
         return true;
       }
     }
   }
 
-  private async getConfigDeviceSettingsMainOptions(): Promise<
-    vscode.QuickPickItem[]
-  > {
+  private async getConfigDeviceSettingsMainOptions(): Promise<vscode.QuickPickItem[]> {
     // Read options configuration JSON
     const devciceConfigFilePath: string = this.extensionContext.asAbsolutePath(
-      path.join(
-        FileNames.resourcesFolderName,
-        FileNames.templatesFolderName,
-        FileNames.configDeviceOptionsFileName
-      )
+      path.join(FileNames.resourcesFolderName, FileNames.templatesFolderName, FileNames.configDeviceOptionsFileName)
     );
 
-    const configSelectionItemsFilePath = await FileUtility.readFile(
-      ScaffoldType.Local,
-      devciceConfigFilePath,
-      "utf8"
-    );
-    const configSelectionItemsContent = JSON.parse(
-      configSelectionItemsFilePath as string
-    );
+    const configSelectionItemsFilePath = await FileUtility.readFile(ScaffoldType.Local, devciceConfigFilePath, "utf8");
+    const configSelectionItemsContent = JSON.parse(configSelectionItemsFilePath as string);
 
     const configSelectionItems: vscode.QuickPickItem[] = [];
-    configSelectionItemsContent.configSelectionItems.forEach(
-      (element: DeviceConfig) => {
-        configSelectionItems.push({
-          label: element.label,
-          description: element.description,
-          detail: element.detail
-        });
-      }
-    );
+    configSelectionItemsContent.configSelectionItems.forEach((element: DeviceConfig) => {
+      configSelectionItems.push({
+        label: element.label,
+        description: element.description,
+        detail: element.detail
+      });
+    });
 
     return configSelectionItems;
   }
 
-  private getDeviceConnectionStringOptions(
-    deviceConnectionString: string | undefined
-  ): vscode.QuickPickItem[] {
+  private getDeviceConnectionStringOptions(deviceConnectionString: string | undefined): vscode.QuickPickItem[] {
     let hostName = "";
     let deviceId = "";
     if (deviceConnectionString) {
-      const hostnameMatches = deviceConnectionString.match(
-        /HostName=(.*?)(;|$)/
-      );
+      const hostnameMatches = deviceConnectionString.match(/HostName=(.*?)(;|$)/);
       if (hostnameMatches) {
         hostName = hostnameMatches[0];
       }
 
-      const deviceIDMatches = deviceConnectionString.match(
-        /DeviceId=(.*?)(;|$)/
-      );
+      const deviceIDMatches = deviceConnectionString.match(/DeviceId=(.*?)(;|$)/);
       if (deviceIDMatches) {
         deviceId = deviceIDMatches[0];
       }
@@ -357,8 +303,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
   private getInputDeviceConnectionStringOptions(): vscode.InputBoxOptions {
     const option: vscode.InputBoxOptions = {
-      value:
-        "HostName=<Host Name>;DeviceId=<Device Name>;SharedAccessKey=<Device Key>",
+      value: "HostName=<Host Name>;DeviceId=<Device Name>;SharedAccessKey=<Device Key>",
       prompt: `Please input device connection string here.`,
       ignoreFocusOut: true,
       validateInput: (deviceConnectionString: string) => {
@@ -433,11 +378,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
   async setDeviceConfig(configValue: string, option: number): Promise<boolean> {
     // Try to close serial monitor
     try {
-      await vscode.commands.executeCommand(
-        ArduinoCommands.CloseSerialMonitor,
-        null,
-        false
-      );
+      await vscode.commands.executeCommand(ArduinoCommands.CloseSerialMonitor, null, false);
     } catch (ignore) {
       // Ignore error if fail to close serial monitor
     }
@@ -451,16 +392,10 @@ export class AZ3166Device extends ArduinoDeviceBase {
     }
   }
 
-  async flushDeviceConfigUnixAndMac(
-    configValue: string,
-    option: number
-  ): Promise<boolean> {
+  async flushDeviceConfigUnixAndMac(configValue: string, option: number): Promise<boolean> {
     return new Promise(
       // eslint-disable-next-line no-async-promise-executor
-      async (
-        resolve: (value: boolean) => void,
-        reject: (value: Error) => void
-      ) => {
+      async (resolve: (value: boolean) => void, reject: (value: Error) => void) => {
         let comPort = "";
         let command = "";
         try {
@@ -482,9 +417,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
         const az3166 = this.board;
 
         if (!az3166) {
-          return reject(
-            new Error("IoT DevKit is not found in the board list.")
-          );
+          return reject(new Error("IoT DevKit is not found in the board list."));
         }
 
         const port = new AZ3166Device.serialport(comPort, {
@@ -559,16 +492,10 @@ export class AZ3166Device extends ArduinoDeviceBase {
     );
   }
 
-  async flushDeviceConfig(
-    configValue: string,
-    option: number
-  ): Promise<boolean> {
+  async flushDeviceConfig(configValue: string, option: number): Promise<boolean> {
     return new Promise(
       // eslint-disable-next-line no-async-promise-executor
-      async (
-        resolve: (value: boolean) => void,
-        reject: (value: Error) => void
-      ) => {
+      async (resolve: (value: boolean) => void, reject: (value: Error) => void) => {
         let comPort = "";
         let command = "";
         try {
@@ -593,9 +520,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
         const az3166 = this.board;
 
         if (!az3166) {
-          return reject(
-            new Error("IoT DevKit is not found in the board list.")
-          );
+          return reject(new Error("IoT DevKit is not found in the board list."));
         }
 
         const port = new AZ3166Device.serialport(comPort, {
@@ -626,10 +551,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
           try {
             const data = `${command} "${configValue}"\r\n`;
             const maxDataLength = 256;
-            await this.sendDataViaSerialPort(
-              port,
-              data.slice(0, maxDataLength)
-            );
+            await this.sendDataViaSerialPort(port, data.slice(0, maxDataLength));
             if (data.length > maxDataLength) {
               await delay(1000);
               await this.sendDataViaSerialPort(port, data.slice(maxDataLength));
@@ -720,30 +642,22 @@ export class AZ3166Device extends ArduinoDeviceBase {
   }
 
   private getComList(): Promise<SerialPortInfo[]> {
-    return new Promise(
-      (
-        resolve: (value: SerialPortInfo[]) => void,
-        reject: (error: Error) => void
-      ) => {
-        // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-        AZ3166Device.serialport.list((e: any, ports: SerialPortInfo[]) => {
-          if (e) {
-            reject(e);
-          } else {
-            resolve(ports);
-          }
-        });
-      }
-    );
+    return new Promise((resolve: (value: SerialPortInfo[]) => void, reject: (error: Error) => void) => {
+      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+      AZ3166Device.serialport.list((e: any, ports: SerialPortInfo[]) => {
+        if (e) {
+          reject(e);
+        } else {
+          resolve(ports);
+        }
+      });
+    });
   }
 
   private async chooseCOM(): Promise<string> {
     return new Promise(
       // eslint-disable-next-line no-async-promise-executor
-      async (
-        resolve: (value: string) => void,
-        reject: (reason: Error) => void
-      ) => {
+      async (resolve: (value: string) => void, reject: (reason: Error) => void) => {
         const comList = await this.getComList();
 
         const az3166 = this.board;
@@ -792,25 +706,23 @@ export class AZ3166Device extends ArduinoDeviceBase {
     port: any,
     data: string
   ): Promise<boolean> {
-    return new Promise(
-      (resolve: (value: boolean) => void, reject: (value: Error) => void) => {
-        try {
-          port.write(
-            data,
-            // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-            (err: any) => {
-              if (err) {
-                reject(err);
-              } else {
-                port.drain(() => resolve(true));
-              }
+    return new Promise((resolve: (value: boolean) => void, reject: (value: Error) => void) => {
+      try {
+        port.write(
+          data,
+          // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+          (err: any) => {
+            if (err) {
+              reject(err);
+            } else {
+              port.drain(() => resolve(true));
             }
-          );
-        } catch (err) {
-          reject(err);
-        }
+          }
+        );
+      } catch (err) {
+        reject(err);
       }
-    );
+    });
   }
 
   private async stlinkDriverInstalled(): Promise<boolean> {
@@ -886,10 +798,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
       const hashMacAddress = await getHashMacAsync();
 
       // Create the file of platform.local.txt
-      const targetFileName = path.join(
-        directoryName,
-        constants.platformLocalFileName
-      );
+      const targetFileName = path.join(directoryName, constants.platformLocalFileName);
 
       const content =
         `${constants.cExtraFlag}${hashMacAddress}" ${constants.traceExtraFlag}${enableTrace}\r\n` +
@@ -906,20 +815,9 @@ export class AZ3166Device extends ArduinoDeviceBase {
     const homeDir = os.homedir();
 
     if (platform === OSPlatform.WIN32) {
-      arduinoPackagePath = path.join(
-        homeDir,
-        "AppData",
-        "Local",
-        "Arduino15",
-        "packages"
-      );
+      arduinoPackagePath = path.join(homeDir, "AppData", "Local", "Arduino15", "packages");
     } else if (platform === OSPlatform.DARWIN) {
-      arduinoPackagePath = path.join(
-        homeDir,
-        "Library",
-        "Arduino15",
-        "packages"
-      );
+      arduinoPackagePath = path.join(homeDir, "Library", "Arduino15", "packages");
     } else if (platform === OSPlatform.LINUX) {
       arduinoPackagePath = path.join(homeDir, ".arduino15", "packages");
     }

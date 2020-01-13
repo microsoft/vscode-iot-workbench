@@ -26,11 +26,7 @@ export class RemoteExtension {
     if (!vscode.extensions.getExtension(DependentExtensions.remote)) {
       const message =
         "Remote extension is required for the current project. Do you want to install it from marketplace?";
-      const choice = await vscode.window.showInformationMessage(
-        message,
-        DialogResponses.yes,
-        DialogResponses.no
-      );
+      const choice = await vscode.window.showInformationMessage(message, DialogResponses.yes, DialogResponses.no);
       if (choice === DialogResponses.yes) {
         vscode.commands.executeCommand(
           VscodeCommands.VscodeOpen,

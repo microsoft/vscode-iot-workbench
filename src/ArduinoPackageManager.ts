@@ -9,17 +9,11 @@ import { Board, BoardInstallation } from "./Models/Interfaces/Board";
 export class ArduinoPackageManager {
   private static INSTALLED_BOARDS: Board[] = [];
   private static async setAdditionalUrl(url: string): Promise<void> {
-    const existedUrls = vscode.workspace
-      .getConfiguration()
-      .get<string[] | string>("arduino.additionalUrls");
+    const existedUrls = vscode.workspace.getConfiguration().get<string[] | string>("arduino.additionalUrls");
     if (!existedUrls || existedUrls.length === 0) {
       await vscode.workspace
         .getConfiguration()
-        .update(
-          "arduino.additionalUrls",
-          url,
-          vscode.ConfigurationTarget.Global
-        );
+        .update("arduino.additionalUrls", url, vscode.ConfigurationTarget.Global);
     } else {
       let _existedUrls: string[];
       if (typeof existedUrls === "string") {
@@ -36,19 +30,11 @@ export class ArduinoPackageManager {
       if (typeof existedUrls === "string") {
         await vscode.workspace
           .getConfiguration()
-          .update(
-            "arduino.additionalUrls",
-            _existedUrls.join(","),
-            vscode.ConfigurationTarget.Global
-          );
+          .update("arduino.additionalUrls", _existedUrls.join(","), vscode.ConfigurationTarget.Global);
       } else {
         await vscode.workspace
           .getConfiguration()
-          .update(
-            "arduino.additionalUrls",
-            _existedUrls,
-            vscode.ConfigurationTarget.Global
-          );
+          .update("arduino.additionalUrls", _existedUrls, vscode.ConfigurationTarget.Global);
       }
     }
   }
@@ -72,9 +58,7 @@ export class ArduinoPackageManager {
     }
 
     try {
-      await ArduinoPackageManager.setAdditionalUrl(
-        board.installation.additionalUrl
-      );
+      await ArduinoPackageManager.setAdditionalUrl(board.installation.additionalUrl);
       await vscode.commands.executeCommand(
         ArduinoCommands.InstallBoard,
         board.installation.packageName,

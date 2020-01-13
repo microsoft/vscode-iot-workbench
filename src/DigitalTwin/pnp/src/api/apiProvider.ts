@@ -10,18 +10,13 @@ import { UIConstants } from "../view/uiConstants";
  * Api provider for extension integration
  */
 export class ApiProvider {
-  constructor(
-    private readonly modelRepositoryManager: ModelRepositoryManager
-  ) {}
+  constructor(private readonly modelRepositoryManager: ModelRepositoryManager) {}
 
   /**
    * select capability model
    */
   async selectCapabilityModel(): Promise<string> {
-    return await UI.selectOneModelFile(
-      UIConstants.SELECT_CAPABILITY_MODEL_LABEL,
-      ModelType.CapabilityModel
-    );
+    return await UI.selectOneModelFile(UIConstants.SELECT_CAPABILITY_MODEL_LABEL, ModelType.CapabilityModel);
   }
 
   /**
@@ -29,13 +24,7 @@ export class ApiProvider {
    * @param folder folder to download interface
    * @param capabilityModelFile capability model file path
    */
-  async downloadDependentInterface(
-    folder: string,
-    capabilityModelFile: string
-  ): Promise<void> {
-    await this.modelRepositoryManager.downloadDependentInterface(
-      folder,
-      capabilityModelFile
-    );
+  async downloadDependentInterface(folder: string, capabilityModelFile: string): Promise<void> {
+    await this.modelRepositoryManager.downloadDependentInterface(folder, capabilityModelFile);
   }
 }

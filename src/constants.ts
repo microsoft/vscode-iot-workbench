@@ -25,17 +25,14 @@ export class ConfigKey {
 
 export class EventNames {
   static readonly createNewProjectEvent = "IoTWorkbench.NewProject";
-  static readonly configProjectEnvironmentEvent =
-    "IoTWorkbench.ConfigProjectEnvironment";
+  static readonly configProjectEnvironmentEvent = "IoTWorkbench.ConfigProjectEnvironment";
   static readonly azureProvisionEvent = "IoTWorkbench.AzureProvision";
   static readonly azureDeployEvent = "IoTWorkbench.AzureDeploy";
-  static readonly createAzureFunctionsEvent =
-    "IoTWorkbench.CreateAzureFunctions";
+  static readonly createAzureFunctionsEvent = "IoTWorkbench.CreateAzureFunctions";
   static readonly deviceCompileEvent = "IoTWorkbench.DeviceCompile";
   static readonly deviceUploadEvent = "IoTWorkbench.DeviceUpload";
   static readonly devicePackageEvent = "IoTWorkbench.DevicePackage";
-  static readonly configDeviceSettingsEvent =
-    "IoTWorkbench.ConfigDeviceSettingsEvent";
+  static readonly configDeviceSettingsEvent = "IoTWorkbench.ConfigDeviceSettingsEvent";
   static readonly openExamplePageEvent = "IoTWorkbench.OpenExamplePage";
   static readonly loadExampleEvent = "IoTWorkbench.loadExample";
   static readonly detectBoard = "IoTWorkbench.DetectBoard";

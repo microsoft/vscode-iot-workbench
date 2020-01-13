@@ -14,11 +14,7 @@ import { IoTWorkbenchSettings } from "./IoTSettings";
 import { ConfigHandler } from "./configHandler";
 import { CodeGeneratorCore } from "./DigitalTwin/CodeGeneratorCore";
 import { ConfigKey, EventNames, FileNames } from "./constants";
-import {
-  TelemetryContext,
-  TelemetryWorker,
-  TelemetryResult
-} from "./telemetry";
+import { TelemetryContext, TelemetryWorker, TelemetryResult } from "./telemetry";
 import { RemoteExtension } from "./Models/RemoteExtension";
 import { constructAndLoadIoTProject } from "./utils";
 import { ProjectEnvironmentConfiger } from "./ProjectEnvironmentConfiger";
@@ -26,10 +22,7 @@ import { WorkbenchExtension } from "./WorkbenchExtension";
 import { WorkbenchCommands, VscodeCommands } from "./common/Commands";
 import { ColorizedChannel } from "./DigitalTwin/pnp/src/common/colorizedChannel";
 import { Constants } from "./DigitalTwin/pnp/src/common/constants";
-import {
-  DeviceModelManager,
-  ModelType
-} from "./DigitalTwin/pnp/src/deviceModel/deviceModelManager";
+import { DeviceModelManager, ModelType } from "./DigitalTwin/pnp/src/deviceModel/deviceModelManager";
 import { ModelRepositoryManager } from "./DigitalTwin/pnp/src/modelRepository/modelRepositoryManager";
 import { IntelliSenseUtility } from "./DigitalTwin/pnp/src/intelliSense/intelliSenseUtility";
 import { DigitalTwinCompletionItemProvider } from "./DigitalTwin/pnp/src/intelliSense/digitalTwinCompletionItemProvider";
@@ -44,9 +37,7 @@ import { NSAT } from "./nsat";
 import { DigitalTwinUtility } from "./DigitalTwin/DigitalTwinUtility";
 
 const impor = require("impor")(__dirname);
-const exampleExplorerModule = impor(
-  "./exampleExplorer"
-) as typeof import("./exampleExplorer");
+const exampleExplorerModule = impor("./exampleExplorer") as typeof import("./exampleExplorer");
 const request = impor("request-promise") as typeof import("request-promise");
 
 // eslint-disable-next-line  @typescript-eslint/no-explicit-any
@@ -100,9 +91,7 @@ function initCommand(
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   callback: (...args: any[]) => Promise<any>
 ): void {
-  context.subscriptions.push(
-    vscode.commands.registerCommand(command, callback)
-  );
+  context.subscriptions.push(vscode.commands.registerCommand(command, callback));
 }
 
 function initIntelliSense(context: vscode.ExtensionContext): void {
@@ -120,34 +109,22 @@ function initIntelliSense(context: vscode.ExtensionContext): void {
       Constants.COMPLETION_TRIGGER
     )
   );
-  context.subscriptions.push(
-    vscode.languages.registerHoverProvider(
-      selector,
-      new DigitalTwinHoverProvider()
-    )
-  );
+  context.subscriptions.push(vscode.languages.registerHoverProvider(selector, new DigitalTwinHoverProvider()));
   // register diagnostic
   let pendingDiagnostic: NodeJS.Timer;
   const diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection(
     Constants.CHANNEL_NAME
   );
   const diagnosticProvider = new DigitalTwinDiagnosticProvider();
-  const activeTextEditor: vscode.TextEditor | undefined =
-    vscode.window.activeTextEditor;
+  const activeTextEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
   if (activeTextEditor) {
-    diagnosticProvider.updateDiagnostics(
-      activeTextEditor.document,
-      diagnosticCollection
-    );
+    diagnosticProvider.updateDiagnostics(activeTextEditor.document, diagnosticCollection);
   }
   context.subscriptions.push(diagnosticCollection);
   context.subscriptions.push(
     vscode.window.onDidChangeActiveTextEditor(event => {
       if (event) {
-        diagnosticProvider.updateDiagnostics(
-          event.document,
-          diagnosticCollection
-        );
+        diagnosticProvider.updateDiagnostics(event.document, diagnosticCollection);
       }
     })
   );
@@ -158,20 +135,14 @@ function initIntelliSense(context: vscode.ExtensionContext): void {
           clearTimeout(pendingDiagnostic);
         }
         pendingDiagnostic = setTimeout(
-          () =>
-            diagnosticProvider.updateDiagnostics(
-              event.document,
-              diagnosticCollection
-            ),
+          () => diagnosticProvider.updateDiagnostics(event.document, diagnosticCollection),
           Constants.DEFAULT_TIMER_MS
         );
       }
     })
   );
   context.subscriptions.push(
-    vscode.workspace.onDidCloseTextDocument(document =>
-      diagnosticCollection.delete(document.uri)
-    )
+    vscode.workspace.onDidCloseTextDocument(document => diagnosticCollection.delete(document.uri))
   );
 }
 
@@ -226,18 +197,11 @@ function initDigitalTwinCommand(
   );
 }
 // DigitalTwin extension part
-function initDigitalTwin(
-  context: vscode.ExtensionContext,
-  outputChannel: vscode.OutputChannel
-): void {
+function initDigitalTwin(context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel): void {
   const colorizedChannel = new ColorizedChannel(Constants.CHANNEL_NAME);
   context.subscriptions.push(colorizedChannel);
   const deviceModelManager = new DeviceModelManager(context, colorizedChannel);
-  const modelRepositoryManager = new ModelRepositoryManager(
-    context,
-    Constants.WEB_VIEW_PATH,
-    colorizedChannel
-  );
+  const modelRepositoryManager = new ModelRepositoryManager(context, Constants.WEB_VIEW_PATH, colorizedChannel);
 
   DigitalTwinUtility.init(modelRepositoryManager, outputChannel);
   initIntelliSense(context);
@@ -297,11 +261,7 @@ function initDigitalTwin(
     colorizedChannel,
     false,
     Command.DeleteModels,
-    async (
-      _telemetryContext: TelemetryContext,
-      publicRepository: boolean,
-      modelIds: string[]
-    ): Promise<void> => {
+    async (_telemetryContext: TelemetryContext, publicRepository: boolean, modelIds: string[]): Promise<void> => {
       return modelRepositoryManager.deleteModels(publicRepository, modelIds);
     }
   );
@@ -311,11 +271,7 @@ function initDigitalTwin(
     colorizedChannel,
     false,
     Command.DownloadModels,
-    async (
-      _telemetryContext: TelemetryContext,
-      publicRepository: boolean,
-      modelIds: string[]
-    ): Promise<void> => {
+    async (_telemetryContext: TelemetryContext, publicRepository: boolean, modelIds: string[]): Promise<void> => {
       return modelRepositoryManager.downloadModels(publicRepository, modelIds);
     }
   );
@@ -365,43 +321,29 @@ function initDigitalTwin(
   );
 }
 
-function enableUsbDetector(
-  context: vscode.ExtensionContext,
-  outputChannel: vscode.OutputChannel
-): void {
+function enableUsbDetector(context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel): void {
   if (RemoteExtension.isRemote(context)) {
     return;
   }
   // delay to detect usb
-  const usbDetectorModule = impor(
-    "./usbDetector"
-  ) as typeof import("./usbDetector");
+  const usbDetectorModule = impor("./usbDetector") as typeof import("./usbDetector");
 
   const usbDetector = new usbDetectorModule.UsbDetector(context, outputChannel);
   usbDetector.startListening(context);
 }
 
-export async function activate(
-  context: vscode.ExtensionContext
-): Promise<void> {
+export async function activate(context: vscode.ExtensionContext): Promise<void> {
   printHello(context);
 
   const channelName = "Azure IoT Device Workbench";
-  const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel(
-    channelName
-  );
+  const outputChannel: vscode.OutputChannel = vscode.window.createOutputChannel(channelName);
   telemetryWorker = TelemetryWorker.getInstance(context);
   context.subscriptions.push(telemetryWorker);
 
   // Load iot Project here and do not ask to new an iot project when no iot
   // project open since no command has been triggered yet.
   const telemetryContext = telemetryWorker.createContext();
-  await constructAndLoadIoTProject(
-    context,
-    outputChannel,
-    telemetryContext,
-    true
-  );
+  await constructAndLoadIoTProject(context, outputChannel, telemetryContext, true);
 
   const deviceOperator = new DeviceOperator();
   const azureOperator = new AzureOperator();
@@ -420,11 +362,7 @@ export async function activate(
       telemetryContext: TelemetryContext
     ): Promise<void> => {
       const projectInitializer = new ProjectInitializer();
-      return projectInitializer.InitializeProject(
-        context,
-        outputChannel,
-        telemetryContext
-      );
+      return projectInitializer.InitializeProject(context, outputChannel, telemetryContext);
     }
   );
 
@@ -441,11 +379,7 @@ export async function activate(
       telemetryContext: TelemetryContext
     ): Promise<void> => {
       const projectEnvConfiger = new ProjectEnvironmentConfiger();
-      return projectEnvConfiger.configureCmakeProjectEnvironment(
-        context,
-        outputChannel,
-        telemetryContext
-      );
+      return projectEnvConfiger.configureCmakeProjectEnvironment(context, outputChannel, telemetryContext);
     }
   );
 
@@ -525,11 +459,7 @@ export async function activate(
       outputChannel: vscode.OutputChannel,
       telemetryContext: TelemetryContext
     ): Promise<void> => {
-      return deviceOperator.configDeviceSettings(
-        context,
-        outputChannel,
-        telemetryContext
-      );
+      return deviceOperator.configDeviceSettings(context, outputChannel, telemetryContext);
     }
   );
 
@@ -564,14 +494,7 @@ export async function activate(
       url?: string,
       boardId?: string
     ): Promise<void> => {
-      return exampleExplorer.initializeExample(
-        context,
-        outputChannel,
-        telemetryContext,
-        name,
-        url,
-        boardId
-      );
+      return exampleExplorer.initializeExample(context, outputChannel, telemetryContext, name, url, boardId);
     }
   );
 
@@ -600,11 +523,7 @@ export async function activate(
       telemetryContext: TelemetryContext
     ): Promise<void> => {
       const codeGenerator = new CodeGeneratorCore();
-      return codeGenerator.generateDeviceCodeStub(
-        context,
-        outputChannel,
-        telemetryContext
-      );
+      return codeGenerator.generateDeviceCodeStub(context, outputChannel, telemetryContext);
     }
   );
 
@@ -620,28 +539,18 @@ export async function activate(
 
       if (boardId) {
         const boardListFolderPath = context.asAbsolutePath(
-          path.join(
-            FileNames.resourcesFolderName,
-            FileNames.templatesFolderName
-          )
+          path.join(FileNames.resourcesFolderName, FileNames.templatesFolderName)
         );
         const boardProvider = new BoardProvider(boardListFolderPath);
         const board = boardProvider.find({ id: boardId });
 
         if (board && board.helpUrl) {
-          await vscode.commands.executeCommand(
-            VscodeCommands.VscodeOpen,
-            vscode.Uri.parse(board.helpUrl)
-          );
+          await vscode.commands.executeCommand(VscodeCommands.VscodeOpen, vscode.Uri.parse(board.helpUrl));
           return;
         }
       }
-      const workbenchHelpUrl =
-        "https://github.com/microsoft/vscode-iot-workbench/blob/master/README.md";
-      await vscode.commands.executeCommand(
-        VscodeCommands.VscodeOpen,
-        vscode.Uri.parse(workbenchHelpUrl)
-      );
+      const workbenchHelpUrl = "https://github.com/microsoft/vscode-iot-workbench/blob/master/README.md";
+      await vscode.commands.executeCommand(VscodeCommands.VscodeOpen, vscode.Uri.parse(workbenchHelpUrl));
       return;
     }
   );
@@ -665,10 +574,7 @@ export async function activate(
   );
 
   initCommand(context, WorkbenchCommands.OpenUri, async (uri: string) => {
-    vscode.commands.executeCommand(
-      VscodeCommands.VscodeOpen,
-      vscode.Uri.parse(uri)
-    );
+    vscode.commands.executeCommand(VscodeCommands.VscodeOpen, vscode.Uri.parse(uri));
   });
 
   initCommand(context, WorkbenchCommands.HttpRequest, async (uri: string) => {

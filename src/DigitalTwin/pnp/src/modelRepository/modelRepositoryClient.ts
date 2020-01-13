@@ -4,12 +4,7 @@
 import * as request from "request-promise";
 import { Constants } from "../common/constants";
 import { ModelType } from "../deviceModel/deviceModelManager";
-import {
-  GetResult,
-  MetaModelType,
-  SearchOptions,
-  SearchResult
-} from "./modelRepositoryInterface";
+import { GetResult, MetaModelType, SearchOptions, SearchResult } from "./modelRepositoryInterface";
 import { RepositoryInfo } from "./modelRepositoryManager";
 
 /**
@@ -32,16 +27,8 @@ export class ModelRepositoryClient {
    * @param modelId model id
    * @param expand identify if expand result
    */
-  static async getModel(
-    repoInfo: RepositoryInfo,
-    modelId: string,
-    expand = false
-  ): Promise<GetResult> {
-    const options: request.OptionsWithUri = ModelRepositoryClient.createOptions(
-      HttpMethod.Get,
-      repoInfo,
-      modelId
-    );
+  static async getModel(repoInfo: RepositoryInfo, modelId: string, expand = false): Promise<GetResult> {
+    const options: request.OptionsWithUri = ModelRepositoryClient.createOptions(HttpMethod.Get, repoInfo, modelId);
     if (expand) {
       options.qs.expand = "true";
     }
@@ -76,13 +63,8 @@ export class ModelRepositoryClient {
     pageSize: number,
     continuationToken: string | null
   ): Promise<SearchResult> {
-    const options: request.OptionsWithUri = ModelRepositoryClient.createOptions(
-      HttpMethod.Post,
-      repoInfo
-    );
-    const modelFilterType: MetaModelType = ModelRepositoryClient.convertToMetaModelType(
-      type
-    );
+    const options: request.OptionsWithUri = ModelRepositoryClient.createOptions(HttpMethod.Post, repoInfo);
+    const modelFilterType: MetaModelType = ModelRepositoryClient.convertToMetaModelType(type);
     const payload: SearchOptions = {
       searchKeyword: keyword,
       modelFilterType,
@@ -114,17 +96,12 @@ export class ModelRepositoryClient {
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     content: any
   ): Promise<string> {
-    const options: request.OptionsWithUri = ModelRepositoryClient.createOptions(
-      HttpMethod.Put,
-      repoInfo,
-      modelId
-    );
+    const options: request.OptionsWithUri = ModelRepositoryClient.createOptions(HttpMethod.Put, repoInfo, modelId);
     options.body = content;
     return new Promise<string>((resolve, reject) => {
       request(options)
         .then(response => {
-          const result: string =
-            response.headers[ModelRepositoryClient.ETAG_HEADER];
+          const result: string = response.headers[ModelRepositoryClient.ETAG_HEADER];
           return resolve(result);
         })
         .catch(err => {
@@ -138,15 +115,8 @@ export class ModelRepositoryClient {
    * @param repoInfo repository info
    * @param modelId model id
    */
-  static async deleteModel(
-    repoInfo: RepositoryInfo,
-    modelId: string
-  ): Promise<void> {
-    const options: request.OptionsWithUri = ModelRepositoryClient.createOptions(
-      HttpMethod.Delete,
-      repoInfo,
-      modelId
-    );
+  static async deleteModel(repoInfo: RepositoryInfo, modelId: string): Promise<void> {
+    const options: request.OptionsWithUri = ModelRepositoryClient.createOptions(HttpMethod.Delete, repoInfo, modelId);
     return new Promise<void>((resolve, reject) => {
       request(options)
         .then(() => {
@@ -181,11 +151,7 @@ export class ModelRepositoryClient {
    * @param repoInfo repository info
    * @param modelId model id
    */
-  private static createOptions(
-    method: HttpMethod,
-    repoInfo: RepositoryInfo,
-    modelId?: string
-  ): request.OptionsWithUri {
+  private static createOptions(method: HttpMethod, repoInfo: RepositoryInfo, modelId?: string): request.OptionsWithUri {
     const uri = modelId
       ? `${repoInfo.hostname}/models/${encodeURIComponent(modelId)}`
       : `${repoInfo.hostname}/models/search`;

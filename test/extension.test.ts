@@ -13,17 +13,13 @@ import * as vscode from "vscode";
 // Defines a Mocha test suite to group tests of similar kind together
 suite("IoT Device Workbench Tests", () => {
   test("should be present", () => {
-    assert.ok(
-      vscode.extensions.getExtension("vsciot-vscode.vscode-iot-workbench")
-    );
+    assert.ok(vscode.extensions.getExtension("vsciot-vscode.vscode-iot-workbench"));
   });
 
   // tslint:disable-next-line:only-arrow-functions
   test("should be able to activate the extension", function(done) {
     this.timeout(60 * 1000);
-    const extension = vscode.extensions.getExtension(
-      "vsciot-vscode.vscode-iot-workbench"
-    );
+    const extension = vscode.extensions.getExtension("vsciot-vscode.vscode-iot-workbench");
     if (!extension) {
       done("Failed to activate extension");
     } else if (!extension.isActive) {
@@ -54,13 +50,10 @@ suite("IoT Device Workbench Tests", () => {
       ];
 
       const foundIoTWorkbenchCommands = commands.filter(value => {
-        return (
-          COMMANDS.indexOf(value) >= 0 || value.startsWith("iotworkbench.")
-        );
+        return COMMANDS.indexOf(value) >= 0 || value.startsWith("iotworkbench.");
       });
 
-      const errorMsg =
-        "Some commands are not registered properly or a new command is not added to the test";
+      const errorMsg = "Some commands are not registered properly or a new command is not added to the test";
       assert.equal(foundIoTWorkbenchCommands.length, COMMANDS.length, errorMsg);
     });
   });

@@ -10,10 +10,7 @@ import * as path from "path";
 import { TelemetryContext } from "./telemetry";
 import { ScaffoldType, PlatformType } from "./constants";
 import { RemoteExtension } from "./Models/RemoteExtension";
-import {
-  IoTWorkbenchProjectBase,
-  OpenScenario
-} from "./Models/IoTWorkbenchProjectBase";
+import { IoTWorkbenchProjectBase, OpenScenario } from "./Models/IoTWorkbenchProjectBase";
 import { ProjectHostType } from "./Models/Interfaces/ProjectHostType";
 import { configExternalCMakeProjectToIoTContainerProject } from "./utils";
 import { CancelOperationError } from "./CancelOperationError";
@@ -80,10 +77,7 @@ export class ProjectEnvironmentConfiger {
     let project;
     if (platform === PlatformType.Arduino) {
       // Verify it is an iot workbench Arduino project
-      const projectHostType = await IoTWorkbenchProjectBase.getProjectType(
-        scaffoldType,
-        projectFileRootPath
-      );
+      const projectHostType = await IoTWorkbenchProjectBase.getProjectType(scaffoldType, projectFileRootPath);
       if (projectHostType !== ProjectHostType.Workspace) {
         const message = `This is not an iot workbench Arduino project. You cannot configure it as Arduino platform.`;
         vscode.window.showWarningMessage(message);
@@ -91,12 +85,7 @@ export class ProjectEnvironmentConfiger {
       }
 
       const projectRootPath = path.join(projectFileRootPath, "..");
-      project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
-        context,
-        channel,
-        telemetryContext,
-        projectRootPath
-      );
+      project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(context, channel, telemetryContext, projectRootPath);
       if (!project) {
         // Ensure the project is correctly open.
         await utils.properlyOpenIoTWorkspaceProject(telemetryContext);
@@ -121,15 +110,8 @@ export class ProjectEnvironmentConfiger {
     await project.load(scaffoldType);
 
     // Add configuration files
-    await project.configureProjectEnvironmentCore(
-      projectFileRootPath,
-      scaffoldType
-    );
+    await project.configureProjectEnvironmentCore(projectFileRootPath, scaffoldType);
 
-    await project.openProject(
-      scaffoldType,
-      false,
-      OpenScenario.configureProject
-    );
+    await project.openProject(scaffoldType, false, OpenScenario.configureProject);
   }
 }

@@ -49,10 +49,7 @@ export class ExampleExplorer {
 
     examplePathList.forEach(item => {
       if (item !== "." && item !== "..") {
-        fs.moveSync(
-          path.join(examplePath as string, item),
-          path.join(fsPath, item)
-        );
+        fs.moveSync(path.join(examplePath as string, item), path.join(fsPath, item));
       }
     });
 
@@ -60,11 +57,7 @@ export class ExampleExplorer {
     return true;
   }
 
-  private async downloadExamplePackage(
-    channel: vscode.OutputChannel,
-    url: string,
-    fsPath: string
-  ): Promise<boolean> {
+  private async downloadExamplePackage(channel: vscode.OutputChannel, url: string, fsPath: string): Promise<boolean> {
     const loading = setInterval(() => {
       channel.append(".");
     }, 1000);
@@ -107,9 +100,7 @@ export class ExampleExplorer {
       return name;
     }
 
-    const workspaceFiles = fs.listSync(name, [
-      FileNames.workspaceExtensionName
-    ]);
+    const workspaceFiles = fs.listSync(name, [FileNames.workspaceExtensionName]);
     if (workspaceFiles && workspaceFiles.length > 0) {
       const workspaceFile = workspaceFiles[0]; // just pick the first one
       if (fs.existsSync(workspaceFile)) {
@@ -153,9 +144,7 @@ export class ExampleExplorer {
         }
         const name = path.join(workbench, "examples", exampleName);
         if (!utils.fileExistsSync(name) && !utils.directoryExistsSync(name)) {
-          if (
-            !/^([a-z0-9_]|[a-z0-9_][-a-z0-9_.]*[a-z0-9_])$/i.test(exampleName)
-          ) {
+          if (!/^([a-z0-9_]|[a-z0-9_][-a-z0-9_.]*[a-z0-9_])$/i.test(exampleName)) {
             return 'Folder name can only contain letters, numbers, "-" and ".", and cannot start or end with "-" or ".".';
           }
           return;
@@ -174,20 +163,14 @@ export class ExampleExplorer {
     }
 
     const customizedPath = path.join(workbench, "examples", customizedName);
-    if (
-      !utils.fileExistsSync(customizedPath) &&
-      !utils.directoryExistsSync(customizedPath)
-    ) {
+    if (!utils.fileExistsSync(customizedPath) && !utils.directoryExistsSync(customizedPath)) {
       utils.mkdirRecursivelySync(customizedPath);
     }
 
     return customizedPath;
   }
 
-  async selectBoard(
-    context: vscode.ExtensionContext,
-    telemetryContext: TelemetryContext
-  ): Promise<void> {
+  async selectBoard(context: vscode.ExtensionContext, telemetryContext: TelemetryContext): Promise<void> {
     const isLocal = RemoteExtension.checkLocalBeforeRunCommand(context);
     if (!isLocal) {
       return;
@@ -238,13 +221,8 @@ export class ExampleExplorer {
         // To avoid block example gallery, use async to install board here
         // await ArduinoPackageManager.installBoard(board);
         ArduinoPackageManager.installBoard(board);
-        const exampleUrl =
-          "example.html?board=" +
-          board.id +
-          "&url=" +
-          encodeURIComponent(board.exampleUrl || "");
-        ExampleExplorer._vscexpress =
-          ExampleExplorer._vscexpress || new VSCExpress(context, "views");
+        const exampleUrl = "example.html?board=" + board.id + "&url=" + encodeURIComponent(board.exampleUrl || "");
+        ExampleExplorer._vscexpress = ExampleExplorer._vscexpress || new VSCExpress(context, "views");
         ExampleExplorer._vscexpress.open(
           exampleUrl,
           board.examplePageName + " samples - Azure IoT Device Workbench",
@@ -272,11 +250,7 @@ export class ExampleExplorer {
       this._exampleUrl = url;
       this._boardId = boardId;
     }
-    const res = await this.initializeExampleInternal(
-      context,
-      channel,
-      telemetryContext
-    );
+    const res = await this.initializeExampleInternal(context, channel, telemetryContext);
 
     if (!res) {
       throw new CancelOperationError(`Example load cancelled.`);
@@ -301,11 +275,7 @@ export class ExampleExplorer {
     }
 
     const boardList = context.asAbsolutePath(
-      path.join(
-        FileNames.resourcesFolderName,
-        FileNames.templatesFolderName,
-        FileNames.boardListFileName
-      )
+      path.join(FileNames.resourcesFolderName, FileNames.templatesFolderName, FileNames.boardListFileName)
     );
     const boardsJson: { boards: Board[] } = require(boardList);
 
@@ -322,11 +292,7 @@ export class ExampleExplorer {
 
     const items = fs.listSync(fsPath, [FileNames.workspaceExtensionName]);
     if (items.length !== 0) {
-      await vscode.commands.executeCommand(
-        IoTCubeCommands.OpenLocally,
-        items[0],
-        true
-      );
+      await vscode.commands.executeCommand(IoTCubeCommands.OpenLocally, items[0], true);
       return true;
     }
 
@@ -335,26 +301,16 @@ export class ExampleExplorer {
     if (res) {
       // Follow the same pattern in Arduino extension to open examples in new
       // VSCode instance
-      const workspaceFiles = fs.listSync(fsPath, [
-        FileNames.workspaceExtensionName
-      ]);
+      const workspaceFiles = fs.listSync(fsPath, [FileNames.workspaceExtensionName]);
       if (workspaceFiles && workspaceFiles.length > 0) {
-        await vscode.commands.executeCommand(
-          IoTCubeCommands.OpenLocally,
-          workspaceFiles[0],
-          true
-        );
+        await vscode.commands.executeCommand(IoTCubeCommands.OpenLocally, workspaceFiles[0], true);
         return true;
       } else {
         // TODO: Add buttom to submit issue to iot-workbench repo.
-        throw new Error(
-          "The example does not contain a project for Azure IoT Device Workbench."
-        );
+        throw new Error("The example does not contain a project for Azure IoT Device Workbench.");
       }
     } else {
-      throw new Error(
-        "Downloading example package failed. Please check your network settings."
-      );
+      throw new Error("Downloading example package failed. Please check your network settings.");
     }
   }
 }

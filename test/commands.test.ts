@@ -10,9 +10,7 @@ suite("IoT Device Workbench: Commands Tests", () => {
   setup(function(done) {
     // Ensure that extension is activate while testing
     this.timeout(60 * 1000);
-    const extension = vscode.extensions.getExtension(
-      "vsciot-vscode.vscode-iot-workbench"
-    );
+    const extension = vscode.extensions.getExtension("vsciot-vscode.vscode-iot-workbench");
     if (!extension) {
       done("Failed to activate extension");
     } else if (!extension.isActive) {
@@ -34,11 +32,9 @@ suite("IoT Device Workbench: Commands Tests", () => {
   test("should be able to run command: iotworkbench.exampleInitialize", function(done) {
     this.timeout(60 * 1000);
     try {
-      vscode.commands
-        .executeCommand(WorkbenchCommands.InitializeProject)
-        .then(() => {
-          done();
-        });
+      vscode.commands.executeCommand(WorkbenchCommands.InitializeProject).then(() => {
+        done();
+      });
     } catch (error) {
       done(new Error(error));
     }

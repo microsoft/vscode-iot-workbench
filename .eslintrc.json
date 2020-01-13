@@ -21,6 +21,7 @@
     "@typescript-eslint/eslint-plugin"
   ],
   "rules": {
+    "prettier/prettier": ["error", {"printWidth": 120}],
     "max-len": ["error", {"code": 120, "ignorePattern": "^import\\s.+\\sfrom\\s.+;$", "ignoreStrings": true}],
     "no-unused-vars": "off",
     "@typescript-eslint/no-var-requires": "off",

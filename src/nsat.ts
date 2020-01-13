@@ -28,10 +28,7 @@ export class NSAT {
     }
 
     const date = new Date().toDateString();
-    const lastSessionDate = globalState.get(
-      LAST_SESSION_DATE_KEY,
-      new Date(0).toDateString()
-    );
+    const lastSessionDate = globalState.get(LAST_SESSION_DATE_KEY, new Date(0).toDateString());
 
     if (date === lastSessionDate) {
       return;
@@ -45,8 +42,7 @@ export class NSAT {
       return;
     }
 
-    const isCandidate =
-      globalState.get(IS_CANDIDATE_KEY, false) || Math.random() <= PROBABILITY;
+    const isCandidate = globalState.get(IS_CANDIDATE_KEY, false) || Math.random() <= PROBABILITY;
 
     await globalState.update(IS_CANDIDATE_KEY, isCandidate);
 
@@ -71,9 +67,7 @@ export class NSAT {
         commands.executeCommand(
           VscodeCommands.VscodeOpen,
           Uri.parse(
-            `${NSAT_SURVEY_URL}?o=${encodeURIComponent(
-              process.platform
-            )}&v=${encodeURIComponent(extensionVersion)}`
+            `${NSAT_SURVEY_URL}?o=${encodeURIComponent(process.platform)}&v=${encodeURIComponent(extensionVersion)}`
           )
         );
         await globalState.update(IS_CANDIDATE_KEY, false);

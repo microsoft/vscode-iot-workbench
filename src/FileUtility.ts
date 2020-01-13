@@ -8,10 +8,7 @@ import { ScaffoldType } from "./constants";
 import extractzip = require("extract-zip");
 
 export class FileUtility {
-  static async directoryExists(
-    type: ScaffoldType,
-    dirPath: string
-  ): Promise<boolean> {
+  static async directoryExists(type: ScaffoldType, dirPath: string): Promise<boolean> {
     if (type === ScaffoldType.Local) {
       if (!(await sdk.FileSystem.exists(dirPath))) {
         return false;
@@ -32,10 +29,7 @@ export class FileUtility {
     }
   }
 
-  static async fileExists(
-    type: ScaffoldType,
-    filePath: string
-  ): Promise<boolean> {
+  static async fileExists(type: ScaffoldType, filePath: string): Promise<boolean> {
     if (type === ScaffoldType.Local) {
       const directoryExists = await sdk.FileSystem.exists(filePath);
       if (!directoryExists) {
@@ -74,10 +68,7 @@ export class FileUtility {
     }
   }
 
-  static async mkdirRecursively(
-    type: ScaffoldType,
-    dirPath: string
-  ): Promise<void> {
+  static async mkdirRecursively(type: ScaffoldType, dirPath: string): Promise<void> {
     if (await FileUtility.directoryExists(type, dirPath)) {
       return;
     }
@@ -93,11 +84,7 @@ export class FileUtility {
   }
 
   // Make sure filepath's parent directory exists
-  static async writeFile(
-    type: ScaffoldType,
-    filePath: string,
-    data: string | Buffer
-  ): Promise<void> {
+  static async writeFile(type: ScaffoldType, filePath: string, data: string | Buffer): Promise<void> {
     if (type === ScaffoldType.Local) {
       return await sdk.FileSystem.writeFile(filePath, data);
     } else {
@@ -136,11 +123,7 @@ export class FileUtility {
     await FileUtility.writeFile(type, fileDestPath, jsonString);
   }
 
-  static async readFile(
-    type: ScaffoldType,
-    filePath: string,
-    encoding?: string
-  ): Promise<string | Buffer> {
+  static async readFile(type: ScaffoldType, filePath: string, encoding?: string): Promise<string | Buffer> {
     if (type === ScaffoldType.Local) {
       return await sdk.FileSystem.readFile(filePath, encoding);
     } else {
@@ -157,10 +140,7 @@ export class FileUtility {
     }
   }
 
-  static async extractZipFile(
-    sourceZip: string,
-    targetFoder: string
-  ): Promise<boolean> {
+  static async extractZipFile(sourceZip: string, targetFoder: string): Promise<boolean> {
     return new Promise((resolve: (value: boolean) => void, reject) => {
       extractzip(sourceZip, { dir: targetFoder }, err => {
         if (err) {
@@ -172,10 +152,7 @@ export class FileUtility {
     });
   }
 
-  static async getFileHash(
-    filename: string,
-    algorithm = "md5"
-  ): Promise<string> {
+  static async getFileHash(filename: string, algorithm = "md5"): Promise<string> {
     const hash = crypto.createHash(algorithm);
     const input = fs.createReadStream(filename);
     let hashvalue = "";

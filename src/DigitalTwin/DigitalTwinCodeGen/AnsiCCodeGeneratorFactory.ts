@@ -13,11 +13,7 @@ export class AnsiCCodeGeneratorFactory implements CodeGeneratorFactory {
   ) {}
   createCodeGeneratorImpl(language: string): CodeGenerator | null {
     if (language === CodeGenLanguage.ANSIC.toString()) {
-      return new AnsiCCodeGenerator(
-        this.context,
-        this.channel,
-        this.telemetryContext
-      );
+      return new AnsiCCodeGenerator(this.context, this.channel, this.telemetryContext);
     } else {
       return null;
     }
