@@ -22,7 +22,7 @@ export enum DiagnosticMessage {
   InvalidEnum = "Invalid value. Valid values:",
   InvalidContext = "Invalid context of DigitalTwin.",
   ConflictType = "Conflict type:",
-  ValueNotString = "Value is not string.",
+  ValueNotString = "Value is not string."
 }
 
 /**

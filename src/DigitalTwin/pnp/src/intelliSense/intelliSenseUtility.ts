@@ -15,7 +15,7 @@ export enum JsonNodeType {
   String = "string",
   Number = "number",
   Boolean = "boolean",
-  Property = "property",
+  Property = "property"
 }
 
 /**

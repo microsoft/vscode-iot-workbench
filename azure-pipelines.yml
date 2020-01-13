@@ -36,8 +36,8 @@ steps:
     inputs:
       verbose: false
 
-  - script: node node_modules/gts/build/src/cli.js check
-    displayName: 'check gts error'
+  - script: npm run check
+    displayName: 'Run eslint check'
     failOnStderr: True
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@2
@@ -74,7 +74,7 @@ steps:
     displayName: 'Define runtime variable'
 
   - script: npm install -g vsce
-    displayName: 'install vsce'
+    displayName: 'Install vsce'
     condition: and(succeeded(), eq(variables['deploy_to_marketplace'], 'true'))
 
   - script: node scripts/updateConfig.js

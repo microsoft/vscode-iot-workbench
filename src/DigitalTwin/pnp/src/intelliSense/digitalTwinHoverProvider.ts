@@ -27,9 +27,10 @@ export class DigitalTwinHoverProvider implements vscode.HoverProvider {
         return `The type of ${Constants.CHANNEL_NAME} meta model object`;
       case DigitalTwinConstants.CONTEXT:
         return `The context for ${Constants.CHANNEL_NAME} Capability Model or interface`;
-      default:
+      default: {
         const propertyNode: PropertyNode | undefined = IntelliSenseUtility.getPropertyNode(propertyName);
         return propertyNode && propertyNode.comment ? propertyNode.comment : Constants.EMPTY_STRING;
+      }
     }
   }
 
@@ -42,7 +43,8 @@ export class DigitalTwinHoverProvider implements vscode.HoverProvider {
   provideHover(
     document: vscode.TextDocument,
     position: vscode.Position,
-    token: vscode.CancellationToken,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _token: vscode.CancellationToken
   ): vscode.ProviderResult<vscode.Hover> {
     const jsonNode: parser.Node | undefined = IntelliSenseUtility.parseDigitalTwinModel(document.getText());
     if (!jsonNode) {

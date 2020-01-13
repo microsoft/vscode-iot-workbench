@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-'use strict';
-import {FileNames} from './constants';
-import {Board} from './Models/Interfaces/Board';
-import * as path from 'path';
+import { FileNames } from "./constants";
+import { Board } from "./Models/Interfaces/Board";
+import * as path from "path";
 
 interface BoardList {
   boards: Board[];
@@ -15,8 +14,8 @@ export interface BoardOption {
   id?: string;
   platform?: string;
   defaultBaudRate?: number;
-  vendorId?: string|number;
-  productId?: string|number;
+  vendorId?: string | number;
+  productId?: string | number;
 }
 
 export class BoardProvider {
@@ -25,14 +24,13 @@ export class BoardProvider {
     this.boardFolderPath = boardFolderPath;
   }
 
-  get list() {
-    const boardList =
-        path.join(this.boardFolderPath, FileNames.boardListFileName);
+  get list(): Board[] {
+    const boardList = path.join(this.boardFolderPath, FileNames.boardListFileName);
     const boardsJson: BoardList = require(boardList);
     return boardsJson.boards;
   }
 
-  find(option: BoardOption) {
+  find(option: BoardOption): Board | undefined {
     const list = this.list;
     return list.find(board => {
       for (const key of Object.keys(option)) {
@@ -47,10 +45,9 @@ export class BoardProvider {
           return false;
         }
 
-        if (key === 'vendorId' || key === 'productId') {
-          const optionId = typeof optionProperty.value === 'number' ?
-              optionProperty.value :
-              Number(`0x${optionProperty.value}`);
+        if (key === "vendorId" || key === "productId") {
+          const optionId =
+            typeof optionProperty.value === "number" ? optionProperty.value : Number(`0x${optionProperty.value}`);
           const boardId = Number(`0x${boardProperty.value}`);
           if (optionId !== boardId) {
             return false;

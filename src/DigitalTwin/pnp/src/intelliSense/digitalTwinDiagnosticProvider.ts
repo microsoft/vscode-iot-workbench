@@ -29,7 +29,7 @@ export class DigitalTwinDiagnosticProvider {
    */
   private static findClassNode(propertyNode: PropertyNode, type: string): ClassNode | undefined {
     if (propertyNode.range) {
-      return propertyNode.range.find((c) => DigitalTwinGraph.getClassType(c) === type);
+      return propertyNode.range.find(c => DigitalTwinGraph.getClassType(c) === type);
     }
     return undefined;
   }
@@ -64,7 +64,7 @@ export class DigitalTwinDiagnosticProvider {
   private static addProblemOfInvalidType(
     jsonNode: parser.Node,
     digitalTwinNode: PropertyNode,
-    problems: Problem[],
+    problems: Problem[]
   ): void {
     const validTypes: string[] = DigitalTwinGraph.getValidTypes(digitalTwinNode);
     const message: string = [DiagnosticMessage.InvalidType, ...validTypes].join(Constants.LINE_FEED);
@@ -164,7 +164,7 @@ export class DigitalTwinDiagnosticProvider {
     DigitalTwinDiagnosticProvider.validateProperties(jsonNode, classNode, problems, exist);
     // validate required property
     if (classNode.constraint && classNode.constraint.required) {
-      const requiredProperty: string[] = classNode.constraint.required.filter((p) => {
+      const requiredProperty: string[] = classNode.constraint.required.filter(p => {
         // @context is not required for inline Interface
         const isInterfaceSchem: boolean =
           p === DigitalTwinConstants.CONTEXT && digitalTwinNode.label === DigitalTwinConstants.SCHEMA;
@@ -172,7 +172,7 @@ export class DigitalTwinDiagnosticProvider {
       });
       if (requiredProperty.length > 0) {
         const message: string = [DiagnosticMessage.MissingRequiredProperties, ...requiredProperty].join(
-          Constants.LINE_FEED,
+          Constants.LINE_FEED
         );
         DigitalTwinDiagnosticProvider.addProblem(jsonNode, problems, message, true);
       }
@@ -190,10 +190,13 @@ export class DigitalTwinDiagnosticProvider {
     jsonNode: parser.Node,
     digitalTwinNode: PropertyNode,
     classes: ClassNode[],
-    problems: Problem[],
+    problems: Problem[]
   ): ClassNode | undefined {
     let classNode: ClassNode | undefined;
-    const dummyNode: PropertyNode = { id: DigitalTwinConstants.DUMMY_NODE, range: classes };
+    const dummyNode: PropertyNode = {
+      id: DigitalTwinConstants.DUMMY_NODE,
+      range: classes
+    };
     if (jsonNode.type === JsonNodeType.String) {
       classNode = DigitalTwinDiagnosticProvider.findClassNode(dummyNode, jsonNode.value as string);
     } else if (jsonNode.type === JsonNodeType.Array && digitalTwinNode.label === DigitalTwinConstants.CONTENTS) {
@@ -234,14 +237,14 @@ export class DigitalTwinDiagnosticProvider {
     jsonNode: parser.Node,
     classNode: ClassNode,
     problems: Problem[],
-    exist: Set<string>,
+    exist: Set<string>
   ): void {
     if (!jsonNode.children) {
       return;
     }
     const expectedProperties = new Map<string, PropertyNode>();
     if (classNode.properties) {
-      classNode.properties.forEach((p) => {
+      classNode.properties.forEach(p => {
         if (p.label) {
           expectedProperties.set(p.label, p);
         }
@@ -350,7 +353,7 @@ export class DigitalTwinDiagnosticProvider {
   private static validateStringNode(jsonNode: parser.Node, digitalTwinNode: PropertyNode, problems: Problem[]): void {
     const classNode: ClassNode | undefined = DigitalTwinDiagnosticProvider.findClassNode(
       digitalTwinNode,
-      ValueSchema.String,
+      ValueSchema.String
     );
     // validate enum node
     if (!classNode) {
@@ -409,7 +412,7 @@ export class DigitalTwinDiagnosticProvider {
   private static validateNumberNode(jsonNode: parser.Node, digitalTwinNode: PropertyNode, problems: Problem[]): void {
     const classNode: ClassNode | undefined = DigitalTwinDiagnosticProvider.findClassNode(
       digitalTwinNode,
-      ValueSchema.Int,
+      ValueSchema.Int
     );
     // validate number is integer
     if (!classNode || !Number.isInteger(jsonNode.value as number)) {
@@ -427,7 +430,7 @@ export class DigitalTwinDiagnosticProvider {
   private static validateBooleanNode(jsonNode: parser.Node, digitalTwinNode: PropertyNode, problems: Problem[]): void {
     const classNode: ClassNode | undefined = DigitalTwinDiagnosticProvider.findClassNode(
       digitalTwinNode,
-      ValueSchema.Boolean,
+      ValueSchema.Boolean
     );
     if (!classNode) {
       DigitalTwinDiagnosticProvider.addProblemOfInvalidType(jsonNode, digitalTwinNode, problems);
@@ -496,12 +499,12 @@ export class DigitalTwinDiagnosticProvider {
     const problems: Problem[] = [];
     DigitalTwinDiagnosticProvider.validateNode(jsonNode, digitalTwinNode, problems);
     diagnostics = problems.map(
-      (p) =>
+      p =>
         new vscode.Diagnostic(
           new vscode.Range(document.positionAt(p.offset), document.positionAt(p.offset + p.length)),
           p.message,
-          vscode.DiagnosticSeverity.Error,
-        ),
+          vscode.DiagnosticSeverity.Error
+        )
     );
     return diagnostics;
   }

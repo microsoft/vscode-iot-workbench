@@ -7,7 +7,7 @@
 export enum MetaModelType {
   None = "none",
   Interface = "interface",
-  CapabilityModel = "capabilityModel",
+  CapabilityModel = "capabilityModel"
 }
 
 /**

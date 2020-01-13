@@ -1,18 +1,15 @@
-
-'use strict';
-
-import * as vscode from 'vscode';
-import {DependentExtensions} from '../constants';
-import {DialogResponses} from '../DialogResponses';
-import {WorkbenchExtension} from '../WorkbenchExtension';
-import {VscodeCommands} from '../common/Commands';
-import {CancelOperationError} from '../CancelOperationError';
+import * as vscode from "vscode";
+import { DependentExtensions } from "../constants";
+import { DialogResponses } from "../DialogResponses";
+import { WorkbenchExtension } from "../WorkbenchExtension";
+import { VscodeCommands } from "../common/Commands";
+import { CancelOperationError } from "../CancelOperationError";
 
 export class RemoteExtension {
-  static isRemote(context: vscode.ExtensionContext) {
+  static isRemote(context: vscode.ExtensionContext): boolean {
     const extension = WorkbenchExtension.getExtension(context);
     if (!extension) {
-      throw new Error('Fail to get workbench extension.');
+      throw new Error("Fail to get workbench extension.");
     }
     return extension.extensionKind === vscode.ExtensionKind.Workspace;
   }
@@ -26,13 +23,13 @@ export class RemoteExtension {
   static async isAvailable(): Promise<boolean> {
     if (!vscode.extensions.getExtension(DependentExtensions.remote)) {
       const message =
-          'Remote extension is required for the current project. Do you want to install it from marketplace?';
-      const choice = await vscode.window.showInformationMessage(
-          message, DialogResponses.yes, DialogResponses.no);
+        "Remote extension is required for the current project. Do you want to install it from marketplace?";
+      const choice = await vscode.window.showInformationMessage(message, DialogResponses.yes, DialogResponses.no);
       if (choice === DialogResponses.yes) {
         vscode.commands.executeCommand(
-            VscodeCommands.VscodeOpen,
-            vscode.Uri.parse('vscode:extension/' + DependentExtensions.remote));
+          VscodeCommands.VscodeOpen,
+          vscode.Uri.parse("vscode:extension/" + DependentExtensions.remote)
+        );
       }
       return false;
     }
@@ -43,8 +40,8 @@ export class RemoteExtension {
     const res = await RemoteExtension.isAvailable();
     if (!res) {
       throw new CancelOperationError(
-          `Remote extension is not available. Please install ${
-              DependentExtensions.remote} first.`);
+        `Remote extension is not available. Please install ${DependentExtensions.remote} first.`
+      );
     }
   }
 
@@ -54,8 +51,8 @@ export class RemoteExtension {
    */
   static checkLocalBeforeRunCommand(context: vscode.ExtensionContext): boolean {
     if (RemoteExtension.isRemote(context)) {
-      const message =
-          `The command is not supported to be run in a remote environment. Open a new window and run this command again.`;
+      const message = `The command is not supported to be run in a remote environment. \
+      Open a new window and run this command again.`;
       vscode.window.showWarningMessage(message);
       return false;
     }

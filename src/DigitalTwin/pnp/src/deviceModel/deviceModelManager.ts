@@ -15,7 +15,7 @@ import { UIConstants } from "../view/uiConstants";
  */
 export enum ModelType {
   Interface = "Interface",
-  CapabilityModel = "Capability Model",
+  CapabilityModel = "Capability Model"
 }
 
 /**
@@ -93,7 +93,7 @@ export class DeviceModelManager {
     const modelId: string = DeviceModelManager.generateModelId(name);
     const filePath: string = path.join(folder, DeviceModelManager.generateModelFileName(name, type));
     const templatePath: string = this.context.asAbsolutePath(
-      path.join(Constants.RESOURCE_FOLDER, Constants.TEMPLATE_FOLDER, DeviceModelManager.getTemplateFileName(type)),
+      path.join(Constants.RESOURCE_FOLDER, Constants.TEMPLATE_FOLDER, DeviceModelManager.getTemplateFileName(type))
     );
     const replacement = new Map<string, string>();
     replacement.set(Constants.DIGITAL_TWIN_ID_PLACEHOLDER, modelId);

@@ -1,20 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-'use strict';
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
-import {TelemetryContext} from './telemetry';
-import {constructAndLoadIoTProject} from './utils';
+import { TelemetryContext } from "./telemetry";
+import { constructAndLoadIoTProject } from "./utils";
 
 export class DeviceOperator {
   async compile(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext) {
-    const iotProject =
-        await constructAndLoadIoTProject(context, channel, telemetryContext);
+    context: vscode.ExtensionContext,
+    channel: vscode.OutputChannel,
+    telemetryContext: TelemetryContext
+  ): Promise<void> {
+    const iotProject = await constructAndLoadIoTProject(context, channel, telemetryContext);
     if (!iotProject) {
       return;
     }
@@ -22,10 +22,11 @@ export class DeviceOperator {
   }
 
   async upload(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext) {
-    const iotProject =
-        await constructAndLoadIoTProject(context, channel, telemetryContext);
+    context: vscode.ExtensionContext,
+    channel: vscode.OutputChannel,
+    telemetryContext: TelemetryContext
+  ): Promise<void> {
+    const iotProject = await constructAndLoadIoTProject(context, channel, telemetryContext);
     if (!iotProject) {
       return;
     }
@@ -33,10 +34,11 @@ export class DeviceOperator {
   }
 
   async configDeviceSettings(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext) {
-    const iotProject =
-        await constructAndLoadIoTProject(context, channel, telemetryContext);
+    context: vscode.ExtensionContext,
+    channel: vscode.OutputChannel,
+    telemetryContext: TelemetryContext
+  ): Promise<void> {
+    const iotProject = await constructAndLoadIoTProject(context, channel, telemetryContext);
     if (!iotProject) {
       return;
     }

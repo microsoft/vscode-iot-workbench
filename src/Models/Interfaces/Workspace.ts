@@ -2,6 +2,6 @@
 // Licensed under the MIT License.
 
 export interface Workspace {
-  folders: Array<{path: string}>;
-  settings: {[key: string]: string};
+  folders: Array<{ path: string }>;
+  settings: { [key: string]: string };
 }

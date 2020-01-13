@@ -38,7 +38,7 @@ export class ModelRepositoryConnection {
       map[ModelRepositoryConnection.HOSTNAME_PROPERTY],
       map[ModelRepositoryConnection.REPOSITORY_ID_PROPERTY],
       map[ModelRepositoryConnection.SHARED_ACCESS_KEY_NAME_PROPERTY],
-      map[ModelRepositoryConnection.SHARED_ACCESS_KEY_PROPERTY],
+      map[ModelRepositoryConnection.SHARED_ACCESS_KEY_PROPERTY]
     );
     connection.validate();
     return connection;
@@ -58,7 +58,7 @@ export class ModelRepositoryConnection {
     readonly hostName: string,
     readonly repositoryId: string,
     readonly sharedAccessKeyName: string,
-    readonly sharedAccessKey: string,
+    readonly sharedAccessKey: string
   ) {
     const now: number = new Date().getTime();
     this.expiry = (Math.round(now / 1000) + ModelRepositoryConnection.EXPIRY_IN_MINUTES * 60).toString();
@@ -75,7 +75,7 @@ export class ModelRepositoryConnection {
     const hash: string = encodeURIComponent(
       createHmac(Constants.SHA256, secret)
         .update(signature)
-        .digest(Constants.BASE64),
+        .digest(Constants.BASE64)
     );
     return (
       "SharedAccessSignature " +
@@ -89,12 +89,13 @@ export class ModelRepositoryConnection {
   private validate(): void {
     if (!this.hostName || !ModelRepositoryConnection.HOSTNAME_REGEX.test(this.hostName)) {
       throw new Error(
-        `${Constants.CONNECTION_STRING_INVALID_FORMAT_MSG} on property ${ModelRepositoryConnection.HOSTNAME_PROPERTY}`,
+        `${Constants.CONNECTION_STRING_INVALID_FORMAT_MSG} on property ${ModelRepositoryConnection.HOSTNAME_PROPERTY}`
       );
     }
     if (!this.repositoryId) {
       throw new Error(
-        `${Constants.CONNECTION_STRING_INVALID_FORMAT_MSG} on property ${ModelRepositoryConnection.REPOSITORY_ID_PROPERTY}`,
+        `${Constants.CONNECTION_STRING_INVALID_FORMAT_MSG} on \
+        property ${ModelRepositoryConnection.REPOSITORY_ID_PROPERTY}`
       );
     }
     if (
@@ -102,12 +103,14 @@ export class ModelRepositoryConnection {
       !ModelRepositoryConnection.SHARED_ACCESS_KEY_NAME_REGEX.test(this.sharedAccessKeyName)
     ) {
       throw new Error(
-        `${Constants.CONNECTION_STRING_INVALID_FORMAT_MSG} on property ${ModelRepositoryConnection.SHARED_ACCESS_KEY_NAME_PROPERTY}`,
+        `${Constants.CONNECTION_STRING_INVALID_FORMAT_MSG} on \
+        property ${ModelRepositoryConnection.SHARED_ACCESS_KEY_NAME_PROPERTY}`
       );
     }
     if (!this.sharedAccessKey) {
       throw new Error(
-        `${Constants.CONNECTION_STRING_INVALID_FORMAT_MSG} on property ${ModelRepositoryConnection.SHARED_ACCESS_KEY_PROPERTY}`,
+        `${Constants.CONNECTION_STRING_INVALID_FORMAT_MSG} on \
+        property ${ModelRepositoryConnection.SHARED_ACCESS_KEY_PROPERTY}`
       );
     }
   }

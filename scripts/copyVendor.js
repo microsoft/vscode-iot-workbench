@@ -1,3 +1,3 @@
-const fs = require('fs-plus');
+const fs = require("fs-plus");
 
-fs.copySync('vendor', 'out/vendor');
+fs.copySync("vendor", "out/vendor");

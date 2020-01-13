@@ -25,7 +25,7 @@ export class DigitalTwinCompletionItemProvider implements vscode.CompletionItemP
       const edit: parser.Edit = {
         offset,
         length: 1,
-        content: Constants.COMPLETION_TRIGGER + Constants.DEFAULT_SEPARATOR,
+        content: Constants.COMPLETION_TRIGGER + Constants.DEFAULT_SEPARATOR
       };
       return parser.applyEdits(text, [edit]);
     }
@@ -45,14 +45,14 @@ export class DigitalTwinCompletionItemProvider implements vscode.CompletionItemP
     isProperty: boolean,
     insertText: string,
     position: vscode.Position,
-    range: vscode.Range,
+    range: vscode.Range
   ): vscode.CompletionItem {
     const completionItem: vscode.CompletionItem = {
       label,
       kind: isProperty ? vscode.CompletionItemKind.Property : vscode.CompletionItemKind.Value,
       insertText: new vscode.SnippetString(insertText),
       // the start of range should not be before position, otherwise completion item will not be shown
-      range: new vscode.Range(position, range.end),
+      range: new vscode.Range(position, range.end)
     };
     if (position.isAfter(range.start)) {
       completionItem.additionalTextEdits = [vscode.TextEdit.delete(new vscode.Range(range.start, position))];
@@ -69,7 +69,7 @@ export class DigitalTwinCompletionItemProvider implements vscode.CompletionItemP
   private static evaluateOverwriteRange(
     document: vscode.TextDocument,
     position: vscode.Position,
-    node: parser.Node,
+    node: parser.Node
   ): vscode.Range {
     let range: vscode.Range;
     if (node.type === JsonNodeType.String || node.type === JsonNodeType.Number || node.type === JsonNodeType.Boolean) {
@@ -129,7 +129,7 @@ export class DigitalTwinCompletionItemProvider implements vscode.CompletionItemP
     position: vscode.Position,
     range: vscode.Range,
     includeValue: boolean,
-    separator: string,
+    separator: string
   ): vscode.CompletionItem[] {
     const completionItems: vscode.CompletionItem[] = [];
     const exist = new Set<string>();
@@ -148,8 +148,8 @@ export class DigitalTwinCompletionItemProvider implements vscode.CompletionItemP
             true,
             DigitalTwinCompletionItemProvider.getInsertTextForProperty(dummyNode, includeValue, separator),
             position,
-            range,
-          ),
+            range
+          )
         );
       }
     } else if (IntelliSenseUtility.isLanguageNode(classNode)) {
@@ -165,8 +165,8 @@ export class DigitalTwinCompletionItemProvider implements vscode.CompletionItemP
             true,
             DigitalTwinCompletionItemProvider.getInsertTextForProperty(dummyNode, includeValue, separator),
             position,
-            range,
-          ),
+            range
+          )
         );
       }
     } else if (classNode.properties) {
@@ -184,8 +184,8 @@ export class DigitalTwinCompletionItemProvider implements vscode.CompletionItemP
             true,
             DigitalTwinCompletionItemProvider.getInsertTextForProperty(child, includeValue, separator),
             position,
-            range,
-          ),
+            range
+          )
         );
       }
       const suggestion: vscode.CompletionItem[] = DigitalTwinCompletionItemProvider.suggestReservedProperty(
@@ -194,7 +194,7 @@ export class DigitalTwinCompletionItemProvider implements vscode.CompletionItemP
         includeValue,
         separator,
         exist,
-        required,
+        required
       );
       completionItems.push(...suggestion);
     }
@@ -292,7 +292,7 @@ export class DigitalTwinCompletionItemProvider implements vscode.CompletionItemP
     includeValue: boolean,
     separator: string,
     exist: Set<string>,
-    required: Set<string>,
+    required: Set<string>
   ): vscode.CompletionItem[] {
     const completionItems: vscode.CompletionItem[] = [];
     const properties: PropertyNode[] = [];
@@ -314,8 +314,8 @@ export class DigitalTwinCompletionItemProvider implements vscode.CompletionItemP
           true,
           DigitalTwinCompletionItemProvider.getInsertTextForProperty(property, includeValue, separator),
           position,
-          range,
-        ),
+          range
+        )
       );
     }
     return completionItems;
@@ -330,7 +330,7 @@ export class DigitalTwinCompletionItemProvider implements vscode.CompletionItemP
   private static getInsertTextForProperty(
     propertyNode: PropertyNode,
     includeValue: boolean,
-    separator: string,
+    separator: string
   ): string {
     const name: string = propertyNode.label || propertyNode.id;
     if (!includeValue) {
@@ -373,7 +373,7 @@ export class DigitalTwinCompletionItemProvider implements vscode.CompletionItemP
     node: parser.Node,
     position: vscode.Position,
     range: vscode.Range,
-    separator: string,
+    separator: string
   ): vscode.CompletionItem[] {
     const completionItems: vscode.CompletionItem[] = [];
     const propertyPair: PropertyPair | undefined = IntelliSenseUtility.parseProperty(node);
@@ -390,8 +390,8 @@ export class DigitalTwinCompletionItemProvider implements vscode.CompletionItemP
           false,
           DigitalTwinCompletionItemProvider.getInsertTextForValue(DigitalTwinConstants.CONTEXT_TEMPLATE, separator),
           position,
-          range,
-        ),
+          range
+        )
       );
     } else if (propertyName === DigitalTwinConstants.TYPE) {
       // suggest value of @type property
@@ -409,8 +409,8 @@ export class DigitalTwinCompletionItemProvider implements vscode.CompletionItemP
                 false,
                 DigitalTwinCompletionItemProvider.getInsertTextForValue(value, separator),
                 position,
-                range,
-              ),
+                range
+              )
             );
           }
         }
@@ -428,8 +428,8 @@ export class DigitalTwinCompletionItemProvider implements vscode.CompletionItemP
               false,
               DigitalTwinCompletionItemProvider.getInsertTextForValue(value, separator),
               position,
-              range,
-            ),
+              range
+            )
           );
         }
       }
@@ -456,8 +456,10 @@ export class DigitalTwinCompletionItemProvider implements vscode.CompletionItemP
   provideCompletionItems(
     document: vscode.TextDocument,
     position: vscode.Position,
-    token: vscode.CancellationToken,
-    context: vscode.CompletionContext,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _token: vscode.CancellationToken,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _context: vscode.CompletionContext
   ): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList> {
     const text: string = DigitalTwinCompletionItemProvider.getTextForParse(document, position);
     const jsonNode: parser.Node | undefined = IntelliSenseUtility.parseDigitalTwinModel(text);
@@ -474,7 +476,7 @@ export class DigitalTwinCompletionItemProvider implements vscode.CompletionItemP
     const range: vscode.Range = DigitalTwinCompletionItemProvider.evaluateOverwriteRange(document, position, node);
     const separator: string = DigitalTwinCompletionItemProvider.evaluateSeparatorAfter(
       document.getText(),
-      document.offsetAt(range.end),
+      document.offsetAt(range.end)
     );
     const parent: parser.Node | undefined = node.parent;
     if (!parent || parent.type !== JsonNodeType.Property || !parent.children) {
