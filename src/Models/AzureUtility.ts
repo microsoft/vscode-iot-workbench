@@ -12,11 +12,11 @@ import rq = require("request");
 import { AzureAccount, AzureResourceFilter, AzureSession } from "../azure-account.api";
 import { ConfigHandler } from "../configHandler";
 
-import {getExtension} from './Apis';
-import {ExtensionName} from './Interfaces/Api';
-import {TelemetryWorker} from '../telemetry';
-import {EventNames} from '../constants';
-import {DependentExtensionNotFoundError} from '../common/Error/Error';
+import { getExtension } from "./Apis";
+import { ExtensionName } from "./Interfaces/Api";
+import { TelemetryWorker } from "../telemetry";
+import { EventNames } from "../constants";
+import { DependentExtensionNotFoundError } from "../common/Error/Error";
 
 export interface ARMParameters {
   [key: string]: { value: string | number | boolean | null };
@@ -299,9 +299,8 @@ export class AzureUtility {
         inputValue = _value.label;
       } else if (key.substr(0, 2) === "$$") {
         // Read value from file
-        if (!vscode.workspace.workspaceFolders ||
-            vscode.workspace.workspaceFolders.length === 0) {
-          inputValue = '';
+        if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
+          inputValue = "";
         } else {
           const _key = key.substr(2);
           const filePath = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, "..", _key);

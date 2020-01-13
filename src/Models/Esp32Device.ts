@@ -1,31 +1,33 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as clipboardy from 'clipboardy';
-import * as fs from 'fs-plus';
-import {Guid} from 'guid-typescript';
-import * as os from 'os';
-import * as path from 'path';
-import * as vscode from 'vscode';
+import * as clipboardy from "clipboardy";
+import * as fs from "fs-plus";
+import { Guid } from "guid-typescript";
+import * as os from "os";
+import * as path from "path";
+import * as vscode from "vscode";
 
-import {BoardProvider} from '../boardProvider';
-import {ConfigNotFoundError, OperationCanceledError, TypeNotSupportedError} from '../common/Error/Error';
-import {ConfigHandler} from '../configHandler';
-import {ConfigKey, OSPlatform} from '../constants';
-import {TelemetryContext} from '../telemetry';
-import {Board} from './Interfaces/Board';
+import { BoardProvider } from "../boardProvider";
+import { ConfigNotFoundError } from "../common/Error/ConfigNotFoundError";
+import { TypeNotSupportedError } from "../common/Error/TypeNotSupportedError";
+import { OperationCanceledError } from "../common/Error/OperationCanceledError";
+import { ConfigHandler } from "../configHandler";
+import { ConfigKey, OSPlatform } from "../constants";
+import { TelemetryContext } from "../telemetry";
+import { Board } from "./Interfaces/Board";
 
-import {ArduinoDeviceBase} from './ArduinoDeviceBase';
-import {DeviceType} from './Interfaces/Device';
-import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
+import { ArduinoDeviceBase } from "./ArduinoDeviceBase";
+import { DeviceType } from "./Interfaces/Device";
+import { TemplateFileInfo } from "./Interfaces/ProjectTemplate";
 
 enum ConfigDeviceSettings {
-  Copy = 'Copy',
-  ConfigCRC = 'Config CRC'
+  Copy = "Copy",
+  ConfigCRC = "Config CRC"
 }
 
 export class Esp32Device extends ArduinoDeviceBase {
-  private static _boardId = 'esp32';
+  private static _boardId = "esp32";
 
   private componentId: string;
   get id(): string {
@@ -93,14 +95,13 @@ export class Esp32Device extends ArduinoDeviceBase {
   async configDeviceSettings(): Promise<void> {
     const configSelectionItems: vscode.QuickPickItem[] = [
       {
-        label: 'Copy device connection string',
-        description: 'Copy device connection string',
+        label: "Copy device connection string",
+        description: "Copy device connection string",
         detail: ConfigDeviceSettings.Copy
       },
       {
-        label: 'Generate CRC for OTA',
-        description:
-            'Generate Cyclic Redundancy Check(CRC) code for OTA Update',
+        label: "Generate CRC for OTA",
+        description: "Generate Cyclic Redundancy Check(CRC) code for OTA Update",
         detail: ConfigDeviceSettings.ConfigCRC
       }
     ];
@@ -113,26 +114,21 @@ export class Esp32Device extends ArduinoDeviceBase {
     });
 
     if (!configSelection) {
-      throw new OperationCanceledError(
-          'ESP32 device setting type selection cancelled.');
+      throw new OperationCanceledError("ESP32 device setting type selection cancelled.");
     }
 
     if (configSelection.detail === ConfigDeviceSettings.ConfigCRC) {
       await this.generateCrc(this.channel);
     } else if (configSelection.detail === ConfigDeviceSettings.Copy) {
-      const deviceConnectionString =
-          ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
+      const deviceConnectionString = ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
 
       if (!deviceConnectionString) {
-        throw new ConfigNotFoundError(
-            ConfigKey.iotHubDeviceConnectionString,
-            'Please provision Azure service first.');
+        throw new ConfigNotFoundError(ConfigKey.iotHubDeviceConnectionString, "Please provision Azure service first.");
       }
       clipboardy.writeSync(deviceConnectionString);
       return;
     } else {
-      throw new TypeNotSupportedError(
-          'configuration type', `${configSelection.detail}`);
+      throw new TypeNotSupportedError("configuration type", `${configSelection.detail}`);
     }
   }
 

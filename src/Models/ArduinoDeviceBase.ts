@@ -1,23 +1,34 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as fs from 'fs-plus';
-import * as path from 'path';
-import * as vscode from 'vscode';
+import * as fs from "fs-plus";
+import * as path from "path";
+import * as vscode from "vscode";
 
-import {VscodeCommands} from '../common/Commands';
-import {AugumentEmptyOrNullError, BoardNotFoundError, ConfigNotFoundError, OperationCanceledError, ResourceNotFoundError, WorkspaceNotOpenError} from '../common/Error/Error';
-import {ConfigHandler} from '../configHandler';
-import {ConfigKey, DependentExtensions, FileNames, OperationType, OSPlatform, PlatformType, ScaffoldType} from '../constants';
-import {FileUtility} from '../FileUtility';
-import {TelemetryContext} from '../telemetry';
-import * as utils from '../utils';
+import { VscodeCommands } from "../common/Commands";
+import { AugumentEmptyOrNullError, ResourceNotFoundError, WorkspaceNotOpenError } from "../common/Error/Error";
+import { OperationCanceledError } from "../common/Error/OperationCanceledError";
+import { BoardNotFoundError } from "../common/Error/BoardNotFoundError";
+import { ConfigNotFoundError } from "../common/Error/ConfigNotFoundError";
+import { ConfigHandler } from "../configHandler";
+import {
+  ConfigKey,
+  DependentExtensions,
+  FileNames,
+  OperationType,
+  OSPlatform,
+  PlatformType,
+  ScaffoldType
+} from "../constants";
+import { FileUtility } from "../FileUtility";
+import { TelemetryContext } from "../telemetry";
+import * as utils from "../utils";
 
-import {Board} from './Interfaces/Board';
-import {ComponentType} from './Interfaces/Component';
-import {Device, DeviceType} from './Interfaces/Device';
-import {TemplateFileInfo} from './Interfaces/ProjectTemplate';
-import {OTA} from './OTA';
+import { Board } from "./Interfaces/Board";
+import { ComponentType } from "./Interfaces/Component";
+import { Device, DeviceType } from "./Interfaces/Device";
+import { TemplateFileInfo } from "./Interfaces/ProjectTemplate";
+import { OTA } from "./OTA";
 
 const constants = {
   defaultSketchFileName: "device.ino",
@@ -132,16 +143,12 @@ export abstract class ArduinoDeviceBase implements Device {
     return true;
   }
 
-
   abstract async configDeviceSettings(): Promise<void>;
 
   async load(): Promise<void> {
     const loadTimeScaffoldType = ScaffoldType.Workspace;
-    if (!await FileUtility.directoryExists(
-            loadTimeScaffoldType, this.deviceFolder)) {
-      throw new ResourceNotFoundError(
-          'load Arduino device',
-          `device folder ${this.deviceFolder} inside the project`);
+    if (!(await FileUtility.directoryExists(loadTimeScaffoldType, this.deviceFolder))) {
+      throw new ResourceNotFoundError("load Arduino device", `device folder ${this.deviceFolder} inside the project`);
     }
 
     if (!this.board) {
@@ -156,19 +163,15 @@ export abstract class ArduinoDeviceBase implements Device {
   async createCore(): Promise<void> {
     // Generate template files
     const createTimeScaffoldType = ScaffoldType.Local;
-    if (!await FileUtility.directoryExists(
-            createTimeScaffoldType, this.deviceFolder)) {
-      throw new ResourceNotFoundError(
-          'create Arduino device',
-          `device folder ${this.deviceFolder} inside the project`);
+    if (!(await FileUtility.directoryExists(createTimeScaffoldType, this.deviceFolder))) {
+      throw new ResourceNotFoundError("create Arduino device", `device folder ${this.deviceFolder} inside the project`);
     }
     if (!this.board) {
       throw new BoardNotFoundError(this.name);
     }
 
     for (const fileInfo of this.templateFiles) {
-      await utils.generateTemplateFile(
-          this.deviceFolder, createTimeScaffoldType, fileInfo);
+      await utils.generateTemplateFile(this.deviceFolder, createTimeScaffoldType, fileInfo);
     }
 
     await this.generateCppPropertiesFile(createTimeScaffoldType, this.board);
@@ -245,17 +248,18 @@ export abstract class ArduinoDeviceBase implements Device {
       throw new WorkspaceNotOpenError();
     }
 
-    const deviceBuildLocation = path.join(rootPath, '..', devicePath, '.build');
+    const deviceBuildLocation = path.join(rootPath, "..", devicePath, ".build");
     if (!fs.isDirectorySync(deviceBuildLocation)) {
       throw new ResourceNotFoundError(
-          'generate CRC', 'device build output folder',
-          'Please compile the project first.');
+        "generate CRC",
+        "device build output folder",
+        "Please compile the project first."
+      );
     }
 
     const binFiles = fs.listSync(deviceBuildLocation, ["bin"]);
     if (!binFiles || !binFiles.length) {
-      throw new ResourceNotFoundError(
-          'generate CRC', 'bin file', 'Please compile the project first.');
+      throw new ResourceNotFoundError("generate CRC", "bin file", "Please compile the project first.");
     }
 
     let binFilePath = "";
@@ -277,7 +281,7 @@ export abstract class ArduinoDeviceBase implements Device {
       });
 
       if (!choice || !choice.description) {
-        throw new OperationCanceledError('Bin file selection cancelled.');
+        throw new OperationCanceledError("Bin file selection cancelled.");
       }
 
       binFilePath = choice.description;
@@ -285,8 +289,10 @@ export abstract class ArduinoDeviceBase implements Device {
 
     if (!binFilePath || !fs.existsSync(binFilePath)) {
       throw new ResourceNotFoundError(
-          'generate CRC', `bin file path ${binFilePath}`,
-          'Please compile the project first.');
+        "generate CRC",
+        `bin file path ${binFilePath}`,
+        "Please compile the project first."
+      );
     }
 
     const res = OTA.generateCrc(binFilePath);
@@ -294,20 +300,18 @@ export abstract class ArduinoDeviceBase implements Device {
     vscode.window.showInformationMessage("Generate CRC succeeded.");
 
     channel.show();
-    channel.appendLine('========== CRC Information ==========');
-    channel.appendLine('');
-    channel.appendLine('fwPath: ' + binFilePath);
-    channel.appendLine('fwPackageCheckValue: ' + res.crc);
-    channel.appendLine('fwSize: ' + res.size);
-    channel.appendLine('');
-    channel.appendLine('======================================');
+    channel.appendLine("========== CRC Information ==========");
+    channel.appendLine("");
+    channel.appendLine("fwPath: " + binFilePath);
+    channel.appendLine("fwPackageCheckValue: " + res.crc);
+    channel.appendLine("fwSize: " + res.size);
+    channel.appendLine("");
+    channel.appendLine("======================================");
   }
 
   async configDeviceEnvironment(deviceRootPath: string, scaffoldType: ScaffoldType): Promise<void> {
     if (!deviceRootPath) {
-      throw new AugumentEmptyOrNullError(
-          'device root path',
-          'Please open the folder and initialize project again.');
+      throw new AugumentEmptyOrNullError("device root path", "Please open the folder and initialize project again.");
     }
 
     const templateFilesInfo = await utils.getEnvTemplateFilesAndAskOverwrite(

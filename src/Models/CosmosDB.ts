@@ -1,4 +1,3 @@
-<<<<<<< bbbda130d6515e3d7f48de5c9ac57cc09ea22585
 import * as crypto from "crypto";
 import * as fs from "fs-plus";
 import { Guid } from "guid-typescript";
@@ -13,7 +12,6 @@ import { AzureComponentsStorage, FileNames, ScaffoldType } from "../constants";
 import {
   AzureComponentConfig,
   AzureConfigFileHandler,
-  AzureConfigs,
   ComponentInfo,
   Dependency,
   DependencyConfig,
@@ -23,25 +21,7 @@ import { ARMTemplate, AzureUtility } from "./AzureUtility";
 import { Component, ComponentType } from "./Interfaces/Component";
 import { Provisionable } from "./Interfaces/Provisionable";
 import { channelShowAndAppendLine, channelPrintJsonObject } from "../utils";
-=======
-import * as crypto from 'crypto';
-import * as fs from 'fs-plus';
-import {Guid} from 'guid-typescript';
-import * as path from 'path';
-import * as vscode from 'vscode';
-
-import request = require('request-promise');
-import rq = require('request');
-
-import {AzureComponentsStorage, FileNames, ScaffoldType} from '../constants';
-
-import {AzureComponentConfig, AzureConfigFileHandler, ComponentInfo, Dependency, DependencyConfig, DependencyType} from './AzureComponentConfig';
-import {ARMTemplate, AzureUtility} from './AzureUtility';
-import {Component, ComponentType} from './Interfaces/Component';
-import {Provisionable} from './Interfaces/Provisionable';
-import {channelShowAndAppendLine, channelPrintJsonObject} from '../utils';
-import {OperationFailedError} from '../common/Error/Error';
->>>>>>> Define specific error type
+import { OperationFailedError } from "../common/Error/OperationFailedError";
 
 export class CosmosDB implements Component, Provisionable {
   dependencies: DependencyConfig[] = [];
@@ -95,33 +75,13 @@ export class CosmosDB implements Component, Provisionable {
       AzureComponentsStorage.fileName
     );
 
-    const azureConfigs = await AzureConfigFileHandler.loadAzureConfigs(
-        ScaffoldType.Workspace, azureConfigFilePath);
-    const cosmosDBConfig = azureConfigs.componentConfigs.find(
-        config => config.type === this.componentType);
+    const azureConfigs = await AzureConfigFileHandler.loadAzureConfigs(ScaffoldType.Workspace, azureConfigFilePath);
+    const cosmosDBConfig = azureConfigs.componentConfigs.find(config => config.type === this.componentType);
     if (cosmosDBConfig) {
       this.componentId = cosmosDBConfig.id;
       this.dependencies = cosmosDBConfig.dependencies;
       // Load other information from config file.
     }
-<<<<<<< bbbda130d6515e3d7f48de5c9ac57cc09ea22585
-
-    let azureConfigs: AzureConfigs;
-
-    try {
-      azureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, "utf8"));
-      const cosmosDBConfig = azureConfigs.componentConfigs.find(config => config.type === this.componentType);
-      if (cosmosDBConfig) {
-        this.componentId = cosmosDBConfig.id;
-        this.dependencies = cosmosDBConfig.dependencies;
-        // Load other information from config file.
-      }
-    } catch (error) {
-      return false;
-    }
-    return true;
-=======
->>>>>>> Define specific error type
   }
 
   async create(): Promise<void> {
@@ -166,7 +126,6 @@ export class CosmosDB implements Component, Provisionable {
         channelShowAndAppendLine(this.channel, "Creating Cosmos DB...");
       }
       const cosmosDBArmTemplatePath = this.extensionContext.asAbsolutePath(
-<<<<<<< bbbda130d6515e3d7f48de5c9ac57cc09ea22585
         path.join(FileNames.resourcesFolderName, "arm", "cosmosdb.json")
       );
       const cosmosDBArmTemplate = JSON.parse(fs.readFileSync(cosmosDBArmTemplatePath, "utf8")) as ARMTemplate;
@@ -179,29 +138,14 @@ export class CosmosDB implements Component, Provisionable {
         !cosmosDBDeploy.properties.outputs.cosmosDBAccountName ||
         !cosmosDBDeploy.properties.outputs.cosmosDBAccountKey
       ) {
-        throw new Error("Provision Cosmos DB failed.");
-=======
-          path.join(FileNames.resourcesFolderName, 'arm', 'cosmosdb.json'));
-      const cosmosDBArmTemplate =
-          JSON.parse(fs.readFileSync(cosmosDBArmTemplatePath, 'utf8')) as
-          ARMTemplate;
-
-      const cosmosDBDeploy =
-          await AzureUtility.deployARMTemplate(cosmosDBArmTemplate);
-      if (!cosmosDBDeploy || !cosmosDBDeploy.properties ||
-          !cosmosDBDeploy.properties.outputs ||
-          !cosmosDBDeploy.properties.outputs.cosmosDBAccountName ||
-          !cosmosDBDeploy.properties.outputs.cosmosDBAccountKey) {
-        throw new OperationFailedError('provision Cosmos DB');
->>>>>>> Define specific error type
+        throw new OperationFailedError("provision Cosmos DB");
       }
       channelPrintJsonObject(this.channel, cosmosDBDeploy);
 
       for (const dependency of this.dependencies) {
         const componentConfig = await this.azureConfigHandler.getComponentById(scaffoldType, dependency.id);
         if (!componentConfig) {
-          throw new OperationFailedError(
-              `find component with id ${dependency.id}`);
+          throw new OperationFailedError(`find component with id ${dependency.id}`);
         }
         if (dependency.type === DependencyType.Input) {
           // CosmosDB input
@@ -258,11 +202,7 @@ export class CosmosDB implements Component, Provisionable {
       database = database.trim();
       const cosmosDBApiRes = await this.ensureDatabase(cosmosDbName, cosmosDbKey, database);
       if (!cosmosDBApiRes) {
-<<<<<<< bbbda130d6515e3d7f48de5c9ac57cc09ea22585
-        throw new Error("Error occurred when create database.");
-=======
-        throw new OperationFailedError('create data base');
->>>>>>> Define specific error type
+        throw new OperationFailedError("create data base");
       }
     } else {
       database = databaseChoose.label;
@@ -301,11 +241,7 @@ export class CosmosDB implements Component, Provisionable {
       collection = collection.trim();
       const cosmosDBApiRes = await this.ensureCollection(cosmosDbName, cosmosDbKey, database, collection);
       if (!cosmosDBApiRes) {
-<<<<<<< bbbda130d6515e3d7f48de5c9ac57cc09ea22585
-        throw new Error("Error occurred when create collection.");
-=======
-        throw new OperationFailedError('create data base collection');
->>>>>>> Define specific error type
+        throw new OperationFailedError("create data base collection");
       }
     } else {
       collection = collectionChoose.label;

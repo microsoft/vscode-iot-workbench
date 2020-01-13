@@ -5,11 +5,11 @@ import * as path from "path";
 import * as vscode from "vscode";
 import * as sdk from "vscode-iot-device-cube-sdk";
 
-import {OperationCanceledError, OperationFailedError} from '../common/Error/Error';
-import {FileNames, OperationType, ScaffoldType} from '../constants';
-import {FileUtility} from '../FileUtility';
-import {TelemetryContext} from '../telemetry';
-import {askAndOpenInRemote, channelShowAndAppendLine, executeCommand} from '../utils';
+import { OperationCanceledError } from "../common/Error/OperationCanceledError";
+import { FileNames, OperationType, ScaffoldType } from "../constants";
+import { FileUtility } from "../FileUtility";
+import { TelemetryContext } from "../telemetry";
+import { askAndOpenInRemote, channelShowAndAppendLine, executeCommand } from "../utils";
 
 import { ContainerDeviceBase } from "./ContainerDeviceBase";
 import { DeviceType } from "./Interfaces/Device";
@@ -184,8 +184,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       placeHolder: "Select an option"
     });
     if (!sshDiscoverOrInputChoice) {
-      throw new OperationCanceledError(
-          'SSH configuration type selection cancelled.');
+      throw new OperationCanceledError("SSH configuration type selection cancelled.");
     }
 
     let raspiHost: string | undefined;
@@ -203,7 +202,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       } while (selectDeviceChoice && selectDeviceChoice.label === "$(sync) Discover again");
 
       if (!selectDeviceChoice) {
-        throw new OperationCanceledError('Device selection cancelled.');
+        throw new OperationCanceledError("Device selection cancelled.");
       }
 
       if (selectDeviceChoice.label !== "$(gear) Manual setup") {
@@ -219,7 +218,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       };
       raspiHost = await vscode.window.showInputBox(raspiHostOption);
       if (!raspiHost) {
-        throw new OperationCanceledError('Hostname input cancelled.');
+        throw new OperationCanceledError("Hostname input cancelled.");
       }
     }
     raspiHost = raspiHost || RaspberryPiUploadConfig.host;
@@ -232,7 +231,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     };
     const raspiPortString = await vscode.window.showInputBox(raspiPortOption);
     if (!raspiPortString) {
-      throw new OperationCanceledError('Port input cancelled.');
+      throw new OperationCanceledError("Port input cancelled.");
     }
     const raspiPort =
       raspiPortString && !isNaN(Number(raspiPortString)) ? Number(raspiPortString) : RaspberryPiUploadConfig.port;
@@ -245,7 +244,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     };
     let raspiUser = await vscode.window.showInputBox(raspiUserOption);
     if (!raspiUser) {
-      throw new OperationCanceledError('User name input cancelled.');
+      throw new OperationCanceledError("User name input cancelled.");
     }
     raspiUser = raspiUser || RaspberryPiUploadConfig.user;
 
@@ -257,7 +256,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     };
     let raspiPassword = await vscode.window.showInputBox(raspiPasswordOption);
     if (raspiPassword === undefined) {
-      throw new OperationCanceledError('Password input cancelled.');
+      throw new OperationCanceledError("Password input cancelled.");
     }
     raspiPassword = raspiPassword || RaspberryPiUploadConfig.password;
 
@@ -269,8 +268,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     };
     let raspiPath = await vscode.window.showInputBox(raspiPathOption);
     if (!raspiPath) {
-      throw new OperationCanceledError(
-          'Project destination path input cancelled.');
+      throw new OperationCanceledError("Project destination path input cancelled.");
     }
     raspiPath = raspiPath || RaspberryPiUploadConfig.projectPath;
 
@@ -281,6 +279,6 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     RaspberryPiUploadConfig.projectPath = raspiPath;
     RaspberryPiUploadConfig.updated = true;
 
-    vscode.window.showInformationMessage('Config SSH successfully.');
+    vscode.window.showInformationMessage("Config SSH successfully.");
   }
 }

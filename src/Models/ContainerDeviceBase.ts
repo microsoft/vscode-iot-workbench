@@ -1,21 +1,22 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import {Guid} from 'guid-typescript';
-import * as path from 'path';
-import * as vscode from 'vscode';
+import { Guid } from "guid-typescript";
+import * as path from "path";
+import * as vscode from "vscode";
 
-import {AugumentEmptyOrNullError, InternalError, OperationCanceledError, ResourceNotFoundError} from '../common/Error/Error';
-import {FileNames, OperationType, PlatformType, ScaffoldType, TemplateTag} from '../constants';
-import {DigitalTwinConstants} from '../DigitalTwin/DigitalTwinConstants';
-import {FileUtility} from '../FileUtility';
-import {TelemetryContext} from '../telemetry';
-import * as utils from '../utils';
+import { AugumentEmptyOrNullError, InternalError, ResourceNotFoundError } from "../common/Error/Error";
+import { OperationCanceledError } from "../common/Error/OperationCanceledError";
+import { FileNames, OperationType, PlatformType, ScaffoldType, TemplateTag } from "../constants";
+import { DigitalTwinConstants } from "../DigitalTwin/DigitalTwinConstants";
+import { FileUtility } from "../FileUtility";
+import { TelemetryContext } from "../telemetry";
+import * as utils from "../utils";
 
-import {ComponentType} from './Interfaces/Component';
-import {Device, DeviceType} from './Interfaces/Device';
-import {ProjectTemplate, TemplateFileInfo, TemplatesType} from './Interfaces/ProjectTemplate';
-import {RemoteExtension} from './RemoteExtension';
+import { ComponentType } from "./Interfaces/Component";
+import { Device, DeviceType } from "./Interfaces/Device";
+import { ProjectTemplate, TemplateFileInfo, TemplatesType } from "./Interfaces/ProjectTemplate";
+import { RemoteExtension } from "./RemoteExtension";
 
 const constants = {
   configFile: "config.json",
@@ -71,14 +72,14 @@ export abstract class ContainerDeviceBase implements Device {
   async load(): Promise<void> {
     // ScaffoldType is Workspace when loading a project
     const scaffoldType = ScaffoldType.Workspace;
-    const operation = 'load container device';
+    const operation = "load container device";
     this.validateProjectFolder(operation, scaffoldType);
   }
 
   async create(): Promise<void> {
     // ScaffoldType is local when creating a project
     const createTimeScaffoldType = ScaffoldType.Local;
-    const operation = 'create container device';
+    const operation = "create container device";
     this.validateProjectFolder(operation, createTimeScaffoldType);
 
     await this.generateTemplateFiles(createTimeScaffoldType, this.projectFolder, this.templateFilesInfo);
@@ -92,11 +93,11 @@ export abstract class ContainerDeviceBase implements Device {
     templateFilesInfo: TemplateFileInfo[]
   ): Promise<boolean> {
     if (!templateFilesInfo) {
-      throw new AugumentEmptyOrNullError('template files');
+      throw new AugumentEmptyOrNullError("template files");
     }
 
     if (!projectPath) {
-      throw new AugumentEmptyOrNullError('project path');
+      throw new AugumentEmptyOrNullError("project path");
     }
 
     // Cannot use forEach here since it's async
@@ -140,14 +141,11 @@ export abstract class ContainerDeviceBase implements Device {
 
   async configDeviceEnvironment(projectPath: string, scaffoldType: ScaffoldType): Promise<void> {
     if (!projectPath) {
-      throw new AugumentEmptyOrNullError(
-          'project path',
-          'Please open the folder and initialize project again.');
+      throw new AugumentEmptyOrNullError("project path", "Please open the folder and initialize project again.");
     }
 
     // Get template list json object
-    const templateJson =
-        await utils.getTemplateJson(this.extensionContext, scaffoldType);
+    const templateJson = await utils.getTemplateJson(this.extensionContext, scaffoldType);
 
     // Select container
     const containerSelection = await this.selectContainer(templateJson);
@@ -156,8 +154,7 @@ export abstract class ContainerDeviceBase implements Device {
     }
     const templateName = containerSelection.label;
     if (!templateName) {
-      throw new InternalError(
-          'Cannot get template name from template property');
+      throw new InternalError("Cannot get template name from template property");
     }
 
     const templateFilesInfo = await utils.getEnvTemplateFilesAndAskOverwrite(
@@ -167,7 +164,7 @@ export abstract class ContainerDeviceBase implements Device {
       templateName
     );
     if (templateFilesInfo.length === 0) {
-      throw new InternalError('template files info is empty.');
+      throw new InternalError("template files info is empty.");
     }
 
     // Configure project environment with template files
@@ -213,12 +210,13 @@ export abstract class ContainerDeviceBase implements Device {
    * @param operation The caller function's operation for logging
    * @param scaffoldType scaffold type
    */
-  async validateProjectFolder(operation: string, scaffoldType: ScaffoldType):
-      Promise<void> {
-    if (!await FileUtility.directoryExists(scaffoldType, this.projectFolder)) {
+  async validateProjectFolder(operation: string, scaffoldType: ScaffoldType): Promise<void> {
+    if (!(await FileUtility.directoryExists(scaffoldType, this.projectFolder))) {
       throw new ResourceNotFoundError(
-          operation, `project folder ${this.projectFolder}`,
-          'Please initialize the project first.');
+        operation,
+        `project folder ${this.projectFolder}`,
+        "Please initialize the project first."
+      );
     }
   }
 }

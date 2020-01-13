@@ -1,18 +1,27 @@
-import {ResourceManagementClient} from 'azure-arm-resource';
-import * as fs from 'fs-plus';
-import {Guid} from 'guid-typescript';
-import * as path from 'path';
-import * as vscode from 'vscode';
+import { ResourceManagementClient } from "azure-arm-resource";
+import * as fs from "fs-plus";
+import { Guid } from "guid-typescript";
+import * as path from "path";
+import * as vscode from "vscode";
 
-import {OperationFailedError, ResourceNotFoundError, TypeNotSupportedError} from '../common/Error/Error';
-import {AzureComponentsStorage, FileNames, ScaffoldType} from '../constants';
-import {channelPrintJsonObject, channelShowAndAppendLine} from '../utils';
+import { ResourceNotFoundError } from "../common/Error/Error";
+import { TypeNotSupportedError } from "../common/Error/TypeNotSupportedError";
+import { OperationFailedError } from "../common/Error/OperationFailedError";
+import { AzureComponentsStorage, FileNames, ScaffoldType } from "../constants";
+import { channelPrintJsonObject, channelShowAndAppendLine } from "../utils";
 
-import {AzureComponentConfig, AzureConfigFileHandler, AzureConfigs, ComponentInfo, Dependency, DependencyConfig, DependencyType} from './AzureComponentConfig';
-import {ARMTemplate, AzureUtility} from './AzureUtility';
-import {Component, ComponentType} from './Interfaces/Component';
-import {Deployable} from './Interfaces/Deployable';
-import {Provisionable} from './Interfaces/Provisionable';
+import {
+  AzureComponentConfig,
+  AzureConfigFileHandler,
+  ComponentInfo,
+  Dependency,
+  DependencyConfig,
+  DependencyType
+} from "./AzureComponentConfig";
+import { ARMTemplate, AzureUtility } from "./AzureUtility";
+import { Component, ComponentType } from "./Interfaces/Component";
+import { Deployable } from "./Interfaces/Deployable";
+import { Provisionable } from "./Interfaces/Provisionable";
 
 enum StreamAnalyticsAction {
   Start = 1,
@@ -41,14 +50,12 @@ export class StreamAnalyticsJob implements Component, Provisionable, Deployable 
 
     const componentConfig = await this.azureConfigHandler.getComponentById(ScaffoldType.Workspace, this.id);
     if (!componentConfig) {
-      throw new OperationFailedError(
-          `get Azure Stream Analytics component with id ${this.id}.`);
+      throw new OperationFailedError(`get Azure Stream Analytics component with id ${this.id}.`);
     }
 
     const componentInfo = componentConfig.componentInfo;
     if (!componentInfo) {
-      throw new OperationFailedError(
-          'get component info', 'Please provision Stream Analytics Job first.');
+      throw new OperationFailedError("get component info", "Please provision Stream Analytics Job first.");
     }
 
     const subscriptionId = componentInfo.values.subscriptionId;
@@ -57,7 +64,7 @@ export class StreamAnalyticsJob implements Component, Provisionable, Deployable 
     AzureUtility.init(this.extensionContext, this.channel, subscriptionId);
     const azureClient = AzureUtility.getClient();
     if (!azureClient) {
-      throw new OperationFailedError('initialize Azure client');
+      throw new OperationFailedError("initialize Azure client");
     }
 
     this.subscriptionId = subscriptionId;
@@ -157,13 +164,13 @@ export class StreamAnalyticsJob implements Component, Provisionable, Deployable 
 
   async load(): Promise<void> {
     const azureConfigFilePath = path.join(
-        this.projectRootPath, AzureComponentsStorage.folderName,
-        AzureComponentsStorage.fileName);
-    const azureConfigs = await AzureConfigFileHandler.loadAzureConfigs(
-        ScaffoldType.Workspace, azureConfigFilePath);
+      this.projectRootPath,
+      AzureComponentsStorage.folderName,
+      AzureComponentsStorage.fileName
+    );
+    const azureConfigs = await AzureConfigFileHandler.loadAzureConfigs(ScaffoldType.Workspace, azureConfigFilePath);
 
-    const asaConfig = azureConfigs.componentConfigs.find(
-        config => config.type === this.componentType);
+    const asaConfig = azureConfigs.componentConfigs.find(config => config.type === this.componentType);
     if (asaConfig) {
       this.componentId = asaConfig.id;
       this.dependencies = asaConfig.dependencies;
@@ -218,10 +225,13 @@ export class StreamAnalyticsJob implements Component, Provisionable, Deployable 
       const asaArmTemplate = JSON.parse(fs.readFileSync(asaArmTemplatePath, "utf8")) as ARMTemplate;
 
       const asaDeploy = await AzureUtility.deployARMTemplate(asaArmTemplate);
-      if (!asaDeploy || !asaDeploy.properties ||
-          !asaDeploy.properties.outputs ||
-          !asaDeploy.properties.outputs.streamAnalyticsJobName) {
-        throw new OperationFailedError('provision Stream Analytics Job');
+      if (
+        !asaDeploy ||
+        !asaDeploy.properties ||
+        !asaDeploy.properties.outputs ||
+        !asaDeploy.properties.outputs.streamAnalyticsJobName
+      ) {
+        throw new OperationFailedError("provision Stream Analytics Job");
       }
       channelPrintJsonObject(this.channel, asaDeploy);
 
@@ -240,9 +250,7 @@ export class StreamAnalyticsJob implements Component, Provisionable, Deployable 
     for (const dependency of this.dependencies) {
       const componentConfig = await this.azureConfigHandler.getComponentById(scaffoldType, dependency.id);
       if (!componentConfig) {
-        throw new ResourceNotFoundError(
-            'provision stream analystics job',
-            `component with id ${dependency.id}`);
+        throw new ResourceNotFoundError("provision stream analystics job", `component with id ${dependency.id}`);
       }
 
       if (dependency.type === DependencyType.Input) {
@@ -269,8 +277,7 @@ export class StreamAnalyticsJob implements Component, Provisionable, Deployable 
             }
 
             if (!iotHubName || !iotHubKeyName || !iotHubKey) {
-              throw new OperationFailedError(
-                  'parse IoT Hub connection string.');
+              throw new OperationFailedError("parse IoT Hub connection string.");
             }
 
             const asaIoTHubArmTemplatePath = this.extensionContext.asAbsolutePath(
@@ -287,14 +294,13 @@ export class StreamAnalyticsJob implements Component, Provisionable, Deployable 
 
             const asaInputDeploy = await AzureUtility.deployARMTemplate(asaIoTHubArmTemplate, asaIotHubArmParameters);
             if (!asaInputDeploy) {
-              throw new OperationFailedError('deploy arm template');
+              throw new OperationFailedError("deploy arm template");
             }
 
             break;
           }
           default: {
-            throw new TypeNotSupportedError(
-                'ASA input type', `${componentConfig.type}`);
+            throw new TypeNotSupportedError("ASA input type", `${componentConfig.type}`);
           }
         }
       } else {
@@ -303,17 +309,11 @@ export class StreamAnalyticsJob implements Component, Provisionable, Deployable 
             if (!componentConfig.componentInfo) {
               return false;
             }
-            const cosmosDBAccountName =
-                componentConfig.componentInfo.values.cosmosDBAccountName;
-            const cosmosDBDatabase =
-                componentConfig.componentInfo.values.cosmosDBDatabase;
-            const cosmosDBCollection =
-                componentConfig.componentInfo.values.cosmosDBCollection;
-            if (!cosmosDBAccountName || !cosmosDBDatabase ||
-                !cosmosDBCollection) {
-              throw new ResourceNotFoundError(
-                  'provision stream analystics job',
-                  'Cosmos DB connection information');
+            const cosmosDBAccountName = componentConfig.componentInfo.values.cosmosDBAccountName;
+            const cosmosDBDatabase = componentConfig.componentInfo.values.cosmosDBDatabase;
+            const cosmosDBCollection = componentConfig.componentInfo.values.cosmosDBCollection;
+            if (!cosmosDBAccountName || !cosmosDBDatabase || !cosmosDBCollection) {
+              throw new ResourceNotFoundError("provision stream analystics job", "Cosmos DB connection information");
             }
 
             const asaCosmosDBArmTemplatePath = this.extensionContext.asAbsolutePath(
@@ -335,14 +335,13 @@ export class StreamAnalyticsJob implements Component, Provisionable, Deployable 
               asaCosmosArmParameters
             );
             if (!asaOutputDeploy) {
-              throw new OperationFailedError('deploy arm template');
+              throw new OperationFailedError("deploy arm template");
             }
 
             break;
           }
           default: {
-            throw new TypeNotSupportedError(
-                'ASA input type', `${componentConfig.type}`);
+            throw new TypeNotSupportedError("ASA input type", `${componentConfig.type}`);
           }
         }
       }
@@ -391,8 +390,7 @@ export class StreamAnalyticsJob implements Component, Provisionable, Deployable 
     /providers/Microsoft.StreamAnalytics/streamingjobs/${this.streamAnalyticsJobName}/transformations/Transformation`;
     const apiVersion = "2015-10-01";
     if (!fs.existsSync(this.queryPath)) {
-      throw new ResourceNotFoundError(
-          'deploy stream analytics job', `query file at ${this.queryPath}`);
+      throw new ResourceNotFoundError("deploy stream analytics job", `query file at ${this.queryPath}`);
     }
     const query = fs.readFileSync(this.queryPath, "utf8");
     const parameters = { properties: { streamingUnits: 1, query } };

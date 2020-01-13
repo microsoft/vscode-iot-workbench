@@ -1,24 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-<<<<<<< 65a72442ab558681d93bcd0c52cbe1e3c404d133
 import * as vscode from "vscode";
 import TelemetryReporter from "vscode-extension-telemetry";
-=======
-import * as vscode from 'vscode';
-import TelemetryReporter from 'vscode-extension-telemetry';
 
-import {OperationCanceledError} from './common/Error/Error';
-import {ExceptionHelper} from './common/Error/exceptionHelper';
-import {DevelopEnvironment} from './constants';
-import {RemoteExtension} from './Models/RemoteExtension';
-import {NSAT} from './nsat';
-import {WorkbenchExtension} from './WorkbenchExtension';
->>>>>>> Move cancelOperationError to common folder
-
-import { CancelOperationError } from "./CancelOperationError";
+import { OperationCanceledError } from "./common/Error/OperationCanceledError";
+import { ExceptionHelper } from "./common/Error/exceptionHelper";
 import { DevelopEnvironment } from "./constants";
-import { ExceptionHelper } from "./exceptionHelper";
 import { RemoteExtension } from "./Models/RemoteExtension";
 import { NSAT } from "./nsat";
 import { WorkbenchExtension } from "./WorkbenchExtension";

@@ -27,7 +27,7 @@ import { RemoteExtension } from "../Models/RemoteExtension";
 import { DigitalTwinUtility } from "./DigitalTwinUtility";
 import { CodeGenUtility } from "./DigitalTwinCodeGen/CodeGenUtility";
 import { FileUtility } from "../FileUtility";
-import { CancelOperationError } from "../common/CancelOperationError";
+import { OperationCanceledError } from "../common/Error/OperationCanceledError";
 import { Utility } from "./pnp/src/common/utility";
 
 interface CodeGeneratorDownloadLocation {
@@ -87,8 +87,10 @@ function localCodeGenCliPath(): string {
 
 export class CodeGeneratorCore {
   async generateDeviceCodeStub(
-      context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext) {
+    context: vscode.ExtensionContext,
+    channel: vscode.OutputChannel,
+    telemetryContext: TelemetryContext
+  ): Promise<void> {
     RemoteExtension.ensureLocalBeforeRunCommand(context);
 
     const rootPath = utils.getFirstWorkspaceFolderPath();
@@ -196,7 +198,7 @@ export class CodeGeneratorCore {
       });
 
       if (!regenSelection) {
-        throw new CancelOperationError("Re-generate code selection cancelled.");
+        throw new OperationCanceledError("Re-generate code selection cancelled.");
       }
 
       // User select regenerate code
@@ -238,7 +240,7 @@ export class CodeGeneratorCore {
     });
 
     if (!codeGenProjectName) {
-      throw new CancelOperationError(`Project name is not specified, cancelled.`);
+      throw new OperationCanceledError(`Project name is not specified, cancelled.`);
     }
 
     const projectPath = path.join(rootPath, codeGenProjectName);
@@ -247,7 +249,7 @@ export class CodeGeneratorCore {
       const messge = `The folder ${projectPath} already exists. Do you want to overwrite the contents in this folder?`;
       const choice = await vscode.window.showWarningMessage(messge, DialogResponses.yes, DialogResponses.no);
       if (choice !== DialogResponses.yes) {
-        throw new CancelOperationError(`Valid project name is not specified, cancelled.`);
+        throw new OperationCanceledError(`Valid project name is not specified, cancelled.`);
       }
     }
 
@@ -277,7 +279,7 @@ export class CodeGeneratorCore {
     });
 
     if (!languageSelection) {
-      throw new CancelOperationError("CodeGen language selection cancelled.");
+      throw new OperationCanceledError("CodeGen language selection cancelled.");
     }
 
     utils.channelShowAndAppendLine(channel, `Selected CodeGen language: ${languageSelection.label}`);
@@ -304,7 +306,7 @@ export class CodeGeneratorCore {
     });
 
     if (!deviceConnectionSelection) {
-      throw new CancelOperationError("Connection type selection cancelled.");
+      throw new OperationCanceledError("Connection type selection cancelled.");
     }
 
     const deviceConnection = codegenOptionsConfig.connectionTypes.find((connectionType: PnpDeviceConnection) => {
@@ -354,7 +356,7 @@ export class CodeGeneratorCore {
     });
 
     if (!projectTemplateSelection) {
-      throw new CancelOperationError("CodeGen project template selection cancelled.");
+      throw new OperationCanceledError("CodeGen project template selection cancelled.");
     }
 
     const projectTemplate = projectTemplates.find((projectType: CodeGenProjectTemplate) => {
@@ -403,7 +405,7 @@ export class CodeGeneratorCore {
         });
 
         if (!deviceConnectionSelection) {
-          throw new CancelOperationError("IoT Device SDK reference type selection cancelled.");
+          throw new OperationCanceledError("IoT Device SDK reference type selection cancelled.");
         }
 
         // Map selection to a DeviceSdkReferenceType enum

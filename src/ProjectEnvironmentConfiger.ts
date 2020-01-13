@@ -1,26 +1,28 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-'use strict';
+"use strict";
 
-import * as vscode from 'vscode';
-import * as utils from './utils';
-import * as path from 'path';
+import * as vscode from "vscode";
+import * as utils from "./utils";
+import * as path from "path";
 
-import {TelemetryContext} from './telemetry';
-import {ScaffoldType, PlatformType} from './constants';
-import {RemoteExtension} from './Models/RemoteExtension';
-import {IoTWorkbenchProjectBase, OpenScenario} from './Models/IoTWorkbenchProjectBase';
-import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
-import {configExternalCMakeProjectToIoTContainerProject} from './utils';
-import {OperationCanceledError, TypeNotSupportedError} from './common/Error/Error';
+import { TelemetryContext } from "./telemetry";
+import { ScaffoldType, PlatformType } from "./constants";
+import { RemoteExtension } from "./Models/RemoteExtension";
+import { IoTWorkbenchProjectBase, OpenScenario } from "./Models/IoTWorkbenchProjectBase";
+import { ProjectHostType } from "./Models/Interfaces/ProjectHostType";
+import { configExternalCMakeProjectToIoTContainerProject } from "./utils";
+import { TypeNotSupportedError } from "./common/Error/TypeNotSupportedError";
+import { OperationCanceledError } from "./common/Error/OperationCanceledError";
 
-const impor = require('impor')(__dirname);
-const ioTWorkspaceProjectModule = impor('./Models/IoTWorkspaceProject') as
-    typeof import('./Models/IoTWorkspaceProject');
-const ioTContainerizedProjectModule =
-    impor('./Models/IoTContainerizedProject') as
-    typeof import('./Models/IoTContainerizedProject');
+const impor = require("impor")(__dirname);
+const ioTWorkspaceProjectModule = impor(
+  "./Models/IoTWorkspaceProject"
+) as typeof import("./Models/IoTWorkspaceProject");
+const ioTContainerizedProjectModule = impor(
+  "./Models/IoTContainerizedProject"
+) as typeof import("./Models/IoTContainerizedProject");
 
 export class ProjectEnvironmentConfiger {
   async configureCmakeProjectEnvironment(
@@ -97,7 +99,7 @@ export class ProjectEnvironmentConfiger {
         projectFileRootPath
       );
     } else {
-      throw new TypeNotSupportedError('platform', `${platform}`);
+      throw new TypeNotSupportedError("platform", `${platform}`);
     }
 
     await project.load(scaffoldType);

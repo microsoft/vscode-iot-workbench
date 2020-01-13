@@ -14,7 +14,7 @@ import { ArduinoPackageManager } from "./ArduinoPackageManager";
 import { BoardProvider } from "./boardProvider";
 import { VSCExpress } from "vscode-express";
 import { RemoteExtension } from "./Models/RemoteExtension";
-import { CancelOperationError } from "./common/CancelOperationError";
+import { OperationCanceledError } from "./common/Error/OperationCanceledError";
 import { IoTCubeCommands } from "./common/Commands";
 
 type OptionsWithUri = import("request-promise").OptionsWithUri;
@@ -168,8 +168,7 @@ export class ExampleExplorer {
     return customizedPath;
   }
 
-  async selectBoard(
-      context: vscode.ExtensionContext, telemetryContext: TelemetryContext) {
+  async selectBoard(context: vscode.ExtensionContext, telemetryContext: TelemetryContext): Promise<void> {
     RemoteExtension.ensureLocalBeforeRunCommand(context);
 
     const boardFolderPath = context.asAbsolutePath(
@@ -205,7 +204,7 @@ export class ExampleExplorer {
     });
 
     if (!boardSelection) {
-      throw new CancelOperationError("Board selection cancelled.");
+      throw new OperationCanceledError("Board selection cancelled.");
     } else if (boardSelection.id === "no_device") {
       await utils.takeNoDeviceSurvey(telemetryContext, context);
       return;
@@ -249,7 +248,7 @@ export class ExampleExplorer {
     const res = await this.initializeExampleInternal(context, channel, telemetryContext);
 
     if (!res) {
-      throw new CancelOperationError(`Example load cancelled.`);
+      throw new OperationCanceledError(`Example load cancelled.`);
     }
 
     vscode.window.showInformationMessage("Example load successfully.");
@@ -292,15 +291,14 @@ export class ExampleExplorer {
       return true;
     }
 
-    utils.channelShowAndAppendLine(channel, 'Downloading example package...');
+    utils.channelShowAndAppendLine(channel, "Downloading example package...");
     await this.downloadExamplePackage(channel, url, fsPath);
     // Follow the same pattern in Arduino extension to open examples in new
     // VSCode instance
     const projectPath = utils.getWorkspaceFile(fsPath);
     if (!projectPath) {
     }
-    await vscode.commands.executeCommand(
-        IoTCubeCommands.OpenLocally, projectPath, true);
+    await vscode.commands.executeCommand(IoTCubeCommands.OpenLocally, projectPath, true);
     return true;
   }
 }

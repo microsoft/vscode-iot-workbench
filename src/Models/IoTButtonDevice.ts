@@ -7,8 +7,9 @@ import * as path from "path";
 import * as request from "request-promise";
 import * as vscode from "vscode";
 
-import {AugumentInvalidError, OperationCanceledError, OperationFailedError, ResourceNotFoundError} from '../common/Error/Error';
-
+import { AugumentInvalidError, ResourceNotFoundError } from "../common/Error/Error";
+import { OperationCanceledError } from "../common/Error/OperationCanceledError";
+import { OperationFailedError } from "../common/Error/OperationFailedError";
 import { ConfigHandler } from "../configHandler";
 import { ConfigKey, ScaffoldType } from "../constants";
 import { FileUtility } from "../FileUtility";
@@ -67,11 +68,8 @@ export class IoTButtonDevice implements Device {
 
   async create(): Promise<void> {
     const createTimeScaffoldType = ScaffoldType.Local;
-    if (!await FileUtility.directoryExists(
-            createTimeScaffoldType, this.deviceFolder)) {
-      throw new ResourceNotFoundError(
-          `device folder ${this.deviceFolder}`,
-          'Please initialize the device first.');
+    if (!(await FileUtility.directoryExists(createTimeScaffoldType, this.deviceFolder))) {
+      throw new ResourceNotFoundError(`device folder ${this.deviceFolder}`, "Please initialize the device first.");
     }
 
     for (const fileInfo of this.templateFilesInfo) {
@@ -128,8 +126,7 @@ export class IoTButtonDevice implements Device {
     });
 
     if (!configSelection) {
-      throw new OperationCanceledError(
-          'IoT Button device setting type selection cancelled.');
+      throw new OperationCanceledError("IoT Button device setting type selection cancelled.");
     }
 
     if (configSelection.detail === "Config WiFi") {
@@ -177,7 +174,7 @@ export class IoTButtonDevice implements Device {
         // the action
       }
 
-      vscode.window.showInformationMessage('Shutdown IoT button completed.');
+      vscode.window.showInformationMessage("Shutdown IoT button completed.");
       return;
     }
 
@@ -196,7 +193,7 @@ export class IoTButtonDevice implements Device {
     const res = await request(option);
 
     if (!res) {
-      throw new OperationFailedError('Empty response.');
+      throw new OperationFailedError("Empty response.");
     }
 
     return res;
@@ -307,12 +304,15 @@ export class IoTButtonDevice implements Device {
         return false;
       }
 
-      if ((deviceConnectionString.indexOf('HostName') === -1) ||
-          (deviceConnectionString.indexOf('DeviceId') === -1) ||
-          (deviceConnectionString.indexOf('SharedAccessKey') === -1)) {
+      if (
+        deviceConnectionString.indexOf("HostName") === -1 ||
+        deviceConnectionString.indexOf("DeviceId") === -1 ||
+        deviceConnectionString.indexOf("SharedAccessKey") === -1
+      ) {
         throw new AugumentInvalidError(
-            'The format of IoT Hub Device connection string',
-            'Please provide a valid Device connection string.');
+          "The format of IoT Hub Device connection string",
+          "Please provide a valid Device connection string."
+        );
       }
     }
 
@@ -348,16 +348,16 @@ export class IoTButtonDevice implements Device {
     return res;
   }
 
-  async configUserData() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async configUserData(): Promise<any> {
     if (!fs.existsSync(this.deviceFolder)) {
-      throw new ResourceNotFoundError('', `device folder ${this.deviceFolder}`);
+      throw new ResourceNotFoundError("config user data", `device folder ${this.deviceFolder}`);
     }
 
-    const userjsonFilePath =
-        path.join(this.deviceFolder, constants.userjsonFilename);
+    const userjsonFilePath = path.join(this.deviceFolder, constants.userjsonFilename);
 
     if (!fs.existsSync(userjsonFilePath)) {
-      throw new ResourceNotFoundError('', `user json file ${userjsonFilePath}`);
+      throw new ResourceNotFoundError("config user data", `user json file ${userjsonFilePath}`);
     }
 
     let userjson = {};
@@ -413,18 +413,21 @@ export class IoTButtonDevice implements Device {
     return res;
   }
 
-  async configDeviceEnvironment(
-      deviceRootPath: string, scaffoldType: ScaffoldType): Promise<void> {}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async configDeviceEnvironment(_deviceRootPath: string, _scaffoldType: ScaffoldType): Promise<void> {
+    // Do nothing.
+  }
 
   /**
    * Validate whether device folder exists. If not, throw error.
    * @param scaffoldType scaffold type
    */
   async validateDeviceFolder(scaffoldType: ScaffoldType): Promise<void> {
-    if (!await FileUtility.directoryExists(scaffoldType, this.deviceFolder)) {
+    if (!(await FileUtility.directoryExists(scaffoldType, this.deviceFolder))) {
       throw new ResourceNotFoundError(
-          `device folder path ${this.deviceFolder}`,
-          'Please initialize the project first.');
+        `device folder path ${this.deviceFolder}`,
+        "Please initialize the project first."
+      );
     }
   }
 }

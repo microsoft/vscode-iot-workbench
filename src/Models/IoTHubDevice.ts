@@ -8,6 +8,9 @@ import * as vscode from "vscode";
 import { ConfigHandler } from "../configHandler";
 import { ConfigKey, ScaffoldType } from "../constants";
 
+import { DependentExtensionNotFoundError } from "../common/Error/Error";
+import { ConfigNotFoundError } from "../common/Error/ConfigNotFoundError";
+
 import { getExtension } from "./Apis";
 import { ComponentInfo, DependencyConfig } from "./AzureComponentConfig";
 import { ExtensionName } from "./Interfaces/Api";
@@ -30,14 +33,8 @@ async function getDeviceNumber(iotHubConnectionString: string): Promise<number> 
   });
 }
 
-<<<<<<< bbbda130d6515e3d7f48de5c9ac57cc09ea22585
 async function getProvisionIothubDeviceSelection(iotHubConnectionString: string): Promise<vscode.QuickPickItem[]> {
   let provisionIothubDeviceSelection: vscode.QuickPickItem[];
-=======
-import {ConfigNotFoundError, DependentExtensionNotFoundError} from '../common/Error/Error';
-import {ConfigHandler} from '../configHandler';
-import {ConfigKey, ScaffoldType} from '../constants';
->>>>>>> Define specific error type
 
   const deviceNumber = await getDeviceNumber(iotHubConnectionString);
   if (deviceNumber > 0) {
@@ -91,7 +88,9 @@ export class IoTHubDevice implements Component, Provisionable {
     return true;
   }
 
-  async load(): Promise<void> {}
+  async load(): Promise<void> {
+    // Do Nothing.
+  }
 
   async create(): Promise<void> {
     // Do nothing.
@@ -100,12 +99,7 @@ export class IoTHubDevice implements Component, Provisionable {
   async provision(): Promise<boolean> {
     const iotHubConnectionString = ConfigHandler.get<string>(ConfigKey.iotHubConnectionString);
     if (!iotHubConnectionString) {
-<<<<<<< bbbda130d6515e3d7f48de5c9ac57cc09ea22585
-      throw new Error("Unable to find IoT Hub connection in the project. Please retry Azure Provision.");
-=======
-      throw new ConfigNotFoundError(
-          ConfigKey.iotHubConnectionString, 'Please retry Azure Provision.');
->>>>>>> Define specific error type
+      throw new ConfigNotFoundError(ConfigKey.iotHubConnectionString, "Please retry Azure Provision.");
     }
 
     const selection = await vscode.window.showQuickPick(getProvisionIothubDeviceSelection(iotHubConnectionString), {
@@ -119,11 +113,7 @@ export class IoTHubDevice implements Component, Provisionable {
 
     const toolkit = getExtension(ExtensionName.Toolkit);
     if (!toolkit) {
-<<<<<<< bbbda130d6515e3d7f48de5c9ac57cc09ea22585
-      throw new Error("Azure IoT Hub Toolkit is not installed. Please install it from Marketplace.");
-=======
       throw new DependentExtensionNotFoundError(ExtensionName.Toolkit);
->>>>>>> Define specific error type
     }
 
     let device = null;

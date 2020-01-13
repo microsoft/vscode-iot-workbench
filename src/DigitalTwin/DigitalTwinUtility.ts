@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import * as vscode from "vscode";
 import * as utils from "../utils";
 import { DigitalTwinConstants } from "./DigitalTwinConstants";
-import { CancelOperationError } from "../common/CancelOperationError";
+import { OperationCanceledError } from "../common/Error/OperationCanceledError";
 import { ModelRepositoryManager } from "./pnp/src/modelRepository/modelRepositoryManager";
 import { ApiProvider } from "./pnp/src/api/apiProvider";
 
@@ -40,7 +39,7 @@ export class DigitalTwinUtility {
       // skip for UserCancelledError
     }
     if (!result) {
-      throw new CancelOperationError(`Selected device capability model file cancelled.`);
+      throw new OperationCanceledError(`Selected device capability model file cancelled.`);
     }
 
     utils.channelShowAndAppendLine(
