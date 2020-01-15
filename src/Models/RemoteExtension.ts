@@ -2,18 +2,27 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import {DependentExtensions, GlobalConstants} from '../constants';
+import {DependentExtensions} from '../constants';
 import {DialogResponses} from '../DialogResponses';
-import {channelShowAndAppendLine} from '../utils';
+import {WorkbenchExtension} from '../WorkbenchExtension';
+import {VscodeCommands} from '../common/Commands';
+import {CancelOperationError} from '../CancelOperationError';
 
 export class RemoteExtension {
   static isRemote(context: vscode.ExtensionContext) {
-    // tslint:disable-next-line: no-any
-    return (vscode as any)
-               .extensions.getExtension(GlobalConstants.extensionId)
-               .extensionKind === vscode.ExtensionKind.Workspace;
+    const extension = WorkbenchExtension.getExtension(context);
+    if (!extension) {
+      throw new Error('Fail to get workbench extension.');
+    }
+    return extension.extensionKind === vscode.ExtensionKind.Workspace;
   }
 
+  /**
+   * Check whether remote extension is installed in VS Code.
+   * If not, ask user to install it from marketplace.
+   * @returns true - remote extension is installed.
+   * @returns false - remote extension is not installed.
+   */
   static async isAvailable(): Promise<boolean> {
     if (!vscode.extensions.getExtension(DependentExtensions.remote)) {
       const message =
@@ -22,7 +31,7 @@ export class RemoteExtension {
           message, DialogResponses.yes, DialogResponses.no);
       if (choice === DialogResponses.yes) {
         vscode.commands.executeCommand(
-            'vscode.open',
+            VscodeCommands.VscodeOpen,
             vscode.Uri.parse('vscode:extension/' + DependentExtensions.remote));
       }
       return false;
@@ -30,16 +39,13 @@ export class RemoteExtension {
     return true;
   }
 
-  static async checkRemoteExtension(channel: vscode.OutputChannel):
-      Promise<boolean> {
+  static async checkRemoteExtension(): Promise<void> {
     const res = await RemoteExtension.isAvailable();
     if (!res) {
-      const message = `Remote extension is not available. Please install ${
-          DependentExtensions.remote} first.`;
-      channelShowAndAppendLine(channel, message);
-      return false;
+      throw new CancelOperationError(
+          `Remote extension is not available. Please install ${
+              DependentExtensions.remote} first.`);
     }
-    return true;
   }
 
   /**

@@ -44,9 +44,7 @@ export class IoTHubDevice implements Component, Provisionable {
     return true;
   }
 
-  async create(): Promise<boolean> {
-    return true;
-  }
+  async create(): Promise<void> {}
 
   async provision(): Promise<boolean> {
     const iotHubConnectionString =

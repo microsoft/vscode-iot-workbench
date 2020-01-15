@@ -3,9 +3,11 @@
 
 'use strict';
 
-import {commands, env, ExtensionContext, extensions, Uri, window} from 'vscode';
-import {EventNames, GlobalConstants} from './constants';
-import {TelemetryProperties, TelemetryContext, TelemetryWorker} from './telemetry';
+import {commands, ExtensionContext, Uri, window} from 'vscode';
+import {EventNames} from './constants';
+import {TelemetryWorker} from './telemetry';
+import {WorkbenchExtension} from './WorkbenchExtension';
+import {VscodeCommands} from './common/Commands';
 
 const NSAT_SURVEY_URL = 'https://aka.ms/vscode-iot-workbench-survey';
 const PROBABILITY = 1;
@@ -18,7 +20,8 @@ const SKIP_VERSION_KEY = 'nsat/skipVersion';
 const IS_CANDIDATE_KEY = 'nsat/isCandidate';
 
 export class NSAT {
-  static async takeSurvey({globalState}: ExtensionContext) {
+  static async takeSurvey(context: ExtensionContext) {
+    const globalState = context.globalState;
     const skipVersion = globalState.get(SKIP_VERSION_KEY, '');
     if (skipVersion) {
       return;
@@ -45,15 +48,10 @@ export class NSAT {
 
     await globalState.update(IS_CANDIDATE_KEY, isCandidate);
 
-    const properties: TelemetryProperties = {
-      result: 'Succeeded',
-      error: '',
-      errorMessage: ''
-    };
-    const telemetryContext:
-        TelemetryContext = {properties, measurements: {duration: 0}};
+    const telemetryWorker = TelemetryWorker.getInstance(context);
+    const telemetryContext = telemetryWorker.createContext();
 
-    const extension = extensions.getExtension(GlobalConstants.extensionId);
+    const extension = WorkbenchExtension.getExtension(context);
     if (!extension) {
       return;
     }
@@ -67,9 +65,9 @@ export class NSAT {
       title: 'Take Survey',
       run: async () => {
         telemetryContext.properties.message = 'nsat.survey/takeShortSurvey';
-        TelemetryWorker.sendEvent(EventNames.nsatsurvery, telemetryContext);
+        telemetryWorker.sendEvent(EventNames.nsatsurvery, telemetryContext);
         commands.executeCommand(
-            'vscode.open',
+            VscodeCommands.VscodeOpen,
             Uri.parse(`${NSAT_SURVEY_URL}?o=${
                 encodeURIComponent(process.platform)}&v=${
                 encodeURIComponent(extensionVersion)}`));
@@ -82,7 +80,7 @@ export class NSAT {
       title: 'Remind Me Later',
       run: async () => {
         telemetryContext.properties.message = 'nsat.survey/remindMeLater';
-        TelemetryWorker.sendEvent(EventNames.nsatsurvery, telemetryContext);
+        telemetryWorker.sendEvent(EventNames.nsatsurvery, telemetryContext);
         await globalState.update(SESSION_COUNT_KEY, 0);
       },
     };
@@ -90,14 +88,14 @@ export class NSAT {
       title: 'Don\'t Show Again',
       run: async () => {
         telemetryContext.properties.message = 'nsat.survey/dontShowAgain';
-        TelemetryWorker.sendEvent(EventNames.nsatsurvery, telemetryContext);
+        telemetryWorker.sendEvent(EventNames.nsatsurvery, telemetryContext);
         await globalState.update(IS_CANDIDATE_KEY, false);
         await globalState.update(SKIP_VERSION_KEY, extensionVersion);
         await globalState.update(DONT_SHOW_DATE_KEY, date);
       },
     };
     telemetryContext.properties.message = 'nsat.survey/userAsked';
-    TelemetryWorker.sendEvent(EventNames.nsatsurvery, telemetryContext);
+    telemetryWorker.sendEvent(EventNames.nsatsurvery, telemetryContext);
     const button = await window.showInformationMessage(
         'Do you mind taking a quick feedback survey about the Azure IoT Device Workbench Extension for VS Code?',
         take, remind, never);

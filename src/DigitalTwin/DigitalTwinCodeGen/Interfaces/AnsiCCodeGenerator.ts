@@ -2,6 +2,9 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+import {VscodeCommands} from '../../../common/Commands';
+import {OSPlatform, ScaffoldType} from '../../../constants';
+import {OpenScenario} from '../../../Models/IoTWorkbenchProjectBase';
 import {IoTWorkspaceProject} from '../../../Models/IoTWorkspaceProject';
 import {TelemetryContext} from '../../../telemetry';
 import * as utils from '../../../utils';
@@ -22,12 +25,14 @@ export class AnsiCCodeGenerator implements CodeGenerator {
     if (codegenSucceeded) {
       if (codegenInfo.codeGenProjectType === CodeGenProjectType.IoTDevKit) {
         const project: IoTWorkspaceProject = new IoTWorkspaceProject(
-            this.context, this.channel, this.telemetryContext);
-        project.openProject(codegenInfo.outputDirectory, true);
+            this.context, this.channel, this.telemetryContext,
+            codegenInfo.outputDirectory);
+        project.openProject(
+            ScaffoldType.Local, true, OpenScenario.createNewProject);
       } else {
         await vscode.commands.executeCommand(
-            'vscode.openFolder', vscode.Uri.file(codegenInfo.outputDirectory),
-            true);
+            VscodeCommands.VscodeOpenFolder,
+            vscode.Uri.file(codegenInfo.outputDirectory), true);
       }
 
       return true;
@@ -54,7 +59,7 @@ export class AnsiCCodeGenerator implements CodeGenerator {
     const homeDir = os.homedir();
     const cmdPath = path.join(homeDir, DigitalTwinConstants.codeGenCliFolder);
     let codeGenCommand = '';
-    if (platform === 'win32') {
+    if (platform === OSPlatform.WIN32) {
       codeGenCommand = `${DigitalTwinConstants.codeGenCliApp}.exe`;
     } else {
       codeGenCommand = `./${DigitalTwinConstants.codeGenCliApp}`;

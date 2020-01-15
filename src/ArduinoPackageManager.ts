@@ -3,6 +3,7 @@
 
 import * as vscode from 'vscode';
 
+import {ArduinoCommands} from './common/Commands';
 import {Board, BoardInstallation} from './Models/Interfaces/Board';
 
 export class ArduinoPackageManager {
@@ -59,7 +60,7 @@ export class ArduinoPackageManager {
       await ArduinoPackageManager.setAdditionalUrl(
           board.installation.additionalUrl);
       await vscode.commands.executeCommand(
-          'arduino.installBoard', board.installation.packageName,
+          ArduinoCommands.InstallBoard, board.installation.packageName,
           board.installation.architecture);
       ArduinoPackageManager.INSTALLED_BOARDS.push(board);
     } catch (ignore) {

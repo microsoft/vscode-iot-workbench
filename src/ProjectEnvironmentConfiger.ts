@@ -2,8 +2,7 @@
 // Licensed under the MIT License.
 
 'use strict';
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
+
 import * as vscode from 'vscode';
 import * as utils from './utils';
 import * as path from 'path';
@@ -11,8 +10,9 @@ import * as path from 'path';
 import {TelemetryContext} from './telemetry';
 import {ScaffoldType, PlatformType} from './constants';
 import {RemoteExtension} from './Models/RemoteExtension';
-import {IoTWorkbenchProjectBase} from './Models/IoTWorkbenchProjectBase';
+import {IoTWorkbenchProjectBase, OpenScenario} from './Models/IoTWorkbenchProjectBase';
 import {ProjectHostType} from './Models/Interfaces/ProjectHostType';
+import {configExternalCMakeProjectToIoTContainerProject} from './utils';
 import {CancelOperationError} from './CancelOperationError';
 
 const impor = require('impor')(__dirname);
@@ -23,66 +23,35 @@ const ioTContainerizedProjectModule =
     typeof import('./Models/IoTContainerizedProject');
 
 export class ProjectEnvironmentConfiger {
-  async configureProjectEnvironment(
+  async configureCmakeProjectEnvironment(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
-      telemetryContext: TelemetryContext) {
+      telemetryContext: TelemetryContext): Promise<void> {
     // Only configure project when not in remote environment
     const isLocal = RemoteExtension.checkLocalBeforeRunCommand(context);
     if (!isLocal) {
       return;
     }
+
     const scaffoldType = ScaffoldType.Local;
 
-    // projectFileRootPath is the root path containing .iotworkbenchproject file
-    const deviceRootPath = utils.checkOpenedFolder();
-    if (!deviceRootPath) {
-      return;
+    const projectRootPath = utils.getFirstWorkspaceFolderPath();
+    if (!projectRootPath) {
+      throw new Error(`Fail to get project root path.`);
     }
 
     await vscode.window.withProgress(
         {
-          title: 'Project environment configuration',
+          title: 'CMake Project development container configuration',
           location: vscode.ProgressLocation.Window,
         },
         async () => {
-          // Select platform if not specified
-          const platformSelection =
-              await utils.selectPlatform(scaffoldType, context);
-          let platform: PlatformType;
-          if (!platformSelection) {
-            telemetryContext.properties.errorMessage =
-                'Platform selection cancelled.';
-            telemetryContext.properties.result = 'Cancelled';
-            return;
-          } else {
-            telemetryContext.properties.platform = platformSelection.label;
-            platform = utils.getEnumKeyByEnumValue(
-                PlatformType, platformSelection.label);
-          }
+          await ProjectEnvironmentConfiger
+              .configureProjectEnvironmentAsPlatform(
+                  context, channel, telemetryContext,
+                  PlatformType.EmbeddedLinux, projectRootPath, scaffoldType);
 
-          let res: boolean;
-          try {
-            res = await ProjectEnvironmentConfiger
-                      .configureProjectEnvironmentAsPlatform(
-                          context, channel, telemetryContext, platform,
-                          deviceRootPath, scaffoldType);
-          } catch (error) {
-            if (error instanceof CancelOperationError) {
-              const message =
-                  `Project development environment configuration cancelled.`;
-              utils.channelShowAndAppendLine(channel, message);
-              vscode.window.showWarningMessage(message);
-              return;
-            } else {
-              throw error;
-            }
-          }
-
-          if (!res) {
-            return;
-          }
-
-          const message = `Successfully configure project environment.`;
+          const message =
+              `Successfully configured development container for CMake project.`;
           utils.channelShowAndAppendLine(channel, message);
           vscode.window.showInformationMessage(message);
         });
@@ -93,71 +62,46 @@ export class ProjectEnvironmentConfiger {
   static async configureProjectEnvironmentAsPlatform(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext, platform: PlatformType,
-      deviceRootPath: string, scaffoldType: ScaffoldType): Promise<boolean> {
+      projectFileRootPath: string, scaffoldType: ScaffoldType): Promise<void> {
+    let project;
     if (platform === PlatformType.Arduino) {
-      // First ensure the project is correctly open.
-      const iotProject = await utils.constructAndLoadIoTProject(
-          context, channel, telemetryContext);
-      if (!iotProject) {
-        return false;
-      }
-
-      // Validate platform.
-      // Only iot workbench Arduino project created by workbench extension
-      // can be configured as Arduino platform(for upgrade).
+      // Verify it is an iot workbench Arduino project
       const projectHostType = await IoTWorkbenchProjectBase.getProjectType(
-          scaffoldType, deviceRootPath);
+          scaffoldType, projectFileRootPath);
       if (projectHostType !== ProjectHostType.Workspace) {
         const message =
-            `This is not an iot workbench Arduino projects. You cannot configure it as Arduino platform.`;
-        utils.channelShowAndAppendLine(channel, message);
+            `This is not an iot workbench Arduino project. You cannot configure it as Arduino platform.`;
         vscode.window.showWarningMessage(message);
-        return false;
-      }
-    }
-
-    let project;
-    let projectRootPath = '';
-    if (platform === PlatformType.EmbeddedLinux) {
-      const result = await RemoteExtension.checkRemoteExtension(channel);
-      if (!result) {
-        return false;
+        throw new CancelOperationError(message);
       }
 
-      telemetryContext.properties.projectHostType = 'Container';
-      project = new ioTContainerizedProjectModule.IoTContainerizedProject(
-          context, channel, telemetryContext);
-
-      // If external project, construct as RaspberryPi Device based
-      // container iot workbench project
-      if (!await project.configExternalProjectToIotProject(scaffoldType)) {
-        return false;
-      }
-      projectRootPath = deviceRootPath;
-    } else if (platform === PlatformType.Arduino) {
-      telemetryContext.properties.projectHostType = 'Workspace';
+      const projectRootPath = path.join(projectFileRootPath, '..');
       project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(
-          context, channel, telemetryContext);
-      projectRootPath = path.join(deviceRootPath, '..');
+          context, channel, telemetryContext, projectRootPath);
+      if (!project) {
+        // Ensure the project is correctly open.
+        await utils.properlyOpenIoTWorkspaceProject(telemetryContext);
+      }
+    } else if (platform === PlatformType.EmbeddedLinux) {
+      // If external cmake project, configure to be IoT Workbench container
+      // project
+      await configExternalCMakeProjectToIoTContainerProject(scaffoldType);
+
+      await RemoteExtension.checkRemoteExtension();
+
+      project = new ioTContainerizedProjectModule.IoTContainerizedProject(
+          context, channel, telemetryContext, projectFileRootPath);
     } else {
       throw new Error('unsupported platform');
     }
 
-    let res = await project.load(scaffoldType);
-    if (!res) {
-      throw new Error(
-          `Failed to load project. Project environment configuration stopped.`);
-    }
+    await project.load(scaffoldType);
 
     // Add configuration files
-    res = await project.configureProjectEnvironmentCore(
-        deviceRootPath, scaffoldType);
-    if (!res) {
-      // User cancel configuration selection
-      return false;
-    }
+    await project.configureProjectEnvironmentCore(
+        projectFileRootPath, scaffoldType);
 
-    await project.openProject(projectRootPath, false);
-    return true;
+    await project.openProject(
+        scaffoldType, false, OpenScenario.configureProject);
   }
 }

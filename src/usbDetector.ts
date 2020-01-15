@@ -8,9 +8,9 @@ import {VSCExpress} from 'vscode-express';
 
 import {ArduinoPackageManager} from './ArduinoPackageManager';
 import {BoardProvider} from './boardProvider';
-import {ConfigHandler} from './configHandler';
-import {EventNames, FileNames} from './constants';
-import {callWithTelemetry} from './telemetry';
+import {ConfigKey, EventNames, FileNames, OSPlatform} from './constants';
+import {TelemetryWorker} from './telemetry';
+import {shouldShowLandingPage} from './utils';
 
 export interface DeviceInfo {
   vendorId: number;
@@ -25,9 +25,8 @@ export class UsbDetector {
   constructor(
       private context: vscode.ExtensionContext,
       private channel: vscode.OutputChannel) {
-    const disableUSBDetection =
-        ConfigHandler.get<boolean>('disableAutoPopupLandingPage');
-    if (os.platform() === 'linux' || disableUSBDetection) {
+    const enableUSBDetection = shouldShowLandingPage(context);
+    if (os.platform() === OSPlatform.LINUX || !enableUSBDetection) {
       return;
     } else {
       // Only load detector module when not in remote
@@ -49,27 +48,14 @@ export class UsbDetector {
   }
 
   showLandingPage(device: DeviceInfo) {
-    // if current workspace is iot device workbench workspace
-    // we shouldn't popup landing page
-    // if (vscode.workspace.workspaceFolders &&
-    //     vscode.workspace.workspaceFolders.length) {
-    //   const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
-    //   if (devicePath) {
-    //     const deviceLocation = path.join(
-    //         vscode.workspace.workspaceFolders[0].uri.fsPath, '..',
-    //         devicePath, constants.iotworkbenchprojectFileName);
-    //     if (fs.existsSync(deviceLocation)) {
-    //       return;
-    //     }
-    //   }
-    // }
-
     const board = this.getBoardFromDeviceInfo(device);
 
     if (board) {
-      callWithTelemetry(
-          EventNames.detectBoard, this.channel, false,
-          this.context, async () => {
+      const telemetryWorker = TelemetryWorker.getInstance(this.context);
+
+      telemetryWorker.callCommandWithTelemetry(
+          this.context, this.channel, EventNames.detectBoard,
+          false, async () => {
             if (board.exampleUrl) {
               ArduinoPackageManager.installBoard(board);
 
@@ -87,14 +73,16 @@ export class UsbDetector {
                     retainContextWhenHidden: true
                   });
             }
-          }, {board: board.name});
+          }, {}, {board: board.name});
     }
+
+    // Will not auto pop up landing page next time.
+    this.context.globalState.update(ConfigKey.hasPopUp, true);
   }
 
-  async startListening() {
-    const disableUSBDetection =
-        ConfigHandler.get<boolean>('disableAutoPopupLandingPage');
-    if (os.platform() === 'linux' || disableUSBDetection) {
+  async startListening(context: vscode.ExtensionContext) {
+    const enableUSBDetection = shouldShowLandingPage(context);
+    if (os.platform() === OSPlatform.LINUX || !enableUSBDetection) {
       return;
     }
 

@@ -29,29 +29,16 @@ export class AzureOperator {
   async deploy(
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext) {
-    if (RemoteExtension.isRemote(context)) {
-      const message =
-          `The project is currently open in container now. 'Azure IoT Device Workbench: Depoly to Azure...' is not supported inside the container.`;
-      vscode.window.showWarningMessage(message);
-
-      telemetryContext.properties.errorMessage = message;
+    // Azure deploy command can be executed only in local environment
+    const isLocal = RemoteExtension.checkLocalBeforeRunCommand(context);
+    if (!isLocal) {
       return;
     }
 
     const iotProject =
         await constructAndLoadIoTProject(context, channel, telemetryContext);
     if (iotProject) {
-      try {
-        await iotProject.deploy();
-      } catch (error) {
-        if (error instanceof CancelOperationError) {
-          telemetryContext.properties.errorMessage = error.message;
-          telemetryContext.properties.result = 'Cancelled';
-          return;
-        } else {
-          throw error;
-        }
-      }
+      await iotProject.deploy();
     }
   }
 }

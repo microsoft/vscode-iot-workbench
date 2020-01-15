@@ -7,25 +7,24 @@ import * as os from 'os';
 import * as vscode from 'vscode';
 import * as fs from 'fs-plus';
 import * as path from 'path';
-import * as crypto from 'crypto';
 
 import request = require('request-promise');
-import extractzip = require('extract-zip');
 
 import * as utils from '../utils';
-import * as dtUtils from './Utilities';
-import {FileNames, ConfigKey, GlobalConstants} from '../constants';
+import {FileNames, ConfigKey, ScaffoldType, OSPlatform} from '../constants';
 import {TelemetryContext} from '../telemetry';
-import {DigitalTwinConstants, DigitalTwinFileNames} from './DigitalTwinConstants';
+import {DigitalTwinConstants} from './DigitalTwinConstants';
 import {CodeGenProjectType, DeviceConnectionType, CodeGenLanguage, DeviceSdkReferenceType, CodeGenExecutionItem} from './DigitalTwinCodeGen/Interfaces/CodeGenerator';
 import {AnsiCCodeGeneratorFactory} from './DigitalTwinCodeGen/AnsiCCodeGeneratorFactory';
 import {ConfigHandler} from '../configHandler';
-import {DigitalTwinMetamodelRepositoryClient} from './DigitalTwinApi/DigitalTwinMetamodelRepositoryClient';
-import {DigitalTwinConnectionStringBuilder} from './DigitalTwinApi/DigitalTwinConnectionStringBuilder';
 import {PnpDeviceConnection, CodeGenProjectTemplate, DeviceSdkReference} from '../Models/Interfaces/ProjectTemplate';
 import {DialogResponses} from '../DialogResponses';
-import {CredentialStore} from '../credentialStore';
 import {RemoteExtension} from '../Models/RemoteExtension';
+import {DigitalTwinUtility} from './DigitalTwinUtility';
+import {CodeGenUtility} from './DigitalTwinCodeGen/CodeGenUtility';
+import {FileUtility} from '../FileUtility';
+import {CancelOperationError} from '../CancelOperationError';
+import {Utility} from './pnp/src/common/utility';
 
 interface CodeGeneratorDownloadLocation {
   win32Md5: string;
@@ -50,8 +49,13 @@ interface CodeGenExecutions {
   codeGenExecutionItems: CodeGenExecutionItem[];
 }
 
+enum CodeGenCliOperation {
+  None = 0,
+  Install,
+  Upgrade
+}
+
 enum ReGenResult {
-  Cancelled,
   Succeeded,
   Skipped
 }
@@ -65,7 +69,7 @@ export class CodeGeneratorCore {
       return;
     }
 
-    const rootPath = utils.checkOpenedFolder();
+    const rootPath = utils.getFirstWorkspaceFolderPath();
     if (!rootPath) {
       return;
     }
@@ -76,80 +80,43 @@ export class CodeGeneratorCore {
       return;
     }
 
-    // Retrieve all DTDL Capability Model files and Interface files from current
-    // opened folder.
-    const interfaceFiles: dtUtils.SchemaFileInfo[] = [];
-    const dcmFiles: dtUtils.SchemaFileInfo[] = [];
-    dtUtils.listAllPnPSchemaFilesSync(rootPath, dcmFiles, interfaceFiles);
-
     // Select Capability Model
-    const capabilityModelFileSelection = await this.selectCapabilityModelFile(
-        channel, dcmFiles, telemetryContext);
-    if (!capabilityModelFileSelection) {
-      utils.channelShowAndAppendLine(
-          channel, `${DigitalTwinConstants.dtPrefix} Cancelled.`);
-      return;
-    }
-
-    const capabilityModelFileName = capabilityModelFileSelection.label;
-    const capabilityModelFilePath = path.join(
-        capabilityModelFileSelection.description as string,
-        capabilityModelFileName);
+    const capabilityModelFilePath: string =
+        await DigitalTwinUtility.selectCapabilityModel();
 
     // Prompt if old project exists for the same Capability Model file
-    const regenResult = await this.RegenCode(
-        rootPath, capabilityModelFilePath, interfaceFiles, context, channel,
-        telemetryContext);
-    if (regenResult === ReGenResult.Succeeded ||
-        regenResult === ReGenResult.Cancelled) {
+    const regenResult = await this.regenCode(
+        rootPath, capabilityModelFilePath, context, channel, telemetryContext);
+    if (regenResult === ReGenResult.Succeeded) {
       return;
     }
 
     // Specify project name
-    const codeGenProjectName = await this.getCodeGenProjectName(rootPath);
-    if (!codeGenProjectName) {
-      const message = `Project name is not specified, cancelled`;
-      utils.channelShowAndAppendLine(channel, message);
-      return;
-    }
-
-    const projectPath = path.join(rootPath, codeGenProjectName);
+    const codeGenProjectName =
+        await this.getCodeGenProjectName(channel, rootPath);
 
     // Select language
-    const codeGenLanguage = await this.selectLanguage(telemetryContext);
-    if (!codeGenLanguage) {
-      return;
-    }
+    const codeGenLanguage = await this.selectLanguage(channel);
 
     // Read CodeGen options configuration JSON
     const codeGenOptions = this.readCodeGenOptionsConfiguration(context);
 
     // Select device connection string type
     const connectionType =
-        await this.selectConnectionType(codeGenOptions, telemetryContext);
-    if (!connectionType) {
-      return;
-    }
+        await this.selectConnectionType(channel, codeGenOptions);
 
     // Select project template
     const codeGenProjectType = await this.selectProjectTemplate(
-        codeGenLanguage, codeGenOptions, telemetryContext);
-    if (!codeGenProjectType) {
-      return;
-    }
+        channel, codeGenLanguage, codeGenOptions);
 
     // Select Device SDK reference type for CMake project
     const sdkReferenceType = await this.selectDeviceSdkReferenceType(
-        codeGenProjectType, codeGenOptions, telemetryContext);
-    if (!sdkReferenceType) {
-      return;
-    }
+        channel, codeGenProjectType, codeGenOptions);
 
-    // Download all interfaces
-    if (!await this.downloadAllIntefaceFiles(
-            channel, rootPath, capabilityModelFilePath, projectPath,
-            interfaceFiles)) {
-      return;
+    // Download dependent interface of capability model
+    if (!await DigitalTwinUtility.downloadDependentInterface(
+            rootPath, capabilityModelFilePath)) {
+      throw new Error(`Failed to download dependent interface.`);
     }
 
     const codeGenExecutionInfo: CodeGenExecutionItem = {
@@ -163,59 +130,21 @@ export class CodeGeneratorCore {
       deviceConnectionType: connectionType
     };
 
-    this.saveCodeGenConfig(
-        rootPath, capabilityModelFilePath, codeGenExecutionInfo);
+    const scaffoldType = ScaffoldType.Local;
+    await this.saveCodeGenConfig(
+        scaffoldType, rootPath, capabilityModelFilePath, codeGenExecutionInfo);
 
     await this.generateDeviceCodeCore(
         codeGenExecutionInfo, context, channel, telemetryContext);
   }
 
-  private async selectCapabilityModelFile(
-      channel: vscode.OutputChannel, dcmFiles: dtUtils.SchemaFileInfo[],
-      telemetryContext: TelemetryContext):
-      Promise<vscode.QuickPickItem|undefined> {
-    if (dcmFiles.length === 0) {
-      const message =
-          'Unable to find Capability Model files in the folder. Please open a folder that contains Capability Model files.';
-      vscode.window.showWarningMessage(message);
-      return;
-    }
-
-    const dcmFileItems: vscode.QuickPickItem[] = [];
-
-    dcmFiles.forEach((dcmFile: dtUtils.SchemaFileInfo) => {
-      dcmFileItems.push({
-        label: path.basename(dcmFile.filePath),
-        description: path.dirname(dcmFile.filePath)
-      });
-    });
-
-    const fileSelection = await vscode.window.showQuickPick(dcmFileItems, {
-      ignoreFocusOut: true,
-      matchOnDescription: true,
-      matchOnDetail: true,
-      placeHolder:
-          `Select a ${DigitalTwinConstants.productName} Capability Model file`
-    });
-
-    if (!fileSelection) {
-      telemetryContext.properties.errorMessage =
-          'Capability Model file selection cancelled.';
-      telemetryContext.properties.result = 'Cancelled';
-      return;
-    }
-
-    return fileSelection;
-  }
-
-  private async RegenCode(
+  private async regenCode(
       rootPath: string, capabilityModelFilePath: string,
-      interfaceFiles: dtUtils.SchemaFileInfo[],
       context: vscode.ExtensionContext, channel: vscode.OutputChannel,
       telemetryContext: TelemetryContext): Promise<ReGenResult> {
     const codeGenConfigPath = path.join(
         rootPath, FileNames.vscodeSettingsFolderName,
-        DigitalTwinFileNames.codeGenConfigFileName);
+        DigitalTwinConstants.codeGenConfigFileName);
 
     let codeGenExecutionItem: CodeGenExecutionItem|undefined;
 
@@ -250,21 +179,22 @@ export class CodeGeneratorCore {
           {ignoreFocusOut: true, placeHolder: 'Please select an option:'});
 
       if (!regenSelection) {
-        telemetryContext.properties.errorMessage =
-            'Re-generate code selection cancelled.';
-        telemetryContext.properties.result = 'Cancelled';
-        return ReGenResult.Succeeded;
+        throw new CancelOperationError('Re-generate code selection cancelled.');
       }
 
       // User select regenerate code
       if (regenSelection.label !== 'Create new project') {
-        const projectPath =
-            path.join(rootPath, codeGenExecutionItem.projectName);
-        if (!await this.downloadAllIntefaceFiles(
-                channel, rootPath, capabilityModelFilePath, projectPath,
-                interfaceFiles)) {
+        if (!await DigitalTwinUtility.downloadDependentInterface(
+                rootPath, capabilityModelFilePath)) {
           return ReGenResult.Skipped;
         }
+
+        utils.channelShowAndAppendLine(
+            channel,
+            `${
+                DigitalTwinConstants
+                    .dtPrefix} Regenerate device code using an existing CodeGen configure:`);
+        CodeGenUtility.printCodeGenConfig(codeGenExecutionItem, channel);
 
         await this.generateDeviceCodeCore(
             codeGenExecutionItem, context, channel, telemetryContext);
@@ -277,8 +207,8 @@ export class CodeGeneratorCore {
     }
   }
 
-  private async getCodeGenProjectName(rootPath: string):
-      Promise<string|undefined> {
+  private async getCodeGenProjectName(
+      channel: vscode.OutputChannel, rootPath: string): Promise<string> {
     // select the project name for code gen
     const codeGenProjectName = await vscode.window.showInputBox({
       placeHolder: 'Please input the project name here.',
@@ -296,7 +226,8 @@ export class CodeGeneratorCore {
     });
 
     if (!codeGenProjectName) {
-      return;
+      throw new CancelOperationError(
+          `Project name is not specified, cancelled.`);
     }
 
     const projectPath = path.join(rootPath, codeGenProjectName);
@@ -306,12 +237,14 @@ export class CodeGeneratorCore {
           projectPath} already exists. Do you want to overwrite the contents in this folder?`;
       const choice = await vscode.window.showWarningMessage(
           messge, DialogResponses.yes, DialogResponses.no);
-      if (choice === DialogResponses.yes) {
-        return codeGenProjectName;
-      } else {
-        return;
+      if (choice !== DialogResponses.yes) {
+        throw new CancelOperationError(
+            `Valid project name is not specified, cancelled.`);
       }
     }
+
+    utils.channelShowAndAppendLine(
+        channel, `Input project name: ${codeGenProjectName}`);
     return codeGenProjectName;
   }
 
@@ -323,12 +256,10 @@ export class CodeGeneratorCore {
     const codeGenConfigFilePath: string = context.asAbsolutePath(path.join(
         FileNames.resourcesFolderName, FileNames.templatesFolderName,
         FileNames.codeGenOptionsFileName));
-
-    return dtUtils.loadJsonConfiguration(codeGenConfigFilePath);
+    return JSON.parse(fs.readFileSync(codeGenConfigFilePath, 'utf8'));
   }
 
-  private async selectLanguage(telemetryContext: TelemetryContext):
-      Promise<string|undefined> {
+  private async selectLanguage(channel: vscode.OutputChannel): Promise<string> {
     const languageItems: vscode.QuickPickItem[] = [];
     languageItems.push({label: CodeGenLanguage.ANSIC, description: ''});
 
@@ -338,19 +269,18 @@ export class CodeGeneratorCore {
     });
 
     if (!languageSelection) {
-      telemetryContext.properties.errorMessage =
-          'CodeGen language selection cancelled.';
-      telemetryContext.properties.result = 'Cancelled';
-      return;
+      throw new CancelOperationError('CodeGen language selection cancelled.');
     }
 
+    utils.channelShowAndAppendLine(
+        channel, `Selected CodeGen language: ${languageSelection.label}`);
     return languageSelection.label;
   }
 
   private async selectConnectionType(
+      channel: vscode.OutputChannel,
       // tslint:disable-next-line: no-any
-      codegenOptionsConfig: any, telemetryContext: TelemetryContext):
-      Promise<DeviceConnectionType|undefined> {
+      codegenOptionsConfig: any): Promise<DeviceConnectionType> {
     // Load available Azure IoT connection types from JSON configuration
     const connectionTypeItems: vscode.QuickPickItem[] = [];
     codegenOptionsConfig.connectionTypes.forEach(
@@ -366,10 +296,7 @@ export class CodeGeneratorCore {
         });
 
     if (!deviceConnectionSelection) {
-      telemetryContext.properties.errorMessage =
-          'Connection type selection cancelled.';
-      telemetryContext.properties.result = 'Cancelled';
-      return;
+      throw new CancelOperationError('Connection type selection cancelled.');
     }
 
     const deviceConnection = codegenOptionsConfig.connectionTypes.find(
@@ -385,14 +312,16 @@ export class CodeGeneratorCore {
           `Failed to find an available device connection type with selection label '${
               deviceConnectionSelection.label}' from CodeGen configuration.`);
     }
+
+    utils.channelShowAndAppendLine(
+        channel, `Selected device connection type: ${connectionType}`);
     return connectionType;
   }
 
   private async selectProjectTemplate(
+      channel: vscode.OutputChannel, language: string,
       // tslint:disable-next-line: no-any
-      language: string, codegenOptionsConfig: any,
-      telemetryContext: TelemetryContext):
-      Promise<CodeGenProjectType|undefined> {
+      codegenOptionsConfig: any): Promise<CodeGenProjectType> {
     // Load available project templates from JSON configuration
     const projectTemplates = codegenOptionsConfig.projectTemplates.filter(
         (projectTemplate: CodeGenProjectTemplate) => {
@@ -416,10 +345,8 @@ export class CodeGeneratorCore {
         {ignoreFocusOut: true, placeHolder: 'Select project template:'});
 
     if (!projectTemplateSelection) {
-      telemetryContext.properties.errorMessage =
-          'CodeGen project template selection cancelled.';
-      telemetryContext.properties.result = 'Cancelled';
-      return;
+      throw new CancelOperationError(
+          'CodeGen project template selection cancelled.');
     }
 
     const projectTemplate =
@@ -436,17 +363,20 @@ export class CodeGeneratorCore {
               projectTemplateSelection.label}' from CodeGen configuration.`);
     }
 
+    utils.channelShowAndAppendLine(
+        channel, `Selected CodeGen project type: ${codeGenProjectType}`);
     return codeGenProjectType;
   }
 
   private async selectDeviceSdkReferenceType(
+      channel: vscode.OutputChannel, projectType: CodeGenProjectType,
       // tslint:disable-next-line: no-any
-      projectType: CodeGenProjectType, codegenOptionsConfig: any,
-      telemetryContext: TelemetryContext):
-      Promise<DeviceSdkReferenceType|undefined> {
+      codegenOptionsConfig: any): Promise<DeviceSdkReferenceType> {
+    let deviceSdkReferenceType = undefined;
     switch (projectType) {
       case CodeGenProjectType.IoTDevKit:
-        return DeviceSdkReferenceType.DevKitSDK;
+        deviceSdkReferenceType = DeviceSdkReferenceType.DevKitSDK;
+        break;
       case CodeGenProjectType.CMakeWindows:
       case CodeGenProjectType.CMakeLinux: {
         // Load available Azure IoT connection types from JSON configuration
@@ -464,10 +394,8 @@ export class CodeGeneratorCore {
             });
 
         if (!deviceConnectionSelection) {
-          telemetryContext.properties.errorMessage =
-              'IoT Device SDK reference type selection cancelled.';
-          telemetryContext.properties.result = 'Cancelled';
-          return;
+          throw new CancelOperationError(
+              'IoT Device SDK reference type selection cancelled.');
         }
 
         // Map selection to a DeviceSdkReferenceType enum
@@ -486,11 +414,17 @@ export class CodeGeneratorCore {
                       .label}' from CodeGen configuration.`);
         }
 
-        return sdkReferenceType;
+        deviceSdkReferenceType = sdkReferenceType;
+        break;
       }
       default:
-        return;
+        throw new Error(`projectType ${projectType} is not supported.`);
     }
+
+    utils.channelShowAndAppendLine(
+        channel,
+        `Selected device SDK reference type: ${deviceSdkReferenceType}`);
+    return deviceSdkReferenceType;
   }
 
   private async generateDeviceCodeCore(
@@ -508,8 +442,8 @@ export class CodeGeneratorCore {
     }
 
     // Parse capabilityModel name from id
-    const capabilityModel = JSON.parse(
-        fs.readFileSync(codeGenExecutionInfo.capabilityModelFilePath, 'utf8'));
+    const capabilityModel = await Utility.getJsonContent(
+        codeGenExecutionInfo.capabilityModelFilePath);
     const capabilityModelId = capabilityModel['@id'];
 
     await vscode.window.withProgress(
@@ -527,17 +461,19 @@ export class CodeGeneratorCore {
     return true;
   }
 
-  private saveCodeGenConfig(
-      rootPath: string, capabilityModelFilePath: string,
-      codeGenExecutionInfo: CodeGenExecutionItem): void {
+  private async saveCodeGenConfig(
+      type: ScaffoldType, rootPath: string, capabilityModelFilePath: string,
+      codeGenExecutionInfo: CodeGenExecutionItem): Promise<void> {
     const codeGenConfigPath = path.join(
         rootPath, FileNames.vscodeSettingsFolderName,
-        DigitalTwinFileNames.codeGenConfigFileName);
+        DigitalTwinConstants.codeGenConfigFileName);
 
     try {
-      if (fs.existsSync(codeGenConfigPath)) {
-        const codeGenExecutions: CodeGenExecutions =
-            JSON.parse(fs.readFileSync(codeGenConfigPath, 'utf8'));
+      let codeGenExecutions: CodeGenExecutions;
+      if (await FileUtility.fileExists(type, codeGenConfigPath)) {
+        const codeGenConfig =
+            await FileUtility.readFile(type, codeGenConfigPath, 'utf8');
+        codeGenExecutions = JSON.parse(codeGenConfig as string);
 
         if (codeGenExecutions) {
           codeGenExecutions.codeGenExecutionItems =
@@ -545,149 +481,18 @@ export class CodeGeneratorCore {
                   item =>
                       item.capabilityModelFilePath !== capabilityModelFilePath);
           codeGenExecutions.codeGenExecutionItems.push(codeGenExecutionInfo);
-          fs.writeFileSync(
-              codeGenConfigPath,
-              JSON.stringify(
-                  codeGenExecutions, null, GlobalConstants.indentationSpace));
         }
       } else {
-        const codeGenExecutions:
-            CodeGenExecutions = {codeGenExecutionItems: [codeGenExecutionInfo]};
-        fs.writeFileSync(
-            codeGenConfigPath,
-            JSON.stringify(
-                codeGenExecutions, null, GlobalConstants.indentationSpace));
+        codeGenExecutions = {codeGenExecutionItems: [codeGenExecutionInfo]};
+      }
+      if (codeGenExecutions) {
+        await FileUtility.writeJsonFile(
+            type, codeGenConfigPath, codeGenExecutions);
       }
     } catch (error) {
       // save config failure should not impact code gen.
       console.log(error);
     }
-  }
-
-  private async downloadInterfaceFile(
-      urnId: string, targetFolder: string, connectionString: string|null,
-      channel: vscode.OutputChannel): Promise<boolean> {
-    const fileName =
-        utils.generateInterfaceFileNameFromUrnId(urnId, targetFolder);
-
-    // Try to download Interface file from company repo
-    const dtMetamodelRepositoryClient =
-        new DigitalTwinMetamodelRepositoryClient();
-    await dtMetamodelRepositoryClient.initialize(connectionString);
-
-    // Try to download Interface file from company repo
-    if (connectionString) {
-      try {
-        const builder = DigitalTwinConnectionStringBuilder.create(
-            connectionString.toString());
-        const repositoryId = builder.repositoryIdValue;
-        const fileMetaData =
-            await dtMetamodelRepositoryClient.getInterfaceAsync(
-                urnId, repositoryId, true);
-        if (fileMetaData) {
-          fs.writeFileSync(
-              path.join(targetFolder, fileName),
-              JSON.stringify(
-                  fileMetaData.content, null,
-                  GlobalConstants.indentationSpace));
-          const message = `${DigitalTwinConstants.dtPrefix} Interface '${
-              urnId}' (${
-              fileName}) has been successfully downloaded from Company repository.`;
-          utils.channelShowAndAppendLine(channel, message);
-          return true;
-        }
-      } catch (error) {
-        // Do nothing. Try to download the Interface from public repo
-        const message =
-            `${DigitalTwinConstants.dtPrefix} Failed to download interface '${
-                urnId}' from Company repository. errorcode: ${error.code}`;
-        utils.channelShowAndAppendLine(channel, message);
-      }
-    } else {
-      // Try to download Interface file from public repo
-      try {
-        const fileMetaData =
-            await dtMetamodelRepositoryClient.getInterfaceAsync(
-                urnId, undefined, true);
-        if (fileMetaData) {
-          fs.writeFileSync(
-              path.join(targetFolder, fileName),
-              JSON.stringify(
-                  fileMetaData.content, null,
-                  GlobalConstants.indentationSpace));
-          const message = `${DigitalTwinConstants.dtPrefix} Interface '${
-              urnId}' (${
-              fileName}) has been successfully downloaded from Public repository.`;
-          utils.channelShowAndAppendLine(channel, message);
-          return true;
-        }
-      } catch (error) {
-        const message =
-            `${DigitalTwinConstants.dtPrefix} Failed to download interface '${
-                urnId}' from Public repository. errorcode: ${error.code}`;
-        utils.channelShowAndAppendLine(channel, message);
-      }
-    }
-    return false;
-  }
-
-  private async downloadAllIntefaceFiles(
-      channel: vscode.OutputChannel, rootPath: string,
-      capabilityModelFilePath: string, projectPath: string,
-      interfaceFiles: dtUtils.SchemaFileInfo[]): Promise<boolean> {
-    const capabilityModel =
-        JSON.parse(fs.readFileSync(capabilityModelFilePath, 'utf8'));
-
-    const implementedInterfaces = capabilityModel['implements'];
-    utils.mkdirRecursivelySync(projectPath);
-
-    let connectionString: string|null = null;
-    let credentialChecked = false;
-    for (const interfaceItem of implementedInterfaces) {
-      const schema = interfaceItem.schema;
-      if (typeof schema === 'string') {
-        // normal Interface, check the Interface file offline and online
-        const item = interfaceFiles.find(item => item.id === schema);
-        if (!item) {
-          if (!credentialChecked) {
-            // Get the connection string of the IoT Plug and Play repo
-            connectionString = await CredentialStore.getCredential(
-                ConfigKey.modelRepositoryKeyName);
-          }
-
-          if (connectionString) {
-            // Company Model Repo connections already set
-            credentialChecked = true;
-            // Try company repo first
-            if (await this.downloadInterfaceFile(
-                    schema, rootPath, connectionString, channel)) {
-              // Downloaded from company repo.
-              continue;
-            }
-            // Then try public repo
-            if (await this.downloadInterfaceFile(
-                    schema, rootPath, null, channel)) {
-              // Downloaded from company repo.
-              continue;
-            }
-            // Unknow interface, throw error
-            throw new Error(`Can't find the interface ${schema}.`);
-          } else {
-            // Only can try public repo
-            if (await this.downloadInterfaceFile(
-                    schema, rootPath, null, channel)) {
-              // Downloaded from public repo.
-              continue;
-            }
-            // Throw error and lead user to set the company model repo
-            // connection string
-            throw new Error(`Can't find the interface: ${
-                schema} in local folder, use 'IoT Plug and Play: Open Model Repository' command to connect to the company repository, then try generating the device code again.`);
-          }
-        }
-      }
-    }
-    return true;
   }
 
   private async getCodeGenCliPackageInfo(
@@ -741,13 +546,13 @@ export class CodeGeneratorCore {
   }
 
   private async checkLocalCodeGenCli(): Promise<string|null> {
-    // Check version of existing CodeGen Cli
+    // Check version of existing CodeGen CLI
     const platform = os.platform();
     const currentVersion =
         ConfigHandler.get<string>(ConfigKey.codeGeneratorVersion);
     let codeGenCliAppPath =
         path.join(localCodeGenCliPath(), DigitalTwinConstants.codeGenCliApp);
-    if (platform === 'win32') {
+    if (platform === OSPlatform.WIN32) {
       codeGenCliAppPath += '.exe';
     }
 
@@ -755,7 +560,7 @@ export class CodeGeneratorCore {
       // Doen't exist
       return null;
     }
-    // TODO: should check the integrity of the CodeGen Cli
+    // TODO: should check the integrity of the CodeGen CLI
     return currentVersion;
   }
 
@@ -765,10 +570,10 @@ export class CodeGeneratorCore {
     let packageUri: string;
     let md5value: string;
     const platform = os.platform();
-    if (platform === 'win32') {
+    if (platform === OSPlatform.WIN32) {
       packageUri = targetConfigItem.codeGeneratorLocation.win32PackageUrl;
       md5value = targetConfigItem.codeGeneratorLocation.win32Md5;
-    } else if (platform === 'darwin') {
+    } else if (platform === OSPlatform.DARWIN) {
       packageUri = targetConfigItem.codeGeneratorLocation.macOSPackageUrl;
       md5value = targetConfigItem.codeGeneratorLocation.macOSMd5;
     } else {
@@ -799,7 +604,7 @@ export class CodeGeneratorCore {
       // Validate hash code
       utils.channelShowAndAppend(
           channel, 'Step 2: Validating hash code for the package ...');
-      const hashvalue = await fileHash(filePath);
+      const hashvalue = await FileUtility.getFileHash(filePath);
       if (hashvalue !== md5value) {
         utils.channelShowAndAppendLine(
             channel,
@@ -825,7 +630,7 @@ export class CodeGeneratorCore {
       // Extract files
       const codeGenCommandPath = localCodeGenCliPath();
       utils.channelShowAndAppend(channel, `Step 3: Extracting files ...`);
-      await extract(filePath, codeGenCommandPath);
+      await FileUtility.extractZipFile(filePath, codeGenCommandPath);
       utils.channelShowAndAppendLine(channel, ' done.');
       // Update the config
       await ConfigHandler.update(
@@ -855,37 +660,38 @@ export class CodeGeneratorCore {
       return false;
     }
 
-    // Check version of existing CodeGen Cli
-    let installOrUpgrade = 0;
+    // Check version of existing CodeGen CLI
+    let installOrUpgrade: CodeGenCliOperation = CodeGenCliOperation.None;
     const currentVersion = await this.checkLocalCodeGenCli();
     if (currentVersion == null) {
-      installOrUpgrade = 1;
+      installOrUpgrade = CodeGenCliOperation.Install;
     } else {
       // Compare version
       if (compareVersion(
               targetConfigItem.codeGeneratorVersion, currentVersion) > 0) {
         // Upgrade
-        installOrUpgrade = 2;
+        installOrUpgrade = CodeGenCliOperation.Upgrade;
       }
     }
-    if (installOrUpgrade === 0) {
+    if (installOrUpgrade === CodeGenCliOperation.None) {
       // Already exists
       utils.channelShowAndAppendLine(
-          channel, ` v${currentVersion} is installed and ready to use.`);
+          channel,
+          `CodeGen CLI v${currentVersion} is installed and ready to use.`);
       return true;
     }
 
     const newVersion = targetConfigItem.codeGeneratorVersion;
     const processTitle =
-        (installOrUpgrade === 1 ?
+        (installOrUpgrade === CodeGenCliOperation.Install ?
              `Installing ${DigitalTwinConstants.codeGenCli} ...` :
              `Upgrading ${DigitalTwinConstants.codeGenCli} ...`);
-    const upgradeMessage =
-        (installOrUpgrade === 1 ?
-             ` not installed, start installing :` :
+    const message =
+        (installOrUpgrade === CodeGenCliOperation.Install ?
+             ` not installed, start installing:` :
              ` new version detected, start upgrading from ${
-                 currentVersion} to ${newVersion} :`);
-    utils.channelShowAndAppendLine(channel, upgradeMessage);
+                 currentVersion} to ${newVersion}:`);
+    utils.channelShowAndAppendLine(channel, message);
 
     // Start donwloading
     let result = false;
@@ -920,35 +726,4 @@ function compareVersion(verion1: string, verion2: string) {
     i++;
   }
   return 0;
-}
-
-async function fileHash(filename: string, algorithm = 'md5') {
-  const hash = crypto.createHash(algorithm);
-  const input = fs.createReadStream(filename);
-  let hashvalue = '';
-  return new Promise((resolve, reject) => {
-    input.on('readable', () => {
-      const data = input.read();
-      if (data) {
-        hash.update(data);
-      }
-    });
-    input.on('error', reject);
-    input.on('end', () => {
-      hashvalue = hash.digest('hex');
-      return resolve(hashvalue);
-    });
-  });
-}
-
-async function extract(sourceZip: string, targetFoder: string) {
-  return new Promise((resolve, reject) => {
-    extractzip(sourceZip, {dir: targetFoder}, err => {
-      if (err) {
-        return reject(err);
-      } else {
-        return resolve(true);
-      }
-    });
-  });
 }

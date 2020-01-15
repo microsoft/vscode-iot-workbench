@@ -48,6 +48,7 @@ Here are a set of tutorials to help you get started:
 - [Develop IoT Plug and Play device using containerized toolchain](docs/embedded-linux/embedded-linux-pnp.md)
 - [Customize your device toolchain](docs/embedded-linux/embedded-linux-customization.md)
 
+
 #### Arduino
 
 Currently, Device Workbench supports MXChip IoT DevKit and ESP32 DevKits using Arduino. For generic Arduino device, we recommend you use [Arduino extension in VS Code](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-arduino).

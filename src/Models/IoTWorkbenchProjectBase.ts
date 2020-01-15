@@ -5,9 +5,9 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import {CancelOperationError} from '../CancelOperationError';
-import {ConfigKey, DevelopEnvironment, EventNames, FileNames, GlobalConstants, ScaffoldType} from '../constants';
+import {ConfigKey, EventNames, FileNames, ScaffoldType} from '../constants';
 import {FileUtility} from '../FileUtility';
-import {TelemetryContext, TelemetryProperties, TelemetryWorker} from '../telemetry';
+import {TelemetryContext, TelemetryWorker} from '../telemetry';
 import * as utils from '../utils';
 
 import {checkAzureLogin} from './Apis';
@@ -19,18 +19,24 @@ import {ProjectHostType} from './Interfaces/ProjectHostType';
 import {ProjectTemplateType, TemplateFileInfo} from './Interfaces/ProjectTemplate';
 import {Provisionable} from './Interfaces/Provisionable';
 import {Uploadable} from './Interfaces/Uploadable';
-import {RemoteExtension} from './RemoteExtension';
 
 const impor = require('impor')(__dirname);
 const azureUtilityModule =
     impor('./AzureUtility') as typeof import('./AzureUtility');
 
+export enum OpenScenario {
+  createNewProject,
+  configureProject
+}
 export abstract class IoTWorkbenchProjectBase {
-  protected componentList: Component[];
-  protected projectRootPath = '';
   protected extensionContext: vscode.ExtensionContext;
   protected channel: vscode.OutputChannel;
   protected telemetryContext: TelemetryContext;
+
+  protected projectRootPath = '';
+  protected iotWorkbenchProjectFilePath = '';
+
+  protected componentList: Component[];
   protected projectHostType: ProjectHostType = ProjectHostType.Unknown;
 
   /**
@@ -45,16 +51,16 @@ export abstract class IoTWorkbenchProjectBase {
       return ProjectHostType.Unknown;
     }
     const iotWorkbenchProjectFile =
-        path.join(projectFileRootPath, FileNames.iotworkbenchprojectFileName);
+        path.join(projectFileRootPath, FileNames.iotWorkbenchProjectFileName);
     if (!await FileUtility.fileExists(scaffoldType, iotWorkbenchProjectFile)) {
       return ProjectHostType.Unknown;
     }
-    const iotworkbenchprojectFileString =
+    const iotWorkbenchProjectFileString =
         (await FileUtility.readFile(
              scaffoldType, iotWorkbenchProjectFile, 'utf8') as string)
             .trim();
-    if (iotworkbenchprojectFileString) {
-      const projectConfig = JSON.parse(iotworkbenchprojectFileString);
+    if (iotWorkbenchProjectFileString) {
+      const projectConfig = JSON.parse(iotWorkbenchProjectFileString);
       if (projectConfig &&
           projectConfig[`${ConfigKey.projectHostType}`] !== undefined) {
         const projectHostType: ProjectHostType = utils.getEnumKeyByEnumValue(
@@ -100,7 +106,11 @@ export abstract class IoTWorkbenchProjectBase {
   }
 
   abstract async load(scaffoldType: ScaffoldType, initLoad?: boolean):
-      Promise<boolean>;
+      Promise<void>;
+
+  abstract async create(
+      templateFilesInfo: TemplateFileInfo[], projectType: ProjectTemplateType,
+      boardId: string, openInNewWindow: boolean): Promise<void>;
 
   async compile(): Promise<boolean> {
     for (const item of this.componentList) {
@@ -139,14 +149,6 @@ export abstract class IoTWorkbenchProjectBase {
   }
 
   async provision(): Promise<boolean> {
-    // const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
-    // if (!devicePath) {
-    //   throw new Error(
-    //       'Cannot run IoT Device Workbench command in a non-IoTWorkbench
-    //       project. Please initialize an IoT Device Workbench project
-    //       first.');
-    // }
-
     const provisionItemList: string[] = [];
     for (const item of this.componentList) {
       if (this.canProvision(item)) {
@@ -205,8 +207,7 @@ export abstract class IoTWorkbenchProjectBase {
 
         const res = await item.provision();
         if (!res) {
-          vscode.window.showWarningMessage('Provision cancelled.');
-          return false;
+          throw new CancelOperationError('Provision cancelled.');
         }
       }
     }
@@ -270,32 +271,23 @@ export abstract class IoTWorkbenchProjectBase {
     vscode.window.showInformationMessage('Azure deploy succeeded.');
   }
 
-  abstract async create(
-      rootFolderPath: string, templateFilesInfo: TemplateFileInfo[],
-      projectType: ProjectTemplateType, boardId: string,
-      openInNewWindow: boolean): Promise<void>;
-
   /**
    * Configure project environment: Scaffold configuration files with the given
    * template files.
    */
   async configureProjectEnvironmentCore(
-      deviceRootPath: string, scaffoldType: ScaffoldType): Promise<boolean> {
+      deviceRootPath: string, scaffoldType: ScaffoldType): Promise<void> {
     for (const component of this.componentList) {
       if (component.getComponentType() === ComponentType.Device) {
         const device = component as Device;
-        const res =
-            await device.configDeviceEnvironment(deviceRootPath, scaffoldType);
-        if (!res) {
-          return false;
-        }
+        await device.configDeviceEnvironment(deviceRootPath, scaffoldType);
       }
     }
-    return true;
   }
 
-  abstract async openProject(projectPath: string, openInNewWindow: boolean):
-      Promise<void>;
+  abstract async openProject(
+      scaffoldType: ScaffoldType, openInNewWindow: boolean,
+      openScenario: OpenScenario): Promise<void>;
 
   async configDeviceSettings(): Promise<boolean> {
     for (const component of this.componentList) {
@@ -308,70 +300,27 @@ export abstract class IoTWorkbenchProjectBase {
   }
 
   /**
-   * Generate iot workbench project file if not exists.
-   * Update project host type configuration in iot workbench project file.
+   * Send telemetry when the IoT project is load when VS Code opens
    */
-  async generateOrUpdateIotWorkbenchProjectFile(
-      type: ScaffoldType, deviceRootPath: string): Promise<void> {
-    if (!await FileUtility.directoryExists(type, deviceRootPath)) {
-      throw new Error('Unable to find the project folder.');
-    }
-
+  sendLoadEventTelemetry(context: vscode.ExtensionContext) {
+    const telemetryWorker = TelemetryWorker.getInstance(context);
     try {
-      const iotworkbenchprojectFilePath =
-          path.join(deviceRootPath, FileNames.iotworkbenchprojectFileName);
-
-      let projectConfig: {[key: string]: string} = {};
-      if (await FileUtility.fileExists(type, iotworkbenchprojectFilePath)) {
-        const projectConfigContent =
-            (await FileUtility.readFile(
-                 type, iotworkbenchprojectFilePath, 'utf8') as string)
-                .trim();
-        if (projectConfigContent) {
-          projectConfig = JSON.parse(projectConfigContent);
-        }
-      }
-
-      projectConfig[`${ConfigKey.projectHostType}`] =
-          ProjectHostType[this.projectHostType];
-
-      // Add config version for easier backward compatibility in the future.
-      const workbenchVersion = '1.0.0';
-      projectConfig[`${ConfigKey.workbenchVersion}`] = workbenchVersion;
-
-      await FileUtility.writeFile(
-          type, iotworkbenchprojectFilePath,
-          JSON.stringify(
-              projectConfig, null, GlobalConstants.indentationSpace));
-
-    } catch (error) {
-      throw new Error(`Generate or update ${
-          FileNames.iotworkbenchprojectFileName} file failed: ${
-          error.message}`);
+      telemetryWorker.sendEvent(
+          EventNames.projectLoadEvent, this.telemetryContext);
+    } catch {
+      // If sending telemetry failed, skip the error to avoid blocking user.
     }
   }
 
   /**
-   * Send telemetry when the IoT project is load when VS Code opens
+   * Validate whether project root path exists. If not, throw error.
+   * @param scaffoldType scaffold type
    */
-  sendTelemetryIfLoadProjectWithVSCodeOpens() {
-    const properties: TelemetryProperties = {
-      result: 'Succeeded',
-      error: '',
-      errorMessage: ''
-    };
-    properties.developEnvironment =
-        RemoteExtension.isRemote(this.extensionContext) ?
-        DevelopEnvironment.Container :
-        DevelopEnvironment.LocalEnv;
-    properties.projectHostType = ProjectHostType[this.projectHostType];
-    const telemetryContext:
-        TelemetryContext = {properties, measurements: {duration: 0}};
-
-    try {
-      TelemetryWorker.sendEvent(EventNames.projectLoadEvent, telemetryContext);
-    } catch {
-      // If sending telemetry failed, skip the error to avoid blocking user.
+  async validateProjectRootPath(scaffoldType: ScaffoldType): Promise<void> {
+    if (!await FileUtility.directoryExists(
+            scaffoldType, this.projectRootPath)) {
+      throw new Error(`Project root path ${
+          this.projectRootPath} does not exist. Please initialize the project first.`);
     }
   }
 }

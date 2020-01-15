@@ -4,6 +4,7 @@
 import * as vscode from 'vscode';
 
 import {AzureAccount} from '../azure-account.api';
+import {AzureAccountCommands} from '../common/Commands';
 
 import {ExtensionName} from './Interfaces/Api';
 
@@ -17,6 +18,10 @@ export function getExtension(name: ExtensionName) {
       const azureAccount = vscode.extensions.getExtension<AzureAccount>(
           'ms-vscode.azure-account');
       return azureAccount ? azureAccount.exports : undefined;
+    case ExtensionName.DigitalTwins:
+      const digitalTwins =
+          vscode.extensions.getExtension('vsciot-vscode.azure-digital-twins');
+      return digitalTwins ? digitalTwins.exports : undefined;
     default:
       return undefined;
   }
@@ -31,7 +36,7 @@ export async function checkAzureLogin(): Promise<boolean> {
 
   // Sign in Azure
   if (azureAccount.status !== 'LoggedIn') {
-    await vscode.commands.executeCommand('azure-account.login');
+    await vscode.commands.executeCommand(AzureAccountCommands.Login);
   }
 
   return true;

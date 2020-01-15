@@ -6,7 +6,6 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as path from 'path';
-import {VSCExpress} from 'vscode-express';
 import {BoardProvider} from './boardProvider';
 import {ProjectInitializer} from './projectInitializer';
 import {DeviceOperator} from './DeviceOperator';
@@ -14,835 +13,522 @@ import {AzureOperator} from './AzureOperator';
 import {IoTWorkbenchSettings} from './IoTSettings';
 import {ConfigHandler} from './configHandler';
 import {CodeGeneratorCore} from './DigitalTwin/CodeGeneratorCore';
-import {DigitalTwinMetaModelUtility, DigitalTwinMetaModelContext} from './DigitalTwin/DigitalTwinMetaModelUtility';
-import {DigitalTwinMetaModelParser, DigitalTwinMetaModelGraph} from './DigitalTwin/DigitalTwinMetaModelGraph';
-import {DeviceModelOperator} from './DigitalTwin/DeviceModelOperator';
-import {DigitalTwinMetaModelJsonParser} from './DigitalTwin/DigitalTwinMetaModelJsonParser';
-import {DigitalTwinDiagnostic} from './DigitalTwin/DigitalTwinDiagnostic';
-import {DigitalTwinConstants} from './DigitalTwin/DigitalTwinConstants';
-import {DTDLKeywords} from './DigitalTwin/DigitalTwinConstants';
-import {ConfigKey, ContextUris, EventNames, FileNames, ModelType} from './constants';
-import {TelemetryContext, TelemetryProperties} from './telemetry';
+import {ConfigKey, EventNames, FileNames} from './constants';
+import {TelemetryContext, TelemetryWorker, TelemetryResult} from './telemetry';
 import {RemoteExtension} from './Models/RemoteExtension';
 import {constructAndLoadIoTProject} from './utils';
 import {ProjectEnvironmentConfiger} from './ProjectEnvironmentConfiger';
+import {WorkbenchExtension} from './WorkbenchExtension';
+import {WorkbenchCommands, VscodeCommands} from './common/Commands';
+import {ColorizedChannel} from './DigitalTwin/pnp/src/common/colorizedChannel';
+import {Constants} from './DigitalTwin/pnp/src/common/constants';
+import {DeviceModelManager, ModelType} from './DigitalTwin/pnp/src/deviceModel/deviceModelManager';
+import {ModelRepositoryManager} from './DigitalTwin/pnp/src/modelRepository/modelRepositoryManager';
+import {IntelliSenseUtility} from './DigitalTwin/pnp/src/intelliSense/intelliSenseUtility';
+import {DigitalTwinCompletionItemProvider} from './DigitalTwin/pnp/src/intelliSense/digitalTwinCompletionItemProvider';
+import {DigitalTwinHoverProvider} from './DigitalTwin/pnp/src/intelliSense/digitalTwinHoverProvider';
+import {DigitalTwinDiagnosticProvider} from './DigitalTwin/pnp/src/intelliSense/digitalTwinDiagnosticProvider';
+import {Command} from './DigitalTwin/pnp/src/common/command';
+import {UserCancelledError} from './DigitalTwin/pnp/src/common/userCancelledError';
+import {UI, MessageType} from './DigitalTwin/pnp/src/view/ui';
+import {ProcessError} from './DigitalTwin/pnp/src/common/processError';
+import {SearchResult} from './DigitalTwin/pnp/src/modelRepository/modelRepositoryInterface';
+import {NSAT} from './nsat';
+import {DigitalTwinUtility} from './DigitalTwin/DigitalTwinUtility';
 
 const impor = require('impor')(__dirname);
 const exampleExplorerModule =
     impor('./exampleExplorer') as typeof import('./exampleExplorer');
-
-const telemetryModule = impor('./telemetry') as typeof import('./telemetry');
 const request = impor('request-promise') as typeof import('request-promise');
 
-interface SuggestionInfo {
-  label: string;
-  required: boolean;
-  type?: string;
-}
+// tslint:disable-next-line:no-any
+let telemetryWorker: any = undefined;
 
-function getDocumentType(document: vscode.TextDocument) {
-  if (/\.interface\.json$/.test(document.uri.fsPath)) {
-    return ModelType.Interface;
-  }
-
-  return ModelType.CapabilityModel;
-}
-
-let telemetryWorkerInitialized = false;
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
-  // Use the console to output diagnostic information (console.log) and errors
-  // (console.error) This line of code will only be executed once when your
-  // extension is activated
-  console.log(
-      'Congratulations, your extension "vscode-iot-workbench" is now active!');
+  printHello(context);
 
+  const channelName = 'Azure IoT Device Workbench';
   const outputChannel: vscode.OutputChannel =
-      vscode.window.createOutputChannel('Azure IoT Device Workbench');
-
-  const deviceModelOperator = new DeviceModelOperator();
-
-  // IoT Plug and Play Language Server
-  const dtContext = new DigitalTwinMetaModelUtility(context);
-  const dtInterface: DigitalTwinMetaModelContext =
-      await dtContext.getInterface();
-  const dtCapabilityModel: DigitalTwinMetaModelContext =
-      await dtContext.getCapabilityModel();
-  const dtIoTModel: DigitalTwinMetaModelContext = await dtContext.getIoTModel();
-  const dtGraph: DigitalTwinMetaModelGraph = await dtContext.getGraph();
-  const dtParser = new DigitalTwinMetaModelParser(dtGraph);
-  const dtDiagnostic = new DigitalTwinDiagnostic(dtParser);
-
-  const activeEditor = vscode.window.activeTextEditor;
-
-  if (activeEditor) {
-    const document = activeEditor.document;
-    if (/\.(interface|capabilitymodel)\.json$/.test(document.uri.fsPath)) {
-      const contextUris =
-          DigitalTwinMetaModelJsonParser.getContextUris(document);
-      const documentType = getDocumentType(document);
-      if (documentType === ModelType.Interface &&
-          contextUris.indexOf(ContextUris.interface) >= 0) {
-        dtDiagnostic.update(dtInterface, document);
-      } else if (
-          documentType === ModelType.Interface &&
-          contextUris.indexOf(ContextUris.capabilityModel) >= 0) {
-        dtDiagnostic.update(dtCapabilityModel, document);
-      } else {
-        console.log('using IoTModel.json');
-        dtDiagnostic.update(dtIoTModel, document);
-      }
-    }
-  }
-
-  let waitingForUpdatingDiagnostic: NodeJS.Timer|null = null;
-
-  vscode.workspace.onDidOpenTextDocument(document => {
-    if (!/\.(interface|capabilitymodel)\.json$/.test(document.uri.fsPath)) {
-      return;
-    }
-
-    waitingForUpdatingDiagnostic = setTimeout(() => {
-      const contextUris =
-          DigitalTwinMetaModelJsonParser.getContextUris(document);
-      const documentType = getDocumentType(document);
-      if (documentType === ModelType.Interface &&
-          contextUris.indexOf(ContextUris.interface) >= 0) {
-        dtDiagnostic.update(dtInterface, document);
-      } else if (
-          documentType === ModelType.Interface &&
-          contextUris.indexOf(ContextUris.capabilityModel) >= 0) {
-        dtDiagnostic.update(dtCapabilityModel, document);
-      } else {
-        console.log('using IoTModel.json');
-        dtDiagnostic.update(dtIoTModel, document);
-      }
-    }, 0);
-  });
-
-  vscode.workspace.onDidChangeTextDocument(event => {
-    const document = event.document;
-    if (!/\.(interface|capabilitymodel)\.json$/.test(document.uri.fsPath)) {
-      return;
-    }
-
-    if (waitingForUpdatingDiagnostic) {
-      clearTimeout(waitingForUpdatingDiagnostic);
-    }
-
-    waitingForUpdatingDiagnostic = setTimeout(() => {
-      const contextUris =
-          DigitalTwinMetaModelJsonParser.getContextUris(document);
-      const documentType = getDocumentType(document);
-      if (documentType === ModelType.Interface &&
-          contextUris.indexOf(ContextUris.interface) >= 0) {
-        dtDiagnostic.update(dtInterface, document);
-      } else if (
-          documentType === ModelType.Interface &&
-          contextUris.indexOf(ContextUris.capabilityModel) >= 0) {
-        dtDiagnostic.update(dtCapabilityModel, document);
-      } else {
-        console.log('using IoTModel.json');
-        dtDiagnostic.update(dtIoTModel, document);
-      }
-      waitingForUpdatingDiagnostic = null;
-    }, 500);
-  });
-
-  vscode.window.onDidChangeActiveTextEditor(editor => {
-    if (!editor) {
-      return;
-    }
-
-    const document = editor.document;
-    if (!/\.(interface|capabilitymodel)\.json$/.test(document.uri.fsPath)) {
-      return;
-    }
-
-    const contextUris = DigitalTwinMetaModelJsonParser.getContextUris(document);
-    const documentType = getDocumentType(document);
-    if (documentType === ModelType.Interface &&
-        contextUris.indexOf(ContextUris.interface) >= 0) {
-      dtDiagnostic.update(dtInterface, document);
-    } else if (
-        documentType === ModelType.Interface &&
-        contextUris.indexOf(ContextUris.capabilityModel) >= 0) {
-      dtDiagnostic.update(dtCapabilityModel, document);
-    } else {
-      console.log('using IoTModel.json');
-      dtDiagnostic.update(dtIoTModel, document);
-    }
-  });
-
-  vscode.workspace.onDidCloseTextDocument(document => {
-    if (!/\.(interface|capabilitymodel)\.json$/.test(document.uri.fsPath)) {
-      return;
-    }
-
-    const documentType = getDocumentType(document);
-    if (documentType === ModelType.Interface) {
-      dtDiagnostic.delete(document);
-    } else {
-      dtDiagnostic.delete(document);
-    }
-  });
-
-  vscode.languages.registerHoverProvider(
-      {
-        language: 'json',
-        scheme: 'file',
-        pattern: '**/*.{interface,capabilitymodel}.json'
-      },
-      {
-        async provideHover(document, position, token):
-            Promise<vscode.Hover|null> {
-              const id = DigitalTwinMetaModelJsonParser.getIdAtPosition(
-                  document, position, dtInterface);
-              let hoverText: string|undefined = undefined;
-              if (id) {
-                if (id === '@id') {
-                  hoverText = `An identifier for ${
-                      DigitalTwinConstants
-                          .productName} Capability Model or interface.`;
-                } else if (id === '@type') {
-                  hoverText = `The type of ${
-                      DigitalTwinConstants.productName} meta model object.`;
-                } else if (id === '@context') {
-                  hoverText = `The context for ${
-                      DigitalTwinConstants
-                          .productName} Capability Model or interface.`;
-                } else {
-                  hoverText = dtParser.getCommentFromId(id);
-                }
-              }
-              return hoverText ? new vscode.Hover(hoverText) : null;
-            }
-      });
-
-  vscode.languages.registerCompletionItemProvider(
-      {
-        language: 'json',
-        scheme: 'file',
-        pattern: '**/*.{interface,capabilitymodel}.json'
-      },
-      {
-        provideCompletionItems(document, position): vscode.CompletionList |
-        null {
-          const documentType = getDocumentType(document);
-
-          const jsonInfo = DigitalTwinMetaModelJsonParser.getJsonInfoAtPosition(
-              document, position);
-          const contextType = DigitalTwinMetaModelJsonParser
-                                  .getDigitalTwinContextTypeAtPosition(
-                                      document, position, documentType);
-
-          let dtContext: DigitalTwinMetaModelContext;
-
-          const contextUris =
-              DigitalTwinMetaModelJsonParser.getContextUris(document);
-          if (documentType === ModelType.Interface &&
-              contextUris.indexOf(ContextUris.interface) >= 0) {
-            dtContext = dtInterface;
-          } else if (
-              documentType === ModelType.Interface &&
-              contextUris.indexOf(ContextUris.capabilityModel) >= 0) {
-            dtContext = dtCapabilityModel;
-          } else {
-            console.log('using IoTModel.json');
-            dtContext = dtIoTModel;
-          }
-
-          if (!jsonInfo) {
-            return null;
-          }
-          if (jsonInfo.isValue) {
-            let values: string[] = [];
-            if (jsonInfo.key === '@context') {
-              const contextUri = contextType === ModelType.Interface ?
-                  ContextUris.interface :
-                  ContextUris.capabilityModel;
-              values = [contextUri, ContextUris.iotModel];
-            } else if (jsonInfo.key === '@type') {
-              if (jsonInfo.lastKey) {
-                const id =
-                    dtParser.getIdFromShortName(dtContext, jsonInfo.lastKey);
-                if (!id) {
-                  return null;
-                }
-                values = dtParser.getTypesFromId(dtContext, id);
-              } else {
-                values = [contextType];
-              }
-            } else if (
-                jsonInfo.key === 'schema' &&
-                jsonInfo.lastKey === 'implements') {
-              // >>> TODO
-              // This's a workaroud for issue
-              // https://dev.azure.com/mseng/VSIoT/_workitems/edit/1575737,
-              // which caused by the wrong DTDL.
-              // Should be removed once the DTDL is fixed.
-              jsonInfo.key = DTDLKeywords.inlineInterfaceKeyName;
-              values = dtParser.getStringValuesFromShortName(
-                  dtContext, jsonInfo.key);
-              // <<<
-            } else {
-              values = dtParser.getStringValuesFromShortName(
-                  dtContext, jsonInfo.key);
-            }
-
-            const range = DigitalTwinMetaModelJsonParser.getTokenRange(
-                jsonInfo.json.tokens, jsonInfo.offset);
-            const startPosition = document.positionAt(range.startIndex);
-            const endPosition = document.positionAt(range.endIndex);
-            const completionItems =
-                DigitalTwinMetaModelJsonParser.getCompletionItemsFromArray(
-                    values, position, startPosition, endPosition);
-            return new vscode.CompletionList(completionItems, false);
-          } else {
-            let keyList: SuggestionInfo[] = [];
-            const completionKeyList: SuggestionInfo[] = [];
-            if (!jsonInfo.type ||
-                (Array.isArray(jsonInfo.type) && jsonInfo.type.length === 0)) {
-              const id =
-                  dtParser.getIdFromShortName(dtContext, jsonInfo.lastKey);
-              if (id) {
-                const values = dtParser.getTypesFromId(dtContext, id);
-                if (values.length === 1 && values[0] !== ModelType.Interface &&
-                    values[0] !== ModelType.CapabilityModel) {
-                  jsonInfo.type = values[0];
-                }
-              }
-            }
-
-            if ((typeof jsonInfo.type === 'string' && jsonInfo.type !== '') ||
-                (Array.isArray(jsonInfo.type) && jsonInfo.type.length > 0)) {
-              if ((jsonInfo.type === ModelType.Interface ||
-                   jsonInfo.type === ModelType.CapabilityModel) &&
-                  jsonInfo.properties.indexOf('@context') === -1) {
-                completionKeyList.push({label: '@context', required: true});
-              }
-              if (Array.isArray(jsonInfo.type)) {
-                for (const currentType of jsonInfo.type) {
-                  keyList = keyList.concat(dtParser.getTypedPropertiesFromType(
-                      dtContext, currentType));
-                }
-                const completionObject: {
-                  [key: string]:
-                      {required: boolean; type: string | undefined};
-                } = {};
-                for (const keyObject of keyList) {
-                  completionObject[keyObject.label] = {
-                    required: (completionObject[keyObject.label] &&
-                               completionObject[keyObject.label].required) ||
-                        keyObject.required,
-                    type: completionObject[keyObject.label] ?
-                        completionObject[keyObject.label].type :
-                        keyObject.type
-                  };
-                }
-                keyList = [];
-                for (const key of Object.keys(completionObject)) {
-                  keyList.push({
-                    label: key,
-                    required: completionObject[key].required,
-                    type: completionObject[key].type
-                  });
-                }
-              } else {
-                keyList = dtParser.getTypedPropertiesFromType(
-                    dtContext, jsonInfo.type);
-              }
-            } else {
-              keyList = [{label: '@type', required: true}];
-            }
-
-            for (const key of keyList) {
-              if (jsonInfo.properties.indexOf(key.label) === -1) {
-                // >>> TODO
-                // This's a workaroud for issue
-                // https://dev.azure.com/mseng/VSIoT/_workitems/edit/1575737,
-                // which caused by the wrong DTDL.
-                // Should be removed once the DTDL is fixed.
-                if (!jsonInfo.isValue &&
-                    key.label === DTDLKeywords.inlineInterfaceKeyName &&
-                    jsonInfo.type === ModelType.InlineInterface) {
-                  key.label = 'schema';
-                }
-                // <<<
-                completionKeyList.push(key);
-              }
-            }
-
-            if ((jsonInfo.type === ModelType.Interface ||
-                 jsonInfo.type === ModelType.CapabilityModel) &&
-                jsonInfo.properties.indexOf('@id') === -1) {
-              completionKeyList.push(
-                  {label: '@id', required: true, type: 'string'});
-            }
-
-            const range = DigitalTwinMetaModelJsonParser.getTokenRange(
-                jsonInfo.json.tokens, jsonInfo.offset);
-            const startPosition = document.positionAt(range.startIndex);
-            const endPosition = document.positionAt(range.endIndex);
-            const completionItems =
-                DigitalTwinMetaModelJsonParser.getCompletionItemsFromArray(
-                    completionKeyList, position, startPosition, endPosition);
-            console.log(completionItems);
-            return new vscode.CompletionList(completionItems, false);
-          }
-        }
-      },
-      '"');
-
-  const telemetryContext: TelemetryContext = {
-    properties: {result: 'Succeeded', error: '', errorMessage: ''},
-    measurements: {duration: 0}
-  };
+      vscode.window.createOutputChannel(channelName);
+  telemetryWorker = TelemetryWorker.getInstance(context);
+  context.subscriptions.push(telemetryWorker);
 
   // Load iot Project here and do not ask to new an iot project when no iot
   // project open since no command has been triggered yet.
+  const telemetryContext = telemetryWorker.createContext();
   await constructAndLoadIoTProject(
       context, outputChannel, telemetryContext, true);
+
   const deviceOperator = new DeviceOperator();
   const azureOperator = new AzureOperator();
   const exampleExplorer = new exampleExplorerModule.ExampleExplorer();
 
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with  registerCommand
-  // The commandId parameter must match the command field in package.json
+  initCommandWithTelemetry(
+      context, telemetryWorker, outputChannel,
+      WorkbenchCommands.InitializeProject, EventNames.createNewProjectEvent,
+      true,
+      async(
+          context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
+          telemetryContext: TelemetryContext): Promise<void> => {
+        const projectInitializer = new ProjectInitializer();
+        return projectInitializer.InitializeProject(
+            context, outputChannel, telemetryContext);
+      });
 
-  const projectInitProvider = async () => {
-    // Initialize Telemetry
-    if (!telemetryWorkerInitialized) {
-      telemetryModule.TelemetryWorker.initialize(context);
-      telemetryWorkerInitialized = true;
-    }
+  initCommandWithTelemetry(
+      context, telemetryWorker, outputChannel,
+      WorkbenchCommands.ConfigureProjectEnvironment,
+      EventNames.configProjectEnvironmentEvent, true,
+      async(
+          context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
+          telemetryContext: TelemetryContext): Promise<void> => {
+        const projectEnvConfiger = new ProjectEnvironmentConfiger();
+        return projectEnvConfiger.configureCmakeProjectEnvironment(
+            context, outputChannel, telemetryContext);
+      });
 
-    const projectInitializer = new ProjectInitializer();
-    const projectInitializerBinder =
-        projectInitializer.InitializeProject.bind(projectInitializer);
-    telemetryModule.callWithTelemetry(
-        EventNames.createNewProjectEvent, outputChannel, true, context,
-        projectInitializerBinder);
-  };
+  initCommandWithTelemetry(
+      context, telemetryWorker, outputChannel, WorkbenchCommands.AzureProvision,
+      EventNames.azureProvisionEvent, true,
+      async(
+          context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
+          telemetryContext: TelemetryContext): Promise<void> => {
+        return azureOperator.provision(
+            context, outputChannel, telemetryContext);
+      });
 
-  const projectEnvironmentConfigProvider = async () => {
-    // Initialize Telemetry
-    if (!telemetryWorkerInitialized) {
-      telemetryModule.TelemetryWorker.initialize(context);
-      telemetryWorkerInitialized = true;
-    }
+  initCommandWithTelemetry(
+      context, telemetryWorker, outputChannel, WorkbenchCommands.AzureDeploy,
+      EventNames.azureDeployEvent, true,
+      async(
+          context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
+          telemetryContext: TelemetryContext): Promise<void> => {
+        return azureOperator.deploy(context, outputChannel, telemetryContext);
+      });
 
-    const projectEnvConfiger = new ProjectEnvironmentConfiger();
-    const projectEnvConfigBinder =
-        projectEnvConfiger.configureProjectEnvironment.bind(projectEnvConfiger);
-    telemetryModule.callWithTelemetry(
-        EventNames.configProjectEnvironmentEvent, outputChannel, true, context,
-        projectEnvConfigBinder);
-  };
+  initCommandWithTelemetry(
+      context, telemetryWorker, outputChannel, WorkbenchCommands.DeviceCompile,
+      EventNames.deviceCompileEvent, true,
+      async(
+          context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
+          telemetryContext: TelemetryContext): Promise<void> => {
+        return deviceOperator.compile(context, outputChannel, telemetryContext);
+      });
 
-  const azureProvisionProvider = async () => {
-    // Initialize Telemetry
-    if (!telemetryWorkerInitialized) {
-      telemetryModule.TelemetryWorker.initialize(context);
-      telemetryWorkerInitialized = true;
-    }
+  initCommandWithTelemetry(
+      context, telemetryWorker, outputChannel, WorkbenchCommands.DeviceUpload,
+      EventNames.deviceUploadEvent, true,
+      async(
+          context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
+          telemetryContext: TelemetryContext): Promise<void> => {
+        return deviceOperator.upload(context, outputChannel, telemetryContext);
+      });
 
-    const azureProvisionBinder = azureOperator.provision.bind(azureOperator);
-    telemetryModule.callWithTelemetry(
-        EventNames.azureProvisionEvent, outputChannel, true, context,
-        azureProvisionBinder);
-  };
+  initCommandWithTelemetry(
+      context, telemetryWorker, outputChannel,
+      WorkbenchCommands.ConfigureDevice, EventNames.configDeviceSettingsEvent,
+      true,
+      async(
+          context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
+          telemetryContext: TelemetryContext): Promise<void> => {
+        return deviceOperator.configDeviceSettings(
+            context, outputChannel, telemetryContext);
+      });
 
-  const azureDeployProvider = async () => {
-    // Initialize Telemetry
-    if (!telemetryWorkerInitialized) {
-      telemetryModule.TelemetryWorker.initialize(context);
-      telemetryWorkerInitialized = true;
-    }
+  initCommandWithTelemetry(
+      context, telemetryWorker, outputChannel, WorkbenchCommands.Examples,
+      EventNames.openExamplePageEvent, true,
+      async(
+          context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
+          telemetryContext: TelemetryContext): Promise<void> => {
+        return exampleExplorer.selectBoard(
+            context, outputChannel, telemetryContext);
+      });
 
-    const azureDeployBinder = azureOperator.deploy.bind(azureOperator);
-    telemetryModule.callWithTelemetry(
-        EventNames.azureDeployEvent, outputChannel, true, context,
-        azureDeployBinder);
-  };
+  initCommandWithTelemetry(
+      context, telemetryWorker, outputChannel,
+      WorkbenchCommands.ExampleInitialize, EventNames.loadExampleEvent, true,
+      async(
+          context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
+          telemetryContext: TelemetryContext, name?: string, url?: string,
+          boardId?: string): Promise<void> => {
+        return exampleExplorer.initializeExample(
+            context, outputChannel, telemetryContext, name, url, boardId);
+      });
 
-  const deviceCompileProvider = async () => {
-    // Initialize Telemetry
-    if (!telemetryWorkerInitialized) {
-      telemetryModule.TelemetryWorker.initialize(context);
-      telemetryWorkerInitialized = true;
-    }
+  initCommandWithTelemetry(
+      context, telemetryWorker, outputChannel, WorkbenchCommands.SendTelemetry,
+      EventNames.openTutorial, true, async () => {});
 
-    const deviceCompileBinder = deviceOperator.compile.bind(deviceOperator);
-    telemetryModule.callWithTelemetry(
-        EventNames.deviceCompileEvent, outputChannel, true, context,
-        deviceCompileBinder);
-  };
+  initCommandWithTelemetry(
+      context, telemetryWorker, outputChannel,
+      WorkbenchCommands.IotPnPGenerateCode, EventNames.scaffoldDeviceStubEvent,
+      true,
+      async(
+          context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
+          telemetryContext: TelemetryContext): Promise<void> => {
+        const codeGenerator = new CodeGeneratorCore();
+        return codeGenerator.generateDeviceCodeStub(
+            context, outputChannel, telemetryContext);
+      });
 
-  const deviceUploadProvider = async () => {
-    // Initialize Telemetry
-    if (!telemetryWorkerInitialized) {
-      telemetryModule.TelemetryWorker.initialize(context);
-      telemetryWorkerInitialized = true;
-    }
+  initCommandWithTelemetry(
+      context, telemetryWorker, outputChannel, WorkbenchCommands.Help,
+      EventNames.help, true, async () => {
+        const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
 
-    const deviceUploadBinder = deviceOperator.upload.bind(deviceOperator);
-    telemetryModule.callWithTelemetry(
-        EventNames.deviceUploadEvent, outputChannel, true, context,
-        deviceUploadBinder);
-  };
+        if (boardId) {
+          const boardListFolderPath = context.asAbsolutePath(path.join(
+              FileNames.resourcesFolderName, FileNames.templatesFolderName));
+          const boardProvider = new BoardProvider(boardListFolderPath);
+          const board = boardProvider.find({id: boardId});
 
-  const deviceSettingsConfigProvider = async () => {
-    // Initialize Telemetry
-    if (!telemetryWorkerInitialized) {
-      telemetryModule.TelemetryWorker.initialize(context);
-      telemetryWorkerInitialized = true;
-    }
-
-    const deviceConfigBinder =
-        deviceOperator.configDeviceSettings.bind(deviceOperator);
-    telemetryModule.callWithTelemetry(
-        EventNames.configDeviceSettingsEvent, outputChannel, true, context,
-        deviceConfigBinder);
-  };
-
-  const examplesProvider = async () => {
-    // Initialize Telemetry
-    if (!telemetryWorkerInitialized) {
-      telemetryModule.TelemetryWorker.initialize(context);
-      telemetryWorkerInitialized = true;
-    }
-
-    const exampleSelectBoardBinder =
-        exampleExplorer.selectBoard.bind(exampleExplorer);
-    telemetryModule.callWithTelemetry(
-        EventNames.openExamplePageEvent, outputChannel, true, context,
-        exampleSelectBoardBinder);
-  };
-
-  const examplesInitializeProvider =
-      async (name?: string, url?: string, boardId?: string) => {
-    // Initialize Telemetry
-    if (!telemetryWorkerInitialized) {
-      telemetryModule.TelemetryWorker.initialize(context);
-      telemetryWorkerInitialized = true;
-    }
-
-    const initializeExampleBinder =
-        exampleExplorer.initializeExample.bind(exampleExplorer);
-    telemetryModule.callWithTelemetry(
-        EventNames.loadExampleEvent, outputChannel, true, context,
-        initializeExampleBinder, {}, name, url, boardId);
-  };
-
-  const projectInit = vscode.commands.registerCommand(
-      'iotworkbench.initializeProject', projectInitProvider);
-
-  const configureContainer = vscode.commands.registerCommand(
-      'iotworkbench.configureProjectEnvironment',
-      projectEnvironmentConfigProvider);
-  const examples = vscode.commands.registerCommand(
-      'iotworkbench.examples', examplesProvider);
-
-  const exampleInitialize = vscode.commands.registerCommand(
-      'iotworkbench.exampleInitialize', examplesInitializeProvider);
-
-  const deviceCompile = vscode.commands.registerCommand(
-      'iotworkbench.deviceCompile', deviceCompileProvider);
-
-  const deviceUpload = vscode.commands.registerCommand(
-      'iotworkbench.deviceUpload', deviceUploadProvider);
-
-  const azureProvision = vscode.commands.registerCommand(
-      'iotworkbench.azureProvision', azureProvisionProvider);
-
-  const azureDeploy = vscode.commands.registerCommand(
-      'iotworkbench.azureDeploy', azureDeployProvider);
-
-  const configureDevice = vscode.commands.registerCommand(
-      'iotworkbench.configureDevice', deviceSettingsConfigProvider);
-
-  const sendTelemetry = vscode.commands.registerCommand(
-      'iotworkbench.sendTelemetry',
-      (additionalProperties: {[key: string]: string}) => {
-        const properties: TelemetryProperties = {
-          result: 'Succeeded',
-          error: '',
-          errorMessage: ''
-        };
-
-        for (const key of Object.keys(additionalProperties)) {
-          properties[key] = additionalProperties[key];
+          if (board && board.helpUrl) {
+            await vscode.commands.executeCommand(
+                VscodeCommands.VscodeOpen, vscode.Uri.parse(board.helpUrl));
+            return;
+          }
         }
-
-        const telemetryContext:
-            TelemetryContext = {properties, measurements: {duration: 0}};
-
-        // Initialize Telemetry
-        if (!telemetryWorkerInitialized) {
-          telemetryModule.TelemetryWorker.initialize(context);
-          telemetryWorkerInitialized = true;
-        }
-        telemetryModule.TelemetryWorker.sendEvent(
-            EventNames.openTutorial, telemetryContext);
-      });
-
-  const openUri =
-      vscode.commands.registerCommand('iotworkbench.openUri', (uri: string) => {
-        vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(uri));
-      });
-
-  const httpRequest = vscode.commands.registerCommand(
-      'iotworkbench.httpRequest', async (uri: string) => {
-        const res = await request(uri);
-        return res;
-      });
-
-  const helpProvider = new VSCExpress(context, 'views');
-
-  const helpInit = vscode.commands.registerCommand('iotworkbench.help', async () => {
-    const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
-
-    if (boardId) {
-      const boardListFolderPath = context.asAbsolutePath(path.join(
-          FileNames.resourcesFolderName, FileNames.templatesFolderName));
-      const boardProvider = new BoardProvider(boardListFolderPath);
-      const board = boardProvider.find({id: boardId});
-
-      if (board && board.helpUrl) {
+        const workbenchHelpUrl =
+            'https://github.com/microsoft/vscode-iot-workbench/blob/master/README.md';
         await vscode.commands.executeCommand(
-            'vscode.open', vscode.Uri.parse(board.helpUrl));
+            VscodeCommands.VscodeOpen, vscode.Uri.parse(workbenchHelpUrl));
         return;
-      }
-    }
-    await vscode.commands.executeCommand(
-        'vscode.open',
-        vscode.Uri.parse(
-            'https://github.com/microsoft/vscode-iot-workbench/blob/master/README.md'));
-    return;
-  });
+      });
 
-  const workbenchPath =
-      vscode.commands.registerCommand('iotworkbench.workbench', async () => {
+  initCommandWithTelemetry(
+      context, telemetryWorker, outputChannel, WorkbenchCommands.Workbench,
+      EventNames.setProjectDefaultPath, true, async () => {
         const isLocal = RemoteExtension.checkLocalBeforeRunCommand(context);
         if (!isLocal) {
           return;
         }
-        const settings: IoTWorkbenchSettings =
-            await IoTWorkbenchSettings.createAsync();
+        const settings = await IoTWorkbenchSettings.getInstance();
         await settings.setWorkbenchPath();
         return;
       });
 
-  const getDisableAutoPopupLandingPage = vscode.commands.registerCommand(
-      'iotworkbench.getDisableAutoPopupLandingPage', () => {
-        return ConfigHandler.get<boolean>('disableAutoPopupLandingPage');
-      });
+  initCommand(context, WorkbenchCommands.OpenUri, async (uri: string) => {
+    vscode.commands.executeCommand(
+        VscodeCommands.VscodeOpen, vscode.Uri.parse(uri));
+  });
 
-  const setDisableAutoPopupLandingPage = vscode.commands.registerCommand(
-      'iotworkbench.setDisableAutoPopupLandingPage',
-      async (disableAutoPopupLandingPage: boolean) => {
-        return ConfigHandler.update(
-            'disableAutoPopupLandingPage', disableAutoPopupLandingPage,
-            vscode.ConfigurationTarget.Global);
-      });
-
-  context.subscriptions.push(projectInit);
-  context.subscriptions.push(configureContainer);
-  context.subscriptions.push(examples);
-  context.subscriptions.push(exampleInitialize);
-  context.subscriptions.push(helpInit);
-  context.subscriptions.push(workbenchPath);
-  context.subscriptions.push(deviceCompile);
-  context.subscriptions.push(deviceUpload);
-  context.subscriptions.push(azureProvision);
-  context.subscriptions.push(azureDeploy);
-  context.subscriptions.push(configureDevice);
-  context.subscriptions.push(sendTelemetry);
-  context.subscriptions.push(openUri);
-  context.subscriptions.push(httpRequest);
-  context.subscriptions.push(getDisableAutoPopupLandingPage);
-  context.subscriptions.push(setDisableAutoPopupLandingPage);
-
-  // IoT Plug and Play commands
-  vscode.commands.registerCommand(
-      'iotworkbench.getInterfaces',
-      async (
-          searchString?: string, publicRepository = false, pageSize?: number,
-          continueToken?: string) => {
-        // Initialize Telemetry
-        if (!telemetryWorkerInitialized) {
-          telemetryModule.TelemetryWorker.initialize(context);
-          telemetryWorkerInitialized = true;
-        }
-
-        return telemetryModule.callWithTelemetry(
-            EventNames.pnpGetInterfacesEvent, outputChannel, true, context,
-            deviceModelOperator.getInterfaces.bind(deviceModelOperator), {},
-            publicRepository, searchString, pageSize, continueToken);
-      });
-
-  vscode.commands.registerCommand(
-      'iotworkbench.getCapabilityModels',
-      async (
-          searchString?: string, publicRepository = false, pageSize?: number,
-          continueToken?: string) => {
-        // Initialize Telemetry
-        if (!telemetryWorkerInitialized) {
-          telemetryModule.TelemetryWorker.initialize(context);
-          telemetryWorkerInitialized = true;
-        }
-
-        return telemetryModule.callWithTelemetry(
-            EventNames.pnpGetCapabilityModelsEvent, outputChannel, true,
-            context,
-            deviceModelOperator.getCapabilityModels.bind(deviceModelOperator),
-            {}, publicRepository, searchString, pageSize, continueToken);
-      });
-
-  vscode.commands.registerCommand(
-      'iotworkbench.deleteMetamodelFiles',
-      async (interfaceIds: string[], metaModelValue: string) => {
-        // Initialize Telemetry
-        if (!telemetryWorkerInitialized) {
-          telemetryModule.TelemetryWorker.initialize(context);
-          telemetryWorkerInitialized = true;
-        }
-
-        telemetryModule.callWithTelemetry(
-            EventNames.pnpDeleteModelsEvent, outputChannel, true, context,
-            deviceModelOperator.deleteMetamodelFiles.bind(deviceModelOperator),
-            {}, interfaceIds, metaModelValue);
-      });
-
-  vscode.commands.registerCommand(
-      'iotworkbench.editMetamodelFiles',
-      async (
-          fileIds: string[], metaModelValue: string,
-          publicRepository = false) => {
-        // Initialize Telemetry
-        if (!telemetryWorkerInitialized) {
-          telemetryModule.TelemetryWorker.initialize(context);
-          telemetryWorkerInitialized = true;
-        }
-
-        const pnpEditModelsBinder =
-            deviceModelOperator.downloadAndEditMetamodelFiles.bind(
-                deviceModelOperator);
-        telemetryModule.callWithTelemetry(
-            EventNames.pnpEditModelsEvent, outputChannel, true, context,
-            pnpEditModelsBinder, {}, fileIds, metaModelValue, publicRepository);
-      });
-
-  context.subscriptions.push(vscode.commands.registerCommand(
-      'iotworkbench.iotPnPOpenRepository', async () => {
-        // Initialize Telemetry
-        if (!telemetryWorkerInitialized) {
-          telemetryModule.TelemetryWorker.initialize(context);
-          telemetryWorkerInitialized = true;
-        }
-        telemetryModule.callWithTelemetry(
-            EventNames.pnpConnectModelRepoEvent, outputChannel, true, context,
-            deviceModelOperator.connectModelRepository.bind(
-                deviceModelOperator));
-      }));
-
-  context.subscriptions.push(vscode.commands.registerCommand(
-      'iotworkbench.iotPnPSignOutRepository', async () => {
-        // Initialize Telemetry
-        if (!telemetryWorkerInitialized) {
-          telemetryModule.TelemetryWorker.initialize(context);
-          telemetryWorkerInitialized = true;
-        }
-        telemetryModule.callWithTelemetry(
-            EventNames.pnpConnectModelRepoEvent, outputChannel, true, context,
-            deviceModelOperator.disconnect.bind(deviceModelOperator));
-      }));
-
-  context.subscriptions.push(vscode.commands.registerCommand(
-      'iotworkbench.iotPnPCreateInterface', async () => {
-        // Initialize Telemetry
-        if (!telemetryWorkerInitialized) {
-          telemetryModule.TelemetryWorker.initialize(context);
-          telemetryWorkerInitialized = true;
-        }
-
-        const pnpCreateInterfaceBinder =
-            deviceModelOperator.createInterface.bind(deviceModelOperator);
-
-        telemetryModule.callWithTelemetry(
-            EventNames.pnpCreateInterfaceEvent, outputChannel, true, context,
-            pnpCreateInterfaceBinder);
-      }));
-
-  context.subscriptions.push(vscode.commands.registerCommand(
-      'iotworkbench.iotPnPCreateCapabilityModel', async () => {
-        // Initialize Telemetry
-        if (!telemetryWorkerInitialized) {
-          telemetryModule.TelemetryWorker.initialize(context);
-          telemetryWorkerInitialized = true;
-        }
-
-        const pnpCreateCapabilityModelBinder =
-            deviceModelOperator.createCapabilityModel.bind(deviceModelOperator);
-
-        telemetryModule.callWithTelemetry(
-            EventNames.pnpCreateCapabilityModelEvent, outputChannel, true,
-            context, pnpCreateCapabilityModelBinder);
-      }));
-
-  context.subscriptions.push(vscode.commands.registerCommand(
-      'iotworkbench.iotPnPSubmitFile', async () => {
-        // Initialize Telemetry
-        if (!telemetryWorkerInitialized) {
-          telemetryModule.TelemetryWorker.initialize(context);
-          telemetryWorkerInitialized = true;
-        }
-
-        const pnpSubmitModelFilesBinder =
-            deviceModelOperator.submitMetaModelFiles.bind(deviceModelOperator);
-        telemetryModule.callWithTelemetry(
-            EventNames.pnpSubmitMetaModelFilesEvent, outputChannel, true,
-            context, pnpSubmitModelFilesBinder);
-      }));
-
-  context.subscriptions.push(vscode.commands.registerCommand(
-      'iotworkbench.iotPnPGenerateCode', async () => {
-        // Initialize Telemetry
-        if (!telemetryWorkerInitialized) {
-          telemetryModule.TelemetryWorker.initialize(context);
-          telemetryWorkerInitialized = true;
-        }
-
-        const codeGenerator = new CodeGeneratorCore();
-        const codeGeneratorBinder =
-            codeGenerator.generateDeviceCodeStub.bind(codeGenerator);
-
-        telemetryModule.callWithTelemetry(
-            EventNames.scaffoldDeviceStubEvent, outputChannel, true, context,
-            codeGeneratorBinder);
-      }));
+  initCommand(context, WorkbenchCommands.HttpRequest, async (uri: string) => {
+    const res = await request(uri);
+    return res;
+  });
 
   // delay to detect usb
   setTimeout(() => {
-    if (RemoteExtension.isRemote(context)) {
-      return;
-    }
-    // delay to detect usb
-    const usbDetectorModule =
-        impor('./usbDetector') as typeof import('./usbDetector');
-
-    const usbDetector =
-        new usbDetectorModule.UsbDetector(context, outputChannel);
-    usbDetector.startListening();
+    enableUsbDetector(context, outputChannel);
   }, 200);
+
+  // init DigitalTwin part
+  initDigitalTwin(context, outputChannel);
 }
 
 // this method is called when your extension is deactivated
-export async function deactivate() {
-  if (telemetryWorkerInitialized) {
-    await telemetryModule.TelemetryWorker.dispose();
+export async function deactivate() {}
+
+function enableUsbDetector(
+    context: vscode.ExtensionContext,
+    outputChannel: vscode.OutputChannel): void {
+  if (RemoteExtension.isRemote(context)) {
+    return;
   }
+  // delay to detect usb
+  const usbDetectorModule =
+      impor('./usbDetector') as typeof import('./usbDetector');
+
+  const usbDetector = new usbDetectorModule.UsbDetector(context, outputChannel);
+  usbDetector.startListening(context);
+}
+
+function printHello(context: vscode.ExtensionContext) {
+  const extension = WorkbenchExtension.getExtension(context);
+  if (!extension) {
+    return;
+  }
+
+  const extensionId = extension.id;
+  console.log(`Congratulations, your extension ${extensionId} is now active!`);
+}
+
+
+function initCommandWithTelemetry(
+    context: vscode.ExtensionContext, telemetryWorker: TelemetryWorker,
+    outputChannel: vscode.OutputChannel, command: WorkbenchCommands,
+    eventName: string, enableSurvey: boolean,
+    // tslint:disable-next-line:no-any
+    callback: (
+        context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel,
+        // tslint:disable-next-line:no-any
+        telemetrycontext: TelemetryContext, ...args: any[]) => any,
+    // tslint:disable-next-line:no-any
+    additionalProperties?: {[key: string]: string}): void {
+  context.subscriptions.push(vscode.commands.registerCommand(
+      command,
+      async (...commandArgs) => telemetryWorker.callCommandWithTelemetry(
+          context, outputChannel, eventName, enableSurvey, callback,
+          additionalProperties, ...commandArgs)));
+}
+
+function initCommand(
+    context: vscode.ExtensionContext, command: WorkbenchCommands,
+    // tslint:disable-next-line:no-any
+    callback: (...args: any[]) => Promise<any>): void {
+  context.subscriptions.push(
+      vscode.commands.registerCommand(command, callback));
+}
+
+// DigitalTwin extension part
+function initDigitalTwin(
+    context: vscode.ExtensionContext,
+    outputChannel: vscode.OutputChannel): void {
+  const colorizedChannel = new ColorizedChannel(Constants.CHANNEL_NAME);
+  context.subscriptions.push(colorizedChannel);
+  const deviceModelManager = new DeviceModelManager(context, colorizedChannel);
+  const modelRepositoryManager = new ModelRepositoryManager(
+      context, Constants.WEB_VIEW_PATH, colorizedChannel);
+
+  DigitalTwinUtility.init(modelRepositoryManager, outputChannel);
+  initIntelliSense(context);
+  initDigitalTwinCommand(
+      context,
+      telemetryWorker,
+      colorizedChannel,
+      true,
+      Command.CreateInterface,
+      async():
+          Promise<void> => {
+            return deviceModelManager.createModel(ModelType.Interface);
+          },
+  );
+  initDigitalTwinCommand(
+      context,
+      telemetryWorker,
+      colorizedChannel,
+      true,
+      Command.CreateCapabilityModel,
+      async():
+          Promise<void> => {
+            return deviceModelManager.createModel(ModelType.CapabilityModel);
+          },
+  );
+  initDigitalTwinCommand(
+      context,
+      telemetryWorker,
+      colorizedChannel,
+      true,
+      Command.OpenRepository,
+      async():
+          Promise<void> => {
+            return modelRepositoryManager.signIn();
+          },
+  );
+  initDigitalTwinCommand(
+      context,
+      telemetryWorker,
+      colorizedChannel,
+      true,
+      Command.SignOutRepository,
+      async():
+          Promise<void> => {
+            return modelRepositoryManager.signOut();
+          },
+  );
+  initDigitalTwinCommand(
+      context,
+      telemetryWorker,
+      colorizedChannel,
+      true,
+      Command.SubmitFiles,
+      async(telemetryContext: TelemetryContext):
+          Promise<void> => {
+            return modelRepositoryManager.submitFiles(telemetryContext);
+          },
+  );
+  initDigitalTwinCommand(
+      context,
+      telemetryWorker,
+      colorizedChannel,
+      false,
+      Command.DeleteModels,
+      async(
+          telemetryContext: TelemetryContext, publicRepository: boolean,
+          modelIds: string[]):
+          Promise<void> => {
+            return modelRepositoryManager.deleteModels(
+                publicRepository, modelIds);
+          },
+  );
+  initDigitalTwinCommand(
+      context,
+      telemetryWorker,
+      colorizedChannel,
+      false,
+      Command.DownloadModels,
+      async(
+          telemetryContext: TelemetryContext, publicRepository: boolean,
+          modelIds: string[]):
+          Promise<void> => {
+            return modelRepositoryManager.downloadModels(
+                publicRepository, modelIds);
+          },
+  );
+  initDigitalTwinCommand(
+      context,
+      telemetryWorker,
+      colorizedChannel,
+      false,
+      Command.SearchInterface,
+      async(
+          telemetryContext: TelemetryContext,
+          publicRepository: boolean,
+          keyword?: string,
+          pageSize?: number,
+          continuationToken?: string,
+          ):
+          Promise<SearchResult> => {
+            return modelRepositoryManager.searchModel(
+                ModelType.Interface,
+                publicRepository,
+                keyword,
+                pageSize,
+                continuationToken,
+            );
+          },
+  );
+  initDigitalTwinCommand(
+      context,
+      telemetryWorker,
+      colorizedChannel,
+      false,
+      Command.SearchCapabilityModel,
+      async(
+          telemetryContext: TelemetryContext,
+          publicRepository: boolean,
+          keyword?: string,
+          pageSize?: number,
+          continuationToken?: string,
+          ):
+          Promise<SearchResult> => {
+            return modelRepositoryManager.searchModel(
+                ModelType.CapabilityModel,
+                publicRepository,
+                keyword,
+                pageSize,
+                continuationToken,
+            );
+          },
+  );
+}
+
+function initIntelliSense(context: vscode.ExtensionContext): void {
+  // init DigitalTwin graph
+  IntelliSenseUtility.initGraph(context);
+  // register providers of completionItem and hover
+  const selector: vscode.DocumentSelector = {
+    language: 'json',
+    scheme: 'file',
+  };
+  context.subscriptions.push(
+      vscode.languages.registerCompletionItemProvider(
+          selector,
+          new DigitalTwinCompletionItemProvider(),
+          Constants.COMPLETION_TRIGGER,
+          ),
+  );
+  context.subscriptions.push(vscode.languages.registerHoverProvider(
+      selector, new DigitalTwinHoverProvider()));
+  // register diagnostic
+  let pendingDiagnostic: NodeJS.Timer;
+  const diagnosticCollection: vscode.DiagnosticCollection =
+      vscode.languages.createDiagnosticCollection(
+          Constants.CHANNEL_NAME,
+      );
+  const diagnosticProvider = new DigitalTwinDiagnosticProvider();
+  const activeTextEditor: vscode.TextEditor|undefined =
+      vscode.window.activeTextEditor;
+  if (activeTextEditor) {
+    diagnosticProvider.updateDiagnostics(
+        activeTextEditor.document, diagnosticCollection);
+  }
+  context.subscriptions.push(diagnosticCollection);
+  context.subscriptions.push(
+      vscode.window.onDidChangeActiveTextEditor((event) => {
+        if (event) {
+          diagnosticProvider.updateDiagnostics(
+              event.document, diagnosticCollection);
+        }
+      }),
+  );
+  context.subscriptions.push(
+      vscode.workspace.onDidChangeTextDocument((event) => {
+        if (event) {
+          if (pendingDiagnostic) {
+            clearTimeout(pendingDiagnostic);
+          }
+          pendingDiagnostic = setTimeout(
+              () => diagnosticProvider.updateDiagnostics(
+                  event.document, diagnosticCollection),
+              Constants.DEFAULT_TIMER_MS,
+          );
+        }
+      }),
+  );
+  context.subscriptions.push(
+      vscode.workspace.onDidCloseTextDocument(
+          (document) => diagnosticCollection.delete(document.uri)),
+  );
+}
+
+function initDigitalTwinCommand(
+    context: vscode.ExtensionContext,
+    telemetryWorker: TelemetryWorker,
+    outputChannel: ColorizedChannel,
+    enableSurvey: boolean,
+    command: Command,
+    // tslint:disable-next-line:no-any
+    callback: (telemetryContext: TelemetryContext, ...args: any[]) =>
+        // tslint:disable-next-line:no-any
+    Promise<any>,
+    ): void {
+  context.subscriptions.push(
+      vscode.commands.registerCommand(
+          command,
+          // tslint:disable-next-line:no-any
+          async (...args: any[]) => {
+            const start: number = Date.now();
+            const telemetryContext: TelemetryContext =
+                telemetryWorker.createContext();
+            try {
+              return await callback(telemetryContext, ...args);
+            } catch (error) {
+              telemetryContext.properties.error = error.name;
+              telemetryContext.properties.errorMessage = error.message;
+              if (error instanceof UserCancelledError) {
+                telemetryContext.properties.result = TelemetryResult.Cancelled;
+                outputChannel.warn(error.message);
+              } else {
+                telemetryContext.properties.result = TelemetryResult.Failed;
+                UI.showNotification(MessageType.Error, error.message);
+                if (error instanceof ProcessError) {
+                  const message = `${error.message}\n${error.stack}`;
+                  outputChannel.error(message, error.component);
+                } else {
+                  outputChannel.error(error.message);
+                }
+              }
+            } finally {
+              telemetryContext.measurements.duration =
+                  (Date.now() - start) / 1000;
+              telemetryWorker.sendEvent(command, telemetryContext);
+              outputChannel.show();
+              if (enableSurvey) {
+                NSAT.takeSurvey(context);
+              }
+            }
+          }),
+  );
 }
