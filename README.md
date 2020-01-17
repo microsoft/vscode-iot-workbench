@@ -44,8 +44,10 @@ Follow the [setup guide](docs/embedded-linux/embedded-linux-setup.md) to setup t
 Here are a set of tutorials to help you get started:
 
 - [Get Started connect Raspberry Pi to Azure IoT Hub](docs/embedded-linux/embedded-linux-get-started.md)
-- [Configure an external CMake project as Embedded Linux project](docs/embedded-linux/configure-external-cmake-project-as-embedded-linux-project.md)
-- [Generate PnP Device Code and Develop in Containerized Toolchain](docs/embedded-linux/generate-PnP-device-code-and-develop-in-containerized-toolchain.md)
+- [Configure an existing CMake project using containerized toolchain](docs/embedded-linux/embedded-linux-configure-project.md)
+- [Develop IoT Plug and Play device using containerized toolchain](docs/embedded-linux/embedded-linux-pnp.md)
+- [Customize your device toolchain](docs/embedded-linux/embedded-linux-customization.md)
+
 
 #### Arduino
 
