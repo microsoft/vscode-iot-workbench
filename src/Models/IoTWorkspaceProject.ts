@@ -32,7 +32,6 @@ const azureComponentConfigModule = impor("./AzureComponentConfig") as typeof imp
 const azureFunctionsModule = impor("./AzureFunctions") as typeof import("./AzureFunctions");
 const cosmosDBModule = impor("./CosmosDB") as typeof import("./CosmosDB");
 const esp32DeviceModule = impor("./Esp32Device") as typeof import("./Esp32Device");
-const ioTButtonDeviceModule = impor("./IoTButtonDevice") as typeof import("./IoTButtonDevice");
 const ioTHubModule = impor("./IoTHub") as typeof import("./IoTHub");
 const ioTHubDeviceModule = impor("./IoTHubDevice") as typeof import("./IoTHubDevice");
 const streamAnalyticsJobModule = impor("./StreamAnalyticsJob") as typeof import("./StreamAnalyticsJob");
@@ -235,8 +234,6 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
         this.deviceRootPath,
         templateFilesInfo
       );
-    } else if (boardId === ioTButtonDeviceModule.IoTButtonDevice.boardId) {
-      device = new ioTButtonDeviceModule.IoTButtonDevice(this.deviceRootPath, templateFilesInfo);
     } else if (boardId === esp32DeviceModule.Esp32Device.boardId) {
       device = new esp32DeviceModule.Esp32Device(
         this.extensionContext,
@@ -269,18 +266,32 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     await iotHub.load();
     this.componentList.push(iotHub);
 
-    const iothubDevice = new ioTHubDeviceModule.IoTHubDevice(this.channel);
-    this.componentList.push(iothubDevice);
+    const iotHubDevice = new ioTHubDeviceModule.IoTHubDevice(this.projectRootPath, this.channel, [
+      {
+        component: iotHub,
+        type: azureComponentConfigModule.DependencyType.Input
+      }
+    ]);
+    await iotHubDevice.updateConfigSettings(scaffoldType);
+    await iotHubDevice.load();
+    this.componentList.push(iotHubDevice);
 
     const functionPath = ConfigHandler.get<string>(ConfigKey.functionPath);
     if (functionPath) {
       const functionLocation = path.join(this.projectRootPath, functionPath);
-      const functionApp = new azureFunctionsModule.AzureFunctions(functionLocation, functionPath, this.channel, null, [
-        {
-          component: iotHub,
-          type: azureComponentConfigModule.DependencyType.Input
-        }
-      ]);
+      const functionApp = new azureFunctionsModule.AzureFunctions(
+        this.projectRootPath,
+        functionLocation,
+        functionPath,
+        this.channel,
+        null,
+        [
+          {
+            component: iotHub,
+            type: azureComponentConfigModule.DependencyType.Input
+          }
+        ]
+      );
       await functionApp.updateConfigSettings(scaffoldType);
       await functionApp.load();
       this.componentList.push(functionApp);
@@ -308,9 +319,19 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
           components[iotHub.id] = iotHub;
           this.componentList.push(iotHub);
 
-          const iothubDevice = new ioTHubDeviceModule.IoTHubDevice(this.channel);
+          const iothubDevice = new ioTHubDeviceModule.IoTHubDevice(this.projectRootPath, this.channel, [
+            {
+              component: iotHub,
+              type: azureComponentConfigModule.DependencyType.Input
+            }
+          ]);
+          await iothubDevice.load();
+          components[iothubDevice.id] = iothubDevice;
           this.componentList.push(iothubDevice);
 
+          break;
+        }
+        case ComponentType.IoTHubDevice: {
           break;
         }
         case ComponentType.AzureFunctions: {
@@ -321,7 +342,12 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
 
           const functionLocation = path.join(this.projectRootPath, functionPath);
           if (functionLocation) {
-            const functionApp = new azureFunctionsModule.AzureFunctions(functionLocation, functionPath, this.channel);
+            const functionApp = new azureFunctionsModule.AzureFunctions(
+              this.projectRootPath,
+              functionLocation,
+              functionPath,
+              this.channel
+            );
             await functionApp.load();
             components[functionApp.id] = functionApp;
             this.componentList.push(functionApp);
@@ -415,6 +441,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
           await FileUtility.mkdirRecursively(scaffoldType, functionDir);
         }
         const azureFunctions = new azureFunctionsModule.AzureFunctions(
+          this.projectRootPath,
           functionDir,
           IoTWorkspaceProject.folderName.functionDefaultFolderName,
           this.channel,

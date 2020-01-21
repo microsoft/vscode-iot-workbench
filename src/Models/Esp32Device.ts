@@ -9,18 +9,19 @@ import * as path from "path";
 import * as vscode from "vscode";
 
 import { BoardProvider } from "../boardProvider";
-import { WorkspaceConfigNotFoundError } from "../common/Error/SystemErrors/WorkspaceConfigNotFoundError";
 import { TypeNotSupportedError } from "../common/Error/SystemErrors/TypeNotSupportedError";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
-import { ConfigHandler } from "../configHandler";
-import { ConfigKey, OSPlatform } from "../constants";
+import { OSPlatform, ScaffoldType } from "../constants";
 import { TelemetryContext } from "../telemetry";
 import { Board } from "./Interfaces/Board";
 
 import { ArduinoDeviceBase } from "./ArduinoDeviceBase";
 import { DeviceType } from "./Interfaces/Device";
 import { TemplateFileInfo } from "./Interfaces/ProjectTemplate";
+import { AzureConfigFileHandler } from "./AzureComponentConfig";
+import { ComponentType } from "./Interfaces/Component";
 import { SystemResourceNotFoundError } from "../common/Error/SystemErrors/SystemResourceNotFoundError";
+import { AzureConfigNotFoundError } from "../common/Error/SystemErrors/AzureConfigNotFoundErrors";
 
 enum ConfigDeviceSettings {
   Copy = "Copy",
@@ -73,6 +74,8 @@ export class Esp32Device extends ArduinoDeviceBase {
 
   name = "Esp32Arduino";
 
+  private azureConfigFileHandler: AzureConfigFileHandler;
+
   constructor(
     context: vscode.ExtensionContext,
     channel: vscode.OutputChannel,
@@ -86,6 +89,8 @@ export class Esp32Device extends ArduinoDeviceBase {
     if (templateFiles) {
       this.templateFiles = templateFiles;
     }
+    const projectFolder = devicePath + "/..";
+    this.azureConfigFileHandler = new AzureConfigFileHandler(projectFolder);
   }
 
   async checkPrerequisites(): Promise<boolean> {
@@ -123,11 +128,19 @@ export class Esp32Device extends ArduinoDeviceBase {
 
     if (configSelection.detail === ConfigDeviceSettings.ConfigCRC) {
       await this.generateCrc(this.channel);
-    } else if (configSelection.detail === ConfigDeviceSettings.Copy) {
-      const deviceConnectionString = ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
+    } else if (configSelection.detail === "Copy") {
+      // Get IoT Hub device connection string from config
+      let deviceConnectionString: string | undefined;
+      const componentConfig = await this.azureConfigFileHandler.getComponentByType(
+        ScaffoldType.Workspace,
+        ComponentType.IoTHubDevice
+      );
+      if (componentConfig) {
+        deviceConnectionString = componentConfig.componentInfo?.values.iotHubDeviceConnectionString;
+      }
 
       if (!deviceConnectionString) {
-        throw new WorkspaceConfigNotFoundError(ConfigKey.iotHubDeviceConnectionString);
+        throw new AzureConfigNotFoundError("iotHubDeviceConnectionString");
       }
       clipboardy.writeSync(deviceConnectionString);
       return;

@@ -18,8 +18,7 @@ import { TypeNotSupportedError } from "../common/Error/SystemErrors/TypeNotSuppo
 import { ResourceNotFoundError } from "../common/Error/OperationFailedErrors/ResourceNotFoundError";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
 import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
-import { ConfigHandler } from "../configHandler";
-import { ConfigKey, FileNames, OSPlatform, ScaffoldType } from "../constants";
+import { FileNames, OSPlatform, ScaffoldType } from "../constants";
 import { DialogResponses } from "../DialogResponses";
 import { FileUtility } from "../FileUtility";
 import { TelemetryContext } from "../telemetry";
@@ -33,6 +32,8 @@ import { DeviceConfig, TemplateFileInfo } from "./Interfaces/ProjectTemplate";
 import { FileNotFoundError } from "../common/Error/OperationFailedErrors/FileNotFound";
 import { DirectoryNotFoundError } from "../common/Error/OperationFailedErrors/DirectoryNotFoundError";
 import { SystemResourceNotFoundError } from "../common/Error/SystemErrors/SystemResourceNotFoundError";
+import { AzureConfigFileHandler } from "./AzureComponentConfig";
+import { ComponentType } from "./Interfaces/Component";
 
 const impor = require("impor")(__dirname);
 const forEach = impor("lodash.foreach") as typeof import("lodash.foreach");
@@ -85,6 +86,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
   private static _boardId = "devkit";
 
+  private azureConfigFileHandler: AzureConfigFileHandler;
+
   static get boardId(): string {
     return AZ3166Device._boardId;
   }
@@ -102,6 +105,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
     if (templateFiles) {
       this.templateFiles = templateFiles;
     }
+    const projectFolder = devicePath + "/..";
+    this.azureConfigFileHandler = new AzureConfigFileHandler(projectFolder);
   }
 
   name = "AZ3166";
@@ -285,7 +290,14 @@ export class AZ3166Device extends ArduinoDeviceBase {
    */
   private async getDeviceConnectionString(): Promise<string> {
     // Get device connection string from workspace config
-    const deviceConnectionStringFromConfig = ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
+    let deviceConnectionStringFromConfig: string | undefined;
+    const componentConfig = await this.azureConfigFileHandler.getComponentByType(
+      ScaffoldType.Workspace,
+      ComponentType.IoTHubDevice
+    );
+    if (componentConfig) {
+      deviceConnectionStringFromConfig = componentConfig.componentInfo?.values.iotHubDeviceConnectionString;
+    }
 
     let deviceConnectionString: string;
     if (deviceConnectionStringFromConfig) {
@@ -294,8 +306,9 @@ export class AZ3166Device extends ArduinoDeviceBase {
         deviceConnectionStringFromConfig
       );
 
-      if (deviceConnectionStringAcquisitionMethodSelection.label == DeviceConnectionStringAcquisitionMethods.Select) {
+      if (deviceConnectionStringAcquisitionMethodSelection.label === DeviceConnectionStringAcquisitionMethods.Select) {
         deviceConnectionString = deviceConnectionStringFromConfig;
+        return deviceConnectionString;
       }
     }
     deviceConnectionString = await this.getInputDeviceConnectionString();
