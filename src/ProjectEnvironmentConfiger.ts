@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+"use strict";
+
 import * as vscode from "vscode";
 import * as utils from "./utils";
 import * as path from "path";
@@ -11,7 +13,9 @@ import { RemoteExtension } from "./Models/RemoteExtension";
 import { IoTWorkbenchProjectBase, OpenScenario } from "./Models/IoTWorkbenchProjectBase";
 import { ProjectHostType } from "./Models/Interfaces/ProjectHostType";
 import { configExternalCMakeProjectToIoTContainerProject } from "./utils";
-import { CancelOperationError } from "./CancelOperationError";
+import { TypeNotSupportedError } from "./common/Error/SystemErrors/TypeNotSupportedError";
+import { OperationCanceledError } from "./common/Error/OperationCanceledError";
+import { WorkspaceNotOpenError } from "./common/Error/OperationFailedErrors/WorkspaceNotOpenError";
 
 const impor = require("impor")(__dirname);
 const ioTWorkspaceProjectModule = impor(
@@ -28,16 +32,13 @@ export class ProjectEnvironmentConfiger {
     telemetryContext: TelemetryContext
   ): Promise<void> {
     // Only configure project when not in remote environment
-    const isLocal = RemoteExtension.checkLocalBeforeRunCommand(context);
-    if (!isLocal) {
-      return;
-    }
+    RemoteExtension.ensureLocalBeforeRunCommand("configure CMake project environment", context);
 
     const scaffoldType = ScaffoldType.Local;
 
     const projectRootPath = utils.getFirstWorkspaceFolderPath();
     if (!projectRootPath) {
-      throw new Error(`Fail to get project root path.`);
+      throw new WorkspaceNotOpenError("configure project environment");
     }
 
     await vscode.window.withProgress(
@@ -79,7 +80,7 @@ export class ProjectEnvironmentConfiger {
       if (projectHostType !== ProjectHostType.Workspace) {
         const message = `This is not an iot workbench Arduino project. You cannot configure it as Arduino platform.`;
         vscode.window.showWarningMessage(message);
-        throw new CancelOperationError(message);
+        throw new OperationCanceledError(message);
       }
 
       const projectRootPath = path.join(projectFileRootPath, "..");
@@ -102,7 +103,7 @@ export class ProjectEnvironmentConfiger {
         projectFileRootPath
       );
     } else {
-      throw new Error("unsupported platform");
+      throw new TypeNotSupportedError("platform", `${platform}`);
     }
 
     await project.load(scaffoldType);

@@ -3,13 +3,15 @@ import { DependentExtensions } from "../constants";
 import { DialogResponses } from "../DialogResponses";
 import { WorkbenchExtension } from "../WorkbenchExtension";
 import { VscodeCommands } from "../common/Commands";
-import { CancelOperationError } from "../CancelOperationError";
+import { RemoteEnvNotSupportedError } from "../common/Error/OperationFailedErrors/RemoteEnvNotSupportedError";
+import { OperationCanceledError } from "../common/Error/OperationCanceledError";
+import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
 
 export class RemoteExtension {
   static isRemote(context: vscode.ExtensionContext): boolean {
     const extension = WorkbenchExtension.getExtension(context);
     if (!extension) {
-      throw new Error("Fail to get workbench extension.");
+      throw new OperationFailedError("check whether is remote", "Failed to get workbench extension", "");
     }
     return extension.extensionKind === vscode.ExtensionKind.Workspace;
   }
@@ -39,23 +41,19 @@ export class RemoteExtension {
   static async checkRemoteExtension(): Promise<void> {
     const res = await RemoteExtension.isAvailable();
     if (!res) {
-      throw new CancelOperationError(
+      throw new OperationCanceledError(
         `Remote extension is not available. Please install ${DependentExtensions.remote} first.`
       );
     }
   }
 
   /**
-   * Check we are not in remote context before running a command
-   * @return true - in local environment; false - in remote environment
+   * Ensure we are not in remote environment before running a command.
+   * If in remote environment, throw error.
    */
-  static checkLocalBeforeRunCommand(context: vscode.ExtensionContext): boolean {
+  static ensureLocalBeforeRunCommand(operation: string, context: vscode.ExtensionContext): void {
     if (RemoteExtension.isRemote(context)) {
-      const message = `The command is not supported to be run in a remote environment. \
-      Open a new window and run this command again.`;
-      vscode.window.showWarningMessage(message);
-      return false;
+      throw new RemoteEnvNotSupportedError(operation);
     }
-    return true;
   }
 }

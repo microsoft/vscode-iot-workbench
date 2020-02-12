@@ -10,8 +10,10 @@ import { MessageItem } from "vscode";
 import * as sdk from "vscode-iot-device-cube-sdk";
 import * as WinReg from "winreg";
 
-import { CancelOperationError } from "./CancelOperationError";
 import { IoTCubeCommands, RemoteContainersCommands, VscodeCommands, WorkbenchCommands } from "./common/Commands";
+import { ArgumentEmptyOrNullError } from "./common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
+import { OperationCanceledError } from "./common/Error/OperationCanceledError";
+import { OperationFailedError } from "./common/Error/OperationFailedErrors/OperationFailedError";
 import {
   AzureFunctionsLanguage,
   ConfigKey,
@@ -27,10 +29,15 @@ import { ProjectHostType } from "./Models/Interfaces/ProjectHostType";
 import { ProjectTemplate, TemplateFileInfo } from "./Models/Interfaces/ProjectTemplate";
 import { Platform } from "./Models/Interfaces/ProjectTemplate";
 import { IoTWorkbenchProjectBase } from "./Models/IoTWorkbenchProjectBase";
+import { IoTWorkspaceProject } from "./Models/IoTWorkspaceProject";
 import { RemoteExtension } from "./Models/RemoteExtension";
 import { ProjectEnvironmentConfiger } from "./ProjectEnvironmentConfiger";
 import { TelemetryContext, TelemetryResult } from "./telemetry";
 import { WorkbenchExtension } from "./WorkbenchExtension";
+import { WorkspaceNotOpenError } from "./common/Error/OperationFailedErrors/WorkspaceNotOpenError";
+import { SystemResourceNotFoundError } from "./common/Error/SystemErrors/SystemResourceNotFoundError";
+import { FileNotFoundError } from "./common/Error/OperationFailedErrors/FileNotFound";
+import { DirectoryNotFoundError } from "./common/Error/OperationFailedErrors/DirectoryNotFoundError";
 
 const impor = require("impor")(__dirname);
 const ioTWorkspaceProjectModule = impor(
@@ -41,7 +48,7 @@ const ioTContainerizedProjectModule = impor(
 ) as typeof import("./Models/IoTContainerizedProject");
 const raspberryPiDeviceModule = impor("./Models/RaspberryPiDevice") as typeof import("./Models/RaspberryPiDevice");
 
-export function delay(ms: number): Promise<void> {
+export function delay(ms: number): Promise<unknown> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -134,22 +141,16 @@ export interface FolderQuickPickItem<T = undefined> extends vscode.QuickPickItem
 }
 
 /**
- * Check there is workspace opened in VS Code
- * and get the first workspace folder path.
+ * Get the first workspace folder path open in current VS Code instance.
  */
-export function getFirstWorkspaceFolderPath(showWarningMessage = true): string {
+export function getFirstWorkspaceFolderPath(): string {
   if (
-    !(vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) ||
+    !vscode.workspace.workspaceFolders ||
+    vscode.workspace.workspaceFolders.length === 0 ||
     !vscode.workspace.workspaceFolders[0].uri.fsPath
   ) {
-    if (showWarningMessage) {
-      vscode.window.showWarningMessage(
-        "You have not yet opened a folder in Visual Studio Code. Please select a folder first."
-      );
-    }
     return "";
   }
-
   return vscode.workspace.workspaceFolders[0].uri.fsPath;
 }
 
@@ -157,7 +158,7 @@ export async function showOpenDialog(options: vscode.OpenDialogOptions): Promise
   const result: vscode.Uri[] | undefined = await vscode.window.showOpenDialog(options);
 
   if (!result) {
-    throw new Error("User cancelled the operation.");
+    throw new OperationCanceledError("User cancelled the dialog");
   } else {
     return result;
   }
@@ -190,7 +191,7 @@ export async function selectWorkspaceItem(
     ignoreFocusOut: true
   });
   if (!folder) {
-    throw new Error("User cancelled the operation.");
+    throw new OperationCanceledError("User cancelled the workspace item selection process");
   }
 
   return folder && folder.data ? folder.data : (await showOpenDialog(options))[0].fsPath;
@@ -300,7 +301,7 @@ export async function askToConfigureEnvironment(
     vscode.window.showInformationMessage(message);
   } else {
     const message = `${operation} operation failed and user cancels to configure project environment.`;
-    throw new CancelOperationError(message);
+    throw new OperationCanceledError(message);
   }
 }
 
@@ -330,7 +331,7 @@ export async function askAndOpenProject(
     const workspaceFilePath = path.join(rootPath, workspaceFile);
     await vscode.commands.executeCommand(IoTCubeCommands.OpenLocally, workspaceFilePath, false);
   } else {
-    throw new CancelOperationError(`Operation failed and user cancels to open current folder as workspace.`);
+    throw new OperationCanceledError(`Operation failed and user cancels to open current folder as workspace.`);
   }
 }
 
@@ -357,7 +358,7 @@ export async function askAndOpenInRemote(operation: OperationType, telemetryCont
 
     await vscode.commands.executeCommand(RemoteContainersCommands.ReopenInContainer);
   } else {
-    throw new CancelOperationError(`${operation} operation failed and user cancels to reopen project in container.`);
+    throw new OperationCanceledError(`${operation} operation failed and user cancels to reopen project in container.`);
   }
 }
 
@@ -399,7 +400,7 @@ export async function getTemplateFilesInfo(templateFolder: string): Promise<Temp
 
   const templateFiles = path.join(templateFolder, FileNames.templateFiles);
   if (!(await FileUtility.fileExists(ScaffoldType.Local, templateFiles))) {
-    throw new Error(`Template file ${templateFiles} does not exist.`);
+    throw new FileNotFoundError("get template files info", `template files ${templateFiles}`, "");
   }
 
   const templateFilesJson = JSON.parse(fs.readFileSync(templateFiles, "utf8"));
@@ -431,13 +432,9 @@ export async function generateTemplateFile(
 
   const targetFilePath = path.join(targetFolderPath, fileInfo.fileName);
   if (fileInfo.fileContent) {
-    try {
-      const fileExist = await FileUtility.fileExists(type, targetFilePath);
-      if (fileInfo.overwrite || !fileExist) {
-        await FileUtility.writeFile(type, targetFilePath, fileInfo.fileContent);
-      }
-    } catch (error) {
-      throw new Error(`Failed to create sketch file ${fileInfo.fileName}: ${error.message}`);
+    const fileExist = await FileUtility.fileExists(type, targetFilePath);
+    if (fileInfo.overwrite || !fileExist) {
+      await FileUtility.writeFile(type, targetFilePath, fileInfo.fileContent);
     }
   }
   return;
@@ -482,7 +479,7 @@ export async function handleExternalProject(telemetryContext: TelemetryContext):
     telemetryContext.properties.errorMessage = "Operation failed and user creates new project";
     await vscode.commands.executeCommand(WorkbenchCommands.InitializeProject);
   } else {
-    throw new CancelOperationError(`Operation failed and user cancels to configure external project.`);
+    throw new OperationCanceledError(`Operation failed and user cancels to configure external project.`);
   }
 }
 
@@ -530,27 +527,23 @@ export async function updateProjectHostTypeConfig(
   iotWorkbenchProjectFilePath: string,
   projectHostType: ProjectHostType
 ): Promise<void> {
-  try {
-    if (!iotWorkbenchProjectFilePath) {
-      throw new Error(`Iot workbench project file path is empty.`);
-    }
-
-    // Get original configs from config file
-    const projectConfig = await getProjectConfig(type, iotWorkbenchProjectFilePath);
-
-    // Update project host type
-    projectConfig[`${ConfigKey.projectHostType}`] = ProjectHostType[projectHostType];
-
-    // Add config version for easier backward compatibility in the future.
-    const workbenchVersion = "1.0.0";
-    if (!projectConfig[`${ConfigKey.workbenchVersion}`]) {
-      projectConfig[`${ConfigKey.workbenchVersion}`] = workbenchVersion;
-    }
-
-    await FileUtility.writeJsonFile(type, iotWorkbenchProjectFilePath, projectConfig);
-  } catch (error) {
-    throw new Error(`Update ${FileNames.iotWorkbenchProjectFileName} file failed: ${error.message}`);
+  if (!iotWorkbenchProjectFilePath) {
+    throw new ArgumentEmptyOrNullError("update project host type configuration", "iot workbench project file path");
   }
+
+  // Get original configs from config file
+  const projectConfig = await getProjectConfig(type, iotWorkbenchProjectFilePath);
+
+  // Update project host type
+  projectConfig[`${ConfigKey.projectHostType}`] = ProjectHostType[projectHostType];
+
+  // Add config version for easier backward compatibility in the future.
+  const workbenchVersion = "1.0.0";
+  if (!projectConfig[`${ConfigKey.workbenchVersion}`]) {
+    projectConfig[`${ConfigKey.workbenchVersion}`] = workbenchVersion;
+  }
+
+  await FileUtility.writeJsonFile(type, iotWorkbenchProjectFilePath, projectConfig);
 }
 
 /**
@@ -561,12 +554,15 @@ export async function updateProjectHostTypeConfig(
  */
 export async function configExternalCMakeProjectToIoTContainerProject(scaffoldType: ScaffoldType): Promise<void> {
   const projectRootPath = getFirstWorkspaceFolderPath();
+  if (!projectRootPath) {
+    throw new WorkspaceNotOpenError("configure external CMake project to IoT container project");
+  }
   // Check if it is a cmake project
   const cmakeFile = path.join(projectRootPath, FileNames.cmakeFileName);
   if (!(await FileUtility.fileExists(scaffoldType, cmakeFile))) {
     const message = `Missing ${FileNames.cmakeFileName} to be configured as Embedded Linux project.`;
     vscode.window.showWarningMessage(message);
-    throw new CancelOperationError(message);
+    throw new OperationCanceledError(message);
   }
 
   const iotWorkbenchProjectFile = path.join(projectRootPath, FileNames.iotWorkbenchProjectFileName);
@@ -587,7 +583,14 @@ export async function configExternalCMakeProjectToIoTContainerProject(scaffoldTy
  */
 export async function properlyOpenIoTWorkspaceProject(telemetryContext: TelemetryContext): Promise<void> {
   const rootPath = getFirstWorkspaceFolderPath();
-  const workbenchFileName = path.join(rootPath, "Device", FileNames.iotWorkbenchProjectFileName);
+  if (!rootPath) {
+    throw new WorkspaceNotOpenError("properly open IoT workspace project");
+  }
+  const workbenchFileName = path.join(
+    rootPath,
+    IoTWorkspaceProject.folderName.deviceDefaultFolderName,
+    FileNames.iotWorkbenchProjectFileName
+  );
   const workspaceFile = getWorkspaceFile(rootPath);
   if (fs.existsSync(workbenchFileName) && workspaceFile) {
     await askAndOpenProject(rootPath, workspaceFile, telemetryContext);
@@ -596,7 +599,15 @@ export async function properlyOpenIoTWorkspaceProject(telemetryContext: Telemetr
 
 export function isWorkspaceProject(): boolean {
   const rootPath = getFirstWorkspaceFolderPath();
-  const workbenchFileName = path.join(rootPath, "Device", FileNames.iotWorkbenchProjectFileName);
+  if (!rootPath) {
+    return false;
+  }
+
+  const workbenchFileName = path.join(
+    rootPath,
+    IoTWorkspaceProject.folderName.deviceDefaultFolderName,
+    FileNames.iotWorkbenchProjectFileName
+  );
   const workspaceFile = getWorkspaceFile(rootPath);
   if (fs.existsSync(workbenchFileName) && workspaceFile) {
     return true;
@@ -618,7 +629,7 @@ export async function constructAndLoadIoTProject(
 ): Promise<IoTWorkbenchProjectBase | undefined> {
   const scaffoldType = ScaffoldType.Workspace;
 
-  const projectFileRootPath = getFirstWorkspaceFolderPath(false);
+  const projectFileRootPath = getFirstWorkspaceFolderPath();
   const projectHostType = await IoTWorkbenchProjectBase.getProjectType(scaffoldType, projectFileRootPath);
 
   let iotProject;
@@ -655,14 +666,7 @@ export async function constructAndLoadIoTProject(
       await properlyOpenIoTWorkspaceProject(telemetryContext);
     } else {
       // If external project
-      try {
-        await handleExternalProject(telemetryContext);
-      } catch (err) {
-        // Ignore if user cancel operation
-        if (!(err instanceof CancelOperationError)) {
-          throw new Error(`Failed to handle external project. Error: ${err.message}`);
-        }
-      }
+      await handleExternalProject(telemetryContext);
     }
     return;
   }
@@ -692,10 +696,6 @@ export async function selectPlatform(
   );
   const platformListJsonString = (await FileUtility.readFile(type, platformListPath, "utf8")) as string;
   const platformListJson = JSON.parse(platformListJsonString);
-
-  if (!platformListJson) {
-    throw new Error("Fail to load platform list.");
-  }
 
   const platformList: vscode.QuickPickItem[] = [];
 
@@ -745,7 +745,7 @@ export async function askToOverwriteFile(fileName: string): Promise<vscode.Quick
 
   if (!overwriteSelection) {
     // Selection was cancelled
-    throw new CancelOperationError(`Ask to overwrite ${fileName} selection cancelled.`);
+    throw new OperationCanceledError(`Ask to overwrite ${fileName} selection cancelled.`);
   }
 
   return overwriteSelection;
@@ -786,7 +786,7 @@ export async function fetchAndExecuteTask(
 ): Promise<void> {
   const scaffoldType = ScaffoldType.Workspace;
   if (!(await FileUtility.directoryExists(scaffoldType, deviceRootPath))) {
-    throw new Error("Unable to find the device root folder.");
+    throw new DirectoryNotFoundError("fetch and execute task", `device root folder ${deviceRootPath}`, "");
   }
 
   const tasks = await vscode.tasks.fetchTasks();
@@ -828,9 +828,25 @@ export async function fetchAndExecuteTask(
   try {
     await vscode.tasks.executeTask(operationTask[0]);
   } catch (error) {
-    throw new Error(`Failed to execute task to ${operationType.toLowerCase()}: ${error.message}`);
+    throw new OperationFailedError(`execute task to ${operationType.toLowerCase()}`, `${error.message}`, "");
   }
   return;
+}
+
+/**
+ * Get template list json object
+ */
+export async function getTemplateJson(
+  context: vscode.ExtensionContext,
+  scaffoldType: ScaffoldType
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+): Promise<any> {
+  const templateJsonFilePath = context.asAbsolutePath(
+    path.join(FileNames.resourcesFolderName, FileNames.templatesFolderName, FileNames.templateFileName)
+  );
+  const templateJsonFileString = (await FileUtility.readFile(scaffoldType, templateJsonFilePath, "utf8")) as string;
+  const templateJson = JSON.parse(templateJsonFileString);
+  return templateJson;
 }
 
 /**
@@ -844,25 +860,21 @@ export async function getEnvTemplateFilesAndAskOverwrite(
   templateName: string
 ): Promise<TemplateFileInfo[]> {
   if (!projectPath) {
-    throw new Error("Unable to find the project path, please open the folder and initialize project again.");
+    throw new ArgumentEmptyOrNullError("project path", "Please open the folder and initialize project again.");
   }
 
-  // Get template list json object
-  const templateJsonFilePath = context.asAbsolutePath(
-    path.join(FileNames.resourcesFolderName, FileNames.templatesFolderName, FileNames.templateFileName)
-  );
-  const templateJsonFileString = (await FileUtility.readFile(scaffoldType, templateJsonFilePath, "utf8")) as string;
-  const templateJson = JSON.parse(templateJsonFileString);
-  if (!templateJson) {
-    throw new Error("Fail to load template list.");
-  }
+  const templateJson = await getTemplateJson(context, scaffoldType);
 
   // Get environment template files
   const projectEnvTemplate: ProjectTemplate[] = templateJson.templates.filter((template: ProjectTemplate) => {
     return template.tag === TemplateTag.DevelopmentEnvironment && template.name === templateName;
   });
   if (projectEnvTemplate.length === 0) {
-    throw new Error(`Fail to get project development environment template files.`);
+    throw new SystemResourceNotFoundError(
+      "environment template files",
+      `template tag ${TemplateTag.DevelopmentEnvironment} and template name ${templateName}`,
+      "template Json file"
+    );
   }
   const templateFolderName = projectEnvTemplate[0].path;
   const templateFolder = context.asAbsolutePath(
@@ -876,7 +888,7 @@ export async function getEnvTemplateFilesAndAskOverwrite(
 
   if (!overwriteAll) {
     const message = "Do not overwrite configuration files and cancel configuration process.";
-    throw new CancelOperationError(message);
+    throw new OperationCanceledError(message);
   }
 
   return templateFilesInfo;

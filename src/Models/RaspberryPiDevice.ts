@@ -5,9 +5,8 @@ import * as path from "path";
 import * as vscode from "vscode";
 import * as sdk from "vscode-iot-device-cube-sdk";
 
-import { CancelOperationError } from "../CancelOperationError";
-import { ConfigHandler } from "../configHandler";
-import { ConfigKey, FileNames, OperationType, ScaffoldType } from "../constants";
+import { OperationCanceledError } from "../common/Error/OperationCanceledError";
+import { FileNames, OperationType, ScaffoldType } from "../constants";
 import { FileUtility } from "../FileUtility";
 import { TelemetryContext } from "../telemetry";
 import { askAndOpenInRemote, channelShowAndAppendLine, executeCommand } from "../utils";
@@ -16,6 +15,7 @@ import { ContainerDeviceBase } from "./ContainerDeviceBase";
 import { DeviceType } from "./Interfaces/Device";
 import { TemplateFileInfo } from "./Interfaces/ProjectTemplate";
 import { RemoteExtension } from "./RemoteExtension";
+import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
 
 class RaspberryPiUploadConfig {
   static host = "hostname";
@@ -95,10 +95,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       }
 
       if (!RaspberryPiUploadConfig.updated) {
-        const res = await this.configSSH();
-        if (!res) {
-          throw new CancelOperationError(`Configure SSH cancelled.`);
-        }
+        await this.configDeviceSettings();
       }
 
       const ssh = new sdk.SSH();
@@ -112,76 +109,37 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       try {
         await ssh.uploadFile(binaryFilePath, RaspberryPiUploadConfig.projectPath);
       } catch (error) {
-        const message = `SSH traffic is too busy. Please wait a second and retry. Error: ${error}.`;
-        channelShowAndAppendLine(this.channel, message);
-        console.log(error);
-        throw new Error(message);
+        throw new OperationFailedError(
+          "upload file to device",
+          `SSH traffic is too busy. Error: ${error}`,
+          "Please wait a second and retry."
+        );
       }
 
       try {
         await this.enableBinaryExecutability(ssh, binaryName);
       } catch (error) {
-        throw new Error(`Failed to enable binary executability. Error: ${error.message}`);
+        throw new OperationFailedError("enable binary executability", `${error.message}`, "");
       }
 
       try {
         await ssh.close();
       } catch (error) {
-        throw new Error(`Failed to close SSH connection. Error: ${error.message}`);
+        throw new OperationFailedError("close SSH connection", `${error.message}`, "");
       }
 
       const message = `Successfully deploy compiled files to device board.`;
       channelShowAndAppendLine(this.channel, message);
       vscode.window.showInformationMessage(message);
     } catch (error) {
-      throw new Error(
-        `Upload binary file to device ${RaspberryPiUploadConfig.user}@${RaspberryPiUploadConfig.host} failed. ${error}`
+      throw new OperationFailedError(
+        `upload binary file to device ${RaspberryPiUploadConfig.user}@${RaspberryPiUploadConfig.host} failed.`,
+        `${error.message}`,
+        ""
       );
     }
 
     return true;
-  }
-
-  async configDeviceSettings(): Promise<boolean> {
-    const configSelectionItems: vscode.QuickPickItem[] = [
-      {
-        label: "Configure SSH to target device",
-        description: "",
-        detail: "Configure SSH (IP, username and password) connection to target device for uploading compiled code"
-      }
-    ];
-
-    const configSelection = await vscode.window.showQuickPick(configSelectionItems, {
-      ignoreFocusOut: true,
-      matchOnDescription: true,
-      matchOnDetail: true,
-      placeHolder: "Select an option"
-    });
-
-    if (!configSelection) {
-      return false;
-    }
-
-    if (configSelection.label === "Configure SSH to target device") {
-      try {
-        const res = await this.configSSH();
-        if (res) {
-          vscode.window.showInformationMessage("Config SSH successfully.");
-        }
-        return res;
-      } catch (error) {
-        vscode.window.showWarningMessage("Config SSH failed.");
-        return false;
-      }
-    } else {
-      try {
-        const res = await this.configHub();
-        return res;
-      } catch (error) {
-        vscode.window.showWarningMessage("Config IoT Hub failed.");
-        return false;
-      }
-    }
   }
 
   private async autoDiscoverDeviceIp(): Promise<vscode.QuickPickItem[]> {
@@ -208,7 +166,10 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     return sshDevicePickItems;
   }
 
-  async configSSH(): Promise<boolean> {
+  /**
+   * Configure Raspberry PI device SSH
+   */
+  async configDeviceSettings(): Promise<void> {
     // Raspberry Pi host
     const sshDiscoverOrInputItems: vscode.QuickPickItem[] = [
       {
@@ -227,7 +188,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       placeHolder: "Select an option"
     });
     if (!sshDiscoverOrInputChoice) {
-      return false;
+      throw new OperationCanceledError("SSH configuration type selection cancelled.");
     }
 
     let raspiHost: string | undefined;
@@ -245,7 +206,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       } while (selectDeviceChoice && selectDeviceChoice.label === "$(sync) Discover again");
 
       if (!selectDeviceChoice) {
-        return false;
+        throw new OperationCanceledError("Device selection cancelled.");
       }
 
       if (selectDeviceChoice.label !== "$(gear) Manual setup") {
@@ -261,7 +222,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       };
       raspiHost = await vscode.window.showInputBox(raspiHostOption);
       if (!raspiHost) {
-        return false;
+        throw new OperationCanceledError("Hostname input cancelled.");
       }
     }
     raspiHost = raspiHost || RaspberryPiUploadConfig.host;
@@ -274,7 +235,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     };
     const raspiPortString = await vscode.window.showInputBox(raspiPortOption);
     if (!raspiPortString) {
-      return false;
+      throw new OperationCanceledError("Port input cancelled.");
     }
     const raspiPort =
       raspiPortString && !isNaN(Number(raspiPortString)) ? Number(raspiPortString) : RaspberryPiUploadConfig.port;
@@ -287,7 +248,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     };
     let raspiUser = await vscode.window.showInputBox(raspiUserOption);
     if (!raspiUser) {
-      return false;
+      throw new OperationCanceledError("User name input cancelled.");
     }
     raspiUser = raspiUser || RaspberryPiUploadConfig.user;
 
@@ -299,7 +260,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     };
     let raspiPassword = await vscode.window.showInputBox(raspiPasswordOption);
     if (raspiPassword === undefined) {
-      return false;
+      throw new OperationCanceledError("Password input cancelled.");
     }
     raspiPassword = raspiPassword || RaspberryPiUploadConfig.password;
 
@@ -311,7 +272,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     };
     let raspiPath = await vscode.window.showInputBox(raspiPathOption);
     if (!raspiPath) {
-      return false;
+      throw new OperationCanceledError("Project destination path input cancelled.");
     }
     raspiPath = raspiPath || RaspberryPiUploadConfig.projectPath;
 
@@ -321,42 +282,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
     RaspberryPiUploadConfig.password = raspiPassword;
     RaspberryPiUploadConfig.projectPath = raspiPath;
     RaspberryPiUploadConfig.updated = true;
-    return true;
-  }
 
-  async configHub(): Promise<boolean> {
-    const projectFolderPath = this.projectFolder;
-
-    if (!FileUtility.directoryExists(ScaffoldType.Workspace, projectFolderPath)) {
-      throw new Error("Unable to find the device folder inside the project.");
-    }
-
-    const deviceConnectionStringSelection: vscode.QuickPickItem[] = [
-      {
-        label: "Copy device connection string",
-        description: "Copy device connection string",
-        detail: "Copy"
-      }
-    ];
-    const selection = await vscode.window.showQuickPick(deviceConnectionStringSelection, {
-      ignoreFocusOut: true,
-      placeHolder: "Copy IoT Hub Device Connection String"
-    });
-
-    if (!selection) {
-      return false;
-    }
-
-    const deviceConnectionString = ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
-    if (!deviceConnectionString) {
-      throw new Error(
-        "Unable to get the device connection string, please invoke the command of Azure Provision first."
-      );
-    }
-    const ssh = new sdk.SSH();
-    await ssh.clipboardCopy(deviceConnectionString);
-    await ssh.close();
-    vscode.window.showInformationMessage("Device connection string has been copied.");
-    return true;
+    vscode.window.showInformationMessage("Config SSH successfully.");
   }
 }

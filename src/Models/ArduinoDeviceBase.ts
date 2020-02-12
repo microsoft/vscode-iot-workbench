@@ -6,6 +6,10 @@ import * as path from "path";
 import * as vscode from "vscode";
 
 import { VscodeCommands } from "../common/Commands";
+import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
+import { WorkspaceNotOpenError } from "../common/Error/OperationFailedErrors/WorkspaceNotOpenError";
+import { OperationCanceledError } from "../common/Error/OperationCanceledError";
+import { WorkspaceConfigNotFoundError } from "../common/Error/SystemErrors/WorkspaceConfigNotFoundError";
 import { ConfigHandler } from "../configHandler";
 import {
   ConfigKey,
@@ -25,6 +29,8 @@ import { ComponentType } from "./Interfaces/Component";
 import { Device, DeviceType } from "./Interfaces/Device";
 import { TemplateFileInfo } from "./Interfaces/ProjectTemplate";
 import { OTA } from "./OTA";
+import { DirectoryNotFoundError } from "../common/Error/OperationFailedErrors/DirectoryNotFoundError";
+import { FileNotFoundError } from "../common/Error/OperationFailedErrors/FileNotFound";
 
 const constants = {
   defaultSketchFileName: "device.ino",
@@ -48,10 +54,11 @@ export abstract class ArduinoDeviceBase implements Device {
   protected channel: vscode.OutputChannel;
   protected extensionContext: vscode.ExtensionContext;
   protected telemetryContext: TelemetryContext;
+  protected templateFiles: TemplateFileInfo[] = [];
 
   abstract name: string;
   abstract id: string;
-  abstract board: Board | undefined;
+  abstract board: Board;
 
   constructor(
     context: vscode.ExtensionContext,
@@ -100,11 +107,7 @@ export abstract class ArduinoDeviceBase implements Device {
   }
 
   async checkPrerequisites(): Promise<boolean> {
-    const isArduinoExtensionAvailable = await ArduinoDeviceBase.isAvailable();
-    if (!isArduinoExtensionAvailable) {
-      return false;
-    }
-    return true;
+    return await ArduinoDeviceBase.isAvailable();
   }
 
   async compile(): Promise<boolean> {
@@ -142,41 +145,39 @@ export abstract class ArduinoDeviceBase implements Device {
     return true;
   }
 
-  abstract async configDeviceSettings(): Promise<boolean>;
+  abstract async configDeviceSettings(): Promise<void>;
 
-  async load(): Promise<boolean> {
-    const deviceFolderPath = this.deviceFolder;
-
+  async load(): Promise<void> {
     const loadTimeScaffoldType = ScaffoldType.Workspace;
-    if (!(await FileUtility.directoryExists(loadTimeScaffoldType, deviceFolderPath))) {
-      throw new Error("Unable to find the device folder inside the project.");
-    }
-
-    if (!this.board) {
-      throw new Error("Unable to find the board in the config file.");
+    if (!(await FileUtility.directoryExists(loadTimeScaffoldType, this.deviceFolder))) {
+      throw new DirectoryNotFoundError(
+        "load Arduino device",
+        `device folder ${this.deviceFolder}`,
+        "Please initialize the device first."
+      );
     }
 
     await this.generateCppPropertiesFile(loadTimeScaffoldType, this.board);
-    return true;
   }
 
   abstract async create(): Promise<void>;
 
-  async createCore(board: Board | undefined, templateFiles: TemplateFileInfo[]): Promise<void> {
+  async createCore(): Promise<void> {
     // Generate template files
     const createTimeScaffoldType = ScaffoldType.Local;
     if (!(await FileUtility.directoryExists(createTimeScaffoldType, this.deviceFolder))) {
-      throw new Error(`Internal error: Couldn't find the template folder.`);
-    }
-    if (!board) {
-      throw new Error(`Invalid / unsupported target platform`);
+      throw new DirectoryNotFoundError(
+        "create Arduino device",
+        `device folder ${this.deviceFolder}`,
+        "Please initialize the device first."
+      );
     }
 
-    for (const fileInfo of templateFiles) {
+    for (const fileInfo of this.templateFiles) {
       await utils.generateTemplateFile(this.deviceFolder, createTimeScaffoldType, fileInfo);
     }
 
-    await this.generateCppPropertiesFile(createTimeScaffoldType, board);
+    await this.generateCppPropertiesFile(createTimeScaffoldType, this.board);
 
     // Configurate device environment
     await this.configDeviceEnvironment(this.deviceFolder, createTimeScaffoldType);
@@ -235,44 +236,33 @@ export abstract class ArduinoDeviceBase implements Device {
     }
 
     // Create c_cpp_properties.json file
-    try {
-      const platform = await utils.getPlatform();
-      await this.writeCppPropertiesFile(board.id, type, platform);
-    } catch (error) {
-      throw new Error(`Create cpp properties file failed: ${error.message}`);
-    }
+    const platform = await utils.getPlatform();
+    await this.writeCppPropertiesFile(board.id, type, platform);
   }
 
-  async generateCrc(channel: vscode.OutputChannel): Promise<boolean> {
-    if (!(vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0)) {
-      const message = "No workspace opened.";
-      vscode.window.showWarningMessage(message);
-      utils.channelShowAndAppendLine(channel, message);
-      return false;
-    }
-
+  async generateCrc(channel: vscode.OutputChannel): Promise<void> {
     const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
     if (!devicePath) {
-      const message = "No device path found in workspace configuration.";
-      vscode.window.showWarningMessage(message);
-      utils.channelShowAndAppendLine(channel, message);
-      return false;
+      throw new WorkspaceConfigNotFoundError(ConfigKey.devicePath);
     }
-    const deviceBuildLocation = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, "..", devicePath, ".build");
 
-    if (!deviceBuildLocation) {
-      const message = "No device compile output folder found.";
-      vscode.window.showWarningMessage(message);
-      utils.channelShowAndAppendLine(channel, message);
-      return false;
+    const rootPath = utils.getFirstWorkspaceFolderPath();
+    if (!rootPath) {
+      throw new WorkspaceNotOpenError("generate CRC");
+    }
+
+    const deviceBuildLocation = path.join(rootPath, "..", devicePath, ".build");
+    if (!fs.isDirectorySync(deviceBuildLocation)) {
+      throw new DirectoryNotFoundError(
+        "generate CRC",
+        "device build output folder",
+        "Please compile the project first."
+      );
     }
 
     const binFiles = fs.listSync(deviceBuildLocation, ["bin"]);
     if (!binFiles || !binFiles.length) {
-      const message = "No bin file found. Please run the command of Device Compile first.";
-      vscode.window.showWarningMessage(message);
-      utils.channelShowAndAppendLine(channel, message);
-      return false;
+      throw new FileNotFoundError("generate CRC", "bin file", "Please compile the project first.");
     }
 
     let binFilePath = "";
@@ -294,14 +284,14 @@ export abstract class ArduinoDeviceBase implements Device {
       });
 
       if (!choice || !choice.description) {
-        return false;
+        throw new OperationCanceledError("Bin file selection cancelled.");
       }
 
       binFilePath = choice.description;
     }
 
     if (!binFilePath || !fs.existsSync(binFilePath)) {
-      return false;
+      throw new FileNotFoundError("generate CRC", `bin file ${binFilePath}`, "Please compile the project first.");
     }
 
     const res = OTA.generateCrc(binFilePath);
@@ -316,13 +306,15 @@ export abstract class ArduinoDeviceBase implements Device {
     channel.appendLine("fwSize: " + res.size);
     channel.appendLine("");
     channel.appendLine("======================================");
-
-    return true;
   }
 
   async configDeviceEnvironment(deviceRootPath: string, scaffoldType: ScaffoldType): Promise<void> {
     if (!deviceRootPath) {
-      throw new Error("Unable to find the project device path, please open the folder and initialize project again.");
+      throw new ArgumentEmptyOrNullError(
+        "configurate device environment",
+        "device root path",
+        "Please open the folder and initialize project again."
+      );
     }
 
     const templateFilesInfo = await utils.getEnvTemplateFilesAndAskOverwrite(

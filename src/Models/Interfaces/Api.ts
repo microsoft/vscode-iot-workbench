@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 export enum ExtensionName {
-  Toolkit = 1,
-  AzureAccount,
-  DigitalTwins
+  Toolkit = "Azure IoT Hub Toolkit",
+  AzureAccount = "Azure Account"
 }

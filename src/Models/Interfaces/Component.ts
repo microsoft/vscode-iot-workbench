@@ -13,7 +13,7 @@ export enum ComponentType {
 export interface Component {
   name: string;
   id: string;
-  load(): Promise<boolean>;
+  load(): Promise<void>;
   create(): Promise<void>;
   checkPrerequisites(): Promise<boolean>;
   getComponentType(): ComponentType;

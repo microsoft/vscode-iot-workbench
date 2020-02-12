@@ -4,7 +4,8 @@
 import * as path from "path";
 import * as vscode from "vscode";
 
-import { CancelOperationError } from "../CancelOperationError";
+import { OperationCanceledError } from "../common/Error/OperationCanceledError";
+import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
 import { ConfigKey, EventNames, FileNames, ScaffoldType } from "../constants";
 import { FileUtility } from "../FileUtility";
 import { TelemetryContext, TelemetryWorker } from "../telemetry";
@@ -19,6 +20,7 @@ import { ProjectHostType } from "./Interfaces/ProjectHostType";
 import { ProjectTemplateType, TemplateFileInfo } from "./Interfaces/ProjectTemplate";
 import { Provisionable } from "./Interfaces/Provisionable";
 import { Uploadable } from "./Interfaces/Uploadable";
+import { DirectoryNotFoundError } from "../common/Error/OperationFailedErrors/DirectoryNotFoundError";
 
 const impor = require("impor")(__dirname);
 const azureUtilityModule = impor("./AzureUtility") as typeof import("./AzureUtility");
@@ -206,7 +208,7 @@ export abstract class IoTWorkbenchProjectBase {
 
         const res = await item.provision();
         if (!res) {
-          throw new CancelOperationError("Provision cancelled.");
+          throw new OperationCanceledError("Provision cancelled.");
         }
       }
     }
@@ -261,12 +263,12 @@ export abstract class IoTWorkbenchProjectBase {
         );
 
         if (!selection) {
-          throw new CancelOperationError(`Component deployment cancelled.`);
+          throw new OperationCanceledError(`Component deployment cancelled.`);
         }
 
         const res = await item.deploy();
         if (!res) {
-          throw new Error(`The deployment of ${item.name} failed.`);
+          throw new OperationFailedError("deploy iot workbench project", `Failed to deploy component ${item.name}`, "");
         }
       }
     }
@@ -319,9 +321,13 @@ export abstract class IoTWorkbenchProjectBase {
    * Validate whether project root path exists. If not, throw error.
    * @param scaffoldType scaffold type
    */
-  async validateProjectRootPath(scaffoldType: ScaffoldType): Promise<void> {
+  async validateProjectRootPath(operation: string, scaffoldType: ScaffoldType): Promise<void> {
     if (!(await FileUtility.directoryExists(scaffoldType, this.projectRootPath))) {
-      throw new Error(`Project root path ${this.projectRootPath} does not exist. Please initialize the project first.`);
+      throw new DirectoryNotFoundError(
+        operation,
+        `project root path ${this.projectRootPath}`,
+        "Please initialize the project first."
+      );
     }
   }
 }

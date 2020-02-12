@@ -16,6 +16,7 @@ import { getExtension } from "./Apis";
 import { ExtensionName } from "./Interfaces/Api";
 import { TelemetryWorker } from "../telemetry";
 import { EventNames } from "../constants";
+import { DependentExtensionNotFoundError } from "../common/Error/OperationFailedErrors/DependentExtensionNotFoundError";
 
 export interface ARMParameters {
   [key: string]: { value: string | number | boolean | null };
@@ -55,7 +56,7 @@ export class AzureUtility {
   private static async _getSubscriptionList(): Promise<vscode.QuickPickItem[]> {
     const subscriptionList: vscode.QuickPickItem[] = [];
     if (!AzureUtility._azureAccountExtension) {
-      throw new Error("Azure account extension is not found.");
+      throw new DependentExtensionNotFoundError("get subscription list", ExtensionName.AzureAccount);
     }
 
     const subscriptions = AzureUtility._azureAccountExtension.filters;
@@ -79,7 +80,7 @@ export class AzureUtility {
 
   private static _getSessionBySubscriptionId(subscriptionId: string): AzureSession | undefined {
     if (!AzureUtility._azureAccountExtension) {
-      throw new Error("Azure account extension is not found.");
+      throw new DependentExtensionNotFoundError("get session by subscription id", ExtensionName.AzureAccount);
     }
 
     const subscriptions: AzureResourceFilter[] = AzureUtility._azureAccountExtension.filters;
@@ -298,7 +299,7 @@ export class AzureUtility {
         inputValue = _value.label;
       } else if (key.substr(0, 2) === "$$") {
         // Read value from file
-        if (!(vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0)) {
+        if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
           inputValue = "";
         } else {
           const _key = key.substr(2);

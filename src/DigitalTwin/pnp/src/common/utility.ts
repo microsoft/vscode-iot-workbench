@@ -8,6 +8,7 @@ import { DeviceModelManager, ModelType } from "../deviceModel/deviceModelManager
 import { DigitalTwinConstants } from "../intelliSense/digitalTwinConstants";
 import { ModelFileInfo } from "../modelRepository/modelRepositoryManager";
 import { Constants } from "./constants";
+import { PnPModelTypeInvalidError } from "../../../../common/Error/PnPErrors/PnPModelTypeInvalidError";
 
 /**
  * Common utility
@@ -105,7 +106,7 @@ export class Utility {
   ): Promise<void> {
     const type: ModelType = DeviceModelManager.convertToModelType(content[DigitalTwinConstants.TYPE]);
     if (!type) {
-      throw new Error(Constants.MODEL_TYPE_INVALID_MSG);
+      throw new PnPModelTypeInvalidError("create model file", type);
     }
     const replacement = new Map<string, string>();
     replacement.set(":", "_");
