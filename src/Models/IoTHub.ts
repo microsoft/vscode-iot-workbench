@@ -12,7 +12,13 @@ import { AzureComponentsStorage, ConfigKey, ScaffoldType } from "../constants";
 import { channelPrintJsonObject, channelShowAndAppendLine } from "../utils";
 
 import { getExtension } from "./Apis";
-import { AzureComponentConfig, AzureConfigFileHandler, ComponentInfo, DependencyConfig } from "./AzureComponentConfig";
+import {
+  AzureComponentConfig,
+  AzureConfigFileHandler,
+  ComponentInfo,
+  DependencyConfig,
+  AzureConfigs
+} from "./AzureComponentConfig";
 import { AzureUtility } from "./AzureUtility";
 import { ExtensionName } from "./Interfaces/Api";
 import { Component, ComponentType } from "./Interfaces/Component";
@@ -54,7 +60,10 @@ export class IoTHub implements Component, Provisionable {
       AzureComponentsStorage.fileName
     );
 
-    const azureConfigs = await AzureConfigFileHandler.loadAzureConfigs(ScaffoldType.Workspace, azureConfigFilePath);
+    const azureConfigs: AzureConfigs = await AzureConfigFileHandler.loadAzureConfigs(
+      ScaffoldType.Workspace,
+      azureConfigFilePath
+    );
     const iotHubConfig = azureConfigs.componentConfigs.find(config => config.type === this.componentType);
     if (iotHubConfig) {
       this.componentId = iotHubConfig.id;
@@ -91,7 +100,7 @@ export class IoTHub implements Component, Provisionable {
 
     const toolkit = getExtension(ExtensionName.Toolkit);
     if (!toolkit) {
-      throw new DependentExtensionNotFoundError(ExtensionName.Toolkit);
+      throw new DependentExtensionNotFoundError("provision IoT Hub", ExtensionName.Toolkit);
     }
 
     let iothub = null;
@@ -122,6 +131,7 @@ export class IoTHub implements Component, Provisionable {
       if (!sharedAccessKeyMatches || sharedAccessKeyMatches.length < 2) {
         throw new OperationFailedError(
           "parse shared access key from IoT Hub connection string",
+          "IoT Hub connection string is not valid.",
           "Please retry Azure Provision."
         );
       }
@@ -152,7 +162,11 @@ export class IoTHub implements Component, Provisionable {
     } else if (!iothub) {
       return false;
     } else {
-      throw new Error("IoT Hub provision failed. Please check output window for detail.");
+      throw new OperationFailedError(
+        "provision IoT Hub",
+        "IoT Hub connection string does not exist.",
+        "Please retry Azure Provision."
+      );
     }
   }
 

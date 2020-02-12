@@ -6,7 +6,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 
 import { RemoteContainersCommands, VscodeCommands } from "../common/Commands";
-import { ResourceNotFoundError } from "../common/Error/OperationFailedErrors/ResourceNotFoundError";
+
 import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
 import { TypeNotSupportedError } from "../common/Error/SystemErrors/TypeNotSupportedError";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
@@ -21,6 +21,8 @@ import { ProjectHostType } from "./Interfaces/ProjectHostType";
 import { ProjectTemplateType, TemplateFileInfo } from "./Interfaces/ProjectTemplate";
 import { IoTWorkbenchProjectBase, OpenScenario } from "./IoTWorkbenchProjectBase";
 import { RemoteExtension } from "./RemoteExtension";
+import { ProjectConfigNotFoundError } from "../common/Error/SystemErrors/ProjectConfigNotFoundError";
+import { DirectoryNotFoundError } from "../common/Error/OperationFailedErrors/DirectoryNotFoundError";
 
 const impor = require("impor")(__dirname);
 const raspberryPiDeviceModule = impor("./RaspberryPiDevice") as typeof import("./RaspberryPiDevice");
@@ -35,7 +37,11 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     super(context, channel, telemetryContext);
     this.projectHostType = ProjectHostType.Container;
     if (!rootFolderPath) {
-      throw new ArgumentEmptyOrNullError("root folder path");
+      throw new ArgumentEmptyOrNullError(
+        "root folder path",
+        "",
+        "Please initialize iot containerized project with root folder path."
+      );
     }
     this.projectRootPath = rootFolderPath;
     this.iotWorkbenchProjectFilePath = path.join(this.projectRootPath, FileNames.iotWorkbenchProjectFileName);
@@ -43,7 +49,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
   }
 
   async load(scaffoldType: ScaffoldType, initLoad = false): Promise<void> {
-    this.validateProjectRootPath(scaffoldType);
+    this.validateProjectRootPath("load project", scaffoldType);
 
     // 1. Update iot workbench project file.
     await updateProjectHostTypeConfig(scaffoldType, this.iotWorkbenchProjectFilePath, this.projectHostType);
@@ -58,9 +64,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     const projectConfigJson = await getProjectConfig(scaffoldType, this.iotWorkbenchProjectFilePath);
     const boardId = projectConfigJson[`${ConfigKey.boardId}`];
     if (!boardId) {
-      throw new OperationFailedError(
-        `get board id from iot workbench project configuration file ${this.iotWorkbenchProjectFilePath}`
-      );
+      throw new ProjectConfigNotFoundError(`${ConfigKey.boardId}`, `${this.iotWorkbenchProjectFilePath}`);
     }
     await this.initDevice(boardId, scaffoldType);
   }
@@ -92,7 +96,11 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
     // Update workspace config to workspace config file
     if (!this.iotWorkbenchProjectFilePath) {
-      throw new ArgumentEmptyOrNullError("iot workbench project file", "Please initialize the project first.");
+      throw new ArgumentEmptyOrNullError(
+        "update workspace configuration",
+        "iot workbench project file",
+        "Please initialize the project first."
+      );
     }
     await FileUtility.writeJsonFile(createTimeScaffoldType, this.iotWorkbenchProjectFilePath, projectConfig);
 
@@ -100,7 +108,11 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     this.componentList.forEach(async item => {
       const res = await item.checkPrerequisites();
       if (!res) {
-        throw new OperationFailedError("create component");
+        throw new OperationFailedError(
+          "create component for iot containerized project",
+          "component prerequisites are not met.",
+          "Please check out error message in the output window."
+        );
       }
     });
 
@@ -123,7 +135,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
    * If yes, open project in container. If not, stay local.
    */
   async openProject(scaffoldType: ScaffoldType, openInNewWindow: boolean, openScenario: OpenScenario): Promise<void> {
-    this.validateProjectRootPath(scaffoldType);
+    this.validateProjectRootPath("open project", scaffoldType);
 
     // 1. Ask to customize
     let openInContainer = false;
@@ -160,7 +172,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
 
   private async openFolderInContainer(folderPath: string): Promise<void> {
     if (!(await FileUtility.directoryExists(ScaffoldType.Local, folderPath))) {
-      throw new ResourceNotFoundError("open folder in container", `folder path ${folderPath}`);
+      throw new DirectoryNotFoundError("open folder in container", `folder path ${folderPath}`, "");
     }
 
     await RemoteExtension.checkRemoteExtension();
@@ -180,7 +192,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     scaffoldType: ScaffoldType,
     templateFilesInfo?: TemplateFileInfo[]
   ): Promise<void> {
-    this.validateProjectRootPath(scaffoldType);
+    this.validateProjectRootPath("initialize device", scaffoldType);
 
     let device: Component;
     if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {

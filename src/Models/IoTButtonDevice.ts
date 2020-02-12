@@ -10,7 +10,6 @@ import * as vscode from "vscode";
 import { ResourceNotFoundError } from "../common/Error/OperationFailedErrors/ResourceNotFoundError";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
 import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
-import { ArgumentInvalidError } from "../common/Error/OperationFailedErrors/ArgumentInvalidError";
 import { ConfigHandler } from "../configHandler";
 import { ConfigKey, ScaffoldType } from "../constants";
 import { FileUtility } from "../FileUtility";
@@ -19,6 +18,7 @@ import { generateTemplateFile } from "../utils";
 import { ComponentType } from "./Interfaces/Component";
 import { Device, DeviceType } from "./Interfaces/Device";
 import { TemplateFileInfo } from "./Interfaces/ProjectTemplate";
+import { DirectoryNotFoundError } from "../common/Error/OperationFailedErrors/DirectoryNotFoundError";
 const constants = {
   timeout: 10000,
   accessEndpoint: "http://192.168.4.1",
@@ -70,7 +70,11 @@ export class IoTButtonDevice implements Device {
   async create(): Promise<void> {
     const createTimeScaffoldType = ScaffoldType.Local;
     if (!(await FileUtility.directoryExists(createTimeScaffoldType, this.deviceFolder))) {
-      throw new ResourceNotFoundError(`device folder ${this.deviceFolder}`, "Please initialize the device first.");
+      throw new DirectoryNotFoundError(
+        "create IoT Button Device",
+        `device folder ${this.deviceFolder}`,
+        "Please initialize the device first."
+      );
     }
 
     for (const fileInfo of this.templateFilesInfo) {
@@ -194,7 +198,7 @@ export class IoTButtonDevice implements Device {
     const res = await request(option);
 
     if (!res) {
-      throw new OperationFailedError("Empty response.");
+      throw new OperationFailedError("set IoT Button Device configurations", "Empty response.", "");
     }
 
     return res;
@@ -310,8 +314,9 @@ export class IoTButtonDevice implements Device {
         deviceConnectionString.indexOf("DeviceId") === -1 ||
         deviceConnectionString.indexOf("SharedAccessKey") === -1
       ) {
-        throw new ArgumentInvalidError(
-          "The format of IoT Hub Device connection string",
+        throw new OperationFailedError(
+          "configure hub",
+          "The format of IoT Hub Device connection string is invalid",
           "Please provide a valid Device connection string."
         );
       }
@@ -352,13 +357,13 @@ export class IoTButtonDevice implements Device {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async configUserData(): Promise<any> {
     if (!fs.existsSync(this.deviceFolder)) {
-      throw new ResourceNotFoundError("config user data", `device folder ${this.deviceFolder}`);
+      throw new DirectoryNotFoundError("config user data", `device folder ${this.deviceFolder}`, "");
     }
 
     const userjsonFilePath = path.join(this.deviceFolder, constants.userjsonFilename);
 
     if (!fs.existsSync(userjsonFilePath)) {
-      throw new ResourceNotFoundError("config user data", `user json file ${userjsonFilePath}`);
+      throw new DirectoryNotFoundError("config user data", `user json file ${userjsonFilePath}`, "");
     }
 
     let userjson = {};
@@ -427,7 +432,8 @@ export class IoTButtonDevice implements Device {
     if (!(await FileUtility.directoryExists(scaffoldType, this.deviceFolder))) {
       throw new ResourceNotFoundError(
         `device folder path ${this.deviceFolder}`,
-        "Please initialize the project first."
+        "Please initialize the project first.",
+        ""
       );
     }
   }

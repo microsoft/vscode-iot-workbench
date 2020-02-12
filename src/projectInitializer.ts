@@ -38,7 +38,7 @@ export class ProjectInitializer {
     telemetryContext: TelemetryContext
   ): Promise<void> {
     // Only create project when not in remote environment
-    RemoteExtension.ensureLocalBeforeRunCommand(context);
+    RemoteExtension.ensureLocalBeforeRunCommand("init project", context);
 
     let openInNewWindow = false;
     // If current window contains other project, open the created project in new
@@ -103,7 +103,8 @@ export class ProjectInitializer {
           throw new ResourceNotFoundError(
             "initialize iot project",
             `project template in template json file with the given template name ${templateName} \
-            and platform ${platformSelection.label}`
+            and platform ${platformSelection.label}`,
+            ""
           );
         }
 

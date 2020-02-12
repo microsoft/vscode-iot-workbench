@@ -15,6 +15,7 @@ import { ContainerDeviceBase } from "./ContainerDeviceBase";
 import { DeviceType } from "./Interfaces/Device";
 import { TemplateFileInfo } from "./Interfaces/ProjectTemplate";
 import { RemoteExtension } from "./RemoteExtension";
+import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
 
 class RaspberryPiUploadConfig {
   static host = "hostname";
@@ -108,30 +109,33 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
       try {
         await ssh.uploadFile(binaryFilePath, RaspberryPiUploadConfig.projectPath);
       } catch (error) {
-        const message = `SSH traffic is too busy. Please wait a second and retry. Error: ${error}.`;
-        channelShowAndAppendLine(this.channel, message);
-        console.log(error);
-        throw new Error(message);
+        throw new OperationFailedError(
+          "upload file to device",
+          `SSH traffic is too busy. Error: ${error}`,
+          "Please wait a second and retry."
+        );
       }
 
       try {
         await this.enableBinaryExecutability(ssh, binaryName);
       } catch (error) {
-        throw new Error(`Failed to enable binary executability. Error: ${error.message}`);
+        throw new OperationFailedError("enable binary executability", `${error.message}`, "");
       }
 
       try {
         await ssh.close();
       } catch (error) {
-        throw new Error(`Failed to close SSH connection. Error: ${error.message}`);
+        throw new OperationFailedError("close SSH connection", `${error.message}`, "");
       }
 
       const message = `Successfully deploy compiled files to device board.`;
       channelShowAndAppendLine(this.channel, message);
       vscode.window.showInformationMessage(message);
     } catch (error) {
-      throw new Error(
-        `Upload binary file to device ${RaspberryPiUploadConfig.user}@${RaspberryPiUploadConfig.host} failed. ${error}`
+      throw new OperationFailedError(
+        `upload binary file to device ${RaspberryPiUploadConfig.user}@${RaspberryPiUploadConfig.host} failed.`,
+        `${error.message}`,
+        ""
       );
     }
 

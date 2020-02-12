@@ -11,7 +11,7 @@ export class RemoteExtension {
   static isRemote(context: vscode.ExtensionContext): boolean {
     const extension = WorkbenchExtension.getExtension(context);
     if (!extension) {
-      throw new OperationFailedError("get workbench extension ");
+      throw new OperationFailedError("check whether is remote", "Failed to get workbench extension", "");
     }
     return extension.extensionKind === vscode.ExtensionKind.Workspace;
   }
@@ -51,9 +51,9 @@ export class RemoteExtension {
    * Ensure we are not in remote environment before running a command.
    * If in remote environment, throw error.
    */
-  static ensureLocalBeforeRunCommand(context: vscode.ExtensionContext): void {
+  static ensureLocalBeforeRunCommand(operation: string, context: vscode.ExtensionContext): void {
     if (RemoteExtension.isRemote(context)) {
-      throw new RemoteEnvNotSupportedError();
+      throw new RemoteEnvNotSupportedError(operation);
     }
   }
 }

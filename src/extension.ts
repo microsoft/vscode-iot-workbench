@@ -562,7 +562,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     EventNames.setProjectDefaultPath,
     true,
     async () => {
-      RemoteExtension.ensureLocalBeforeRunCommand(context);
+      RemoteExtension.ensureLocalBeforeRunCommand("set default project path", context);
       const settings = await IoTWorkbenchSettings.getInstance();
       await settings.setWorkbenchPath();
       return;

@@ -35,12 +35,12 @@ import {
 } from "./AzureComponentConfig";
 import { FileUtility } from "../FileUtility";
 import { VscodeCommands, AzureFunctionsCommands } from "../common/Commands";
-import { ResourceNotFoundError } from "../common/Error/OperationFailedErrors/ResourceNotFoundError";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
 import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
 import { DependentExtensionNotFoundError } from "../common/Error/OperationFailedErrors/DependentExtensionNotFoundError";
-import { ConfigNotFoundError } from "../common/Error/SystemErrors/ConfigNotFoundError";
+import { WorkspaceConfigNotFoundError } from "../common/Error/SystemErrors/WorkspaceConfigNotFoundError";
 import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
+import { FileNotFoundError } from "../common/Error/OperationFailedErrors/FileNotFound";
 
 const impor = require("impor")(__dirname);
 const azureUtilityModule = impor("./AzureUtility") as typeof import("./AzureUtility");
@@ -61,11 +61,11 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
 
   private async getCredentialFromSubscriptionId(subscriptionId: string): Promise<ServiceClientCredentials | undefined> {
     if (!this.azureAccountExtension) {
-      throw new DependentExtensionNotFoundError(ExtensionName.AzureAccount);
+      throw new DependentExtensionNotFoundError("get credential from subscription id", ExtensionName.AzureAccount);
     }
 
     if (!subscriptionId) {
-      throw new ArgumentEmptyOrNullError("subscription ID");
+      throw new ArgumentEmptyOrNullError("get credential from subscription id", "subscription ID");
     }
 
     const subscriptions: AzureResourceFilter[] = this.azureAccountExtension.filters;
@@ -144,7 +144,11 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     );
 
     if (!fs.existsSync(azureConfigFilePath)) {
-      throw new ResourceNotFoundError("load Azure Functions", `azure configuratio file ${azureConfigFilePath}`);
+      throw new FileNotFoundError(
+        "load Azure Functions",
+        `azure configuration file ${azureConfigFilePath}`,
+        "Please run Azure provision again."
+      );
     }
 
     const azureConfigs: AzureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, "utf8"));
@@ -252,7 +256,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
       resourceGroup
     );
     if (!functionAppId) {
-      throw new OperationFailedError("create function application", "Please check the error log in output window.");
+      throw new OperationFailedError("create function application", "Please check the error log in output window.", "");
     }
     await ConfigHandler.update(ConfigKey.functionAppId, functionAppId);
     const eventHubConnectionString = ConfigHandler.get<string>(ConfigKey.eventHubConnectionString);
@@ -260,26 +264,26 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     const iotHubConnectionString = ConfigHandler.get<string>(ConfigKey.iotHubConnectionString);
 
     if (!eventHubConnectionString) {
-      throw new ConfigNotFoundError(ConfigKey.eventHubConnectionString);
+      throw new WorkspaceConfigNotFoundError(ConfigKey.eventHubConnectionString);
     }
     if (!eventHubConnectionPath) {
-      throw new ConfigNotFoundError(ConfigKey.eventHubConnectionPath);
+      throw new WorkspaceConfigNotFoundError(ConfigKey.eventHubConnectionPath);
     }
 
     const credential = await this.getCredentialFromSubscriptionId(subscriptionId);
     if (!credential) {
-      throw new OperationFailedError("get credential for the subscription");
+      throw new OperationFailedError("get credential from subscription id", "", "");
     }
 
     const resourceGroupMatches = functionAppId.match(/\/resourceGroups\/([^\/]*)/);
     if (!resourceGroupMatches || resourceGroupMatches.length < 2) {
-      throw new OperationFailedError(`parse resource group from function app ID ${functionAppId}`);
+      throw new OperationFailedError(`parse resource group from function app ID ${functionAppId}`, "", "");
     }
     resourceGroup = resourceGroupMatches[1];
 
     const siteNameMatches = functionAppId.match(/\/sites\/([^\/]*)/);
     if (!siteNameMatches || siteNameMatches.length < 2) {
-      throw new OperationFailedError(`parse function app name from function app ID ${functionAppId}`);
+      throw new OperationFailedError(`parse function app name from function app ID ${functionAppId}`, "", "");
     }
     const siteName = siteNameMatches[1];
 

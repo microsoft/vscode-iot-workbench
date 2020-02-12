@@ -43,7 +43,6 @@ export class Constants {
     "Company repository connection string is not found. Please sign out and sign in with a valid connection string";
   static readonly PUBLIC_REPOSITORY_URL_NOT_FOUND_MSG = "Public repository url is not found";
   static readonly CONNECTION_STRING_INVALID_FORMAT_MSG = "Invalid connection string format";
-  static readonly MODEL_TYPE_INVALID_MSG = "Invalid model type";
   static readonly NEED_OPEN_COMPANY_REPOSITORY_MSG = "Please open company repository and try again";
 
   static readonly NSAT_SURVEY_URL = "https://aka.ms/vscode-iot-workbench-survey";

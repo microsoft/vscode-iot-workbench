@@ -6,9 +6,9 @@ import * as path from "path";
 import * as vscode from "vscode";
 
 import { IoTCubeCommands } from "../common/Commands";
-import { ResourceNotFoundError } from "../common/Error/OperationFailedErrors/ResourceNotFoundError";
+
 import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
-import { ConfigNotFoundError } from "../common/Error/SystemErrors/ConfigNotFoundError";
+import { WorkspaceConfigNotFoundError } from "../common/Error/SystemErrors/WorkspaceConfigNotFoundError";
 import { TypeNotSupportedError } from "../common/Error/SystemErrors/TypeNotSupportedError";
 import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
 import { ConfigHandler } from "../configHandler";
@@ -23,6 +23,8 @@ import { ProjectHostType } from "./Interfaces/ProjectHostType";
 import { ProjectTemplateType, TemplateFileInfo } from "./Interfaces/ProjectTemplate";
 import { Workspace } from "./Interfaces/Workspace";
 import { IoTWorkbenchProjectBase, OpenScenario } from "./IoTWorkbenchProjectBase";
+import { DirectoryNotFoundError } from "../common/Error/OperationFailedErrors/DirectoryNotFoundError";
+import { FileNotFoundError } from "../common/Error/OperationFailedErrors/FileNotFound";
 
 const impor = require("impor")(__dirname);
 const az3166DeviceModule = impor("./AZ3166Device") as typeof import("./AZ3166Device");
@@ -54,23 +56,27 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     super(context, channel, telemetryContext);
     this.projectHostType = ProjectHostType.Workspace;
     if (!rootFolderPath) {
-      throw new ArgumentEmptyOrNullError("root folder path");
+      throw new ArgumentEmptyOrNullError(
+        "construct iot workspace project",
+        "root folder path",
+        "Please initialize iot workspace project with root folder path."
+      );
     }
     this.projectRootPath = rootFolderPath;
     this.telemetryContext.properties.projectHostType = this.projectHostType;
   }
 
   async load(scaffoldType: ScaffoldType, initLoad = false): Promise<void> {
-    this.validateProjectRootPath(scaffoldType);
+    this.validateProjectRootPath("load project", scaffoldType);
 
     // Init device root path
     const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
     if (!devicePath) {
-      throw new ConfigNotFoundError(ConfigKey.devicePath);
+      throw new WorkspaceConfigNotFoundError(ConfigKey.devicePath);
     }
     this.deviceRootPath = path.join(this.projectRootPath, devicePath);
     if (!(await FileUtility.directoryExists(scaffoldType, this.deviceRootPath))) {
-      throw new ResourceNotFoundError(
+      throw new DirectoryNotFoundError(
         "load iot workspace project",
         `device root path ${this.deviceRootPath}`,
         "Please initialize the project first."
@@ -92,7 +98,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
 
     const boardId = ConfigHandler.get<string>(ConfigKey.boardId);
     if (!boardId) {
-      throw new ConfigNotFoundError(ConfigKey.boardId);
+      throw new WorkspaceConfigNotFoundError(ConfigKey.boardId);
     }
     await this.initDevice(boardId, scaffoldType);
 
@@ -141,7 +147,11 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
 
     // Update workspace config to workspace config file
     if (!this.workspaceConfigFilePath) {
-      throw new ArgumentEmptyOrNullError("workspace configuration file path", "Please initialize the project first.");
+      throw new ArgumentEmptyOrNullError(
+        "update workspace config file",
+        "workspace configuration file path",
+        "Please initialize the project first."
+      );
     }
     await FileUtility.writeJsonFile(createTimeScaffoldType, this.workspaceConfigFilePath, workspace);
 
@@ -171,7 +181,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     this.loadAndInitWorkspaceConfigFilePath(scaffoldType);
 
     if (!(await FileUtility.fileExists(scaffoldType, this.workspaceConfigFilePath))) {
-      throw new ResourceNotFoundError(
+      throw new FileNotFoundError(
         "open project",
         `workspace configuration file ${this.workspaceConfigFilePath}`,
         "Please initialize the project first.`"
@@ -209,7 +219,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     templateFilesInfo?: TemplateFileInfo[]
   ): Promise<void> {
     if (!(await FileUtility.directoryExists(scaffoldType, this.deviceRootPath))) {
-      throw new ResourceNotFoundError(
+      throw new DirectoryNotFoundError(
         "initialize device",
         `device root path: ${this.deviceRootPath}`,
         "Please initialize the project first."
@@ -252,7 +262,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
    * @param scaffoldType Scaffold type
    */
   private async initAzureComponentsWithoutConfig(scaffoldType: ScaffoldType): Promise<void> {
-    this.validateProjectRootPath(scaffoldType);
+    this.validateProjectRootPath("init azure components without configuration", scaffoldType);
 
     const iotHub = new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
     await iotHub.updateConfigSettings(scaffoldType);
@@ -287,7 +297,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     scaffoldType: ScaffoldType,
     componentConfigs: AzureComponentConfig[]
   ): Promise<void> {
-    this.validateProjectRootPath(scaffoldType);
+    this.validateProjectRootPath("initialize azure components with configurations", scaffoldType);
 
     const components: { [key: string]: Component } = {};
     for (const componentConfig of componentConfigs) {
@@ -306,7 +316,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
         case ComponentType.AzureFunctions: {
           const functionPath = ConfigHandler.get<string>(ConfigKey.functionPath);
           if (!functionPath) {
-            throw new ConfigNotFoundError(ConfigKey.functionPath);
+            throw new WorkspaceConfigNotFoundError(ConfigKey.functionPath);
           }
 
           const functionLocation = path.join(this.projectRootPath, functionPath);
@@ -362,7 +372,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
    * @param scaffoldType scaffold type
    */
   private async initAzureConfig(scaffoldType: ScaffoldType): Promise<void> {
-    this.validateProjectRootPath(scaffoldType);
+    this.validateProjectRootPath("initialize azure configurations", scaffoldType);
 
     const azureConfigFileHandler = new azureComponentConfigModule.AzureConfigFileHandler(this.projectRootPath);
     await azureConfigFileHandler.createIfNotExists(scaffoldType);
@@ -382,7 +392,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     scaffoldType: ScaffoldType,
     workspaceConfig: Workspace
   ): Promise<void> {
-    this.validateProjectRootPath(scaffoldType);
+    this.validateProjectRootPath("init azure components", scaffoldType);
 
     // initialize the storage for azure component settings
     const azureConfigFileHandler = new azureComponentConfigModule.AzureConfigFileHandler(this.projectRootPath);
@@ -476,13 +486,14 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
 
   // Init workspace config file path at load time
   private async loadAndInitWorkspaceConfigFilePath(scaffoldType: ScaffoldType): Promise<void> {
-    this.validateProjectRootPath(scaffoldType);
+    this.validateProjectRootPath("init workspace config file path", scaffoldType);
 
     const workspaceFile = getWorkspaceFile(this.projectRootPath);
     if (!workspaceFile) {
-      throw new ResourceNotFoundError(
+      throw new FileNotFoundError(
         "init iot project workspace file path",
-        `workspace file under project root path: ${this.projectRootPath}.`
+        `workspace file under project root path: ${this.projectRootPath}.`,
+        ""
       );
     }
     this.workspaceConfigFilePath = path.join(this.projectRootPath, workspaceFile);
@@ -496,7 +507,11 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     for (const dependent of componentConfig.dependencies) {
       const component = components[dependent.id];
       if (!component) {
-        throw new OperationFailedError(`find component with id ${dependent}`);
+        throw new OperationFailedError(
+          "extract component dependencies",
+          `Failed to find component with id ${dependent}`,
+          ""
+        );
       }
       dependencies.push({ component, type: dependent.type });
     }

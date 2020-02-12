@@ -9,7 +9,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 
 import { BoardProvider } from "../boardProvider";
-import { ConfigNotFoundError } from "../common/Error/SystemErrors/ConfigNotFoundError";
+import { WorkspaceConfigNotFoundError } from "../common/Error/SystemErrors/WorkspaceConfigNotFoundError";
 import { TypeNotSupportedError } from "../common/Error/SystemErrors/TypeNotSupportedError";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
 import { ConfigHandler } from "../configHandler";
@@ -20,6 +20,7 @@ import { Board } from "./Interfaces/Board";
 import { ArduinoDeviceBase } from "./ArduinoDeviceBase";
 import { DeviceType } from "./Interfaces/Device";
 import { TemplateFileInfo } from "./Interfaces/ProjectTemplate";
+import { SystemResourceNotFoundError } from "../common/Error/SystemErrors/SystemResourceNotFoundError";
 
 enum ConfigDeviceSettings {
   Copy = "Copy",
@@ -38,9 +39,12 @@ export class Esp32Device extends ArduinoDeviceBase {
     return Esp32Device._boardId;
   }
 
-  get board(): Board | undefined {
+  get board(): Board {
     const boardProvider = new BoardProvider(this.boardFolderPath);
     const esp32 = boardProvider.find({ id: Esp32Device._boardId });
+    if (!esp32) {
+      throw new SystemResourceNotFoundError("Esp32 Device board", `board id ${Esp32Device._boardId}`, "board list");
+    }
     return esp32;
   }
 
@@ -123,7 +127,7 @@ export class Esp32Device extends ArduinoDeviceBase {
       const deviceConnectionString = ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
 
       if (!deviceConnectionString) {
-        throw new ConfigNotFoundError(ConfigKey.iotHubDeviceConnectionString, "Please provision Azure service first.");
+        throw new WorkspaceConfigNotFoundError(ConfigKey.iotHubDeviceConnectionString);
       }
       clipboardy.writeSync(deviceConnectionString);
       return;

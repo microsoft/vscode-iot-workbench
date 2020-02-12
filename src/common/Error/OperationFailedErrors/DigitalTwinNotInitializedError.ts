@@ -7,8 +7,8 @@ export class DigitalTwinNotInitializedError extends OperationFailedError {
   /**
    * Construct a digital twin not initialized error.
    */
-  constructor() {
-    super("Azure Digital Twin extension is not inititalized.", "Please initialize the extension first.");
+  constructor(operation: string) {
+    super(operation, "Azure Digital Twin extension is not initialized.", "Please initialize the extension first.");
     this.name = "DigitalTwinNotInitializedError";
   }
 }

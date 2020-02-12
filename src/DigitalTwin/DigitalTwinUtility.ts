@@ -30,7 +30,7 @@ export class DigitalTwinUtility {
    */
   static async selectCapabilityModel(): Promise<string> {
     if (!DigitalTwinUtility.extensionInstance) {
-      throw new DigitalTwinNotInitializedError();
+      throw new DigitalTwinNotInitializedError("select capability model");
     }
     let result = "";
     try {
@@ -57,7 +57,7 @@ export class DigitalTwinUtility {
    */
   static async downloadDependentInterface(folder: string, capabilityModelFile: string): Promise<boolean> {
     if (!DigitalTwinUtility.extensionInstance) {
-      throw new DigitalTwinNotInitializedError();
+      throw new DigitalTwinNotInitializedError("download dependent interface");
     }
     try {
       await DigitalTwinUtility.extensionInstance.downloadDependentInterface(folder, capabilityModelFile);

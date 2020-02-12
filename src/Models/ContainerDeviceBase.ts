@@ -5,10 +5,8 @@ import { Guid } from "guid-typescript";
 import * as path from "path";
 import * as vscode from "vscode";
 
-import { ResourceNotFoundError } from "../common/Error/OperationFailedErrors/ResourceNotFoundError";
 import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
-import { SystemError } from "../common/Error/SystemErrors/SystemError";
 import { FileNames, OperationType, PlatformType, ScaffoldType, TemplateTag } from "../constants";
 import { DigitalTwinConstants } from "../DigitalTwin/DigitalTwinConstants";
 import { FileUtility } from "../FileUtility";
@@ -19,6 +17,7 @@ import { ComponentType } from "./Interfaces/Component";
 import { Device, DeviceType } from "./Interfaces/Device";
 import { ProjectTemplate, TemplateFileInfo, TemplatesType } from "./Interfaces/ProjectTemplate";
 import { RemoteExtension } from "./RemoteExtension";
+import { DirectoryNotFoundError } from "../common/Error/OperationFailedErrors/DirectoryNotFoundError";
 
 const constants = {
   configFile: "config.json",
@@ -95,11 +94,11 @@ export abstract class ContainerDeviceBase implements Device {
     templateFilesInfo: TemplateFileInfo[]
   ): Promise<boolean> {
     if (!templateFilesInfo) {
-      throw new ArgumentEmptyOrNullError("template files");
+      throw new ArgumentEmptyOrNullError("generate template files", "template files");
     }
 
     if (!projectPath) {
-      throw new ArgumentEmptyOrNullError("project path");
+      throw new ArgumentEmptyOrNullError("generate template files", "project path");
     }
 
     // Cannot use forEach here since it's async
@@ -143,7 +142,11 @@ export abstract class ContainerDeviceBase implements Device {
 
   async configDeviceEnvironment(projectPath: string, scaffoldType: ScaffoldType): Promise<void> {
     if (!projectPath) {
-      throw new ArgumentEmptyOrNullError("project path", "Please open the folder and initialize project again.");
+      throw new ArgumentEmptyOrNullError(
+        "configure device environment",
+        "project path",
+        "Please open the folder and initialize project again."
+      );
     }
 
     // Get template list json object
@@ -155,9 +158,6 @@ export abstract class ContainerDeviceBase implements Device {
       throw new OperationCanceledError(`Container selection cancelled.`);
     }
     const templateName = containerSelection.label;
-    if (!templateName) {
-      throw new SystemError("Cannot get template name from template property");
-    }
 
     const templateFilesInfo = await utils.getEnvTemplateFilesAndAskOverwrite(
       this.extensionContext,
@@ -165,9 +165,6 @@ export abstract class ContainerDeviceBase implements Device {
       scaffoldType,
       templateName
     );
-    if (templateFilesInfo.length === 0) {
-      throw new SystemError("template files info is empty.");
-    }
 
     // Configure project environment with template files
     for (const fileInfo of templateFilesInfo) {
@@ -214,7 +211,7 @@ export abstract class ContainerDeviceBase implements Device {
    */
   async validateProjectFolder(operation: string, scaffoldType: ScaffoldType): Promise<void> {
     if (!(await FileUtility.directoryExists(scaffoldType, this.projectFolder))) {
-      throw new ResourceNotFoundError(
+      throw new DirectoryNotFoundError(
         operation,
         `project folder ${this.projectFolder}`,
         "Please initialize the project first."

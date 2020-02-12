@@ -15,6 +15,7 @@ import { ProjectHostType } from "./Models/Interfaces/ProjectHostType";
 import { configExternalCMakeProjectToIoTContainerProject } from "./utils";
 import { TypeNotSupportedError } from "./common/Error/SystemErrors/TypeNotSupportedError";
 import { OperationCanceledError } from "./common/Error/OperationCanceledError";
+import { WorkspaceNotOpenError } from "./common/Error/OperationFailedErrors/WorkspaceNotOpenError";
 
 const impor = require("impor")(__dirname);
 const ioTWorkspaceProjectModule = impor(
@@ -31,11 +32,14 @@ export class ProjectEnvironmentConfiger {
     telemetryContext: TelemetryContext
   ): Promise<void> {
     // Only configure project when not in remote environment
-    RemoteExtension.ensureLocalBeforeRunCommand(context);
+    RemoteExtension.ensureLocalBeforeRunCommand("configure CMake project environment", context);
 
     const scaffoldType = ScaffoldType.Local;
 
     const projectRootPath = utils.getFirstWorkspaceFolderPath();
+    if (!projectRootPath) {
+      throw new WorkspaceNotOpenError("configure project environment");
+    }
 
     await vscode.window.withProgress(
       {

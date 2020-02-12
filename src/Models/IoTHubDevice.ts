@@ -9,7 +9,7 @@ import { ConfigHandler } from "../configHandler";
 import { ConfigKey, ScaffoldType } from "../constants";
 
 import { DependentExtensionNotFoundError } from "../common/Error/OperationFailedErrors/DependentExtensionNotFoundError";
-import { ConfigNotFoundError } from "../common/Error/SystemErrors/ConfigNotFoundError";
+import { WorkspaceConfigNotFoundError } from "../common/Error/SystemErrors/WorkspaceConfigNotFoundError";
 
 import { getExtension } from "./Apis";
 import { ComponentInfo, DependencyConfig } from "./AzureComponentConfig";
@@ -99,7 +99,7 @@ export class IoTHubDevice implements Component, Provisionable {
   async provision(): Promise<boolean> {
     const iotHubConnectionString = ConfigHandler.get<string>(ConfigKey.iotHubConnectionString);
     if (!iotHubConnectionString) {
-      throw new ConfigNotFoundError(ConfigKey.iotHubConnectionString, "Please retry Azure Provision.");
+      throw new WorkspaceConfigNotFoundError(ConfigKey.iotHubConnectionString);
     }
 
     const selection = await vscode.window.showQuickPick(getProvisionIothubDeviceSelection(iotHubConnectionString), {
@@ -113,7 +113,7 @@ export class IoTHubDevice implements Component, Provisionable {
 
     const toolkit = getExtension(ExtensionName.Toolkit);
     if (!toolkit) {
-      throw new DependentExtensionNotFoundError(ExtensionName.Toolkit);
+      throw new DependentExtensionNotFoundError("provision IoT Hub Device", ExtensionName.Toolkit);
     }
 
     let device = null;

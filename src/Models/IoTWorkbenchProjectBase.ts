@@ -4,7 +4,6 @@
 import * as path from "path";
 import * as vscode from "vscode";
 
-import { ResourceNotFoundError } from "../common/Error/OperationFailedErrors/ResourceNotFoundError";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
 import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
 import { ConfigKey, EventNames, FileNames, ScaffoldType } from "../constants";
@@ -21,6 +20,7 @@ import { ProjectHostType } from "./Interfaces/ProjectHostType";
 import { ProjectTemplateType, TemplateFileInfo } from "./Interfaces/ProjectTemplate";
 import { Provisionable } from "./Interfaces/Provisionable";
 import { Uploadable } from "./Interfaces/Uploadable";
+import { DirectoryNotFoundError } from "../common/Error/OperationFailedErrors/DirectoryNotFoundError";
 
 const impor = require("impor")(__dirname);
 const azureUtilityModule = impor("./AzureUtility") as typeof import("./AzureUtility");
@@ -268,7 +268,7 @@ export abstract class IoTWorkbenchProjectBase {
 
         const res = await item.deploy();
         if (!res) {
-          throw new OperationFailedError(`deploy ${item.name}`);
+          throw new OperationFailedError("deploy iot workbench project", `Failed to deploy component ${item.name}`, "");
         }
       }
     }
@@ -321,9 +321,10 @@ export abstract class IoTWorkbenchProjectBase {
    * Validate whether project root path exists. If not, throw error.
    * @param scaffoldType scaffold type
    */
-  async validateProjectRootPath(scaffoldType: ScaffoldType): Promise<void> {
+  async validateProjectRootPath(operation: string, scaffoldType: ScaffoldType): Promise<void> {
     if (!(await FileUtility.directoryExists(scaffoldType, this.projectRootPath))) {
-      throw new ResourceNotFoundError(
+      throw new DirectoryNotFoundError(
+        operation,
         `project root path ${this.projectRootPath}`,
         "Please initialize the project first."
       );

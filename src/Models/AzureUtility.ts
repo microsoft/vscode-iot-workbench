@@ -56,7 +56,7 @@ export class AzureUtility {
   private static async _getSubscriptionList(): Promise<vscode.QuickPickItem[]> {
     const subscriptionList: vscode.QuickPickItem[] = [];
     if (!AzureUtility._azureAccountExtension) {
-      throw new DependentExtensionNotFoundError(ExtensionName.AzureAccount);
+      throw new DependentExtensionNotFoundError("get subscription list", ExtensionName.AzureAccount);
     }
 
     const subscriptions = AzureUtility._azureAccountExtension.filters;
@@ -80,7 +80,7 @@ export class AzureUtility {
 
   private static _getSessionBySubscriptionId(subscriptionId: string): AzureSession | undefined {
     if (!AzureUtility._azureAccountExtension) {
-      throw new DependentExtensionNotFoundError(ExtensionName.AzureAccount);
+      throw new DependentExtensionNotFoundError("get session by subscription id", ExtensionName.AzureAccount);
     }
 
     const subscriptions: AzureResourceFilter[] = AzureUtility._azureAccountExtension.filters;

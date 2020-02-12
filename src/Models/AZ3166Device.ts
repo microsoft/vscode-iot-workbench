@@ -14,7 +14,6 @@ import * as WinReg from "winreg";
 
 import { BoardProvider } from "../boardProvider";
 import { ArduinoCommands } from "../common/Commands";
-import { BoardNotFoundError } from "../common/Error/SystemErrors/BoardNotFoundError";
 import { TypeNotSupportedError } from "../common/Error/SystemErrors/TypeNotSupportedError";
 import { ResourceNotFoundError } from "../common/Error/OperationFailedErrors/ResourceNotFoundError";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
@@ -31,6 +30,9 @@ import { reject } from "bluebird";
 import { ArduinoDeviceBase } from "./ArduinoDeviceBase";
 import { DeviceType } from "./Interfaces/Device";
 import { DeviceConfig, TemplateFileInfo } from "./Interfaces/ProjectTemplate";
+import { FileNotFoundError } from "../common/Error/OperationFailedErrors/FileNotFound";
+import { DirectoryNotFoundError } from "../common/Error/OperationFailedErrors/DirectoryNotFoundError";
+import { SystemResourceNotFoundError } from "../common/Error/SystemErrors/SystemResourceNotFoundError";
 
 const impor = require("impor")(__dirname);
 const forEach = impor("lodash.foreach") as typeof import("lodash.foreach");
@@ -104,9 +106,12 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
   name = "AZ3166";
 
-  get board(): Board | undefined {
+  get board(): Board {
     const boardProvider = new BoardProvider(this.boardFolderPath);
     const az3166 = boardProvider.find({ id: AZ3166Device._boardId });
+    if (!az3166) {
+      throw new SystemResourceNotFoundError("AZ3166 board", `board id ${AZ3166Device._boardId}`, "board list");
+    }
     return az3166;
   }
 
@@ -211,7 +216,11 @@ export class AZ3166Device extends ArduinoDeviceBase {
     // Set credentials
     const res = await this.setDeviceConfig(credentials, deviceSettingType); // TODO: Mind the return value.
     if (!res) {
-      throw new OperationFailedError("flush configuration to device");
+      throw new OperationFailedError(
+        "flush configuration to device",
+        "",
+        "Please check out error message in the output channel."
+      );
     }
     let deviceSettingTypeForLog;
     switch (deviceSettingType) {
@@ -276,20 +285,20 @@ export class AZ3166Device extends ArduinoDeviceBase {
    */
   private async getDeviceConnectionString(): Promise<string> {
     // Get device connection string from workspace config
-    let deviceConnectionString = ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
+    const deviceConnectionStringFromConfig = ConfigHandler.get<string>(ConfigKey.iotHubDeviceConnectionString);
 
-    // Select method to acquire device connection string
-    const deviceConnectionStringAcquisitionMethodSelection = await this.selectDeviceConnectionStringAcquisitionMethod(
-      deviceConnectionString
-    );
+    let deviceConnectionString: string;
+    if (deviceConnectionStringFromConfig) {
+      // Select method to acquire device connection string
+      const deviceConnectionStringAcquisitionMethodSelection = await this.selectDeviceConnectionStringAcquisitionMethod(
+        deviceConnectionStringFromConfig
+      );
 
-    if (deviceConnectionStringAcquisitionMethodSelection.label === DeviceConnectionStringAcquisitionMethods.Input) {
-      deviceConnectionString = await this.getInputDeviceConnectionString();
+      if (deviceConnectionStringAcquisitionMethodSelection.label == DeviceConnectionStringAcquisitionMethods.Select) {
+        deviceConnectionString = deviceConnectionStringFromConfig;
+      }
     }
-
-    if (!deviceConnectionString) {
-      throw new OperationFailedError("get device connection string");
-    }
+    deviceConnectionString = await this.getInputDeviceConnectionString();
 
     return deviceConnectionString;
   }
@@ -299,7 +308,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
    * configuration.
    */
   private async selectDeviceConnectionStringAcquisitionMethod(
-    deviceConnectionString: string | undefined
+    deviceConnectionString: string
   ): Promise<vscode.QuickPickItem> {
     const deviceConnectionStringAcquisitionOptions = this.getDeviceConnectionStringAcquisitionOptions(
       deviceConnectionString
@@ -316,29 +325,26 @@ export class AZ3166Device extends ArduinoDeviceBase {
     return deviceConnectionStringAcquisitionSelection;
   }
 
-  private getDeviceConnectionStringAcquisitionOptions(
-    deviceConnectionString: string | undefined
-  ): vscode.QuickPickItem[] {
-    let hostName = "";
-    let deviceId = "";
-    if (deviceConnectionString) {
-      const hostnameMatches = deviceConnectionString.match(/HostName=(.*?)(;|$)/);
-      if (hostnameMatches) {
-        hostName = hostnameMatches[0];
-      }
-
-      const deviceIDMatches = deviceConnectionString.match(/DeviceId=(.*?)(;|$)/);
-      if (deviceIDMatches) {
-        deviceId = deviceIDMatches[0];
-      }
-    }
-
+  private getDeviceConnectionStringAcquisitionOptions(deviceConnectionString: string): vscode.QuickPickItem[] {
     let deviceConnectionStringAcquisitionOptions: vscode.QuickPickItem[] = [];
     const inputDeviceConnectionStringOption = {
       label: DeviceConnectionStringAcquisitionMethods.Input,
       description: "",
       detail: ""
     };
+
+    let hostName = "";
+    let deviceId = "";
+    const hostnameMatches = deviceConnectionString.match(/HostName=(.*?)(;|$)/);
+    if (hostnameMatches) {
+      hostName = hostnameMatches[0];
+    }
+
+    const deviceIDMatches = deviceConnectionString.match(/DeviceId=(.*?)(;|$)/);
+    if (deviceIDMatches) {
+      deviceId = deviceIDMatches[0];
+    }
+
     if (deviceId && hostName) {
       deviceConnectionStringAcquisitionOptions = [
         {
@@ -495,7 +501,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
     }
   }
 
-  private async flushDeviceConfigUnixAndMac(configValue: string, option: ConfigDeviceOptions): Promise<boolean> {
+  private flushDeviceConfigUnixAndMac(configValue: string, option: ConfigDeviceOptions): Promise<boolean> {
     return new Promise(
       // eslint-disable-next-line no-async-promise-executor
       async (resolve: (value: boolean) => void, reject: (value: Error) => void) => {
@@ -506,7 +512,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
           comPort = await this.chooseCOM();
           console.log(`Opening ${comPort}.`);
         } catch (error) {
-          reject(error);
+          return reject(error);
         }
         if (option === ConfigDeviceOptions.ConnectionString) {
           command = "set_az_iothub";
@@ -517,9 +523,11 @@ export class AZ3166Device extends ArduinoDeviceBase {
         }
         let errorRejected = false;
 
-        const az3166 = this.board;
-        if (!az3166) {
-          return reject(new BoardNotFoundError(AZ3166Device._boardId));
+        let az3166: Board;
+        try {
+          az3166 = this.board;
+        } catch (error) {
+          return reject(error);
         }
 
         const port = new AZ3166Device.serialport(comPort, {
@@ -594,7 +602,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
     );
   }
 
-  async flushDeviceConfig(configValue: string, option: ConfigDeviceOptions): Promise<boolean> {
+  private flushDeviceConfig(configValue: string, option: ConfigDeviceOptions): Promise<boolean> {
     return new Promise(
       // eslint-disable-next-line no-async-promise-executor
       async (resolve: (value: boolean) => void, reject: (value: Error) => void) => {
@@ -619,9 +627,11 @@ export class AZ3166Device extends ArduinoDeviceBase {
         let commandExecuted = false;
         let gotData = false;
 
-        const az3166 = this.board;
-        if (!az3166) {
-          return reject(new BoardNotFoundError(AZ3166Device._boardId));
+        let az3166: Board;
+        try {
+          az3166 = this.board;
+        } catch (error) {
+          return reject(error);
         }
 
         const port = new AZ3166Device.serialport(comPort, {
@@ -759,10 +769,11 @@ export class AZ3166Device extends ArduinoDeviceBase {
     return new Promise(async (resolve: (value: string) => void, reject: (reason: Error) => void) => {
       const comList = await this.getComList();
 
-      const az3166 = this.board;
-
-      if (!az3166) {
-        return reject(new BoardNotFoundError(AZ3166Device._boardId));
+      let az3166: Board;
+      try {
+        az3166 = this.board;
+      } catch (error) {
+        return reject(error);
       }
 
       const list = _.filter(comList, com => {
@@ -882,7 +893,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
     }
 
     if (files.length === 0 || files.length > 1) {
-      throw new ResourceNotFoundError(
+      throw new FileNotFoundError(
         `generate ${constants.platformLocalFileName} file`,
         `files under Arduino package installation path ${arduinoPackagePath}`,
         "Please clear the path and reinstall the package for Devkit."
@@ -891,7 +902,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
 
     const directoryName = path.join(arduinoPackagePath, files[0]);
     if (!fs.isDirectorySync(directoryName)) {
-      throw new ResourceNotFoundError(
+      throw new DirectoryNotFoundError(
         `generate ${constants.platformLocalFileName} file`,
         "Arduino package for MXChip IoT Devkit",
         "Please follow guide to install the DevKit package."

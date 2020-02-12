@@ -1,11 +1,11 @@
 import * as path from "path";
 
-import { ArgumentInvalidError } from "../common/Error/OperationFailedErrors/ArgumentInvalidError";
 import { AzureComponentsStorage, ScaffoldType } from "../constants";
 import { FileUtility } from "../FileUtility";
 
 import { Component } from "./Interfaces/Component";
 import { ComponentType } from "./Interfaces/Component";
+import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
 
 // TODO: need to check what value should be included here
 export interface ComponentInfo {
@@ -68,13 +68,9 @@ export class AzureConfigFileHandler {
   }
 
   static async loadAzureConfigs(type: ScaffoldType, configFilePath: string): Promise<AzureConfigs> {
-    try {
-      const azureConfigContent = await FileUtility.readFile(type, configFilePath, "utf8");
-      const azureConfigs = JSON.parse(azureConfigContent as string) as AzureConfigs;
-      return azureConfigs;
-    } catch {
-      throw new ArgumentInvalidError(`azure component configuration file ${configFilePath}`);
-    }
+    const azureConfigContent = await FileUtility.readFile(type, configFilePath, "utf8");
+    const azureConfigs = JSON.parse(azureConfigContent as string) as AzureConfigs;
+    return azureConfigs;
   }
 
   async getSortedComponents(type: ScaffoldType): Promise<AzureComponentConfig[]> {
@@ -133,7 +129,7 @@ export class AzureConfigFileHandler {
     const azureConfigs = await AzureConfigFileHandler.loadAzureConfigs(type, this.configFilePath);
     const component = azureConfigs.componentConfigs[index];
     if (!component) {
-      throw new ArgumentInvalidError(`index of component list ${index}.`);
+      throw new ArgumentEmptyOrNullError("update azure component", `component configurations of index ${index}.`);
     }
     component.componentInfo = componentInfo;
     await FileUtility.writeJsonFile(type, this.configFilePath, azureConfigs);

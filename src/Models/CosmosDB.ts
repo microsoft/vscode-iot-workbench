@@ -138,14 +138,14 @@ export class CosmosDB implements Component, Provisionable {
         !cosmosDBDeploy.properties.outputs.cosmosDBAccountName ||
         !cosmosDBDeploy.properties.outputs.cosmosDBAccountKey
       ) {
-        throw new OperationFailedError("provision Cosmos DB");
+        throw new OperationFailedError("deploy Cosmos DB arm template", "", "");
       }
       channelPrintJsonObject(this.channel, cosmosDBDeploy);
 
       for (const dependency of this.dependencies) {
         const componentConfig = await this.azureConfigHandler.getComponentById(scaffoldType, dependency.id);
         if (!componentConfig) {
-          throw new OperationFailedError(`find component with id ${dependency.id}`);
+          throw new OperationFailedError(`find component with id ${dependency.id}`, "", "");
         }
         if (dependency.type === DependencyType.Input) {
           // CosmosDB input
@@ -202,7 +202,7 @@ export class CosmosDB implements Component, Provisionable {
       database = database.trim();
       const cosmosDBApiRes = await this.ensureDatabase(cosmosDbName, cosmosDbKey, database);
       if (!cosmosDBApiRes) {
-        throw new OperationFailedError("create data base");
+        throw new OperationFailedError("create data base", "", "");
       }
     } else {
       database = databaseChoose.label;
@@ -241,7 +241,7 @@ export class CosmosDB implements Component, Provisionable {
       collection = collection.trim();
       const cosmosDBApiRes = await this.ensureCollection(cosmosDbName, cosmosDbKey, database, collection);
       if (!cosmosDBApiRes) {
-        throw new OperationFailedError("create data base collection");
+        throw new OperationFailedError("create data base collection", "", "");
       }
     } else {
       collection = collectionChoose.label;

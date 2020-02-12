@@ -30,6 +30,9 @@ import { FileUtility } from "../FileUtility";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
 import { Utility } from "./pnp/src/common/utility";
 import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
+import { SystemResourceNotFoundError } from "../common/Error/SystemErrors/SystemResourceNotFoundError";
+import { TypeNotSupportedError } from "../common/Error/SystemErrors/TypeNotSupportedError";
+import { WorkspaceNotOpenError } from "../common/Error/OperationFailedErrors/WorkspaceNotOpenError";
 
 interface CodeGeneratorDownloadLocation {
   win32Md5: string;
@@ -92,9 +95,12 @@ export class CodeGeneratorCore {
     channel: vscode.OutputChannel,
     telemetryContext: TelemetryContext
   ): Promise<void> {
-    RemoteExtension.ensureLocalBeforeRunCommand(context);
+    RemoteExtension.ensureLocalBeforeRunCommand("generate device code stub", context);
 
     const rootPath = utils.getFirstWorkspaceFolderPath();
+    if (!rootPath) {
+      throw new WorkspaceNotOpenError("generate device code stub");
+    }
 
     // Check installation of Codegen CLI and update its bits if a new version is
     // found
@@ -131,7 +137,11 @@ export class CodeGeneratorCore {
 
     // Download dependent interface of capability model
     if (!(await DigitalTwinUtility.downloadDependentInterface(rootPath, capabilityModelFilePath))) {
-      throw new OperationFailedError(`Failed to download dependent interface.`);
+      throw new OperationFailedError(
+        "download dependent interface",
+        "",
+        "Check out error message in the output channel."
+      );
     }
 
     const codeGenExecutionInfo: CodeGenExecutionItem = {
@@ -314,14 +324,19 @@ export class CodeGeneratorCore {
       return connectionType.name === deviceConnectionSelection.label;
     });
 
+    if (!deviceConnection) {
+      throw new SystemResourceNotFoundError(
+        "device connection type",
+        `${deviceConnectionSelection.label} connection type`,
+        "CodeGen configuration"
+      );
+    }
+
     const connectionType: DeviceConnectionType =
       DeviceConnectionType[deviceConnection.type as keyof typeof DeviceConnectionType];
 
     if (!connectionType) {
-      throw new Error(
-        `Failed to find an available device connection type with selection label\
-        '${deviceConnectionSelection.label}' from CodeGen configuration.`
-      );
+      throw new TypeNotSupportedError("device connection type", `${deviceConnection.type}`);
     }
 
     utils.channelShowAndAppendLine(channel, `Selected device connection type: ${connectionType}`);
@@ -348,7 +363,7 @@ export class CodeGeneratorCore {
     });
 
     if (!projectTemplateItems) {
-      throw new Error(`Internal error. Unable to find available project templates using ${language} language.`);
+      throw new SystemResourceNotFoundError("project template", `${language} language`, "CodeGen configuration");
     }
 
     const projectTemplateSelection = await vscode.window.showQuickPick(projectTemplateItems, {
@@ -364,14 +379,19 @@ export class CodeGeneratorCore {
       return projectType.name === projectTemplateSelection.label;
     });
 
+    if (!projectTemplate) {
+      throw new SystemResourceNotFoundError(
+        "project template",
+        `${projectTemplateSelection.label} project template name`,
+        "CodeGen configuration"
+      );
+    }
+
     const codeGenProjectType: CodeGenProjectType =
       CodeGenProjectType[projectTemplate.type as keyof typeof CodeGenProjectType];
 
     if (!codeGenProjectType) {
-      throw new Error(
-        `Failed to find an available project template with selection label 
-        '${projectTemplateSelection.label}' from CodeGen configuration.`
-      );
+      throw new TypeNotSupportedError("CodeGen project type", `${projectTemplate.type}`);
     }
 
     utils.channelShowAndAppendLine(channel, `Selected CodeGen project type: ${codeGenProjectType}`);
@@ -414,21 +434,26 @@ export class CodeGeneratorCore {
           return sdkReference.name === deviceConnectionSelection.label;
         });
 
+        if (!sdkReference) {
+          throw new SystemResourceNotFoundError(
+            "SDK reference",
+            `${deviceConnectionSelection.label} IoT Device SDK reference type`,
+            "CodeGen configuration"
+          );
+        }
+
         const sdkReferenceType: DeviceSdkReferenceType =
           DeviceSdkReferenceType[sdkReference.type as keyof typeof DeviceSdkReferenceType];
 
-        if (!sdkReference) {
-          throw new Error(
-            `Failed to find an available SDK reference type with selection label \
-            '${deviceConnectionSelection.label}' from CodeGen configuration.`
-          );
+        if (!sdkReferenceType) {
+          throw new TypeNotSupportedError("SDK reference type", `${sdkReference.type}`);
         }
 
         deviceSdkReferenceType = sdkReferenceType;
         break;
       }
       default:
-        throw new Error(`projectType ${projectType} is not supported.`);
+        throw new TypeNotSupportedError("project type", `${projectType}`);
     }
 
     utils.channelShowAndAppendLine(channel, `Selected device SDK reference type: ${deviceSdkReferenceType}`);

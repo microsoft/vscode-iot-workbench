@@ -27,7 +27,7 @@ export class AzureOperator {
     telemetryContext: TelemetryContext
   ): Promise<void> {
     // Azure deploy command can be executed only in local environment
-    RemoteExtension.ensureLocalBeforeRunCommand(context);
+    RemoteExtension.ensureLocalBeforeRunCommand("deploy azure project", context);
 
     const iotProject = await constructAndLoadIoTProject(context, channel, telemetryContext);
     if (iotProject) {

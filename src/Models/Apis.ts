@@ -29,7 +29,7 @@ export function getExtension(name: ExtensionName): any {
 export async function checkAzureLogin(): Promise<boolean> {
   const azureAccount = getExtension(ExtensionName.AzureAccount);
   if (!azureAccount) {
-    throw new DependentExtensionNotFoundError(ExtensionName.AzureAccount);
+    throw new DependentExtensionNotFoundError("check Azure Login", ExtensionName.AzureAccount);
   }
 
   // Sign in Azure
