@@ -333,7 +333,7 @@ The whole process includes:
 
 ## Test the project
 
-Open [serial monitor](#Serial_monitor_usage).
+Open [serial monitor](#Serial-monitor-usage).
 
 The sample application is running successfully when you see the following results:
 

@@ -36,6 +36,13 @@ steps:
     inputs:
       verbose: false
 
+  - task: Bash@3
+    inputs:
+      targetType: 'inline'
+      script: |
+        npm run validateLinks
+    displayName: 'Validate links on Linux'
+
   - script: npm run check
     displayName: 'Run eslint check'
     failOnStderr: True
