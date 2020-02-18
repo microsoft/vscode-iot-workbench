@@ -111,7 +111,7 @@ You need to make sure the following steps are finished before beginning the proc
         {            
             log.LogInformation($"C# IoT Hub trigger function processed a message: {message}");
             var httpContent = new StringContent(message.ToString(), Encoding.UTF8, "application/json");
-            client.PostAsync("https://prod-07..yourLogicAppURL..", httpContent);
+            client.PostAsync("your-logic-app-url", httpContent);
         }
     }
    }      

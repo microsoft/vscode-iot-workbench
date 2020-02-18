@@ -15,7 +15,7 @@ For first-time users of ESP32 device, follow these quick steps to:
 ## What you need
 
 - A ESP32 device. 
-    > Note: We use [M5Stack](www.m5stack.com) in this tutorial, but the steps below could also be applied to other ESP32 devices.
+    > Note: We use [M5Stack](http://m5stack.com) in this tutorial, but the steps below could also be applied to other ESP32 devices.
 - A computer running Windows 10, Ubuntu 18.04+ or macOS 10.10+.
 - An active Azure subscription. [Activate a free 30-day trial Microsoft Azure account](https://azure.microsoft.com/en-us/free/).
 
