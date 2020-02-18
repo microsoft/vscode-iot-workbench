@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import * as fs from "fs-plus";
 import * as path from "path";
 import * as vscode from "vscode";
 
@@ -10,14 +9,7 @@ import { Component, ComponentType } from "./Interfaces/Component";
 import { Provisionable } from "./Interfaces/Provisionable";
 import { Deployable } from "./Interfaces/Deployable";
 
-import { ConfigHandler } from "../configHandler";
-import {
-  ConfigKey,
-  AzureFunctionsLanguage,
-  AzureComponentsStorage,
-  DependentExtensions,
-  ScaffoldType
-} from "../constants";
+import { AzureFunctionsLanguage, DependentExtensions, ScaffoldType } from "../constants";
 
 import { ServiceClientCredentials } from "ms-rest";
 import { AzureAccount, AzureResourceFilter } from "../azure-account.api";
@@ -27,7 +19,6 @@ import { ExtensionName } from "./Interfaces/Api";
 import { Guid } from "guid-typescript";
 import {
   AzureComponentConfig,
-  AzureConfigs,
   ComponentInfo,
   DependencyConfig,
   Dependency,
@@ -38,9 +29,8 @@ import { VscodeCommands, AzureFunctionsCommands } from "../common/Commands";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
 import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
 import { DependentExtensionNotFoundError } from "../common/Error/OperationFailedErrors/DependentExtensionNotFoundError";
-import { WorkspaceConfigNotFoundError } from "../common/Error/SystemErrors/WorkspaceConfigNotFoundError";
 import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
-import { FileNotFoundError } from "../common/Error/OperationFailedErrors/FileNotFound";
+import { AzureConfigNotFoundError } from "../common/Error/SystemErrors/AzureConfigNotFoundErrors";
 
 const impor = require("impor")(__dirname);
 const azureUtilityModule = impor("./AzureUtility") as typeof import("./AzureUtility");
@@ -53,7 +43,8 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
   private azureAccountExtension: AzureAccount | undefined = getExtension(ExtensionName.AzureAccount);
   private functionLanguage: string | null;
   private functionFolder: string;
-
+  private projectRootPath: string;
+  private azureConfigFileHandler: AzureConfigFileHandler;
   private componentId: string;
   get id(): string {
     return this.componentId;
@@ -80,6 +71,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
   }
 
   constructor(
+    projectRoot: string,
     azureFunctionsPath: string,
     functionFolder: string,
     channel: vscode.OutputChannel,
@@ -92,6 +84,8 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     this.functionLanguage = language;
     this.functionFolder = functionFolder;
     this.componentId = Guid.create().toString();
+    this.projectRootPath = projectRoot;
+    this.azureConfigFileHandler = new AzureConfigFileHandler(this.projectRootPath);
     if (dependencyComponents && dependencyComponents.length > 0) {
       dependencyComponents.forEach(dependency =>
         this.dependencies.push({
@@ -136,31 +130,16 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
   }
 
   async load(): Promise<void> {
-    const azureConfigFilePath = path.join(
-      this.azureFunctionsPath,
-      "..",
-      AzureComponentsStorage.folderName,
-      AzureComponentsStorage.fileName
+    const componentConfig = await this.azureConfigFileHandler.getComponentByFolder(
+      ScaffoldType.Workspace,
+      this.functionFolder
     );
-
-    if (!fs.existsSync(azureConfigFilePath)) {
-      throw new FileNotFoundError(
-        "load Azure Functions",
-        `azure configuration file ${azureConfigFilePath}`,
-        "Please run Azure provision again."
-      );
-    }
-
-    const azureConfigs: AzureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, "utf8"));
-    const azureFunctionsConfig = azureConfigs.componentConfigs.find(config => config.folder === this.functionFolder);
-    if (azureFunctionsConfig) {
-      this.componentId = azureFunctionsConfig.id;
-      this.dependencies = azureFunctionsConfig.dependencies;
-      if (azureFunctionsConfig.componentInfo) {
-        this.functionLanguage = azureFunctionsConfig.componentInfo.values.functionLanguage;
+    if (componentConfig) {
+      this.componentId = componentConfig.id;
+      this.dependencies = componentConfig.dependencies;
+      if (componentConfig.componentInfo) {
+        this.functionLanguage = componentConfig.componentInfo.values.functionLanguage;
       }
-
-      // Load other information from config file.
     }
   }
 
@@ -258,16 +237,28 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     if (!functionAppId) {
       throw new OperationFailedError("create function application", "Please check the error log in output window.", "");
     }
-    await ConfigHandler.update(ConfigKey.functionAppId, functionAppId);
-    const eventHubConnectionString = ConfigHandler.get<string>(ConfigKey.eventHubConnectionString);
-    const eventHubConnectionPath = ConfigHandler.get<string>(ConfigKey.eventHubConnectionPath);
-    const iotHubConnectionString = ConfigHandler.get<string>(ConfigKey.iotHubConnectionString);
+
+    const scaffoldType = ScaffoldType.Workspace;
+    const iotHubId = this.dependencies[0].id;
+    const componentConfig = await this.azureConfigFileHandler.getComponentById(scaffoldType, iotHubId);
+    if (!componentConfig) {
+      throw new AzureConfigNotFoundError(`component of config id ${iotHubId}`);
+    }
+    if (!componentConfig.componentInfo) {
+      throw new AzureConfigNotFoundError(`componentInfo of config id ${iotHubId}`);
+    }
+    const iotHubConnectionString = componentConfig.componentInfo.values.iotHubConnectionString;
+    if (!iotHubConnectionString) {
+      throw new AzureConfigNotFoundError(`iothubConnectionString of config id ${iotHubId}`);
+    }
+    const eventHubConnectionString = componentConfig.componentInfo.values.eventHubConnectionString;
+    const eventHubConnectionPath = componentConfig.componentInfo.values.eventHubConnectionPath;
 
     if (!eventHubConnectionString) {
-      throw new WorkspaceConfigNotFoundError(ConfigKey.eventHubConnectionString);
+      throw new AzureConfigNotFoundError(`eventHubConnectionString of config id ${iotHubId}`);
     }
     if (!eventHubConnectionPath) {
-      throw new WorkspaceConfigNotFoundError(ConfigKey.eventHubConnectionPath);
+      throw new AzureConfigNotFoundError(`evenHubConnectionPath of config id ${iotHubId}`);
     }
 
     const credential = await this.getCredentialFromSubscriptionId(subscriptionId);
@@ -308,6 +299,15 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
 
     await client.webApps.updateApplicationSettings(resourceGroup, siteName, appSettings);
 
+    if (this.functionLanguage) {
+      await this.updateConfigSettings(scaffoldType, {
+        values: {
+          functionLanguage: this.functionLanguage,
+          functionAppId
+        }
+      });
+    }
+
     return true;
   }
 
@@ -322,7 +322,14 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
 
     try {
       const azureFunctionsPath = this.azureFunctionsPath;
-      const functionAppId = ConfigHandler.get(ConfigKey.functionAppId);
+      const componentConfig = await this.azureConfigFileHandler.getComponentById(ScaffoldType.Workspace, this.id);
+      if (!componentConfig) {
+        throw new AzureConfigNotFoundError(`component of config id ${this.id}`);
+      }
+      if (!componentConfig.componentInfo) {
+        throw new AzureConfigNotFoundError(`componentInfo of config id ${this.id}`);
+      }
+      const functionAppId = componentConfig.componentInfo.values.functionAppId;
       if (this.functionLanguage !== (AzureFunctionsLanguage.CSharpLibrary as string)) {
         await vscode.commands.executeCommand(AzureFunctionsCommands.Deploy, azureFunctionsPath, functionAppId);
       } else {
@@ -341,19 +348,12 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
   }
 
   async updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo): Promise<void> {
-    const azureConfigFilePath = path.join(
-      this.azureFunctionsPath,
-      "..",
-      AzureComponentsStorage.folderName,
-      AzureComponentsStorage.fileName
-    );
-
-    let azureConfigs: AzureConfigs = { componentConfigs: [] };
-    azureConfigs = await AzureConfigFileHandler.loadAzureConfigs(type, azureConfigFilePath);
-
-    const azureFunctionsConfig = azureConfigs.componentConfigs.find(config => config.id === this.id);
-    if (azureFunctionsConfig) {
-      // TODO: update the existing setting for the provision result
+    const componentIndex = await this.azureConfigFileHandler.getComponentIndexById(type, this.id);
+    if (componentIndex > -1) {
+      if (!componentInfo) {
+        throw new ArgumentEmptyOrNullError("AzureFunctions updateConfigSettings", `componentInfo`);
+      }
+      await this.azureConfigFileHandler.updateComponent(type, componentIndex, componentInfo);
     } else {
       const newAzureFunctionsConfig: AzureComponentConfig = {
         id: this.id,
@@ -363,9 +363,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
         type: this.componentType,
         componentInfo
       };
-      azureConfigs.componentConfigs.push(newAzureFunctionsConfig);
-      await FileUtility.writeJsonFile(type, azureConfigFilePath, azureConfigs);
-      utils.channelPrintJsonObject(this.channel, azureConfigs);
+      await this.azureConfigFileHandler.appendComponent(type, newAzureFunctionsConfig);
     }
   }
 }

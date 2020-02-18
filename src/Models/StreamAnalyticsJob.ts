@@ -7,7 +7,7 @@ import * as vscode from "vscode";
 import { ResourceNotFoundError } from "../common/Error/OperationFailedErrors/ResourceNotFoundError";
 import { TypeNotSupportedError } from "../common/Error/SystemErrors/TypeNotSupportedError";
 import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
-import { AzureComponentsStorage, FileNames, ScaffoldType } from "../constants";
+import { FileNames, ScaffoldType } from "../constants";
 import { channelPrintJsonObject, channelShowAndAppendLine } from "../utils";
 
 import {
@@ -23,6 +23,8 @@ import { Component, ComponentType } from "./Interfaces/Component";
 import { Deployable } from "./Interfaces/Deployable";
 import { Provisionable } from "./Interfaces/Provisionable";
 import { DirectoryNotFoundError } from "../common/Error/OperationFailedErrors/DirectoryNotFoundError";
+import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
+import { AzureConfigNotFoundError } from "../common/Error/SystemErrors/AzureConfigNotFoundErrors";
 
 enum StreamAnalyticsAction {
   Start = 1,
@@ -35,7 +37,7 @@ export class StreamAnalyticsJob implements Component, Provisionable, Deployable 
   private channel: vscode.OutputChannel;
   private projectRootPath: string;
   private componentId: string;
-  private azureConfigHandler: AzureConfigFileHandler;
+  private azureConfigFileHandler: AzureConfigFileHandler;
   private extensionContext: vscode.ExtensionContext;
   private queryPath: string;
   private subscriptionId: string | null = null;
@@ -49,28 +51,20 @@ export class StreamAnalyticsJob implements Component, Provisionable, Deployable 
       return this.azureClient;
     }
 
-    const componentConfig = await this.azureConfigHandler.getComponentById(ScaffoldType.Workspace, this.id);
+    const componentConfig = await this.azureConfigFileHandler.getComponentById(ScaffoldType.Workspace, this.id);
     if (!componentConfig) {
-      throw new OperationFailedError(
-        "init azure client",
-        `Failed to get Azure Stream Analytics component with id ${this.id}.`,
-        ""
-      );
+      throw new AzureConfigNotFoundError(`component of config id ${this.id}`);
     }
 
     const componentInfo = componentConfig.componentInfo;
     if (!componentInfo) {
-      throw new OperationFailedError(
-        "init azure client",
-        "Failed to get component info.",
-        "Please provision Stream Analytics Job first."
-      );
+      throw new AzureConfigNotFoundError(`componentInfo of config id ${this.id}`);
     }
 
     const subscriptionId = componentInfo.values.subscriptionId;
     const resourceGroup = componentInfo.values.resourceGroup;
     const streamAnalyticsJobName = componentInfo.values.streamAnalyticsJobName;
-    AzureUtility.init(this.extensionContext, this.channel, subscriptionId);
+    AzureUtility.init(this.extensionContext, this.projectRootPath, this.channel, subscriptionId);
     const azureClient = AzureUtility.getClient();
     if (!azureClient) {
       throw new OperationFailedError("init Azure client", "Failed to get azure client.", "");
@@ -149,7 +143,7 @@ export class StreamAnalyticsJob implements Component, Provisionable, Deployable 
     this.channel = channel;
     this.componentId = Guid.create().toString();
     this.projectRootPath = projectRoot;
-    this.azureConfigHandler = new AzureConfigFileHandler(projectRoot);
+    this.azureConfigFileHandler = new AzureConfigFileHandler(projectRoot);
     this.extensionContext = context;
     if (dependencyComponents && dependencyComponents.length > 0) {
       dependencyComponents.forEach(dependency =>
@@ -172,18 +166,13 @@ export class StreamAnalyticsJob implements Component, Provisionable, Deployable 
   }
 
   async load(): Promise<void> {
-    const azureConfigFilePath = path.join(
-      this.projectRootPath,
-      AzureComponentsStorage.folderName,
-      AzureComponentsStorage.fileName
+    const componentConfig = await this.azureConfigFileHandler.getComponentByType(
+      ScaffoldType.Workspace,
+      this.componentType
     );
-    const azureConfigs = await AzureConfigFileHandler.loadAzureConfigs(ScaffoldType.Workspace, azureConfigFilePath);
-
-    const asaConfig = azureConfigs.componentConfigs.find(config => config.type === this.componentType);
-    if (asaConfig) {
-      this.componentId = asaConfig.id;
-      this.dependencies = asaConfig.dependencies;
-      // Load other information from config file.
+    if (componentConfig) {
+      this.componentId = componentConfig.id;
+      this.dependencies = componentConfig.dependencies;
     }
   }
 
@@ -192,12 +181,12 @@ export class StreamAnalyticsJob implements Component, Provisionable, Deployable 
   }
 
   async updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo): Promise<void> {
-    const asaComponentIndex = await this.azureConfigHandler.getComponentIndexById(type, this.id);
+    const asaComponentIndex = await this.azureConfigFileHandler.getComponentIndexById(type, this.id);
     if (asaComponentIndex > -1) {
       if (!componentInfo) {
-        return;
+        throw new ArgumentEmptyOrNullError("StreamAnalyticsJob updateConfigSettings", "componentInfo");
       }
-      await this.azureConfigHandler.updateComponent(type, asaComponentIndex, componentInfo);
+      await this.azureConfigFileHandler.updateComponent(type, asaComponentIndex, componentInfo);
     } else {
       const newAsaConfig: AzureComponentConfig = {
         id: this.id,
@@ -206,7 +195,7 @@ export class StreamAnalyticsJob implements Component, Provisionable, Deployable 
         dependencies: this.dependencies,
         type: this.componentType
       };
-      await this.azureConfigHandler.appendComponent(type, newAsaConfig);
+      await this.azureConfigFileHandler.appendComponent(type, newAsaConfig);
     }
   }
 
@@ -257,13 +246,9 @@ export class StreamAnalyticsJob implements Component, Provisionable, Deployable 
     }
 
     for (const dependency of this.dependencies) {
-      const componentConfig = await this.azureConfigHandler.getComponentById(scaffoldType, dependency.id);
+      const componentConfig = await this.azureConfigFileHandler.getComponentById(scaffoldType, dependency.id);
       if (!componentConfig) {
-        throw new OperationFailedError(
-          "provision stream analystics job",
-          `Failed to get component with id ${dependency.id}`,
-          ""
-        );
+        throw new AzureConfigNotFoundError(`component of config id ${dependency.id}`);
       }
 
       if (dependency.type === DependencyType.Input) {

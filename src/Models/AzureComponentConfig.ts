@@ -5,7 +5,7 @@ import { FileUtility } from "../FileUtility";
 
 import { Component } from "./Interfaces/Component";
 import { ComponentType } from "./Interfaces/Component";
-import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
+import { AzureConfigNotFoundError } from "../common/Error/SystemErrors/AzureConfigNotFoundErrors";
 
 // TODO: need to check what value should be included here
 export interface ComponentInfo {
@@ -129,10 +129,25 @@ export class AzureConfigFileHandler {
     const azureConfigs = await AzureConfigFileHandler.loadAzureConfigs(type, this.configFilePath);
     const component = azureConfigs.componentConfigs[index];
     if (!component) {
-      throw new ArgumentEmptyOrNullError("update azure component", `component configurations of index ${index}.`);
+      throw new AzureConfigNotFoundError(`component of config index ${index}`);
     }
     component.componentInfo = componentInfo;
     await FileUtility.writeJsonFile(type, this.configFilePath, azureConfigs);
     return azureConfigs;
+  }
+
+  async getComponentByType(
+    type: ScaffoldType,
+    componentType: ComponentType
+  ): Promise<AzureComponentConfig | undefined> {
+    const azureConfigs = await AzureConfigFileHandler.loadAzureConfigs(type, this.configFilePath);
+    const componentConfig = azureConfigs.componentConfigs.find(config => config.type === componentType);
+    return componentConfig;
+  }
+
+  async getComponentByFolder(type: ScaffoldType, folder: string): Promise<AzureComponentConfig | undefined> {
+    const azureConfigs = await AzureConfigFileHandler.loadAzureConfigs(type, this.configFilePath);
+    const componentConfig = azureConfigs.componentConfigs.find(config => config.folder === folder);
+    return componentConfig;
   }
 }

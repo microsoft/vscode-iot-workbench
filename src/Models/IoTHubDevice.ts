@@ -5,17 +5,23 @@ import * as iothub from "azure-iothub";
 import { Guid } from "guid-typescript";
 import * as vscode from "vscode";
 
-import { ConfigHandler } from "../configHandler";
-import { ConfigKey, ScaffoldType } from "../constants";
+import { ScaffoldType } from "../constants";
 
 import { DependentExtensionNotFoundError } from "../common/Error/OperationFailedErrors/DependentExtensionNotFoundError";
-import { WorkspaceConfigNotFoundError } from "../common/Error/SystemErrors/WorkspaceConfigNotFoundError";
 
 import { getExtension } from "./Apis";
-import { ComponentInfo, DependencyConfig } from "./AzureComponentConfig";
+import {
+  AzureComponentConfig,
+  AzureConfigFileHandler,
+  ComponentInfo,
+  DependencyConfig,
+  Dependency
+} from "./AzureComponentConfig";
 import { ExtensionName } from "./Interfaces/Api";
 import { Component, ComponentType } from "./Interfaces/Component";
 import { Provisionable } from "./Interfaces/Provisionable";
+import { AzureConfigNotFoundError } from "../common/Error/SystemErrors/AzureConfigNotFoundErrors";
+import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
 
 async function getDeviceNumber(iotHubConnectionString: string): Promise<number> {
   return new Promise((resolve: (value: number) => void, reject: (error: Error) => void) => {
@@ -65,17 +71,27 @@ async function getProvisionIothubDeviceSelection(iotHubConnectionString: string)
 export class IoTHubDevice implements Component, Provisionable {
   private componentType: ComponentType;
   private channel: vscode.OutputChannel;
+  private projectRootPath: string;
   private componentId: string;
+  private azureConfigFileHandler: AzureConfigFileHandler;
   get id(): string {
     return this.componentId;
   }
 
   dependencies: DependencyConfig[] = [];
 
-  constructor(channel: vscode.OutputChannel) {
+  constructor(projectRoot: string, channel: vscode.OutputChannel, dependencyComponents: Dependency[] | null = null) {
     this.componentType = ComponentType.IoTHubDevice;
     this.channel = channel;
     this.componentId = Guid.create().toString();
+    this.projectRootPath = projectRoot;
+    this.azureConfigFileHandler = new AzureConfigFileHandler(this.projectRootPath);
+
+    if (dependencyComponents && dependencyComponents.length > 0) {
+      dependencyComponents.forEach(dependency =>
+        this.dependencies.push({ id: dependency.component.id, type: dependency.type })
+      );
+    }
   }
 
   name = "IoT Hub Device";
@@ -89,19 +105,34 @@ export class IoTHubDevice implements Component, Provisionable {
   }
 
   async load(): Promise<void> {
-    // Do Nothing.
+    const componentConfig = await this.azureConfigFileHandler.getComponentByType(
+      ScaffoldType.Workspace,
+      this.componentType
+    );
+    if (componentConfig) {
+      this.componentId = componentConfig.id;
+      this.dependencies = componentConfig.dependencies;
+    }
   }
 
   async create(): Promise<void> {
-    // Do nothing.
+    await this.updateConfigSettings(ScaffoldType.Local);
   }
 
   async provision(): Promise<boolean> {
-    const iotHubConnectionString = ConfigHandler.get<string>(ConfigKey.iotHubConnectionString);
-    if (!iotHubConnectionString) {
-      throw new WorkspaceConfigNotFoundError(ConfigKey.iotHubConnectionString);
+    const scaffoldType = ScaffoldType.Workspace;
+    const iotHubId = this.dependencies[0].id;
+    const componentConfig = await this.azureConfigFileHandler.getComponentById(scaffoldType, iotHubId);
+    if (!componentConfig) {
+      throw new AzureConfigNotFoundError(`component of config id ${iotHubId}`);
     }
-
+    if (!componentConfig.componentInfo) {
+      throw new AzureConfigNotFoundError(`componentInfo of config id ${iotHubId}`);
+    }
+    const iotHubConnectionString = componentConfig.componentInfo.values.iotHubConnectionString;
+    if (!iotHubConnectionString) {
+      throw new AzureConfigNotFoundError(`iotHubConnectionString of config id ${iotHubId}`);
+    }
     const selection = await vscode.window.showQuickPick(getProvisionIothubDeviceSelection(iotHubConnectionString), {
       ignoreFocusOut: true,
       placeHolder: "Provision IoTHub Device"
@@ -123,7 +154,12 @@ export class IoTHubDevice implements Component, Provisionable {
         if (!device) {
           return false;
         } else {
-          await ConfigHandler.update(ConfigKey.iotHubDeviceConnectionString, device.connectionString);
+          await this.updateConfigSettings(scaffoldType, {
+            values: {
+              iotHubConnectionString,
+              iotHubDeviceConnectionString: device.connectionString
+            }
+          });
         }
         break;
 
@@ -132,7 +168,12 @@ export class IoTHubDevice implements Component, Provisionable {
         if (!device) {
           return false;
         } else {
-          await ConfigHandler.update(ConfigKey.iotHubDeviceConnectionString, device.connectionString);
+          await this.updateConfigSettings(scaffoldType, {
+            values: {
+              iotHubConnectionString,
+              iotHubDeviceConnectionString: device.connectionString
+            }
+          });
         }
         break;
       default:
@@ -141,12 +182,23 @@ export class IoTHubDevice implements Component, Provisionable {
     return true;
   }
 
-  updateConfigSettings(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _type: ScaffoldType,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _componentInfo?: ComponentInfo
-  ): void {
-    // Do nothing.
+  async updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo): Promise<void> {
+    const iotHubComponentIndex = await this.azureConfigFileHandler.getComponentIndexById(type, this.id);
+    if (iotHubComponentIndex > -1) {
+      if (!componentInfo) {
+        throw new ArgumentEmptyOrNullError("IoTHubDevice updateConfigSettings", "componentInfo");
+      }
+      await this.azureConfigFileHandler.updateComponent(type, iotHubComponentIndex, componentInfo);
+    } else {
+      const newIotHubConfig: AzureComponentConfig = {
+        id: this.id,
+        folder: "",
+        name: "",
+        dependencies: this.dependencies,
+        type: this.componentType,
+        componentInfo
+      };
+      await this.azureConfigFileHandler.appendComponent(type, newIotHubConfig);
+    }
   }
 }

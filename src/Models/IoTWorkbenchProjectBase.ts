@@ -171,7 +171,7 @@ export abstract class IoTWorkbenchProjectBase {
     let resourceGroup: string | undefined = "";
     if (provisionItemList.length > 0) {
       await checkAzureLogin();
-      azureUtilityModule.AzureUtility.init(this.extensionContext, this.channel);
+      azureUtilityModule.AzureUtility.init(this.extensionContext, this.projectRootPath, this.channel);
       resourceGroup = await azureUtilityModule.AzureUtility.getResourceGroup();
       subscriptionId = azureUtilityModule.AzureUtility.subscriptionId;
       if (!resourceGroup || !subscriptionId) {

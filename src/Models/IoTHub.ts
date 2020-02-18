@@ -2,27 +2,20 @@
 // Licensed under the MIT License.
 
 import { Guid } from "guid-typescript";
-import * as path from "path";
 import * as vscode from "vscode";
 
 import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
 import { DependentExtensionNotFoundError } from "../common/Error/OperationFailedErrors/DependentExtensionNotFoundError";
-import { ConfigHandler } from "../configHandler";
-import { AzureComponentsStorage, ConfigKey, ScaffoldType } from "../constants";
+import { ScaffoldType } from "../constants";
 import { channelPrintJsonObject, channelShowAndAppendLine } from "../utils";
 
 import { getExtension } from "./Apis";
-import {
-  AzureComponentConfig,
-  AzureConfigFileHandler,
-  ComponentInfo,
-  DependencyConfig,
-  AzureConfigs
-} from "./AzureComponentConfig";
+import { AzureComponentConfig, AzureConfigFileHandler, ComponentInfo, DependencyConfig } from "./AzureComponentConfig";
 import { AzureUtility } from "./AzureUtility";
 import { ExtensionName } from "./Interfaces/Api";
 import { Component, ComponentType } from "./Interfaces/Component";
 import { Provisionable } from "./Interfaces/Provisionable";
+import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
 
 export class IoTHub implements Component, Provisionable {
   dependencies: DependencyConfig[] = [];
@@ -40,7 +33,7 @@ export class IoTHub implements Component, Provisionable {
     this.channel = channel;
     this.componentId = Guid.create().toString();
     this.projectRootPath = projectRoot;
-    this.azureConfigFileHandler = new AzureConfigFileHandler(projectRoot);
+    this.azureConfigFileHandler = new AzureConfigFileHandler(this.projectRootPath);
   }
 
   name = "IoT Hub";
@@ -54,21 +47,13 @@ export class IoTHub implements Component, Provisionable {
   }
 
   async load(): Promise<void> {
-    const azureConfigFilePath = path.join(
-      this.projectRootPath,
-      AzureComponentsStorage.folderName,
-      AzureComponentsStorage.fileName
-    );
-
-    const azureConfigs: AzureConfigs = await AzureConfigFileHandler.loadAzureConfigs(
+    const componentConfig = await this.azureConfigFileHandler.getComponentByType(
       ScaffoldType.Workspace,
-      azureConfigFilePath
+      this.componentType
     );
-    const iotHubConfig = azureConfigs.componentConfigs.find(config => config.type === this.componentType);
-    if (iotHubConfig) {
-      this.componentId = iotHubConfig.id;
-      this.dependencies = iotHubConfig.dependencies;
-      // Load other information from config file.
+    if (componentConfig) {
+      this.componentId = componentConfig.id;
+      this.dependencies = componentConfig.dependencies;
     }
   }
 
@@ -142,10 +127,6 @@ export class IoTHub implements Component, Provisionable {
       SharedAccessKeyName=iothubowner;SharedAccessKey=${sharedAccessKey}`;
       const eventHubConnectionPath = iothub.properties.eventHubEndpoints.events.path;
 
-      await ConfigHandler.update(ConfigKey.iotHubConnectionString, iothub.iotHubConnectionString);
-      await ConfigHandler.update(ConfigKey.eventHubConnectionString, eventHubConnectionString);
-      await ConfigHandler.update(ConfigKey.eventHubConnectionPath, eventHubConnectionPath);
-
       const scaffoldType = ScaffoldType.Workspace;
       await this.updateConfigSettings(scaffoldType, {
         values: {
@@ -175,7 +156,7 @@ export class IoTHub implements Component, Provisionable {
 
     if (iotHubComponentIndex > -1) {
       if (!componentInfo) {
-        return;
+        throw new ArgumentEmptyOrNullError("IoTHub updateConfigSettings", "componentInfo");
       }
       await this.azureConfigFileHandler.updateComponent(type, iotHubComponentIndex, componentInfo);
     } else {

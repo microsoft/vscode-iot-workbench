@@ -15,8 +15,10 @@ import { ConfigHandler } from "../configHandler";
 import { getExtension } from "./Apis";
 import { ExtensionName } from "./Interfaces/Api";
 import { TelemetryWorker } from "../telemetry";
-import { EventNames } from "../constants";
 import { DependentExtensionNotFoundError } from "../common/Error/OperationFailedErrors/DependentExtensionNotFoundError";
+import { EventNames, ScaffoldType } from "../constants";
+import { AzureConfigFileHandler } from "./AzureComponentConfig";
+import { ComponentType } from "./Interfaces/Component";
 
 export interface ARMParameters {
   [key: string]: { value: string | number | boolean | null };
@@ -42,13 +44,20 @@ export interface ARMTemplate {
 
 export class AzureUtility {
   private static _context: vscode.ExtensionContext;
+  private static _projectFolder: string;
   private static _channel: vscode.OutputChannel | undefined;
   private static _subscriptionId: string | undefined;
   private static _resourceGroup: string | undefined;
   private static _azureAccountExtension: AzureAccount | undefined = getExtension(ExtensionName.AzureAccount);
 
-  static init(context: vscode.ExtensionContext, channel?: vscode.OutputChannel, subscriptionId?: string): void {
+  static init(
+    context: vscode.ExtensionContext,
+    projectPath: string,
+    channel?: vscode.OutputChannel,
+    subscriptionId?: string
+  ): void {
     AzureUtility._context = context;
+    AzureUtility._projectFolder = projectPath;
     AzureUtility._channel = channel;
     AzureUtility._subscriptionId = subscriptionId;
   }
@@ -315,7 +324,15 @@ export class AzureUtility {
         // Read value from workspace config
         const _key = key.substr(1);
 
-        const iothubConnectionString = ConfigHandler.get<string>("iothubConnectionString");
+        let iothubConnectionString: string | undefined;
+        const azureConfigFileHandler = new AzureConfigFileHandler(this._projectFolder);
+        const componentConfig = await azureConfigFileHandler.getComponentByType(
+          ScaffoldType.Workspace,
+          ComponentType.IoTHub
+        );
+        if (componentConfig) {
+          iothubConnectionString = componentConfig.componentInfo?.values.iothubConnectionString;
+        }
 
         switch (_key) {
           case "iotHubName":
