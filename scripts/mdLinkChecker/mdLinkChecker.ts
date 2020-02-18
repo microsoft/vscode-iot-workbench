@@ -68,7 +68,8 @@ function checkLinksCore(file: string, links: Link[]): Promise<FileReport> {
           // Check markdown relative urls
           try {
             const currentWorkingDirectory = path.dirname(file);
-            const fullPath = path.resolve(currentWorkingDirectory, link.address).split("/#")[0];
+            const splitPattern = path.sep + '#';
+            const fullPath = path.resolve(currentWorkingDirectory, link.address).split(splitPattern)[0];
             isBroken = !fs.existsSync(fullPath);
           } catch (error) {
             // If there's an error, log the link
