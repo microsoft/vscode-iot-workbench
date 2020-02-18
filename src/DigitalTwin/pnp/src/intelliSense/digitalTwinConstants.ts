@@ -56,6 +56,5 @@ export class DigitalTwinConstants {
   static readonly REQUIRED_PROPERTY_LABEL = "(required)";
   static readonly IOT_MODEL_LABEL = "IoTModel";
   static readonly CONTEXT_TEMPLATE = "http://azureiot.com/v1/contexts/IoTModel.json";
-  static readonly CONTEXT_REGEX = new RegExp("^http://azureiot.com/v[0-9]+/contexts/IoTModel.json$");
   static readonly SUPPORT_SEMANTIC_TYPES = new Set<string>(["Telemetry", "Property"]);
 }
