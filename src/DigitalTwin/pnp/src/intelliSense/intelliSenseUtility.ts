@@ -88,9 +88,15 @@ export class IntelliSenseUtility {
    * @param node json node
    */
   static isDigitalTwinContext(node: parser.Node): boolean {
-    // assume @context is string node
+    // @context accept both array and string
     if (node.type === JsonNodeType.String) {
-      return DigitalTwinConstants.CONTEXT_REGEX.test(node.value as string);
+      return (node.value as string) === DigitalTwinConstants.CONTEXT_TEMPLATE;
+    } else if (node.type === JsonNodeType.Array && node.children) {
+      for (const child of node.children) {
+        if (child.type === JsonNodeType.String && (child.value as string) === DigitalTwinConstants.CONTEXT_TEMPLATE) {
+          return true;
+        }
+      }
     }
     return false;
   }
