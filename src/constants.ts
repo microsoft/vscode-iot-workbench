@@ -13,7 +13,6 @@ export class ConfigKey {
   static readonly functionAppId = "functionAppId";
   static readonly boardId = "BoardId";
   static readonly codeGeneratorVersion = "IoTPnPCodeGenVersion";
-  static readonly asaPath = "StreamAnalyticsPath";
 
   // Keys for configurations in iot workbench project config file
   static readonly projectHostType = "ProjectHostType";

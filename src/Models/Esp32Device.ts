@@ -83,7 +83,7 @@ export class Esp32Device extends ArduinoDeviceBase {
     devicePath: string,
     templateFiles?: TemplateFileInfo[]
   ) {
-    super(context, devicePath, channel, telemetryContext, DeviceType.IoTButton);
+    super(context, devicePath, channel, telemetryContext, DeviceType.Esp32);
     this.channel = channel;
     this.componentId = Guid.create().toString();
     if (templateFiles) {
