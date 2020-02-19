@@ -93,6 +93,7 @@ function initCommand(
   context.subscriptions.push(vscode.commands.registerCommand(command, callback));
 }
 
+// DigitalTwin extension part
 function initIntelliSense(context: vscode.ExtensionContext): void {
   // init DigitalTwin graph
   IntelliSenseUtility.initGraph(context);
@@ -195,7 +196,7 @@ function initDigitalTwinCommand(
     )
   );
 }
-// DigitalTwin extension part
+
 function initDigitalTwin(context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel): void {
   const colorizedChannel = new ColorizedChannel(Constants.CHANNEL_NAME);
   context.subscriptions.push(colorizedChannel);

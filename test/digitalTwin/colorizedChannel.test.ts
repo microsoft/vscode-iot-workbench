@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license.
+
 import { ColorizedChannel } from "../../src/DigitalTwin/pnp/src/common/colorizedChannel";
 import { Constants } from "../../src/DigitalTwin/pnp/src/common/constants";
 
@@ -8,8 +11,8 @@ describe("Colorized channel", () => {
   const operation = "Test";
   const message = "mock";
 
-  afterEach(() => {
-    vscode.OutputChannel.appendLine.mockReset();
+  beforeEach(() => {
+    vscode.OutputChannel.appendLine.mockClear();
   });
 
   test("format success message", () => {
