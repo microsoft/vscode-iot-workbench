@@ -146,7 +146,7 @@ In Visual Studio Code, open the `door_monitor.cs` file (default named `Functions
 Edit the code with the following lines
 
 ```csharp
-client.PostAsync("https://prod-07..yourLogicAppURL..", httpContent);  
+client.PostAsync("your-logic-app-uri", httpContent);
 ```
 
 > NOTE: replace the URL with the unique URL of your workflow

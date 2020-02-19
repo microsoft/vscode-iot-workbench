@@ -175,7 +175,7 @@ and the content includes:
 * "fwVersion" : [firmware version](#build-the-new-firmware).
 * "fwPackageURI" : [URL of the firmware](#upload-the-firmware-to-cloud)
 * "fwPackageCheckValue" : [CRC value of the firmware](#crc-value-and-file-size-of-the-firmware)
-* "fwSize" : [file size of the firmware](#fcrc-value-and-file-size-of-the-firmware)
+* "fwSize" : [file size of the firmware](#crc-value-and-file-size-of-the-firmware)
 
 The Settings may like this:
 ![Configuration settings](media/firmware-ota/configuration-settings.png)
@@ -264,7 +264,7 @@ After a while, IoT DevKit get the new firmware information from Azure IoT Hub, a
 
 ![ota-2](media/firmware-ota/ota-2.jpg)
 
-The download may take 1 minute (depend on the speed of the network). After downloaded the new firmware to device, it verify the file size and CRC value whether it's the same as the firmware information in [device twins](#step-2:-specify-settings).  
+The download may take 1 minute (depend on the speed of the network). After downloaded the new firmware to device, it verify the file size and CRC value whether it's the same as the firmware information in [device twins](#step-2-specify-settings).
 
 Display "passed" if match.
 
