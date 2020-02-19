@@ -36,9 +36,21 @@ steps:
     inputs:
       verbose: false
 
-  - script: node node_modules/gts/build/src/cli.js check
-    displayName: 'check gts error'
+  - script: npm run check
+    displayName: 'Run eslint check'
     failOnStderr: True
+
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@2
+    displayName: 'Run CredScan'
+    inputs:
+      debugMode: false
+    condition: eq(variables['Agent.OS'], 'Windows_NT')
+
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@1
+    displayName: 'Run PoliCheck'
+    inputs:
+      targetType: F
+    condition: eq(variables['Agent.OS'], 'Windows_NT')
 
   - task: Npm@1
     displayName: 'Compile sources'
@@ -62,7 +74,7 @@ steps:
     displayName: 'Define runtime variable'
 
   - script: npm install -g vsce
-    displayName: 'install vsce'
+    displayName: 'Install vsce'
     condition: and(succeeded(), eq(variables['deploy_to_marketplace'], 'true'))
 
   - script: node scripts/updateConfig.js

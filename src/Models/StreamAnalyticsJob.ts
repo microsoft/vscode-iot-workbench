@@ -1,64 +1,73 @@
-import {ResourceManagementClient} from 'azure-arm-resource';
-import * as fs from 'fs-plus';
-import {Guid} from 'guid-typescript';
-import * as path from 'path';
-import * as vscode from 'vscode';
+import { ResourceManagementClient } from "azure-arm-resource";
+import * as fs from "fs-plus";
+import { Guid } from "guid-typescript";
+import * as path from "path";
+import * as vscode from "vscode";
 
-import {AzureComponentsStorage, FileNames, ScaffoldType} from '../constants';
-import {channelPrintJsonObject, channelShowAndAppendLine} from '../utils';
+import { ResourceNotFoundError } from "../common/Error/OperationFailedErrors/ResourceNotFoundError";
+import { TypeNotSupportedError } from "../common/Error/SystemErrors/TypeNotSupportedError";
+import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
+import { FileNames, ScaffoldType } from "../constants";
+import { channelPrintJsonObject, channelShowAndAppendLine } from "../utils";
 
-import {AzureComponentConfig, AzureConfigFileHandler, AzureConfigs, ComponentInfo, Dependency, DependencyConfig, DependencyType} from './AzureComponentConfig';
-import {ARMTemplate, AzureUtility} from './AzureUtility';
-import {Component, ComponentType} from './Interfaces/Component';
-import {Deployable} from './Interfaces/Deployable';
-import {Provisionable} from './Interfaces/Provisionable';
+import {
+  AzureComponentConfig,
+  AzureConfigFileHandler,
+  ComponentInfo,
+  Dependency,
+  DependencyConfig,
+  DependencyType
+} from "./AzureComponentConfig";
+import { ARMTemplate, AzureUtility } from "./AzureUtility";
+import { Component, ComponentType } from "./Interfaces/Component";
+import { Deployable } from "./Interfaces/Deployable";
+import { Provisionable } from "./Interfaces/Provisionable";
+import { DirectoryNotFoundError } from "../common/Error/OperationFailedErrors/DirectoryNotFoundError";
+import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
+import { AzureConfigNotFoundError } from "../common/Error/SystemErrors/AzureConfigNotFoundErrors";
 
 enum StreamAnalyticsAction {
   Start = 1,
   Stop
 }
 
-export class StreamAnalyticsJob implements Component, Provisionable,
-                                           Deployable {
+export class StreamAnalyticsJob implements Component, Provisionable, Deployable {
   dependencies: DependencyConfig[] = [];
   private componentType: ComponentType;
   private channel: vscode.OutputChannel;
   private projectRootPath: string;
   private componentId: string;
-  private azureConfigHandler: AzureConfigFileHandler;
+  private azureConfigFileHandler: AzureConfigFileHandler;
   private extensionContext: vscode.ExtensionContext;
   private queryPath: string;
-  private subscriptionId: string|null = null;
-  private resourceGroup: string|null = null;
-  private streamAnalyticsJobName: string|null = null;
-  private azureClient: ResourceManagementClient|null = null;
-  private catchedStreamAnalyticsList: Array<{name: string}> = [];
+  private subscriptionId: string | null = null;
+  private resourceGroup: string | null = null;
+  private streamAnalyticsJobName: string | null = null;
+  private azureClient: ResourceManagementClient | null = null;
+  private catchedStreamAnalyticsList: Array<{ name: string }> = [];
 
-  private async initAzureClient() {
-    if (this.subscriptionId && this.resourceGroup &&
-        this.streamAnalyticsJobName && this.azureClient) {
+  private async initAzureClient(): Promise<ResourceManagementClient> {
+    if (this.subscriptionId && this.resourceGroup && this.streamAnalyticsJobName && this.azureClient) {
       return this.azureClient;
     }
 
-    const componentConfig = await this.azureConfigHandler.getComponentById(
-        ScaffoldType.Workspace, this.id);
+    const componentConfig = await this.azureConfigFileHandler.getComponentById(ScaffoldType.Workspace, this.id);
     if (!componentConfig) {
-      throw new Error(
-          `Cannot find Azure Stream Analytics component with id ${this.id}.`);
+      throw new AzureConfigNotFoundError(`component of config id ${this.id}`);
     }
 
     const componentInfo = componentConfig.componentInfo;
     if (!componentInfo) {
-      throw new Error(`You must provision Stream Analytics Job first.`);
+      throw new AzureConfigNotFoundError(`componentInfo of config id ${this.id}`);
     }
 
     const subscriptionId = componentInfo.values.subscriptionId;
     const resourceGroup = componentInfo.values.resourceGroup;
     const streamAnalyticsJobName = componentInfo.values.streamAnalyticsJobName;
-    AzureUtility.init(this.extensionContext, this.channel, subscriptionId);
+    AzureUtility.init(this.extensionContext, this.projectRootPath, this.channel, subscriptionId);
     const azureClient = AzureUtility.getClient();
     if (!azureClient) {
-      throw new Error('Initialize Azure client failed.');
+      throw new OperationFailedError("init Azure client", "Failed to get azure client.", "");
     }
 
     this.subscriptionId = subscriptionId;
@@ -69,25 +78,28 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     return azureClient;
   }
 
-  private async callAction(action: StreamAnalyticsAction) {
-    const actionResource = `/subscriptions/${
-        this.subscriptionId}/resourceGroups/${
-        this.resourceGroup}/providers/Microsoft.StreamAnalytics/streamingjobs/${
-        this.streamAnalyticsJobName}/${
-        StreamAnalyticsAction[action].toLowerCase()}?api-version=2015-10-01`;
+  private async callAction(action: StreamAnalyticsAction): Promise<unknown> {
+    const actionResource = `/subscriptions/${this.subscriptionId}/resourceGroups/${
+      this.resourceGroup
+    }/providers/Microsoft.StreamAnalytics/streamingjobs/${this.streamAnalyticsJobName}/${StreamAnalyticsAction[
+      action
+    ].toLowerCase()}?api-version=2015-10-01`;
     await AzureUtility.postRequest(actionResource);
 
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       const timeout = setTimeout(() => {
+        // eslint-disable-next-line @typescript-eslint/no-use-before-define
         clearTimeout(timer);
         return resolve(false);
       }, 10 * 60 * 1000);
 
       const timer = setInterval(async () => {
         const state: string = await this.getState();
-        if (action === StreamAnalyticsAction.Start && state === 'Running' ||
-            action === StreamAnalyticsAction.Stop && state === 'Stopped' ||
-            action === StreamAnalyticsAction.Stop && state === 'Created') {
+        if (
+          (action === StreamAnalyticsAction.Start && state === "Running") ||
+          (action === StreamAnalyticsAction.Stop && state === "Stopped") ||
+          (action === StreamAnalyticsAction.Stop && state === "Created")
+        ) {
           clearTimeout(timeout);
           clearInterval(timer);
           return resolve(true);
@@ -96,50 +108,54 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     });
   }
 
-  private getStreamAnalyticsByNameFromCache(name: string) {
+  private getStreamAnalyticsByNameFromCache(name: string): { name: string } | undefined {
     return this.catchedStreamAnalyticsList.find(item => item.name === name);
   }
 
-  private async getStreamAnalyticsInResourceGroup() {
-    const resource = `/subscriptions/${
-        AzureUtility.subscriptionId}/resourceGroups/${
-        AzureUtility
-            .resourceGroup}/providers/Microsoft.StreamAnalytics/streamingjobs?api-version=2015-10-01`;
-    const asaListRes = await AzureUtility.getRequest(resource) as
-        {value: Array<{name: string, properties: {jobState: string}}>};
-    const asaList: vscode.QuickPickItem[] =
-        [{label: '$(plus) Create New Stream Analytics Job', description: ''}];
+  private async getStreamAnalyticsInResourceGroup(): Promise<vscode.QuickPickItem[]> {
+    const resource = `/subscriptions/${AzureUtility.subscriptionId}/resourceGroups/\
+    ${AzureUtility.resourceGroup}/providers/Microsoft.StreamAnalytics/streamingjobs?api-version=2015-10-01`;
+    const asaListRes = (await AzureUtility.getRequest(resource)) as {
+      value: Array<{ name: string; properties: { jobState: string } }>;
+    };
+    const asaList: vscode.QuickPickItem[] = [{ label: "$(plus) Create New Stream Analytics Job", description: "" }];
     for (const item of asaListRes.value) {
-      asaList.push({label: item.name, description: item.properties.jobState});
+      asaList.push({ label: item.name, description: item.properties.jobState });
     }
 
     this.catchedStreamAnalyticsList = asaListRes.value;
     return asaList;
   }
 
-  get id() {
+  get id(): string {
     return this.componentId;
   }
 
   constructor(
-      queryPath: string, context: vscode.ExtensionContext, projectRoot: string,
-      channel: vscode.OutputChannel,
-      dependencyComponents: Dependency[]|null = null) {
+    queryPath: string,
+    context: vscode.ExtensionContext,
+    projectRoot: string,
+    channel: vscode.OutputChannel,
+    dependencyComponents: Dependency[] | null = null
+  ) {
     this.queryPath = queryPath;
     this.componentType = ComponentType.StreamAnalyticsJob;
     this.channel = channel;
     this.componentId = Guid.create().toString();
     this.projectRootPath = projectRoot;
-    this.azureConfigHandler = new AzureConfigFileHandler(projectRoot);
+    this.azureConfigFileHandler = new AzureConfigFileHandler(projectRoot);
     this.extensionContext = context;
     if (dependencyComponents && dependencyComponents.length > 0) {
-      dependencyComponents.forEach(
-          dependency => this.dependencies.push(
-              {id: dependency.component.id, type: dependency.type}));
+      dependencyComponents.forEach(dependency =>
+        this.dependencies.push({
+          id: dependency.component.id,
+          type: dependency.type
+        })
+      );
     }
   }
 
-  name = 'Stream Analytics Job';
+  name = "Stream Analytics Job";
 
   getComponentType(): ComponentType {
     return this.componentType;
@@ -149,55 +165,37 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     return true;
   }
 
-  async load(): Promise<boolean> {
-    const azureConfigFilePath = path.join(
-        this.projectRootPath, AzureComponentsStorage.folderName,
-        AzureComponentsStorage.fileName);
-
-    if (!fs.existsSync(azureConfigFilePath)) {
-      return false;
+  async load(): Promise<void> {
+    const componentConfig = await this.azureConfigFileHandler.getComponentByType(
+      ScaffoldType.Workspace,
+      this.componentType
+    );
+    if (componentConfig) {
+      this.componentId = componentConfig.id;
+      this.dependencies = componentConfig.dependencies;
     }
-
-    let azureConfigs: AzureConfigs;
-
-    try {
-      azureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, 'utf8'));
-      const asaConfig = azureConfigs.componentConfigs.find(
-          config => config.type === this.componentType);
-      if (asaConfig) {
-        this.componentId = asaConfig.id;
-        this.dependencies = asaConfig.dependencies;
-        // Load other information from config file.
-      }
-    } catch (error) {
-      return false;
-    }
-    return true;
   }
 
   async create(): Promise<void> {
     await this.updateConfigSettings(ScaffoldType.Local);
   }
 
-  async updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo):
-      Promise<void> {
-    const asaComponentIndex =
-        await this.azureConfigHandler.getComponentIndexById(type, this.id);
+  async updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo): Promise<void> {
+    const asaComponentIndex = await this.azureConfigFileHandler.getComponentIndexById(type, this.id);
     if (asaComponentIndex > -1) {
       if (!componentInfo) {
-        return;
+        throw new ArgumentEmptyOrNullError("StreamAnalyticsJob updateConfigSettings", "componentInfo");
       }
-      await this.azureConfigHandler.updateComponent(
-          type, asaComponentIndex, componentInfo);
+      await this.azureConfigFileHandler.updateComponent(type, asaComponentIndex, componentInfo);
     } else {
       const newAsaConfig: AzureComponentConfig = {
         id: this.id,
-        folder: '',
-        name: '',
+        folder: "",
+        name: "",
         dependencies: this.dependencies,
         type: this.componentType
       };
-      await this.azureConfigHandler.appendComponent(type, newAsaConfig);
+      await this.azureConfigFileHandler.appendComponent(type, newAsaConfig);
     }
   }
 
@@ -205,73 +203,67 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     const scaffoldType = ScaffoldType.Workspace;
 
     const asaList = this.getStreamAnalyticsInResourceGroup();
-    const asaNameChoose = await vscode.window.showQuickPick(
-        asaList,
-        {placeHolder: 'Select Stream Analytics Job', ignoreFocusOut: true});
+    const asaNameChoose = await vscode.window.showQuickPick(asaList, {
+      placeHolder: "Select Stream Analytics Job",
+      ignoreFocusOut: true
+    });
     if (!asaNameChoose) {
       return false;
     }
 
-    let streamAnalyticsJobName = '';
+    let streamAnalyticsJobName = "";
 
     if (!asaNameChoose.description) {
       if (this.channel) {
-        channelShowAndAppendLine(
-            this.channel, 'Creating Stream Analytics Job...');
+        channelShowAndAppendLine(this.channel, "Creating Stream Analytics Job...");
       }
-      const asaArmTemplatePath = this.extensionContext.asAbsolutePath(path.join(
-          FileNames.resourcesFolderName, 'arm', 'streamanalytics.json'));
-      const asaArmTemplate =
-          JSON.parse(fs.readFileSync(asaArmTemplatePath, 'utf8')) as
-          ARMTemplate;
+      const asaArmTemplatePath = this.extensionContext.asAbsolutePath(
+        path.join(FileNames.resourcesFolderName, "arm", "streamanalytics.json")
+      );
+      const asaArmTemplate = JSON.parse(fs.readFileSync(asaArmTemplatePath, "utf8")) as ARMTemplate;
 
       const asaDeploy = await AzureUtility.deployARMTemplate(asaArmTemplate);
-      if (!asaDeploy || !asaDeploy.properties ||
-          !asaDeploy.properties.outputs ||
-          !asaDeploy.properties.outputs.streamAnalyticsJobName) {
-        throw new Error('Provision Stream Analytics Job failed.');
+      if (
+        !asaDeploy ||
+        !asaDeploy.properties ||
+        !asaDeploy.properties.outputs ||
+        !asaDeploy.properties.outputs.streamAnalyticsJobName
+      ) {
+        throw new OperationFailedError("provision Stream Analytics Job", "Failed to deploy ASA arm template", "");
       }
       channelPrintJsonObject(this.channel, asaDeploy);
 
-      streamAnalyticsJobName =
-          asaDeploy.properties.outputs.streamAnalyticsJobName.value;
+      streamAnalyticsJobName = asaDeploy.properties.outputs.streamAnalyticsJobName.value;
     } else {
       if (this.channel) {
-        channelShowAndAppendLine(
-            this.channel, 'Creating Stream Analytics Job...');
+        channelShowAndAppendLine(this.channel, "Creating Stream Analytics Job...");
       }
       streamAnalyticsJobName = asaNameChoose.label;
-      const asaDetail =
-          this.getStreamAnalyticsByNameFromCache(streamAnalyticsJobName);
+      const asaDetail = this.getStreamAnalyticsByNameFromCache(streamAnalyticsJobName);
       if (asaDetail) {
         channelPrintJsonObject(this.channel, asaDetail);
       }
     }
 
     for (const dependency of this.dependencies) {
-      const componentConfig = await this.azureConfigHandler.getComponentById(
-          scaffoldType, dependency.id);
+      const componentConfig = await this.azureConfigFileHandler.getComponentById(scaffoldType, dependency.id);
       if (!componentConfig) {
-        throw new Error(`Cannot find component with id ${dependency.id}.`);
+        throw new AzureConfigNotFoundError(`component of config id ${dependency.id}`);
       }
 
       if (dependency.type === DependencyType.Input) {
         switch (componentConfig.type) {
-          case 'IoTHub': {
+          case "IoTHub": {
             if (!componentConfig.componentInfo) {
               return false;
             }
-            const iotHubConnectionString =
-                componentConfig.componentInfo.values.iotHubConnectionString;
-            let iotHubName = '';
-            let iotHubKeyName = '';
-            let iotHubKey = '';
-            const iotHubNameMatches =
-                iotHubConnectionString.match(/HostName=(.*?)\./);
-            const iotHubKeyMatches =
-                iotHubConnectionString.match(/SharedAccessKey=(.*?)(;|$)/);
-            const iotHubKeyNameMatches =
-                iotHubConnectionString.match(/SharedAccessKeyName=(.*?)(;|$)/);
+            const iotHubConnectionString = componentConfig.componentInfo.values.iotHubConnectionString;
+            let iotHubName = "";
+            let iotHubKeyName = "";
+            let iotHubKey = "";
+            const iotHubNameMatches = iotHubConnectionString.match(/HostName=(.*?)\./);
+            const iotHubKeyMatches = iotHubConnectionString.match(/SharedAccessKey=(.*?)(;|$)/);
+            const iotHubKeyNameMatches = iotHubConnectionString.match(/SharedAccessKeyName=(.*?)(;|$)/);
             if (iotHubNameMatches) {
               iotHubName = iotHubNameMatches[1];
             }
@@ -283,80 +275,83 @@ export class StreamAnalyticsJob implements Component, Provisionable,
             }
 
             if (!iotHubName || !iotHubKeyName || !iotHubKey) {
-              throw new Error('Cannot parse IoT Hub connection string.');
+              throw new OperationFailedError(
+                "provision stream analystics job",
+                "Failed to parse IoT Hub connection string.",
+                "Please provide valid iot hub connection string."
+              );
             }
 
-            const asaIoTHubArmTemplatePath =
-                this.extensionContext.asAbsolutePath(path.join(
-                    FileNames.resourcesFolderName, 'arm',
-                    'streamanalytics-input-iothub.json'));
-            const asaIoTHubArmTemplate =
-                JSON.parse(fs.readFileSync(asaIoTHubArmTemplatePath, 'utf8')) as
-                ARMTemplate;
+            const asaIoTHubArmTemplatePath = this.extensionContext.asAbsolutePath(
+              path.join(FileNames.resourcesFolderName, "arm", "streamanalytics-input-iothub.json")
+            );
+            const asaIoTHubArmTemplate = JSON.parse(fs.readFileSync(asaIoTHubArmTemplatePath, "utf8")) as ARMTemplate;
             const asaIotHubArmParameters = {
-              streamAnalyticsJobName: {value: streamAnalyticsJobName},
-              inputName: {value: `iothub-${componentConfig.id}`},
-              iotHubName: {value: iotHubName},
-              iotHubKeyName: {value: iotHubKeyName},
-              iotHubKey: {value: iotHubKey}
+              streamAnalyticsJobName: { value: streamAnalyticsJobName },
+              inputName: { value: `iothub-${componentConfig.id}` },
+              iotHubName: { value: iotHubName },
+              iotHubKeyName: { value: iotHubKeyName },
+              iotHubKey: { value: iotHubKey }
             };
 
-            const asaInputDeploy = await AzureUtility.deployARMTemplate(
-                asaIoTHubArmTemplate, asaIotHubArmParameters);
+            const asaInputDeploy = await AzureUtility.deployARMTemplate(asaIoTHubArmTemplate, asaIotHubArmParameters);
             if (!asaInputDeploy) {
-              throw new Error('Provision Stream Analytics Job failed.');
+              throw new OperationFailedError(
+                "provision stream analystics job",
+                "Failed to deploy ASA arm template",
+                ""
+              );
             }
 
             break;
           }
           default: {
-            throw new Error(
-                `Not supported ASA input type: ${componentConfig.type}.`);
+            throw new TypeNotSupportedError("ASA input type", `${componentConfig.type}`);
           }
         }
       } else {
         switch (componentConfig.type) {
-          case 'CosmosDB': {
+          case "CosmosDB": {
             if (!componentConfig.componentInfo) {
               return false;
             }
-            const cosmosDBAccountName =
-                componentConfig.componentInfo.values.cosmosDBAccountName;
-            const cosmosDBDatabase =
-                componentConfig.componentInfo.values.cosmosDBDatabase;
-            const cosmosDBCollection =
-                componentConfig.componentInfo.values.cosmosDBCollection;
-            if (!cosmosDBAccountName || !cosmosDBDatabase ||
-                !cosmosDBCollection) {
-              throw new Error('Cannot get Cosmos DB connection information.');
+            const cosmosDBAccountName = componentConfig.componentInfo.values.cosmosDBAccountName;
+            const cosmosDBDatabase = componentConfig.componentInfo.values.cosmosDBDatabase;
+            const cosmosDBCollection = componentConfig.componentInfo.values.cosmosDBCollection;
+            if (!cosmosDBAccountName || !cosmosDBDatabase || !cosmosDBCollection) {
+              throw new ResourceNotFoundError(
+                "provision stream analystics job",
+                "Cosmos DB connection information",
+                ""
+              );
             }
 
-            const asaCosmosDBArmTemplatePath =
-                this.extensionContext.asAbsolutePath(path.join(
-                    FileNames.resourcesFolderName, 'arm',
-                    'streamanalytics-output-cosmosdb.json'));
-            const asaCosmosDBArmTemplate =
-                JSON.parse(fs.readFileSync(
-                    asaCosmosDBArmTemplatePath, 'utf8')) as ARMTemplate;
+            const asaCosmosDBArmTemplatePath = this.extensionContext.asAbsolutePath(
+              path.join(FileNames.resourcesFolderName, "arm", "streamanalytics-output-cosmosdb.json")
+            );
+            const asaCosmosDBArmTemplate = JSON.parse(
+              fs.readFileSync(asaCosmosDBArmTemplatePath, "utf8")
+            ) as ARMTemplate;
             const asaCosmosArmParameters = {
-              streamAnalyticsJobName: {value: streamAnalyticsJobName},
-              outputName: {value: `cosmosdb-${componentConfig.id}`},
-              cosmosDBName: {value: cosmosDBAccountName},
-              cosmosDBDatabase: {value: cosmosDBDatabase},
-              cosmosDBCollection: {value: cosmosDBCollection}
+              streamAnalyticsJobName: { value: streamAnalyticsJobName },
+              outputName: { value: `cosmosdb-${componentConfig.id}` },
+              cosmosDBName: { value: cosmosDBAccountName },
+              cosmosDBDatabase: { value: cosmosDBDatabase },
+              cosmosDBCollection: { value: cosmosDBCollection }
             };
 
             const asaOutputDeploy = await AzureUtility.deployARMTemplate(
-                asaCosmosDBArmTemplate, asaCosmosArmParameters);
+              asaCosmosDBArmTemplate,
+              asaCosmosArmParameters
+            );
             if (!asaOutputDeploy) {
-              throw new Error('Provision Stream Analytics Job failed.');
+              throw new OperationFailedError("provision stream analystics job", "Failed to deploy arm template", "");
             }
 
             break;
           }
           default: {
-            throw new Error(
-                `Not supported ASA output type: ${componentConfig.type}.`);
+            throw new TypeNotSupportedError("ASA input type", `${componentConfig.type}`);
           }
         }
       }
@@ -371,116 +366,105 @@ export class StreamAnalyticsJob implements Component, Provisionable,
     });
 
     if (this.channel) {
-      channelShowAndAppendLine(
-          this.channel, 'Stream Analytics Job provision succeeded.');
+      channelShowAndAppendLine(this.channel, "Stream Analytics Job provision succeeded.");
     }
     return true;
   }
 
   async deploy(): Promise<boolean> {
-    const azureClient = this.azureClient || await this.initAzureClient();
+    const azureClient = this.azureClient || (await this.initAzureClient());
 
     // Stop Job
-    let stopPending: NodeJS.Timer|null = null;
+    let stopPending: NodeJS.Timer | null = null;
     if (this.channel) {
-      channelShowAndAppendLine(
-          this.channel, 'Stopping Stream Analytics Job...');
+      channelShowAndAppendLine(this.channel, "Stopping Stream Analytics Job...");
       stopPending = setInterval(() => {
-        this.channel.append('.');
+        this.channel.append(".");
       }, 1000);
     }
     const jobStopped = await this.stop();
     if (!jobStopped) {
       if (this.channel) {
-        channelShowAndAppendLine(
-            this.channel, 'Stop Stream Analytics Job failed.');
+        channelShowAndAppendLine(this.channel, "Stop Stream Analytics Job failed.");
       }
       return false;
     } else {
       if (this.channel && stopPending) {
         clearInterval(stopPending);
-        channelShowAndAppendLine(this.channel, '.');
-        channelShowAndAppendLine(
-            this.channel, 'Stop Stream Analytics Job succeeded.');
+        channelShowAndAppendLine(this.channel, ".");
+        channelShowAndAppendLine(this.channel, "Stop Stream Analytics Job succeeded.");
       }
     }
 
-    const resourceId = `/subscriptions/${this.subscriptionId}/resourceGroups/${
-        this.resourceGroup}/providers/Microsoft.StreamAnalytics/streamingjobs/${
-        this.streamAnalyticsJobName}/transformations/Transformation`;
-    const apiVersion = '2015-10-01';
+    const resourceId = `/subscriptions/${this.subscriptionId}/resourceGroups/${this.resourceGroup}\
+    /providers/Microsoft.StreamAnalytics/streamingjobs/${this.streamAnalyticsJobName}/transformations/Transformation`;
+    const apiVersion = "2015-10-01";
     if (!fs.existsSync(this.queryPath)) {
-      throw new Error(`Cannot find query file at ${this.queryPath}`);
+      throw new DirectoryNotFoundError("deploy stream analytics job", `query file at ${this.queryPath}`, "");
     }
-    const query = fs.readFileSync(this.queryPath, 'utf8');
-    const parameters = {properties: {streamingUnits: 1, query}};
+    const query = fs.readFileSync(this.queryPath, "utf8");
+    const parameters = { properties: { streamingUnits: 1, query } };
 
-    let deployPending: NodeJS.Timer|null = null;
+    let deployPending: NodeJS.Timer | null = null;
     try {
       if (this.channel) {
-        channelShowAndAppendLine(
-            this.channel, 'Deploying Stream Analytics Job...');
+        channelShowAndAppendLine(this.channel, "Deploying Stream Analytics Job...");
         deployPending = setInterval(() => {
-          this.channel.append('.');
+          this.channel.append(".");
         }, 1000);
       }
-      const deployment = await azureClient.resources.createOrUpdateById(
-          resourceId, apiVersion, parameters);
+      const deployment = await azureClient.resources.createOrUpdateById(resourceId, apiVersion, parameters);
       if (this.channel && deployPending) {
         clearInterval(deployPending);
-        channelShowAndAppendLine(this.channel, '.');
+        channelShowAndAppendLine(this.channel, ".");
         channelPrintJsonObject(this.channel, deployment);
-        channelShowAndAppendLine(
-            this.channel, 'Stream Analytics Job query deploy succeeded.');
+        channelShowAndAppendLine(this.channel, "Stream Analytics Job query deploy succeeded.");
       }
 
       // Start Job
-      let startPending: NodeJS.Timer|null = null;
+      let startPending: NodeJS.Timer | null = null;
       if (this.channel) {
-        channelShowAndAppendLine(
-            this.channel, 'Starting Stream Analytics Job...');
+        channelShowAndAppendLine(this.channel, "Starting Stream Analytics Job...");
         startPending = setInterval(() => {
-          this.channel.append('.');
+          this.channel.append(".");
         }, 1000);
       }
       const jobStarted = await this.start();
       if (!jobStarted) {
         if (this.channel) {
-          channelShowAndAppendLine(
-              this.channel, 'Start Stream Analytics Job failed.');
+          channelShowAndAppendLine(this.channel, "Start Stream Analytics Job failed.");
         }
         return false;
       } else if (this.channel && startPending) {
         clearInterval(startPending);
-        channelShowAndAppendLine(this.channel, '.');
-        channelShowAndAppendLine(
-            this.channel, 'Start Stream Analytics Job succeeded.');
+        channelShowAndAppendLine(this.channel, ".");
+        channelShowAndAppendLine(this.channel, "Start Stream Analytics Job succeeded.");
       }
     } catch (error) {
       if (this.channel && deployPending) {
         clearInterval(deployPending);
-        channelShowAndAppendLine(this.channel, '.');
+        channelShowAndAppendLine(this.channel, ".");
       }
       throw error;
     }
     return true;
   }
 
-  async stop() {
+  async stop(): Promise<unknown> {
     return await this.callAction(StreamAnalyticsAction.Stop);
   }
 
-  async start() {
+  async start(): Promise<unknown> {
     return await this.callAction(StreamAnalyticsAction.Start);
   }
 
-  async getState() {
-    const azureClient = this.azureClient || await this.initAzureClient();
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+  async getState(): Promise<any> {
+    const azureClient = this.azureClient || (await this.initAzureClient());
 
-    const resourceId = `/subscriptions/${this.subscriptionId}/resourceGroups/${
-        this.resourceGroup}/providers/Microsoft.StreamAnalytics/streamingjobs/${
-        this.streamAnalyticsJobName}`;
-    const apiVersion = '2015-10-01';
+    const resourceId = `/subscriptions/${this.subscriptionId}/resourceGroups/${this.resourceGroup}\
+    /providers/Microsoft.StreamAnalytics/streamingjobs/${this.streamAnalyticsJobName}`;
+    const apiVersion = "2015-10-01";
     const res = await azureClient.resources.getById(resourceId, apiVersion);
     return res.properties.jobState;
   }

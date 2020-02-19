@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 export interface CommandItem extends vscode.QuickPickItem {
   /**
    * Click action of the menu item
    */
-  // tslint:disable-next-line: no-any
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   click?: (...args: any[]) => any;
   /**
    * Submenu of the menu item
@@ -18,7 +18,7 @@ export interface CommandItem extends vscode.QuickPickItem {
    * workspace configuration contains
    * the specific field.
    */
-  only?: string|string[];
+  only?: string | string[];
   /**
    * Show the menu item when only the
    * deviceId of current workspace is in

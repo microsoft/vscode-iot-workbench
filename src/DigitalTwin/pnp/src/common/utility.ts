@@ -8,6 +8,7 @@ import { DeviceModelManager, ModelType } from "../deviceModel/deviceModelManager
 import { DigitalTwinConstants } from "../intelliSense/digitalTwinConstants";
 import { ModelFileInfo } from "../modelRepository/modelRepositoryManager";
 import { Constants } from "./constants";
+import { PnPModelTypeInvalidError } from "../../../../common/Error/PnPErrors/PnPModelTypeInvalidError";
 
 /**
  * Common utility
@@ -22,12 +23,15 @@ export class Utility {
   static async createFileFromTemplate(
     templatePath: string,
     filePath: string,
-    replacement: Map<string, string>,
+    replacement: Map<string, string>
   ): Promise<void> {
     const template: string = await fs.readFile(templatePath, Constants.UTF8);
     const content: string = Utility.replaceAll(template, replacement);
     const jsonContent = JSON.parse(content);
-    await fs.writeJson(filePath, jsonContent, { spaces: Constants.JSON_SPACE, encoding: Constants.UTF8 });
+    await fs.writeJson(filePath, jsonContent, {
+      spaces: Constants.JSON_SPACE,
+      encoding: Constants.UTF8
+    });
   }
 
   /**
@@ -40,7 +44,7 @@ export class Utility {
     const flag = caseInsensitive ? "ig" : "g";
     const keys = Array.from(replacement.keys());
     const pattern = new RegExp(keys.join("|"), flag);
-    return str.replace(pattern, (matched) => {
+    return str.replace(pattern, matched => {
       const value: string | undefined = replacement.get(matched);
       return value || matched;
     });
@@ -94,17 +98,22 @@ export class Utility {
    * @param modelId model id
    * @param content model content
    */
-  // tslint:disable-next-line:no-any
-  static async createModelFile(folder: string, modelId: string, content: any): Promise<void> {
+  static async createModelFile(
+    folder: string,
+    modelId: string,
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+    content: any
+  ): Promise<void> {
     const type: ModelType = DeviceModelManager.convertToModelType(content[DigitalTwinConstants.TYPE]);
     if (!type) {
-      throw new Error(Constants.MODEL_TYPE_INVALID_MSG);
+      throw new PnPModelTypeInvalidError("create model file", type);
     }
     const replacement = new Map<string, string>();
     replacement.set(":", "_");
     const modelName: string = Utility.replaceAll(modelId, replacement);
     let candidate: string = DeviceModelManager.generateModelFileName(modelName, type);
     let counter = 0;
+    /*eslint no-constant-condition: ["error", { "checkLoops": false }]*/
     while (true) {
       if (!(await fs.pathExists(path.join(folder, candidate)))) {
         break;
@@ -114,7 +123,7 @@ export class Utility {
     }
     await fs.writeJson(path.join(folder, candidate), content, {
       spaces: Constants.JSON_SPACE,
-      encoding: Constants.UTF8,
+      encoding: Constants.UTF8
     });
   }
 
@@ -131,7 +140,7 @@ export class Utility {
       return {
         id: modelId,
         type: modelType,
-        filePath,
+        filePath
       };
     }
     return undefined;
@@ -141,7 +150,7 @@ export class Utility {
    * get json content from file
    * @param filePath file path
    */
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   static async getJsonContent(filePath: string): Promise<any> {
     return fs.readJson(filePath, { encoding: Constants.UTF8 });
   }

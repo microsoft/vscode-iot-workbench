@@ -5,8 +5,8 @@ function command(cmd, callback) {
   if (!cmd) {
     return;
   }
-  let args = Array.from(arguments);
-  if (typeof args[args.length - 1] === 'function') {
+  const args = Array.from(arguments);
+  if (typeof args[args.length - 1] === "function") {
     callback = args[args.length - 1];
     args.length = args.length - 1;
   } else {
@@ -14,7 +14,7 @@ function command(cmd, callback) {
   }
   args.shift();
   const messageId = new Date().getTime() + Math.random();
-  
+
   callbackStack.push({
     messageId,
     callback
@@ -27,7 +27,7 @@ function command(cmd, callback) {
   });
 }
 
-window.addEventListener('message', event => {
+window.addEventListener("message", event => {
   const message = event.data;
 
   for (let index = 0; index < callbackStack.length; index++) {

@@ -325,7 +325,7 @@ export class ModelRepositoryManager {
     const repoInfos: RepositoryInfo[] = await ModelRepositoryManager.getAvailableRepositoryInfo();
     const fileInfos: ModelFileInfo[] = await UI.findModelFiles(ModelType.Interface);
     const exist = new Set<string>(fileInfos.map(f => f.id));
-    // tslint:disable-next-line:no-any
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     let schema: any;
     let found: boolean;
     let message: string;

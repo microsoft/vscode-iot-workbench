@@ -14,7 +14,7 @@ enum HttpMethod {
   Get = "GET",
   Post = "POST",
   Put = "PUT",
-  Delete = "DELETE",
+  Delete = "DELETE"
 }
 
 /**
@@ -34,15 +34,15 @@ export class ModelRepositoryClient {
     }
     return new Promise<GetResult>((resolve, reject) => {
       request(options)
-        .then((response) => {
+        .then(response => {
           const result: GetResult = {
             etag: response.headers[ModelRepositoryClient.ETAG_HEADER],
             modelId: response.headers["x-ms-model-id"],
-            content: response.body,
+            content: response.body
           };
           return resolve(result);
         })
-        .catch((err) => {
+        .catch(err => {
           reject(err);
         });
     });
@@ -61,7 +61,7 @@ export class ModelRepositoryClient {
     type: ModelType,
     keyword: string,
     pageSize: number,
-    continuationToken: string | null,
+    continuationToken: string | null
   ): Promise<SearchResult> {
     const options: request.OptionsWithUri = ModelRepositoryClient.createOptions(HttpMethod.Post, repoInfo);
     const modelFilterType: MetaModelType = ModelRepositoryClient.convertToMetaModelType(type);
@@ -69,16 +69,16 @@ export class ModelRepositoryClient {
       searchKeyword: keyword,
       modelFilterType,
       continuationToken,
-      pageSize,
+      pageSize
     };
     options.body = payload;
     return new Promise<SearchResult>((resolve, reject) => {
       request(options)
-        .then((response) => {
+        .then(response => {
           const result = response.body as SearchResult;
           return resolve(result);
         })
-        .catch((err) => {
+        .catch(err => {
           reject(err);
         });
     });
@@ -90,17 +90,21 @@ export class ModelRepositoryClient {
    * @param modelId model id
    * @param content content to update
    */
-  // tslint:disable-next-line:no-any
-  static async updateModel(repoInfo: RepositoryInfo, modelId: string, content: any): Promise<string> {
+  static async updateModel(
+    repoInfo: RepositoryInfo,
+    modelId: string,
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+    content: any
+  ): Promise<string> {
     const options: request.OptionsWithUri = ModelRepositoryClient.createOptions(HttpMethod.Put, repoInfo, modelId);
     options.body = content;
     return new Promise<string>((resolve, reject) => {
       request(options)
-        .then((response) => {
+        .then(response => {
           const result: string = response.headers[ModelRepositoryClient.ETAG_HEADER];
           return resolve(result);
         })
-        .catch((err) => {
+        .catch(err => {
           reject(err);
         });
     });
@@ -118,7 +122,7 @@ export class ModelRepositoryClient {
         .then(() => {
           resolve();
         })
-        .catch((err) => {
+        .catch(err => {
           reject(err);
         });
     });
@@ -151,7 +155,7 @@ export class ModelRepositoryClient {
     const uri = modelId
       ? `${repoInfo.hostname}/models/${encodeURIComponent(modelId)}`
       : `${repoInfo.hostname}/models/search`;
-    // tslint:disable-next-line:no-any
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     const qs: any = { "api-version": repoInfo.apiVersion };
     if (repoInfo.repositoryId) {
       qs.repositoryId = repoInfo.repositoryId;
@@ -163,8 +167,11 @@ export class ModelRepositoryClient {
       qs,
       encoding: Constants.UTF8,
       json: true,
-      headers: { "Authorization": accessToken, "Content-Type": "application/json" },
-      resolveWithFullResponse: true,
+      headers: {
+        Authorization: accessToken,
+        "Content-Type": "application/json"
+      },
+      resolveWithFullResponse: true
     };
     return options;
   }

@@ -1,13 +1,16 @@
-import * as path from 'path';
+import * as path from "path";
 
-import {AzureComponentsStorage, ScaffoldType} from '../constants';
-import {FileUtility} from '../FileUtility';
+import { AzureComponentsStorage, ScaffoldType } from "../constants";
+import { FileUtility } from "../FileUtility";
 
-import {Component} from './Interfaces/Component';
-import {ComponentType} from './Interfaces/Component';
+import { Component } from "./Interfaces/Component";
+import { ComponentType } from "./Interfaces/Component";
+import { AzureConfigNotFoundError } from "../common/Error/SystemErrors/AzureConfigNotFoundErrors";
 
 // TODO: need to check what value should be included here
-export interface ComponentInfo { values: {[key: string]: string}; }
+export interface ComponentInfo {
+  values: { [key: string]: string };
+}
 
 export enum DependencyType {
   Other,
@@ -29,7 +32,9 @@ export interface AzureComponentConfig {
   componentInfo?: ComponentInfo;
 }
 
-export interface AzureConfigs { componentConfigs: AzureComponentConfig[]; }
+export interface AzureConfigs {
+  componentConfigs: AzureComponentConfig[];
+}
 
 export interface Dependency {
   component: Component;
@@ -43,129 +48,106 @@ export class AzureConfigFileHandler {
   constructor(projectRoot: string) {
     this.projectRootPath = projectRoot;
     this.configFilePath = path.join(
-        this.projectRootPath, AzureComponentsStorage.folderName,
-        AzureComponentsStorage.fileName);
+      this.projectRootPath,
+      AzureComponentsStorage.folderName,
+      AzureComponentsStorage.fileName
+    );
   }
 
-  async createIfNotExists(type: ScaffoldType) {
-    const azureConfigs: AzureConfigs = {componentConfigs: []};
-    const azureConfigFolderPath =
-        path.join(this.projectRootPath, AzureComponentsStorage.folderName);
-    if (!await FileUtility.directoryExists(type, azureConfigFolderPath)) {
-      try {
-        await FileUtility.mkdirRecursively(type, azureConfigFolderPath);
-      } catch (error) {
-        throw new Error(`Failed to create azure config folder. Error message: ${
-            error.message}`);
-      }
+  async createIfNotExists(type: ScaffoldType): Promise<void> {
+    const azureConfigs: AzureConfigs = { componentConfigs: [] };
+    const azureConfigFolderPath = path.join(this.projectRootPath, AzureComponentsStorage.folderName);
+    if (!(await FileUtility.directoryExists(type, azureConfigFolderPath))) {
+      await FileUtility.mkdirRecursively(type, azureConfigFolderPath);
     }
-    const azureConfigFilePath =
-        path.join(azureConfigFolderPath, AzureComponentsStorage.fileName);
+    const azureConfigFilePath = path.join(azureConfigFolderPath, AzureComponentsStorage.fileName);
 
-    if (!await FileUtility.fileExists(type, azureConfigFilePath)) {
+    if (!(await FileUtility.fileExists(type, azureConfigFilePath))) {
       await FileUtility.writeJsonFile(type, azureConfigFilePath, azureConfigs);
     }
   }
 
-  async getSortedComponents(type: ScaffoldType) {
-    try {
-      const azureConfigContent =
-          await FileUtility.readFile(type, this.configFilePath, 'utf8');
-      const azureConfigs =
-          JSON.parse(azureConfigContent as string) as AzureConfigs;
-      const components: AzureComponentConfig[] = [];
-      const componentConfigs = azureConfigs.componentConfigs;
-      const sortedComponentIds: string[] = [];
-      let lastSortedCount = 0;
+  static async loadAzureConfigs(type: ScaffoldType, configFilePath: string): Promise<AzureConfigs> {
+    const azureConfigContent = await FileUtility.readFile(type, configFilePath, "utf8");
+    const azureConfigs = JSON.parse(azureConfigContent as string) as AzureConfigs;
+    return azureConfigs;
+  }
 
-      do {
-        lastSortedCount = components.length;
-        for (const componentConfig of componentConfigs) {
-          if (sortedComponentIds.indexOf(componentConfig.id) > -1) {
-            continue;
-          }
+  async getSortedComponents(type: ScaffoldType): Promise<AzureComponentConfig[]> {
+    const azureConfigs = await AzureConfigFileHandler.loadAzureConfigs(type, this.configFilePath);
+    const components: AzureComponentConfig[] = [];
+    const componentConfigs = azureConfigs.componentConfigs;
+    const sortedComponentIds: string[] = [];
+    let lastSortedCount = 0;
 
-          let hold = false;
-          for (const dependency of componentConfig.dependencies) {
-            if (sortedComponentIds.indexOf(dependency.id) === -1) {
-              hold = true;
-              break;
-            }
-          }
-
-          if (hold) {
-            continue;
-          }
-
-          sortedComponentIds.push(componentConfig.id);
-          components.push(componentConfig);
+    do {
+      lastSortedCount = components.length;
+      for (const componentConfig of componentConfigs) {
+        if (sortedComponentIds.indexOf(componentConfig.id) > -1) {
+          continue;
         }
-      } while (lastSortedCount < componentConfigs.length &&
-               lastSortedCount < components.length);
-      return components;
-    } catch (error) {
-      throw new Error('Invalid azure components config file.');
-    }
-  }
 
-  async getComponentIndexById(type: ScaffoldType, id: string) {
-    try {
-      const azureConfigContent =
-          await FileUtility.readFile(type, this.configFilePath, 'utf8');
-      const azureConfigs =
-          JSON.parse(azureConfigContent as string) as AzureConfigs;
-      const componentIndex =
-          azureConfigs.componentConfigs.findIndex(config => config.id === (id));
-      return componentIndex;
-    } catch (error) {
-      throw new Error('Invalid azure components config file.');
-    }
-  }
+        let hold = false;
+        for (const dependency of componentConfig.dependencies) {
+          if (sortedComponentIds.indexOf(dependency.id) === -1) {
+            hold = true;
+            break;
+          }
+        }
 
-  async getComponentById(type: ScaffoldType, id: string) {
-    try {
-      const azureConfigContent =
-          await FileUtility.readFile(type, this.configFilePath, 'utf8');
-      const azureConfigs =
-          JSON.parse(azureConfigContent as string) as AzureConfigs;
-      const componentConfig =
-          azureConfigs.componentConfigs.find(config => config.id === (id));
-      return componentConfig;
-    } catch (error) {
-      throw new Error('Invalid azure components config file.');
-    }
-  }
+        if (hold) {
+          continue;
+        }
 
-  async appendComponent(type: ScaffoldType, component: AzureComponentConfig) {
-    try {
-      const azureConfigContent =
-          await FileUtility.readFile(type, this.configFilePath, 'utf8');
-      const azureConfigs =
-          JSON.parse(azureConfigContent as string) as AzureConfigs;
-      azureConfigs.componentConfigs.push(component);
-      await FileUtility.writeJsonFile(type, this.configFilePath, azureConfigs);
-      return azureConfigs;
-    } catch (error) {
-      throw new Error('Invalid azure components config file.');
-    }
-  }
-
-  async updateComponent(
-      type: ScaffoldType, index: number, componentInfo: ComponentInfo) {
-    try {
-      const azureConfigContent =
-          await FileUtility.readFile(type, this.configFilePath, 'utf8');
-      const azureConfigs =
-          JSON.parse(azureConfigContent as string) as AzureConfigs;
-      const component = azureConfigs.componentConfigs[index];
-      if (!component) {
-        throw new Error('Invalid index of componet list.');
+        sortedComponentIds.push(componentConfig.id);
+        components.push(componentConfig);
       }
-      component.componentInfo = componentInfo;
-      await FileUtility.writeJsonFile(type, this.configFilePath, azureConfigs);
-      return azureConfigs;
-    } catch (error) {
-      throw new Error('Invalid azure components config file.');
+    } while (lastSortedCount < componentConfigs.length && lastSortedCount < components.length);
+    return components;
+  }
+
+  async getComponentIndexById(type: ScaffoldType, id: string): Promise<number> {
+    const azureConfigs = await AzureConfigFileHandler.loadAzureConfigs(type, this.configFilePath);
+    const componentIndex = azureConfigs.componentConfigs.findIndex(config => config.id === id);
+    return componentIndex;
+  }
+
+  async getComponentById(type: ScaffoldType, id: string): Promise<AzureComponentConfig | undefined> {
+    const azureConfigs = await AzureConfigFileHandler.loadAzureConfigs(type, this.configFilePath);
+    const componentConfig = azureConfigs.componentConfigs.find(config => config.id === id);
+    return componentConfig;
+  }
+
+  async appendComponent(type: ScaffoldType, component: AzureComponentConfig): Promise<AzureConfigs> {
+    const azureConfigs = await AzureConfigFileHandler.loadAzureConfigs(type, this.configFilePath);
+    azureConfigs.componentConfigs.push(component);
+    await FileUtility.writeJsonFile(type, this.configFilePath, azureConfigs);
+    return azureConfigs;
+  }
+
+  async updateComponent(type: ScaffoldType, index: number, componentInfo: ComponentInfo): Promise<AzureConfigs> {
+    const azureConfigs = await AzureConfigFileHandler.loadAzureConfigs(type, this.configFilePath);
+    const component = azureConfigs.componentConfigs[index];
+    if (!component) {
+      throw new AzureConfigNotFoundError(`component of config index ${index}`);
     }
+    component.componentInfo = componentInfo;
+    await FileUtility.writeJsonFile(type, this.configFilePath, azureConfigs);
+    return azureConfigs;
+  }
+
+  async getComponentByType(
+    type: ScaffoldType,
+    componentType: ComponentType
+  ): Promise<AzureComponentConfig | undefined> {
+    const azureConfigs = await AzureConfigFileHandler.loadAzureConfigs(type, this.configFilePath);
+    const componentConfig = azureConfigs.componentConfigs.find(config => config.type === componentType);
+    return componentConfig;
+  }
+
+  async getComponentByFolder(type: ScaffoldType, folder: string): Promise<AzureComponentConfig | undefined> {
+    const azureConfigs = await AzureConfigFileHandler.loadAzureConfigs(type, this.configFilePath);
+    const componentConfig = azureConfigs.componentConfigs.find(config => config.folder === folder);
+    return componentConfig;
   }
 }

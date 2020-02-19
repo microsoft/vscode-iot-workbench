@@ -1,2 +1,2 @@
-exports.detector = require('./detector');
-exports.SerialPort = require('./serialport');
+exports.detector = require("./detector");
+exports.SerialPort = require("./serialport");

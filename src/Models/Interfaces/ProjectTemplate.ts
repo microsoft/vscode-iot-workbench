@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 
 export enum ProjectTemplateType {
-  Basic = 'Basic',
-  IotHub = 'IotHub',
-  AzureFunctions = 'AzureFunctions',
-  StreamAnalytics = 'StreamAnalytics'
+  Basic = "Basic",
+  IotHub = "IotHub",
+  AzureFunctions = "AzureFunctions",
+  StreamAnalytics = "StreamAnalytics"
 }
 
 export interface TemplateFileInfo {
@@ -16,7 +16,9 @@ export interface TemplateFileInfo {
   overwrite?: boolean;
 }
 
-export interface TemplatesType { templates: ProjectTemplate[]; }
+export interface TemplatesType {
+  templates: ProjectTemplate[];
+}
 export interface ProjectTemplate {
   platform: string;
   name: string;
@@ -57,7 +59,7 @@ export interface Platform {
 }
 
 export interface DeviceConfig {
+  id: string;
   label: string;
-  description: string;
   detail: string;
 }

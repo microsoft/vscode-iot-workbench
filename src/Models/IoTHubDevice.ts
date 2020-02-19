@@ -1,36 +1,100 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as iothub from 'azure-iothub';
-import {Guid} from 'guid-typescript';
-import * as vscode from 'vscode';
+import * as iothub from "azure-iothub";
+import { Guid } from "guid-typescript";
+import * as vscode from "vscode";
 
-import {ConfigHandler} from '../configHandler';
-import {ConfigKey, ScaffoldType} from '../constants';
+import { ScaffoldType } from "../constants";
 
-import {getExtension} from './Apis';
-import {ComponentInfo, DependencyConfig} from './AzureComponentConfig';
-import {ExtensionName} from './Interfaces/Api';
-import {Component, ComponentType} from './Interfaces/Component';
-import {Provisionable} from './Interfaces/Provisionable';
+import { DependentExtensionNotFoundError } from "../common/Error/OperationFailedErrors/DependentExtensionNotFoundError";
+
+import { getExtension } from "./Apis";
+import {
+  AzureComponentConfig,
+  AzureConfigFileHandler,
+  ComponentInfo,
+  DependencyConfig,
+  Dependency
+} from "./AzureComponentConfig";
+import { ExtensionName } from "./Interfaces/Api";
+import { Component, ComponentType } from "./Interfaces/Component";
+import { Provisionable } from "./Interfaces/Provisionable";
+import { AzureConfigNotFoundError } from "../common/Error/SystemErrors/AzureConfigNotFoundErrors";
+import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
+
+async function getDeviceNumber(iotHubConnectionString: string): Promise<number> {
+  return new Promise((resolve: (value: number) => void, reject: (error: Error) => void) => {
+    const registry: iothub.Registry = iothub.Registry.fromConnectionString(iotHubConnectionString);
+    registry.list((err, list) => {
+      if (err) {
+        return reject(err);
+      }
+      if (!list) {
+        return resolve(0);
+      } else {
+        return resolve(list.length);
+      }
+    });
+  });
+}
+
+async function getProvisionIothubDeviceSelection(iotHubConnectionString: string): Promise<vscode.QuickPickItem[]> {
+  let provisionIothubDeviceSelection: vscode.QuickPickItem[];
+
+  const deviceNumber = await getDeviceNumber(iotHubConnectionString);
+  if (deviceNumber > 0) {
+    provisionIothubDeviceSelection = [
+      {
+        label: "Select an existing IoT Hub device",
+        description: "Select an existing IoT Hub device",
+        detail: "select"
+      },
+      {
+        label: "Create a new IoT Hub device",
+        description: "Create a new IoT Hub device",
+        detail: "create"
+      }
+    ];
+  } else {
+    provisionIothubDeviceSelection = [
+      {
+        label: "Create a new IoT Hub device",
+        description: "Create a new IoT Hub device",
+        detail: "create"
+      }
+    ];
+  }
+  return provisionIothubDeviceSelection;
+}
 
 export class IoTHubDevice implements Component, Provisionable {
   private componentType: ComponentType;
   private channel: vscode.OutputChannel;
+  private projectRootPath: string;
   private componentId: string;
-  get id() {
+  private azureConfigFileHandler: AzureConfigFileHandler;
+  get id(): string {
     return this.componentId;
   }
 
   dependencies: DependencyConfig[] = [];
 
-  constructor(channel: vscode.OutputChannel) {
+  constructor(projectRoot: string, channel: vscode.OutputChannel, dependencyComponents: Dependency[] | null = null) {
     this.componentType = ComponentType.IoTHubDevice;
     this.channel = channel;
     this.componentId = Guid.create().toString();
+    this.projectRootPath = projectRoot;
+    this.azureConfigFileHandler = new AzureConfigFileHandler(this.projectRootPath);
+
+    if (dependencyComponents && dependencyComponents.length > 0) {
+      dependencyComponents.forEach(dependency =>
+        this.dependencies.push({ id: dependency.component.id, type: dependency.type })
+      );
+    }
   }
 
-  name = 'IoT Hub Device';
+  name = "IoT Hub Device";
 
   getComponentType(): ComponentType {
     return this.componentType;
@@ -40,23 +104,39 @@ export class IoTHubDevice implements Component, Provisionable {
     return true;
   }
 
-  async load(): Promise<boolean> {
-    return true;
+  async load(): Promise<void> {
+    const componentConfig = await this.azureConfigFileHandler.getComponentByType(
+      ScaffoldType.Workspace,
+      this.componentType
+    );
+    if (componentConfig) {
+      this.componentId = componentConfig.id;
+      this.dependencies = componentConfig.dependencies;
+    }
   }
 
-  async create(): Promise<void> {}
+  async create(): Promise<void> {
+    await this.updateConfigSettings(ScaffoldType.Local);
+  }
 
   async provision(): Promise<boolean> {
-    const iotHubConnectionString =
-        ConfigHandler.get<string>(ConfigKey.iotHubConnectionString);
-    if (!iotHubConnectionString) {
-      throw new Error(
-          'Unable to find IoT Hub connection in the project. Please retry Azure Provision.');
+    const scaffoldType = ScaffoldType.Workspace;
+    const iotHubId = this.dependencies[0].id;
+    const componentConfig = await this.azureConfigFileHandler.getComponentById(scaffoldType, iotHubId);
+    if (!componentConfig) {
+      throw new AzureConfigNotFoundError(`component of config id ${iotHubId}`);
     }
-
-    const selection = await vscode.window.showQuickPick(
-        getProvisionIothubDeviceSelection(iotHubConnectionString),
-        {ignoreFocusOut: true, placeHolder: 'Provision IoTHub Device'});
+    if (!componentConfig.componentInfo) {
+      throw new AzureConfigNotFoundError(`componentInfo of config id ${iotHubId}`);
+    }
+    const iotHubConnectionString = componentConfig.componentInfo.values.iotHubConnectionString;
+    if (!iotHubConnectionString) {
+      throw new AzureConfigNotFoundError(`iotHubConnectionString of config id ${iotHubId}`);
+    }
+    const selection = await vscode.window.showQuickPick(getProvisionIothubDeviceSelection(iotHubConnectionString), {
+      ignoreFocusOut: true,
+      placeHolder: "Provision IoTHub Device"
+    });
 
     if (!selection) {
       return false;
@@ -64,31 +144,36 @@ export class IoTHubDevice implements Component, Provisionable {
 
     const toolkit = getExtension(ExtensionName.Toolkit);
     if (!toolkit) {
-      throw new Error(
-          'Azure IoT Hub Toolkit is not installed. Please install it from Marketplace.');
+      throw new DependentExtensionNotFoundError("provision IoT Hub Device", ExtensionName.Toolkit);
     }
 
     let device = null;
     switch (selection.detail) {
-      case 'select':
-        device = await toolkit.azureIoTExplorer.getDevice(
-            null, iotHubConnectionString, this.channel);
+      case "select":
+        device = await toolkit.azureIoTExplorer.getDevice(null, iotHubConnectionString, this.channel);
         if (!device) {
           return false;
         } else {
-          await ConfigHandler.update(
-              ConfigKey.iotHubDeviceConnectionString, device.connectionString);
+          await this.updateConfigSettings(scaffoldType, {
+            values: {
+              iotHubConnectionString,
+              iotHubDeviceConnectionString: device.connectionString
+            }
+          });
         }
         break;
 
-      case 'create':
-        device = await toolkit.azureIoTExplorer.createDevice(
-            false, iotHubConnectionString, this.channel);
+      case "create":
+        device = await toolkit.azureIoTExplorer.createDevice(false, iotHubConnectionString, this.channel);
         if (!device) {
           return false;
         } else {
-          await ConfigHandler.update(
-              ConfigKey.iotHubDeviceConnectionString, device.connectionString);
+          await this.updateConfigSettings(scaffoldType, {
+            values: {
+              iotHubConnectionString,
+              iotHubDeviceConnectionString: device.connectionString
+            }
+          });
         }
         break;
       default:
@@ -97,52 +182,23 @@ export class IoTHubDevice implements Component, Provisionable {
     return true;
   }
 
-  updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo):
-      void {}
-}
-
-async function getProvisionIothubDeviceSelection(
-    iotHubConnectionString: string) {
-  let provisionIothubDeviceSelection: vscode.QuickPickItem[];
-
-  const deviceNumber = await getDeviceNumber(iotHubConnectionString);
-  if (deviceNumber > 0) {
-    provisionIothubDeviceSelection = [
-      {
-        label: 'Select an existing IoT Hub device',
-        description: 'Select an existing IoT Hub device',
-        detail: 'select'
-      },
-      {
-        label: 'Create a new IoT Hub device',
-        description: 'Create a new IoT Hub device',
-        detail: 'create'
+  async updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo): Promise<void> {
+    const iotHubComponentIndex = await this.azureConfigFileHandler.getComponentIndexById(type, this.id);
+    if (iotHubComponentIndex > -1) {
+      if (!componentInfo) {
+        throw new ArgumentEmptyOrNullError("IoTHubDevice updateConfigSettings", "componentInfo");
       }
-    ];
-  } else {
-    provisionIothubDeviceSelection = [{
-      label: 'Create a new IoT Hub device',
-      description: 'Create a new IoT Hub device',
-      detail: 'create'
-    }];
+      await this.azureConfigFileHandler.updateComponent(type, iotHubComponentIndex, componentInfo);
+    } else {
+      const newIotHubConfig: AzureComponentConfig = {
+        id: this.id,
+        folder: "",
+        name: "",
+        dependencies: this.dependencies,
+        type: this.componentType,
+        componentInfo
+      };
+      await this.azureConfigFileHandler.appendComponent(type, newIotHubConfig);
+    }
   }
-  return provisionIothubDeviceSelection;
-}
-
-async function getDeviceNumber(iotHubConnectionString: string) {
-  return new Promise(
-      (resolve: (value: number) => void, reject: (error: Error) => void) => {
-        const registry: iothub.Registry =
-            iothub.Registry.fromConnectionString(iotHubConnectionString);
-        registry.list((err, list) => {
-          if (err) {
-            return reject(err);
-          }
-          if (!list) {
-            return resolve(0);
-          } else {
-            return resolve(list.length);
-          }
-        });
-      });
 }

@@ -1,9 +1,9 @@
-var detection = require('./bindings');
-var EventEmitter2 = require('eventemitter2').EventEmitter2;
+const detection = require("./bindings");
+const EventEmitter2 = require("eventemitter2").EventEmitter2;
 
-var detector = new EventEmitter2({
+const detector = new EventEmitter2({
   wildcard: true,
-  delimiter: ':',
+  delimiter: ":",
   maxListeners: 1000 // default would be 10!
 });
 
@@ -20,7 +20,7 @@ detector.find = (vid, pid, callback) => {
 
   return new Promise((resolve, reject) => {
     // Assemble the optional args into something we can use with `apply`
-    var args = [];
+    let args = [];
     if (vid) {
       args = args.concat(vid);
     }
@@ -53,25 +53,25 @@ if (detection.registerAdded) {
     detector.emit(`insert:${device.vendorId}:${device.productId}`, device);
     detector.emit(`add:${device.vendorId}`, device);
     detector.emit(`insert:${device.vendorId}`, device);
-    detector.emit('add', device);
-    detector.emit('insert', device);
+    detector.emit("add", device);
+    detector.emit("insert", device);
 
     detector.emit(`change:${device.vendorId}:${device.productId}`, device);
     detector.emit(`change:${device.vendorId}`, device);
-    detector.emit('change', device);
+    detector.emit("change", device);
   });
 
   detection.registerRemoved((device) => {
     detector.emit(`remove:${device.vendorId}:${device.productId}`, device);
     detector.emit(`remove:${device.vendorId}`, device);
-    detector.emit('remove', device);
+    detector.emit("remove", device);
 
     detector.emit(`change:${device.vendorId}:${device.productId}`, device);
     detector.emit(`change:${device.vendorId}`, device);
-    detector.emit('change', device);
+    detector.emit("change", device);
   });
 
-  var started = true;
+  let started = true;
 
   detector.startMonitoring = () => {
     if (started) {

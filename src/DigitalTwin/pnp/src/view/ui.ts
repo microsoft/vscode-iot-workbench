@@ -16,7 +16,7 @@ import { UIConstants } from "./uiConstants";
 export enum MessageType {
   Info,
   Warn,
-  Error,
+  Error
 }
 
 /**
@@ -26,7 +26,7 @@ export enum ChoiceType {
   All = "All",
   Yes = "Yes",
   No = "No",
-  Cancel = "Cancel",
+  Cancel = "Cancel"
 }
 
 /**
@@ -87,11 +87,14 @@ export class UI {
         const fsPath: string = f.uri.fsPath;
         return {
           label: path.basename(fsPath),
-          description: fsPath,
+          description: fsPath
         };
       });
     }
-    items.push({ label: UIConstants.BROWSE_LABEL, description: Constants.EMPTY_STRING });
+    items.push({
+      label: UIConstants.BROWSE_LABEL,
+      description: Constants.EMPTY_STRING
+    });
     const selected: vscode.QuickPickItem = await UI.showQuickPick(label, items);
     return selected.description || (await UI.showOpenDialog(label));
   }
@@ -104,7 +107,7 @@ export class UI {
   static async showQuickPick(label: string, items: vscode.QuickPickItem[]): Promise<vscode.QuickPickItem> {
     const options: vscode.QuickPickOptions = {
       placeHolder: label,
-      ignoreFocusOut: true,
+      ignoreFocusOut: true
     };
     const selected: vscode.QuickPickItem | undefined = await vscode.window.showQuickPick(items, options);
     if (!selected) {
@@ -124,7 +127,7 @@ export class UI {
       defaultUri,
       canSelectFiles: false,
       canSelectFolders: true,
-      canSelectMany: false,
+      canSelectMany: false
     };
     const selected: vscode.Uri[] | undefined = await vscode.window.showOpenDialog(options);
     if (!selected || selected.length === 0) {
@@ -141,7 +144,7 @@ export class UI {
    */
   static async inputModelName(label: string, type: ModelType, folder: string): Promise<string> {
     const placeHolder = `${type} name`;
-    const validateInput = async (name: string) => {
+    const validateInput = async (name: string): Promise<string | undefined> => {
       return await Utility.validateModelName(name, type, folder);
     };
     return await UI.showInputBox(label, placeHolder, validateInput);
@@ -160,14 +163,14 @@ export class UI {
     placeHolder: string,
     validateInput?: (s: string) => string | undefined | Promise<string | undefined>,
     value?: string,
-    ignoreFocusOut = true,
+    ignoreFocusOut = true
   ): Promise<string> {
     const options: vscode.InputBoxOptions = {
       prompt: label,
       placeHolder,
       validateInput,
       value,
-      ignoreFocusOut,
+      ignoreFocusOut
     };
     const input: string | undefined = await vscode.window.showInputBox(options);
     if (!input) {
@@ -181,7 +184,7 @@ export class UI {
    * @param label label
    */
   static async inputConnectionString(label: string): Promise<string> {
-    const validateInput = (name: string) => {
+    const validateInput = (name: string): string | undefined => {
       return Utility.validateNotEmpty(name, "Connection string");
     };
     return await UI.showInputBox(label, UIConstants.REPOSITORY_CONNECTION_STRING_TEMPLATE, validateInput);
@@ -198,23 +201,23 @@ export class UI {
       UI.showNotification(MessageType.Warn, UIConstants.MODELS_NOT_FOUND_MSG);
       return [];
     }
-    const items: Array<QuickPickItemWithData<string>> = fileInfos.map((f) => {
+    const items: Array<QuickPickItemWithData<string>> = fileInfos.map(f => {
       return {
         label: path.basename(f.filePath),
         description: f.id,
-        data: f.filePath,
+        data: f.filePath
       };
     });
     const selected: Array<QuickPickItemWithData<string>> | undefined = await vscode.window.showQuickPick(items, {
       placeHolder: label,
       ignoreFocusOut: true,
       canPickMany: true,
-      matchOnDescription: true,
+      matchOnDescription: true
     });
     if (!selected || selected.length === 0) {
       throw new UserCancelledError(label);
     }
-    return selected.map((s) => s.data);
+    return selected.map(s => s.data);
   }
 
   /**
@@ -228,18 +231,18 @@ export class UI {
       UI.showNotification(MessageType.Warn, UIConstants.MODELS_NOT_FOUND_MSG);
       return Constants.EMPTY_STRING;
     }
-    const items: Array<QuickPickItemWithData<string>> = fileInfos.map((f) => {
+    const items: Array<QuickPickItemWithData<string>> = fileInfos.map(f => {
       return {
         label: path.basename(f.filePath),
         description: f.id,
-        data: f.filePath,
+        data: f.filePath
       };
     });
     const selected: QuickPickItemWithData<string> | undefined = await vscode.window.showQuickPick(items, {
       placeHolder: label,
       ignoreFocusOut: true,
       canPickMany: false,
-      matchOnDescription: true,
+      matchOnDescription: true
     });
     if (!selected) {
       throw new UserCancelledError(label);
@@ -259,7 +262,7 @@ export class UI {
     }
     // process in parallel
     await Promise.all(
-      files.map(async (f) => {
+      files.map(async f => {
         let fileInfo: ModelFileInfo | undefined;
         try {
           fileInfo = await Utility.getModelFileInfo(f.fsPath);
@@ -273,7 +276,7 @@ export class UI {
         if (!type || type === fileInfo.type) {
           fileInfos.push(fileInfo);
         }
-      }),
+      })
     );
     return fileInfos;
   }
@@ -284,20 +287,20 @@ export class UI {
    * @param files file list
    */
   static async ensureFilesSaved(label: string, files: string[]): Promise<void> {
-    const dirtyFiles: vscode.TextDocument[] = vscode.workspace.textDocuments.filter((f) => f.isDirty);
-    const unsaved: vscode.TextDocument[] = dirtyFiles.filter((f) => files.some((file) => file === f.fileName));
+    const dirtyFiles: vscode.TextDocument[] = vscode.workspace.textDocuments.filter(f => f.isDirty);
+    const unsaved: vscode.TextDocument[] = dirtyFiles.filter(f => files.some(file => file === f.fileName));
     if (unsaved.length === 0) {
       return;
     }
-    const nameList: string = unsaved.map((f) => path.basename(f.fileName)).toString();
+    const nameList: string = unsaved.map(f => path.basename(f.fileName)).toString();
     const message = `${UIConstants.ASK_TO_SAVE_MSG} [${nameList}]`;
     const choice: string | undefined = await vscode.window.showWarningMessage(
       message,
       ChoiceType.Yes,
-      ChoiceType.Cancel,
+      ChoiceType.Cancel
     );
     if (choice === ChoiceType.Yes) {
-      await Promise.all(unsaved.map((f) => f.save()));
+      await Promise.all(unsaved.map(f => f.save()));
     } else {
       throw new UserCancelledError(label);
     }

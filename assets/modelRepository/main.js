@@ -4,10 +4,13 @@ const IS_PUBLIC_URL = "?public";
 const VALUE = "value";
 const ALL = "All";
 
-var repository = new Vue({
+const repository = new Vue({
   el: "#main",
   data: {
-    companyName: _location.search === IS_PUBLIC_URL ? "Public repository" : "Company repository",
+    companyName:
+      _location.search === IS_PUBLIC_URL
+        ? "Public repository"
+        : "Company repository",
     selectedInterfaces: {
       value: []
     },
@@ -44,7 +47,20 @@ var repository = new Vue({
       value: true
     },
     allTags: {
-      value: ["tag1", "tag2", "tag3", "tag11", "tag12", "tag13", "tag21", "tag22", "tag23", "tag31", "tag32", "tag33"]
+      value: [
+        "tag1",
+        "tag2",
+        "tag3",
+        "tag11",
+        "tag12",
+        "tag13",
+        "tag21",
+        "tag22",
+        "tag23",
+        "tag31",
+        "tag32",
+        "tag33"
+      ]
     },
     filterTagsKeywords: "",
     nextPageLoadingCounter: null,
@@ -96,18 +112,36 @@ function encodeHTML(value) {
 }
 
 function deleteDigitalTwinFiles() {
-  const fileIds = this.type.value === INTERFACE ? this.selectedInterfaces.value : this.selectedCapabilityModels.value;
-  command("azure-digital-twins.deleteModels", this.publicRepository, fileIds, refreshDigitalTwinFileList.bind(this));
+  const fileIds =
+    this.type.value === INTERFACE
+      ? this.selectedInterfaces.value
+      : this.selectedCapabilityModels.value;
+  command(
+    "azure-digital-twins.deleteModels",
+    this.publicRepository,
+    fileIds,
+    refreshDigitalTwinFileList.bind(this)
+  );
 }
 
 function editDigitalTwinFiles() {
-  const fileIds = this.type.value === INTERFACE ? this.selectedInterfaces.value : this.selectedCapabilityModels.value;
-  command("azure-digital-twins.downloadModels", this.publicRepository, fileIds, refreshDigitalTwinFileList.bind(this));
+  const fileIds =
+    this.type.value === INTERFACE
+      ? this.selectedInterfaces.value
+      : this.selectedCapabilityModels.value;
+  command(
+    "azure-digital-twins.downloadModels",
+    this.publicRepository,
+    fileIds,
+    refreshDigitalTwinFileList.bind(this)
+  );
 }
 
 function createDigitalTwinFile() {
   const commandName =
-    this.type.value === INTERFACE ? "azure-digital-twins.createInterface" : "azure-digital-twins.createCapabilityModel";
+    this.type.value === INTERFACE
+      ? "azure-digital-twins.createInterface"
+      : "azure-digital-twins.createCapabilityModel";
   command(commandName);
 }
 
@@ -130,11 +164,18 @@ function getNextPageDigitalTwinFiles(fileType) {
   }
 
   loadingDigitalTwinFiles.value = true;
-  command(commandName, this.publicRepository, this.searchKeywords, 50, nextToken.value, res => {
-    Vue.set(fileList, VALUE, fileList.value.concat(res.result.results));
-    Vue.set(nextToken, VALUE, res.result.continuationToken);
-    Vue.set(loadingDigitalTwinFiles, VALUE, false);
-  });
+  command(
+    commandName,
+    this.publicRepository,
+    this.searchKeywords,
+    50,
+    nextToken.value,
+    res => {
+      Vue.set(fileList, VALUE, fileList.value.concat(res.result.results));
+      Vue.set(nextToken, VALUE, res.result.continuationToken);
+      Vue.set(loadingDigitalTwinFiles, VALUE, false);
+    }
+  );
 }
 
 function refreshDigitalTwinFileList() {
@@ -294,10 +335,19 @@ function onScrollTable(event) {
   if (this.filterKeywords) {
     return;
   }
-  const nextToken = this.type.value === INTERFACE ? this.interfaceNextToken.value : this.capabilityNextToken.value;
+  const nextToken =
+    this.type.value === INTERFACE
+      ? this.interfaceNextToken.value
+      : this.capabilityNextToken.value;
   const loadingDigitalTwinFiles =
-    this.type.value === INTERFACE ? this.loadingDigitalTwinInterfaces : this.loadingDigitalTwinCapabilityModels;
-  if (!nextToken || this.nextPageLoadingCounter || loadingDigitalTwinFiles.value) {
+    this.type.value === INTERFACE
+      ? this.loadingDigitalTwinInterfaces
+      : this.loadingDigitalTwinCapabilityModels;
+  if (
+    !nextToken ||
+    this.nextPageLoadingCounter ||
+    loadingDigitalTwinFiles.value
+  ) {
     return;
   }
   this.nextPageLoadingCounter = setTimeout(() => {
