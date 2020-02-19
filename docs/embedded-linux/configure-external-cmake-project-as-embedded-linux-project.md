@@ -12,7 +12,7 @@ You can now configure an external CMake project to be an Embedded Linux IoT Proj
 
 4. Select **Azure IoT Device C SDK for x86 Linux** as your toolchain container for your device platform. (Select **Azure IoT Device C SDK for armv7 Linux** or **Azure IoT Device C SDK for arm64 Linux** if you would like to cross-compile your application.) Later the built application will be able to be executed in x86 Linux machine.
 
-5. Select **No** to open the configured project in remote container.
+5. Select **Yes** to open the configured project in remote container.
 
     > The first time you use a container, it takes around 1 to 3 minutes to download and prepare the dev container. Click the details link on the notification for the progress:
     ![](../images/prepare-dev-container.png)

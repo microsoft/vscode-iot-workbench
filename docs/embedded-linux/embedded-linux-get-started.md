@@ -62,8 +62,19 @@ This tutorial shows how to develop and compile a simple device app written in C 
 
 2. You need to pass the device connection string as a parameter to run the app, follow [this guide](./docs/create-iothub-device.md) to use Azure IoT Hub Toolkit to do so.
 
-3. Run `azure_iot_app [connection string]` and you see the Raspberry Pi start sending telemetry data to the Azure IoT Hub:
+3. Run the below commands to enable use to `openssl 1.0.2` on Raspberry Pi:
+
+    ```bash
+    apt-get install libssl1.0 linssl1.0-dev
+    sudo ln -s /usr/lib/arm-linux-gnueabihf/libssl.so.1.0.2 /usr/lib/libssl.so.1.0.0
+    sudo ln -s /usr/lib/arm-linux-gnueabihf/libcrypto.so.1.0.2 /usr/lib/libcrypto.so.1.0.0
+    ```
+
+    > We use Azure IoT Device C SDK via Vcpkg, while currently it only supports `openssl 1.0.2`. `openssl 1.1.1` is not supported yet. See [issue 1341](https://github.com/Azure/azure-iot-sdk-c/issues/1341) and [issue 4267](https://github.com/microsoft/vcpkg/issues/4267).
+
+
+4. Run `azure_iot_app [device connection string]` and you see the Raspberry Pi start sending telemetry data to the Azure IoT Hub:
     <img src="https://raw.githubusercontent.com/microsoft/vscode-iot-workbench/master/docs/images/result.png" />
 
-4. To verify the reception of the data, use Azure IoT Hub Toolkit, right click on the device and select **Start Monitoring Built-in Event Endpoint**. In the output window, you can see that IoT Hub gets telemetry data sent from Raspberry Pi:
+5. To verify the reception of the data, use Azure IoT Hub Toolkit, right click on the device and select **Start Monitoring Built-in Event Endpoint**. In the output window, you can see that IoT Hub gets telemetry data sent from Raspberry Pi:
     <img src="https://raw.githubusercontent.com/microsoft/vscode-iot-workbench/master/docs/images/iothub-d2c.png" />
