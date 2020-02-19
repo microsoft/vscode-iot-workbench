@@ -4,7 +4,6 @@ import { Guid } from "guid-typescript";
 import * as path from "path";
 import * as vscode from "vscode";
 
-import { ResourceNotFoundError } from "../common/Error/OperationFailedErrors/ResourceNotFoundError";
 import { TypeNotSupportedError } from "../common/Error/SystemErrors/TypeNotSupportedError";
 import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
 import { FileNames, ScaffoldType } from "../constants";
@@ -310,50 +309,7 @@ export class StreamAnalyticsJob implements Component, Provisionable, Deployable 
           }
         }
       } else {
-        switch (componentConfig.type) {
-          case "CosmosDB": {
-            if (!componentConfig.componentInfo) {
-              return false;
-            }
-            const cosmosDBAccountName = componentConfig.componentInfo.values.cosmosDBAccountName;
-            const cosmosDBDatabase = componentConfig.componentInfo.values.cosmosDBDatabase;
-            const cosmosDBCollection = componentConfig.componentInfo.values.cosmosDBCollection;
-            if (!cosmosDBAccountName || !cosmosDBDatabase || !cosmosDBCollection) {
-              throw new ResourceNotFoundError(
-                "provision stream analystics job",
-                "Cosmos DB connection information",
-                ""
-              );
-            }
-
-            const asaCosmosDBArmTemplatePath = this.extensionContext.asAbsolutePath(
-              path.join(FileNames.resourcesFolderName, "arm", "streamanalytics-output-cosmosdb.json")
-            );
-            const asaCosmosDBArmTemplate = JSON.parse(
-              fs.readFileSync(asaCosmosDBArmTemplatePath, "utf8")
-            ) as ARMTemplate;
-            const asaCosmosArmParameters = {
-              streamAnalyticsJobName: { value: streamAnalyticsJobName },
-              outputName: { value: `cosmosdb-${componentConfig.id}` },
-              cosmosDBName: { value: cosmosDBAccountName },
-              cosmosDBDatabase: { value: cosmosDBDatabase },
-              cosmosDBCollection: { value: cosmosDBCollection }
-            };
-
-            const asaOutputDeploy = await AzureUtility.deployARMTemplate(
-              asaCosmosDBArmTemplate,
-              asaCosmosArmParameters
-            );
-            if (!asaOutputDeploy) {
-              throw new OperationFailedError("provision stream analystics job", "Failed to deploy arm template", "");
-            }
-
-            break;
-          }
-          default: {
-            throw new TypeNotSupportedError("ASA input type", `${componentConfig.type}`);
-          }
-        }
+        throw new TypeNotSupportedError("ASA input type", `${componentConfig.type}`);
       }
     }
 

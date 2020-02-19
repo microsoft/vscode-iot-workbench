@@ -30,7 +30,6 @@ const impor = require("impor")(__dirname);
 const az3166DeviceModule = impor("./AZ3166Device") as typeof import("./AZ3166Device");
 const azureComponentConfigModule = impor("./AzureComponentConfig") as typeof import("./AzureComponentConfig");
 const azureFunctionsModule = impor("./AzureFunctions") as typeof import("./AzureFunctions");
-const cosmosDBModule = impor("./CosmosDB") as typeof import("./CosmosDB");
 const esp32DeviceModule = impor("./Esp32Device") as typeof import("./Esp32Device");
 const ioTHubModule = impor("./IoTHub") as typeof import("./IoTHub");
 const ioTHubDeviceModule = impor("./IoTHubDevice") as typeof import("./IoTHubDevice");
@@ -373,19 +372,6 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
           this.componentList.push(asa);
           break;
         }
-        case ComponentType.CosmosDB: {
-          const dependencies = this.extractComponentDependencies(componentConfig, components);
-          const cosmosDB = new cosmosDBModule.CosmosDB(
-            this.extensionContext,
-            this.projectRootPath,
-            this.channel,
-            dependencies
-          );
-          await cosmosDB.load();
-          components[cosmosDB.id] = cosmosDB;
-          this.componentList.push(cosmosDB);
-          break;
-        }
         default: {
           throw new TypeNotSupportedError("component type", `${componentConfig.type}`);
         }
@@ -464,9 +450,6 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
       }
       case ProjectTemplateType.StreamAnalytics: {
         const iothub = new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
-
-        const cosmosDB = new cosmosDBModule.CosmosDB(this.extensionContext, this.projectRootPath, this.channel);
-
         const asaDir = path.join(this.projectRootPath, IoTWorkspaceProject.folderName.asaFolderName);
         if (!(await FileUtility.directoryExists(scaffoldType, asaDir))) {
           await FileUtility.mkdirRecursively(scaffoldType, asaDir);
@@ -475,10 +458,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
           path.join(FileNames.resourcesFolderName, "asaql", "query.asaql")
         );
         const queryPath = path.join(asaDir, "query.asaql");
-        const asaQueryContent = fs
-          .readFileSync(asaFilePath, "utf8")
-          .replace(/\[input\]/, `"iothub-${iothub.id}"`)
-          .replace(/\[output\]/, `"cosmosdb-${cosmosDB.id}"`);
+        const asaQueryContent = fs.readFileSync(asaFilePath, "utf8").replace(/\[input\]/, `"iothub-${iothub.id}"`);
         await FileUtility.writeFile(scaffoldType, queryPath, asaQueryContent);
 
         const asa = new streamAnalyticsJobModule.StreamAnalyticsJob(
@@ -490,10 +470,6 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
             {
               component: iothub,
               type: azureComponentConfigModule.DependencyType.Input
-            },
-            {
-              component: cosmosDB,
-              type: azureComponentConfigModule.DependencyType.Other
             }
           ]
         );
@@ -502,7 +478,6 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
         workspaceConfig.settings[`IoTWorkbench.${ConfigKey.asaPath}`] = IoTWorkspaceProject.folderName.asaFolderName;
 
         this.componentList.push(iothub);
-        this.componentList.push(cosmosDB);
         this.componentList.push(asa);
         break;
       }

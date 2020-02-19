@@ -6,8 +6,7 @@ export enum ComponentType {
   IoTHub = "IoTHub",
   AzureFunctions = "AzureFunctions",
   IoTHubDevice = "IoTHubDevice",
-  StreamAnalyticsJob = "StreamAnalyticsJob",
-  CosmosDB = "CosmosDB"
+  StreamAnalyticsJob = "StreamAnalyticsJob"
 }
 
 export interface Component {
