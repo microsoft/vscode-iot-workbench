@@ -100,9 +100,11 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     await this.initAzureConfig(scaffoldType);
 
     // Check components prerequisites
-    this.componentList.forEach(async item => {
-      await item.checkPrerequisites();
-    });
+    await Promise.all(
+      this.componentList.map(async component => {
+        await component.checkPrerequisites("load project");
+      })
+    );
   }
 
   async create(
@@ -151,12 +153,11 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     await FileUtility.writeJsonFile(createTimeScaffoldType, this.workspaceConfigFilePath, workspace);
 
     // Check components prerequisites
-    this.componentList.forEach(async item => {
-      const res = await item.checkPrerequisites();
-      if (!res) {
-        return;
-      }
-    });
+    await Promise.all(
+      this.componentList.map(async component => {
+        await component.checkPrerequisites("create project");
+      })
+    );
 
     // Create components
     try {
