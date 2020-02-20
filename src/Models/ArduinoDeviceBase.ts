@@ -5,21 +5,12 @@ import * as fs from "fs-plus";
 import * as path from "path";
 import * as vscode from "vscode";
 
-import { VscodeCommands } from "../common/Commands";
 import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
 import { WorkspaceNotOpenError } from "../common/Error/OperationFailedErrors/WorkspaceNotOpenError";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
 import { WorkspaceConfigNotFoundError } from "../common/Error/SystemErrors/WorkspaceConfigNotFoundError";
 import { ConfigHandler } from "../configHandler";
-import {
-  ConfigKey,
-  DependentExtensions,
-  FileNames,
-  OperationType,
-  OSPlatform,
-  PlatformType,
-  ScaffoldType
-} from "../constants";
+import { ConfigKey, FileNames, OperationType, OSPlatform, PlatformType, ScaffoldType } from "../constants";
 import { FileUtility } from "../FileUtility";
 import { TelemetryContext } from "../telemetry";
 import * as utils from "../utils";
@@ -31,6 +22,8 @@ import { TemplateFileInfo } from "./Interfaces/ProjectTemplate";
 import { OTA } from "./OTA";
 import { DirectoryNotFoundError } from "../common/Error/OperationFailedErrors/DirectoryNotFoundError";
 import { FileNotFoundError } from "../common/Error/OperationFailedErrors/FileNotFound";
+import { checkExtensionAvailable } from "./Apis";
+import { ExtensionName } from "./Interfaces/Api";
 
 const constants = {
   defaultSketchFileName: "device.ino",
@@ -88,22 +81,7 @@ export abstract class ArduinoDeviceBase implements Device {
   }
 
   static async isAvailable(): Promise<boolean> {
-    if (!vscode.extensions.getExtension(DependentExtensions.arduino)) {
-      const choice = await vscode.window.showInformationMessage(
-        "Arduino extension is required for the current project. Do you want to install it from marketplace?",
-        "Yes",
-        "No"
-      );
-      if (choice === "Yes") {
-        vscode.commands.executeCommand(
-          VscodeCommands.VscodeOpen,
-          vscode.Uri.parse("vscode:extension/" + DependentExtensions.arduino)
-        );
-      }
-      return false;
-    }
-
-    return true;
+    return await checkExtensionAvailable(ExtensionName.Arduino);
   }
 
   async checkPrerequisites(): Promise<boolean> {
