@@ -10,14 +10,13 @@ import { IoTCubeCommands } from "../common/Commands";
 import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
 import { WorkspaceConfigNotFoundError } from "../common/Error/SystemErrors/WorkspaceConfigNotFoundError";
 import { TypeNotSupportedError } from "../common/Error/SystemErrors/TypeNotSupportedError";
-import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
 import { ConfigHandler } from "../configHandler";
 import { ConfigKey, EventNames, FileNames, ScaffoldType } from "../constants";
 import { FileUtility } from "../FileUtility";
 import { TelemetryContext, TelemetryWorker } from "../telemetry";
 import { getWorkspaceFile, updateProjectHostTypeConfig } from "../utils";
 
-import { AzureComponentConfig, Dependency } from "./AzureComponentConfig";
+import { AzureComponentConfig } from "./AzureComponentConfig";
 import { Component, ComponentType } from "./Interfaces/Component";
 import { ProjectHostType } from "./Interfaces/ProjectHostType";
 import { ProjectTemplateType, TemplateFileInfo } from "./Interfaces/ProjectTemplate";
@@ -30,11 +29,9 @@ const impor = require("impor")(__dirname);
 const az3166DeviceModule = impor("./AZ3166Device") as typeof import("./AZ3166Device");
 const azureComponentConfigModule = impor("./AzureComponentConfig") as typeof import("./AzureComponentConfig");
 const azureFunctionsModule = impor("./AzureFunctions") as typeof import("./AzureFunctions");
-const cosmosDBModule = impor("./CosmosDB") as typeof import("./CosmosDB");
 const esp32DeviceModule = impor("./Esp32Device") as typeof import("./Esp32Device");
 const ioTHubModule = impor("./IoTHub") as typeof import("./IoTHub");
 const ioTHubDeviceModule = impor("./IoTHubDevice") as typeof import("./IoTHubDevice");
-const streamAnalyticsJobModule = impor("./StreamAnalyticsJob") as typeof import("./StreamAnalyticsJob");
 
 export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
   private deviceRootPath = "";
@@ -42,8 +39,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
 
   static folderName = {
     deviceDefaultFolderName: "Device",
-    functionDefaultFolderName: "Functions",
-    asaFolderName: "StreamAnalytics"
+    functionDefaultFolderName: "Functions"
   };
 
   constructor(
@@ -354,38 +350,6 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
           }
           break;
         }
-        case ComponentType.StreamAnalyticsJob: {
-          const dependencies = this.extractComponentDependencies(componentConfig, components);
-          const queryPath = path.join(
-            this.projectRootPath,
-            IoTWorkspaceProject.folderName.asaFolderName,
-            "query.asaql"
-          );
-          const asa = new streamAnalyticsJobModule.StreamAnalyticsJob(
-            queryPath,
-            this.extensionContext,
-            this.projectRootPath,
-            this.channel,
-            dependencies
-          );
-          await asa.load();
-          components[asa.id] = asa;
-          this.componentList.push(asa);
-          break;
-        }
-        case ComponentType.CosmosDB: {
-          const dependencies = this.extractComponentDependencies(componentConfig, components);
-          const cosmosDB = new cosmosDBModule.CosmosDB(
-            this.extensionContext,
-            this.projectRootPath,
-            this.channel,
-            dependencies
-          );
-          await cosmosDB.load();
-          components[cosmosDB.id] = cosmosDB;
-          this.componentList.push(cosmosDB);
-          break;
-        }
         default: {
           throw new TypeNotSupportedError("component type", `${componentConfig.type}`);
         }
@@ -462,50 +426,6 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
         this.componentList.push(azureFunctions);
         break;
       }
-      case ProjectTemplateType.StreamAnalytics: {
-        const iothub = new ioTHubModule.IoTHub(this.projectRootPath, this.channel);
-
-        const cosmosDB = new cosmosDBModule.CosmosDB(this.extensionContext, this.projectRootPath, this.channel);
-
-        const asaDir = path.join(this.projectRootPath, IoTWorkspaceProject.folderName.asaFolderName);
-        if (!(await FileUtility.directoryExists(scaffoldType, asaDir))) {
-          await FileUtility.mkdirRecursively(scaffoldType, asaDir);
-        }
-        const asaFilePath = this.extensionContext.asAbsolutePath(
-          path.join(FileNames.resourcesFolderName, "asaql", "query.asaql")
-        );
-        const queryPath = path.join(asaDir, "query.asaql");
-        const asaQueryContent = fs
-          .readFileSync(asaFilePath, "utf8")
-          .replace(/\[input\]/, `"iothub-${iothub.id}"`)
-          .replace(/\[output\]/, `"cosmosdb-${cosmosDB.id}"`);
-        await FileUtility.writeFile(scaffoldType, queryPath, asaQueryContent);
-
-        const asa = new streamAnalyticsJobModule.StreamAnalyticsJob(
-          queryPath,
-          this.extensionContext,
-          this.projectRootPath,
-          this.channel,
-          [
-            {
-              component: iothub,
-              type: azureComponentConfigModule.DependencyType.Input
-            },
-            {
-              component: cosmosDB,
-              type: azureComponentConfigModule.DependencyType.Other
-            }
-          ]
-        );
-
-        workspaceConfig.folders.push({ path: IoTWorkspaceProject.folderName.asaFolderName });
-        workspaceConfig.settings[`IoTWorkbench.${ConfigKey.asaPath}`] = IoTWorkspaceProject.folderName.asaFolderName;
-
-        this.componentList.push(iothub);
-        this.componentList.push(cosmosDB);
-        this.componentList.push(asa);
-        break;
-      }
       default:
         break;
     }
@@ -524,24 +444,5 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
       );
     }
     this.workspaceConfigFilePath = path.join(this.projectRootPath, workspaceFile);
-  }
-
-  private extractComponentDependencies(
-    componentConfig: AzureComponentConfig,
-    components: { [key: string]: Component }
-  ): Dependency[] {
-    const dependencies: Dependency[] = [];
-    for (const dependent of componentConfig.dependencies) {
-      const component = components[dependent.id];
-      if (!component) {
-        throw new OperationFailedError(
-          "extract component dependencies",
-          `Failed to find component with id ${dependent}`,
-          ""
-        );
-      }
-      dependencies.push({ component, type: dependent.type });
-    }
-    return dependencies;
   }
 }
