@@ -3,30 +3,27 @@
 
 import * as vscode from "vscode";
 
-import { AzureAccount } from "../azure-account.api";
 import { AzureAccountCommands, VscodeCommands } from "../common/Commands";
 import { DependentExtensionNotFoundError } from "../common/Error/OperationFailedErrors/DependentExtensionNotFoundError";
-import { ExtensionName, DependentExtensions, ExtensionNameIdMap } from "./Interfaces/Api";
+import { ExtensionName, ExtensionNameIdMap } from "./Interfaces/Api";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getExtension(name: ExtensionName): any {
-  // }
-  switch (name) {
-    case ExtensionName.AzureAccount: {
-      const azureAccount = vscode.extensions.getExtension<AzureAccount>(DependentExtensions.azureAccount);
-      return azureAccount ? azureAccount.exports : undefined;
-    }
-    case ExtensionName.Toolkit:
-    case ExtensionName.Remote:
-    case ExtensionName.AzureFunctions:
-    case ExtensionName.Arduino: {
-      const extension = vscode.extensions.getExtension(ExtensionNameIdMap[name] as string);
-      return extension ? extension.exports : undefined;
-    }
-    default: {
-      return undefined;
+  const extensionId = ExtensionNameIdMap.get(name);
+  if (extensionId) {
+    const extension = vscode.extensions.getExtension(extensionId);
+    if (extension) {
+      switch (name) {
+        case ExtensionName.AzureAccount:
+        case ExtensionName.AzureFunctions:
+        case ExtensionName.Toolkit:
+          return extension.exports ? extension.exports : undefined;
+        default:
+          return extension;
+      }
     }
   }
+  return undefined;
 }
 
 export async function checkAzureLogin(): Promise<boolean> {
@@ -53,7 +50,7 @@ export async function checkExtensionAvailable(extensionName: ExtensionName): Pro
     if (choice === "Yes") {
       vscode.commands.executeCommand(
         VscodeCommands.VscodeOpen,
-        vscode.Uri.parse(("vscode:extension/" + ExtensionNameIdMap[ExtensionName.Arduino]) as string)
+        vscode.Uri.parse(("vscode:extension/" + ExtensionNameIdMap.get(extensionName)) as string)
       );
     }
     return false;
