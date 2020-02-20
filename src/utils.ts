@@ -354,7 +354,7 @@ export async function askAndOpenInRemote(operation: OperationType, telemetryCont
 
   if (result === DialogResponses.yes) {
     telemetryContext.properties.errorMessage = `${operation} operation failed and user reopens project in container.`;
-    await RemoteExtension.checkRemoteExtension();
+    await RemoteExtension.checkRemoteExtension("open project in container");
 
     await vscode.commands.executeCommand(RemoteContainersCommands.ReopenInContainer);
   } else {

@@ -75,7 +75,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     openInNewWindow: boolean
   ): Promise<void> {
     // Can only create project locally
-    await RemoteExtension.checkRemoteExtension();
+    await RemoteExtension.checkRemoteExtension("create iot containerized project");
 
     const createTimeScaffoldType = ScaffoldType.Local;
 
@@ -169,7 +169,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       throw new DirectoryNotFoundError("open folder in container", `folder path ${folderPath}`, "");
     }
 
-    await RemoteExtension.checkRemoteExtension();
+    await RemoteExtension.checkRemoteExtension("open folder in container");
 
     await vscode.commands.executeCommand(RemoteContainersCommands.OpenFolder, vscode.Uri.file(folderPath));
   }
