@@ -18,8 +18,13 @@ const window = {
   showErrorMessage: jest.fn()
 };
 
+const commands = {
+  executeCommand: jest.fn()
+};
+
 const vscode = {
   window,
+  commands,
   OutputChannel,
   ExtensionContext
 };
