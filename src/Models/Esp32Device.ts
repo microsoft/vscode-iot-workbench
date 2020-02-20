@@ -93,10 +93,6 @@ export class Esp32Device extends ArduinoDeviceBase {
     this.azureConfigFileHandler = new AzureConfigFileHandler(projectFolder);
   }
 
-  async checkPrerequisites(): Promise<boolean> {
-    return super.checkPrerequisites();
-  }
-
   async create(): Promise<void> {
     this.createCore();
   }
