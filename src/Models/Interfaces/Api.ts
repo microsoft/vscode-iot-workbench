@@ -9,18 +9,18 @@ export enum ExtensionName {
   Arduino = "Arduino"
 }
 
-export class DependentExtensions {
-  static readonly azureFunctions = "ms-azuretools.vscode-azurefunctions";
-  static readonly arduino = "vsciot-vscode.vscode-arduino";
-  static readonly remote = "ms-vscode-remote.vscode-remote-extensionpack";
-  static readonly toolkit = "vsciot-vscode.azure-iot-toolkit";
-  static readonly azureAccount = "ms-vscode.azure-account";
+export enum ExtensionId {
+  AzureFunctions = "ms-azuretools.vscode-azurefunctions",
+  Arduino = "vsciot-vscode.vscode-arduino",
+  Remote = "ms-vscode-remote.vscode-remote-extensionpack",
+  Toolkit = "vsciot-vscode.azure-iot-toolkit",
+  AzureAccount = "ms-vscode.azure-account"
 }
 
-export const ExtensionNameIdMap: Record<ExtensionName, DependentExtensions> = {
-  [ExtensionName.Arduino]: DependentExtensions.arduino,
-  [ExtensionName.AzureAccount]: DependentExtensions.azureAccount,
-  [ExtensionName.AzureFunctions]: DependentExtensions.azureFunctions,
-  [ExtensionName.Remote]: DependentExtensions.remote,
-  [ExtensionName.Toolkit]: DependentExtensions.toolkit
-};
+export const ExtensionNameIdMap: Map<ExtensionName, ExtensionId> = new Map<ExtensionName, ExtensionId>([
+  [ExtensionName.Toolkit, ExtensionId.Toolkit],
+  [ExtensionName.AzureAccount, ExtensionId.AzureAccount],
+  [ExtensionName.Remote, ExtensionId.Remote],
+  [ExtensionName.AzureFunctions, ExtensionId.AzureFunctions],
+  [ExtensionName.Arduino, ExtensionId.Arduino]
+]);
