@@ -9,12 +9,12 @@ import { Component, ComponentType } from "./Interfaces/Component";
 import { Provisionable } from "./Interfaces/Provisionable";
 import { Deployable } from "./Interfaces/Deployable";
 
-import { AzureFunctionsLanguage, DependentExtensions, ScaffoldType } from "../constants";
+import { AzureFunctionsLanguage, ScaffoldType } from "../constants";
 
 import { ServiceClientCredentials } from "ms-rest";
 import { AzureAccount, AzureResourceFilter } from "../azure-account.api";
 import { StringDictionary } from "azure-arm-website/lib/models";
-import { getExtension } from "./Apis";
+import { getExtension, checkExtensionAvailable } from "./Apis";
 import { ExtensionName } from "./Interfaces/Api";
 import { Guid } from "guid-typescript";
 import {
@@ -25,7 +25,7 @@ import {
   AzureConfigFileHandler
 } from "./AzureComponentConfig";
 import { FileUtility } from "../FileUtility";
-import { VscodeCommands, AzureFunctionsCommands } from "../common/Commands";
+import { AzureFunctionsCommands } from "../common/Commands";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
 import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
 import { DependentExtensionNotFoundError } from "../common/Error/OperationFailedErrors/DependentExtensionNotFoundError";
@@ -103,22 +103,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
   }
 
   static async isAvailable(): Promise<boolean> {
-    if (!vscode.extensions.getExtension(DependentExtensions.azureFunctions)) {
-      const choice = await vscode.window.showInformationMessage(
-        "Azure Functions extension is required for the current project. Do you want to install it from marketplace?",
-        "Yes",
-        "No"
-      );
-      if (choice === "Yes") {
-        vscode.commands.executeCommand(
-          VscodeCommands.VscodeOpen,
-          vscode.Uri.parse("vscode:extension/" + DependentExtensions.azureFunctions)
-        );
-      }
-      return false;
-    }
-
-    return true;
+    return await checkExtensionAvailable(ExtensionName.AzureFunctions);
   }
 
   async checkPrerequisites(): Promise<boolean> {
