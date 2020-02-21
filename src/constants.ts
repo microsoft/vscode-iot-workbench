@@ -88,12 +88,6 @@ export class AzureComponentsStorage {
   static readonly fileName = "azureconfig.json";
 }
 
-export class DependentExtensions {
-  static readonly azureFunctions = "ms-azuretools.vscode-azurefunctions";
-  static readonly arduino = "vsciot-vscode.vscode-arduino";
-  static readonly remote = "ms-vscode-remote.vscode-remote-extensionpack";
-}
-
 export enum PlatformType {
   Arduino = "Arduino",
   EmbeddedLinux = "Embedded Linux (Preview)",

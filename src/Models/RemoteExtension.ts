@@ -1,11 +1,10 @@
 import * as vscode from "vscode";
-import { DependentExtensions } from "../constants";
-import { DialogResponses } from "../DialogResponses";
+import { ExtensionName } from "./Interfaces/Api";
 import { WorkbenchExtension } from "../WorkbenchExtension";
-import { VscodeCommands } from "../common/Commands";
 import { RemoteEnvNotSupportedError } from "../common/Error/OperationFailedErrors/RemoteEnvNotSupportedError";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
 import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
+import { checkExtensionAvailable } from "./Apis";
 
 export class RemoteExtension {
   static isRemote(context: vscode.ExtensionContext): boolean {
@@ -23,26 +22,14 @@ export class RemoteExtension {
    * @returns false - remote extension is not installed.
    */
   static async isAvailable(): Promise<boolean> {
-    if (!vscode.extensions.getExtension(DependentExtensions.remote)) {
-      const message =
-        "Remote extension is required for the current project. Do you want to install it from marketplace?";
-      const choice = await vscode.window.showInformationMessage(message, DialogResponses.yes, DialogResponses.no);
-      if (choice === DialogResponses.yes) {
-        vscode.commands.executeCommand(
-          VscodeCommands.VscodeOpen,
-          vscode.Uri.parse("vscode:extension/" + DependentExtensions.remote)
-        );
-      }
-      return false;
-    }
-    return true;
+    return await checkExtensionAvailable(ExtensionName.Remote);
   }
 
   static async checkRemoteExtension(): Promise<void> {
     const res = await RemoteExtension.isAvailable();
     if (!res) {
       throw new OperationCanceledError(
-        `Remote extension is not available. Please install ${DependentExtensions.remote} first.`
+        `Remote extension is not available. Please install ${ExtensionName.Remote} first.`
       );
     }
   }
