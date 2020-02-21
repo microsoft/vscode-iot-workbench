@@ -94,7 +94,7 @@ export class ProjectEnvironmentConfiger {
       // project
       await configExternalCMakeProjectToIoTContainerProject(scaffoldType);
 
-      await RemoteExtension.checkRemoteExtension();
+      await RemoteExtension.checkRemoteExtension("configure project environment");
 
       project = new ioTContainerizedProjectModule.IoTContainerizedProject(
         context,
