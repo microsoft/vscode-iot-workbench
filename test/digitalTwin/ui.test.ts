@@ -20,7 +20,6 @@ describe("UI", () => {
     placeHolder: label,
     ignoreFocusOut: true
   };
-
   const secondUri = {
     fsPath: secondPath
   };
