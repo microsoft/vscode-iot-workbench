@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { ExtensionId, ExtensionName } from "./Interfaces/Api";
+import { ExtensionName } from "./Interfaces/Api";
 import { WorkbenchExtension } from "../WorkbenchExtension";
 import { RemoteEnvNotSupportedError } from "../common/Error/OperationFailedErrors/RemoteEnvNotSupportedError";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
@@ -29,7 +29,7 @@ export class RemoteExtension {
     const res = await RemoteExtension.isAvailable();
     if (!res) {
       throw new OperationCanceledError(
-        `Remote extension is not available. Please install ${ExtensionId.Remote} first.`
+        `Remote extension is not available. Please install ${ExtensionName.Remote} first.`
       );
     }
   }
