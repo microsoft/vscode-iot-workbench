@@ -11,7 +11,7 @@ describe("Colorized channel", () => {
   const operation = "Test";
   const message = "mock";
 
-  beforeEach(() => {
+  afterEach(() => {
     vscode.OutputChannel.appendLine.mockClear();
   });
 
@@ -25,41 +25,41 @@ describe("Colorized channel", () => {
 
   test("print operation start", () => {
     channel.start(operation);
-    expect(vscode.OutputChannel.appendLine).toBeCalledWith("[Start] Test");
+    expect(vscode.OutputChannel.appendLine).toHaveBeenCalledWith("[Start] Test");
   });
 
   test("print operation successfully end", () => {
     channel.end(operation, Constants.DEVICE_MODEL_COMPONENT);
-    expect(vscode.OutputChannel.appendLine).toBeCalledWith("[Done][Device Model] Test successfully");
+    expect(vscode.OutputChannel.appendLine).toHaveBeenCalledWith("[Done][Device Model] Test successfully");
   });
 
   test("print info message", () => {
     channel.info(operation);
-    expect(vscode.OutputChannel.appendLine).toBeCalledWith("Test");
+    expect(vscode.OutputChannel.appendLine).toHaveBeenCalledWith("Test");
   });
 
   test("print warn message", () => {
     channel.warn(operation);
-    expect(vscode.OutputChannel.appendLine).toBeCalledWith("[Warn] Test");
+    expect(vscode.OutputChannel.appendLine).toHaveBeenCalledWith("[Warn] Test");
   });
 
   test("print error message", () => {
     channel.error(message);
-    expect(vscode.OutputChannel.appendLine).toBeCalledWith("[Error] mock");
+    expect(vscode.OutputChannel.appendLine).toHaveBeenCalledWith("[Error] mock");
   });
 
   test("print operation fail to end", () => {
     channel.error(operation, Constants.MODEL_REPOSITORY_COMPONENT, new Error(message));
-    expect(vscode.OutputChannel.appendLine).toBeCalledWith("[Error][Model Repository] Fail to test. Error: mock");
+    expect(vscode.OutputChannel.appendLine).toHaveBeenCalledWith("[Error][Model Repository] Fail to test. Error: mock");
   });
 
   test("show channel", () => {
     channel.show();
-    expect(vscode.OutputChannel.show).toBeCalled();
+    expect(vscode.OutputChannel.show).toHaveBeenCalled();
   });
 
   test("dispose channel", () => {
     channel.dispose();
-    expect(vscode.OutputChannel.dispose).toBeCalled();
+    expect(vscode.OutputChannel.dispose).toHaveBeenCalled();
   });
 });
