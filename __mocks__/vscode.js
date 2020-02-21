@@ -8,11 +8,27 @@ const OutputChannel = {
 };
 
 const ExtensionContext = {
-  asAbsolutePath: jest.fn(p => p)
+  asAbsolutePath: jest.fn()
 };
+
+const Uri = {
+  fsPath: "path"
+};
+
+const WorkspaceFolder = {
+  uri: Uri
+};
+
+const QuickPickOptions = {};
+
+const QuickPickItem = {};
+
+const OpenDialogOptions = {};
 
 const window = {
   createOutputChannel: jest.fn(() => OutputChannel),
+  showQuickPick: jest.fn(items => items[0]),
+  showOpenDialog: jest.fn(),
   showInformationMessage: jest.fn(),
   showWarningMessage: jest.fn(),
   showErrorMessage: jest.fn()
@@ -22,11 +38,21 @@ const commands = {
   executeCommand: jest.fn()
 };
 
+const workspace = {
+  workspaceFolders: undefined
+};
+
 const vscode = {
+  OutputChannel,
+  ExtensionContext,
+  Uri,
+  WorkspaceFolder,
+  QuickPickOptions,
+  QuickPickItem,
+  OpenDialogOptions,
   window,
   commands,
-  OutputChannel,
-  ExtensionContext
+  workspace
 };
 
 module.exports = vscode;

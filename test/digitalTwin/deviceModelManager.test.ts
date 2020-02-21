@@ -11,6 +11,8 @@ import { UI } from "../../src/DigitalTwin/pnp/src/view/ui";
 
 const vscode = require("../../__mocks__/vscode");
 
+jest.mock("../../src/DigitalTwin/pnp/src/common/colorizedChannel");
+jest.mock("../../src/DigitalTwin/pnp/src/common/utility");
 jest.mock("../../src/DigitalTwin/pnp/src/view/ui");
 
 describe("Device model manager", () => {
@@ -20,29 +22,24 @@ describe("Device model manager", () => {
 
   UI.selectRootFolder = jest.fn().mockResolvedValue("root");
   UI.inputModelName = jest.fn().mockResolvedValue("test");
-  Utility.createFileFromTemplate = jest.fn();
 
   test("create interface successfully", async () => {
     await manager.createModel(ModelType.Interface);
-    expect(UI.openAndShowTextDocument).toBeCalledWith(path.join("root", "test.interface.json"));
+    expect(UI.openAndShowTextDocument).toHaveBeenCalledWith(path.join("root", "test.interface.json"));
   });
 
   test("create interface with error", async () => {
-    Utility.createFileFromTemplate = jest.fn().mockImplementationOnce(() => {
-      throw new Error();
-    });
+    Utility.createFileFromTemplate = jest.fn().mockRejectedValueOnce(new Error());
     await expect(manager.createModel(ModelType.Interface)).rejects.toThrow(ProcessError);
   });
 
   test("create capability model successfully", async () => {
     await manager.createModel(ModelType.CapabilityModel);
-    expect(UI.openAndShowTextDocument).toBeCalledWith(path.join("root", "test.capabilitymodel.json"));
+    expect(UI.openAndShowTextDocument).toHaveBeenCalledWith(path.join("root", "test.capabilitymodel.json"));
   });
 
   test("create capability model with error", async () => {
-    Utility.createFileFromTemplate = jest.fn().mockImplementationOnce(() => {
-      throw new Error();
-    });
+    Utility.createFileFromTemplate = jest.fn().mockRejectedValueOnce(new Error());
     await expect(manager.createModel(ModelType.CapabilityModel)).rejects.toThrow(ProcessError);
   });
 });
