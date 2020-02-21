@@ -12,7 +12,8 @@ const ExtensionContext = {
 };
 
 const Uri = {
-  fsPath: "path"
+  fsPath: "defaultPath",
+  file: jest.fn()
 };
 
 const WorkspaceFolder = {
@@ -29,6 +30,7 @@ const window = {
   createOutputChannel: jest.fn(() => OutputChannel),
   showQuickPick: jest.fn(items => items[0]),
   showOpenDialog: jest.fn(),
+  showTextDocument: jest.fn(),
   showInformationMessage: jest.fn(),
   showWarningMessage: jest.fn(),
   showErrorMessage: jest.fn()
