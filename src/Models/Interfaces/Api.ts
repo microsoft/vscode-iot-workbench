@@ -9,18 +9,10 @@ export enum ExtensionName {
   Arduino = "Arduino"
 }
 
-export enum ExtensionId {
-  AzureFunctions = "ms-azuretools.vscode-azurefunctions",
-  Arduino = "vsciot-vscode.vscode-arduino",
-  Remote = "ms-vscode-remote.vscode-remote-extensionpack",
-  Toolkit = "vsciot-vscode.azure-iot-toolkit",
-  AzureAccount = "ms-vscode.azure-account"
-}
-
-export const ExtensionNameIdMap: Map<ExtensionName, ExtensionId> = new Map<ExtensionName, ExtensionId>([
-  [ExtensionName.Toolkit, ExtensionId.Toolkit],
-  [ExtensionName.AzureAccount, ExtensionId.AzureAccount],
-  [ExtensionName.Remote, ExtensionId.Remote],
-  [ExtensionName.AzureFunctions, ExtensionId.AzureFunctions],
-  [ExtensionName.Arduino, ExtensionId.Arduino]
+export const ExtensionNameIdMap: Map<ExtensionName, string> = new Map<ExtensionName, string>([
+  [ExtensionName.Toolkit, "vsciot-vscode.azure-iot-toolkit"],
+  [ExtensionName.AzureAccount, "ms-vscode.azure-account"],
+  [ExtensionName.Remote, "ms-vscode-remote.vscode-remote-extensionpack"],
+  [ExtensionName.AzureFunctions, "ms-azuretools.vscode-azurefunctions"],
+  [ExtensionName.Arduino, "vsciot-vscode.vscode-arduino"]
 ]);
