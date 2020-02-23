@@ -21,7 +21,6 @@ import { ExtensionName } from "./Interfaces/Api";
 import { Component, ComponentType } from "./Interfaces/Component";
 import { Provisionable } from "./Interfaces/Provisionable";
 import { AzureConfigNotFoundError } from "../common/Error/SystemErrors/AzureConfigNotFoundErrors";
-import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
 
 async function getDeviceNumber(iotHubConnectionString: string): Promise<number> {
   return new Promise((resolve: (value: number) => void, reject: (error: Error) => void) => {
@@ -185,10 +184,9 @@ export class IoTHubDevice implements Component, Provisionable {
   async updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo): Promise<void> {
     const iotHubComponentIndex = await this.azureConfigFileHandler.getComponentIndexById(type, this.id);
     if (iotHubComponentIndex > -1) {
-      if (!componentInfo) {
-        throw new ArgumentEmptyOrNullError("IoTHubDevice updateConfigSettings", "componentInfo");
+      if (componentInfo) {
+        await this.azureConfigFileHandler.updateComponent(type, iotHubComponentIndex, componentInfo);
       }
-      await this.azureConfigFileHandler.updateComponent(type, iotHubComponentIndex, componentInfo);
     } else {
       const newIotHubConfig: AzureComponentConfig = {
         id: this.id,

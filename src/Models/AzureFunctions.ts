@@ -334,10 +334,9 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
   async updateConfigSettings(type: ScaffoldType, componentInfo?: ComponentInfo): Promise<void> {
     const componentIndex = await this.azureConfigFileHandler.getComponentIndexById(type, this.id);
     if (componentIndex > -1) {
-      if (!componentInfo) {
-        throw new ArgumentEmptyOrNullError("AzureFunctions updateConfigSettings", `componentInfo`);
+      if (componentInfo) {
+        await this.azureConfigFileHandler.updateComponent(type, componentIndex, componentInfo);
       }
-      await this.azureConfigFileHandler.updateComponent(type, componentIndex, componentInfo);
     } else {
       const newAzureFunctionsConfig: AzureComponentConfig = {
         id: this.id,

@@ -97,7 +97,7 @@ export class CodeGeneratorCore {
   ): Promise<void> {
     RemoteExtension.ensureLocalBeforeRunCommand("generate device code stub", context);
 
-    const rootPath = utils.getFirstWorkspaceFolderPath();
+    const rootPath = utils.getProjectDeviceRootPath();
     if (!rootPath) {
       throw new WorkspaceNotOpenError("generate device code stub");
     }

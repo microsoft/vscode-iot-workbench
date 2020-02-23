@@ -306,7 +306,7 @@ export abstract class IoTWorkbenchProjectBase {
    * Validate whether project root path exists. If not, throw error.
    * @param scaffoldType scaffold type
    */
-  async validateProjectRootPath(operation: string, scaffoldType: ScaffoldType): Promise<void> {
+  async validateProjectRootPathExists(operation: string, scaffoldType: ScaffoldType): Promise<void> {
     if (!(await FileUtility.directoryExists(scaffoldType, this.projectRootPath))) {
       throw new DirectoryNotFoundError(
         operation,
