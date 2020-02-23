@@ -228,7 +228,7 @@ export abstract class ArduinoDeviceBase implements Device {
       throw new WorkspaceConfigNotFoundError(ConfigKey.devicePath);
     }
 
-    const rootPath = utils.getFirstWorkspaceFolderPath();
+    const rootPath = utils.getProjectDeviceRootPath();
     if (!rootPath) {
       throw new WorkspaceNotOpenError("generate CRC");
     }
