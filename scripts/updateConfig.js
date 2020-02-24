@@ -1,7 +1,5 @@
 const fs = require("fs");
 
-fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2) + '\n');
-
 /**
  * Update package.json with test name, displayName, publisher, ai aky.
  * Trim version number. Delete extension icon.
