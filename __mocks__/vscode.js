@@ -47,6 +47,12 @@ const workspace = {
   workspaceFolders: undefined
 };
 
+const ConfigurationTarget = {
+  Global: 1,
+  workspace: 2,
+  WorkspaceFolder: 3
+};
+
 const vscode = {
   OutputChannel,
   ExtensionContext,
@@ -58,7 +64,8 @@ const vscode = {
   InputBoxOptions,
   window,
   commands,
-  workspace
+  workspace,
+  ConfigurationTarget
 };
 
 module.exports = vscode;
