@@ -66,8 +66,8 @@ export abstract class ContainerDeviceBase implements Device {
     return this.componentType;
   }
 
-  async checkPrerequisites(): Promise<boolean> {
-    return true;
+  async checkPrerequisites(): Promise<void> {
+    // Do nothing.
   }
 
   async load(): Promise<void> {

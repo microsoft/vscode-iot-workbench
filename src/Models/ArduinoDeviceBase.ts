@@ -23,6 +23,7 @@ import { OTA } from "./OTA";
 import { DirectoryNotFoundError } from "../common/Error/OperationFailedErrors/DirectoryNotFoundError";
 import { FileNotFoundError } from "../common/Error/OperationFailedErrors/FileNotFound";
 import { checkExtensionAvailable } from "./Apis";
+import { DependentExtensionNotFoundError } from "../common/Error/OperationFailedErrors/DependentExtensionNotFoundError";
 import { ExtensionName } from "./Interfaces/Api";
 
 const constants = {
@@ -84,8 +85,11 @@ export abstract class ArduinoDeviceBase implements Device {
     return await checkExtensionAvailable(ExtensionName.Arduino);
   }
 
-  async checkPrerequisites(): Promise<boolean> {
-    return await ArduinoDeviceBase.isAvailable();
+  async checkPrerequisites(operation: string): Promise<void> {
+    const res = await ArduinoDeviceBase.isAvailable();
+    if (!res) {
+      throw new DependentExtensionNotFoundError(operation, ExtensionName.Arduino);
+    }
   }
 
   async compile(): Promise<boolean> {

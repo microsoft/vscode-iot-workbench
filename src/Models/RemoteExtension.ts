@@ -2,9 +2,9 @@ import * as vscode from "vscode";
 import { ExtensionName } from "./Interfaces/Api";
 import { WorkbenchExtension } from "../WorkbenchExtension";
 import { RemoteEnvNotSupportedError } from "../common/Error/OperationFailedErrors/RemoteEnvNotSupportedError";
-import { OperationCanceledError } from "../common/Error/OperationCanceledError";
 import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
 import { checkExtensionAvailable } from "./Apis";
+import { DependentExtensionNotFoundError } from "../common/Error/OperationFailedErrors/DependentExtensionNotFoundError";
 
 export class RemoteExtension {
   static isRemote(context: vscode.ExtensionContext): boolean {
@@ -25,12 +25,10 @@ export class RemoteExtension {
     return await checkExtensionAvailable(ExtensionName.Remote);
   }
 
-  static async checkRemoteExtension(): Promise<void> {
+  static async checkRemoteExtension(operation: string): Promise<void> {
     const res = await RemoteExtension.isAvailable();
     if (!res) {
-      throw new OperationCanceledError(
-        `Remote extension is not available. Please install ${ExtensionName.Remote} first.`
-      );
+      throw new DependentExtensionNotFoundError(operation, ExtensionName.Remote);
     }
   }
 

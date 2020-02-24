@@ -10,7 +10,6 @@ import { RemoteContainersCommands, VscodeCommands } from "../common/Commands";
 import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
 import { TypeNotSupportedError } from "../common/Error/SystemErrors/TypeNotSupportedError";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
-import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
 import { ConfigKey, EventNames, FileNames, ScaffoldType } from "../constants";
 import { FileUtility } from "../FileUtility";
 import { TelemetryContext, TelemetryWorker } from "../telemetry";
@@ -76,7 +75,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     openInNewWindow: boolean
   ): Promise<void> {
     // Can only create project locally
-    await RemoteExtension.checkRemoteExtension();
+    await RemoteExtension.checkRemoteExtension("create iot containerized project");
 
     const createTimeScaffoldType = ScaffoldType.Local;
 
@@ -105,16 +104,11 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     await FileUtility.writeJsonFile(createTimeScaffoldType, this.iotWorkbenchProjectFilePath, projectConfig);
 
     // Check components prerequisites
-    this.componentList.forEach(async item => {
-      const res = await item.checkPrerequisites();
-      if (!res) {
-        throw new OperationFailedError(
-          "create component for iot containerized project",
-          "component prerequisites are not met.",
-          "Please check out error message in the output window."
-        );
-      }
-    });
+    await Promise.all(
+      this.componentList.map(async component => {
+        await component.checkPrerequisites("create iot containerized project");
+      })
+    );
 
     // Create components
     try {
@@ -175,7 +169,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       throw new DirectoryNotFoundError("open folder in container", `folder path ${folderPath}`, "");
     }
 
-    await RemoteExtension.checkRemoteExtension();
+    await RemoteExtension.checkRemoteExtension("open folder in container");
 
     await vscode.commands.executeCommand(RemoteContainersCommands.OpenFolder, vscode.Uri.file(folderPath));
   }

@@ -106,12 +106,11 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     return await checkExtensionAvailable(ExtensionName.AzureFunctions);
   }
 
-  async checkPrerequisites(): Promise<boolean> {
+  async checkPrerequisites(operation: string): Promise<void> {
     const isFunctionsExtensionAvailable = await AzureFunctions.isAvailable();
     if (!isFunctionsExtensionAvailable) {
-      return false;
+      throw new DependentExtensionNotFoundError(operation, ExtensionName.AzureFunctions);
     }
-    return true;
   }
 
   async load(): Promise<void> {

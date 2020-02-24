@@ -134,10 +134,6 @@ export class AZ3166Device extends ArduinoDeviceBase {
     return version;
   }
 
-  async checkPrerequisites(): Promise<boolean> {
-    return super.checkPrerequisites();
-  }
-
   async create(): Promise<void> {
     this.createCore();
   }
