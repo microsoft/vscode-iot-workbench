@@ -16,16 +16,17 @@ jest.mock("../../src/DigitalTwin/pnp/src/common/utility");
 jest.mock("../../src/DigitalTwin/pnp/src/view/ui");
 
 describe("Device model manager", () => {
+  const folder = "root";
   const context = vscode.ExtensionContext;
   const channel = new ColorizedChannel(Constants.CHANNEL_NAME);
   const manager = new DeviceModelManager(context, channel);
 
-  UI.selectRootFolder = jest.fn().mockResolvedValue("root");
+  UI.selectRootFolder = jest.fn().mockResolvedValue(folder);
   UI.inputModelName = jest.fn().mockResolvedValue("test");
 
   test("create interface successfully", async () => {
     await manager.createModel(ModelType.Interface);
-    expect(UI.openAndShowTextDocument).toHaveBeenCalledWith(path.join("root", "test.interface.json"));
+    expect(UI.openAndShowTextDocument).toHaveBeenCalledWith(path.join(folder, "test.interface.json"));
   });
 
   test("create interface with error", async () => {
@@ -35,7 +36,7 @@ describe("Device model manager", () => {
 
   test("create capability model successfully", async () => {
     await manager.createModel(ModelType.CapabilityModel);
-    expect(UI.openAndShowTextDocument).toHaveBeenCalledWith(path.join("root", "test.capabilitymodel.json"));
+    expect(UI.openAndShowTextDocument).toHaveBeenCalledWith(path.join(folder, "test.capabilitymodel.json"));
   });
 
   test("create capability model with error", async () => {

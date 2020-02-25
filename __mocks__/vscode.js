@@ -26,10 +26,13 @@ const QuickPickItem = {};
 
 const OpenDialogOptions = {};
 
+const InputBoxOptions = {};
+
 const window = {
   createOutputChannel: jest.fn(() => OutputChannel),
   showQuickPick: jest.fn(items => items[0]),
   showOpenDialog: jest.fn(),
+  showInputBox: jest.fn(),
   showTextDocument: jest.fn(),
   showInformationMessage: jest.fn(),
   showWarningMessage: jest.fn(),
@@ -52,6 +55,7 @@ const vscode = {
   QuickPickOptions,
   QuickPickItem,
   OpenDialogOptions,
+  InputBoxOptions,
   window,
   commands,
   workspace
