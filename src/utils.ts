@@ -144,7 +144,7 @@ export interface FolderQuickPickItem<T = undefined> extends vscode.QuickPickItem
 /**
  * Get project device root path.
  * For iot workspace project, it is the "Device" folder.
- * For iot container project, it is the root path.
+ * For iot containerized project, it is the root path.
  */
 export function getProjectDeviceRootPath(): string {
   if (
