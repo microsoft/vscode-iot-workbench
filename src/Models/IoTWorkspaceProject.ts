@@ -106,7 +106,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     );
 
     // Init and load azure components
-    await this.loadAzureConfigAndInitAzureComponents(scaffoldType);
+    await this.loadAzureConfigAndComponents(scaffoldType);
 
     // Check components prerequisites
     await Promise.all(
@@ -297,7 +297,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
    * @param scaffoldType scaffold type
    * @param componentConfigs azure component configs
    */
-  private async loadAzureComponentsWithConfig(componentConfigs: AzureComponentConfig[]): Promise<void> {
+  private async loadAzureComponentsByConfig(componentConfigs: AzureComponentConfig[]): Promise<void> {
     for (const componentConfig of componentConfigs) {
       switch (componentConfig.type) {
         case ComponentType.IoTHub: {
@@ -349,7 +349,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
    * Load project config and init Azure components.
    * @param scaffoldType scaffold type
    */
-  private async loadAzureConfigAndInitAzureComponents(scaffoldType: ScaffoldType): Promise<void> {
+  private async loadAzureConfigAndComponents(scaffoldType: ScaffoldType): Promise<void> {
     const azureConfigFileHandler = new azureComponentConfigModule.AzureConfigFileHandler(this.projectRootPath);
     await azureConfigFileHandler.createIfNotExists(scaffoldType);
 
@@ -359,7 +359,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
       // Support backward compact
       this.initAzureComponentsWithoutConfig(scaffoldType);
     } else {
-      await this.loadAzureComponentsWithConfig(componentConfigs);
+      await this.loadAzureComponentsByConfig(componentConfigs);
     }
   }
 

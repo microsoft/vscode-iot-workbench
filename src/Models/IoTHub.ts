@@ -15,6 +15,7 @@ import { AzureUtility } from "./AzureUtility";
 import { ExtensionName } from "./Interfaces/Api";
 import { Component, ComponentType } from "./Interfaces/Component";
 import { Provisionable } from "./Interfaces/Provisionable";
+import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
 
 export class IoTHub implements Component, Provisionable {
   dependencies: DependencyConfig[] = [];
@@ -154,9 +155,10 @@ export class IoTHub implements Component, Provisionable {
     const iotHubComponentIndex = await this.azureConfigFileHandler.getComponentIndexById(type, this.id);
 
     if (iotHubComponentIndex > -1) {
-      if (componentInfo) {
-        await this.azureConfigFileHandler.updateComponent(type, iotHubComponentIndex, componentInfo);
+      if (!componentInfo) {
+        throw new ArgumentEmptyOrNullError("update config settings of azure functions", "component info");
       }
+      await this.azureConfigFileHandler.updateComponent(type, iotHubComponentIndex, componentInfo);
     } else {
       const newIoTHubConfig: AzureComponentConfig = {
         id: this.id,
