@@ -155,7 +155,7 @@ export function getProjectDeviceRootPath(): string {
     return "";
   }
 
-  // Try get the "Device" folder
+  // Try to get the "Device" folder
   const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
   if (devicePath) {
     const deviceFolder = vscode.workspace.workspaceFolders.find(

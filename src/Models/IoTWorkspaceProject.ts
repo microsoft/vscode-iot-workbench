@@ -97,7 +97,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     }
 
     // Init device component
-    this.initDeviceComponents(boardId);
+    this.initDeviceComponents(boardId, this.deviceRootPath);
     // Load device component
     await Promise.all(
       this.componentList.map(async component => {
@@ -131,7 +131,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
     this.iotWorkbenchProjectFilePath = path.join(this.deviceRootPath, FileNames.iotWorkbenchProjectFileName);
 
     // Init device components
-    this.initDeviceComponents(boardId, templateFilesInfo);
+    this.initDeviceComponents(boardId, this.deviceRootPath, templateFilesInfo);
     // init azure components
     this.initAzureComponents(projectType, workspace);
 
@@ -177,7 +177,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
   }
 
   async openProject(scaffoldType: ScaffoldType, openInNewWindow: boolean, openScenario: OpenScenario): Promise<void> {
-    this.loadWorkspaceConfigFilePath(scaffoldType);
+    await this.loadWorkspaceConfigFilePath(scaffoldType);
 
     if (!(await FileUtility.fileExists(scaffoldType, this.workspaceConfigFilePath))) {
       throw new FileNotFoundError(
@@ -209,14 +209,15 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
    * Init device components according to board id.
    * Update component list with device.
    * @param boardId board id
+   * @param deviceRootPath device root path
    * @param scaffoldType scaffold type
    * @param templateFilesInfo template files info to scaffold files for device
    */
-  private initDeviceComponents(boardId: string, templateFilesInfo?: TemplateFileInfo[]): void {
-    if (!this.deviceRootPath) {
+  private initDeviceComponents(boardId: string, deviceRootPath: string, templateFilesInfo?: TemplateFileInfo[]): void {
+    if (!deviceRootPath) {
       throw new ArgumentEmptyOrNullError(
         "initialize device",
-        `device root path: ${this.deviceRootPath}`,
+        `device root path: ${deviceRootPath}`,
         "Please initialize the project first."
       );
     }
@@ -227,7 +228,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
         this.extensionContext,
         this.channel,
         this.telemetryContext,
-        this.deviceRootPath,
+        deviceRootPath,
         templateFilesInfo
       );
     } else if (boardId === esp32DeviceModule.Esp32Device.boardId) {
@@ -235,7 +236,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
         this.extensionContext,
         this.channel,
         this.telemetryContext,
-        this.deviceRootPath,
+        deviceRootPath,
         templateFilesInfo
       );
     } else {
@@ -357,7 +358,7 @@ export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
 
     if (componentConfigs.length === 0) {
       // Support backward compact
-      this.initAzureComponentsWithoutConfig(scaffoldType);
+      await this.initAzureComponentsWithoutConfig(scaffoldType);
     } else {
       await this.loadAzureComponentsByConfig(componentConfigs);
     }
