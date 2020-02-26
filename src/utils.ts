@@ -38,6 +38,7 @@ import { WorkspaceNotOpenError } from "./common/Error/OperationFailedErrors/Work
 import { SystemResourceNotFoundError } from "./common/Error/SystemErrors/SystemResourceNotFoundError";
 import { FileNotFoundError } from "./common/Error/OperationFailedErrors/FileNotFound";
 import { DirectoryNotFoundError } from "./common/Error/OperationFailedErrors/DirectoryNotFoundError";
+import { ConfigHandler } from "./configHandler";
 
 const impor = require("impor")(__dirname);
 const ioTWorkspaceProjectModule = impor(
@@ -141,9 +142,11 @@ export interface FolderQuickPickItem<T = undefined> extends vscode.QuickPickItem
 }
 
 /**
- * Get the first workspace folder path open in current VS Code instance.
+ * Get project device root path.
+ * For iot workspace project, it is the "Device" folder.
+ * For iot containerized project, it is the root path.
  */
-export function getFirstWorkspaceFolderPath(): string {
+export function getProjectDeviceRootPath(): string {
   if (
     !vscode.workspace.workspaceFolders ||
     vscode.workspace.workspaceFolders.length === 0 ||
@@ -151,6 +154,19 @@ export function getFirstWorkspaceFolderPath(): string {
   ) {
     return "";
   }
+
+  // Try to get the "Device" folder
+  const devicePath = ConfigHandler.get<string>(ConfigKey.devicePath);
+  if (devicePath) {
+    const deviceFolder = vscode.workspace.workspaceFolders.find(
+      folder => path.basename(folder.uri.fsPath) === devicePath
+    );
+    if (deviceFolder) {
+      return deviceFolder.uri.fsPath;
+    }
+  }
+
+  // If no "Device" folder found in current workspace, return first workspace folder directly
   return vscode.workspace.workspaceFolders[0].uri.fsPath;
 }
 
@@ -493,7 +509,7 @@ export async function getProjectConfig(
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
 ): Promise<any> {
   let projectConfig: { [key: string]: string } = {};
-  if (await FileUtility.fileExists(type, iotWorkbenchProjectFilePath)) {
+  if (iotWorkbenchProjectFilePath && (await FileUtility.fileExists(type, iotWorkbenchProjectFilePath))) {
     const projectConfigContent = ((await FileUtility.readFile(
       type,
       iotWorkbenchProjectFilePath,
@@ -507,6 +523,9 @@ export async function getProjectConfig(
 }
 
 export function getWorkspaceFile(rootPath: string): string {
+  if (!rootPath) {
+    throw new ArgumentEmptyOrNullError("get workspace file", "root path");
+  }
   const workspaceFiles = fs
     .readdirSync(rootPath)
     .filter(file => path.extname(file).endsWith(FileNames.workspaceExtensionName));
@@ -542,7 +561,6 @@ export async function updateProjectHostTypeConfig(
   if (!projectConfig[`${ConfigKey.workbenchVersion}`]) {
     projectConfig[`${ConfigKey.workbenchVersion}`] = workbenchVersion;
   }
-
   await FileUtility.writeJsonFile(type, iotWorkbenchProjectFilePath, projectConfig);
 }
 
@@ -553,7 +571,7 @@ export async function updateProjectHostTypeConfig(
  * @param scaffoldType
  */
 export async function configExternalCMakeProjectToIoTContainerProject(scaffoldType: ScaffoldType): Promise<void> {
-  const projectRootPath = getFirstWorkspaceFolderPath();
+  const projectRootPath = getProjectDeviceRootPath();
   if (!projectRootPath) {
     throw new WorkspaceNotOpenError("configure external CMake project to IoT container project");
   }
@@ -582,7 +600,7 @@ export async function configExternalCMakeProjectToIoTContainerProject(scaffoldTy
  * Ask to open as workspace.
  */
 export async function properlyOpenIoTWorkspaceProject(telemetryContext: TelemetryContext): Promise<void> {
-  const rootPath = getFirstWorkspaceFolderPath();
+  const rootPath = getProjectDeviceRootPath();
   if (!rootPath) {
     throw new WorkspaceNotOpenError("properly open IoT workspace project");
   }
@@ -598,7 +616,7 @@ export async function properlyOpenIoTWorkspaceProject(telemetryContext: Telemetr
 }
 
 export function isWorkspaceProject(): boolean {
-  const rootPath = getFirstWorkspaceFolderPath();
+  const rootPath = getProjectDeviceRootPath();
   if (!rootPath) {
     return false;
   }
@@ -629,7 +647,7 @@ export async function constructAndLoadIoTProject(
 ): Promise<IoTWorkbenchProjectBase | undefined> {
   const scaffoldType = ScaffoldType.Workspace;
 
-  const projectFileRootPath = getFirstWorkspaceFolderPath();
+  const projectFileRootPath = getProjectDeviceRootPath();
   const projectHostType = await IoTWorkbenchProjectBase.getProjectType(scaffoldType, projectFileRootPath);
 
   let iotProject;

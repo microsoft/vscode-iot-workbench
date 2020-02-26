@@ -48,7 +48,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
   }
 
   async load(scaffoldType: ScaffoldType, initLoad = false): Promise<void> {
-    this.validateProjectRootPath("load project", scaffoldType);
+    await this.validateProjectRootPathExists("load project", scaffoldType);
 
     // 1. Update iot workbench project file.
     await updateProjectHostTypeConfig(scaffoldType, this.iotWorkbenchProjectFilePath, this.projectHostType);
@@ -129,7 +129,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
    * If yes, open project in container. If not, stay local.
    */
   async openProject(scaffoldType: ScaffoldType, openInNewWindow: boolean, openScenario: OpenScenario): Promise<void> {
-    this.validateProjectRootPath("open project", scaffoldType);
+    await this.validateProjectRootPathExists("open project", scaffoldType);
 
     // 1. Ask to customize
     let openInContainer = false;
@@ -186,7 +186,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     scaffoldType: ScaffoldType,
     templateFilesInfo?: TemplateFileInfo[]
   ): Promise<void> {
-    this.validateProjectRootPath("initialize device", scaffoldType);
+    await this.validateProjectRootPathExists("initialize device", scaffoldType);
 
     let device: Component;
     if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {

@@ -335,7 +335,7 @@ export class AzureFunctions implements Component, Provisionable, Deployable {
     const componentIndex = await this.azureConfigFileHandler.getComponentIndexById(type, this.id);
     if (componentIndex > -1) {
       if (!componentInfo) {
-        throw new ArgumentEmptyOrNullError("AzureFunctions updateConfigSettings", `componentInfo`);
+        throw new ArgumentEmptyOrNullError("update config settings of IoTHub", "component info");
       }
       await this.azureConfigFileHandler.updateComponent(type, componentIndex, componentInfo);
     } else {

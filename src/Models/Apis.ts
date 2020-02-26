@@ -15,7 +15,6 @@ export function getExtension(name: ExtensionName): any {
     if (extension) {
       switch (name) {
         case ExtensionName.AzureAccount:
-        case ExtensionName.AzureFunctions:
         case ExtensionName.Toolkit:
           return extension.exports ? extension.exports : undefined;
         default:

@@ -36,7 +36,7 @@ export class ProjectEnvironmentConfiger {
 
     const scaffoldType = ScaffoldType.Local;
 
-    const projectRootPath = utils.getFirstWorkspaceFolderPath();
+    const projectRootPath = utils.getProjectDeviceRootPath();
     if (!projectRootPath) {
       throw new WorkspaceNotOpenError("configure project environment");
     }
