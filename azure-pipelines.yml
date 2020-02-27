@@ -12,7 +12,7 @@ strategy:
     linux:
       imageName: "ubuntu-16.04"
     mac:
-      imageName: "macos-10.13"
+      imageName: "macos-10.14"
     windows:
       imageName: "vs2017-win2016"
 
@@ -41,7 +41,7 @@ steps:
       targetType: 'inline'
       script: |
         npm run validateLinks
-    displayName: 'Validate links on Linux'
+    displayName: 'Validate links'
 
   - script: npm run check
     displayName: 'Run eslint check'
@@ -50,6 +50,7 @@ steps:
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@2
     displayName: 'Run CredScan'
     inputs:
+      toolMajorVersion: V2
       debugMode: false
     condition: eq(variables['Agent.OS'], 'Windows_NT')
 
