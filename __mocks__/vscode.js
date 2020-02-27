@@ -1,6 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+// Class
+const Uri = {
+  fsPath: "defaultPath",
+  file: jest.fn()
+};
+
+// Interface
 const OutputChannel = {
   appendLine: jest.fn(),
   show: jest.fn(),
@@ -9,11 +16,6 @@ const OutputChannel = {
 
 const ExtensionContext = {
   asAbsolutePath: jest.fn()
-};
-
-const Uri = {
-  fsPath: "defaultPath",
-  file: jest.fn()
 };
 
 const WorkspaceFolder = {
@@ -28,6 +30,14 @@ const OpenDialogOptions = {};
 
 const InputBoxOptions = {};
 
+// Enum
+const ConfigurationTarget = {
+  Global: 1,
+  workspace: 2,
+  WorkspaceFolder: 3
+};
+
+// Namespace
 const window = {
   createOutputChannel: jest.fn(() => OutputChannel),
   showQuickPick: jest.fn(items => items[0]),
@@ -47,25 +57,26 @@ const workspace = {
   workspaceFolders: undefined
 };
 
-const ConfigurationTarget = {
-  Global: 1,
-  workspace: 2,
-  WorkspaceFolder: 3
-};
-
 const vscode = {
+  // Class
+  Uri,
+
+  // Interface
   OutputChannel,
   ExtensionContext,
-  Uri,
   WorkspaceFolder,
   QuickPickOptions,
   QuickPickItem,
   OpenDialogOptions,
   InputBoxOptions,
+
+  // Enum
+  ConfigurationTarget,
+
+  // Namespace
   window,
   commands,
-  workspace,
-  ConfigurationTarget
+  workspace
 };
 
 module.exports = vscode;
