@@ -4,8 +4,7 @@
 export enum ProjectTemplateType {
   Basic = "Basic",
   IotHub = "IotHub",
-  AzureFunctions = "AzureFunctions",
-  StreamAnalytics = "StreamAnalytics"
+  AzureFunctions = "AzureFunctions"
 }
 
 export interface TemplateFileInfo {
@@ -59,7 +58,7 @@ export interface Platform {
 }
 
 export interface DeviceConfig {
+  id: string;
   label: string;
-  description: string;
   detail: string;
 }

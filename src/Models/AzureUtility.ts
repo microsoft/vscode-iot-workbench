@@ -15,7 +15,10 @@ import { ConfigHandler } from "../configHandler";
 import { getExtension } from "./Apis";
 import { ExtensionName } from "./Interfaces/Api";
 import { TelemetryWorker } from "../telemetry";
-import { EventNames } from "../constants";
+import { DependentExtensionNotFoundError } from "../common/Error/OperationFailedErrors/DependentExtensionNotFoundError";
+import { EventNames, ScaffoldType } from "../constants";
+import { AzureConfigFileHandler } from "./AzureComponentConfig";
+import { ComponentType } from "./Interfaces/Component";
 
 export interface ARMParameters {
   [key: string]: { value: string | number | boolean | null };
@@ -41,13 +44,20 @@ export interface ARMTemplate {
 
 export class AzureUtility {
   private static _context: vscode.ExtensionContext;
+  private static _projectFolder: string;
   private static _channel: vscode.OutputChannel | undefined;
   private static _subscriptionId: string | undefined;
   private static _resourceGroup: string | undefined;
   private static _azureAccountExtension: AzureAccount | undefined = getExtension(ExtensionName.AzureAccount);
 
-  static init(context: vscode.ExtensionContext, channel?: vscode.OutputChannel, subscriptionId?: string): void {
+  static init(
+    context: vscode.ExtensionContext,
+    projectPath: string,
+    channel?: vscode.OutputChannel,
+    subscriptionId?: string
+  ): void {
     AzureUtility._context = context;
+    AzureUtility._projectFolder = projectPath;
     AzureUtility._channel = channel;
     AzureUtility._subscriptionId = subscriptionId;
   }
@@ -55,7 +65,7 @@ export class AzureUtility {
   private static async _getSubscriptionList(): Promise<vscode.QuickPickItem[]> {
     const subscriptionList: vscode.QuickPickItem[] = [];
     if (!AzureUtility._azureAccountExtension) {
-      throw new Error("Azure account extension is not found.");
+      throw new DependentExtensionNotFoundError("get subscription list", ExtensionName.AzureAccount);
     }
 
     const subscriptions = AzureUtility._azureAccountExtension.filters;
@@ -79,7 +89,7 @@ export class AzureUtility {
 
   private static _getSessionBySubscriptionId(subscriptionId: string): AzureSession | undefined {
     if (!AzureUtility._azureAccountExtension) {
-      throw new Error("Azure account extension is not found.");
+      throw new DependentExtensionNotFoundError("get session by subscription id", ExtensionName.AzureAccount);
     }
 
     const subscriptions: AzureResourceFilter[] = AzureUtility._azureAccountExtension.filters;
@@ -298,7 +308,7 @@ export class AzureUtility {
         inputValue = _value.label;
       } else if (key.substr(0, 2) === "$$") {
         // Read value from file
-        if (!(vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0)) {
+        if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
           inputValue = "";
         } else {
           const _key = key.substr(2);
@@ -314,7 +324,15 @@ export class AzureUtility {
         // Read value from workspace config
         const _key = key.substr(1);
 
-        const iothubConnectionString = ConfigHandler.get<string>("iothubConnectionString");
+        let iothubConnectionString: string | undefined;
+        const azureConfigFileHandler = new AzureConfigFileHandler(this._projectFolder);
+        const componentConfig = await azureConfigFileHandler.getComponentByType(
+          ScaffoldType.Workspace,
+          ComponentType.IoTHub
+        );
+        if (componentConfig) {
+          iothubConnectionString = componentConfig.componentInfo?.values.iothubConnectionString;
+        }
 
         switch (_key) {
           case "iotHubName":

@@ -1,27 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as fs from "fs-plus";
 import { Guid } from "guid-typescript";
-import * as path from "path";
 import * as vscode from "vscode";
 
-import { ConfigHandler } from "../configHandler";
-import { AzureComponentsStorage, ConfigKey, ScaffoldType } from "../constants";
+import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
+import { DependentExtensionNotFoundError } from "../common/Error/OperationFailedErrors/DependentExtensionNotFoundError";
+import { ScaffoldType } from "../constants";
 import { channelPrintJsonObject, channelShowAndAppendLine } from "../utils";
 
 import { getExtension } from "./Apis";
-import {
-  AzureComponentConfig,
-  AzureConfigFileHandler,
-  AzureConfigs,
-  ComponentInfo,
-  DependencyConfig
-} from "./AzureComponentConfig";
+import { AzureComponentConfig, AzureConfigFileHandler, ComponentInfo, DependencyConfig } from "./AzureComponentConfig";
 import { AzureUtility } from "./AzureUtility";
 import { ExtensionName } from "./Interfaces/Api";
 import { Component, ComponentType } from "./Interfaces/Component";
 import { Provisionable } from "./Interfaces/Provisionable";
+import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
 
 export class IoTHub implements Component, Provisionable {
   dependencies: DependencyConfig[] = [];
@@ -39,7 +33,7 @@ export class IoTHub implements Component, Provisionable {
     this.channel = channel;
     this.componentId = Guid.create().toString();
     this.projectRootPath = projectRoot;
-    this.azureConfigFileHandler = new AzureConfigFileHandler(projectRoot);
+    this.azureConfigFileHandler = new AzureConfigFileHandler(this.projectRootPath);
   }
 
   name = "IoT Hub";
@@ -48,35 +42,19 @@ export class IoTHub implements Component, Provisionable {
     return this.componentType;
   }
 
-  async checkPrerequisites(): Promise<boolean> {
-    return true;
+  async checkPrerequisites(): Promise<void> {
+    // Do nothing.
   }
 
-  async load(): Promise<boolean> {
-    const azureConfigFilePath = path.join(
-      this.projectRootPath,
-      AzureComponentsStorage.folderName,
-      AzureComponentsStorage.fileName
+  async load(): Promise<void> {
+    const componentConfig = await this.azureConfigFileHandler.getComponentByType(
+      ScaffoldType.Workspace,
+      this.componentType
     );
-
-    if (!fs.existsSync(azureConfigFilePath)) {
-      return false;
+    if (componentConfig) {
+      this.componentId = componentConfig.id;
+      this.dependencies = componentConfig.dependencies;
     }
-
-    let azureConfigs: AzureConfigs;
-
-    try {
-      azureConfigs = JSON.parse(fs.readFileSync(azureConfigFilePath, "utf8"));
-      const iotHubConfig = azureConfigs.componentConfigs.find(config => config.type === this.componentType);
-      if (iotHubConfig) {
-        this.componentId = iotHubConfig.id;
-        this.dependencies = iotHubConfig.dependencies;
-        // Load other information from config file.
-      }
-    } catch (error) {
-      return false;
-    }
-    return true;
   }
 
   async create(): Promise<void> {
@@ -107,7 +85,7 @@ export class IoTHub implements Component, Provisionable {
 
     const toolkit = getExtension(ExtensionName.Toolkit);
     if (!toolkit) {
-      throw new Error("Azure IoT Hub Toolkit is not installed. Please install it from Marketplace.");
+      throw new DependentExtensionNotFoundError("provision IoT Hub", ExtensionName.Toolkit);
     }
 
     let iothub = null;
@@ -136,7 +114,11 @@ export class IoTHub implements Component, Provisionable {
 
       const sharedAccessKeyMatches = iothub.iotHubConnectionString.match(/SharedAccessKey=([^;]*)/);
       if (!sharedAccessKeyMatches || sharedAccessKeyMatches.length < 2) {
-        throw new Error("Cannot parse shared access key from IoT Hub connection string. Please retry Azure Provision.");
+        throw new OperationFailedError(
+          "parse shared access key from IoT Hub connection string",
+          "IoT Hub connection string is not valid.",
+          "Please retry Azure Provision."
+        );
       }
 
       const sharedAccessKey = sharedAccessKeyMatches[1];
@@ -144,10 +126,6 @@ export class IoTHub implements Component, Provisionable {
       const eventHubConnectionString = `Endpoint=${iothub.properties.eventHubEndpoints.events.endpoint};\
       SharedAccessKeyName=iothubowner;SharedAccessKey=${sharedAccessKey}`;
       const eventHubConnectionPath = iothub.properties.eventHubEndpoints.events.path;
-
-      await ConfigHandler.update(ConfigKey.iotHubConnectionString, iothub.iotHubConnectionString);
-      await ConfigHandler.update(ConfigKey.eventHubConnectionString, eventHubConnectionString);
-      await ConfigHandler.update(ConfigKey.eventHubConnectionPath, eventHubConnectionPath);
 
       const scaffoldType = ScaffoldType.Workspace;
       await this.updateConfigSettings(scaffoldType, {
@@ -165,7 +143,11 @@ export class IoTHub implements Component, Provisionable {
     } else if (!iothub) {
       return false;
     } else {
-      throw new Error("IoT Hub provision failed. Please check output window for detail.");
+      throw new OperationFailedError(
+        "provision IoT Hub",
+        "IoT Hub connection string does not exist.",
+        "Please retry Azure Provision."
+      );
     }
   }
 
@@ -174,7 +156,7 @@ export class IoTHub implements Component, Provisionable {
 
     if (iotHubComponentIndex > -1) {
       if (!componentInfo) {
-        return;
+        throw new ArgumentEmptyOrNullError("update config settings of azure functions", "component info");
       }
       await this.azureConfigFileHandler.updateComponent(type, iotHubComponentIndex, componentInfo);
     } else {

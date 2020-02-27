@@ -1,18 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import * as vscode from "vscode";
 import * as utils from "../utils";
 import { DigitalTwinConstants } from "./DigitalTwinConstants";
-import { CancelOperationError } from "../CancelOperationError";
+import { OperationCanceledError } from "../common/Error/OperationCanceledError";
 import { ModelRepositoryManager } from "./pnp/src/modelRepository/modelRepositoryManager";
 import { ApiProvider } from "./pnp/src/api/apiProvider";
+import { DigitalTwinNotInitializedError } from "../common/Error/OperationFailedErrors/DigitalTwinNotInitializedError";
 
 /**
  * Digital Twin extension utility
  */
 export class DigitalTwinUtility {
-  private static readonly EXTENSION_NOT_INIT = "Azure Digital Twin extension is not inititalized";
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   private static extensionInstance: any;
   private static channel: vscode.OutputChannel;
@@ -31,7 +30,7 @@ export class DigitalTwinUtility {
    */
   static async selectCapabilityModel(): Promise<string> {
     if (!DigitalTwinUtility.extensionInstance) {
-      throw new Error(DigitalTwinUtility.EXTENSION_NOT_INIT);
+      throw new DigitalTwinNotInitializedError("select capability model");
     }
     let result = "";
     try {
@@ -40,7 +39,7 @@ export class DigitalTwinUtility {
       // skip for UserCancelledError
     }
     if (!result) {
-      throw new CancelOperationError(`Selected device capability model file cancelled.`);
+      throw new OperationCanceledError(`Selected device capability model file cancelled.`);
     }
 
     utils.channelShowAndAppendLine(
@@ -58,7 +57,7 @@ export class DigitalTwinUtility {
    */
   static async downloadDependentInterface(folder: string, capabilityModelFile: string): Promise<boolean> {
     if (!DigitalTwinUtility.extensionInstance) {
-      throw new Error(DigitalTwinUtility.EXTENSION_NOT_INIT);
+      throw new DigitalTwinNotInitializedError("download dependent interface");
     }
     try {
       await DigitalTwinUtility.extensionInstance.downloadDependentInterface(folder, capabilityModelFile);

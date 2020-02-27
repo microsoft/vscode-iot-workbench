@@ -4,9 +4,9 @@
 import * as vscode from "vscode";
 import TelemetryReporter from "vscode-extension-telemetry";
 
-import { CancelOperationError } from "./CancelOperationError";
+import { OperationCanceledError } from "./common/Error/OperationCanceledError";
+import { ExceptionHelper } from "./common/Error/exceptionHelper";
 import { DevelopEnvironment } from "./constants";
-import { ExceptionHelper } from "./exceptionHelper";
 import { RemoteExtension } from "./Models/RemoteExtension";
 import { NSAT } from "./nsat";
 import { WorkbenchExtension } from "./WorkbenchExtension";
@@ -147,7 +147,7 @@ export class TelemetryWorker {
     } catch (error) {
       telemetryContext.properties.errorMessage = error.message;
       let isPopupErrorMsg = true;
-      if (error instanceof CancelOperationError) {
+      if (error instanceof OperationCanceledError) {
         telemetryContext.properties.result = TelemetryResult.Cancelled;
         isPopupErrorMsg = false;
       } else {

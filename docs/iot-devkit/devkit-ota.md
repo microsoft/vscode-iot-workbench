@@ -31,7 +31,7 @@ An active Azure subscription. If you do not have one, you can register via one o
 * Start Visual Studio Code.
 * Make sure [Azure IoT Device Workbench](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-iot-workbench) is installed.
 * Connect the IoT DevKit to your computer.
-* Make sure the [bootloader](https://microsoft.github.io/azure-iot-developer-kit/docs/firmware-upgrading/) on your IoT DevKit and the [SDK](https://microsoft.github.io/azure-iot-developer-kit/versions/) are both updated to [v1.4.0](https://github.com/Microsoft/devkit-sdk/releases/tag/1.4.0) or higher.
+* Make sure the [bootloader](https://microsoft.github.io/azure-iot-developer-kit/docs/firmware-upgrading/) on your IoT DevKit and the [SDK](https://github.com/microsoft/devkit-sdk/releases) are both updated to [v1.4.0](https://github.com/Microsoft/devkit-sdk/releases/tag/1.4.0) or higher.
 
 
 ### Open Azure IoT Device Workbench Examples
@@ -175,7 +175,7 @@ and the content includes:
 * "fwVersion" : [firmware version](#build-the-new-firmware).
 * "fwPackageURI" : [URL of the firmware](#upload-the-firmware-to-cloud)
 * "fwPackageCheckValue" : [CRC value of the firmware](#crc-value-and-file-size-of-the-firmware)
-* "fwSize" : [file size of the firmware](#fcrc-value-and-file-size-of-the-firmware)
+* "fwSize" : [file size of the firmware](#crc-value-and-file-size-of-the-firmware)
 
 The Settings may like this:
 ![Configuration settings](media/firmware-ota/configuration-settings.png)
@@ -264,7 +264,7 @@ After a while, IoT DevKit get the new firmware information from Azure IoT Hub, a
 
 ![ota-2](media/firmware-ota/ota-2.jpg)
 
-The download may take 1 minute (depend on the speed of the network). After downloaded the new firmware to device, it verify the file size and CRC value whether it's the same as the firmware information in [device twins](#step-2:-specify-settings).  
+The download may take 1 minute (depend on the speed of the network). After downloaded the new firmware to device, it verify the file size and CRC value whether it's the same as the firmware information in [device twins](#step-2-specify-settings).
 
 Display "passed" if match.
 

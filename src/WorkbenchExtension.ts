@@ -21,10 +21,6 @@ export class WorkbenchExtension {
     const packageJsonPath = context.asAbsolutePath("./package.json");
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
     const extensionId = packageJson.publisher + "." + packageJson.name;
-
-    if (!extensionId) {
-      throw new Error("Fail to get extension id from package.json.");
-    }
     return extensionId;
   }
 }

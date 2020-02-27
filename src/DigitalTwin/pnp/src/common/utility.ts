@@ -8,6 +8,7 @@ import { DeviceModelManager, ModelType } from "../deviceModel/deviceModelManager
 import { DigitalTwinConstants } from "../intelliSense/digitalTwinConstants";
 import { ModelFileInfo } from "../modelRepository/modelRepositoryManager";
 import { Constants } from "./constants";
+import { PnPModelTypeInvalidError } from "../../../../common/Error/PnPErrors/PnPModelTypeInvalidError";
 
 /**
  * Common utility
@@ -37,12 +38,10 @@ export class Utility {
    * replace all for content
    * @param str string
    * @param replacement replacement
-   * @param caseInsensitive identify if it is case insensitive
    */
-  static replaceAll(str: string, replacement: Map<string, string>, caseInsensitive = false): string {
-    const flag = caseInsensitive ? "ig" : "g";
+  static replaceAll(str: string, replacement: Map<string, string>): string {
     const keys = Array.from(replacement.keys());
-    const pattern = new RegExp(keys.join("|"), flag);
+    const pattern = new RegExp(keys.join("|"), "g");
     return str.replace(pattern, matched => {
       const value: string | undefined = replacement.get(matched);
       return value || matched;
@@ -105,7 +104,7 @@ export class Utility {
   ): Promise<void> {
     const type: ModelType = DeviceModelManager.convertToModelType(content[DigitalTwinConstants.TYPE]);
     if (!type) {
-      throw new Error(Constants.MODEL_TYPE_INVALID_MSG);
+      throw new PnPModelTypeInvalidError("create model file", type);
     }
     const replacement = new Map<string, string>();
     replacement.set(":", "_");

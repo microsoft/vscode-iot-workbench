@@ -81,7 +81,7 @@ A typical **Unique Device Secret (UDS)** is a 64 characters long hexadecimal dig
 
     ![Config UDS string](media/devkit-dps/config-uds-string.png)
 
-Here you may need to close [serial monitor](./devkit-get-started.md/#Serial_monitor_usage) and let devkit enter configuration mode. After UDS string configed successfully, you will see a Visual Studio Code notification.
+Here you may need to close [serial monitor](./devkit-get-started.md/#Serial-monitor-usage) and let devkit enter configuration mode. After UDS string configed successfully, you will see a Visual Studio Code notification.
 ![Config UDS string successfully](media/devkit-dps/config-uds-string-notification.png)
 
 ## Build and upload the device code
@@ -131,7 +131,7 @@ And you will see a **.pem** file generated in your folder.
 
 ## Start the DevKit
 
-1. Launch VS Code and open [serial monitor](./devkit-get-started.md/#Serial_monitor_usage).
+1. Launch VS Code and open [serial monitor](./devkit-get-started.md/#Serial-monitor-usage).
 
 2. Press the **Reset** button on your DevKit.
 
