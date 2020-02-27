@@ -41,7 +41,7 @@ steps:
       targetType: 'inline'
       script: |
         npm run validateLinks
-    displayName: 'Validate links on Linux'
+    displayName: 'Validate links'
 
   - script: npm run check
     displayName: 'Run eslint check'
