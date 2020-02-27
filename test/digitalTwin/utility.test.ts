@@ -15,7 +15,6 @@ describe("Utility", () => {
   const modelId = "urn:model:id:1";
   const replacement = new Map<string, string>();
   replacement.set(Constants.DIGITAL_TWIN_ID_PLACEHOLDER, modelId);
-  replacement.set("{foo}", "bar");
 
   test("create file from template", async () => {
     const templatePath = "templatePath";
@@ -24,14 +23,14 @@ describe("Utility", () => {
       spaces: Constants.JSON_SPACE,
       encoding: Constants.UTF8
     };
-    const template = '{"@id": "{DigitalTwinIdentifier}"}';
+    const template = `{"@id": "${Constants.DIGITAL_TWIN_ID_PLACEHOLDER}"}`;
     readFile.mockResolvedValueOnce(template);
     await Utility.createFileFromTemplate(templatePath, filePath, replacement);
     expect(writeJson).toHaveBeenCalledWith(filePath, { "@id": modelId }, writeOptions);
   });
 
   test("replace all when multiple matched", () => {
-    const template = "{DigitalTwinIdentifier},{DigitalTwinIdentifier}";
+    const template = Constants.DIGITAL_TWIN_ID_PLACEHOLDER + "," + Constants.DIGITAL_TWIN_ID_PLACEHOLDER;
     expect(Utility.replaceAll(template, replacement)).toBe(modelId + "," + modelId);
   });
 
@@ -41,8 +40,11 @@ describe("Utility", () => {
   });
 
   test("replace all with multiple pattern", () => {
-    const template = "{DigitalTwinIdentifier},{foo}";
-    expect(Utility.replaceAll(template, replacement)).toBe(modelId + ",bar");
+    const secondKey = "{foo}";
+    const secondValue = "bar";
+    replacement.set(secondKey, secondValue);
+    const template = Constants.DIGITAL_TWIN_ID_PLACEHOLDER + "," + secondKey;
+    expect(Utility.replaceAll(template, replacement)).toBe(modelId + "," + secondValue);
   });
 
   test("validate model name successfully", async () => {
