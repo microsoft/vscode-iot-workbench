@@ -1,15 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-import { UI, MessageType } from "../../src/DigitalTwin/pnp/src/view/ui";
-import { UIConstants } from "../../src/DigitalTwin/pnp/src/view/uiConstants";
 import { Constants } from "../../src/DigitalTwin/pnp/src/common/constants";
 import { UserCancelledError } from "../../src/DigitalTwin/pnp/src/common/userCancelledError";
+import { ModelType } from "../../src/DigitalTwin/pnp/src/deviceModel/deviceModelManager";
+import { UI, MessageType } from "../../src/DigitalTwin/pnp/src/view/ui";
+import { UIConstants } from "../../src/DigitalTwin/pnp/src/view/uiConstants";
 
 const vscode = require("../../__mocks__/vscode");
 
+jest.mock("../../src/DigitalTwin/pnp/src/common/utility");
+
 describe("UI", () => {
   const label = "label";
+  const name = "test";
   const defaultPath = "defaultPath";
   const secondPath = "secondPath";
   const browseQuickPickItem = {
@@ -46,7 +50,7 @@ describe("UI", () => {
   test("select root folder when only one folder is opened", async () => {
     vscode.workspace.workspaceFolders = [vscode.WorkspaceFolder];
     const folder: string = await UI.selectRootFolder(label);
-    expect(folder).toBe("defaultPath");
+    expect(folder).toBe(defaultPath);
   });
 
   test("select root folder when no folder is opened", async () => {
@@ -59,7 +63,7 @@ describe("UI", () => {
       canSelectFolders: true,
       canSelectMany: false
     });
-    expect(folder).toBe("secondPath");
+    expect(folder).toBe(secondPath);
   });
 
   test("select root folder when multiple folders are opened", async () => {
@@ -79,7 +83,7 @@ describe("UI", () => {
       ],
       quickPickOptions
     );
-    expect(folder).toBe("defaultPath");
+    expect(folder).toBe(defaultPath);
   });
 
   test("show quick pick with cancellation", async () => {
@@ -88,5 +92,16 @@ describe("UI", () => {
 
   test("show open dialog with cancellation", async () => {
     await expect(UI.showOpenDialog(label)).rejects.toThrow(UserCancelledError);
+  });
+
+  test("input model name", async () => {
+    vscode.window.showInputBox = jest.fn().mockResolvedValueOnce(name);
+    const modelName = await UI.inputModelName(label, ModelType.Interface, defaultPath);
+    expect(modelName).toBe(name);
+    expect(vscode.window.showInputBox).toHaveBeenCalled();
+  });
+
+  test("show input box with cancellation", async () => {
+    await expect(UI.showInputBox(label, "Interface name")).rejects.toThrow(UserCancelledError);
   });
 });
