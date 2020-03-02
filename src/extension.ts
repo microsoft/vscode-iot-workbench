@@ -152,12 +152,8 @@ function initDigitalTwinCommand(
   outputChannel: ColorizedChannel,
   enableSurvey: boolean,
   command: Command,
-  callback: (
-    telemetryContext: TelemetryContext,
-    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-    ...args: any[]
-  ) => // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-  Promise<any>
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+  callback: (...args: any[]) => Promise<any>
 ): void {
   context.subscriptions.push(
     vscode.commands.registerCommand(
@@ -166,8 +162,9 @@ function initDigitalTwinCommand(
       async (...args: any[]) => {
         const start: number = Date.now();
         const telemetryContext: TelemetryContext = telemetryWorker.createContext();
+        args.push(telemetryContext);
         try {
-          return await callback(telemetryContext, ...args);
+          return await callback(...args);
         } catch (error) {
           telemetryContext.properties.error = error.name;
           telemetryContext.properties.errorMessage = error.message;
@@ -261,7 +258,7 @@ function initDigitalTwin(context: vscode.ExtensionContext, outputChannel: vscode
     colorizedChannel,
     false,
     Command.DeleteModels,
-    async (_telemetryContext: TelemetryContext, publicRepository: boolean, modelIds: string[]): Promise<void> => {
+    async (publicRepository: boolean, modelIds: string[]): Promise<void> => {
       return modelRepositoryManager.deleteModels(publicRepository, modelIds);
     }
   );
@@ -271,7 +268,7 @@ function initDigitalTwin(context: vscode.ExtensionContext, outputChannel: vscode
     colorizedChannel,
     false,
     Command.DownloadModels,
-    async (_telemetryContext: TelemetryContext, publicRepository: boolean, modelIds: string[]): Promise<void> => {
+    async (publicRepository: boolean, modelIds: string[]): Promise<void> => {
       return modelRepositoryManager.downloadModels(publicRepository, modelIds);
     }
   );
@@ -282,7 +279,6 @@ function initDigitalTwin(context: vscode.ExtensionContext, outputChannel: vscode
     false,
     Command.SearchInterface,
     async (
-      _telemetryContext: TelemetryContext,
       publicRepository: boolean,
       keyword?: string,
       pageSize?: number,
@@ -304,7 +300,6 @@ function initDigitalTwin(context: vscode.ExtensionContext, outputChannel: vscode
     false,
     Command.SearchCapabilityModel,
     async (
-      _telemetryContext: TelemetryContext,
       publicRepository: boolean,
       keyword?: string,
       pageSize?: number,
