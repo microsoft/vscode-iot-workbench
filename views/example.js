@@ -297,13 +297,12 @@ function generateAside(data) {
     });
   }
 }
-
-function command(cmd, callback, ...args) {
+function command(cmd, callback) {
   if (!cmd) {
     return;
   }
-  const args = Array.from(args);
-  if (typeof args[args.length - 1] === "function") {
+  const args = Array.from(arguments);
+  if (typeof args[args.length - 1] === 'function') {
     callback = args[args.length - 1];
     args.length = args.length - 1;
   } else {
