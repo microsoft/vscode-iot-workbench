@@ -16,6 +16,7 @@ import { VSCExpress } from "vscode-express";
 import { RemoteExtension } from "./Models/RemoteExtension";
 import { OperationCanceledError } from "./common/Error/OperationCanceledError";
 import { IoTCubeCommands } from "./common/Commands";
+import { SystemError } from "./common/Error/SystemErrors/SystemError";
 
 type OptionsWithUri = import("request-promise").OptionsWithUri;
 
@@ -301,7 +302,7 @@ export class ExampleExplorer {
       return true;
     } else {
       // TODO: Add buttom to submit issue to iot-workbench repo.
-      throw new Error("The example does not contain a project for Azure IoT Device Workbench.");
+      throw new SystemError("The example does not contain a project for Azure IoT Device Workbench.");
     }
   }
 }
