@@ -83,7 +83,7 @@ export class Esp32Device extends ArduinoDeviceBase {
     devicePath: string,
     templateFiles?: TemplateFileInfo[]
   ) {
-    super(context, devicePath, channel, telemetryContext, DeviceType.IoTButton);
+    super(context, devicePath, channel, telemetryContext, DeviceType.Esp32);
     this.channel = channel;
     this.componentId = Guid.create().toString();
     if (templateFiles) {
@@ -91,10 +91,6 @@ export class Esp32Device extends ArduinoDeviceBase {
     }
     const projectFolder = devicePath + "/..";
     this.azureConfigFileHandler = new AzureConfigFileHandler(projectFolder);
-  }
-
-  async checkPrerequisites(): Promise<boolean> {
-    return super.checkPrerequisites();
   }
 
   async create(): Promise<void> {

@@ -36,7 +36,7 @@ export class ProjectEnvironmentConfiger {
 
     const scaffoldType = ScaffoldType.Local;
 
-    const projectRootPath = utils.getFirstWorkspaceFolderPath();
+    const projectRootPath = utils.getProjectDeviceRootPath();
     if (!projectRootPath) {
       throw new WorkspaceNotOpenError("configure project environment");
     }
@@ -94,7 +94,7 @@ export class ProjectEnvironmentConfiger {
       // project
       await configExternalCMakeProjectToIoTContainerProject(scaffoldType);
 
-      await RemoteExtension.checkRemoteExtension();
+      await RemoteExtension.checkRemoteExtension("configure project environment");
 
       project = new ioTContainerizedProjectModule.IoTContainerizedProject(
         context,

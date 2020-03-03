@@ -10,7 +10,6 @@ import { RemoteContainersCommands, VscodeCommands } from "../common/Commands";
 import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
 import { TypeNotSupportedError } from "../common/Error/SystemErrors/TypeNotSupportedError";
 import { OperationCanceledError } from "../common/Error/OperationCanceledError";
-import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
 import { ConfigKey, EventNames, FileNames, ScaffoldType } from "../constants";
 import { FileUtility } from "../FileUtility";
 import { TelemetryContext, TelemetryWorker } from "../telemetry";
@@ -49,7 +48,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
   }
 
   async load(scaffoldType: ScaffoldType, initLoad = false): Promise<void> {
-    this.validateProjectRootPath("load project", scaffoldType);
+    await this.validateProjectRootPathExists("load project", scaffoldType);
 
     // 1. Update iot workbench project file.
     await updateProjectHostTypeConfig(scaffoldType, this.iotWorkbenchProjectFilePath, this.projectHostType);
@@ -76,7 +75,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     openInNewWindow: boolean
   ): Promise<void> {
     // Can only create project locally
-    await RemoteExtension.checkRemoteExtension();
+    await RemoteExtension.checkRemoteExtension("create iot containerized project");
 
     const createTimeScaffoldType = ScaffoldType.Local;
 
@@ -105,16 +104,11 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     await FileUtility.writeJsonFile(createTimeScaffoldType, this.iotWorkbenchProjectFilePath, projectConfig);
 
     // Check components prerequisites
-    this.componentList.forEach(async item => {
-      const res = await item.checkPrerequisites();
-      if (!res) {
-        throw new OperationFailedError(
-          "create component for iot containerized project",
-          "component prerequisites are not met.",
-          "Please check out error message in the output window."
-        );
-      }
-    });
+    await Promise.all(
+      this.componentList.map(async component => {
+        await component.checkPrerequisites("create iot containerized project");
+      })
+    );
 
     // Create components
     try {
@@ -135,7 +129,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
    * If yes, open project in container. If not, stay local.
    */
   async openProject(scaffoldType: ScaffoldType, openInNewWindow: boolean, openScenario: OpenScenario): Promise<void> {
-    this.validateProjectRootPath("open project", scaffoldType);
+    await this.validateProjectRootPathExists("open project", scaffoldType);
 
     // 1. Ask to customize
     let openInContainer = false;
@@ -175,7 +169,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
       throw new DirectoryNotFoundError("open folder in container", `folder path ${folderPath}`, "");
     }
 
-    await RemoteExtension.checkRemoteExtension();
+    await RemoteExtension.checkRemoteExtension("open folder in container");
 
     await vscode.commands.executeCommand(RemoteContainersCommands.OpenFolder, vscode.Uri.file(folderPath));
   }
@@ -192,7 +186,7 @@ export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
     scaffoldType: ScaffoldType,
     templateFilesInfo?: TemplateFileInfo[]
   ): Promise<void> {
-    this.validateProjectRootPath("initialize device", scaffoldType);
+    await this.validateProjectRootPathExists("initialize device", scaffoldType);
 
     let device: Component;
     if (boardId === raspberryPiDeviceModule.RaspberryPiDevice.boardId) {

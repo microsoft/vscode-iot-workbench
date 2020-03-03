@@ -38,12 +38,10 @@ export class Utility {
    * replace all for content
    * @param str string
    * @param replacement replacement
-   * @param caseInsensitive identify if it is case insensitive
    */
-  static replaceAll(str: string, replacement: Map<string, string>, caseInsensitive = false): string {
-    const flag = caseInsensitive ? "ig" : "g";
+  static replaceAll(str: string, replacement: Map<string, string>): string {
     const keys = Array.from(replacement.keys());
-    const pattern = new RegExp(keys.join("|"), flag);
+    const pattern = new RegExp(keys.join("|"), "g");
     return str.replace(pattern, matched => {
       const value: string | undefined = replacement.get(matched);
       return value || matched;

@@ -42,8 +42,8 @@ export class IoTHub implements Component, Provisionable {
     return this.componentType;
   }
 
-  async checkPrerequisites(): Promise<boolean> {
-    return true;
+  async checkPrerequisites(): Promise<void> {
+    // Do nothing.
   }
 
   async load(): Promise<void> {
@@ -156,7 +156,7 @@ export class IoTHub implements Component, Provisionable {
 
     if (iotHubComponentIndex > -1) {
       if (!componentInfo) {
-        throw new ArgumentEmptyOrNullError("IoTHub updateConfigSettings", "componentInfo");
+        throw new ArgumentEmptyOrNullError("update config settings of azure functions", "component info");
       }
       await this.azureConfigFileHandler.updateComponent(type, iotHubComponentIndex, componentInfo);
     } else {

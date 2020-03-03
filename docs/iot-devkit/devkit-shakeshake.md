@@ -161,9 +161,9 @@ The Arduino sketch sends an event to the Azure IoT Hub. This event triggers the 
 
 For testing purposes, this sample project uses a pre-configured Twitter bearer token. However, there is a [rate limit](https://dev.twitter.com/rest/reference/get/search/tweets) for every Twitter account. If you want to consider using your own token, follow these steps:
 
-1. Go to [Twitter Developer portal](https://dev.twitter.com/) to register a new Twitter app.
+1. Go to [Twitter Developer portal](https://developer.twitter.com/) to register a new Twitter app.
 
-2. [Get Consumer Key and Consumer Secrets](https://support.yapsody.com/hc/en-us/articles/203068116-How-do-I-get-a-Twitter-Consumer-Key-and-Consumer-Secret-key-) of your app.
+2. Get Consumer Key and Consumer Secrets of your app.
 
 3. Use [some utility](https://gearside.com/nebula/utilities/twitter-bearer-token-generator/) to generate a Twitter bearer token from these two keys.
 

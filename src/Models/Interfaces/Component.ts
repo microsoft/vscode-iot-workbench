@@ -5,9 +5,7 @@ export enum ComponentType {
   Device = "Device",
   IoTHub = "IoTHub",
   AzureFunctions = "AzureFunctions",
-  IoTHubDevice = "IoTHubDevice",
-  StreamAnalyticsJob = "StreamAnalyticsJob",
-  CosmosDB = "CosmosDB"
+  IoTHubDevice = "IoTHubDevice"
 }
 
 export interface Component {
@@ -15,6 +13,6 @@ export interface Component {
   id: string;
   load(): Promise<void>;
   create(): Promise<void>;
-  checkPrerequisites(): Promise<boolean>;
+  checkPrerequisites(operation: string): Promise<void>;
   getComponentType(): ComponentType;
 }

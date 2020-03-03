@@ -60,7 +60,7 @@ This tutorial shows how to develop and compile a simple device app written in C 
 
 1. To start running the deployed binary, SSH into your Raspberry Pi device. You can follow these [instructions](https://itsfoss.com/ssh-into-raspberry/) to do so.
 
-2. You need to pass the device connection string as a parameter to run the app, follow [this guide](./docs/create-iothub-device.md) to use Azure IoT Hub Toolkit to do so.
+2. You need to pass the device connection string as a parameter to run the app, follow [this guide](../create-iothub-device.md) to use Azure IoT Hub Toolkit to do so.
 
 3. Run the below commands to enable use to `openssl 1.0.2` on Raspberry Pi:
 

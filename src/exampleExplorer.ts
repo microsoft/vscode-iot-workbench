@@ -16,6 +16,7 @@ import { VSCExpress } from "vscode-express";
 import { RemoteExtension } from "./Models/RemoteExtension";
 import { OperationCanceledError } from "./common/Error/OperationCanceledError";
 import { IoTCubeCommands } from "./common/Commands";
+import { SystemError } from "./common/Error/SystemErrors/SystemError";
 
 type OptionsWithUri = import("request-promise").OptionsWithUri;
 
@@ -295,10 +296,13 @@ export class ExampleExplorer {
     await this.downloadExamplePackage(channel, url, fsPath);
     // Follow the same pattern in Arduino extension to open examples in new
     // VSCode instance
-    const projectPath = utils.getWorkspaceFile(fsPath);
-    if (!projectPath) {
+    const workspaceFiles = fs.listSync(fsPath, [FileNames.workspaceExtensionName]);
+    if (workspaceFiles && workspaceFiles.length > 0) {
+      await vscode.commands.executeCommand(IoTCubeCommands.OpenLocally, workspaceFiles[0], true);
+      return true;
+    } else {
+      // TODO: Add buttom to submit issue to iot-workbench repo.
+      throw new SystemError("The example does not contain a project for Azure IoT Device Workbench.");
     }
-    await vscode.commands.executeCommand(IoTCubeCommands.OpenLocally, projectPath, true);
-    return true;
   }
 }

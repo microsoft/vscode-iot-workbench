@@ -116,10 +116,7 @@ export abstract class IoTWorkbenchProjectBase {
   async compile(): Promise<boolean> {
     for (const item of this.componentList) {
       if (this.canCompile(item)) {
-        const isPrerequisitesAchieved = await item.checkPrerequisites();
-        if (!isPrerequisitesAchieved) {
-          return false;
-        }
+        await item.checkPrerequisites("compile device code");
 
         const res = await item.compile();
         if (!res) {
@@ -133,11 +130,7 @@ export abstract class IoTWorkbenchProjectBase {
   async upload(): Promise<boolean> {
     for (const item of this.componentList) {
       if (this.canUpload(item)) {
-        const isPrerequisitesAchieved = await item.checkPrerequisites();
-        if (!isPrerequisitesAchieved) {
-          return false;
-        }
-
+        await item.checkPrerequisites("upload device code");
         const res = await item.upload();
         if (!res) {
           vscode.window.showErrorMessage("Unable to upload the sketch, please check output window for detail.");
@@ -151,11 +144,7 @@ export abstract class IoTWorkbenchProjectBase {
     const provisionItemList: string[] = [];
     for (const item of this.componentList) {
       if (this.canProvision(item)) {
-        const isPrerequisitesAchieved = await item.checkPrerequisites();
-        if (!isPrerequisitesAchieved) {
-          return false;
-        }
-
+        await item.checkPrerequisites("provision");
         provisionItemList.push(item.name);
       }
     }
@@ -221,11 +210,7 @@ export abstract class IoTWorkbenchProjectBase {
     const deployItemList: string[] = [];
     for (const item of this.componentList) {
       if (this.canDeploy(item)) {
-        const isPrerequisitesAchieved = await item.checkPrerequisites();
-        if (!isPrerequisitesAchieved) {
-          return;
-        }
-
+        await item.checkPrerequisites("deploy device code");
         deployItemList.push(item.name);
       }
     }
@@ -321,7 +306,7 @@ export abstract class IoTWorkbenchProjectBase {
    * Validate whether project root path exists. If not, throw error.
    * @param scaffoldType scaffold type
    */
-  async validateProjectRootPath(operation: string, scaffoldType: ScaffoldType): Promise<void> {
+  async validateProjectRootPathExists(operation: string, scaffoldType: ScaffoldType): Promise<void> {
     if (!(await FileUtility.directoryExists(scaffoldType, this.projectRootPath))) {
       throw new DirectoryNotFoundError(
         operation,
