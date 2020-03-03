@@ -10,7 +10,7 @@
     "url": "https://github.com/Microsoft/vscode-iot-workbench/issues"
   },
   "homepage": "https://github.com/Microsoft/vscode-iot-workbench/blob/master/README.md",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "publisher": "vsciot-vscode",
   "icon": "logo.png",
   "license": "SEE LICENSE IN <LICENSE>",
