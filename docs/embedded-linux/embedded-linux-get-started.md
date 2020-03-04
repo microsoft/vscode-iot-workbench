@@ -65,7 +65,7 @@ This tutorial shows how to develop and compile a simple device app written in C 
 3. Run the below commands to enable use to `openssl 1.0.2` on Raspberry Pi:
 
     ```bash
-    apt-get install libssl1.0 linssl1.0-dev
+    apt-get install libssl1.0 libssl1.0-dev
     sudo ln -s /usr/lib/arm-linux-gnueabihf/libssl.so.1.0.2 /usr/lib/libssl.so.1.0.0
     sudo ln -s /usr/lib/arm-linux-gnueabihf/libcrypto.so.1.0.2 /usr/lib/libcrypto.so.1.0.0
     ```
