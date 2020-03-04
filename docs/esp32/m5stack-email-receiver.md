@@ -4,7 +4,7 @@ In this tutorial, you will learn how to use M5Stack Board to receive email from 
 
 ## What you need
 
-Finish the [Getting Started Guide](./esp32-get-started.md) to:
+Finish the [Getting Started Guide](https://docs.microsoft.com/en-us/samples/azure-samples/esp32-iot-devkit-get-started/sample/) to:
 
 - Get basic knowledge of ESP32 device.
 - Prepare the development environment.
