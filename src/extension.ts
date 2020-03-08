@@ -93,7 +93,10 @@ function initCommand(
   context.subscriptions.push(vscode.commands.registerCommand(command, callback));
 }
 
-// DigitalTwin extension part
+function isJsonFile(document: vscode.TextDocument): boolean {
+  return document.languageId === "json";
+}
+
 function initIntelliSense(context: vscode.ExtensionContext): void {
   // init DigitalTwin graph
   IntelliSenseUtility.initGraph(context);
@@ -117,20 +120,24 @@ function initIntelliSense(context: vscode.ExtensionContext): void {
   );
   const diagnosticProvider = new DigitalTwinDiagnosticProvider();
   const activeTextEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-  if (activeTextEditor) {
-    diagnosticProvider.updateDiagnostics(activeTextEditor.document, diagnosticCollection);
+  if (activeTextEditor && isJsonFile(activeTextEditor.document)) {
+    // delay it for DigitalTwin graph initialization
+    pendingDiagnostic = setTimeout(
+      () => diagnosticProvider.updateDiagnostics(activeTextEditor.document, diagnosticCollection),
+      Constants.DEFAULT_TIMER_MS
+    );
   }
   context.subscriptions.push(diagnosticCollection);
   context.subscriptions.push(
     vscode.window.onDidChangeActiveTextEditor(event => {
-      if (event) {
+      if (event && isJsonFile(event.document)) {
         diagnosticProvider.updateDiagnostics(event.document, diagnosticCollection);
       }
     })
   );
   context.subscriptions.push(
     vscode.workspace.onDidChangeTextDocument(event => {
-      if (event) {
+      if (event && isJsonFile(event.document)) {
         if (pendingDiagnostic) {
           clearTimeout(pendingDiagnostic);
         }
@@ -142,7 +149,11 @@ function initIntelliSense(context: vscode.ExtensionContext): void {
     })
   );
   context.subscriptions.push(
-    vscode.workspace.onDidCloseTextDocument(document => diagnosticCollection.delete(document.uri))
+    vscode.workspace.onDidCloseTextDocument(document => {
+      if (isJsonFile(document)) {
+        diagnosticCollection.delete(document.uri);
+      }
+    })
   );
 }
 

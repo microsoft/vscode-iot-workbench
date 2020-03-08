@@ -6,7 +6,7 @@ import * as vscode from "vscode";
 import { Constants } from "../common/constants";
 import { DigitalTwinConstants } from "./digitalTwinConstants";
 import { PropertyNode } from "./digitalTwinGraph";
-import { IntelliSenseUtility, PropertyPair } from "./intelliSenseUtility";
+import { IntelliSenseUtility, PropertyPair, ModelContent } from "./intelliSenseUtility";
 
 /**
  * Hover provider for DigitalTwin IntelliSense
@@ -38,22 +38,17 @@ export class DigitalTwinHoverProvider implements vscode.HoverProvider {
    * provide hover
    * @param document text document
    * @param position position
-   * @param token cancellation token
    */
-  provideHover(
-    document: vscode.TextDocument,
-    position: vscode.Position,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _token: vscode.CancellationToken
-  ): vscode.ProviderResult<vscode.Hover> {
-    const jsonNode: parser.Node | undefined = IntelliSenseUtility.parseDigitalTwinModel(document.getText());
-    if (!jsonNode) {
-      return undefined;
-    }
+  provideHover(document: vscode.TextDocument, position: vscode.Position): vscode.ProviderResult<vscode.Hover> {
     if (!IntelliSenseUtility.enabled()) {
       return undefined;
     }
-    const node: parser.Node | undefined = parser.findNodeAtOffset(jsonNode, document.offsetAt(position));
+    const modelContent: ModelContent | undefined = IntelliSenseUtility.parseDigitalTwinModel(document.getText());
+    if (!modelContent) {
+      return undefined;
+    }
+    // get json node of Property from position
+    const node: parser.Node | undefined = parser.findNodeAtOffset(modelContent.jsonNode, document.offsetAt(position));
     if (!node || !node.parent) {
       return undefined;
     }

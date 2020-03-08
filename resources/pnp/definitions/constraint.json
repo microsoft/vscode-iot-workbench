@@ -1,4 +1,8 @@
 {
+  "@context": {
+    "v1": "http://azureiot.com/v1/contexts/IoTModel.json",
+    "v2": "http://azure.com/v2/contexts/Model.json"
+  },
   "@id": {
     "minLength": 1,
     "maxLength": 256,

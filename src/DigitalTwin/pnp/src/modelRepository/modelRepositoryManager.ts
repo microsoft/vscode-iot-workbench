@@ -133,7 +133,7 @@ export class ModelRepositoryManager {
    * @param modelIds model id list
    */
   private static validateModelIds(modelIds: string[]): void {
-    if (!modelIds || modelIds.length === 0) {
+    if (!modelIds || !modelIds.length) {
       throw new BadRequestError(`modelIds ${Constants.NOT_EMPTY_MSG}`);
     }
   }
@@ -200,7 +200,7 @@ export class ModelRepositoryManager {
    */
   async submitFiles(telemetryContext: TelemetryContext): Promise<void> {
     const files: string[] = await UI.selectModelFiles(UIConstants.SELECT_MODELS_LABEL);
-    if (files.length === 0) {
+    if (!files.length) {
       return;
     }
     // check unsaved files and save
@@ -317,7 +317,7 @@ export class ModelRepositoryManager {
     // get implemented interface of capability model
     const content = await Utility.getJsonContent(capabilityModelFile);
     const implementedInterface = content[DigitalTwinConstants.IMPLEMENTS];
-    if (!implementedInterface || implementedInterface.length === 0) {
+    if (!implementedInterface || !implementedInterface.length) {
       throw new BadRequestError("no implemented interface found in capability model");
     }
 

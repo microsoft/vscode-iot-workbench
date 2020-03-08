@@ -130,7 +130,7 @@ export class UI {
       canSelectMany: false
     };
     const selected: vscode.Uri[] | undefined = await vscode.window.showOpenDialog(options);
-    if (!selected || selected.length === 0) {
+    if (!selected || !selected.length) {
       throw new UserCancelledError(label);
     }
     return selected[0].fsPath;
@@ -197,7 +197,7 @@ export class UI {
    */
   static async selectModelFiles(label: string, type?: ModelType): Promise<string[]> {
     const fileInfos: ModelFileInfo[] = await UI.findModelFiles(type);
-    if (fileInfos.length === 0) {
+    if (!fileInfos.length) {
       UI.showNotification(MessageType.Warn, UIConstants.MODELS_NOT_FOUND_MSG);
       return [];
     }
@@ -214,7 +214,7 @@ export class UI {
       canPickMany: true,
       matchOnDescription: true
     });
-    if (!selected || selected.length === 0) {
+    if (!selected || !selected.length) {
       throw new UserCancelledError(label);
     }
     return selected.map(s => s.data);
@@ -227,7 +227,7 @@ export class UI {
    */
   static async selectOneModelFile(label: string, type?: ModelType): Promise<string> {
     const fileInfos: ModelFileInfo[] = await UI.findModelFiles(type);
-    if (fileInfos.length === 0) {
+    if (!fileInfos.length) {
       UI.showNotification(MessageType.Warn, UIConstants.MODELS_NOT_FOUND_MSG);
       return Constants.EMPTY_STRING;
     }
@@ -257,7 +257,7 @@ export class UI {
   static async findModelFiles(type?: ModelType): Promise<ModelFileInfo[]> {
     const fileInfos: ModelFileInfo[] = [];
     const files: vscode.Uri[] = await vscode.workspace.findFiles(UIConstants.MODEL_FILE_GLOB);
-    if (files.length === 0) {
+    if (!files.length) {
       return fileInfos;
     }
     // process in parallel
@@ -289,7 +289,7 @@ export class UI {
   static async ensureFilesSaved(label: string, files: string[]): Promise<void> {
     const dirtyFiles: vscode.TextDocument[] = vscode.workspace.textDocuments.filter(f => f.isDirty);
     const unsaved: vscode.TextDocument[] = dirtyFiles.filter(f => files.some(file => file === f.fileName));
-    if (unsaved.length === 0) {
+    if (!unsaved.length) {
       return;
     }
     const nameList: string = unsaved.map(f => path.basename(f.fileName)).toString();
