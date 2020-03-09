@@ -4,7 +4,7 @@
 import * as parser from "jsonc-parser";
 import * as vscode from "vscode";
 import { DigitalTwinConstants } from "./digitalTwinConstants";
-import { ClassNode, DigitalTwinGraph, PropertyNode } from "./digitalTwinGraph";
+import { ClassNode, DigitalTwinGraph, PropertyNode, VersionNode } from "./digitalTwinGraph";
 
 /**
  * Type of json node
@@ -16,6 +16,14 @@ export enum JsonNodeType {
   Number = "number",
   Boolean = "boolean",
   Property = "property"
+}
+
+/**
+ * DigitalTwin model content
+ */
+export interface ModelContent {
+  jsonNode: parser.Node;
+  version: number;
 }
 
 /**
@@ -69,36 +77,83 @@ export class IntelliSenseUtility {
   }
 
   /**
-   * parse the text, return json node if it is DigitalTwin model
+   * get class type of class node
+   * @param classNode class node
+   */
+  static getClassType(classNode: ClassNode): string {
+    return classNode.label || classNode.id;
+  }
+
+  /**
+   * get valid type names
+   * @param propertyNode property node
+   */
+  static getValidTypes(propertyNode: PropertyNode): string[] {
+    if (!propertyNode.range) {
+      return [];
+    }
+    return propertyNode.range.map(classNode => {
+      if (classNode.label) {
+        return classNode.label;
+      } else {
+        // get the name of XMLSchema
+        const index: number = classNode.id.lastIndexOf(DigitalTwinConstants.SCHEMA_SEPARATOR);
+        return index === -1 ? classNode.id : classNode.id.slice(index + 1);
+      }
+    });
+  }
+
+  /**
+   * parse the text, return DigitalTwin model content
    * @param text text
    */
-  static parseDigitalTwinModel(text: string): parser.Node | undefined {
+  static parseDigitalTwinModel(text: string): ModelContent | undefined {
     // skip checking errors in order to do IntelliSense at best effort
     const jsonNode: parser.Node = parser.parseTree(text);
     const contextPath: string[] = [DigitalTwinConstants.CONTEXT];
     const contextNode: parser.Node | undefined = parser.findNodeAtLocation(jsonNode, contextPath);
-    if (contextNode && IntelliSenseUtility.isDigitalTwinContext(contextNode)) {
-      return jsonNode;
+    if (!contextNode) {
+      return undefined;
     }
-    return undefined;
+    const version = IntelliSenseUtility.getDigitalTwinVersion(contextNode);
+    if (!version) {
+      return undefined;
+    }
+    return { jsonNode, version };
   }
 
   /**
-   * check if json node has DigitalTwin context
+   * get the version of DigitalTwin definition,
+   * return 0 if it has no DigitalTwin context
    * @param node json node
    */
-  static isDigitalTwinContext(node: parser.Node): boolean {
+  static getDigitalTwinVersion(node: parser.Node): number {
+    if (!IntelliSenseUtility.graph) {
+      return 0;
+    }
     // @context accept both array and string
     if (node.type === JsonNodeType.String) {
-      return (node.value as string) === DigitalTwinConstants.CONTEXT_TEMPLATE;
+      return IntelliSenseUtility.graph.getVersion(node.value as string);
     } else if (node.type === JsonNodeType.Array && node.children) {
       for (const child of node.children) {
-        if (child.type === JsonNodeType.String && (child.value as string) === DigitalTwinConstants.CONTEXT_TEMPLATE) {
-          return true;
+        if (child.type !== JsonNodeType.String) {
+          return 0;
+        }
+        const version: number = IntelliSenseUtility.graph.getVersion(child.value as string);
+        if (version) {
+          return version;
         }
       }
     }
-    return false;
+    return 0;
+  }
+
+  /**
+   * check if name is a reserved name
+   * @param name name
+   */
+  static isReservedName(name: string): boolean {
+    return name.startsWith(DigitalTwinConstants.RESERVED);
   }
 
   /**
@@ -107,6 +162,21 @@ export class IntelliSenseUtility {
    */
   static isLanguageNode(classNode: ClassNode): boolean {
     return classNode.id === DigitalTwinConstants.LANGUAGE;
+  }
+
+  /**
+   * check if class node is a object class,
+   * which is not one of the following
+   * 1. abstract class
+   * 2. enum
+   * 3. value schema
+   * @param classNode class node
+   */
+  static isObjectClass(classNode: ClassNode): boolean {
+    if (classNode.isAbstract || classNode.enums || !classNode.label) {
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -130,19 +200,19 @@ export class IntelliSenseUtility {
   }
 
   /**
-   * get enums from property range
+   * get enums by version
    * @param propertyNode property node
+   * @param version target version
    */
-  static getEnums(propertyNode: PropertyNode): string[] {
+  static getEnums(propertyNode: PropertyNode, version: number): string[] {
     const enums: string[] = [];
-    if (!propertyNode.range) {
-      return enums;
-    }
-    for (const classNode of propertyNode.range) {
+    for (const classNode of IntelliSenseUtility.getRangeOfPropertyByVersion(propertyNode, version)) {
+      // assume enum node can have different version,
+      // but all enum value of one enum node share the same version
       if (classNode.enums) {
         enums.push(...classNode.enums);
-      } else if (classNode.isAbstract && classNode.children) {
-        for (const child of classNode.children) {
+      } else if (classNode.isAbstract) {
+        for (const child of IntelliSenseUtility.getChildrenOfClassByVersion(classNode, version)) {
           if (child.enums) {
             enums.push(...child.enums);
           }
@@ -153,19 +223,17 @@ export class IntelliSenseUtility {
   }
 
   /**
-   * get object classes from property range
+   * get object classes by version
    * @param propertyNode property node
+   * @param version target version
    */
-  static getObjectClasses(propertyNode: PropertyNode): ClassNode[] {
+  static getObjectClasses(propertyNode: PropertyNode, version: number): ClassNode[] {
     const classes: ClassNode[] = [];
-    if (!propertyNode.range) {
-      return classes;
-    }
-    for (const classNode of propertyNode.range) {
-      if (DigitalTwinGraph.isObjectClass(classNode)) {
+    for (const classNode of IntelliSenseUtility.getRangeOfPropertyByVersion(propertyNode, version)) {
+      if (IntelliSenseUtility.isObjectClass(classNode)) {
         classes.push(classNode);
-      } else if (classNode.isAbstract && classNode.children) {
-        for (const child of classNode.children) {
+      } else if (classNode.isAbstract) {
+        for (const child of IntelliSenseUtility.getChildrenOfClassByVersion(classNode, version)) {
           if (!child.enums) {
             classes.push(child);
           }
@@ -173,6 +241,61 @@ export class IntelliSenseUtility {
       }
     }
     return classes;
+  }
+
+  /**
+   * get range of property node by version
+   * @param propertyNode property node
+   * @param version target version
+   */
+  static getRangeOfPropertyByVersion(propertyNode: PropertyNode, version: number): ClassNode[] {
+    if (!propertyNode.range) {
+      return [];
+    }
+    return propertyNode.range.filter(node => IntelliSenseUtility.isAvailableByVersion(version, node.version));
+  }
+
+  /**
+   * get children of class node by version
+   * @param classNode class node
+   * @param version target version
+   */
+  static getChildrenOfClassByVersion(classNode: ClassNode, version: number): ClassNode[] {
+    if (!classNode.children) {
+      return [];
+    }
+    return classNode.children.filter(node => IntelliSenseUtility.isAvailableByVersion(version, node.version));
+  }
+
+  /**
+   * get properties of class node by version
+   * @param classNode class node
+   * @param version target version
+   */
+  static getPropertiesOfClassByVersion(classNode: ClassNode, version: number): ClassNode[] {
+    if (!classNode.properties) {
+      return [];
+    }
+    return classNode.properties.filter(node => IntelliSenseUtility.isAvailableByVersion(version, node.version));
+  }
+
+  /**
+   * check if node is available by version
+   * @param version target version
+   * @param versionNode version node
+   */
+  static isAvailableByVersion(version: number, versionNode: VersionNode | undefined): boolean {
+    if (!versionNode) {
+      return true;
+    }
+    // assume definition is not allowed to be re-included
+    if (versionNode.includeSince && versionNode.includeSince > version) {
+      return false;
+    }
+    if (versionNode.excludeSince && versionNode.excludeSince <= version) {
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -184,11 +307,10 @@ export class IntelliSenseUtility {
     if (propertyName !== DigitalTwinConstants.SCHEMA) {
       return propertyName;
     }
-    let node: parser.Node = propertyPair.name;
+    const node: parser.Node = propertyPair.name;
     // get outer object node
     if (node.parent && node.parent.parent) {
-      node = node.parent.parent;
-      const outPropertyPair: PropertyPair | undefined = IntelliSenseUtility.getOuterPropertyPair(node);
+      const outPropertyPair: PropertyPair | undefined = IntelliSenseUtility.getOuterPropertyPair(node.parent.parent);
       if (outPropertyPair) {
         const name: string = outPropertyPair.name.value as string;
         if (name === DigitalTwinConstants.IMPLEMENTS) {
