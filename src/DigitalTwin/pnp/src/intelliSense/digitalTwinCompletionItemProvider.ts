@@ -104,7 +104,7 @@ export class DigitalTwinCompletionItemProvider implements vscode.CompletionItemP
   }
 
   /**
-   * evaluate if need add separator after offset
+   * evaluate if need to add separator after offset
    * @param text text
    * @param offset offset
    */

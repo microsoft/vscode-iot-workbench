@@ -531,13 +531,13 @@ export class DigitalTwinDiagnosticProvider {
    * @param collection diagnostic collection
    */
   updateDiagnostics(document: vscode.TextDocument, collection: vscode.DiagnosticCollection): void {
-    // clean diagnostic cache when IntelliSense is disabled
     if (!IntelliSenseUtility.enabled()) {
-      collection.delete(document.uri);
       return;
     }
     const modelContent: ModelContent | undefined = IntelliSenseUtility.parseDigitalTwinModel(document.getText());
     if (!modelContent) {
+      // clean diagnostic cache
+      collection.delete(document.uri);
       return;
     }
     const diagnostics: vscode.Diagnostic[] = this.provideDiagnostics(document, modelContent);
