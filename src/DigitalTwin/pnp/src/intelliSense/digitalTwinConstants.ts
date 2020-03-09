@@ -54,7 +54,5 @@ export class DigitalTwinConstants {
   static readonly INTERFACE_SCHEMA_NODE = "InterfaceInstance/schema";
   static readonly WORD_STOP = ' \t\n\r\v":{[,';
   static readonly REQUIRED_PROPERTY_LABEL = "(required)";
-  static readonly IOT_MODEL_LABEL = "IoTModel";
-  static readonly CONTEXT_TEMPLATE = "http://azureiot.com/v1/contexts/IoTModel.json";
   static readonly SUPPORT_SEMANTIC_TYPES = new Set<string>(["Telemetry", "Property"]);
 }
