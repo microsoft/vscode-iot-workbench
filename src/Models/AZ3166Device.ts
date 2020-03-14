@@ -762,12 +762,8 @@ export class AZ3166Device extends ArduinoDeviceBase {
   }
 
   private async getComList(): Promise<SerialPortInfo[]> {
-    try {
-      const lists = await AZ3166Device.serialport.list();
-      return lists;
-    } catch (err) {
-      throw err;
-    }
+    const lists = await AZ3166Device.serialport.list();
+    return lists;
   }
 
   private async chooseCOM(): Promise<string> {
