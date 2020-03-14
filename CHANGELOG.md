@@ -9,6 +9,7 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 ## Fixed
 
 - Fix serialport on VS Code 1.43.0
+- Fix issue of "Unable to configure UDS"
 
 ## Version 0.12.0
 
