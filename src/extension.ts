@@ -93,6 +93,10 @@ function initCommand(
   context.subscriptions.push(vscode.commands.registerCommand(command, callback));
 }
 
+function isJsonFile(document: vscode.TextDocument): boolean {
+  return document.languageId === "json";
+}
+
 function initIntelliSense(context: vscode.ExtensionContext): void {
   // init DigitalTwin graph
   IntelliSenseUtility.initGraph(context);
@@ -116,20 +120,24 @@ function initIntelliSense(context: vscode.ExtensionContext): void {
   );
   const diagnosticProvider = new DigitalTwinDiagnosticProvider();
   const activeTextEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-  if (activeTextEditor) {
-    diagnosticProvider.updateDiagnostics(activeTextEditor.document, diagnosticCollection);
+  if (activeTextEditor && isJsonFile(activeTextEditor.document)) {
+    // delay it for DigitalTwin graph initialization
+    pendingDiagnostic = setTimeout(
+      () => diagnosticProvider.updateDiagnostics(activeTextEditor.document, diagnosticCollection),
+      Constants.DEFAULT_TIMER_MS
+    );
   }
   context.subscriptions.push(diagnosticCollection);
   context.subscriptions.push(
     vscode.window.onDidChangeActiveTextEditor(event => {
-      if (event) {
+      if (event && isJsonFile(event.document)) {
         diagnosticProvider.updateDiagnostics(event.document, diagnosticCollection);
       }
     })
   );
   context.subscriptions.push(
     vscode.workspace.onDidChangeTextDocument(event => {
-      if (event) {
+      if (event && isJsonFile(event.document)) {
         if (pendingDiagnostic) {
           clearTimeout(pendingDiagnostic);
         }
@@ -141,7 +149,11 @@ function initIntelliSense(context: vscode.ExtensionContext): void {
     })
   );
   context.subscriptions.push(
-    vscode.workspace.onDidCloseTextDocument(document => diagnosticCollection.delete(document.uri))
+    vscode.workspace.onDidCloseTextDocument(document => {
+      if (isJsonFile(document)) {
+        diagnosticCollection.delete(document.uri);
+      }
+    })
   );
 }
 
@@ -151,12 +163,8 @@ function initDigitalTwinCommand(
   outputChannel: ColorizedChannel,
   enableSurvey: boolean,
   command: Command,
-  callback: (
-    telemetryContext: TelemetryContext,
-    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-    ...args: any[]
-  ) => // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-  Promise<any>
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+  callback: (...args: any[]) => Promise<any>
 ): void {
   context.subscriptions.push(
     vscode.commands.registerCommand(
@@ -165,8 +173,9 @@ function initDigitalTwinCommand(
       async (...args: any[]) => {
         const start: number = Date.now();
         const telemetryContext: TelemetryContext = telemetryWorker.createContext();
+        args.push(telemetryContext);
         try {
-          return await callback(telemetryContext, ...args);
+          return await callback(...args);
         } catch (error) {
           telemetryContext.properties.error = error.name;
           telemetryContext.properties.errorMessage = error.message;
@@ -195,7 +204,7 @@ function initDigitalTwinCommand(
     )
   );
 }
-// DigitalTwin extension part
+
 function initDigitalTwin(context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel): void {
   const colorizedChannel = new ColorizedChannel(Constants.CHANNEL_NAME);
   context.subscriptions.push(colorizedChannel);
@@ -260,7 +269,7 @@ function initDigitalTwin(context: vscode.ExtensionContext, outputChannel: vscode
     colorizedChannel,
     false,
     Command.DeleteModels,
-    async (_telemetryContext: TelemetryContext, publicRepository: boolean, modelIds: string[]): Promise<void> => {
+    async (publicRepository: boolean, modelIds: string[]): Promise<void> => {
       return modelRepositoryManager.deleteModels(publicRepository, modelIds);
     }
   );
@@ -270,7 +279,7 @@ function initDigitalTwin(context: vscode.ExtensionContext, outputChannel: vscode
     colorizedChannel,
     false,
     Command.DownloadModels,
-    async (_telemetryContext: TelemetryContext, publicRepository: boolean, modelIds: string[]): Promise<void> => {
+    async (publicRepository: boolean, modelIds: string[]): Promise<void> => {
       return modelRepositoryManager.downloadModels(publicRepository, modelIds);
     }
   );
@@ -281,7 +290,6 @@ function initDigitalTwin(context: vscode.ExtensionContext, outputChannel: vscode
     false,
     Command.SearchInterface,
     async (
-      _telemetryContext: TelemetryContext,
       publicRepository: boolean,
       keyword?: string,
       pageSize?: number,
@@ -303,7 +311,6 @@ function initDigitalTwin(context: vscode.ExtensionContext, outputChannel: vscode
     false,
     Command.SearchCapabilityModel,
     async (
-      _telemetryContext: TelemetryContext,
       publicRepository: boolean,
       keyword?: string,
       pageSize?: number,
@@ -562,10 +569,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     EventNames.setProjectDefaultPath,
     true,
     async () => {
-      const isLocal = RemoteExtension.checkLocalBeforeRunCommand(context);
-      if (!isLocal) {
-        return;
-      }
+      RemoteExtension.ensureLocalBeforeRunCommand("set default project path", context);
       const settings = await IoTWorkbenchSettings.getInstance();
       await settings.setWorkbenchPath();
       return;

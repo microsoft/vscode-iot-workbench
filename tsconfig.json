@@ -9,7 +9,7 @@
       "es2017"
     ],
     "sourceMap": true,
-    "rootDir": ".",    
+    "rootDir": ".",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "strict": true // Enable several strict checks
@@ -22,7 +22,6 @@
   ],
   "exclude": [
     "node_modules",
-    ".vscode-test",
-    "src/DigitalTwin/pnp"
+    ".vscode-test"
   ]
 }

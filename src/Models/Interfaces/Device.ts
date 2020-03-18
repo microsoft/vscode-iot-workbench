@@ -9,13 +9,12 @@ import { Uploadable } from "./Uploadable";
 
 export enum DeviceType {
   MXChipAZ3166 = 1,
-  IoTButton = 2,
-  Esp32 = 3,
-  RaspberryPi = 4
+  Esp32 = 2,
+  RaspberryPi = 3
 }
 
 export interface Device extends Component, Compilable, Uploadable {
   getDeviceType(): DeviceType;
-  configDeviceSettings(): Promise<boolean>;
+  configDeviceSettings(): Promise<void>;
   configDeviceEnvironment(deviceRootPath: string, scaffoldType: ScaffoldType): Promise<void>;
 }

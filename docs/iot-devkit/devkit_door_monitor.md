@@ -20,7 +20,7 @@ The [MXChip IoT DevKit](https://aka.ms/iot-devkit) (a.k.a. IoT DevKit) is an all
 
 ## What you need
 
-Finish the [Getting Started Guide](./devkit-get-started.md) to:
+Finish the [Getting Started Guide](https://docs.microsoft.com/en-us/samples/azure-samples/mxchip-iot-devkit-get-started/sample/) to:
 
 * Have your IoT DevKit connected to Wi-Fi.
 * Prepare the development environment.
@@ -146,7 +146,7 @@ In Visual Studio Code, open the `door_monitor.cs` file (default named `Functions
 Edit the code with the following lines
 
 ```csharp
-client.PostAsync("https://prod-07..yourLogicAppURL..", httpContent);  
+client.PostAsync("your-logic-app-uri", httpContent);
 ```
 
 > NOTE: replace the URL with the unique URL of your workflow

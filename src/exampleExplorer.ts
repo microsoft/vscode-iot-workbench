@@ -14,8 +14,9 @@ import { ArduinoPackageManager } from "./ArduinoPackageManager";
 import { BoardProvider } from "./boardProvider";
 import { VSCExpress } from "vscode-express";
 import { RemoteExtension } from "./Models/RemoteExtension";
-import { CancelOperationError } from "./CancelOperationError";
+import { OperationCanceledError } from "./common/Error/OperationCanceledError";
 import { IoTCubeCommands } from "./common/Commands";
+import { SystemError } from "./common/Error/SystemErrors/SystemError";
 
 type OptionsWithUri = import("request-promise").OptionsWithUri;
 
@@ -169,10 +170,7 @@ export class ExampleExplorer {
   }
 
   async selectBoard(context: vscode.ExtensionContext, telemetryContext: TelemetryContext): Promise<void> {
-    const isLocal = RemoteExtension.checkLocalBeforeRunCommand(context);
-    if (!isLocal) {
-      return;
-    }
+    RemoteExtension.ensureLocalBeforeRunCommand("select board", context);
 
     const boardFolderPath = context.asAbsolutePath(
       path.join(FileNames.resourcesFolderName, FileNames.templatesFolderName)
@@ -207,7 +205,7 @@ export class ExampleExplorer {
     });
 
     if (!boardSelection) {
-      throw new CancelOperationError("Board selection cancelled.");
+      throw new OperationCanceledError("Board selection cancelled.");
     } else if (boardSelection.id === "no_device") {
       await utils.takeNoDeviceSurvey(telemetryContext, context);
       return;
@@ -251,7 +249,7 @@ export class ExampleExplorer {
     const res = await this.initializeExampleInternal(context, channel, telemetryContext);
 
     if (!res) {
-      throw new CancelOperationError(`Example load cancelled.`);
+      throw new OperationCanceledError(`Example load cancelled.`);
     }
 
     vscode.window.showInformationMessage("Example load successfully.");
@@ -295,20 +293,16 @@ export class ExampleExplorer {
     }
 
     utils.channelShowAndAppendLine(channel, "Downloading example package...");
-    const res = await this.downloadExamplePackage(channel, url, fsPath);
-    if (res) {
-      // Follow the same pattern in Arduino extension to open examples in new
-      // VSCode instance
-      const workspaceFiles = fs.listSync(fsPath, [FileNames.workspaceExtensionName]);
-      if (workspaceFiles && workspaceFiles.length > 0) {
-        await vscode.commands.executeCommand(IoTCubeCommands.OpenLocally, workspaceFiles[0], true);
-        return true;
-      } else {
-        // TODO: Add buttom to submit issue to iot-workbench repo.
-        throw new Error("The example does not contain a project for Azure IoT Device Workbench.");
-      }
+    await this.downloadExamplePackage(channel, url, fsPath);
+    // Follow the same pattern in Arduino extension to open examples in new
+    // VSCode instance
+    const workspaceFiles = fs.listSync(fsPath, [FileNames.workspaceExtensionName]);
+    if (workspaceFiles && workspaceFiles.length > 0) {
+      await vscode.commands.executeCommand(IoTCubeCommands.OpenLocally, workspaceFiles[0], true);
+      return true;
     } else {
-      throw new Error("Downloading example package failed. Please check your network settings.");
+      // TODO: Add buttom to submit issue to iot-workbench repo.
+      throw new SystemError("The example does not contain a project for Azure IoT Device Workbench.");
     }
   }
 }

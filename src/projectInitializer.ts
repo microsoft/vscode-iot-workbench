@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+"use strict";
+
 import * as vscode from "vscode";
 import * as path from "path";
 import * as utils from "./utils";
@@ -11,7 +13,9 @@ import { IoTWorkbenchSettings } from "./IoTSettings";
 import { FileUtility } from "./FileUtility";
 import { ProjectTemplate, ProjectTemplateType, TemplatesType } from "./Models/Interfaces/ProjectTemplate";
 import { RemoteExtension } from "./Models/RemoteExtension";
-import { CancelOperationError } from "./CancelOperationError";
+import { ResourceNotFoundError } from "./common/Error/OperationFailedErrors/ResourceNotFoundError";
+import { OperationCanceledError } from "./common/Error/OperationCanceledError";
+import { TypeNotSupportedError } from "./common/Error/SystemErrors/TypeNotSupportedError";
 
 const impor = require("impor")(__dirname);
 const ioTWorkspaceProjectModule = impor(
@@ -34,10 +38,7 @@ export class ProjectInitializer {
     telemetryContext: TelemetryContext
   ): Promise<void> {
     // Only create project when not in remote environment
-    const isLocal = RemoteExtension.checkLocalBeforeRunCommand(context);
-    if (!isLocal) {
-      return;
-    }
+    RemoteExtension.ensureLocalBeforeRunCommand("init project", context);
 
     let openInNewWindow = false;
     // If current window contains other project, open the created project in new
@@ -62,38 +63,25 @@ export class ProjectInitializer {
         // Step 1: Get project name
         const projectPath = await this.generateProjectFolder(telemetryContext, scaffoldType);
         if (!projectPath) {
-          throw new CancelOperationError(`Project initialization cancelled: Project name input cancelled.`);
+          throw new OperationCanceledError(`Project initialization cancelled: Project name input cancelled.`);
         }
 
         // Step 2: Select platform
         const platformSelection = await utils.selectPlatform(scaffoldType, context);
         if (!platformSelection) {
-          throw new CancelOperationError(`Project initialization cancelled: Platform selection cancelled.`);
+          throw new OperationCanceledError(`Project initialization cancelled: Platform selection cancelled.`);
         } else {
           telemetryContext.properties.platform = platformSelection.label;
         }
 
         // Step 3: Select template
-        const resourceRootPath = context.asAbsolutePath(
-          path.join(FileNames.resourcesFolderName, FileNames.templatesFolderName)
-        );
-        const templateJsonFilePath = path.join(resourceRootPath, FileNames.templateFileName);
-        const templateJsonFileString = (await FileUtility.readFile(
-          scaffoldType,
-          templateJsonFilePath,
-          "utf8"
-        )) as string;
-        const templateJson = JSON.parse(templateJsonFileString);
-        if (!templateJson) {
-          throw new Error(`Fail to load template json.`);
-        }
-
+        const templateJson = await utils.getTemplateJson(context, scaffoldType);
         let templateName: string | undefined;
         if (platformSelection.label === PlatformType.Arduino) {
           const templateSelection = await this.selectTemplate(templateJson, PlatformType.Arduino);
 
           if (!templateSelection) {
-            throw new CancelOperationError(`Project initialization cancelled: Project template selection cancelled.`);
+            throw new OperationCanceledError(`Project initialization cancelled: Project template selection cancelled.`);
           } else {
             telemetryContext.properties.template = templateSelection.label;
             if (templateSelection.label === constants.noDeviceMessage) {
@@ -108,11 +96,16 @@ export class ProjectInitializer {
           templateName = constants.embeddedLinuxProjectName;
         }
 
-        const template = templateJson.templates.find((template: ProjectTemplate) => {
+        const template: ProjectTemplate = templateJson.templates.find((template: ProjectTemplate) => {
           return template.platform === platformSelection.label && template.name === templateName;
         });
         if (!template) {
-          throw new Error(`Fail to find the wanted project template in template json file.`);
+          throw new ResourceNotFoundError(
+            "initialize iot project",
+            `project template in template json file with the given template name ${templateName} \
+            and platform ${platformSelection.label}`,
+            ""
+          );
         }
 
         // Step 4: Load the list of template files
@@ -121,6 +114,9 @@ export class ProjectInitializer {
           template.type
         );
 
+        const resourceRootPath = context.asAbsolutePath(
+          path.join(FileNames.resourcesFolderName, FileNames.templatesFolderName)
+        );
         const templateFolder = path.join(resourceRootPath, template.path);
         const templateFilesInfo = await utils.getTemplateFilesInfo(templateFolder);
 
@@ -135,7 +131,7 @@ export class ProjectInitializer {
         } else if (template.platform === PlatformType.Arduino) {
           project = new ioTWorkspaceProjectModule.IoTWorkspaceProject(context, channel, telemetryContext, projectPath);
         } else {
-          throw new Error("unsupported platform");
+          throw new TypeNotSupportedError("platform", `${template.platform}`);
         }
         await project.create(templateFilesInfo, projectTemplateType, template.boardId, openInNewWindow);
       }

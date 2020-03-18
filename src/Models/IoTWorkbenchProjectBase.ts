@@ -4,7 +4,8 @@
 import * as path from "path";
 import * as vscode from "vscode";
 
-import { CancelOperationError } from "../CancelOperationError";
+import { OperationCanceledError } from "../common/Error/OperationCanceledError";
+import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
 import { ConfigKey, EventNames, FileNames, ScaffoldType } from "../constants";
 import { FileUtility } from "../FileUtility";
 import { TelemetryContext, TelemetryWorker } from "../telemetry";
@@ -19,6 +20,7 @@ import { ProjectHostType } from "./Interfaces/ProjectHostType";
 import { ProjectTemplateType, TemplateFileInfo } from "./Interfaces/ProjectTemplate";
 import { Provisionable } from "./Interfaces/Provisionable";
 import { Uploadable } from "./Interfaces/Uploadable";
+import { DirectoryNotFoundError } from "../common/Error/OperationFailedErrors/DirectoryNotFoundError";
 
 const impor = require("impor")(__dirname);
 const azureUtilityModule = impor("./AzureUtility") as typeof import("./AzureUtility");
@@ -114,10 +116,7 @@ export abstract class IoTWorkbenchProjectBase {
   async compile(): Promise<boolean> {
     for (const item of this.componentList) {
       if (this.canCompile(item)) {
-        const isPrerequisitesAchieved = await item.checkPrerequisites();
-        if (!isPrerequisitesAchieved) {
-          return false;
-        }
+        await item.checkPrerequisites("compile device code");
 
         const res = await item.compile();
         if (!res) {
@@ -131,11 +130,7 @@ export abstract class IoTWorkbenchProjectBase {
   async upload(): Promise<boolean> {
     for (const item of this.componentList) {
       if (this.canUpload(item)) {
-        const isPrerequisitesAchieved = await item.checkPrerequisites();
-        if (!isPrerequisitesAchieved) {
-          return false;
-        }
-
+        await item.checkPrerequisites("upload device code");
         const res = await item.upload();
         if (!res) {
           vscode.window.showErrorMessage("Unable to upload the sketch, please check output window for detail.");
@@ -149,11 +144,7 @@ export abstract class IoTWorkbenchProjectBase {
     const provisionItemList: string[] = [];
     for (const item of this.componentList) {
       if (this.canProvision(item)) {
-        const isPrerequisitesAchieved = await item.checkPrerequisites();
-        if (!isPrerequisitesAchieved) {
-          return false;
-        }
-
+        await item.checkPrerequisites("provision");
         provisionItemList.push(item.name);
       }
     }
@@ -169,7 +160,7 @@ export abstract class IoTWorkbenchProjectBase {
     let resourceGroup: string | undefined = "";
     if (provisionItemList.length > 0) {
       await checkAzureLogin();
-      azureUtilityModule.AzureUtility.init(this.extensionContext, this.channel);
+      azureUtilityModule.AzureUtility.init(this.extensionContext, this.projectRootPath, this.channel);
       resourceGroup = await azureUtilityModule.AzureUtility.getResourceGroup();
       subscriptionId = azureUtilityModule.AzureUtility.subscriptionId;
       if (!resourceGroup || !subscriptionId) {
@@ -206,7 +197,7 @@ export abstract class IoTWorkbenchProjectBase {
 
         const res = await item.provision();
         if (!res) {
-          throw new CancelOperationError("Provision cancelled.");
+          throw new OperationCanceledError("Provision cancelled.");
         }
       }
     }
@@ -219,11 +210,7 @@ export abstract class IoTWorkbenchProjectBase {
     const deployItemList: string[] = [];
     for (const item of this.componentList) {
       if (this.canDeploy(item)) {
-        const isPrerequisitesAchieved = await item.checkPrerequisites();
-        if (!isPrerequisitesAchieved) {
-          return;
-        }
-
+        await item.checkPrerequisites("deploy device code");
         deployItemList.push(item.name);
       }
     }
@@ -261,12 +248,12 @@ export abstract class IoTWorkbenchProjectBase {
         );
 
         if (!selection) {
-          throw new CancelOperationError(`Component deployment cancelled.`);
+          throw new OperationCanceledError(`Component deployment cancelled.`);
         }
 
         const res = await item.deploy();
         if (!res) {
-          throw new Error(`The deployment of ${item.name} failed.`);
+          throw new OperationFailedError("deploy iot workbench project", `Failed to deploy component ${item.name}`, "");
         }
       }
     }
@@ -319,9 +306,13 @@ export abstract class IoTWorkbenchProjectBase {
    * Validate whether project root path exists. If not, throw error.
    * @param scaffoldType scaffold type
    */
-  async validateProjectRootPath(scaffoldType: ScaffoldType): Promise<void> {
+  async validateProjectRootPathExists(operation: string, scaffoldType: ScaffoldType): Promise<void> {
     if (!(await FileUtility.directoryExists(scaffoldType, this.projectRootPath))) {
-      throw new Error(`Project root path ${this.projectRootPath} does not exist. Please initialize the project first.`);
+      throw new DirectoryNotFoundError(
+        operation,
+        `project root path ${this.projectRootPath}`,
+        "Please initialize the project first."
+      );
     }
   }
 }
