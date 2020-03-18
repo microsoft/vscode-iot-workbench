@@ -1,11 +1,23 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+const path = require("path");
+
 // Class
 const Uri = {
   fsPath: "defaultPath",
   file: jest.fn()
 };
+
+const Diagnostic = jest.fn((range, message, severity) => {
+  return {
+    range,
+    message,
+    severity
+  };
+});
+
+const Range = jest.fn();
 
 // Interface
 const OutputChannel = {
@@ -15,11 +27,25 @@ const OutputChannel = {
 };
 
 const ExtensionContext = {
-  asAbsolutePath: jest.fn()
+  asAbsolutePath: jest.fn(p => {
+    const rootPath = path.resolve(__dirname, "..");
+    return path.join(rootPath, p);
+  })
 };
 
 const WorkspaceFolder = {
   uri: Uri
+};
+
+const TextDocument = {
+  uri: Uri,
+  getText: jest.fn(),
+  positionAt: jest.fn()
+};
+
+const DiagnosticCollection = {
+  set: jest.fn(),
+  delete: jest.fn()
 };
 
 const QuickPickOptions = {};
@@ -35,6 +61,13 @@ const ConfigurationTarget = {
   Global: 1,
   workspace: 2,
   WorkspaceFolder: 3
+};
+
+const DiagnosticSeverity = {
+  Error: 0,
+  Warning: 1,
+  Information: 2,
+  Hint: 3
 };
 
 // Namespace
@@ -60,6 +93,8 @@ const workspace = {
 const vscode = {
   // Class
   Uri,
+  Diagnostic,
+  Range,
 
   // Interface
   OutputChannel,
@@ -69,9 +104,12 @@ const vscode = {
   QuickPickItem,
   OpenDialogOptions,
   InputBoxOptions,
+  TextDocument,
+  DiagnosticCollection,
 
   // Enum
   ConfigurationTarget,
+  DiagnosticSeverity,
 
   // Namespace
   window,
