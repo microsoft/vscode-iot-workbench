@@ -1,0 +1,15 @@
+{
+  "input": {
+    "@id": "{DigitalTwinIdentifier}",
+    "@type": "Invalid",
+    "displayName": "mycapabilitymodel",
+    "implements": [
+      {
+        "schema": "urn:azureiot:DeviceManagement:DeviceInformation:1",
+        "name": "deviceInfo"
+      }
+    ],
+    "@context": "http://azureiot.com/v1/contexts/IoTModel.json"
+  },
+  "output": ["Invalid type. Valid types:\nInterface\nCapabilityModel"]
+}
