@@ -23,7 +23,7 @@ import { ColorizedChannel } from "./DigitalTwin/pnp/src/common/colorizedChannel"
 import { Constants } from "./DigitalTwin/pnp/src/common/constants";
 import { DeviceModelManager, ModelType } from "./DigitalTwin/pnp/src/deviceModel/deviceModelManager";
 import { ModelRepositoryManager } from "./DigitalTwin/pnp/src/modelRepository/modelRepositoryManager";
-import { IntelliSenseUtility } from "./DigitalTwin/pnp/src/intelliSense/intelliSenseUtility";
+import { IntelliSenseUtility, ModelContent } from "./DigitalTwin/pnp/src/intelliSense/intelliSenseUtility";
 import { DigitalTwinCompletionItemProvider } from "./DigitalTwin/pnp/src/intelliSense/digitalTwinCompletionItemProvider";
 import { DigitalTwinHoverProvider } from "./DigitalTwin/pnp/src/intelliSense/digitalTwinHoverProvider";
 import { DigitalTwinDiagnosticProvider } from "./DigitalTwin/pnp/src/intelliSense/digitalTwinDiagnosticProvider";
@@ -155,12 +155,13 @@ function initIntelliSense(context: vscode.ExtensionContext, telemetryWorker: Tel
   context.subscriptions.push(
     vscode.workspace.onDidOpenTextDocument(document => {
       if (IntelliSenseUtility.isJsonFile(document)) {
-        // check it is DTDL file and get version of it
-        // send telemetry
-        const telemetryContext: TelemetryContext = telemetryWorker.createContext();
-        telemetryContext.properties.result = TelemetryResult.Succeeded;
-        // other properties such as model id and version
-        telemetryWorker.sendEvent(Command.OpenModelFile, telemetryContext);
+        const modelContent: ModelContent | undefined = IntelliSenseUtility.parseDigitalTwinModel(document.getText());
+        if (modelContent) {
+          const telemetryContext: TelemetryContext = telemetryWorker.createContext();
+          telemetryContext.properties.result = TelemetryResult.Succeeded;
+          telemetryContext.properties.version = modelContent.version.toString();
+          telemetryWorker.sendEvent(Command.OpenFile, telemetryContext);
+        }
       }
     })
   );

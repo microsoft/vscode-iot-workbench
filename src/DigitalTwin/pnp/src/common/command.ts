@@ -14,5 +14,5 @@ export enum Command {
   SubmitFiles = "azure-digital-twins.submitFiles",
   DeleteModels = "azure-digital-twins.deleteModels",
   DownloadModels = "azure-digital-twins.downloadModels",
-  OpenModelFile = "azure-digital-twins.openModelFile"
+  OpenFile = "azure-digital-twins.openFile"
 }
