@@ -29,6 +29,7 @@ export enum DiagnosticMessage {
  * Constants for DigitalTwin IntelliSense
  */
 export class DigitalTwinConstants {
+  static readonly JSON_LANGUAGE_ID = "json";
   static readonly SCHEMA_SEPARATOR = "#";
   static readonly BASE_CLASS = "Entity";
   static readonly NAME = "name";

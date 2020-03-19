@@ -336,6 +336,14 @@ export class IntelliSenseUtility {
     return outerProperty ? IntelliSenseUtility.parseProperty(outerProperty) : undefined;
   }
 
+  /**
+   * check if text document is a JSON file
+   * @param document text document
+   */
+  static isJsonFile(document: vscode.TextDocument): boolean {
+    return document.languageId === DigitalTwinConstants.JSON_LANGUAGE_ID;
+  }
+
   private static graph: DigitalTwinGraph;
   private constructor() {}
 }
