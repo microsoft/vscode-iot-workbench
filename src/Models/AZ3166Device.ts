@@ -186,13 +186,13 @@ export class AZ3166Device extends ArduinoDeviceBase {
         // Get DPS Credential
         credentials = await this.getDPSCredentialsFromInput();
 
-        await this.logAndSetCredentials(credentials, ConfigDeviceOptions.ConnectionString);
+        await this.logAndSetCredentials(credentials, ConfigDeviceOptions.DPS);
         return;
       case ConfigDeviceOptions.UDS:
         // Get UDS string
         credentials = await this.getUDSStringFromInput();
 
-        await this.logAndSetCredentials(credentials, ConfigDeviceOptions.ConnectionString);
+        await this.logAndSetCredentials(credentials, ConfigDeviceOptions.UDS);
         return;
       default:
         throw new TypeNotSupportedError("device setting type", `${deviceSettingType}`);
@@ -229,7 +229,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
         deviceSettingTypeForLog = "device connection string";
         break;
       case ConfigDeviceOptions.DPS:
-        deviceSettingTypeForLog = "UPS credentials";
+        deviceSettingTypeForLog = "DPS credentials";
         break;
       case ConfigDeviceOptions.UDS:
         deviceSettingTypeForLog = "Unique Device String (UDS)";
