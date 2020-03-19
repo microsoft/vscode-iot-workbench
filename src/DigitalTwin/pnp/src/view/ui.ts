@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
-
+"use strict";
 import * as path from "path";
 import * as vscode from "vscode";
 import { Constants } from "../common/constants";
@@ -75,15 +75,14 @@ export class UI {
    * @param label label
    */
   static async selectRootFolder(label: string): Promise<string> {
-    const workspaceFolders: vscode.WorkspaceFolder[] | undefined = vscode.workspace.workspaceFolders;
     // use the only workspace as default
-    if (workspaceFolders && workspaceFolders.length === 1) {
-      return workspaceFolders[0].uri.fsPath;
+    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
+      return vscode.workspace.workspaceFolders[0].uri.fsPath;
     }
     // select workspace or open specified folder
     let items: vscode.QuickPickItem[] = [];
-    if (workspaceFolders) {
-      items = workspaceFolders.map((f: vscode.WorkspaceFolder) => {
+    if (vscode.workspace.workspaceFolders) {
+      items = vscode.workspace.workspaceFolders.map((f: vscode.WorkspaceFolder) => {
         const fsPath: string = f.uri.fsPath;
         return {
           label: path.basename(fsPath),

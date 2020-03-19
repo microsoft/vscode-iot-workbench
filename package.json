@@ -17,7 +17,7 @@
   "aiKey": "[AIKEY PLACEHOLDER]",
   "codeGenConfigUrl": "https://aka.ms/iot-codegen-cli-for-workbench-staging",
   "engines": {
-    "vscode": "^1.39.0"
+    "vscode": "^1.43.0"
   },
   "categories": [
     "Azure",
@@ -225,9 +225,9 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile && webpack --mode production",
-    "compile": "tsc -p ./ && node scripts/copyVendor.js",
+    "compile": "tsc -p ./",
     "validateLinks": "tsc scripts/mdLinkChecker/mdLinkChecker.ts && node scripts/mdLinkChecker/mdLinkChecker.js --rootDir=.",
-    "watch": "tsc -watch -p ./ && node scripts/copyVendor.js",
+    "watch": "tsc -watch -p ./",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "test": "jest",
     "test:coverage": "jest --coverage",
@@ -299,6 +299,7 @@
     "request": "^2.88.2",
     "request-promise": "^4.2.4",
     "ssh2": "^0.6.1",
+    "usb-native": "^5.0.5",
     "validator": "^12.2.0",
     "vscode-express": "^1.0.1",
     "vscode-extension-telemetry": "^0.1.0",
