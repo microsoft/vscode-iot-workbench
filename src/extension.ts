@@ -23,7 +23,7 @@ import { ColorizedChannel } from "./DigitalTwin/pnp/src/common/colorizedChannel"
 import { Constants } from "./DigitalTwin/pnp/src/common/constants";
 import { DeviceModelManager, ModelType } from "./DigitalTwin/pnp/src/deviceModel/deviceModelManager";
 import { ModelRepositoryManager } from "./DigitalTwin/pnp/src/modelRepository/modelRepositoryManager";
-import { IntelliSenseUtility } from "./DigitalTwin/pnp/src/intelliSense/intelliSenseUtility";
+import { IntelliSenseUtility, ModelContent } from "./DigitalTwin/pnp/src/intelliSense/intelliSenseUtility";
 import { DigitalTwinCompletionItemProvider } from "./DigitalTwin/pnp/src/intelliSense/digitalTwinCompletionItemProvider";
 import { DigitalTwinHoverProvider } from "./DigitalTwin/pnp/src/intelliSense/digitalTwinHoverProvider";
 import { DigitalTwinDiagnosticProvider } from "./DigitalTwin/pnp/src/intelliSense/digitalTwinDiagnosticProvider";
@@ -93,11 +93,7 @@ function initCommand(
   context.subscriptions.push(vscode.commands.registerCommand(command, callback));
 }
 
-function isJsonFile(document: vscode.TextDocument): boolean {
-  return document.languageId === "json";
-}
-
-function initIntelliSense(context: vscode.ExtensionContext): void {
+function initIntelliSense(context: vscode.ExtensionContext, telemetryWorker: TelemetryWorker): void {
   // init DigitalTwin graph
   IntelliSenseUtility.initGraph(context);
   // register providers of completionItem and hover
@@ -120,7 +116,7 @@ function initIntelliSense(context: vscode.ExtensionContext): void {
   );
   const diagnosticProvider = new DigitalTwinDiagnosticProvider();
   const activeTextEditor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
-  if (activeTextEditor && isJsonFile(activeTextEditor.document)) {
+  if (activeTextEditor && IntelliSenseUtility.isJsonFile(activeTextEditor.document)) {
     // delay it for DigitalTwin graph initialization
     pendingDiagnostic = setTimeout(
       () => diagnosticProvider.updateDiagnostics(activeTextEditor.document, diagnosticCollection),
@@ -130,14 +126,14 @@ function initIntelliSense(context: vscode.ExtensionContext): void {
   context.subscriptions.push(diagnosticCollection);
   context.subscriptions.push(
     vscode.window.onDidChangeActiveTextEditor(event => {
-      if (event && isJsonFile(event.document)) {
+      if (event && IntelliSenseUtility.isJsonFile(event.document)) {
         diagnosticProvider.updateDiagnostics(event.document, diagnosticCollection);
       }
     })
   );
   context.subscriptions.push(
     vscode.workspace.onDidChangeTextDocument(event => {
-      if (event && isJsonFile(event.document)) {
+      if (event && IntelliSenseUtility.isJsonFile(event.document)) {
         if (pendingDiagnostic) {
           clearTimeout(pendingDiagnostic);
         }
@@ -150,8 +146,22 @@ function initIntelliSense(context: vscode.ExtensionContext): void {
   );
   context.subscriptions.push(
     vscode.workspace.onDidCloseTextDocument(document => {
-      if (isJsonFile(document)) {
+      if (IntelliSenseUtility.isJsonFile(document)) {
         diagnosticCollection.delete(document.uri);
+      }
+    })
+  );
+  // send DigitalTwin usage telemetry
+  context.subscriptions.push(
+    vscode.workspace.onDidOpenTextDocument(document => {
+      if (IntelliSenseUtility.isJsonFile(document)) {
+        const modelContent: ModelContent | undefined = IntelliSenseUtility.parseDigitalTwinModel(document.getText());
+        if (modelContent) {
+          const telemetryContext: TelemetryContext = telemetryWorker.createContext();
+          telemetryContext.properties.result = TelemetryResult.Succeeded;
+          telemetryContext.properties.dtdlVersion = modelContent.version.toString();
+          telemetryWorker.sendEvent(Command.OpenFile, telemetryContext);
+        }
       }
     })
   );
@@ -212,7 +222,7 @@ function initDigitalTwin(context: vscode.ExtensionContext, outputChannel: vscode
   const modelRepositoryManager = new ModelRepositoryManager(context, Constants.WEB_VIEW_PATH, colorizedChannel);
 
   DigitalTwinUtility.init(modelRepositoryManager, outputChannel);
-  initIntelliSense(context);
+  initIntelliSense(context, telemetryWorker);
   initDigitalTwinCommand(
     context,
     telemetryWorker,
