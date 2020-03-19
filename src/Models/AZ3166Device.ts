@@ -40,7 +40,7 @@ const forEach = impor("lodash.foreach") as typeof import("lodash.foreach");
 const trimStart = impor("lodash.trimstart") as typeof import("lodash.trimstart");
 
 interface SerialPortInfo {
-  comName: string;
+  path: string;
   manufacturer: string;
   vendorId: string;
   productId: string;
@@ -71,7 +71,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   static get serialport(): any {
     if (!AZ3166Device._serialport) {
-      AZ3166Device._serialport = require("../../vendor/node-usb-native").SerialPort;
+      AZ3166Device._serialport = require("usb-native").SerialPort;
     }
     return AZ3166Device._serialport;
   }
@@ -801,11 +801,11 @@ export class AZ3166Device extends ArduinoDeviceBase {
       });
 
       if (list && list.length) {
-        let comPort = list[0].comName;
+        let comPort = list[0].path;
         if (list.length > 1) {
           // TODO: select com port from list when there are multiple AZ3166
           // boards connected
-          comPort = list[0].comName;
+          comPort = list[0].path;
         }
 
         if (!comPort) {
