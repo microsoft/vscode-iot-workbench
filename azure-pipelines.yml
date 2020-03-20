@@ -31,6 +31,17 @@ steps:
     inputs:
       version: '>=12.0.0'
 
+  - task: Bash@3
+    inputs:
+      targetType: 'inline'
+      script: |
+        sudo apt-get update;
+        sudo apt-get install g++-multilib;
+        sudo apt-get install -y build-essential;
+        sudo apt-get install libudev-dev;
+    displayName: 'Install dev dependencies'
+    condition: eq(variables['Agent.OS'], 'Linux')
+
   - task: Npm@1
     displayName: 'Install dependencies'
     inputs:
