@@ -6,7 +6,6 @@ import * as crypto from "crypto";
 import * as fs from "fs-plus";
 import * as path from "path";
 import * as vscode from "vscode";
-import { MessageItem } from "vscode";
 import * as sdk from "vscode-iot-device-cube-sdk";
 import * as WinReg from "winreg";
 
@@ -475,10 +474,10 @@ export async function handleExternalProject(telemetryContext: TelemetryContext):
   const message =
     "An IoT project is needed to process the operation, do you want to configure current project to be an IoT Embedded Linux Project or create an IoT project?";
   class Choice {
-    static configureAsContainerProject: MessageItem = {
+    static configureAsContainerProject: vscode.MessageItem = {
       title: "Configure as Embedded Linux Project"
     };
-    static createNewProject: MessageItem = { title: "Create IoT Project" };
+    static createNewProject: vscode.MessageItem = { title: "Create IoT Project" };
   }
 
   const result: vscode.MessageItem | undefined = await vscode.window.showInformationMessage(

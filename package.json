@@ -299,11 +299,11 @@
     "request": "^2.88.2",
     "request-promise": "^4.2.4",
     "ssh2": "^0.6.1",
-    "usb-native": "^5.0.5",
+    "usb-native": "^5.0.12",
     "validator": "^12.2.0",
     "vscode-express": "^1.0.1",
     "vscode-extension-telemetry": "^0.1.0",
-    "vscode-iot-device-cube-sdk": "^0.0.21",
+    "vscode-iot-device-cube-sdk": "^0.1.1",
     "winreg": "^1.2.3"
   },
   "extensionDependencies": [
