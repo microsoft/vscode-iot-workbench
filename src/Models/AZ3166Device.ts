@@ -71,7 +71,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   static get serialport(): any {
     if (!AZ3166Device._serialport) {
-      AZ3166Device._serialport = require("usb-native").SerialPort;
+      AZ3166Device._serialport = require("node-usb-native").SerialPort;
     }
     return AZ3166Device._serialport;
   }
@@ -761,17 +761,12 @@ export class AZ3166Device extends ArduinoDeviceBase {
     );
   }
 
-  private getComList(): Promise<SerialPortInfo[]> {
-    return new Promise((resolve: (value: SerialPortInfo[]) => void, reject: (error: Error) => void) => {
-      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-      AZ3166Device.serialport.list((e: any, ports: SerialPortInfo[]) => {
-        if (e) {
-          reject(e);
-        } else {
-          resolve(ports);
-        }
-      });
-    });
+  private async getComList(): Promise<SerialPortInfo[]> {
+    const lists = await AZ3166Device.serialport.list();
+    if (!lists.length) {
+      vscode.window.showInformationMessage("No serial port is available.");
+    }
+    return lists;
   }
 
   private async chooseCOM(): Promise<string> {
