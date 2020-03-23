@@ -29,7 +29,7 @@ function getEntry() {
     "typechecker",
     "keytar",
     // usb-native modules can not be bundled
-    "usb-native",
+    "node-usb-native",
     "usb-detection",
     "@serialport/bindings",
     "bindings",
