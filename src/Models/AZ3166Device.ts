@@ -762,11 +762,12 @@ export class AZ3166Device extends ArduinoDeviceBase {
   }
 
   private async getComList(): Promise<SerialPortInfo[]> {
-    const lists = await AZ3166Device.serialport.list();
-    if (!lists.length) {
-      vscode.window.showInformationMessage("No serial port is available.");
+    try {
+      const lists = await AZ3166Device.serialport.list();
+      return lists;
+    } catch (err) {
+      throw err;
     }
-    return lists;
   }
 
   private async chooseCOM(): Promise<string> {
