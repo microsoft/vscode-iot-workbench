@@ -60,7 +60,6 @@ export class FileNames {
   static readonly workspaceConfigFilePath = "project.code-workspace";
   static readonly iotworkbenchTempFolder = ".iotworkbenchtemp";
   static readonly workspaceExtensionName = ".code-workspace";
-  static readonly cacheFolderName = "cache";
   static readonly outputPathName = "cmake";
   static readonly templatesFolderName = "templates";
   static readonly templateFiles = "templatefiles.json";

@@ -7,10 +7,14 @@
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
-      "args": ["--extensionDevelopmentPath=${workspaceRoot}"],
+      "args": [
+        "--extensionDevelopmentPath=${workspaceRoot}"
+      ],
       "stopOnEntry": false,
       "sourceMaps": true,
-      "outFiles": ["${workspaceRoot}/out/src/**/*.js"],
+      "outFiles": [
+        "${workspaceRoot}/dist/**/*.js"
+      ],
       "preLaunchTask": "npm: watch"
     },
     {
@@ -25,7 +29,9 @@
       ],
       "stopOnEntry": false,
       "sourceMaps": true,
-      "outFiles": ["${workspaceRoot}/out/test/**/*.js"],
+      "outFiles": [
+        "${workspaceRoot}/out/test/**/*.js"
+      ],
       "preLaunchTask": "npm: watch"
     },
     {
@@ -33,9 +39,13 @@
       "request": "launch",
       "name": "Unit Tests",
       "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
-      "args": ["-i"],
+      "args": [
+        "-i"
+      ],
       "internalConsoleOptions": "openOnSessionStart",
-      "outFiles": ["${workspaceRoot}/out/test/**/*.js"]
+      "outFiles": [
+        "${workspaceRoot}/out/test/**/*.js"
+      ]
     }
   ]
 }

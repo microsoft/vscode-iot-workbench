@@ -20,8 +20,8 @@ import { SystemError } from "./common/Error/SystemErrors/SystemError";
 
 type OptionsWithUri = import("request-promise").OptionsWithUri;
 
-const impor = require("impor")(__dirname);
-const request = impor("request-promise") as typeof import("request-promise");
+const importLazy = require("import-lazy");
+const request = importLazy(() => require("request-promise"))();
 
 export class ExampleExplorer {
   private _exampleName = "";
@@ -273,7 +273,7 @@ export class ExampleExplorer {
     const boardList = context.asAbsolutePath(
       path.join(FileNames.resourcesFolderName, FileNames.templatesFolderName, FileNames.boardListFileName)
     );
-    const boardsJson: { boards: Board[] } = require(boardList);
+    const boardsJson: { boards: Board[] } = JSON.parse(fs.readFileSync(boardList, "utf8"));
 
     telemetryContext.properties.Example = this._exampleName;
     const board = boardsJson.boards.find(board => board.id === this._boardId);
