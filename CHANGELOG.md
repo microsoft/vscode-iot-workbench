@@ -2,6 +2,14 @@
 
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
 
+## Version 0.13.0
+
+- Release data: March 25rd, 2020
+
+## Fixed
+
+- Fix serialport on VS Code 1.43.0
+
 ## Version 0.12.0
 
 - Release data: March 3rd, 2020
