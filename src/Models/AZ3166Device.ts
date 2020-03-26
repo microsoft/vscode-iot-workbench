@@ -40,7 +40,7 @@ const forEach = impor("lodash.foreach") as typeof import("lodash.foreach");
 const trimStart = impor("lodash.trimstart") as typeof import("lodash.trimstart");
 
 interface SerialPortInfo {
-  comName: string;
+  path: string;
   manufacturer: string;
   vendorId: string;
   productId: string;
@@ -71,7 +71,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   static get serialport(): any {
     if (!AZ3166Device._serialport) {
-      AZ3166Device._serialport = require("../../vendor/node-usb-native").SerialPort;
+      AZ3166Device._serialport = require("node-usb-native").SerialPort;
     }
     return AZ3166Device._serialport;
   }
@@ -186,13 +186,13 @@ export class AZ3166Device extends ArduinoDeviceBase {
         // Get DPS Credential
         credentials = await this.getDPSCredentialsFromInput();
 
-        await this.logAndSetCredentials(credentials, ConfigDeviceOptions.ConnectionString);
+        await this.logAndSetCredentials(credentials, ConfigDeviceOptions.DPS);
         return;
       case ConfigDeviceOptions.UDS:
         // Get UDS string
         credentials = await this.getUDSStringFromInput();
 
-        await this.logAndSetCredentials(credentials, ConfigDeviceOptions.ConnectionString);
+        await this.logAndSetCredentials(credentials, ConfigDeviceOptions.UDS);
         return;
       default:
         throw new TypeNotSupportedError("device setting type", `${deviceSettingType}`);
@@ -229,7 +229,7 @@ export class AZ3166Device extends ArduinoDeviceBase {
         deviceSettingTypeForLog = "device connection string";
         break;
       case ConfigDeviceOptions.DPS:
-        deviceSettingTypeForLog = "UPS credentials";
+        deviceSettingTypeForLog = "DPS credentials";
         break;
       case ConfigDeviceOptions.UDS:
         deviceSettingTypeForLog = "Unique Device String (UDS)";
@@ -761,17 +761,9 @@ export class AZ3166Device extends ArduinoDeviceBase {
     );
   }
 
-  private getComList(): Promise<SerialPortInfo[]> {
-    return new Promise((resolve: (value: SerialPortInfo[]) => void, reject: (error: Error) => void) => {
-      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-      AZ3166Device.serialport.list((e: any, ports: SerialPortInfo[]) => {
-        if (e) {
-          reject(e);
-        } else {
-          resolve(ports);
-        }
-      });
-    });
+  private async getComList(): Promise<SerialPortInfo[]> {
+    const lists = await AZ3166Device.serialport.list();
+    return lists;
   }
 
   private async chooseCOM(): Promise<string> {
@@ -801,11 +793,11 @@ export class AZ3166Device extends ArduinoDeviceBase {
       });
 
       if (list && list.length) {
-        let comPort = list[0].comName;
+        let comPort = list[0].path;
         if (list.length > 1) {
           // TODO: select com port from list when there are multiple AZ3166
           // boards connected
-          comPort = list[0].comName;
+          comPort = list[0].path;
         }
 
         if (!comPort) {

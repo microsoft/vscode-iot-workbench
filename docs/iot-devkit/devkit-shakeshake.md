@@ -10,7 +10,7 @@ The [MXChip IoT DevKit](https://aka.ms/iot-devkit) (a.k.a. IoT DevKit) is an all
 
 ## What you need
 
-Finish the [Getting Started Guide](./devkit-get-started.md) to:
+Finish the [Getting Started Guide](https://docs.microsoft.com/en-us/samples/azure-samples/mxchip-iot-devkit-get-started/sample/) to:
 
 - Have your DevKit connected to Wi-Fi.
 - Prepare the development environment.

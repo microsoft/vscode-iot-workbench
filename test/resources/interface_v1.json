@@ -1,0 +1,81 @@
+{
+  "input": {
+    "@id": "urn:{companyName}:my:1",
+    "@type": "Interface",
+    "displayName": "myinterface",
+    "contents": [
+      {
+        "@type": "Property",
+        "displayName": "Device Name",
+        "description": "The name of the device.",
+        "name": "name",
+        "schema": "invalid",
+        "writable": 0
+      },
+      {
+        "@type": "Invalid",
+        "name": "fanSpeed",
+        "displayName": "Fan Speed",
+        "schema": "double"
+      },
+      {
+        "@type": "Telemetry",
+        "comment": "This shows an event that contains a single value (temperature).",
+        "invalid": ""
+      },
+      {
+        "@type": "Telemetry",
+        "name": "magnetometer",
+        "displayName": "Magnetometer",
+        "comment": "This shows a complex telemetry that contains a magnetometer reading.",
+        "schema": {
+          "@type": "Object",
+          "fields": [
+            {
+              "name": "x",
+              "schema": "integer"
+            },
+            {
+              "name": "y",
+              "schema": "integer"
+            },
+            {
+              "name": "x",
+              "schema": "integer"
+            }
+          ]
+        }
+      },
+      {
+        "@type": "Command",
+        "description": "This command will begin blinking the LED for given time interval.",
+        "name": "blink",
+        "commandType": "invalid",
+        "request": {
+          "name": "",
+          "schema": "long"
+        },
+        "response": {
+          "name": "blinkResponse",
+          "schema": {
+            "@type": "Object",
+            "fields": []
+          }
+        }
+      }
+    ],
+    "@context": "http://azureiot.com/v1/contexts/IoTModel.json"
+  },
+  "output": [
+    "String does not match the pattern of ^urn(:[a-zA-Z_][a-zA-Z0-9_]*){2,}:[0-9]+$.",
+    "Invalid value. Valid values:\nboolean\ndate\ndateTime\ndouble\nduration\nfloat\ninteger\nlong\nstring\ntime",
+    "Invalid type. Valid types:\nboolean",
+    "Invalid type. Valid types:\nProperty\nCommand\nTelemetry",
+    "invalid is unexpected.",
+    "Missing required properties:\nname\nschema",
+    "x has been assigned to another item.",
+    "Invalid value. Valid values:\nasynchronous\nsynchronous",
+    "String is empty.",
+    "Array is empty."
+  ]
+}

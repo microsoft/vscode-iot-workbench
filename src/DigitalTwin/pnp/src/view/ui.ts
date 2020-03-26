@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
-
+"use strict";
 import * as path from "path";
 import * as vscode from "vscode";
 import { Constants } from "../common/constants";
@@ -75,15 +75,14 @@ export class UI {
    * @param label label
    */
   static async selectRootFolder(label: string): Promise<string> {
-    const workspaceFolders: vscode.WorkspaceFolder[] | undefined = vscode.workspace.workspaceFolders;
     // use the only workspace as default
-    if (workspaceFolders && workspaceFolders.length === 1) {
-      return workspaceFolders[0].uri.fsPath;
+    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
+      return vscode.workspace.workspaceFolders[0].uri.fsPath;
     }
     // select workspace or open specified folder
     let items: vscode.QuickPickItem[] = [];
-    if (workspaceFolders) {
-      items = workspaceFolders.map((f: vscode.WorkspaceFolder) => {
+    if (vscode.workspace.workspaceFolders) {
+      items = vscode.workspace.workspaceFolders.map((f: vscode.WorkspaceFolder) => {
         const fsPath: string = f.uri.fsPath;
         return {
           label: path.basename(fsPath),
@@ -130,7 +129,7 @@ export class UI {
       canSelectMany: false
     };
     const selected: vscode.Uri[] | undefined = await vscode.window.showOpenDialog(options);
-    if (!selected || selected.length === 0) {
+    if (!selected || !selected.length) {
       throw new UserCancelledError(label);
     }
     return selected[0].fsPath;
@@ -197,7 +196,7 @@ export class UI {
    */
   static async selectModelFiles(label: string, type?: ModelType): Promise<string[]> {
     const fileInfos: ModelFileInfo[] = await UI.findModelFiles(type);
-    if (fileInfos.length === 0) {
+    if (!fileInfos.length) {
       UI.showNotification(MessageType.Warn, UIConstants.MODELS_NOT_FOUND_MSG);
       return [];
     }
@@ -214,7 +213,7 @@ export class UI {
       canPickMany: true,
       matchOnDescription: true
     });
-    if (!selected || selected.length === 0) {
+    if (!selected || !selected.length) {
       throw new UserCancelledError(label);
     }
     return selected.map(s => s.data);
@@ -227,7 +226,7 @@ export class UI {
    */
   static async selectOneModelFile(label: string, type?: ModelType): Promise<string> {
     const fileInfos: ModelFileInfo[] = await UI.findModelFiles(type);
-    if (fileInfos.length === 0) {
+    if (!fileInfos.length) {
       UI.showNotification(MessageType.Warn, UIConstants.MODELS_NOT_FOUND_MSG);
       return Constants.EMPTY_STRING;
     }
@@ -257,7 +256,7 @@ export class UI {
   static async findModelFiles(type?: ModelType): Promise<ModelFileInfo[]> {
     const fileInfos: ModelFileInfo[] = [];
     const files: vscode.Uri[] = await vscode.workspace.findFiles(UIConstants.MODEL_FILE_GLOB);
-    if (files.length === 0) {
+    if (!files.length) {
       return fileInfos;
     }
     // process in parallel
@@ -289,7 +288,7 @@ export class UI {
   static async ensureFilesSaved(label: string, files: string[]): Promise<void> {
     const dirtyFiles: vscode.TextDocument[] = vscode.workspace.textDocuments.filter(f => f.isDirty);
     const unsaved: vscode.TextDocument[] = dirtyFiles.filter(f => files.some(file => file === f.fileName));
-    if (unsaved.length === 0) {
+    if (!unsaved.length) {
       return;
     }
     const nameList: string = unsaved.map(f => path.basename(f.fileName)).toString();

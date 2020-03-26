@@ -21,7 +21,20 @@ function getEntry() {
     encoding: "utf8"
   });
   const mod = JSON.parse(npmListRes);
-  const unbundledModule = ["impor", "eachr", "extract-opts", "getmac", "typechecker", "keytar"];
+  const unbundledModule = [
+    "impor",
+    "eachr",
+    "extract-opts",
+    "getmac",
+    "typechecker",
+    "keytar",
+    // usb-native modules can not be bundled
+    "node-usb-native",
+    "usb-detection",
+    "@serialport/bindings",
+    "bindings",
+    "serialport"
+  ];
   for (const mod of unbundledModule) {
     const p = "node_modules/" + mod;
     fs.copySync(p, "out/node_modules/" + mod);

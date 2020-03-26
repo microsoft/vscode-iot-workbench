@@ -29,7 +29,7 @@ export class UsbDetector {
       return;
     } else {
       // Only load detector module when not in remote
-      UsbDetector._usbDetector = require("../vendor/node-usb-native").detector;
+      UsbDetector._usbDetector = require("node-usb-native").detector;
     }
   }
 

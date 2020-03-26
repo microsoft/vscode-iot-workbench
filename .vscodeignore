@@ -14,5 +14,4 @@ cache/**
 node_modules/**
 webpack.config.js
 gts.cmd
-vendor/**
 scripts/**

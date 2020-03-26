@@ -17,6 +17,14 @@ import { TemplateFileInfo } from "./Interfaces/ProjectTemplate";
 import { RemoteExtension } from "./RemoteExtension";
 import { OperationFailedError } from "../common/Error/OperationFailedErrors/OperationFailedError";
 
+interface DeviceInfo {
+  id: string;
+  mac: string;
+  ip?: string;
+  host?: string;
+  ssid?: string;
+}
+
 class RaspberryPiUploadConfig {
   static host = "hostname";
   static port = 22;
@@ -144,7 +152,7 @@ export class RaspberryPiDevice extends ContainerDeviceBase {
 
   private async autoDiscoverDeviceIp(): Promise<vscode.QuickPickItem[]> {
     const sshDevicePickItems: vscode.QuickPickItem[] = [];
-    const deviceInfos = await sdk.SSH.discover();
+    const deviceInfos: DeviceInfo[] = await sdk.SSH.discover();
     deviceInfos.forEach(deviceInfo => {
       sshDevicePickItems.push({
         label: deviceInfo.ip as string,
