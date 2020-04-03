@@ -35,9 +35,9 @@ import { SystemResourceNotFoundError } from "../common/Error/SystemErrors/System
 import { AzureConfigFileHandler } from "./AzureComponentConfig";
 import { ComponentType } from "./Interfaces/Component";
 
-const impor = require("impor")(__dirname);
-const forEach = impor("lodash.foreach") as typeof import("lodash.foreach");
-const trimStart = impor("lodash.trimstart") as typeof import("lodash.trimstart");
+const importLazy = require("import-lazy");
+const forEach = importLazy(() => require("lodash.foreach"))() as typeof import("lodash.foreach");
+const trimStart = importLazy(() => require("lodash.trimstart"))();
 
 interface SerialPortInfo {
   path: string;

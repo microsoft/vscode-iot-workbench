@@ -35,9 +35,9 @@ import { SearchResult } from "./DigitalTwin/pnp/src/modelRepository/modelReposit
 import { NSAT } from "./nsat";
 import { DigitalTwinUtility } from "./DigitalTwin/DigitalTwinUtility";
 
-const impor = require("impor")(__dirname);
-const exampleExplorerModule = impor("./exampleExplorer") as typeof import("./exampleExplorer");
-const request = impor("request-promise") as typeof import("request-promise");
+const importLazy = require("import-lazy");
+const exampleExplorerModule = importLazy(() => require("./exampleExplorer"))();
+const request = importLazy(() => require("request-promise"))();
 
 // eslint-disable-next-line  @typescript-eslint/no-explicit-any
 let telemetryWorker: any = undefined;
@@ -342,7 +342,7 @@ function enableUsbDetector(context: vscode.ExtensionContext, outputChannel: vsco
     return;
   }
   // delay to detect usb
-  const usbDetectorModule = impor("./usbDetector") as typeof import("./usbDetector");
+  const usbDetectorModule = importLazy(() => require("./usbDetector"))();
 
   const usbDetector = new usbDetectorModule.UsbDetector(context, outputChannel);
   usbDetector.startListening(context);

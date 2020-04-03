@@ -22,8 +22,8 @@ import { Provisionable } from "./Interfaces/Provisionable";
 import { Uploadable } from "./Interfaces/Uploadable";
 import { DirectoryNotFoundError } from "../common/Error/OperationFailedErrors/DirectoryNotFoundError";
 
-const impor = require("impor")(__dirname);
-const azureUtilityModule = impor("./AzureUtility") as typeof import("./AzureUtility");
+const importLazy = require("import-lazy");
+const azureUtilityModule = importLazy(() => require("./AzureUtility"))();
 
 export enum OpenScenario {
   createNewProject,

@@ -25,13 +25,13 @@ import { IoTWorkbenchProjectBase, OpenScenario } from "./IoTWorkbenchProjectBase
 import { DirectoryNotFoundError } from "../common/Error/OperationFailedErrors/DirectoryNotFoundError";
 import { FileNotFoundError } from "../common/Error/OperationFailedErrors/FileNotFound";
 
-const impor = require("impor")(__dirname);
-const az3166DeviceModule = impor("./AZ3166Device") as typeof import("./AZ3166Device");
-const azureComponentConfigModule = impor("./AzureComponentConfig") as typeof import("./AzureComponentConfig");
-const azureFunctionsModule = impor("./AzureFunctions") as typeof import("./AzureFunctions");
-const esp32DeviceModule = impor("./Esp32Device") as typeof import("./Esp32Device");
-const ioTHubModule = impor("./IoTHub") as typeof import("./IoTHub");
-const ioTHubDeviceModule = impor("./IoTHubDevice") as typeof import("./IoTHubDevice");
+const importLazy = require("import-lazy");
+const az3166DeviceModule = importLazy(() => require("./AZ3166Device"))();
+const azureComponentConfigModule = importLazy(() => require("./AzureComponentConfig"))();
+const azureFunctionsModule = importLazy(() => require("./AzureFunctions"))();
+const esp32DeviceModule = importLazy(() => require("./Esp32Device"))();
+const ioTHubModule = importLazy(() => require("./IoTHub"))();
+const ioTHubDeviceModule = importLazy(() => require("./IoTHubDevice"))();
 
 export class IoTWorkspaceProject extends IoTWorkbenchProjectBase {
   private deviceRootPath = "";

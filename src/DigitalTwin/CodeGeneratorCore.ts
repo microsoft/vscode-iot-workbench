@@ -533,7 +533,7 @@ export class CodeGeneratorCore {
     context: vscode.ExtensionContext,
     channel: vscode.OutputChannel
   ): Promise<CodeGeneratorConfigItem | null> {
-    const extensionPackage = require(context.asAbsolutePath("./package.json"));
+    const extensionPackage = await Utility.getJsonContent(context.asAbsolutePath("./package.json"));
     const extensionVersion = extensionPackage.version;
 
     // Download the config file for CodeGen cli

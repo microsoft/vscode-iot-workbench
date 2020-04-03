@@ -39,14 +39,10 @@ import { FileNotFoundError } from "./common/Error/OperationFailedErrors/FileNotF
 import { DirectoryNotFoundError } from "./common/Error/OperationFailedErrors/DirectoryNotFoundError";
 import { ConfigHandler } from "./configHandler";
 
-const impor = require("impor")(__dirname);
-const ioTWorkspaceProjectModule = impor(
-  "./Models/IoTWorkspaceProject"
-) as typeof import("./Models/IoTWorkspaceProject");
-const ioTContainerizedProjectModule = impor(
-  "./Models/IoTContainerizedProject"
-) as typeof import("./Models/IoTContainerizedProject");
-const raspberryPiDeviceModule = impor("./Models/RaspberryPiDevice") as typeof import("./Models/RaspberryPiDevice");
+const importLazy = require("import-lazy");
+const ioTWorkspaceProjectModule = importLazy(() => require("./Models/IoTWorkspaceProject"))();
+const ioTContainerizedProjectModule = importLazy(() => require("./Models/IoTContainerizedProject"))();
+const raspberryPiDeviceModule = importLazy(() => require("./Models/RaspberryPiDevice"))();
 
 export function delay(ms: number): Promise<unknown> {
   return new Promise(resolve => setTimeout(resolve, ms));
