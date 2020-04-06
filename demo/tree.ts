@@ -1,13 +1,22 @@
+import "reflect-metadata";
+import { jsonObject, jsonMember, TypedJSON } from "typedjson";
 namespace demo {
+    @jsonObject
     class Node {
+        @jsonMember
         left_: Node;
+        @jsonMember
         right_: Node;
-        value_: number
+        @jsonMember
+        value_: number;
 
-        constructor(value: number) {
+        constructor() {
             this.left_ = null;
             this.right_ = null;
-            this.value_ = value;
+        }
+
+        setValue(newValue: number): void {
+            this.value_ = newValue; 
         }
 
         showValue(): number {
@@ -15,7 +24,9 @@ namespace demo {
         }
     }
 
+    @jsonObject
     export class BinarySearchTree {
+        @jsonMember
         root_: Node;
 
         constructor() {
@@ -24,7 +35,8 @@ namespace demo {
 
         add(newValue: number): void {
             if (this.root_ === null) {
-                this.root_ = new Node(newValue);
+                this.root_ = new Node();
+                this.root_.setValue(newValue);
                 return ;
             }
 
@@ -35,7 +47,8 @@ namespace demo {
             if (newValue < current.value_) {
                 // go to left.
                 if (current.left_ === null) {
-                    current.left_ = new Node(newValue);
+                    current.left_ = new Node();
+                    current.left_.setValue(newValue);
                     return ;
                 }
 
@@ -43,7 +56,8 @@ namespace demo {
             } else {
                 // go to right.
                 if (current.right_ === null) {
-                    current.right_ = new Node(newValue);
+                    current.right_ = new Node();
+                    current.right_.setValue(newValue);
                     return ;
                 }
 
@@ -89,3 +103,11 @@ for (;i < 10; i++) {
     bst.add(randValue);
 }
 bst.print();
+
+const serializer = new TypedJSON(demo.BinarySearchTree);
+const json = serializer.stringify(bst);
+console.log(`json:${json}`);
+
+const back = serializer.parse(json);
+console.log("back.print():");
+back.print();

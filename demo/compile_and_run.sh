@@ -1,4 +1,3 @@
 #!/usr/bin/env bash
-
-tsc ./tree.ts
+tsc --build ./tsconfig.json
 node ./tree.js
