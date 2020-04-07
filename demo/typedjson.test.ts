@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import { jsonObject, jsonMember, TypedJSON } from "typedjson";
+
 namespace demo {
     @jsonObject
     class Node {

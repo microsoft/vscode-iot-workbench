@@ -2,9 +2,13 @@
 	"compilerOptions": {
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
-        "sourceMap": true
+        "lib": [
+            "es6",
+            "es2017",
+            "dom"
+        ]
 	},
     "files": [
-        "tree.ts"
+        "typedjson.test.ts"
     ]
 }

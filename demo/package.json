@@ -10,8 +10,6 @@
   "license": "ISC",
   "dependencies": {
     "reflect-metadata": "^0.1.13",
-    "serialazy": "^2.0.2",
-    "ts-serializable": "^1.1.15",
     "typedjson": "^1.5.1"
   }
 }
