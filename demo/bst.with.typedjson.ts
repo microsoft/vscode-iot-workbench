@@ -14,6 +14,7 @@ namespace demo {
         constructor() {
             this.left_ = null;
             this.right_ = null;
+            this.value_ = 0;
         }
 
         setValue(newValue: number): void {
@@ -41,7 +42,7 @@ namespace demo {
                 return ;
             }
 
-            this.recursiveAdd(newValue, this.root_);    
+            this.recursiveAdd(newValue, this.root_);
         }
 
         recursiveAdd(newValue: number, current: Node): void {
@@ -106,6 +107,7 @@ for (;i < 10; i++) {
 bst.print();
 
 const serializer = new TypedJSON(demo.BinarySearchTree);
+
 const json = serializer.stringify(bst);
 console.log(`json:${json}`);
 

@@ -1,14 +1,21 @@
 {
 	"compilerOptions": {
+        "moduleResolution": "node",
+        "module": "commonjs",
+        "target": "es6",
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
         "lib": [
             "es6",
             "es2017",
             "dom"
-        ]
+        ],
+        "sourceMap": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        //"strict": true
 	},
     "files": [
-        "typedjson.test.ts"
+        "bst.with.typedjson.ts"
     ]
 }
