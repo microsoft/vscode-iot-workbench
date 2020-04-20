@@ -121,7 +121,7 @@ steps:
   - task: GitHubRelease@0
     displayName: 'Deploy production or RC candidate to GitHub Release'
     inputs:
-      gitHubConnection: 'pat_for_github_release_deployment'
+      gitHubConnection: 'vsciotci_github_pat'
       repositoryName: '$(Build.Repository.Name)'
       action: 'create'
       target: '$(Build.SourceVersion)'
