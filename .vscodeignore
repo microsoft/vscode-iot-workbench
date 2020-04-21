@@ -10,7 +10,7 @@
 !node_modules/typechecker
 !node_modules/eachr
 !node_modules/getos
-!node_modules/node-usb-native/native
+!node_modules/node-usb-native/lib/native
 !node_modules/usb-detection/build/Release/detection.node
 !node_modules/usb-detection/*.*
 !node_modules/eventemitter2
