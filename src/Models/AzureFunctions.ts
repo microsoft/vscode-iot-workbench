@@ -32,8 +32,8 @@ import { DependentExtensionNotFoundError } from "../common/Error/OperationFailed
 import { ArgumentEmptyOrNullError } from "../common/Error/OperationFailedErrors/ArgumentEmptyOrNullError";
 import { AzureConfigNotFoundError } from "../common/Error/SystemErrors/AzureConfigNotFoundErrors";
 
-const impor = require("impor")(__dirname);
-const azureUtilityModule = impor("./AzureUtility") as typeof import("./AzureUtility");
+const importLazy = require("import-lazy");
+const azureUtilityModule = importLazy(() => require("./AzureUtility"))();
 
 export class AzureFunctions implements Component, Provisionable, Deployable {
   dependencies: DependencyConfig[] = [];

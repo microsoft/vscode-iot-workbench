@@ -1,17 +1,45 @@
-.vscode/**
-.vscode-test/**
-out/test/**
-out/**/*.map
-out/**/*.ts
-src/**
-gif/**
-hooks/**
-test/**
-docs/**
+.vscode
+.vscode-test
+# The following lines starting with '!' are the modules that are not webpack bundle friendly, 
+# so make sure we pack it into extension package.
+!node_modules/keytar
+!node_modules/getmac
+!node_modules/editions
+!node_modules/errlop
+!node_modules/extract-opts
+!node_modules/typechecker
+!node_modules/eachr
+!node_modules/getos
+!node_modules/node-usb-native/lib/native
+!node_modules/usb-detection/build/Release/detection.node
+!node_modules/usb-detection/*.*
+!node_modules/eventemitter2
+!node_modules/bindings
+!node_modules/file-uri-to-path
+!node_modules/@serialport/bindings
+!node_modules/@serialport/binding-abstract
+!node_modules/@serialport/parser-readline
+!node_modules/@serialport/parser-delimiter
+!node_modules/debug
+!node_modules/ms
+node_modules
+# The following folders don't need to be in extension package.
+__mocks__
+src
+hooks
+test
+docs
+scripts
+devicedevex_dockerfiles
+# out folder is the temporary folder for compilation
+out
+# The following folder/files are for test
+coverage
+jest.config.js
+# Other files don't need to be in extension package
 .gitignore
+.eslintignore
 tsconfig.json
-cache/**
-node_modules/**
 webpack.config.js
-gts.cmd
-scripts/**
+azure-pipelines.yml
+**/*.map

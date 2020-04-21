@@ -4,6 +4,7 @@
 import { FileNames } from "./constants";
 import { Board } from "./Models/Interfaces/Board";
 import * as path from "path";
+import * as fs from "fs-extra";
 
 interface BoardList {
   boards: Board[];
@@ -26,7 +27,8 @@ export class BoardProvider {
 
   get list(): Board[] {
     const boardList = path.join(this.boardFolderPath, FileNames.boardListFileName);
-    const boardsJson: BoardList = require(boardList);
+    const data = fs.readFileSync(boardList, "utf8");
+    const boardsJson: BoardList = JSON.parse(data);
     return boardsJson.boards;
   }
 

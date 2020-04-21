@@ -17,13 +17,9 @@ import { TypeNotSupportedError } from "./common/Error/SystemErrors/TypeNotSuppor
 import { OperationCanceledError } from "./common/Error/OperationCanceledError";
 import { WorkspaceNotOpenError } from "./common/Error/OperationFailedErrors/WorkspaceNotOpenError";
 
-const impor = require("impor")(__dirname);
-const ioTWorkspaceProjectModule = impor(
-  "./Models/IoTWorkspaceProject"
-) as typeof import("./Models/IoTWorkspaceProject");
-const ioTContainerizedProjectModule = impor(
-  "./Models/IoTContainerizedProject"
-) as typeof import("./Models/IoTContainerizedProject");
+const importLazy = require("import-lazy");
+const ioTWorkspaceProjectModule = importLazy(() => require("./Models/IoTWorkspaceProject"))();
+const ioTContainerizedProjectModule = importLazy(() => require("./Models/IoTContainerizedProject"))();
 
 export class ProjectEnvironmentConfiger {
   async configureCmakeProjectEnvironment(

@@ -10,7 +10,7 @@
     "url": "https://github.com/Microsoft/vscode-iot-workbench/issues"
   },
   "homepage": "https://github.com/Microsoft/vscode-iot-workbench/blob/master/README.md",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "publisher": "vsciot-vscode",
   "icon": "logo.png",
   "license": "SEE LICENSE IN <LICENSE>",
@@ -43,7 +43,7 @@
     "onCommand:azure-digital-twins.submitFiles",
     "workspaceContains:**/*.json"
   ],
-  "main": "./out/src/extension",
+  "main": "./dist/extension",
   "contributes": {
     "commands": [
       {
@@ -224,7 +224,7 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile && webpack --mode production",
+    "vscode:prepublish": "webpack --mode production",
     "compile": "tsc -p ./",
     "validateLinks": "tsc scripts/mdLinkChecker/mdLinkChecker.ts && node scripts/mdLinkChecker/mdLinkChecker.js --rootDir=.",
     "watch": "tsc -watch -p ./",
@@ -237,6 +237,7 @@
     "prepare": "npm run compile",
     "pretest": "npm run compile",
     "posttest": "npm run check",
+    "webpack": "webpack --mode development",
     "update:package": "rm -rf node_modules && npm update --save-dev && npm update --save"
   },
   "devDependencies": {
@@ -262,12 +263,15 @@
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-prettier": "^3.1.2",
+    "fail-on-errors-webpack-plugin": "^3.0.0",
     "glob": "^7.1.4",
     "gulp": "^4.0.2",
     "jest": "^25.1.0",
     "node-gyp": "^6.1.0",
     "prettier": "^1.19.1",
     "ts-jest": "^25.2.0",
+    "ts-loader": "^6.2.1",
+    "node-loader": "0.6.0",
     "typescript": "^3.7.5",
     "vscode": "^1.1.33",
     "webpack": "^4.41.6",
@@ -288,7 +292,7 @@
     "fs-plus": "^3.1.1",
     "getmac": "^1.2.1",
     "guid-typescript": "^1.0.9",
-    "impor": "^0.1.1",
+    "import-lazy": "^4.0.0",
     "jsonc-parser": "^2.1.1",
     "keytar": "^4.13.0",
     "lodash.filter": "^4.6.0",
@@ -297,7 +301,7 @@
     "lodash.uniq": "^4.5.0",
     "ms-rest": "^2.5.3",
     "ms-rest-azure": "^3.0.0",
-    "node-usb-native": "^0.0.13",
+    "node-usb-native": "^0.0.15",
     "opn": "5.1.0",
     "request": "^2.88.2",
     "request-promise": "^4.2.4",

@@ -23,8 +23,8 @@ import { RemoteExtension } from "./RemoteExtension";
 import { ProjectConfigNotFoundError } from "../common/Error/SystemErrors/ProjectConfigNotFoundError";
 import { DirectoryNotFoundError } from "../common/Error/OperationFailedErrors/DirectoryNotFoundError";
 
-const impor = require("impor")(__dirname);
-const raspberryPiDeviceModule = impor("./RaspberryPiDevice") as typeof import("./RaspberryPiDevice");
+const importLazy = require("import-lazy");
+const raspberryPiDeviceModule = importLazy(() => require("./RaspberryPiDevice"))();
 
 export class IoTContainerizedProject extends IoTWorkbenchProjectBase {
   constructor(
