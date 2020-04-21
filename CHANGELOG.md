@@ -2,9 +2,17 @@
 
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
 
+## Version 0.14.0
+
+- Release date: April 21st, 2020
+
+## Fixed
+
+- Change webpack bundle configuration to improve performance
+
 ## Version 0.13.0
 
-- Release data: March 26th, 2020
+- Release date: March 26th, 2020
 
 ## Fixed
 
@@ -13,7 +21,7 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 
 ## Version 0.12.0
 
-- Release data: March 3rd, 2020
+- Release date: March 3rd, 2020
 
 ## Fixed
 
@@ -25,7 +33,7 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 
 ## Version 0.11.0
 
-- Release data: January 2nd, 2020
+- Release date: January 2nd, 2020
 
 ## Fixed
 
@@ -39,7 +47,7 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 
 ## Version 0.10.17
 
-- Release data: November 22, 2019
+- Release date: November 22, 2019
 
 ### Fixed
 
@@ -59,7 +67,7 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 
 ## Version 0.10.16
 
-- Release data: October 28, 2019
+- Release date: October 28, 2019
 
 ### Fixed
 
@@ -80,7 +88,7 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 
 ## Version 0.10.15
 
-- Release data: September 26, 2019
+- Release date: September 26, 2019
 
 ### Fixed
 - Add delay() in DevKit IoTHub example
@@ -93,7 +101,7 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 
 ## Version 0.10.13
 
-- Release data: August 20, 2019
+- Release date: August 20, 2019
 
 ### Fixed
 
@@ -102,7 +110,7 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 
 ## Version 0.10.12
 
-- Release data: August 12, 2019
+- Release date: August 12, 2019
 
 ### Added
 

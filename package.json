@@ -10,7 +10,7 @@
     "url": "https://github.com/Microsoft/vscode-iot-workbench/issues"
   },
   "homepage": "https://github.com/Microsoft/vscode-iot-workbench/blob/master/README.md",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "publisher": "vsciot-vscode",
   "icon": "logo.png",
   "license": "SEE LICENSE IN <LICENSE>",
@@ -301,7 +301,7 @@
     "lodash.uniq": "^4.5.0",
     "ms-rest": "^2.5.3",
     "ms-rest-azure": "^3.0.0",
-    "node-usb-native": "^0.0.14",
+    "node-usb-native": "^0.0.15",
     "opn": "5.1.0",
     "request": "^2.88.2",
     "request-promise": "^4.2.4",
