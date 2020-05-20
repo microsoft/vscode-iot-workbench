@@ -308,7 +308,7 @@
     "ssh2": "^0.6.1",
     "validator": "^12.2.0",
     "vscode-express": "^1.0.1",
-    "vscode-extension-telemetry": "^0.1.0",
+    "vscode-extension-telemetry": "^0.1.6",
     "vscode-iot-device-cube-sdk": "^0.1.1",
     "winreg": "^1.2.3"
   },
