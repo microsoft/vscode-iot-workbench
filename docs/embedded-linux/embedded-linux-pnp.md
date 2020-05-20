@@ -10,13 +10,13 @@
 
 1. Create a `pnp_app` directory in your local drive. You use this folder for the device model files and device code stub.
 
-2. Download the [device capability model](https://github.com/Azure/IoTPlugandPlay/blob/master/samples/SampleDevice.capabilitymodel.json) and [interface sample](https://github.com/Azure/IoTPlugandPlay/blob/master/samples/EnvironmentalSensor.interface.json) files and save files into `pnp_app` folder.
+2. Download the [device capability model](https://github.com/Azure/IoTPlugandPlay/blob/9004219bff1e958b7cd6ff2a52209f4b7ae19396/samples/SampleDevice.capabilitymodel.json) and [interface sample](https://github.com/Azure/IoTPlugandPlay/blob/9004219bff1e958b7cd6ff2a52209f4b7ae19396/samples/EnvironmentalSensor.interface.json) files and save files into `pnp_app` folder.
 
-    > To download a file from GitHub, navigate to the file, right-click on **Raw**, and then select **Save link as**.
+   > To download a file from GitHub, navigate to the file, right-click on **Raw**, and then select **Save link as**.
 
 3. Open `pnp_app` folder with VS Code. You can view the files with IntelliSense:
 
-    ![](../images/author-pnp-dcm.png)
+   ![](../images/author-pnp-dcm.png)
 
 4. In the files you downloaded, replace `<YOUR_COMPANY_NAME_HERE>` in the `@id` and `schema` fields with a unique value. Use only the characters a-z, A-Z, 0-9, and underscore. For more information, see [Digital Twin identifier format](https://github.com/Azure/IoTPlugandPlay/tree/master/DTDL#digital-twin-identifier-format).
 
@@ -26,7 +26,7 @@ Now that you have a DCM and its associated interfaces, you can generate the devi
 
 1. With the `pnp_app` folder open in VS Code, use **Ctrl+Shift+P** to open the command palette, select "**IoT Plug and Play: Generate Device Code Stub...**"
 
-    > The first time you use the IoT Plug and Play CodeGen CLI, it takes a few seconds to download and install automatically.
+   > The first time you use the IoT Plug and Play CodeGen CLI, it takes a few seconds to download and install automatically.
 
 2. Choose the **SampleDevice.capabilitymodel.json** file to use for generating the device code stub.
 
@@ -56,16 +56,16 @@ You use the built-in containerized toolchain to build the generated device code 
 
 4. Select **No** to open the configured project in remote container.
 
-    > The first time you use a container, it takes around 1 to 3 minutes to download and prepare the dev container. Click the details link on the notification for the progress:
-    ![](../images/prepare-dev-container.png)
+   > The first time you use a container, it takes around 1 to 3 minutes to download and prepare the dev container. Click the details link on the notification for the progress:
+   > ![](../images/prepare-dev-container.png)
 
 5. Select **Azure IoT Device Workbench: Compile Device Code** to build device code. The cross-compiling of the code happens in the dev container. Once it's done, it shows the notification:
 
-    ![](../images/pnp-with-container-compile-success.png)
+   ![](../images/pnp-with-container-compile-success.png)
 
 6. Select **Azure IoT Device Workbench: Upload Device Code** to upload device code to your target machine. Select **Manual setup** and enter the `IP address`, `port`, `user name`, `password` and `project destinarion path` to deploy the compiled binary via SSH to your target x86 Linux machine:
 
-    ![](../images/upload-options.png)
+   ![](../images/upload-options.png)
 
 ## Run the Application on target machine
 
@@ -77,8 +77,8 @@ Navigate to your target x86 Linux machine, check the binary file is successfully
 
 You can see the target device starts sending telemetry data to the Azure IoT Hub:
 
-  ![](../images/pnp-with-container-result.jpg)
+![](../images/pnp-with-container-result.jpg)
 
 To verify the reception of the data, use Azure IoT Hub Toolkit, right click on the device and select **Start Monitoring Built-in Event Endpoint**. In the output window, you can see that IoT Hub gets telemetry data sent from Raspberry Pi:
 
-  ![](../images/pnp-with-container-iothub-d2c.png)
+![](../images/pnp-with-container-iothub-d2c.png)
