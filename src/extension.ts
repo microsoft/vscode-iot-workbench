@@ -187,7 +187,7 @@ function initDigitalTwinCommand(
         try {
           return await callback(...args);
         } catch (error) {
-          telemetryContext.properties.error = error.name;
+          telemetryContext.properties.errorType = error.name;
           telemetryContext.properties.errorMessage = error.message;
           if (error instanceof UserCancelledError) {
             telemetryContext.properties.result = TelemetryResult.Cancelled;
