@@ -527,9 +527,6 @@ export class DigitalTwinGraph {
 
     // handle interfaceSchema
     this.handleInterfaceSchema(stringNode);
-
-    // handle definition change
-    this.handleDefinitionChange();
   }
 
   /**
@@ -571,95 +568,6 @@ export class DigitalTwinGraph {
         propertyNode.constraint = this.constraintNodes.get(DigitalTwinConstants.ID);
       }
     }
-  }
-
-  /**
-   * patch definition change for different DTDL version
-   */
-  private handleDefinitionChange(): void {
-    // DTDL v2 change
-    const version = 2;
-    // rename InterfaceInstance to Component
-    const componentNode: ClassNode | undefined = this.renameClassNode(
-      DigitalTwinConstants.INTERFACE_INSTANCE_NODE,
-      DigitalTwinConstants.COMPONENT_NODE,
-      version
-    );
-    if (componentNode) {
-      this.addChildrenOfClass(DigitalTwinConstants.NAMED_ENTITY_NODE, componentNode);
-      this.addRangeOfProperty(DigitalTwinConstants.IMPLEMENTS, componentNode);
-    }
-  }
-
-  /**
-   * rename class node in target version
-   * @param oldName old name
-   * @param newName new name
-   * @param version target version
-   */
-  private renameClassNode(oldName: string, newName: string, version: number): ClassNode | undefined {
-    const oldClass: ClassNode | undefined = this.getClassNode(oldName);
-    if (!oldClass) {
-      return undefined;
-    }
-    const newClass: ClassNode = this.cloneNode(oldClass) as ClassNode;
-    newClass.id = this.getId(newName);
-    newClass.label = newName;
-    newClass.version = { includeSince: version };
-    oldClass.version = { excludeSince: version };
-    return newClass;
-  }
-
-  /**
-   * clone DigitalTwin node
-   * @param node node
-   */
-  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-  private cloneNode(node: any): any {
-    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-    const clone: any = {};
-    for (const key in node) {
-      if (Array.isArray(node[key])) {
-        // create new array to hold elements
-        clone[key] = [...node[key]];
-      } else {
-        // shallow copy
-        clone[key] = node[key];
-      }
-    }
-    return clone;
-  }
-
-  /**
-   * add class node as range of target property
-   * @param name target property name
-   * @param classNode class node
-   */
-  private addRangeOfProperty(name: string, classNode: ClassNode): void {
-    const propertyNode: PropertyNode | undefined = this.getPropertyNode(name);
-    if (!propertyNode) {
-      return;
-    }
-    if (!propertyNode.range) {
-      propertyNode.range = [];
-    }
-    propertyNode.range.push(classNode);
-  }
-
-  /**
-   * add class node as children of target class
-   * @param name target class name
-   * @param classNode class node
-   */
-  private addChildrenOfClass(name: string, classNode: ClassNode): void {
-    const parent: ClassNode | undefined = this.getClassNode(name);
-    if (!parent) {
-      return;
-    }
-    if (!parent.children) {
-      parent.children = [];
-    }
-    parent.children.push(classNode);
   }
 
   /**

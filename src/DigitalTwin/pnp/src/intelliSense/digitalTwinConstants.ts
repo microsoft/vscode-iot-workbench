@@ -53,9 +53,6 @@ export class DigitalTwinConstants {
   static readonly SCHEMA_NODE = "Schema";
   static readonly UNIT_NODE = "Unit";
   static readonly INTERFACE_SCHEMA_NODE = "InterfaceInstance/schema";
-  static readonly INTERFACE_INSTANCE_NODE = "InterfaceInstance";
-  static readonly COMPONENT_NODE = "Component";
-  static readonly NAMED_ENTITY_NODE = "NamedEntity";
   static readonly WORD_STOP = ' \t\n\r\v":{[,';
   static readonly REQUIRED_PROPERTY_LABEL = "(required)";
   static readonly SUPPORT_SEMANTIC_TYPES = new Set<string>(["Telemetry", "Property"]);

@@ -291,7 +291,6 @@ export class DigitalTwinDiagnosticProvider {
       switch (propertyName) {
         case DigitalTwinConstants.ID:
           // @id is available for each class
-          // TODO(erichen): @id format may be differnt in v2
           propertyNode = IntelliSenseUtility.getPropertyNode(DigitalTwinConstants.ID);
           if (propertyNode) {
             DigitalTwinDiagnosticProvider.validateNode(version, propertyPair.value, propertyNode, problems);
@@ -316,7 +315,6 @@ export class DigitalTwinDiagnosticProvider {
           break;
         default:
           // validate expected property
-          // TODO(erichen): semantic types may have additional property
           propertyNode = expectedProperties.get(propertyName);
           if (!propertyNode) {
             DigitalTwinDiagnosticProvider.addProblemOfUnexpectedProperty(propertyPair.name, problems);
