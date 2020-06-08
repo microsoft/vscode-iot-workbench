@@ -8,7 +8,7 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 
 ## Fixed
 
-- Document Update for the link of pnp sample files to DTDL v1
+- Update pnp sample files links in docs
 - Suppress sending telemetry data with error details
 
 ## Version 0.14.0
