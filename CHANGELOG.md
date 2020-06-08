@@ -4,12 +4,12 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 
 ## Version 0.15.0
 
-- Release date: May 29th, 2020
+- Release date: June 9th, 2020
 
 ## Fixed
 
-- Suppress sending telemetry data with error details
 - Document Update for the link of pnp sample files to DTDL v1
+- Suppress sending telemetry data with error details
 
 ## Version 0.14.0
 
