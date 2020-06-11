@@ -2,6 +2,15 @@
 
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
 
+## Version 0.15.0
+
+- Release date: June 9th, 2020
+
+## Fixed
+
+- Update pnp sample files links in docs
+- Suppress sending telemetry data with error details
+
 ## Version 0.14.0
 
 - Release date: April 21st, 2020
