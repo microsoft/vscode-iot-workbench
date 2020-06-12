@@ -51,7 +51,7 @@ export class TelemetryWorker {
       console.log("Unable to initialize telemetry, please make sure AIKey is set in package.json");
       return;
     }
-    this._reporter = new TelemetryReporter(packageInfo.name, packageInfo.version, packageInfo.aiKey);
+    this._reporter = new TelemetryReporter(packageInfo.name, packageInfo.version, packageInfo.aiKey, true);
     this._isInternal = TelemetryWorker.isInternalUser();
   }
 
@@ -97,7 +97,13 @@ export class TelemetryWorker {
     if (!telemetryContext) {
       telemetryContext = this.createContext();
     }
-    this._reporter.sendTelemetryEvent(eventName, telemetryContext.properties, telemetryContext.measurements);
+    if (telemetryContext.properties.result === TelemetryResult.Succeeded) {
+      this._reporter.sendTelemetryEvent(eventName, telemetryContext.properties, telemetryContext.measurements);
+    } else {
+      this._reporter.sendTelemetryErrorEvent(eventName, telemetryContext.properties, telemetryContext.measurements, [
+        "errorMessage"
+      ]);
+    }
   }
 
   /**
