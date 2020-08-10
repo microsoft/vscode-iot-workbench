@@ -215,6 +215,7 @@ function initDigitalTwinCommand(
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function initDigitalTwin(context: vscode.ExtensionContext, outputChannel: vscode.OutputChannel): void {
   const colorizedChannel = new ColorizedChannel(Constants.CHANNEL_NAME);
   context.subscriptions.push(colorizedChannel);
@@ -601,7 +602,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   }, 200);
 
   // init DigitalTwin part
-  initDigitalTwin(context, outputChannel);
+  // Deprecate digital twin feature in workbench.
+  // initDigitalTwin(context, outputChannel);
 }
 
 // this method is called when your extension is deactivated

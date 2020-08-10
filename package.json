@@ -35,13 +35,7 @@
     "onCommand:iotworkbench.deviceUpload",
     "onCommand:iotworkbench.azureProvision",
     "onCommand:iotworkbench.azureDeploy",
-    "onCommand:iotworkbench.configureDevice",
-    "onCommand:azure-digital-twins.createInterface",
-    "onCommand:azure-digital-twins.createCapabilityModel",
-    "onCommand:azure-digital-twins.openRepository",
-    "onCommand:azure-digital-twins.signOutRepository",
-    "onCommand:azure-digital-twins.submitFiles",
-    "workspaceContains:**/*.json"
+    "onCommand:iotworkbench.configureDevice"
   ],
   "main": "./dist/extension",
   "contributes": {
@@ -95,36 +89,6 @@
         "command": "iotworkbench.configureDevice",
         "title": "Configure Device Settings...",
         "category": "Azure IoT Device Workbench"
-      },
-      {
-        "command": "iotworkbench.iotPnPGenerateCode",
-        "title": "Generate Device Code Stub...",
-        "category": "IoT Plug and Play"
-      },
-      {
-        "command": "azure-digital-twins.createInterface",
-        "title": "Create Interface",
-        "category": "IoT Plug and Play"
-      },
-      {
-        "command": "azure-digital-twins.createCapabilityModel",
-        "title": "Create Capability Model",
-        "category": "IoT Plug and Play"
-      },
-      {
-        "command": "azure-digital-twins.openRepository",
-        "title": "Open Model Repository",
-        "category": "IoT Plug and Play"
-      },
-      {
-        "command": "azure-digital-twins.signOutRepository",
-        "title": "Sign out Model Repository",
-        "category": "IoT Plug and Play"
-      },
-      {
-        "command": "azure-digital-twins.submitFiles",
-        "title": "Submit Files to Model Repository",
-        "category": "IoT Plug and Play"
       }
     ],
     "configuration": [
@@ -180,31 +144,8 @@
           },
           "IoTWorkbench.BoardId": {
             "type": "string"
-          },
-          "IoTWorkbench.IoTPnPCodeGenVersion": {
-            "type": "string"
-          },
-          "IoTWorkbench.IoTPnPPublicRepositoryUrl": {
-            "type": "string",
-            "default": "https://repo.azureiotrepository.com"
           }
         }
-      },
-      {
-        "title": "IoT Plug and Play",
-        "properties": {
-          "azure-digital-twins.publicRepositoryUrl": {
-            "type": "string",
-            "default": "https://repo.azureiotrepository.com",
-            "description": "Set the public model repository url."
-          }
-        }
-      }
-    ],
-    "jsonValidation": [
-      {
-        "fileMatch": "*.json",
-        "url": "./resources/pnp/templates/emptySchema.json"
       }
     ],
     "languages": [
