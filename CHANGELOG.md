@@ -2,6 +2,14 @@
 
 All notable changes to the "vscode-iot-workbench" extension will be documented in this file.
 
+## Version 0.16.0
+
+- Release date: Aug 12th, 2020
+
+## Changes
+
+- Deprecate IoT Plug and Play.
+
 ## Version 0.15.0
 
 - Release date: June 9th, 2020
