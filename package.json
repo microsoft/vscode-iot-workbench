@@ -169,7 +169,7 @@
     "compile": "tsc -p ./",
     "validateLinks": "tsc scripts/mdLinkChecker/mdLinkChecker.ts && node scripts/mdLinkChecker/mdLinkChecker.js --rootDir=.",
     "watch": "tsc -watch -p ./",
-    "postinstall": "node ./node_modules/vscode/bin/install && (node ./node_modules/node-usb-native/scripts/rebuild-serialport.js)",
+    "postinstall": "node ./node_modules/node-usb-native/scripts/rebuild-serialport.js",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:integration": "node ./node_modules/vscode/bin/test",
@@ -198,6 +198,7 @@
     "@types/request-promise": "^4.1.44",
     "@types/ssh2": "^0.5.40",
     "@types/unzip": "^0.1.0",
+    "@types/vscode": "^1.43.0",
     "@types/winreg": "^1.2.30",
     "@typescript-eslint/eslint-plugin": "^2.19.2",
     "@typescript-eslint/parser": "^2.19.2",
@@ -214,7 +215,6 @@
     "ts-jest": "^25.2.0",
     "ts-loader": "^6.2.1",
     "typescript": "^3.7.5",
-    "vscode": "^1.1.33",
     "webpack": "^4.41.6",
     "webpack-cli": "^3.3.11",
     "yargs": "^15.3.1"
@@ -250,7 +250,7 @@
     "validator": "^12.2.0",
     "vscode-express": "^1.0.1",
     "vscode-extension-telemetry": "^0.1.6",
-    "vscode-iot-device-cube-sdk": "^0.1.1",
+    "vscode-iot-device-cube-sdk": "^0.1.2",
     "winreg": "^1.2.3"
   },
   "extensionDependencies": [
