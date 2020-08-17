@@ -172,7 +172,6 @@
     "postinstall": "node ./node_modules/node-usb-native/scripts/rebuild-serialport.js",
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "test:integration": "node ./node_modules/vscode/bin/test",
     "check": "node ./node_modules/eslint/bin/eslint.js . --ext .ts",
     "fix": "node ./node_modules/eslint/bin/eslint.js . --ext .ts --fix",
     "prepare": "npm run compile",
