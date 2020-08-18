@@ -15,7 +15,7 @@
             ],
             "intelliSenseMode": "clang-x64",
             "cStandard": "c11",
-            "cppStandard": "c++17",
+            "cppStandard": "gnu++17",
             "compilerPath": "~/Library/Arduino15/packages/AZ3166/tools/arm-none-eabi-gcc/5_4-2016q3/bin/arm-none-eabi-g++"
         }
     ],
