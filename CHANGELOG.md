@@ -4,12 +4,13 @@ All notable changes to the "vscode-iot-workbench" extension will be documented i
 
 ## Version 0.16.0
 
-- Release date: Aug 13th, 2020
+- Release date: Aug 18th, 2020
 
 ## Changes
 
 - Deprecate IoT Plug and Play.
 - Update dependencies.
+- Fix C/C++ intellisense show problem for "strdup" function in the "Get Started" example of Mxchip IoT DevKit issue [[984](https://github.com/microsoft/vscode-iot-workbench/issues/984)].
 
 ## Version 0.15.0
 
