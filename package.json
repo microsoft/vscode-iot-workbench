@@ -10,7 +10,7 @@
     "url": "https://github.com/Microsoft/vscode-iot-workbench/issues"
   },
   "homepage": "https://github.com/Microsoft/vscode-iot-workbench/blob/master/README.md",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "publisher": "vsciot-vscode",
   "icon": "logo.png",
   "license": "SEE LICENSE IN <LICENSE>",
@@ -35,13 +35,7 @@
     "onCommand:iotworkbench.deviceUpload",
     "onCommand:iotworkbench.azureProvision",
     "onCommand:iotworkbench.azureDeploy",
-    "onCommand:iotworkbench.configureDevice",
-    "onCommand:azure-digital-twins.createInterface",
-    "onCommand:azure-digital-twins.createCapabilityModel",
-    "onCommand:azure-digital-twins.openRepository",
-    "onCommand:azure-digital-twins.signOutRepository",
-    "onCommand:azure-digital-twins.submitFiles",
-    "workspaceContains:**/*.json"
+    "onCommand:iotworkbench.configureDevice"
   ],
   "main": "./dist/extension",
   "contributes": {
@@ -95,36 +89,6 @@
         "command": "iotworkbench.configureDevice",
         "title": "Configure Device Settings...",
         "category": "Azure IoT Device Workbench"
-      },
-      {
-        "command": "iotworkbench.iotPnPGenerateCode",
-        "title": "Generate Device Code Stub...",
-        "category": "IoT Plug and Play"
-      },
-      {
-        "command": "azure-digital-twins.createInterface",
-        "title": "Create Interface",
-        "category": "IoT Plug and Play"
-      },
-      {
-        "command": "azure-digital-twins.createCapabilityModel",
-        "title": "Create Capability Model",
-        "category": "IoT Plug and Play"
-      },
-      {
-        "command": "azure-digital-twins.openRepository",
-        "title": "Open Model Repository",
-        "category": "IoT Plug and Play"
-      },
-      {
-        "command": "azure-digital-twins.signOutRepository",
-        "title": "Sign out Model Repository",
-        "category": "IoT Plug and Play"
-      },
-      {
-        "command": "azure-digital-twins.submitFiles",
-        "title": "Submit Files to Model Repository",
-        "category": "IoT Plug and Play"
       }
     ],
     "configuration": [
@@ -180,31 +144,8 @@
           },
           "IoTWorkbench.BoardId": {
             "type": "string"
-          },
-          "IoTWorkbench.IoTPnPCodeGenVersion": {
-            "type": "string"
-          },
-          "IoTWorkbench.IoTPnPPublicRepositoryUrl": {
-            "type": "string",
-            "default": "https://repo.azureiotrepository.com"
           }
         }
-      },
-      {
-        "title": "IoT Plug and Play",
-        "properties": {
-          "azure-digital-twins.publicRepositoryUrl": {
-            "type": "string",
-            "default": "https://repo.azureiotrepository.com",
-            "description": "Set the public model repository url."
-          }
-        }
-      }
-    ],
-    "jsonValidation": [
-      {
-        "fileMatch": "*.json",
-        "url": "./resources/pnp/templates/emptySchema.json"
       }
     ],
     "languages": [
@@ -228,10 +169,9 @@
     "compile": "tsc -p ./",
     "validateLinks": "tsc scripts/mdLinkChecker/mdLinkChecker.ts && node scripts/mdLinkChecker/mdLinkChecker.js --rootDir=.",
     "watch": "tsc -watch -p ./",
-    "postinstall": "node ./node_modules/vscode/bin/install && (node ./node_modules/node-usb-native/scripts/rebuild-serialport.js)",
+    "postinstall": "node ./node_modules/node-usb-native/scripts/rebuild-serialport.js",
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "test:integration": "node ./node_modules/vscode/bin/test",
     "check": "node ./node_modules/eslint/bin/eslint.js . --ext .ts",
     "fix": "node ./node_modules/eslint/bin/eslint.js . --ext .ts --fix",
     "prepare": "npm run compile",
@@ -257,10 +197,11 @@
     "@types/request-promise": "^4.1.44",
     "@types/ssh2": "^0.5.40",
     "@types/unzip": "^0.1.0",
+    "@types/vscode": "^1.43.0",
     "@types/winreg": "^1.2.30",
     "@typescript-eslint/eslint-plugin": "^2.19.2",
     "@typescript-eslint/parser": "^2.19.2",
-    "eslint": "^6.8.0",
+    "eslint": "^7.6.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-prettier": "^3.1.2",
     "fail-on-errors-webpack-plugin": "^3.0.0",
@@ -268,15 +209,14 @@
     "gulp": "^4.0.2",
     "jest": "^25.1.0",
     "node-gyp": "^6.1.0",
+    "node-loader": "0.6.0",
     "prettier": "^1.19.1",
     "ts-jest": "^25.2.0",
     "ts-loader": "^6.2.1",
-    "node-loader": "0.6.0",
     "typescript": "^3.7.5",
-    "vscode": "^1.1.33",
     "webpack": "^4.41.6",
     "webpack-cli": "^3.3.11",
-    "yargs": "^15.1.0"
+    "yargs": "^15.3.1"
   },
   "dependencies": {
     "adm-zip": "^0.4.14",
@@ -309,7 +249,7 @@
     "validator": "^12.2.0",
     "vscode-express": "^1.0.1",
     "vscode-extension-telemetry": "^0.1.6",
-    "vscode-iot-device-cube-sdk": "^0.1.1",
+    "vscode-iot-device-cube-sdk": "^0.1.2",
     "winreg": "^1.2.3"
   },
   "extensionDependencies": [

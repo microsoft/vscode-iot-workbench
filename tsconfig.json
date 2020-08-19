@@ -10,7 +10,7 @@
     ],
     "sourceMap": true,
     "rootDir": ".",
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "noUnusedParameters": true,
     "strict": true // Enable several strict checks
   },
