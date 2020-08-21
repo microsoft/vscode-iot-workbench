@@ -17,15 +17,15 @@ The **Azure IoT Device Workbench** is a Visual Studio Code extension that provid
 
 ### Develop device using IoT Plug and Play
 
-[IoT Plug and Play <sup>public preview</sup>](https://docs.microsoft.com/azure/iot-pnp/) is a *device capability model schema* that describes device capabilities. The Azure IoT Device Workbench extension provides an integrated environment to author IoT Plug and Play *device capability models (DCM)* and *interfaces*, publish to model repositories, and generate skeleton C code to implement the device application.
+[IoT Plug and Play <sup>public preview</sup>](https://docs.microsoft.com/azure/iot-pnp/) is a *device capability model schema* that describes device capabilities. If you are using the Azure IoT Device Workbench extension **0.16.0 release or above**, you could create the model file with [DTDL extension](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.vscode-dtdl). If you are using the release before **0.16.0**, this extension provides an integrated environment to author IoT Plug and Play *device capability models (DCM)* and *interfaces*, publish to model repositories, and generate skeleton C code to implement the device application.
 
 Learn how to get started with IoT Plug and Play and use the Device Workbench extension to build an IoT Plug and Play device:
 
 - [What is IoT Plug and Play](https://docs.microsoft.com/azure/iot-pnp/overview-iot-plug-and-play) and the [Digital Twin Definition Language (DTDL)](https://aka.ms/DTDL) that enables it.
-- [Quickstart: Use a device capability model to create an IoT Plug and Play device](https://docs.microsoft.com/azure/iot-pnp/quickstart-create-pnp-device)
-- [Build an IoT Plug and Play Preview device that's ready for certification](https://docs.microsoft.com/azure/iot-pnp/tutorial-build-device-certification)
-- [Use Azure IoT Device Workbench extension in Visual Studio Code](https://docs.microsoft.com/azure/iot-pnp/howto-develop-with-vs-vscode)
-- [Connect an MXChip IoT DevKit device to your Azure IoT Central application via IoT Plug and Play](https://docs.microsoft.com/azure/iot-central/howto-connect-devkit-pnp)
+- [Quickstart: Use a device capability model to create an IoT Plug and Play device](https://docs.microsoft.com/azure/iot-pnp/quickstart-create-pnp-device) <sup>[[1](#notes)]</sup>
+- [Build an IoT Plug and Play Preview device that's ready for certification](https://docs.microsoft.com/azure/iot-pnp/tutorial-build-device-certification) <sup>[[1](#notes)]</sup>
+- [Use Azure IoT Device Workbench extension in Visual Studio Code](https://docs.microsoft.com/azure/iot-pnp/howto-develop-with-vs-vscode) <sup>[[1](#notes)]</sup>
+- [Connect an MXChip IoT DevKit device to your Azure IoT Central application via IoT Plug and Play](https://docs.microsoft.com/azure/iot-central/howto-connect-devkit-pnp) <sup>[[1](#notes)]</sup>
 
 ### Develop on generic device
 
@@ -86,7 +86,7 @@ Please take the [survey](https://www.surveymonkey.com/r/C7NY7KJ) to let us know 
 
 ## Commands
 
-### IoT Plug and Play
+### IoT Plug and Play  <sup>[[1](#notes)]</sup>
 
 | Command | Description |
 | --- | --- |
@@ -110,6 +110,10 @@ Please take the [survey](https://www.surveymonkey.com/r/C7NY7KJ) to let us know 
 | `Azure IoT Device Workbench: Configure Device Settings...`  | Manage the settings on the device. |
 | `Azure IoT Device Workbench: Set Workbench Path` | Set the default path for Azure IoT Device Workbench. |
 | `Azure IoT Device Workbench: Help` | Get help for Azure IoT Device Workbench. |
+
+# <a name="notes"></a>
+## Notes
+1. Deprecated for Azure IoT Device Workbench 0.16.0 or above
 
 ## Documentation
 
