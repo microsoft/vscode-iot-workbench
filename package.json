@@ -245,7 +245,7 @@
     "opn": "5.1.0",
     "request": "^2.88.2",
     "request-promise": "^4.2.4",
-    "ssh2": "^0.6.1",
+    "ssh2": "^1.4.0",
     "validator": "^12.2.0",
     "vscode-express": "^1.0.1",
     "vscode-extension-telemetry": "^0.1.6",
