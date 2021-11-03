@@ -246,7 +246,7 @@
     "request": "^2.88.2",
     "request-promise": "^4.2.4",
     "ssh2": "^0.6.1",
-    "validator": "^12.2.0",
+    "validator": "^13.7.0",
     "vscode-express": "^1.0.1",
     "vscode-extension-telemetry": "^0.1.6",
     "vscode-iot-device-cube-sdk": "^0.1.2",
